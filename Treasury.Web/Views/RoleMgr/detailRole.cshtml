@@ -1,0 +1,1289 @@
+﻿@model Treasury.WebViewModels.RoleMgrModel
+
+@{
+    ViewBag.Title = "角色明細畫面";
+
+    var isDisabledList = ViewBag.isDisabledList as SelectList;
+    //var test = ViewBag.test as SelectList;
+
+    var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+    var userAuthJson = jss.Serialize(ViewBag.userAuthFuncList);
+
+    var bHaveData = ViewBag.bHaveData as String;
+
+    
+}
+
+
+    <div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cRoleID)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.cRoleID)
+                        @Html.Hidden("cRoleID", Model.cRoleID)
+                    </td>
+
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.cRoleName)：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.cRoleName)
+                        @Html.Hidden("hidcRoleName", Model.cRoleName)
+                    </td>
+
+                </tr>
+
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.dataStatus)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.dataStatus)
+                        @Html.Hidden("hidDataStatus", Model.dataStatus)
+                    </td>
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+                    </td>
+                    <td>
+                        @Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        @Html.ValidationMessageFor(model => model.isDisabled, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidisDisabled", Model.isDisabled)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.vMemo)：
+                    </td>
+                    <td colspan="5">
+                        @Html.TextBoxFor(model => model.vMemo, new { style = "width:90%", @maxlength = "250" })
+                        @Html.Hidden("hidvMemo", Model.vMemo)
+                        <br />
+                        (最多請輸入中/英文字共250字內)
+                        @Html.ValidationMessageFor(model => model.vMemo, "", new { @class = "text-danger" })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtUserID)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.cCrtUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtDateTime)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.cCrtDateTime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdUserID)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.cUpdUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdDateTime)：
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(model => model.cUpdDateTime)
+                    </td>
+                </tr>
+            </table>
+
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-24" style="text-align:center;">
+            <input type="button" id="btnConfirm" name="btnConfirm" value="修改(申請覆核)" class="btn btn-primary" />
+            <input type="button" id="btnQryHis" name="btnQryHis" value="查詢歷史紀錄" class="btn btn-primary" />
+            <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+            <input type="button" id="btnReturn" name="btnReturn" value="返回" class="btn btn-primary" />
+            
+        </div>
+        @Html.Hidden("bChgFunc", false)
+        @Html.Hidden("hidEquip", "")
+        @Html.Hidden("hidControl", "")
+        @Html.Hidden("hidCustody", "")
+        @Html.Hidden("hidItemOpType", "")
+        @Html.Hidden("hidItem", "")
+        @Html.Hidden("onEdit", "")
+        @Html.Hidden("valueErr", "")
+    </div>
+  
+
+    <div class="panel panel-primary">
+        <div class="panel-body">
+            <div id="exTab1" class="container">
+                <ul class="nav nav-pills">
+                    <li class="active" id="liFunc">
+                        <a href="#tabFunct" data-toggle="tab">授權功能</a>
+                    </li>
+                    <li id="liEquip">
+                        <a href="#tabEquip" data-toggle="tab">金庫設備權限</a>
+                    </li>
+                    <li id="liItem">
+                        <a href="#tabItem" data-toggle="tab">存取項目權限</a>
+                    </li>
+                    <li id="liFormAply">
+                        <a href="#tabFormAply" data-toggle="tab">表單申請權限</a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="tab-content clearfix">
+
+                <div class="tab-pane active" id="tabFunct">
+                    @{
+                        int total = 0;
+                        int sysTotal = 0;
+                        bool bEndRow = true;
+                        bool bRoot = true;
+                    }
+
+                    <table id="memberlist">
+                        <tbody>
+                            @foreach (var item in Model.Categories)
+                            {
+                                if (@item.iFunctionLevel == 1)
+                                {
+                                    sysTotal = 0;
+                                    bRoot = true;
+
+                                    if (!bEndRow)
+                                    {
+                                        @:</tr>
+                         bEndRow = true;
+                                    }
+
+                                    <tr>
+                                        <td>
+                                            ===@item.cFunctionName===
+                                        </td>
+                                    </tr>
+
+                                }
+                                else
+                                {
+                                    bRoot = false;
+
+                                }
+
+
+
+                                if (!bRoot)
+                                {
+
+                                    if (sysTotal % 3 == 0)
+                                    {
+                                        bEndRow = false;
+                                        @:<tr>
+                            }
+
+                                    <td>
+                                        <input id="chk@(item.cFunctionID)"
+                                               name="chkFun"
+                                               type="checkbox"
+                                               value="@item.cFunctionID" />
+                                        @item.cFunctionName
+                                    </td>
+
+                                    if (sysTotal + 1 % 4 == 0)
+                                    {
+
+                                        @:</tr>
+                                        bEndRow = true;
+                                    }
+                                }
+
+                                if (@item.iFunctionLevel != 1)
+                                {
+                                    sysTotal++;
+                                }
+
+
+                                total++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane active" id="tabEquip">
+                    <div id="qryEquip" class="col-sm-24">
+                        <button id="btnNewEquip" name="btnNewEquip" class="btn btn-primary">新增設備</button>
+                        <br/>
+                        <table id="gridEquip"></table>
+                        <div id="pagerEquip"></div>
+
+                        @Html.Hidden("onEdit", "");
+                        @Html.Hidden("valueErr", "");
+                    </div>
+                </div>
+
+                <div class="tab-pane active" id="tabItem">
+                    <div id="qryItem" class="col-sm-24">
+                        <button id="btnNewItem" name="btnNewItem" class="btn btn-primary">新增存取項目權限</button>
+                        <br />
+                        <table id="gridItem"></table>
+                        <div id="pagerItem"></div>
+                    </div>
+                </div>
+
+                <div class="tab-pane active" id="tabFormAply">
+                    <div id="qryFormAply" class="col-sm-24">
+                        <button id="btnNewFormAply" name="btnNewFormAply" class="btn btn-primary">新增表單申請權限</button>
+                        <br />
+                        <table id="gridFormAply"></table>
+                        <div id="pagerFormAply"></div>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    <script type="text/javascript">
+        var currentOpType;
+
+
+        //切換tab
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href");
+
+            switch (target) {
+
+                case '#tabFunct':
+                    $("#tabFunct").show();
+                    $("#tabEquip").hide();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").hide();
+                    break;
+                case '#tabEquip':
+                    $("#tabEquip").attr('style', 'width:' + $("#tabMain").width());
+
+                    $("#gridEquip").setGridWidth($('div.active').width());
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").show();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").hide();
+                    break;
+                case '#tabItem':
+                    $("#tabItem").attr('style', 'width:' + $("#tabMain").width());
+
+                    $("#gridItem").setGridWidth($('div.active').width());
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").hide();
+                    $("#tabItem").show();
+                    $("#tabFormAply").hide();
+                    break;
+                case '#tabFormAply':
+                    $("#tabFormAply").attr('style', 'width:' + $("#tabMain").width());
+
+                    $("#gridFormAply").setGridWidth($('div.active').width());
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").hide();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").show();
+                    break;
+            }
+
+        });
+
+
+
+
+
+
+        //新增金庫設備
+        $("#btnNewEquip").on("click", function () {
+
+            $("#gridEquip").jqGrid('addRow', "new", { addParams: { position: "last" } });
+            var sel_id = $('#gridEquip').jqGrid('getGridParam', 'selrow');
+
+            var invoId = sel_id;
+            be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "', 'Equip');\"  />";
+            de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "', 'Equip');\"  />";
+
+            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + sel_id + "' value='儲存' onclick=\"TheOnSaveFunction('" + sel_id + "', 'Equip');\"  />";
+            ce = "<input class=\"cancel\" style='height:28px;width:50px; ' type='button' id='btn_cancel_" + sel_id + "'  value='取消' onclick=\"TheOnCancelFunction('" + sel_id + "', 'Equip');\"  />";
+            jQuery("#gridEquip").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
+            $("#btn_edit_" + sel_id).hide();
+            $("#btn_del_" + sel_id).hide();
+
+            getControlMode(sel_id, $("#" + sel_id + "_treaEquipId").val());
+            
+            $("#onEdit").val("Y");
+
+        });
+
+
+        //新增存取項目權限
+        $("#btnNewItem").on("click", function () {
+
+            $("#gridItem").jqGrid('addRow', "new", { addParams: { position: "last" } });
+            var sel_id = $('#gridItem').jqGrid('getGridParam', 'selrow');
+            getOpItem('Item', '1', '');
+
+            be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "', 'Item');\"  />";
+            de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "', 'Item');\"  />";
+
+            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + sel_id + "' value='儲存' onclick=\"TheOnSaveFunction('" + sel_id + "', 'Item');\"  />";
+            ce = "<input class=\"cancel\" style='height:28px;width:50px; ' type='button' id='btn_cancel_" + sel_id + "'  value='取消' onclick=\"TheOnCancelFunction('" + sel_id + "', 'Item');\"  />";
+            jQuery("#gridItem").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
+            $("#btn_edit_" + sel_id).hide();
+            $("#btn_del_" + sel_id).hide();
+            $("#onEdit").val("Y");
+
+        });
+
+
+        //新增表單申請權限
+        $("#btnNewFormAply").on("click", function () {
+
+            $("#gridFormAply").jqGrid('addRow', "new", { addParams: { position: "last" } });
+            var sel_id = $('#gridFormAply').jqGrid('getGridParam', 'selrow');
+
+            getOpItem('FormAply', '1', '');
+
+            be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "', 'FormAply');\"  />";
+            de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "', 'FormAply');\"  />";
+
+            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + sel_id + "' value='儲存' onclick=\"TheOnSaveFunction('" + sel_id + "', 'FormAply');\"  />";
+            ce = "<input class=\"cancel\" style='height:28px;width:50px; ' type='button' id='btn_cancel_" + sel_id + "'  value='取消' onclick=\"TheOnCancelFunction('" + sel_id + "', 'FormAply');\"  />";
+            jQuery("#gridFormAply").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
+            $("#btn_edit_" + sel_id).hide();
+            $("#btn_del_" + sel_id).hide();
+            $("#onEdit").val("Y");
+
+        });
+
+
+        //jqgrid中的刪除
+        function TheOnDelFunction(rowid, gridType) {
+            $("#grid" + gridType).jqGrid('delRowData', rowid);
+            jQuery("#grid" + gridType).trigger("reloadGrid");
+
+        }
+
+
+        //jqgrid中的修改
+        function TheOnEditFunction(rowid, gridType) {
+
+            if (gridType == 'Item' || gridType == 'FormAply') {
+                var rowData = jQuery("#grid" + gridType).jqGrid("getRowData", rowid);
+                var itemId = rowData.itemId;
+                getOpItem(gridType, rowData.itemOpType, itemId);
+            }
+
+
+            jQuery("#grid" + gridType).setSelection(rowid, true);
+            jQuery("#grid" + gridType).editRow(rowid);
+
+
+            //alert("rowid is " + rowid);
+            $("#btn_save_" + rowid).css("visibility", "visible");
+            $("#btn_cancel_" + rowid).css("visibility", "visible");
+
+            $("#btn_edit_" + rowid).css("visibility", "hidden");
+            $("#btn_del_" + rowid).css("visibility", "hidden");
+            $("#btn_edit_" + rowid).hide();
+            $("#btn_del_" + rowid).hide();
+            $("#btn_save_" + rowid).show();
+            $("#btn_cancel_" + rowid).show();
+
+            $("#onEdit").val("Y");
+        }
+
+
+        //jqgrid中的儲存
+        function TheOnSaveFunction(rowid, gridType) {
+            jQuery("#grid" + gridType).saveRow(rowid, false);
+            if ($("#valueErr").val() == "Y") {
+            } else {
+
+                //jQuery("#jqGrid").saveRow(rowid, false);
+                DisplayEditButton(rowid, gridType);
+                //jQuery("#jqGrid").restoreRow(rowid, DisplayEditButton);
+
+
+            }
+        }
+
+
+        //jqgrid中的取消
+        function TheOnCancelFunction(rowid, gridType) {
+            jQuery("#grid" + gridType).restoreRow(rowid);
+
+            if (gridType == "Item" || gridType == 'FormAply') {
+                getAllItem(rowid, gridType);
+
+            }
+
+            $("#btn_save_" + rowid).css("visibility", "hidden");
+            $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+            $("#btn_edit_" + rowid).css("visibility", "visible");
+            $("#btn_del_" + rowid).css("visibility", "visible");
+            $("#btn_edit_" + rowid).show();
+            $("#btn_del_" + rowid).show();
+            $("#btn_save_" + rowid).hide();
+            $("#btn_cancel_" + rowid).hide();
+
+        }
+
+
+
+        function DisplayEditButton(rowid, gridType) {
+            if ($("#valueErr").val() == "Y") {
+            } else {
+
+                if (gridType == "Item" || gridType == 'FormAply') {
+                    getAllItem(rowid, gridType);
+
+                }
+
+                jQuery("#grid" + gridType).trigger("reloadGrid");
+                //alert("rowid is " + rowid);
+                $("#btn_save_" + rowid).css("visibility", "hidden");
+                $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+                $("#btn_edit_" + rowid).css("visibility", "visible");
+                $("#btn_del_" + rowid).css("visibility", "visible");
+                $("#btn_edit_" + rowid).show();
+                $("#btn_del_" + rowid).show();
+                $("#btn_save_" + rowid).hide();
+                $("#btn_cancel_" + rowid).hide();
+
+                $("#onEdit").val("");
+
+
+            }
+
+
+        }
+
+
+        //取得存取項目的所有下拉選單值
+        function getAllItem(rowid, gridType) {
+            var ids = jQuery("#grid" + gridType).jqGrid('getDataIDs');
+
+            var itemStr = '';
+            var res = $('#hidItem').val().split(";");
+            for (var i = 0; i < res.length; i++) {
+                var codeItem = res[i].split(":");
+                itemStr += "<option value='" + codeItem[0] + "'>" + codeItem[1] + "</option>";
+            }
+
+
+            for (var i = 0; i < ids.length; i++) {
+                var itemId = ids[i];
+
+
+                var sel = jQuery("#grid" + gridType).getGridParam('selrow');
+                $("select#" + sel + "_itemId").html(itemStr);
+
+
+            }
+
+        }
+
+
+        //依"金庫設備"取得對應的控管模式
+        function getControlMode(rowId, equipId) {
+            equipId = equipId.toUpperCase();
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'equipId': equipId
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryEquipByKey", "RoleMgr")',
+                contentType: 'application/json',
+
+                success: function (data) {
+
+                    if (data.success) {
+                        $("#gridEquip").jqGrid("setCell", rowId, "controlMode", data.equip.CONTROL_MODE);
+
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    }
+                }
+            });
+
+        }
+
+        //依"作業類型"取得對應的存取項目
+        function getOpItem(gridType, opType, itemId) {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'opType': opType
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryItemList", "RoleMgr")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    // $('#hidItem').val(data.itemList);
+
+                    // $("#itemId").html(data.itemList);
+                    //jQuery("#gridItem").setColProp('itemId', { editoptions: { value: data.itemList.toString() } });
+
+                    var itemStr = '';
+                    var res = data.itemList.split(";");
+                    for (var i = 0; i < res.length; i++) {
+                        var codeItem = res[i].split(":");
+                        itemStr += "<option value='" + codeItem[0] + "'>" + codeItem[1] + "</option>";
+                    }
+
+                    var sel = jQuery("#grid" + gridType).getGridParam('selrow');
+                    $("select#" + sel + "_itemId").html(itemStr);
+
+                    if(itemId != '')
+                        $("#" + sel + "_itemId").val(itemId);
+
+                }
+            });
+
+        }
+
+
+
+        $(function () {
+
+            var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+            $("#tabEquip").hide();
+            $("#tabItem").hide();
+            $("#tabFormAply").hide();
+
+            if ($('#cRoleID').val() == '')
+                $("#btnQryHis").hide();
+
+
+            if (bHaveData) {
+                $('#hidEquip').val('@Html.Raw(ViewBag.equipList)');
+                $('#hidControl').val('@Html.Raw(ViewBag.controlList)');
+                $('#hidCustody').val('@Html.Raw(ViewBag.custodyList)');
+                $('#hidItemOpType').val('@Html.Raw(ViewBag.itemOpTypeList)');
+                $('#hidItem').val('@Html.Raw(ViewBag.itemList)');
+
+                $.blockUI();
+
+                //授權功能
+                createFuncList();
+
+
+            } else {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                validationSummary.append('<li>' + '無此角色資料' + '</li>');
+            }
+
+
+        //金庫設備權限下拉選單
+            function getEquip() {
+                return $('#hidEquip').val();
+
+            }
+
+        //存取項目下拉選單
+            function getControl() {
+                return $('#hidControl').val();
+
+            }
+
+        //表單申請下拉選單
+            function getCustody() {
+                return $('#hidCustody').val();
+
+            }
+            //作業類型下拉選單
+            function getItemOpType() {
+                return $('#hidItemOpType').val();
+
+            }
+
+            //存取項目下拉選單
+            function getItem() {
+                return $('#hidItem').val();
+
+
+            }
+
+
+            if ($("#hidDataStatus").val() != null) {
+                if ($("#hidDataStatus").val().substring(0, 1) == "2") {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnClear").attr('disabled', true);
+                }
+            }
+
+
+            //查詢歷史紀錄
+            $("#btnQryHis").click().on('click', function () {
+                var param = $('#cRoleID').val();
+                var url = '@Url.Action("roleHis", "RoleMgr", new { cRoleId = "__param__" })';
+                window.location.href = url.replace('__param__', encodeURIComponent(param));
+            });
+
+
+            //清空
+            $("#btnClear").click().on('click', function () {
+                $('#cRoleName').val($('#hidcRoleName').val());
+                $('#isDisabled').val($('#hidisDisabled').val());
+                $('#vMemo').val($('#hidvMemo').val());
+                createFuncList();
+            });
+
+
+            //返回
+            $("#btnReturn").click().on('click', function () {
+
+                var param = $('#cRoleID').val();
+                var url = '@Url.Action("Index", "RoleMgr", new { cRoleId = "__param__" })';
+                window.location.href = url.replace('__param__', encodeURIComponent(param));
+
+
+            });
+
+
+
+            //*-----------------------修改(申請覆核)  begin-----------------------*//
+            $("#btnConfirm").click().on('click', function () {
+
+
+
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                var bPass = true;
+
+
+                if ($('#onEdit').val() == "Y") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '畫面尚有資料未存檔，請檢查"金庫設備權限"、"存取項目權限"、"表單申請權限"!!' + '</li>');
+                }
+
+
+                if ($('#cRoleName').val() == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入角色名稱!!' + '</li>');
+                }
+
+                if ($('#isDisabled').val() == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入啟用狀態!!' + '</li>');
+                }
+
+
+                var r = document.getElementsByName("chkFun");
+                var authFunc = "";
+                for (var i = 0; i < r.length; i++) {
+                    if (r[i].checked) {
+                        authFunc = authFunc + r[i].value + '|';
+
+                    }
+                }
+                //if (authFunc == "") {
+                //    bPass = false;
+                //    validationSummary.append('<li>' + '請授權一個以上的功能!!' + '</li>');
+                //}
+
+
+                if (bPass == false)
+                    return;
+
+
+                $.blockUI();
+
+                ////若有異動功能時
+                //var nonAuthFunc = "";
+                //var authFunc = "";
+
+
+                //if ($("#bChgFunc").val()) {
+
+
+                //    $("#auth option").each(function () {
+                //        var $this = $(this);
+                //        if ($this.length) {
+                //            authFunc = authFunc + $this.val() + '|';
+                //        }
+                //    });
+                //}
+
+
+                //若有異動角色資訊時
+                var bRoleChg = false;
+                if ($('#cRoleName').val() != $('#hidcRoleName').val() ||
+                    $('#isDisabled').val() != $('#hidisDisabled').val() ||
+                    $('#vMemo').val() != $('#hidvMemo').val()
+                    ) {
+                    bRoleChg = true;
+                }
+
+
+                //if (bRoleChg || $("#bChgFunc").val()) {
+
+                var equipData = $("#gridEquip").jqGrid('getRowData');
+                var itemData = $("#gridItem").jqGrid('getRowData');
+                var formAplyData = $("#gridFormAply").jqGrid('getRowData');
+
+
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            roleMgrModel: {
+                                'cRoleID': $('#cRoleID').val(),
+                                'cRoleName': $('#cRoleName').val(),
+                                'isDisabled': $('#isDisabled').val(),
+                                'vMemo': $('#vMemo').val()
+                            }, 'authFunc': authFunc, 'equipData': equipData, 'itemData': itemData, 'formAplyData': formAplyData
+                        }),
+                        dataType: "json",
+                        url: '@Url.Action("updateRole", "RoleMgr")',
+                        contentType: 'application/json',
+                        success: function (data) {
+                            $.unblockUI();
+
+                            if (data.success) {
+                                $('#hidcRoleName').val($('#cRoleName').val())
+
+                                $('#hidcFlag').val($('#cFlag').val())
+                                $('#hidvMemo').val($('#vMemo').val())
+
+
+                                $("#btnConfirm").attr('disabled', true);
+
+                                validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+                            } else {
+                                validationSummary.append('<li>' + data.errors + '</li>');
+                            }
+                        }
+                    });
+                //} else {
+                //    alert('未異動角色資料!!');
+                //}
+
+            });
+            //*-----------------------修改(申請覆核)  end-----------------------*//
+
+
+
+
+            //*----------------授權功能清單  begin------------------*//
+            function createFuncList() {
+
+                var authObj = JSON.parse('@Html.Raw(userAuthJson)');
+
+
+                for (i = 0; i < authObj.Data.item.length; i++) {
+                    if (authObj.Data.item[i].iFunctionLevel == 2) {
+                        $('#chk' + authObj.Data.item[i].cFunctionID).prop('checked', true);
+                    }
+
+                }
+
+
+                //金庫設備權限
+                qryEquip();
+
+
+
+
+            }
+            //*----------------授權功能清單   end------------------*//
+
+
+            //*----------------查詢金庫設備權限  begin------------------*//
+            function qryEquip(bClearMsg) {
+                if (bClearMsg)
+                    $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+
+                var jsonData = JSON.stringify({ 'cRoleID': $("#cRoleID").val() });
+
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("qryEquip", "RoleMgr")',
+                    contentType: 'application/json',
+
+                    success: function (data) {
+
+                        if (data.success) {
+                            //更新畫面GRID
+                            jQuery("#gridEquip").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.roleEquipList })
+                                .trigger("reloadGrid");
+
+                            //存取項目權限
+                            qryItem();
+
+
+
+                        } else {
+                            validationSummary.append('<li>' + data.err + '</li>');
+
+                        }
+                    }
+                });
+
+
+            }
+
+
+            //金庫設備權限GRID
+            $("#gridEquip").jqGrid({
+                editurl: 'clientArray',
+                datatype: "local",
+                //caption: '金庫設備權限',
+                jsonReader: {
+                    repeatitems: false, id: 'treaEquipId'
+                },
+                colModel: [
+                    {
+                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left'
+                    },
+                    {
+                        label: '設備名稱',
+                        name: 'treaEquipId', align: 'left', width: "200",
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getEquip(),
+                            dataEvents: [{
+                                type: 'change', fn: function (e) {
+
+                                    this.value = this.value.toUpperCase();
+                                    var sel = jQuery("#gridEquip").getGridParam('selrow');
+                                    getControlMode(sel, this.value);
+                                    @*$.ajax({
+                                        type: "POST",
+                                        data: JSON.stringify({
+                                            'equipId': this.value
+                                        }),
+                                        dataType: "json",
+                                        url: '@Url.Action("qryEquipByKey", "RoleMgr")',
+                                        contentType: 'application/json',
+
+                                        success: function (data) {
+
+                                            if (data.success) {
+                                                $("#gridEquip").jqGrid("setCell", sel, "controlMode", data.equip.CONTROL_MODE);
+
+                                            } else {
+                                                validationSummary.append('<li>' + data.err + '</li>');
+
+                                            }
+                                        }
+                                    });*@
+
+
+                                }
+                            }]
+                        }
+
+                    },
+                    {
+                        label: '控管模式',
+                        name: 'controlMode',
+                        align: 'center',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: { value: getControl() }
+                    }
+                    ,
+                    {
+                        label: '控管方式',
+                        name: 'custodyMode',
+                        align: 'center',
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: { value: getCustody() }
+
+                    },
+                    {
+                        label: '保管順位',
+                        name: 'custodyOrder',
+                        align: 'center',
+                        editable: true,
+                        editrules: {  custom: true, custom_func: checkCustodyOrder }
+
+                    }
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                pager: "#pagerEquip",
+                onSelectRow: function (id) {
+
+
+
+                },
+                loadComplete: function () {
+                    if ($("#valueErr").val() == "Y") {
+                    } else {
+                        var ids = jQuery("#gridEquip").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var treaEquipId = ids[i];
+                            //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"jQuery('#gridEquip').editRow('" + treaEquipId + "', true, TheOnEditFunction );\"  />";
+                            be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"TheOnEditFunction('" + treaEquipId + "', 'Equip');\"  />";
+
+                            de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + treaEquipId + "' value='刪除' onclick=\" TheOnDelFunction ('" + treaEquipId + "', 'Equip');\"  />";
+
+                            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + treaEquipId + "' value='儲存' onclick=\"TheOnSaveFunction('" + treaEquipId + "', 'Equip');\"  />";
+                            ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + treaEquipId + "'  value='取消' onclick=\"TheOnCancelFunction('" + treaEquipId + "', 'Equip');\"  />";
+                            jQuery("#gridEquip").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                            $("#btn_save_" + treaEquipId).hide();
+                            $("#btn_cancel_" + treaEquipId).hide();
+
+                        }
+                    }
+
+
+
+                }
+            });
+
+
+            //欄位檢核-保管順位
+            function checkCustodyOrder(value, colname) {
+                if (value != "1" && value != "2") {
+                    $("#valueErr").val("Y");
+                    return [false, '保管順位需為"1"或"2"'];
+                } else {
+                    $("#valueErr").val("");
+                    return [true, ""];
+                }
+            }
+            //*----------------查詢金庫設備權限  end------------------*//
+
+
+
+            //*----------------查詢存取項目權限  begin------------------*//
+            function qryItem(bClearMsg) {
+                if (bClearMsg)
+                    $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+
+                var jsonData = JSON.stringify({ 'cRoleID': $("#cRoleID").val(), 'authType': '1' });
+
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("qryItem", "RoleMgr")',
+                    contentType: 'application/json',
+
+                    success: function (data) {
+
+                        if (data.success) {
+                            //更新畫面GRID
+                            jQuery("#gridItem").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.roleItemList })
+                                .trigger("reloadGrid");
+
+                        } else {
+                            validationSummary.append('<li>' + data.err + '</li>');
+
+                        }
+
+                        //表單申請權限
+                        qryFormAply();
+
+
+                    }
+                });
+
+
+            }
+
+
+            //存取項目權限GRID
+            $("#gridItem").jqGrid({
+                editurl: 'clientArray',
+                datatype: "local",
+                //caption: '存取項目權限',
+                jsonReader: {
+                    repeatitems: false, id: 'id'
+                },
+                colModel: [
+                    {
+                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width: "60"
+                    },
+                    {
+                        label: '作業類型',
+                        name: 'itemOpType', align: 'left', width: "200",
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        sorttype:'number',
+                        editoptions: {
+                            value: getItemOpType(),
+                            dataEvents: [{
+                                type: 'change', fn: function (e) {
+
+                                    this.value = this.value.toUpperCase();
+                                    var sel = jQuery("#gridItem").getGridParam('selrow');
+                                    getOpItem('Item', this.value, '');
+
+
+                                }
+                            }]
+                        }
+
+
+                    },
+                    {
+                        label: '存取項目',
+                        name: 'itemId',
+                        align: 'center',
+                        sorttype:'text',
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: { value: getItem() }
+                    }
+
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                pager: "#pagerItem",
+                onSelectRow: function (id) {
+
+                },
+                loadComplete: function () {
+                    if ($("#valueErr").val() == "Y") {
+                    } else {
+                        var ids = jQuery("#gridItem").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var itemId = ids[i];
+                            //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"jQuery('#gridEquip').editRow('" + treaEquipId + "', true, TheOnEditFunction );\"  />";
+                            be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + itemId + "' value='修改' onclick=\"TheOnEditFunction('" + itemId + "', 'Item');\"  />";
+
+                            de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + itemId + "' value='刪除' onclick=\" TheOnDelFunction ('" + itemId + "', 'Item');\"  />";
+
+                            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + itemId + "' value='儲存' onclick=\"TheOnSaveFunction('" + itemId + "', 'Item');\"  />";
+                            ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + itemId + "'  value='取消' onclick=\"TheOnCancelFunction('" + itemId + "', 'Item');\"  />";
+                            jQuery("#gridItem").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                            $("#btn_save_" + itemId).hide();
+                            $("#btn_cancel_" + itemId).hide();
+
+                        }
+                    }
+                }
+            });
+            //*----------------查詢存取項目權限  end------------------*//
+
+
+
+
+
+            //*----------------查詢表單申請權限  begin------------------*//
+            function qryFormAply(bClearMsg) {
+                if (bClearMsg)
+                    $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+
+                var jsonData = JSON.stringify({ 'cRoleID': $("#cRoleID").val(), 'authTYpe': '2' });
+
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("qryItem", "RoleMgr")',
+                    contentType: 'application/json',
+
+                    success: function (data) {
+
+                        if (data.success) {
+                            //更新畫面GRID
+                            jQuery("#gridFormAply").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.roleItemList })
+                                .trigger("reloadGrid");
+
+                        } else {
+                            validationSummary.append('<li>' + data.err + '</li>');
+
+                        }
+
+                        $.unblockUI();
+                    }
+                });
+
+
+            }
+
+
+            //存取項目權限GRID
+            $("#gridFormAply").jqGrid({
+                editurl: 'clientArray',
+                datatype: "local",
+                //caption: '表單申請權限',
+                jsonReader: {
+                    repeatitems: false, id: 'id'
+                },
+                colModel: [
+                    {
+                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width: "60"
+                    },
+                    {
+                        label: '作業類型',
+                        name: 'itemOpType', align: 'left', width: "200",
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        sorttype: 'number',
+                        editoptions: {
+                            value: getItemOpType(),
+                            dataEvents: [{
+                                type: 'change', fn: function (e) {
+
+                                    this.value = this.value.toUpperCase();
+                                    var sel = jQuery("#gridFormAply").getGridParam('selrow');
+                                    getOpItem('FormAply', this.value, '');
+
+
+                                }
+                            }]
+                        }
+
+
+                    },
+                    {
+                        label: '存取項目',
+                        name: 'itemId',
+                        align: 'center',
+                        sorttype: 'text',
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: { value: getItem() }
+                    }
+
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                pager: "#pagerFormAply",
+                onSelectRow: function (id) {
+
+                },
+                loadComplete: function () {
+                    if ($("#valueErr").val() == "Y") {
+                    } else {
+                        var ids = jQuery("#gridFormAply").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var itemId = ids[i];
+                            //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"jQuery('#gridEquip').editRow('" + treaEquipId + "', true, TheOnEditFunction );\"  />";
+                            be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + itemId + "' value='修改' onclick=\"TheOnEditFunction('" + itemId + "', 'FormAply');\"  />";
+
+                            de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + itemId + "' value='刪除' onclick=\" TheOnDelFunction ('" + itemId + "', 'FormAply');\"  />";
+
+                            se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + itemId + "' value='儲存' onclick=\"TheOnSaveFunction('" + itemId + "', 'FormAply');\"  />";
+                            ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + itemId + "'  value='取消' onclick=\"TheOnCancelFunction('" + itemId + "', 'FormAply');\"  />";
+                            jQuery("#gridFormAply").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                            $("#btn_save_" + itemId).hide();
+                            $("#btn_cancel_" + itemId).hide();
+
+                        }
+                    }
+                }
+            });
+            //*----------------查詢存取項目權限  end------------------*//
+
+
+
+        });
+
+
+    </script>
+
+

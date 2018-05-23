@@ -1,0 +1,84 @@
+﻿@model Demo.Service.Models.ProductModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Create</h2>
+
+<div class="form-horizontal">
+    <h4>ProductModel</h4>
+    <hr />
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", maxlength = "50" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", maxlength = "20" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="button" id="submit" value="Create" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var log = fb.log,
+                http = fb.http,
+                msg = fb.msg,
+                msgError = fb.msgError,
+                visableAnn = true;
+
+            $("#submit").click(function (e) {
+                e.preventDefault();
+                fb.mask();
+                var name = $("#Name").val().trim(),
+                    price = $("#Price").val().trim(),
+                    emsg = "";
+
+                if (name.length < 1 || name.length > 50) {
+                    emsg += locale.product_errorName + " \r\n";
+                }
+
+                if (price.length < 1 || price.length > 21) {
+                    emsg += locale.product_errorPrice + " \r\n";
+                }
+                if (emsg === "") {
+                    http.post({
+                        url: fb.url('ProductAjax/Create'),
+                        data: {
+                            Name: name,
+                            Price: price
+                        },
+                        whenDone: function (data, textStatus, jqXHR) {
+                            if (!fb.isNullOrUndefined(data.Data) && data.Data === "success") {
+                                fb.msg(locale.addSuccess, function () {
+                                    window.location.href = fb.url("ProductAjax/Index");
+                                });
+                            }
+                            fb.unmask();
+                        }
+                    });
+                } else {
+                    fb.msgError(emsg);
+                    fb.unmask();
+                }
+            });
+        });
+    </script>
+}

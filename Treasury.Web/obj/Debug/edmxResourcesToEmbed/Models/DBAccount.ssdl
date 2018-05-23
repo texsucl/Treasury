@@ -1,0 +1,980 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="DbAccountModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="AuthReview">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cReviewType" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="cReviewFlag" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="cReviewUserID" Type="char" MaxLength="10" />
+    <Property Name="cReviewUserName" Type="char" MaxLength="40" />
+    <Property Name="cReviewDate" Type="char" MaxLength="8" />
+    <Property Name="cReviewTime" Type="char" MaxLength="6" />
+    <Property Name="cReviewMemo" Type="nvarchar" MaxLength="100" />
+    <Property Name="cCrtUserID" Type="char" MaxLength="10" />
+    <Property Name="cCrtUserName" Type="char" MaxLength="40" />
+    <Property Name="cCrtDate" Type="char" MaxLength="8" />
+    <Property Name="cCrtTime" Type="char" MaxLength="6" />
+    <Property Name="cUpdUserID" Type="char" MaxLength="10" />
+    <Property Name="cUpdUserName" Type="char" MaxLength="40" />
+    <Property Name="cUpdDate" Type="char" MaxLength="8" />
+    <Property Name="cUpdTime" Type="char" MaxLength="6" />
+    <Property Name="cMappingKey" Type="nvarchar" MaxLength="20" />
+  </EntityType>
+  <EntityType Name="AwardCount">
+    <Key>
+      <PropertyRef Name="CBATCHNO" />
+      <PropertyRef Name="CAWARDKIND" />
+    </Key>
+    <Property Name="CBATCHNO" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="IACCOUNT" Type="int" Nullable="false" />
+    <Property Name="ITAX" Type="int" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CDELFLAG" Type="char" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardDetail">
+    <Key>
+      <PropertyRef Name="CTEMPID" />
+    </Key>
+    <Property Name="CTEMPID" Type="char" MaxLength="16" Nullable="false" />
+    <Property Name="CBATCHNO" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CBATCHSEQ" Type="char" MaxLength="7" Nullable="false" />
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CAGENTNAME" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="IACCOUNT" Type="int" Nullable="false" />
+    <Property Name="ITAX" Type="int" Nullable="false" />
+    <Property Name="CMEMO" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="CFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardMain">
+    <Key>
+      <PropertyRef Name="CBATCHNO" />
+    </Key>
+    <Property Name="CBATCHNO" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CREGIONCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CREGIONNAME" Type="char" MaxLength="42" Nullable="false" />
+    <Property Name="CUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CYEARMONTH" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CACTIVENAME" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="CWITHHOLDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CTICKETNO" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CSTATUS" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="IACCOUNT" Type="int" Nullable="false" />
+    <Property Name="ITAX" Type="int" Nullable="false" />
+    <Property Name="CPRINTFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CDELFLAG" Type="char" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardTemp">
+    <Key>
+      <PropertyRef Name="CID" />
+    </Key>
+    <Property Name="CID" Type="char" MaxLength="16" Nullable="false" />
+    <Property Name="CBATCHNO" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CYEARMONTH" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CACTIVENAME" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CAGENTNAME" Type="char" MaxLength="14" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="IACCOUNT" Type="int" Nullable="false" />
+    <Property Name="ITAX" Type="int" Nullable="false" />
+    <Property Name="CMEMO" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="CFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CHalfword">
+    <Key>
+      <PropertyRef Name="Cbatchno" />
+      <PropertyRef Name="Cbatchseq" />
+    </Key>
+    <Property Name="Cbatchno" Type="int" Nullable="false" />
+    <Property Name="Cbatchseq" Type="int" Nullable="false" />
+    <Property Name="CtableToChk" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="CfieldToChk" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="CkeyPairs" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="CbatchFin" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CcrtDateTime" Type="datetime" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CODEFUNCTION' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODEFUNCTION">
+    <Key>
+      <PropertyRef Name="CFUNCTIONID" />
+      <PropertyRef Name="CPARENTFUNCTIONID" />
+      <PropertyRef Name="CFUNCTIONNAME" />
+      <PropertyRef Name="CFUNCTIONTYPE" />
+      <PropertyRef Name="IFUNCTIONLEVEL" />
+      <PropertyRef Name="VFUNCTIONMEMO" />
+      <PropertyRef Name="VFUNCTIONURL" />
+      <PropertyRef Name="ISORTBY" />
+      <PropertyRef Name="CFLAG" />
+      <PropertyRef Name="CCRTUSERID" />
+      <PropertyRef Name="CCRTUSERNAME" />
+      <PropertyRef Name="CCRTDATE" />
+      <PropertyRef Name="CCRTTIME" />
+      <PropertyRef Name="CUPDUSERID" />
+      <PropertyRef Name="CUPDUSERNAME" />
+      <PropertyRef Name="CUPDDATE" />
+      <PropertyRef Name="CUPDTIME" />
+    </Key>
+    <Property Name="CFUNCTIONID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CPARENTFUNCTIONID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CFUNCTIONNAME" Type="char" MaxLength="50" Nullable="false" />
+    <Property Name="CFUNCTIONTYPE" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="IFUNCTIONLEVEL" Type="int" Nullable="false" />
+    <Property Name="VFUNCTIONMEMO" Type="varchar" MaxLength="500" Nullable="false" />
+    <Property Name="VFUNCTIONURL" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="ISORTBY" Type="int" Nullable="false" />
+    <Property Name="CFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCRTUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CCRTUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODEROLE">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+    </Key>
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CROLENAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CSEARCHAREA" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPERATORAREA" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="VMEMO" Type="varchar" MaxLength="500" Nullable="false" />
+    <Property Name="CCRTUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CCRTUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CREVIEWFLAG" Type="char" MaxLength="1" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CODEROLEDETAIL' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODEROLEDETAIL">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CROLEDETAILID" />
+      <PropertyRef Name="COPRUSERID" />
+      <PropertyRef Name="COPRUSERNAME" />
+      <PropertyRef Name="COPRDATE" />
+      <PropertyRef Name="COPRTIME" />
+    </Key>
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CROLEDETAILID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="COPRDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="COPRTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CODEROLEFUNCTION' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODEROLEFUNCTION">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CFUNCTIONID" />
+      <PropertyRef Name="COPRUSERID" />
+      <PropertyRef Name="COPRUSERNAME" />
+      <PropertyRef Name="COPRDATE" />
+      <PropertyRef Name="COPRTIME" />
+    </Key>
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CFUNCTIONID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="COPRDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="COPRTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CodeRoleFunctionHis' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CodeRoleFunctionHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cRoleID" />
+      <PropertyRef Name="cFunctionID" />
+      <PropertyRef Name="cExecType" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cRoleID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cFunctionID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cExecType" Type="char" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CodeRoleHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cRoleID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cRoleName" Type="char" MaxLength="40" />
+    <Property Name="cSearchArea" Type="char" MaxLength="10" />
+    <Property Name="cOperatorArea" Type="char" MaxLength="10" />
+    <Property Name="cFlag" Type="char" MaxLength="1" />
+    <Property Name="vMemo" Type="varchar" MaxLength="500" />
+    <Property Name="cExecType" Type="char" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CodeSeqNo">
+    <Key>
+      <PropertyRef Name="CTYPE" />
+      <PropertyRef Name="CPRECODE" />
+    </Key>
+    <Property Name="CTYPE" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CPRECODE" Type="char" MaxLength="20" Nullable="false" />
+    <Property Name="ICURRENTVALUE" Type="int" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODEUSER">
+    <Key>
+      <PropertyRef Name="CUSERID" />
+    </Key>
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CFLAG" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CUSERTYPE" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="VMEMO" Type="varchar" MaxLength="500" Nullable="false" />
+    <Property Name="CWORKUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CWORKUNITSEQ" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="CWORKUNITNAME" Type="char" MaxLength="60" Nullable="false" />
+    <Property Name="CBELONGUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CBELONGUNITSEQ" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="CBELONGUNITNAME" Type="char" MaxLength="60" Nullable="false" />
+    <Property Name="CCRTUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CCRTUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="cLoginDateTime" Type="datetime" />
+    <Property Name="cLogoutDateTime" Type="datetime" />
+    <Property Name="CREVIEWFLAG" Type="char" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="CodeUserHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cAgentID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cUserID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cUserName" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="cUserType" Type="char" MaxLength="1" />
+    <Property Name="cFlag" Type="char" MaxLength="1" />
+    <Property Name="vMemo" Type="varchar" MaxLength="500" />
+    <Property Name="cExecType" Type="char" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="CODEUSERMAINTAINUNIT">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CENABLEDATE" />
+      <PropertyRef Name="CDISABLEDATE" />
+    </Key>
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CUNITSEQ" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="CENABLEDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CDISABLEDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUNITNAME" Type="char" MaxLength="60" Nullable="false" />
+    <Property Name="COPRUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="COPRDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="COPRTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CodeUserMaintainUnitHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cAgentID" />
+      <PropertyRef Name="cUnitCode" />
+      <PropertyRef Name="cUnitSeq" />
+      <PropertyRef Name="cEnableDate" />
+      <PropertyRef Name="cDisableDate" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cAgentID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cUnitCode" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="cUnitSeq" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="cEnableDate" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="cDisableDate" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="cUnitName" Type="char" MaxLength="60" />
+    <Property Name="cExecType" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="cOprUserID" Type="char" MaxLength="10" />
+    <Property Name="cOprUserName" Type="char" MaxLength="40" />
+    <Property Name="cOprDate" Type="char" MaxLength="8" />
+    <Property Name="cOprTime" Type="char" MaxLength="6" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CODEUSEROPRUNITMAPPING' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODEUSEROPRUNITMAPPING">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CUNITTYPE" />
+      <PropertyRef Name="CUNITNAME" />
+      <PropertyRef Name="CLEVELCODE" />
+      <PropertyRef Name="REGIONCODE" />
+      <PropertyRef Name="REGIONSEQ" />
+    </Key>
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CUNITSEQ" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="CUNITTYPE" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CUNITNAME" Type="char" MaxLength="60" Nullable="false" />
+    <Property Name="CLEVELCODE" Type="char" MaxLength="2" Nullable="false" />
+    <Property Name="REGIONCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="REGIONSEQ" Type="char" MaxLength="4" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODEUSERROLE">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CENABLEDATE" />
+      <PropertyRef Name="CDISABLEDATE" />
+    </Key>
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CENABLEDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CDISABLEDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="COPRUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="COPRUSERNAME" Type="char" MaxLength="40" Nullable="false" />
+    <Property Name="COPRDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="COPRTIME" Type="char" MaxLength="6" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CodeUserRoleHis' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CodeUserRoleHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cAgentID" />
+      <PropertyRef Name="cRoleID" />
+      <PropertyRef Name="cEnableDate" />
+      <PropertyRef Name="cDisableDate" />
+      <PropertyRef Name="cExecType" />
+    </Key>
+    <Property Name="cReviewSeq" Type="char" MaxLength="11" Nullable="false" />
+    <Property Name="cAgentID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cRoleID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="cEnableDate" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="cDisableDate" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="cExecType" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="cOprUserID" Type="char" MaxLength="10" />
+    <Property Name="cOprUserName" Type="char" MaxLength="40" />
+    <Property Name="cOprDate" Type="char" MaxLength="8" />
+    <Property Name="cOprTime" Type="char" MaxLength="6" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.CODEUSERSRCHUNITMAPPING' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODEUSERSRCHUNITMAPPING">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CUNITTYPE" />
+      <PropertyRef Name="CUNITNAME" />
+      <PropertyRef Name="CLEVELCODE" />
+      <PropertyRef Name="REGIONCODE" />
+      <PropertyRef Name="REGIONSEQ" />
+    </Key>
+    <Property Name="CAGENTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CROLEID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUNITCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="CUNITSEQ" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="CUNITTYPE" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CUNITNAME" Type="char" MaxLength="60" Nullable="false" />
+    <Property Name="CLEVELCODE" Type="char" MaxLength="2" Nullable="false" />
+    <Property Name="REGIONCODE" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="REGIONSEQ" Type="char" MaxLength="4" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.E_INVO_ALLOWANCE' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="E_INVO_ALLOWANCE">
+    <Key>
+      <PropertyRef Name="ALLOWANCE_NO" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="ALLOWANCE_STS" />
+      <PropertyRef Name="ALLOWANCE_TYPE" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="BUYER_BAN" />
+      <PropertyRef Name="SELLER_BAN" />
+      <PropertyRef Name="ITEM_DESC" />
+    </Key>
+    <Property Name="ALLOWANCE_NO" Type="nvarchar" MaxLength="16" Nullable="false" />
+    <Property Name="FORMAT_CD" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="ALLOWANCE_STS" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="ALLOWANCE_TYPE" Type="nvarchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="BUYER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="BUYER_NAME" Type="nvarchar" MaxLength="60" />
+    <Property Name="SELLER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SELLER_NAME" Type="nvarchar" MaxLength="60" />
+    <Property Name="SEND_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="ITEM_ALLOWANCE_AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ITEM_ALLOWANCE_TAX" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_TAX" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="256" />
+    <Property Name="ALLOWANCE_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+    <Property Name="REVIEW_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="REVIEW_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.E_INVO_ALLOWANCE_TEMP' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="E_INVO_ALLOWANCE_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="FILE_NAME" />
+      <PropertyRef Name="ALLOWANCE_NO" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="ALLOWANCE_STS" />
+      <PropertyRef Name="ALLOWANCE_TYPE" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="BUYER_BAN" />
+      <PropertyRef Name="SELLER_BAN" />
+      <PropertyRef Name="ITEM_DESC" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="FILE_NAME" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="ALLOWANCE_NO" Type="nvarchar" MaxLength="16" Nullable="false" />
+    <Property Name="FORMAT_CD" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="ALLOWANCE_STS" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="ALLOWANCE_TYPE" Type="nvarchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="BUYER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="BUYER_NAME" Type="nvarchar" MaxLength="60" />
+    <Property Name="SELLER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SELLER_NAME" Type="nvarchar" MaxLength="60" />
+    <Property Name="SEND_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="ITEM_ALLOWANCE_AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ITEM_ALLOWANCE_TAX" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_TAX" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="256" />
+    <Property Name="ALLOWANCE_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <EntityType Name="E_INVO_CANCELLATION">
+    <Key>
+      <PropertyRef Name="BATCH_NO" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+    </Key>
+    <Property Name="BATCH_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="FORMAT_CD" Type="varchar" MaxLength="2" />
+    <Property Name="PAY_NO" Type="nvarchar" MaxLength="30" />
+    <Property Name="DATA_BL_YM" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="CTICKET_NO" Type="nvarchar" MaxLength="30" />
+    <Property Name="INVO_O_STS" Type="varchar" MaxLength="1" />
+    <Property Name="CANCELLATION_STS" Type="varchar" MaxLength="1" />
+    <Property Name="CANCELLATION_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="CANCELLATION_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+    <Property Name="CUP_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CUP_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <EntityType Name="E_INVO_ITEM">
+    <Key>
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SEQ" Type="nvarchar" MaxLength="3" Nullable="false" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="QUANTITY" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="UNIT" Type="nvarchar" MaxLength="12" />
+    <Property Name="UNIT_PRICE" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="80" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+    <Property Name="REVIEW_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="REVIEW_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <EntityType Name="E_INVO_ITEM_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="FILE_NAME" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SEQ" Type="nvarchar" MaxLength="3" Nullable="false" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="QUANTITY" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="UNIT" Type="nvarchar" MaxLength="12" />
+    <Property Name="UNIT_PRICE" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="AMT" Type="decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="80" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <EntityType Name="E_INVO_STOCK">
+    <Key>
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="TAX_TYPE" />
+    </Key>
+    <Property Name="FORMAT_CD" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="VAT_LOSN" Type="varchar" MaxLength="9" Nullable="false" />
+    <Property Name="SEQ" Type="int" Nullable="false" />
+    <Property Name="DATA_BL_YM" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="BUYER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SELLER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SALE_AMT" Type="decimal" Precision="17" Scale="0" Nullable="false" />
+    <Property Name="TAX_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TAX_AMT" Type="decimal" Precision="17" Scale="0" Nullable="false" />
+    <Property Name="DED_CD" Type="varchar" MaxLength="1" />
+    <Property Name="SP_TAX_RATE" Type="varchar" MaxLength="1" />
+    <Property Name="SUMY_MK" Type="varchar" MaxLength="1" />
+    <Property Name="CLEARANCE_MK" Type="varchar" MaxLength="1" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="CARRIER_TYPE" Type="nvarchar" MaxLength="6" />
+    <Property Name="CARRIER_NO" Type="nvarchar" MaxLength="64" />
+    <Property Name="INVO_O_STS" Type="varchar" MaxLength="1" />
+    <Property Name="BATCH_NO" Type="varchar" MaxLength="12" />
+    <Property Name="CANCELLATION_STS" Type="varchar" MaxLength="1" />
+    <Property Name="CANCELLATION_DATE" Type="varchar" MaxLength="8" />
+    <Property Name="CANCELLATION_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+    <Property Name="CUP_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CUP_DATE_TIME" Type="datetime" />
+    <Property Name="PAY_NO" Type="varchar" MaxLength="30" />
+    <Property Name="CTICKET_NO" Type="varchar" MaxLength="30" />
+    <Property Name="REVIEW_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="REVIEW_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <EntityType Name="E_INVO_STOCK_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="TAX_TYPE" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="FORMAT_CD" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="VAT_LOSN" Type="varchar" MaxLength="9" Nullable="false" />
+    <Property Name="SEQ" Type="int" Nullable="false" />
+    <Property Name="DATA_BL_YM" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="BUYER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="SELLER_BAN" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="INVO_TRACK_NO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SALE_AMT" Type="decimal" Precision="17" Scale="0" Nullable="false" />
+    <Property Name="TAX_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TAX_AMT" Type="decimal" Precision="17" Scale="0" Nullable="false" />
+    <Property Name="DED_CD" Type="varchar" MaxLength="1" />
+    <Property Name="SP_TAX_RATE" Type="varchar" MaxLength="1" />
+    <Property Name="SUMY_MK" Type="varchar" MaxLength="1" />
+    <Property Name="CLEARANCE_MK" Type="varchar" MaxLength="1" />
+    <Property Name="INVO_DATE" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="CARRIER_TYPE" Type="nvarchar" MaxLength="6" />
+    <Property Name="CARRIER_NO" Type="nvarchar" MaxLength="64" />
+    <Property Name="INVO_O_STS" Type="varchar" MaxLength="1" />
+    <Property Name="FILE_NAME" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="CRT_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CRT_DATE_TIME" Type="datetime" />
+    <Property Name="CUP_UID" Type="nvarchar" MaxLength="10" />
+    <Property Name="CUP_DATE_TIME" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.Log' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="Log">
+    <Key>
+      <PropertyRef Name="CDATE" />
+      <PropertyRef Name="CTIME" />
+      <PropertyRef Name="CFUNCTION" />
+      <PropertyRef Name="CUSERID" />
+      <PropertyRef Name="CACTION" />
+      <PropertyRef Name="CCONTENT" />
+    </Key>
+    <Property Name="CDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CFUNCTION" Type="varchar" MaxLength="30" Nullable="false" />
+    <Property Name="CUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CACTION" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCONTENT" Type="char" MaxLength="250" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PIA_EXEC_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="IN_NAME" Type="varchar" MaxLength="45" Nullable="false" />
+    <Property Name="OUT_NAME" Type="varchar" MaxLength="45" />
+    <Property Name="CRT_UID" Type="varchar" MaxLength="10" />
+    <Property Name="CRT_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="CRT_DATE" Type="date" />
+    <Property Name="CRT_TIME" Type="time" Precision="7" />
+    <Property Name="UPD_UID" Type="varchar" MaxLength="10" />
+    <Property Name="UPD_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="UPD_DATE" Type="date" />
+    <Property Name="UPD_TIME" Type="time" Precision="7" />
+  </EntityType>
+  <EntityType Name="PIA_LOG_MAIN">
+    <Key>
+      <PropertyRef Name="TRACKING_SEQ" />
+    </Key>
+    <Property Name="TRACKING_SEQ" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TRACKING_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="ACCESS_ACCOUNT" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ACCOUNT_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="FROM_IP" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="ACCESS_DATE" Type="date" Nullable="false" />
+    <Property Name="ACCESS_TIME" Type="time" Precision="7" Nullable="false" />
+    <Property Name="PROGFUN_NAME" Type="varchar" MaxLength="128" Nullable="false" />
+    <Property Name="ACCESSOBJ_NAME" Type="varchar" MaxLength="256" Nullable="false" />
+    <Property Name="EXECUTION_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="EXECUTION_CONTENT" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="AFFECT_ROWS" Type="int" />
+    <Property Name="PIA_OWNER1" Type="nvarchar" MaxLength="30" />
+    <Property Name="PIA_OWNER2" Type="nvarchar" MaxLength="30" />
+    <Property Name="PIA_TYPE" Type="varchar" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PIA_TRACK_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="IN_NAME" Type="varchar" MaxLength="45" Nullable="false" />
+    <Property Name="OUT_NAME" Type="varchar" MaxLength="45" />
+    <Property Name="CRT_UID" Type="varchar" MaxLength="10" />
+    <Property Name="CRT_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="CRT_DATE" Type="date" />
+    <Property Name="CRT_TIME" Type="time" Precision="7" />
+    <Property Name="UPD_UID" Type="varchar" MaxLength="10" />
+    <Property Name="UPD_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="UPD_DATE" Type="date" />
+    <Property Name="UPD_TIME" Type="time" Precision="7" />
+  </EntityType>
+  <EntityType Name="PIA_TRN_HIST">
+    <Key>
+      <PropertyRef Name="HIST_ID" />
+    </Key>
+    <Property Name="HIST_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TRACKSEQ_START" Type="bigint" Nullable="false" />
+    <Property Name="TRACKSEQ_END" Type="bigint" Nullable="false" />
+    <Property Name="EXEC_DATE" Type="date" Nullable="false" />
+    <Property Name="EXEC_TIME" Type="time" Precision="7" Nullable="false" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbAWTC.dbo.SignDescription' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="SignDescription">
+    <Key>
+      <PropertyRef Name="CCONTENT" />
+      <PropertyRef Name="CCRTDATE" />
+      <PropertyRef Name="CCRTTIME" />
+      <PropertyRef Name="CCRTID" />
+      <PropertyRef Name="CUPDDATE" />
+      <PropertyRef Name="CUPDTIME" />
+      <PropertyRef Name="CUPDID" />
+    </Key>
+    <Property Name="CCONTENT" Type="ntext" Nullable="false" />
+    <Property Name="CCRTDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CCRTTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CCRTID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CUPDDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CUPDTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CUPDID" Type="char" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SysPara">
+    <Key>
+      <PropertyRef Name="para_id" />
+    </Key>
+    <Property Name="para_id" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="para_value" Type="varchar" MaxLength="200" Nullable="false" />
+    <Property Name="remark" Type="nvarchar" MaxLength="200" />
+    <Property Name="reserve1" Type="varchar" MaxLength="200" />
+    <Property Name="reserve2" Type="varchar" MaxLength="200" />
+    <Property Name="reserve3" Type="varchar" MaxLength="200" />
+  </EntityType>
+  <EntityType Name="TypeDefine">
+    <Key>
+      <PropertyRef Name="CTYPE" />
+      <PropertyRef Name="CCODE" />
+    </Key>
+    <Property Name="CTYPE" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CCODE" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CVALUE" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ISORTBY" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="R_LOG_MAIN_EXEC_TYPE">
+    <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PIA_EXEC_TYPE">
+        <PropertyRef Name="STATUS_ID" />
+      </Principal>
+      <Dependent Role="PIA_LOG_MAIN">
+        <PropertyRef Name="EXECUTION_TYPE" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="R_LOG_MAIN_TRACK_TYPE">
+    <End Role="PIA_TRACK_TYPE" Type="Self.PIA_TRACK_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PIA_TRACK_TYPE">
+        <PropertyRef Name="STATUS_ID" />
+      </Principal>
+      <Dependent Role="PIA_LOG_MAIN">
+        <PropertyRef Name="TRACKING_TYPE" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Function Name="up_chkHWAwardDetail" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="usr_CYEARMONTH" Type="char" Mode="In" />
+    <Parameter Name="usr_User" Type="varchar" Mode="In" />
+    <Parameter Name="exec_cnt" Type="int" Mode="InOut" />
+  </Function>
+  <Function Name="up_chkHWAwardMain" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="usr_CYEARMONTH" Type="char" Mode="In" />
+    <Parameter Name="usr_User" Type="varchar" Mode="In" />
+    <Parameter Name="exec_cnt" Type="int" Mode="InOut" />
+  </Function>
+  <EntityContainer Name="DbAccountModelStoreContainer">
+    <EntitySet Name="AuthReview" EntityType="Self.AuthReview" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AwardCount" EntityType="Self.AwardCount" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AwardDetail" EntityType="Self.AwardDetail" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AwardMain" EntityType="Self.AwardMain" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AwardTemp" EntityType="Self.AwardTemp" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CHalfword" EntityType="Self.CHalfword" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODEROLE" EntityType="Self.CODEROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CodeRoleHis" EntityType="Self.CodeRoleHis" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CodeSeqNo" EntityType="Self.CodeSeqNo" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODEUSER" EntityType="Self.CODEUSER" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CodeUserHis" EntityType="Self.CodeUserHis" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODEUSERMAINTAINUNIT" EntityType="Self.CODEUSERMAINTAINUNIT" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CodeUserMaintainUnitHis" EntityType="Self.CodeUserMaintainUnitHis" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODEUSERROLE" EntityType="Self.CODEUSERROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="E_INVO_CANCELLATION" EntityType="Self.E_INVO_CANCELLATION" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="E_INVO_ITEM" EntityType="Self.E_INVO_ITEM" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="E_INVO_ITEM_TEMP" EntityType="Self.E_INVO_ITEM_TEMP" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="E_INVO_STOCK" EntityType="Self.E_INVO_STOCK" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="E_INVO_STOCK_TEMP" EntityType="Self.E_INVO_STOCK_TEMP" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_TRN_HIST" EntityType="Self.PIA_TRN_HIST" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SysPara" EntityType="Self.SysPara" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TypeDefine" EntityType="Self.TypeDefine" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODEFUNCTION" EntityType="Self.CODEFUNCTION" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODEFUNCTION].[CFUNCTIONID] AS [CFUNCTIONID], 
+    [CODEFUNCTION].[CPARENTFUNCTIONID] AS [CPARENTFUNCTIONID], 
+    [CODEFUNCTION].[CFUNCTIONNAME] AS [CFUNCTIONNAME], 
+    [CODEFUNCTION].[CFUNCTIONTYPE] AS [CFUNCTIONTYPE], 
+    [CODEFUNCTION].[IFUNCTIONLEVEL] AS [IFUNCTIONLEVEL], 
+    [CODEFUNCTION].[VFUNCTIONMEMO] AS [VFUNCTIONMEMO], 
+    [CODEFUNCTION].[VFUNCTIONURL] AS [VFUNCTIONURL], 
+    [CODEFUNCTION].[ISORTBY] AS [ISORTBY], 
+    [CODEFUNCTION].[CFLAG] AS [CFLAG], 
+    [CODEFUNCTION].[CCRTUSERID] AS [CCRTUSERID], 
+    [CODEFUNCTION].[CCRTUSERNAME] AS [CCRTUSERNAME], 
+    [CODEFUNCTION].[CCRTDATE] AS [CCRTDATE], 
+    [CODEFUNCTION].[CCRTTIME] AS [CCRTTIME], 
+    [CODEFUNCTION].[CUPDUSERID] AS [CUPDUSERID], 
+    [CODEFUNCTION].[CUPDUSERNAME] AS [CUPDUSERNAME], 
+    [CODEFUNCTION].[CUPDDATE] AS [CUPDDATE], 
+    [CODEFUNCTION].[CUPDTIME] AS [CUPDTIME]
+    FROM [dbo].[CODEFUNCTION] AS [CODEFUNCTION]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CODEROLEDETAIL" EntityType="Self.CODEROLEDETAIL" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODEROLEDETAIL].[CROLEID] AS [CROLEID], 
+    [CODEROLEDETAIL].[CROLEDETAILID] AS [CROLEDETAILID], 
+    [CODEROLEDETAIL].[COPRUSERID] AS [COPRUSERID], 
+    [CODEROLEDETAIL].[COPRUSERNAME] AS [COPRUSERNAME], 
+    [CODEROLEDETAIL].[COPRDATE] AS [COPRDATE], 
+    [CODEROLEDETAIL].[COPRTIME] AS [COPRTIME]
+    FROM [dbo].[CODEROLEDETAIL] AS [CODEROLEDETAIL]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CODEROLEFUNCTION" EntityType="Self.CODEROLEFUNCTION" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODEROLEFUNCTION].[CROLEID] AS [CROLEID], 
+    [CODEROLEFUNCTION].[CFUNCTIONID] AS [CFUNCTIONID], 
+    [CODEROLEFUNCTION].[COPRUSERID] AS [COPRUSERID], 
+    [CODEROLEFUNCTION].[COPRUSERNAME] AS [COPRUSERNAME], 
+    [CODEROLEFUNCTION].[COPRDATE] AS [COPRDATE], 
+    [CODEROLEFUNCTION].[COPRTIME] AS [COPRTIME]
+    FROM [dbo].[CODEROLEFUNCTION] AS [CODEROLEFUNCTION]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CodeRoleFunctionHis" EntityType="Self.CodeRoleFunctionHis" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CodeRoleFunctionHis].[cReviewSeq] AS [cReviewSeq], 
+    [CodeRoleFunctionHis].[cRoleID] AS [cRoleID], 
+    [CodeRoleFunctionHis].[cFunctionID] AS [cFunctionID], 
+    [CodeRoleFunctionHis].[cExecType] AS [cExecType]
+    FROM [dbo].[CodeRoleFunctionHis] AS [CodeRoleFunctionHis]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CODEUSEROPRUNITMAPPING" EntityType="Self.CODEUSEROPRUNITMAPPING" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODEUSEROPRUNITMAPPING].[CAGENTID] AS [CAGENTID], 
+    [CODEUSEROPRUNITMAPPING].[CROLEID] AS [CROLEID], 
+    [CODEUSEROPRUNITMAPPING].[CUNITCODE] AS [CUNITCODE], 
+    [CODEUSEROPRUNITMAPPING].[CUNITSEQ] AS [CUNITSEQ], 
+    [CODEUSEROPRUNITMAPPING].[CUNITTYPE] AS [CUNITTYPE], 
+    [CODEUSEROPRUNITMAPPING].[CUNITNAME] AS [CUNITNAME], 
+    [CODEUSEROPRUNITMAPPING].[CLEVELCODE] AS [CLEVELCODE], 
+    [CODEUSEROPRUNITMAPPING].[REGIONCODE] AS [REGIONCODE], 
+    [CODEUSEROPRUNITMAPPING].[REGIONSEQ] AS [REGIONSEQ]
+    FROM [dbo].[CODEUSEROPRUNITMAPPING] AS [CODEUSEROPRUNITMAPPING]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CodeUserRoleHis" EntityType="Self.CodeUserRoleHis" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CodeUserRoleHis].[cReviewSeq] AS [cReviewSeq], 
+    [CodeUserRoleHis].[cAgentID] AS [cAgentID], 
+    [CodeUserRoleHis].[cRoleID] AS [cRoleID], 
+    [CodeUserRoleHis].[cEnableDate] AS [cEnableDate], 
+    [CodeUserRoleHis].[cDisableDate] AS [cDisableDate], 
+    [CodeUserRoleHis].[cExecType] AS [cExecType], 
+    [CodeUserRoleHis].[cOprUserID] AS [cOprUserID], 
+    [CodeUserRoleHis].[cOprUserName] AS [cOprUserName], 
+    [CodeUserRoleHis].[cOprDate] AS [cOprDate], 
+    [CodeUserRoleHis].[cOprTime] AS [cOprTime]
+    FROM [dbo].[CodeUserRoleHis] AS [CodeUserRoleHis]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="CODEUSERSRCHUNITMAPPING" EntityType="Self.CODEUSERSRCHUNITMAPPING" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODEUSERSRCHUNITMAPPING].[CAGENTID] AS [CAGENTID], 
+    [CODEUSERSRCHUNITMAPPING].[CROLEID] AS [CROLEID], 
+    [CODEUSERSRCHUNITMAPPING].[CUNITCODE] AS [CUNITCODE], 
+    [CODEUSERSRCHUNITMAPPING].[CUNITSEQ] AS [CUNITSEQ], 
+    [CODEUSERSRCHUNITMAPPING].[CUNITTYPE] AS [CUNITTYPE], 
+    [CODEUSERSRCHUNITMAPPING].[CUNITNAME] AS [CUNITNAME], 
+    [CODEUSERSRCHUNITMAPPING].[CLEVELCODE] AS [CLEVELCODE], 
+    [CODEUSERSRCHUNITMAPPING].[REGIONCODE] AS [REGIONCODE], 
+    [CODEUSERSRCHUNITMAPPING].[REGIONSEQ] AS [REGIONSEQ]
+    FROM [dbo].[CODEUSERSRCHUNITMAPPING] AS [CODEUSERSRCHUNITMAPPING]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="E_INVO_ALLOWANCE" EntityType="Self.E_INVO_ALLOWANCE" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_NO] AS [ALLOWANCE_NO], 
+    [E_INVO_ALLOWANCE].[FORMAT_CD] AS [FORMAT_CD], 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_STS] AS [ALLOWANCE_STS], 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_TYPE] AS [ALLOWANCE_TYPE], 
+    [E_INVO_ALLOWANCE].[INVO_TRACK_NO] AS [INVO_TRACK_NO], 
+    [E_INVO_ALLOWANCE].[INVO_DATE] AS [INVO_DATE], 
+    [E_INVO_ALLOWANCE].[BUYER_BAN] AS [BUYER_BAN], 
+    [E_INVO_ALLOWANCE].[BUYER_NAME] AS [BUYER_NAME], 
+    [E_INVO_ALLOWANCE].[SELLER_BAN] AS [SELLER_BAN], 
+    [E_INVO_ALLOWANCE].[SELLER_NAME] AS [SELLER_NAME], 
+    [E_INVO_ALLOWANCE].[SEND_DATE] AS [SEND_DATE], 
+    [E_INVO_ALLOWANCE].[ITEM_DESC] AS [ITEM_DESC], 
+    [E_INVO_ALLOWANCE].[ITEM_ALLOWANCE_AMT] AS [ITEM_ALLOWANCE_AMT], 
+    [E_INVO_ALLOWANCE].[ITEM_ALLOWANCE_TAX] AS [ITEM_ALLOWANCE_TAX], 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_AMT] AS [ALLOWANCE_AMT], 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_TAX] AS [ALLOWANCE_TAX], 
+    [E_INVO_ALLOWANCE].[MEMO] AS [MEMO], 
+    [E_INVO_ALLOWANCE].[ALLOWANCE_DATE] AS [ALLOWANCE_DATE], 
+    [E_INVO_ALLOWANCE].[CRT_UID] AS [CRT_UID], 
+    [E_INVO_ALLOWANCE].[CRT_DATE_TIME] AS [CRT_DATE_TIME], 
+    [E_INVO_ALLOWANCE].[REVIEW_UID] AS [REVIEW_UID], 
+    [E_INVO_ALLOWANCE].[REVIEW_DATE_TIME] AS [REVIEW_DATE_TIME]
+    FROM [dbo].[E_INVO_ALLOWANCE] AS [E_INVO_ALLOWANCE]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="E_INVO_ALLOWANCE_TEMP" EntityType="Self.E_INVO_ALLOWANCE_TEMP" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [E_INVO_ALLOWANCE_TEMP].[EXEC_SEQ] AS [EXEC_SEQ], 
+    [E_INVO_ALLOWANCE_TEMP].[FILE_NAME] AS [FILE_NAME], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_NO] AS [ALLOWANCE_NO], 
+    [E_INVO_ALLOWANCE_TEMP].[FORMAT_CD] AS [FORMAT_CD], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_STS] AS [ALLOWANCE_STS], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_TYPE] AS [ALLOWANCE_TYPE], 
+    [E_INVO_ALLOWANCE_TEMP].[INVO_TRACK_NO] AS [INVO_TRACK_NO], 
+    [E_INVO_ALLOWANCE_TEMP].[INVO_DATE] AS [INVO_DATE], 
+    [E_INVO_ALLOWANCE_TEMP].[BUYER_BAN] AS [BUYER_BAN], 
+    [E_INVO_ALLOWANCE_TEMP].[BUYER_NAME] AS [BUYER_NAME], 
+    [E_INVO_ALLOWANCE_TEMP].[SELLER_BAN] AS [SELLER_BAN], 
+    [E_INVO_ALLOWANCE_TEMP].[SELLER_NAME] AS [SELLER_NAME], 
+    [E_INVO_ALLOWANCE_TEMP].[SEND_DATE] AS [SEND_DATE], 
+    [E_INVO_ALLOWANCE_TEMP].[ITEM_DESC] AS [ITEM_DESC], 
+    [E_INVO_ALLOWANCE_TEMP].[ITEM_ALLOWANCE_AMT] AS [ITEM_ALLOWANCE_AMT], 
+    [E_INVO_ALLOWANCE_TEMP].[ITEM_ALLOWANCE_TAX] AS [ITEM_ALLOWANCE_TAX], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_AMT] AS [ALLOWANCE_AMT], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_TAX] AS [ALLOWANCE_TAX], 
+    [E_INVO_ALLOWANCE_TEMP].[MEMO] AS [MEMO], 
+    [E_INVO_ALLOWANCE_TEMP].[ALLOWANCE_DATE] AS [ALLOWANCE_DATE], 
+    [E_INVO_ALLOWANCE_TEMP].[CRT_UID] AS [CRT_UID], 
+    [E_INVO_ALLOWANCE_TEMP].[CRT_DATE_TIME] AS [CRT_DATE_TIME]
+    FROM [dbo].[E_INVO_ALLOWANCE_TEMP] AS [E_INVO_ALLOWANCE_TEMP]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="Log" EntityType="Self.Log" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [Log].[CDATE] AS [CDATE], 
+    [Log].[CTIME] AS [CTIME], 
+    [Log].[CFUNCTION] AS [CFUNCTION], 
+    [Log].[CUSERID] AS [CUSERID], 
+    [Log].[CACTION] AS [CACTION], 
+    [Log].[CCONTENT] AS [CCONTENT]
+    FROM [dbo].[Log] AS [Log]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="SignDescription" EntityType="Self.SignDescription" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [SignDescription].[CCONTENT] AS [CCONTENT], 
+    [SignDescription].[CCRTDATE] AS [CCRTDATE], 
+    [SignDescription].[CCRTTIME] AS [CCRTTIME], 
+    [SignDescription].[CCRTID] AS [CCRTID], 
+    [SignDescription].[CUPDDATE] AS [CUPDDATE], 
+    [SignDescription].[CUPDTIME] AS [CUPDTIME], 
+    [SignDescription].[CUPDID] AS [CUPDID]
+    FROM [dbo].[SignDescription] AS [SignDescription]</DefiningQuery>
+    </EntitySet>
+    <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
+      <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+    <AssociationSet Name="R_LOG_MAIN_TRACK_TYPE" Association="Self.R_LOG_MAIN_TRACK_TYPE">
+      <End Role="PIA_TRACK_TYPE" EntitySet="PIA_TRACK_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

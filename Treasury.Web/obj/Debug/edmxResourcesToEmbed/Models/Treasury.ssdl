@@ -1,0 +1,1102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbTreasuryModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="APLY_REC_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="PROC_DT" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="PROC_DT" Type="datetime" Nullable="false" />
+    <Property Name="APLY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="PROC_UID" Type="varchar" MaxLength="5" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AUTH_APLY_REC">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="APLY_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="APPR_MAPPING_KEY" Type="nvarchar" MaxLength="20" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="AUTH_APPR">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="AUTH_APLY_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="APPR_MAPPING_KEY" Type="varchar" MaxLength="20" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="BLANK_NOTE_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="DATA_SEQ" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="DATA_SEQ" Type="int" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
+    <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="CHECK_NO_TRACK" Type="nvarchar" MaxLength="4" Nullable="false" />
+    <Property Name="CHECK_NO_B" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="CHECK_NO_E" Type="varchar" MaxLength="8" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODE_FUNC">
+    <Key>
+      <PropertyRef Name="SYS_CD" />
+      <PropertyRef Name="FUNC_ID" />
+    </Key>
+    <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="PARENT_FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="FUNC_NAME" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="FUNC_LEVEL" Type="int" Nullable="false" />
+    <Property Name="FUNC_MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="FUNC_URL" Type="varchar" MaxLength="100" />
+    <Property Name="FUNC_ORDER" Type="int" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ROLE_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_FUNC">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="SYS_CD" />
+      <PropertyRef Name="FUNC_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_FUNC_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="SYS_CD" />
+      <PropertyRef Name="FUNC_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ROLE_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="ROLE_NAME_B" Type="nvarchar" MaxLength="30" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+    <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_ITEM">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="AUTH_TYPE" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="AUTH_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_ITEM_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="AUTH_TYPE" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="AUTH_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_TREA_ITEM">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="TREA_EQUIP_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="TREA_EQUIP_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CUSTODY_MODE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CUSTODY_ORDER" Type="int" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_TREA_ITEM_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="TREA_EQUIP_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="TREA_EQUIP_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CUSTODY_MODE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CUSTODY_ORDER" Type="int" />
+    <Property Name="CUSTODY_MODE_B" Type="varchar" MaxLength="1" />
+    <Property Name="CUSTODY_ORDER_B" Type="int" />
+  </EntityType>
+  <EntityType Name="CODE_USER">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="USER_UNIT" Type="varchar" MaxLength="5" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="REVIEW_UID" Type="varchar" MaxLength="5" />
+    <Property Name="REVIEW_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+    <Property Name="LAST_LOGIN_DT" Type="datetime" />
+    <Property Name="LAST_LOGOUT_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_USER_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="USER_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+    <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+    <Property Name="IS_MAIL_B" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="CODE_USER_ROLE">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ENABLED_DATE" Type="datetime" Nullable="false" />
+    <Property Name="DISABLED_DATE" Type="datetime" Nullable="false" />
+    <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbTreasury.dbo.CODE_USER_ROLE_HIS' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="CODE_USER_ROLE_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="USER_ID" />
+      <PropertyRef Name="ROLE_ID" />
+      <PropertyRef Name="ENABLED_DATE" />
+      <PropertyRef Name="DISABLED_DATE" />
+      <PropertyRef Name="EXEC_ACTION" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ENABLED_DATE" Type="datetime" Nullable="false" />
+    <Property Name="DISABLED_DATE" Type="datetime" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+    <Property Name="ENABLED_DATE_B" Type="datetime" />
+    <Property Name="DISABLED_DATE_B" Type="datetime" />
+    <Property Name="IS_MAIL_B" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="DEP_CHK_ITEM">
+    <Key>
+      <PropertyRef Name="ACCESS_TYPE" />
+      <PropertyRef Name="ISORTBY" />
+    </Key>
+    <Property Name="ACCESS_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ISORTBY" Type="int" Nullable="false" />
+    <Property Name="DEP_CHK_ITEM_DESC" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="DEP_CHK_ITEM_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ACCESS_TYPE" />
+      <PropertyRef Name="ISORTBY" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ACCESS_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ISORTBY" Type="int" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DEP_CHK_ITEM_DESC" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DEP_CHK_ITEM_DESC_B" Type="nvarchar" MaxLength="50" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="ITEM_BLANK_NOTE">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
+    <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="CHECK_NO_TRACK" Type="nvarchar" MaxLength="4" Nullable="false" />
+    <Property Name="CHECK_NO_B" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="CHECK_NO_E" Type="varchar" MaxLength="8" Nullable="false" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbTreasury.dbo.ITEM_BOOK' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="ITEM_BOOK">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="GROUP_NO" />
+      <PropertyRef Name="COL" />
+      <PropertyRef Name="COL_NAME" />
+      <PropertyRef Name="COL_VALUE" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="GROUP_NO" Type="int" Nullable="false" />
+    <Property Name="COL" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="COL_NAME" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="COL_VALUE" Type="nvarchar" MaxLength="200" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ITEM_CA">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CA_USE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CA_DESC" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="BANK" Type="nvarchar" MaxLength="8" Nullable="false" />
+    <Property Name="CA_NUMBER" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_CHARGE_UNIT">
+    <Key>
+      <PropertyRef Name="CHARGE_UNIT_ID" />
+    </Key>
+    <Property Name="CHARGE_UNIT_ID" Type="varchar" MaxLength="3" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="IS_MAIL_DEPT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_MAIL_SECT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbTreasury.dbo.ITEM_CHARGE_UNIT_HIS' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="ITEM_CHARGE_UNIT_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="CHARGE_UNIT_ID" />
+      <PropertyRef Name="EXEC_ACTION" />
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="CHARGE_DEPT" />
+      <PropertyRef Name="CHARGE_SECT" />
+      <PropertyRef Name="CHARGE_UID" />
+      <PropertyRef Name="IS_MAIL_DEPT_MGR" />
+      <PropertyRef Name="IS_MAIL_SECT_MGR" />
+      <PropertyRef Name="IS_DISABLED" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="CHARGE_UNIT_ID" Type="varchar" MaxLength="3" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="IS_MAIL_DEPT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_MAIL_SECT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CHARGE_UID_B" Type="varchar" MaxLength="5" />
+    <Property Name="IS_MAIL_DEPT_MGR_B" Type="varchar" MaxLength="1" />
+    <Property Name="IS_MAIL_SECT_MGR_B" Type="varchar" MaxLength="1" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="ITEM_DEP_ORDER_D">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="DATA_SEQ" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="DATA_SEQ" Type="int" Nullable="false" />
+    <Property Name="DEP_NO_PREAMBLE" Type="varchar" MaxLength="3" Nullable="false" />
+    <Property Name="DEP_NO_B" Type="varchar" MaxLength="7" Nullable="false" />
+    <Property Name="DEP_NO_E" Type="varchar" MaxLength="7" Nullable="false" />
+    <Property Name="DEP_NO_TAIL" Type="varchar" MaxLength="1" />
+    <Property Name="DEP_CNT" Type="int" Nullable="false" />
+    <Property Name="DENOMINATION" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+    <Property Name="SUBTOTAL_DENOMINATION" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ITEM_DEP_ORDER_M">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CURRENCY" Type="varchar" MaxLength="3" Nullable="false" />
+    <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="COMMIT_DATE" Type="date" Nullable="false" />
+    <Property Name="EXPIRY_DATE" Type="date" Nullable="false" />
+    <Property Name="INTEREST_RATE_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="INTEREST_RATE" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+    <Property Name="DEP_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TOTAL_DENOMINATION" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+    <Property Name="DEP_SET_QUALITY" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="AUTO_TRANS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TRANS_EXPIRY_DATE" Type="date" />
+    <Property Name="TRANS_TMS" Type="int" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_DEP_RECEIVED">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="9" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="MARGIN_TAKE_OF_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MARGIN_ITEM" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="AMOUNT" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+    <Property Name="MARGIN_ITEM_ISSUER" Type="nvarchar" MaxLength="10" Nullable="false" />
+    <Property Name="PLEDGE_ITEM_NO" Type="varchar" MaxLength="16" Nullable="false" />
+    <Property Name="EFFECTIVE_DATE_B" Type="date" />
+    <Property Name="EFFECTIVE_DATE_E" Type="date" />
+    <Property Name="DESCRIPTION" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="BOOK_NO" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_IMPO">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ITEM_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="QUANTITY" Type="int" />
+    <Property Name="AMOUNT" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="EXPECTED_ACCESS_DATE" Type="date" />
+    <Property Name="DESCRIPTION" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_OTHER">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="11" Nullable="false" />
+    <Property Name="ITEM_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="BOOK_NO" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_REAL_ESTATE">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="GROUP_NO" Type="int" Nullable="false" />
+    <Property Name="ESTATE_FORM_NO" Type="nvarchar" MaxLength="8" Nullable="false" />
+    <Property Name="ESTATE_DATE" Type="date" Nullable="false" />
+    <Property Name="OWNERSHIP_CERT_NO" Type="nvarchar" MaxLength="16" />
+    <Property Name="LAND_BUILDING_NO" Type="nvarchar" MaxLength="10" />
+    <Property Name="HOUSE_NO" Type="nvarchar" MaxLength="30" />
+    <Property Name="ESTATE_SEQ" Type="nvarchar" MaxLength="16" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_REFUNDABLE_DEP">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="9" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="MARGIN_DEP_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="AMOUNT" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="WORKPLACE_CODE" Type="nvarchar" MaxLength="7" />
+    <Property Name="DESCRIPTION" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="BOOK_NO" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_SEAL">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TREA_ITEM_NAME" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="SEAL_DESC" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="ITEM_STOCK">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="GROUP_NO" Type="int" Nullable="false" />
+    <Property Name="TREA_BATCH_NO" Type="int" Nullable="false" />
+    <Property Name="STOCK_NO_PREAMBLE" Type="nvarchar" MaxLength="7" />
+    <Property Name="STOCK_NO_B" Type="nvarchar" MaxLength="8" />
+    <Property Name="STOCK_NO_E" Type="nvarchar" MaxLength="8" />
+    <Property Name="DENOMINATION" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="NUMBER_OF_SHARES" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PUT_DATE" Type="datetime" />
+    <Property Name="GET_DATE" Type="datetime" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbTreasury.dbo.Log' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="Log">
+    <Key>
+      <PropertyRef Name="CDATE" />
+      <PropertyRef Name="CTIME" />
+      <PropertyRef Name="CFUNCTION" />
+      <PropertyRef Name="CUSERID" />
+      <PropertyRef Name="CACTION" />
+      <PropertyRef Name="CCONTENT" />
+    </Key>
+    <Property Name="CDATE" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="CTIME" Type="char" MaxLength="6" Nullable="false" />
+    <Property Name="CFUNCTION" Type="varchar" MaxLength="30" Nullable="false" />
+    <Property Name="CUSERID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="CACTION" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="CCONTENT" Type="char" MaxLength="250" Nullable="false" />
+  </EntityType>
+  <EntityType Name="MAIL_CONTENT">
+    <Key>
+      <PropertyRef Name="MAIL_CONTENT_ID" />
+    </Key>
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="MAIL_SUBJECT" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="MAIL_CONTENT" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="MAIL_CONTENT_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="MAIL_CONTENT_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MAIL_SUBJECT" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="MAIL_CONTENT" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MAIL_SUBJECT_B" Type="nvarchar" MaxLength="50" />
+    <Property Name="MAIL_CONTENT_B" Type="nvarchar" MaxLength="100" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="MAIL_RECEIVE">
+    <Key>
+      <PropertyRef Name="MAIL_CONTENT_ID" />
+      <PropertyRef Name="FUNC_ID" />
+    </Key>
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="MAIL_RECEIVE_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="MAIL_CONTENT_ID" />
+      <PropertyRef Name="FUNC_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityType Name="MAIL_TIME">
+    <Key>
+      <PropertyRef Name="MAIL_TIME_ID" />
+    </Key>
+    <Property Name="MAIL_TIME_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SEND_TIME" Type="varchar" MaxLength="5" />
+    <Property Name="INTERVAL_MIN" Type="int" />
+    <Property Name="TREA_OPEN_TIME" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_B" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_E" Type="varchar" MaxLength="5" />
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="MAIL_TIME_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="MAIL_TIME_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="MAIL_TIME_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SEND_TIME" Type="varchar" MaxLength="5" />
+    <Property Name="INTERVAL_MIN" Type="int" />
+    <Property Name="TREA_OPEN_TIME" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_B" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_E" Type="varchar" MaxLength="5" />
+    <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="FUNC_ID_B" Type="varchar" MaxLength="10" />
+    <Property Name="SEND_TIME_B" Type="varchar" MaxLength="5" />
+    <Property Name="INTERVAL_MIN_B" Type="int" />
+    <Property Name="TREA_OPEN_TIME_B" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_B_B" Type="varchar" MaxLength="5" />
+    <Property Name="EXEC_TIME_E_B" Type="varchar" MaxLength="5" />
+    <Property Name="MAIL_CONTENT_ID_B" Type="varchar" MaxLength="2" />
+    <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+  </EntityType>
+  <EntityType Name="OTHER_ITEM_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="DATA_SEQ" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="DATA_SEQ" Type="int" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PIA_EXEC_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="IN_NAME" Type="varchar" MaxLength="45" Nullable="false" />
+    <Property Name="OUT_NAME" Type="varchar" MaxLength="45" />
+    <Property Name="CRT_UID" Type="varchar" MaxLength="10" />
+    <Property Name="CRT_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="CRT_DATE" Type="date" />
+    <Property Name="CRT_TIME" Type="time" Precision="7" />
+    <Property Name="UPD_UID" Type="varchar" MaxLength="10" />
+    <Property Name="UPD_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="UPD_DATE" Type="date" />
+    <Property Name="UPD_TIME" Type="time" Precision="7" />
+  </EntityType>
+  <EntityType Name="PIA_LOG_MAIN">
+    <Key>
+      <PropertyRef Name="TRACKING_SEQ" />
+    </Key>
+    <Property Name="TRACKING_SEQ" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TRACKING_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="ACCESS_ACCOUNT" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ACCOUNT_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="FROM_IP" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="ACCESS_DATE" Type="date" Nullable="false" />
+    <Property Name="ACCESS_TIME" Type="time" Precision="7" Nullable="false" />
+    <Property Name="PROGFUN_NAME" Type="varchar" MaxLength="128" Nullable="false" />
+    <Property Name="ACCESSOBJ_NAME" Type="varchar" MaxLength="256" Nullable="false" />
+    <Property Name="EXECUTION_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="EXECUTION_CONTENT" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="AFFECT_ROWS" Type="int" />
+    <Property Name="PIA_OWNER1" Type="nvarchar" MaxLength="30" />
+    <Property Name="PIA_OWNER2" Type="nvarchar" MaxLength="30" />
+    <Property Name="PIA_TYPE" Type="varchar" MaxLength="10" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PIA_TRACK_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="IN_NAME" Type="varchar" MaxLength="45" Nullable="false" />
+    <Property Name="OUT_NAME" Type="varchar" MaxLength="45" />
+    <Property Name="CRT_UID" Type="varchar" MaxLength="10" />
+    <Property Name="CRT_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="CRT_DATE" Type="date" />
+    <Property Name="CRT_TIME" Type="time" Precision="7" />
+    <Property Name="UPD_UID" Type="varchar" MaxLength="10" />
+    <Property Name="UPD_NAME" Type="varchar" MaxLength="30" />
+    <Property Name="UPD_DATE" Type="date" />
+    <Property Name="UPD_TIME" Type="time" Precision="7" />
+  </EntityType>
+  <EntityType Name="PIA_TRN_HIST">
+    <Key>
+      <PropertyRef Name="HIST_ID" />
+    </Key>
+    <Property Name="HIST_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="TRACKSEQ_START" Type="bigint" Nullable="false" />
+    <Property Name="TRACKSEQ_END" Type="bigint" Nullable="false" />
+    <Property Name="EXEC_DATE" Type="date" Nullable="false" />
+    <Property Name="EXEC_TIME" Type="time" Precision="7" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SYS_CODE">
+    <Key>
+      <PropertyRef Name="CODE_TYPE" />
+      <PropertyRef Name="CODE" />
+    </Key>
+    <Property Name="CODE_TYPE" Type="varchar" MaxLength="30" Nullable="false" />
+    <Property Name="CODE" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="CODE_VALUE" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="ISORTBY" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SYS_SEQ">
+    <Key>
+      <PropertyRef Name="SEQ_TYPE" />
+      <PropertyRef Name="PRECODE" />
+    </Key>
+    <Property Name="SEQ_TYPE" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PRECODE" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="CURR_VALUE" Type="int" Nullable="false" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="TREA_APLY_REC">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="APLY_FROM" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TREA_REGISTER_ID" Type="varchar" MaxLength="10" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ACCESS_TYPE" Type="varchar" MaxLength="1" />
+    <Property Name="ACCESS_REASON" Type="nvarchar" MaxLength="60" />
+    <Property Name="APLY_STATUS" Type="varchar" MaxLength="1" />
+    <Property Name="ACTUAL_ACCESS_UID" Type="varchar" MaxLength="5" />
+    <Property Name="ACTUAL_ACCESS_TYPE" Type="varchar" MaxLength="1" />
+    <Property Name="EXPECTED_ACCESS_DATE" Type="date" />
+    <Property Name="APLY_UNIT" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_DT" Type="datetime" />
+    <Property Name="APLY_APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APLY_APPR_DT" Type="datetime" />
+    <Property Name="APLY_APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="CUSTODY_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CUSTODY_DT" Type="datetime" />
+    <Property Name="CUSTODY_APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CUSTODY_APPR_DT" Type="datetime" />
+    <Property Name="CUSTODY_APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="CONFIRM_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CONFIRM_DT" Type="datetime" />
+    <Property Name="RTN_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="TREA_APLY_TEMP">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ACCESS_TYPE" Type="varchar" MaxLength="1" />
+    <Property Name="ACCESS_REASON" Type="nvarchar" MaxLength="60" />
+    <Property Name="APLY_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="TREA_EQUIP">
+    <Key>
+      <PropertyRef Name="TREA_EQUIP_ID" />
+    </Key>
+    <Property Name="TREA_EQUIP_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EQUIP_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="CONTROL_MODE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="NORMAL_CNT" Type="int" />
+    <Property Name="RESERVE_CNT" Type="int" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="TREA_EQUIP_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="TREA_EQUIP_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="TREA_EQUIP_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="EQUIP_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="CONTROL_MODE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="NORMAL_CNT" Type="int" />
+    <Property Name="RESERVE_CNT" Type="int" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="CONTROL_MODE_B" Type="varchar" MaxLength="1" />
+    <Property Name="NORMAL_CNT_B" Type="int" />
+    <Property Name="RESERVE_CNT_B" Type="int" />
+    <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+  </EntityType>
+  <EntityType Name="TREA_ITEM">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="IS_TREA_ITEM" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TREA_ITEM_NAME" Type="nvarchar" MaxLength="20" />
+    <Property Name="TREA_ITEM_TYPE" Type="varchar" MaxLength="20" />
+    <Property Name="ITEM_OP_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="DAILY_FLAG" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" Nullable="false" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="TREA_ITEM_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="ITEM_DESC" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="IS_TREA_ITEM" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="TREA_ITEM_NAME" Type="nvarchar" MaxLength="20" />
+    <Property Name="TREA_ITEM_TYPE" Type="varchar" MaxLength="1" />
+    <Property Name="ITEM_OP_TYPE" Type="varchar" MaxLength="1" />
+    <Property Name="DAILY_FLAG" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="IS_TREA_ITEM_B" Type="varchar" MaxLength="1" />
+    <Property Name="TREA_ITEM_NAME_B" Type="varchar" MaxLength="1" />
+    <Property Name="TREA_ITEM_TYPE_B" Type="varchar" MaxLength="1" />
+    <Property Name="ITEM_OP_TYPE_B" Type="varchar" MaxLength="1" />
+    <Property Name="DAILY_FLAG_B" Type="varchar" MaxLength="1" />
+    <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+    <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+  </EntityType>
+  <EntityType Name="TREA_OPEN_REC">
+    <Key>
+      <PropertyRef Name="TREA_REGISTER_ID" />
+    </Key>
+    <Property Name="TREA_REGISTER_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="OPEN_TREA_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="OPEN_TREA_REASON" Type="nvarchar" MaxLength="1000" Nullable="false" />
+    <Property Name="OPEN_TREA_TIME" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_TIME_B" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="EXEC_TIME_E" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ACTUAL_PUT_TIME" Type="datetime" />
+    <Property Name="ACTUAL_GET_TIME" Type="datetime" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="REGI_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="REGI_APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="REGI_APPR_DT" Type="datetime" />
+    <Property Name="REGI_APPR_DESC" Type="nvarchar" MaxLength="50" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <Association Name="R_LOG_MAIN_EXEC_TYPE">
+    <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PIA_EXEC_TYPE">
+        <PropertyRef Name="STATUS_ID" />
+      </Principal>
+      <Dependent Role="PIA_LOG_MAIN">
+        <PropertyRef Name="EXECUTION_TYPE" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="R_LOG_MAIN_TRACK_TYPE">
+    <End Role="PIA_TRACK_TYPE" Type="Self.PIA_TRACK_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="PIA_TRACK_TYPE">
+        <PropertyRef Name="STATUS_ID" />
+      </Principal>
+      <Dependent Role="PIA_LOG_MAIN">
+        <PropertyRef Name="TRACKING_TYPE" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="dbTreasuryModelStoreContainer">
+    <EntitySet Name="APLY_REC_HIS" EntityType="Self.APLY_REC_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AUTH_APLY_REC" EntityType="Self.AUTH_APLY_REC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="AUTH_APPR" EntityType="Self.AUTH_APPR" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="BLANK_NOTE_APLY" EntityType="Self.BLANK_NOTE_APLY" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_FUNC" EntityType="Self.CODE_FUNC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE" EntityType="Self.CODE_ROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_FUNC" EntityType="Self.CODE_ROLE_FUNC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_FUNC_HIS" EntityType="Self.CODE_ROLE_FUNC_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_HIS" EntityType="Self.CODE_ROLE_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_ITEM" EntityType="Self.CODE_ROLE_ITEM" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_ITEM_HIS" EntityType="Self.CODE_ROLE_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_TREA_ITEM" EntityType="Self.CODE_ROLE_TREA_ITEM" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_ROLE_TREA_ITEM_HIS" EntityType="Self.CODE_ROLE_TREA_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER" EntityType="Self.CODE_USER" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER_HIS" EntityType="Self.CODE_USER_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_BLANK_NOTE" EntityType="Self.ITEM_BLANK_NOTE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="Self.ITEM_DEP_ORDER_D" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="Self.ITEM_DEP_ORDER_M" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_DEP_RECEIVED" EntityType="Self.ITEM_DEP_RECEIVED" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_IMPO" EntityType="Self.ITEM_IMPO" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_OTHER" EntityType="Self.ITEM_OTHER" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_REAL_ESTATE" EntityType="Self.ITEM_REAL_ESTATE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_REFUNDABLE_DEP" EntityType="Self.ITEM_REFUNDABLE_DEP" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_SEAL" EntityType="Self.ITEM_SEAL" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_STOCK" EntityType="Self.ITEM_STOCK" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_CONTENT" EntityType="Self.MAIL_CONTENT" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_CONTENT_HIS" EntityType="Self.MAIL_CONTENT_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_RECEIVE" EntityType="Self.MAIL_RECEIVE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="Self.MAIL_RECEIVE_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_TIME" EntityType="Self.MAIL_TIME" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MAIL_TIME_HIS" EntityType="Self.MAIL_TIME_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="OTHER_ITEM_APLY" EntityType="Self.OTHER_ITEM_APLY" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="PIA_TRN_HIST" EntityType="Self.PIA_TRN_HIST" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SYS_CODE" EntityType="Self.SYS_CODE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SYS_SEQ" EntityType="Self.SYS_SEQ" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_APLY_REC" EntityType="Self.TREA_APLY_REC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_APLY_TEMP" EntityType="Self.TREA_APLY_TEMP" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_EQUIP" EntityType="Self.TREA_EQUIP" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_EQUIP_HIS" EntityType="Self.TREA_EQUIP_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_ITEM" EntityType="Self.TREA_ITEM" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_ITEM_HIS" EntityType="Self.TREA_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TREA_OPEN_REC" EntityType="Self.TREA_OPEN_REC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER_ROLE_HIS" EntityType="Self.CODE_USER_ROLE_HIS" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [CODE_USER_ROLE_HIS].[APLY_NO] AS [APLY_NO], 
+    [CODE_USER_ROLE_HIS].[USER_ID] AS [USER_ID], 
+    [CODE_USER_ROLE_HIS].[ROLE_ID] AS [ROLE_ID], 
+    [CODE_USER_ROLE_HIS].[ENABLED_DATE] AS [ENABLED_DATE], 
+    [CODE_USER_ROLE_HIS].[DISABLED_DATE] AS [DISABLED_DATE], 
+    [CODE_USER_ROLE_HIS].[EXEC_ACTION] AS [EXEC_ACTION], 
+    [CODE_USER_ROLE_HIS].[IS_MAIL] AS [IS_MAIL], 
+    [CODE_USER_ROLE_HIS].[ENABLED_DATE_B] AS [ENABLED_DATE_B], 
+    [CODE_USER_ROLE_HIS].[DISABLED_DATE_B] AS [DISABLED_DATE_B], 
+    [CODE_USER_ROLE_HIS].[IS_MAIL_B] AS [IS_MAIL_B]
+    FROM [dbo].[CODE_USER_ROLE_HIS] AS [CODE_USER_ROLE_HIS]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [ITEM_BOOK].[ITEM_ID] AS [ITEM_ID], 
+    [ITEM_BOOK].[GROUP_NO] AS [GROUP_NO], 
+    [ITEM_BOOK].[COL] AS [COL], 
+    [ITEM_BOOK].[COL_NAME] AS [COL_NAME], 
+    [ITEM_BOOK].[COL_VALUE] AS [COL_VALUE]
+    FROM [dbo].[ITEM_BOOK] AS [ITEM_BOOK]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [ITEM_CHARGE_UNIT_HIS].[APLY_NO] AS [APLY_NO], 
+    [ITEM_CHARGE_UNIT_HIS].[CHARGE_UNIT_ID] AS [CHARGE_UNIT_ID], 
+    [ITEM_CHARGE_UNIT_HIS].[EXEC_ACTION] AS [EXEC_ACTION], 
+    [ITEM_CHARGE_UNIT_HIS].[ITEM_ID] AS [ITEM_ID], 
+    [ITEM_CHARGE_UNIT_HIS].[CHARGE_DEPT] AS [CHARGE_DEPT], 
+    [ITEM_CHARGE_UNIT_HIS].[CHARGE_SECT] AS [CHARGE_SECT], 
+    [ITEM_CHARGE_UNIT_HIS].[CHARGE_UID] AS [CHARGE_UID], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_DEPT_MGR] AS [IS_MAIL_DEPT_MGR], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_SECT_MGR] AS [IS_MAIL_SECT_MGR], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_DISABLED] AS [IS_DISABLED], 
+    [ITEM_CHARGE_UNIT_HIS].[CHARGE_UID_B] AS [CHARGE_UID_B], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_DEPT_MGR_B] AS [IS_MAIL_DEPT_MGR_B], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_SECT_MGR_B] AS [IS_MAIL_SECT_MGR_B], 
+    [ITEM_CHARGE_UNIT_HIS].[IS_DISABLED_B] AS [IS_DISABLED_B]
+    FROM [dbo].[ITEM_CHARGE_UNIT_HIS] AS [ITEM_CHARGE_UNIT_HIS]</DefiningQuery>
+    </EntitySet>
+    <EntitySet Name="Log" EntityType="Self.Log" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [Log].[CDATE] AS [CDATE], 
+    [Log].[CTIME] AS [CTIME], 
+    [Log].[CFUNCTION] AS [CFUNCTION], 
+    [Log].[CUSERID] AS [CUSERID], 
+    [Log].[CACTION] AS [CACTION], 
+    [Log].[CCONTENT] AS [CCONTENT]
+    FROM [dbo].[Log] AS [Log]</DefiningQuery>
+    </EntitySet>
+    <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
+      <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+    <AssociationSet Name="R_LOG_MAIN_TRACK_TYPE" Association="Self.R_LOG_MAIN_TRACK_TYPE">
+      <End Role="PIA_TRACK_TYPE" EntitySet="PIA_TRACK_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

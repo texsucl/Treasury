@@ -1,0 +1,287 @@
+﻿@{
+    ViewBag.Title = "角色資訊";
+
+    //var userFuncList = ViewBag.userFuncList as SelectList;
+    var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+    var userInfoJson = jss.Serialize(ViewBag.userFuncList);
+}
+
+
+
+<div class="panel-body">
+    <div class="container-fluid">
+        <div class="panel panel-primary">
+            <div class="panel-heading">授權功能</div>
+            <div class="panel-body">
+
+                <div class="container">
+                    <div class="row">
+
+
+                        <div class="dual-list list-right col-md-10">
+                            
+                            <div class="well" >
+                                <div style="text-align:center;color:blue">未授權功能</div>
+                                @*<div class="row">
+                                    <div class="col-md-12 form-group">
+                                        <div class="input-group">
+                                            <span class="input-group-addon glyphicon glyphicon-search" style="top: 0px;"></span>
+                                            <input type="text" name="SearchDualList" class="form-control" placeholder="search">
+                                            <span class="input-group-addon glyphicon glyphicon-unchecked selector" style="cursor: pointer; top: 0px;" title="Select All"></span>
+                                            <span class="input-group-addon glyphicon glyphicon-plus move-left" style="cursor: pointer; top: 0px;" title="Add Selected"></span>
+                                        </div>
+                                    </div>
+                                </div>*@
+                                <div style="max-height: 300px;overflow: auto;">
+                                    <select id="sbOne" multiple="multiple">
+                                        <option value="1">Alpha</option>
+                                        <option value="2">Beta</option>
+                                        <option value="3">Gamma</option>
+                                        <option value="4">Delta</option>
+                                        <option value="5">Epsilon</option>
+                                    </select>
+                                    @*<ul class="list-group" id="dual-list-right">
+                                        <li class="list-group-item" data-value="6">Option 6</li>
+                                        <li class="list-group-item" data-value="7">Option 7</li>
+                                        <li class="list-group-item" data-value="8">Option 8</li>
+                                        <li class="list-group-item" data-value="9">Option 9</li>
+                                        <li class="list-group-item" data-value="10">Option 10</li>
+                                    </ul>*@
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dual-list list-left col-md-10">
+                            
+                            <div class="well text-right">
+                                <div style="text-align:center;color:blue">已授權功能</div>
+                                
+                                @*<div class="row">
+                                    <div class="col-md-12 form-group">
+                                        <div class="input-group">
+                                            <span class="input-group-addon glyphicon glyphicon-search" style="top: 0px;"></span>
+                                            <input type="text" name="SearchDualList" class="form-control" placeholder="search">
+                                            <span class="input-group-addon glyphicon glyphicon-unchecked selector" style="cursor: pointer; top: 0px;" title="Select All"></span>
+                                            <span class="input-group-addon glyphicon glyphicon-minus move-right" style="cursor: pointer; top: 0px;" title="Remove Selected"></span>
+                                        </div>
+                                    </div>
+                                </div>*@
+                                <div style="max-height: 300px;overflow: auto;">
+                                    <select id="sbTwo" multiple="multiple">
+                                        <option value="6">Zeta</option>
+                                        <option value="7">Eta</option>
+                                    </select>
+                                    @*<ul class="list-group" id="dual-list-left">
+
+                                        <li class="list-group-item" data-value="1">Option 1</li>
+                                        <li class="list-group-item" data-value="2">Option 2</li>
+                                        <li class="list-group-item" data-value="3">Option 3</li>
+                                        <li class="list-group-item" data-value="4">Option 4</li>
+                                        <li class="list-group-item" data-value="5">Option 5</li>
+                                    </ul>*@
+                                </div>
+                                </div>
+                        </div>
+                        <br/>
+                        <input type="button" id="left" value="<" />
+                        <input type="button" id="right" value=">" />
+                        <input type="button" id="leftall" value="<<" />
+                        <input type="button" id="rightall" value=">>" />
+                        @*<select id="dual-list-options" name="dual-list-options[]" multiple="multiple" style="display: none;" size="10">*@
+                            <select id="dual-list-options" name="dual-list-options[]" multiple="multiple" size="14">
+                                <option value="1" selected="selected">Option 1</option>
+                                <option value="2" selected="selected">Option 2</option>
+                                <option value="3" selected="selected">Option 3</option>
+                                <option value="4" selected="selected">Option 4</option>
+                                <option value="5" selected="selected">Option 5</option>
+                            </select>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+        //var jsonObj = '@Html.Raw(ViewBag.userFuncList)';
+        var jsonObj = JSON.parse('@Html.Raw(userInfoJson)');
+
+        // $('#dual-list-right').children().remove();
+        $('#sbOne').children().remove();
+        
+        for (i = 0; i < jsonObj.Data.item.length; i++) {
+
+            //$('#dual-list-right').append('<li class="list-group-item" data-value="' + jsonObj.Data.item[i].cFunctionID + '">' + jsonObj.Data.item[i].cFunctionName + '</li>');
+            $('#sbOne').append('<option value="' + jsonObj.Data.item[i].cFunctionID + '">' + jsonObj.Data.item[i].cFunctionName + '</option>');
+            //<li class="list-group-item" data-value="6">Option 6</li>
+
+
+            //var cFunctionName = jsonObj.Data.item[i].cFunctionName;
+            
+        }
+
+
+
+
+        function moveItems(origin, dest) {
+            $(origin).find(':selected').appendTo(dest);
+        }
+
+        function moveAllItems(origin, dest) {
+            $(origin).children().appendTo(dest);
+        }
+
+        $('#left').click(function () {
+            moveItems('#sbTwo', '#sbOne');
+        });
+
+        $('#right').on('click', function () {
+            moveItems('#sbOne', '#sbTwo');
+        });
+
+        $('#leftall').on('click', function () {
+            moveAllItems('#sbTwo', '#sbOne');
+        });
+
+        $('#rightall').on('click', function () {
+            moveAllItems('#sbOne', '#sbTwo');
+        });
+
+
+
+
+
+    var move_right = '<span class="glyphicon glyphicon-minus pull-left  dual-list-move-right" title="Remove Selected"></span>';
+    var move_left  = '<span class="glyphicon glyphicon-plus  pull-right dual-list-move-left " title="Add Selected"></span>';
+
+    $(".dual-list.list-left .list-group").sortable({
+        stop: function( event, ui ) {
+            updateSelectedOptions();
+        }
+    });
+
+
+    $('body').on('click', '.list-group .list-group-item', function () {
+        $(this).toggleClass('active');
+    });
+
+
+    $('body').on('click', '.dual-list-move-right', function (e) {
+        e.preventDefault();
+
+        actives = $(this).parent();
+        $(this).parent().find("span").remove();
+        $(move_left).clone().appendTo(actives);
+        actives.clone().appendTo('.list-right ul').removeClass("active");
+        actives.remove();
+
+        sortUnorderedList("dual-list-right");
+
+        updateSelectedOptions();
+    });
+
+
+    $('body').on('click', '.dual-list-move-left', function (e) {
+        e.preventDefault();
+
+        actives = $(this).parent();
+        $(this).parent().find("span").remove();
+        $(move_right).clone().appendTo(actives);
+        actives.clone().appendTo('.list-left ul').removeClass("active");
+        actives.remove();
+
+        updateSelectedOptions();
+    });
+
+
+    $('.move-right, .move-left').click(function () {
+        var $button = $(this), actives = '';
+        if ($button.hasClass('move-left')) {
+            actives = $('.list-right ul li.active');
+            actives.find(".dual-list-move-left").remove();
+            actives.append($(move_right).clone());
+            actives.clone().appendTo('.list-left ul').removeClass("active");
+            actives.remove();
+
+        } else if ($button.hasClass('move-right')) {
+            actives = $('.list-left ul li.active');
+            actives.find(".dual-list-move-right").remove();
+            actives.append($(move_left).clone());
+            actives.clone().appendTo('.list-right ul').removeClass("active");
+            actives.remove();
+
+        }
+
+        updateSelectedOptions();
+    });
+
+
+    function updateSelectedOptions() {
+        $('#dual-list-options').find('option').remove();
+
+        $('.list-left ul li').each(function(idx, opt) {
+            $('#dual-list-options').append($("<option></option>")
+                .attr("value", $(opt).data("value"))
+                .text( $(opt).text())
+                .prop("selected", "selected")
+            );
+        });
+    }
+
+
+    $('.dual-list .selector').click(function () {
+        var $checkBox = $(this);
+        if (!$checkBox.hasClass('selected')) {
+            $checkBox.addClass('selected').closest('.well').find('ul li:not(.active)').addClass('active');
+            $checkBox.children('i').removeClass('glyphicon-unchecked').addClass('glyphicon-check');
+        } else {
+            $checkBox.removeClass('selected').closest('.well').find('ul li.active').removeClass('active');
+            $checkBox.children('i').removeClass('glyphicon-check').addClass('glyphicon-unchecked');
+        }
+    });
+
+
+    $('[name="SearchDualList"]').keyup(function (e) {
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        if (code == '27') $(this).val(null);
+        var $rows = $(this).closest('.dual-list').find('.list-group li');
+        var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+        $rows.show().filter(function () {
+            var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+            return !~text.indexOf(val);
+        }).hide();
+    });
+
+
+    $(".glyphicon-search").on("click", function() {
+        $(this).next("input").focus();
+    });
+
+
+    function sortUnorderedList(ul, sortDescending) {
+        $("#" + ul + " li").sort(sort_li).appendTo("#" + ul);
+
+        function sort_li(a, b){
+            return ($(b).data('value')) < ($(a).data('value')) ? 1 : -1;
+        }
+    }
+
+
+    $("#dual-list-left li").append(move_right);
+    $("#dual-list-right li").append(move_left);
+
+
+
+
+});
+</script>
+
+

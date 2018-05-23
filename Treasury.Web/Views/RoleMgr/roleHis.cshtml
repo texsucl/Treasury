@@ -1,0 +1,504 @@
+﻿@model Treasury.WebViewModels.RoleMgrHisModel
+
+@{
+    ViewBag.Title = "角色歷史異動紀錄";
+
+    var apprStatusList = ViewBag.apprStatusList as SelectList;
+
+}
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cRoleID)：
+                    
+                        @Html.DisplayTextFor(model => model.cRoleID)
+                        @Html.Hidden("cRoleID", Model.cRoleID)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cRoleName)：
+                    
+                        @Html.DisplayTextFor(model => model.cRoleName)
+   
+                    </td>
+
+                </tr>
+
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdDateTime)：
+                        <input id="updDateB" name="updDateB" type="text">
+                        ~
+                        <input id="updDateE" name="updDateE" type="text">
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.apprtatus)：
+                        @Html.DropDownList("apprStatus", apprStatusList, "請選擇")
+                    </td>
+                    
+                </tr>
+
+            </table>
+
+            
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-24" style="text-align:center;">
+            <input type="button" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+            <input type="button" id="btnReturn" name="btnReturn" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+
+    <div id="qryRoleHis">
+        <table id="gridRoleHis"></table>
+        <div id="pagerRoleHis"></div>
+    </div>
+    <br/>
+
+
+    <div id="qryFuncHis">
+        <table id="gridFuncHis"></table>
+        <div id="pagerFuncHis"></div>
+    </div>
+    <br />
+
+    <div id="qryEquipHis">
+        <table id="gridEquipHis"></table>
+        <div id="pagerEquipHis"></div>
+    </div>
+    <br />
+
+    <div id="qryItemHis">
+        <table id="gridItemHis"></table>
+        <div id="pagerItemHis"></div>
+    </div>
+    <br />
+
+    <div id="qryFormAplyHis">
+        <table id="gridFormAplyHis"></table>
+        <div id="pagerFormAplyHis"></div>
+    </div>
+
+
+    </div>
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+
+        $("#qryRoleHis").css("visibility", "hidden");
+        $("#qryFuncHis").css("visibility", "hidden");
+        $("#qryEquipHis").css("visibility", "hidden");
+        $("#qryItemHis").css("visibility", "hidden");
+        $("#qryFormAplyHis").css("visibility", "hidden");
+
+
+
+
+        $('#updDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#updDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+            //返回
+            $("#btnReturn").click().on('click', function () {
+                history.go(-1)
+            });
+
+
+
+            //*----------------------查詢   begin -----------------------*//
+            $("#btnQry").click().on('click', function () {
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                $.blockUI(); //畫面鎖起來
+
+
+                //$('#qryRoleHis').children().remove();
+
+                //$('#qryRoleHis').append('<table id="' + "gridRoleHis" + '"></table>');
+                //$('#qryRoleHis').append('<div id="' + "pagerRoleHis" + '"></div>');
+                //genRoleHis();
+                var jsonData = JSON.stringify({
+                    cRoleID: $('#cRoleID').val(),
+                    apprStatus: $('#apprStatus').val(),
+                    updDateB: $('#updDateB').val(),
+                    updDateE: $('#updDateE').val()
+                });
+
+                
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("qryRoleHisData", "RoleMgr")',
+                    contentType: 'application/json',
+
+                    success: function (data) {
+
+                        if (data.success) {
+                            $("#qryRoleHis").css("visibility", "visible");
+                            $("#qryFuncHis").css("visibility", "visible");
+                            $("#qryEquipHis").css("visibility", "visible");
+                            $("#qryItemHis").css("visibility", "visible");
+                            $("#qryFormAplyHis").css("visibility", "visible");
+
+
+                            //更新畫面GRID
+                            jQuery("#gridRoleHis").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.roleHisList })
+                                .trigger("reloadGrid");
+
+                            jQuery("#gridFuncHis").jqGrid('clearGridData')
+                               .jqGrid('setGridParam', { data: data.roleFuncHisList })
+                               .trigger("reloadGrid");
+
+                            jQuery("#gridEquipHis").jqGrid('clearGridData')
+                               .jqGrid('setGridParam', { data: data.roleEquipHisList })
+                               .trigger("reloadGrid");
+
+                            jQuery("#gridItemHis").jqGrid('clearGridData')
+                               .jqGrid('setGridParam', { data: data.roleItemHisList })
+                               .trigger("reloadGrid");
+
+                            jQuery("#gridFormAplyHis").jqGrid('clearGridData')
+                               .jqGrid('setGridParam', { data: data.roleFormAplyHisList })
+                               .trigger("reloadGrid");
+
+                        } else {
+                            validationSummary.append('<li>' + data.err + '</li>');
+     
+                        }
+                        $.unblockUI();
+                       
+                    }
+                });
+
+
+            });
+        //*----------------------查詢   end -----------------------*//
+
+
+        //*----------------------角色資訊 begin -----------------------*//
+                $("#gridRoleHis").jqGrid({
+                    caption: '角色資訊',
+                    editurl: 'clientArray',
+                    datatype: "local",
+                    //jsonReader: {
+                    //    repeatitems: false, id: 'aplyNo'
+                    //},
+                    mtype: 'POST',
+                    colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '修改前', '修改後', '修改前', '修改後'
+                   , '修改前', '修改後'],
+                    colModel: [
+                        { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                        { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
+                        { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
+                        { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
+                        { name: 'execActionDesc', index: 'execActionDesc', align: 'center', width: "100" },
+                        
+                        { name: 'roleNameB', index: 'roleNameB', align: 'center', width: "120" },
+                        { name: 'roleName', index: 'roleName', align: 'center', width: "120" },
+                        { name: 'isDisabledDescB', index: 'isDisabledDescB', align: 'center', width: "80" },
+                        { name: 'isDisabledDesc', index: 'isDisabledDesc', align: 'center', width: "80" },
+                         { name: 'memoB', index: 'memoB', align: 'left', width: "180" },
+                        { name: 'memo', index: 'memo', align: 'left', width: "180" }
+                       
+                    ],
+
+                    autowidth: true,
+                    width: 'auto',
+                    height: 'auto',
+                shrinkToFit: false,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                    $("#gridRoleHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridRoleHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    fixPositionsOfFrozenDivs.call(this);
+
+                   
+                },
+                pager: "#pagerRoleHis"
+                    ,
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+
+            });
+                jQuery("#gridRoleHis").jqGrid('setFrozenColumns');
+                jQuery("#gridRoleHis").jqGrid('setGroupHeaders', {
+                    useColSpanStyle: false,
+                    groupHeaders: [
+                      { startColumnName: 'roleNameB', numberOfColumns: 2, titleText: '角色名稱' },
+                      { startColumnName: 'isDisabledDescB', numberOfColumns: 2, titleText: '停用註記' },
+                    { startColumnName: 'memoB', numberOfColumns: 2, titleText: '備註' }
+                    ]
+                });
+
+        //*----------------------角色資訊 end -----------------------*//
+       
+
+        //*----------------------授權功能 begin -----------------------*//
+            $("#gridFuncHis").jqGrid({
+                caption: '授權功能',
+                editurl: 'clientArray',
+                datatype: "local",
+                //jsonReader: {
+                //    repeatitems: false, id: 'cFunctionName'
+                //},
+                mtype: 'POST',
+                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '功能名稱'],
+                colModel: [
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
+                    { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
+                    { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
+                    { name: 'execActionDesc', index: 'execActionDesc', align: 'center', width: "100" },
+                    { name: 'cFunctionName', index: 'cFunctionName', align: 'left', width: "200" }
+                ],
+
+                autowidth: true,
+                width: 'auto',
+                height: 'auto',
+                shrinkToFit: false,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                    $("#gridFuncHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridFuncHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    fixPositionsOfFrozenDivs.call(this);
+
+
+                },
+                pager: "#pagerFuncHis"
+                ,
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+
+            });
+            jQuery("#gridFuncHis").jqGrid('setFrozenColumns');
+        //*----------------------授權功能 end -----------------------*//
+
+
+        //*----------------------金庫設備 begin -----------------------*//
+            $("#gridEquipHis").jqGrid({
+                caption: '金庫設備權限',
+                editurl: 'clientArray',
+                datatype: "local",
+                //jsonReader: {
+                //    repeatitems: false, id: 'equipName'
+                //},
+                mtype: 'POST',
+                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '設備名稱', '控管模式'
+                    , '修改前', '修改後', '修改前', '修改後'],
+                colModel: [
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
+                    { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
+                    { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
+                    { name: 'execActionDesc', index: 'execActionDesc', align: 'center', width: "100" },
+
+                    { name: 'equipName', index: 'equipName', align: 'left', width: "160" },
+                    { name: 'controlModeDesc', index: 'controlModeDesc', align: 'center', width: "100" },
+
+                     { name: 'custodyModeDescB', index: 'custodyModeDescB', align: 'center', width: "100" },
+                    { name: 'custodyModeDesc', index: 'custodyModeDesc', align: 'center', width: "100" },
+                    { name: 'custodyOrderB', index: 'custodyOrderB', align: 'center', width: "100" },
+                    { name: 'custodyOrder', index: 'custodyOrder', align: 'center', width: "100" }
+                   
+                ],
+                autowidth: true,
+                width: 'auto',
+                height: 'auto',
+                shrinkToFit: false,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                    $("#gridEquipHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridEquipHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    fixPositionsOfFrozenDivs.call(this);
+
+
+                },
+                pager: "#pagerEquipHis"
+                ,
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+
+            });
+            jQuery("#gridEquipHis").jqGrid('setFrozenColumns');
+            jQuery("#gridEquipHis").jqGrid('setGroupHeaders', {
+                useColSpanStyle: false,
+                groupHeaders: [
+                  { startColumnName: 'custodyModeDescB', numberOfColumns: 2, titleText: '控管方式' },
+                  { startColumnName: 'custodyOrderB', numberOfColumns: 2, titleText: '保管順位' }
+                ]
+            });
+        //*----------------------金庫設備 end -----------------------*//
+
+
+
+        //*----------------------存取設備權限 begin -----------------------*//
+            $("#gridItemHis").jqGrid({
+                caption: '存取設備權限',
+                editurl: 'clientArray',
+                datatype: "local",
+                //jsonReader: {
+                //    repeatitems: false, id: 'cFunctionName'
+                //},
+                mtype: 'POST',
+                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
+                colModel: [
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
+                    { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
+                    { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
+                    { name: 'execActionDesc', index: 'execActionDesc', align: 'center', width: "100" },
+
+                    
+                    { name: 'itemDesc', index: 'itemDesc', align: 'left', width: "160" },
+                    { name: 'itemOpType', index: 'itemOpType', align: 'left', width: "300" }
+                ],
+
+                autowidth: true,
+                width: 'auto',
+                height: 'auto',
+                shrinkToFit: false,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                    $("#gridItemHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridItemHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    fixPositionsOfFrozenDivs.call(this);
+
+
+                },
+                pager: "#pagerItemHis"
+                ,
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+
+            });
+            jQuery("#gridItemHis").jqGrid('setFrozenColumns');
+        //*----------------------存取設備權限 end -----------------------*//
+
+
+        //*----------------------表單申請權限 begin -----------------------*//
+            $("#gridFormAplyHis").jqGrid({
+                caption: '表單申請權限',
+                editurl: 'clientArray',
+                datatype: "local",
+                //jsonReader: {
+                //    repeatitems: false, id: 'cFunctionName'
+                //},
+                mtype: 'POST',
+                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
+                colModel: [
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
+                    { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
+                    { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
+                    { name: 'execActionDesc', index: 'execActionDesc', align: 'center', width: "100" },
+
+                   
+                    { name: 'itemDesc', index: 'itemDesc', align: 'left', width: "160" },
+                { name: 'itemOpType', index: 'itemOpType', align: 'left', width: "300" }
+                ],
+
+                autowidth: true,
+                width: 'auto',
+                height: 'auto',
+                shrinkToFit: false,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                    $("#gridFormAplyHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridFormAplyHis").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    fixPositionsOfFrozenDivs.call(this);
+
+
+                },
+                pager: "#pagerFormAplyHis"
+                ,
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+
+            });
+            jQuery("#gridFormAplyHis").jqGrid('setFrozenColumns');
+        //*----------------------表單申請權限 end -----------------------*//
+
+
+        });
+
+
+</script>
+
+

@@ -1,0 +1,348 @@
+﻿@model Treasury.WebViewModels.FuncMgrDetailModel
+
+@{
+    ViewBag.Title = "功能管理作業";
+    var opScope = ViewBag.opScope;
+
+    var FlagList = ViewBag.FlagList as SelectList;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading" style="text-align:center;">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+                    <table >
+                        
+                        <tr>
+                            <td valign="top" width="230">
+                                <div  id="tree" style="text-align:left;"></div>
+                                </td>
+                            <td valign="top">
+                                    <table id="detail">
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.cParentFunctionID)：</td>
+                                            <td><label id="lblPFuncId"></label></td>
+                                            @*<td>@Html.TextBoxFor(model => model.cParentFunctionID)</td>*@
+
+                                            <td>@Html.DisplayNameFor(model => model.cParentFunctionName)：</td>
+                                            <td><label id="lblPFuncName"></label></td>
+                                            @*<td>@Html.TextBoxFor(model => model.cParentFunctionName)</td>*@
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.cFunctionID)：</td>
+                                            <td><label id="lblFuncId"></label></td>
+                                            @*<td>@Html.TextBoxFor(model => model.cFunctionID)</td>*@
+
+                                            <td>@Html.DisplayNameFor(model => model.cFunctionName)：</td>
+                                            <td>@Html.TextBoxFor(model => model.cFunctionName, new { @maxlength = "25" })</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.iSortBy)：</td>
+                                            <td>@Html.TextBoxFor(model => model.iSortBy)</td>
+
+                                            <td>@Html.DisplayNameFor(model => model.cFlag)：</td>
+                                            <td>@Html.DropDownList("cFlag", FlagList, "請選擇")</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.vFunctionUrl)：</td>
+                                            <td colspan="3">@Html.TextBoxFor(model => model.vFunctionUrl, new { @maxlength = "25" })</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.vFunctionMemo)：</td>
+                                            <td colspan="3">@Html.TextBoxFor(model => model.vFunctionMemo, new { style = "width:90%", @maxlength = "250" })</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.cCrtUserID)：</td>
+                                            <td><label id="crtUser"></label></td>
+
+                                            <td>@Html.DisplayNameFor(model => model.cCrtDate)：</td>
+                                            <td><label id="crtDate"></label></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>@Html.DisplayNameFor(model => model.cUpdUserID)：</td>
+                                            <td><label id="updUser"></label></td>
+
+                                            <td>@Html.DisplayNameFor(model => model.cUpdDate)：</td>
+                                            <td><label id="updDate"></label></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td colspan="4" style="text-align:center;">
+                                                <input type="button" id="btnInsert" name="btnInsert" value="新增子功能" class="btn btn-primary" />
+                                                <input type="button" id="btnSave" name="btnSave" value="儲存" class="btn btn-primary" />
+                                                <input type="button" id="btnModify" name="btnModify" value="修改" class="btn btn-primary" />
+                                                </td>
+                                            </tr>
+                                    </table>
+
+
+                                </td>
+
+                        </tr>
+                    </table>
+            
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<script type="text/javascript">
+
+    //新增子功能
+    $("#btnInsert").click().on('click', function () {
+        $('#lblPFuncId').text($('#lblFuncId').text());
+        $('#lblPFuncName').text($('#cFunctionName').val());
+        $('#lblFuncId').text("");
+
+        $('#cFunctionName').val("");
+        $('#iSortBy').val("");
+        $('#cFlag').val("N");
+        $('#vFunctionUrl').val("");
+        $('#vFunctionMemo').val("");
+        $('#crtUser').text("");
+        $('#crtDate').text("");
+        $('#updUser').text("");
+        $('#updDate').text("");
+
+
+        $('#btnInsert').hide();
+        $('#btnModify').hide();
+        
+        $('#btnSave').show();
+
+
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify({
+                'cParentFunctionID': $('#lblPFuncId').text()
+            }),
+            url: '@Url.Action("qrySort", "FuncMgr")',
+            contentType: 'application/json',
+            success: function (data) {
+                $('#iSortBy').val(data.sort);
+                
+
+            },
+            error: function () {
+                alert("新增失敗！")
+            }
+        });
+
+
+
+    });
+
+
+
+    //確定新增
+    $("#btnSave").click().on('click', function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify({
+                'cParentFunctionID': $('#lblPFuncId').text(),
+                'cFunctionName': $('#cFunctionName').val(),
+                'iSortBy': $('#iSortBy').val(),
+                'cFlag': $('#cFlag').val(),
+                'vFunctionUrl': $('#vFunctionUrl').val(),
+                'vFunctionMemo': $('#vFunctionMemo').val()
+            }),
+            url: '@Url.Action("execInsert", "FuncMgr")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    validationSummary.append('<li>' + '新增成功' + '</li>');
+                    qryDetail(data.id, "", false);
+                    $('#btnSave').hide();
+
+                    $('#btnModify').show();
+
+                    getTree(false);
+                }
+                    
+                else 
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+            },
+            error: function () {
+                alert("新增失敗！")
+            }
+        });
+    });
+
+
+    //修改
+    $("#btnModify").click().on('click', function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify({
+                'cFunctionId': $('#lblFuncId').text(),
+                'cFunctionName': $('#cFunctionName').val(),
+                'iSortBy': $('#iSortBy').val(),
+                'cFlag': $('#cFlag').val(),
+                'vFunctionUrl': $('#vFunctionUrl').val(),
+                'vFunctionMemo': $('#vFunctionMemo').val()
+            }),
+            url: '@Url.Action("execModify", "FuncMgr")',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.success) {
+                    validationSummary.append('<li>' + '修改成功' + '</li>');
+                    qryDetail(data.id, "", false);
+                }
+                    
+                else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+            },
+            error: function () {
+                alert("修改失敗！")
+            }
+        });
+
+    });
+
+
+    //點選功能
+    function qryDetail(id, pId, clrMsg) {
+
+        if (clrMsg)
+            $('#validationSummary').children().remove();
+
+
+
+        if (checkNum(pId))
+            $('#btnInsert').hide();
+        else
+            $('#btnInsert').show();
+
+
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify({ 'cFunctionID': id }),
+            url: '@Url.Action("qryDetail", "FuncMgr")',
+            contentType: 'application/json',
+            success: function (data) {
+                $('#detail').show();
+
+
+                $('#lblPFuncId').text(data.funcDetail.cParentFunctionID);
+                $('#lblPFuncName').text(data.funcDetail.cParentFunctionName);
+                $('#lblFuncId').text(data.funcDetail.cFunctionID);
+
+                $('#cFunctionName').val(data.funcDetail.cFunctionName);
+                $('#iSortBy').val(data.funcDetail.iSortBy);
+                $('#cFlag').val(data.funcDetail.cFlag);
+                $('#vFunctionUrl').val(data.funcDetail.vFunctionUrl);
+                $('#vFunctionMemo').val(data.funcDetail.vFunctionMemo);
+                $('#cCrtUserID').val(data.funcDetail.cCrtUserID);
+                $('#cCrtUserName').val(data.funcDetail.cCrtUserName);
+                $('#cCrtTime').val(data.funcDetail.cCrtTime);
+                //$('#cUpdUserID').val(data.funcDetail.cUpdUserID);
+                //$('#cUpdUserName').val(data.funcDetail.cUpdUserName);
+                //$('#cUpdDate').val(data.funcDetail.cUpdDate);
+                //$('#cUpdTime').val(data.funcDetail.cUpdTime);
+
+                $('#crtUser').text(data.funcDetail.cCrtUserID + "　" + data.funcDetail.cCrtUserName);
+                $('#crtDate').text(data.funcDetail.cCrtDate);
+
+                $('#updUser').text(data.funcDetail.cUpdUserID + "　" + data.funcDetail.cUpdUserName);
+                $('#updDate').text(data.funcDetail.cUpdDate);
+
+            },
+            error: function () {
+                alert("查詢失敗！")
+            }
+        });
+    }
+
+
+    function getTree(collapse) {
+
+        $.ajax({
+            type: "Post",
+            url: "/FuncMgr/GetTreeJson",
+            dataType: "json",
+            success: function (result) {
+                $('#tree').treeview({
+                    color: "#428bca",
+                    data: result.nodes, // 數據源
+                    showCheckbox: false, //是否顯示復選框
+                    highlightSelected: true, //是否高亮選中
+                    //nodeIcon: 'glyphicon glyphicon-user', //節點上的圖標
+                    //nodeIcon: 'glyphicon glyphicon-globe',
+                    emptyIcon: '', //沒有子節點的節點圖標
+                    multiSelect: false, //多選
+                    onNodeChecked: function (event, data) {
+                        //alert(data.Id);
+                    },
+                    onNodeSelected: function (event, data) {
+                        qryDetail(data.Id, data.parentId, true);
+
+                    }
+                });
+
+
+                if (collapse)
+                    $('#tree').treeview('collapseAll', { silent: true });
+                else
+                    $('#tree').treeview('collapseAll', { silent: false });
+
+            },
+            error: function () {
+                alert("樹形結構加載失敗！")
+            }
+        });
+
+
+    }
+
+    $(function () {
+
+
+        $('#detail').hide();
+        $('#btnSave').hide();
+
+            getTree(true);
+
+
+    });
+
+
+</script>

@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="sssdbModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="AgentInfo">
+    <Key>
+      <PropertyRef Name="AgentID" />
+    </Key>
+    <Property Name="AgentID" Type="char" MaxLength="10" Nullable="false" />
+    <Property Name="AgentName" Type="nvarchar" MaxLength="28" />
+    <Property Name="Rank" Type="char" MaxLength="3" />
+    <Property Name="Grade" Type="char" MaxLength="1" />
+    <Property Name="Generation" Type="char" MaxLength="1" />
+    <Property Name="CurStatus" Type="char" MaxLength="2" Nullable="false" />
+    <Property Name="Birthday" Type="char" MaxLength="8" />
+    <Property Name="Domiciliary" Type="char" MaxLength="14" />
+    <Property Name="DomAddr" Type="char" MaxLength="72" />
+    <Property Name="ZipCode" Type="char" MaxLength="5" />
+    <Property Name="Addr" Type="char" MaxLength="72" />
+    <Property Name="OfficeTel" Type="char" MaxLength="20" />
+    <Property Name="HomeTel" Type="char" MaxLength="12" />
+    <Property Name="PagerNo" Type="char" MaxLength="12" />
+    <Property Name="PagerFlag" Type="char" MaxLength="1" />
+    <Property Name="PagerExt" Type="char" MaxLength="4" />
+    <Property Name="MobPhoneNo" Type="char" MaxLength="12" />
+    <Property Name="EmailAddr" Type="char" MaxLength="50" />
+    <Property Name="RptDate" Type="char" MaxLength="8" />
+    <Property Name="ApplDate" Type="char" MaxLength="8" />
+    <Property Name="EfftDate" Type="char" MaxLength="8" Nullable="false" />
+    <Property Name="UnitCode" Type="char" MaxLength="5" />
+    <Property Name="UnitSeq" Type="char" MaxLength="4" />
+    <Property Name="WorkUnitCode" Type="char" MaxLength="5" />
+    <Property Name="WorkUnitSeq" Type="char" MaxLength="4" />
+    <Property Name="SuperAgentID" Type="char" MaxLength="10" />
+    <Property Name="RecrueAgentID" Type="char" MaxLength="10" />
+    <Property Name="Password" Type="char" MaxLength="4" />
+    <Property Name="PagerStatus" Type="char" MaxLength="1" />
+    <Property Name="MobPhoneStatus" Type="char" MaxLength="1" />
+    <Property Name="ModifyDate" Type="char" MaxLength="8" />
+    <Property Name="ModifyTime" Type="char" MaxLength="6" />
+    <Property Name="ChgPWDDate" Type="varchar" MaxLength="8" />
+    <Property Name="Style" Type="varchar" MaxLength="255" />
+    <Property Name="AgentFax" Type="varchar" MaxLength="15" Nullable="false" />
+    <Property Name="IsUse" Type="char" MaxLength="1" Nullable="false" />
+    <Property Name="EncPassword" Type="varchar" MaxLength="50" Nullable="false" />
+    <Property Name="UnitTel" Type="char" MaxLength="20" />
+    <Property Name="UnitTelExt" Type="char" MaxLength="10" />
+    <Property Name="Survey" Type="varchar" MaxLength="1" />
+    <Property Name="SurveyDate" Type="varchar" MaxLength="8" />
+    <Property Name="O365StartDt" Type="datetime" />
+  </EntityType>
+  <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'sssdb.dbo.UnitInfo' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+  <EntityType Name="UnitInfo">
+    <Key>
+      <PropertyRef Name="UnitCode" />
+      <PropertyRef Name="UnitSeq" />
+    </Key>
+    <Property Name="UnitCode" Type="char" MaxLength="5" Nullable="false" />
+    <Property Name="UnitSeq" Type="char" MaxLength="4" Nullable="false" />
+    <Property Name="UnitName" Type="nvarchar" MaxLength="84" />
+    <Property Name="System" Type="char" MaxLength="1" />
+    <Property Name="ManagerID" Type="char" MaxLength="10" />
+    <Property Name="RegionCode" Type="char" MaxLength="5" />
+    <Property Name="RegionSeq" Type="char" MaxLength="4" />
+    <Property Name="BelongedCode" Type="char" MaxLength="5" />
+    <Property Name="BelongedSeq" Type="char" MaxLength="4" />
+    <Property Name="Flow" Type="char" MaxLength="1" />
+    <Property Name="EstablishDate" Type="char" MaxLength="8" />
+    <Property Name="WithdrawDate" Type="char" MaxLength="8" />
+    <Property Name="ModUser" Type="char" MaxLength="10" />
+    <Property Name="ModDate" Type="char" MaxLength="8" />
+    <Property Name="ModTime" Type="char" MaxLength="6" />
+    <Property Name="Faxnumber" Type="varchar" MaxLength="12" />
+    <Property Name="Levelcode" Type="varchar" MaxLength="1" />
+  </EntityType>
+  <EntityContainer Name="sssdbModelStoreContainer">
+    <EntitySet Name="AgentInfo" EntityType="Self.AgentInfo" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="UnitInfo" EntityType="Self.UnitInfo" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [UnitInfo].[UnitCode] AS [UnitCode], 
+    [UnitInfo].[UnitSeq] AS [UnitSeq], 
+    [UnitInfo].[UnitName] AS [UnitName], 
+    [UnitInfo].[System] AS [System], 
+    [UnitInfo].[ManagerID] AS [ManagerID], 
+    [UnitInfo].[RegionCode] AS [RegionCode], 
+    [UnitInfo].[RegionSeq] AS [RegionSeq], 
+    [UnitInfo].[BelongedCode] AS [BelongedCode], 
+    [UnitInfo].[BelongedSeq] AS [BelongedSeq], 
+    [UnitInfo].[Flow] AS [Flow], 
+    [UnitInfo].[EstablishDate] AS [EstablishDate], 
+    [UnitInfo].[WithdrawDate] AS [WithdrawDate], 
+    [UnitInfo].[ModUser] AS [ModUser], 
+    [UnitInfo].[ModDate] AS [ModDate], 
+    [UnitInfo].[ModTime] AS [ModTime], 
+    [UnitInfo].[Faxnumber] AS [Faxnumber], 
+    [UnitInfo].[Levelcode] AS [Levelcode]
+    FROM [dbo].[UnitInfo] AS [UnitInfo]</DefiningQuery>
+    </EntitySet>
+  </EntityContainer>
+</Schema>

@@ -1,0 +1,244 @@
+﻿@model Treasury.WebViewModels.AuthRptModel
+
+@{
+    ViewBag.Title = "權限報表";
+
+    var opScope = ViewBag.opScope;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>
+                            @Html.DisplayNameFor(model => model.cRptType)：
+
+                             @Html.RadioButton("cRptType", "userRole", new { @checked = true })使用者角色報表　
+                             @Html.RadioButton("cRptType", "roleFunc")功能角色報表
+                            
+
+                            <input type="button" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" style="display: none;" />
+
+                            <input type="button" id="btnPrint" name="btnPrint" value="確定列印" class="btn btn-primary" style="display: none;" />
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        $("#btnQry").hide();
+        $("#btnPrint").hide();
+
+
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $("#btnQry").hide();
+            $("#btnPrint").show();
+        }
+
+
+        //確定列印
+        $("#btnPrint").click().on('click', function () {
+            genRpt();
+
+        });
+
+
+
+
+        //組合報表
+        function genRpt(type) {
+            $('#validationSummary').children().remove();
+
+
+
+
+
+            //if (printList.length == 0) {
+
+            //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+            //    validationSummary.append('<li>' + '請選擇需要列印的資料！' + '</li>');
+
+            //} else {
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("print", "AuthRpt")",
+                    data: JSON.stringify({ 'cRptType': $('input:radio:checked[name="cRptType"]').val() }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        var url = '/AuthRpt/downloadRpt?id=' + data.guid;
+                        window.location = url;
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                },
+                error: function () {
+
+                }
+            });
+
+            $.unblockUI();
+            //}
+        }
+
+
+
+
+        //查詢
+        $("#btnQry").click().on('click', function () {
+            var bPass = true;
+            printList = [];
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            //if (!checkTwYearMonth($('#cYearMonth').val(), true)) {
+            //    validationSummary.append('<li>' + '“年月”欄位-請輸入正確的格式：民國年4碼+月份2碼！(ex:0096年8月請輸入009608' + '</li>');
+            //    bPass = false;
+            //}
+
+
+            if(bPass)
+                createGrid();
+        });
+
+
+
+        //查詢結果GRID
+        function createGrid() {
+
+            $("#btnPrint").hide();
+
+            var para = {
+                'cRptType': $('#cRptType').val()
+            };
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            alert($('#cRptType').val());
+            if ($('#cRptType').val() == "userRole")
+                userRoleGrid();
+            else
+                funcRoleGrid();
+
+
+           
+        }
+
+
+        function userRoleGrid() {
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/AuthRpt/loadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cUserId'
+                },
+                mtype: 'POST',
+                colNames: ['網路帳號', '中文姓名', '上班單位', '角色', '指派單位及區間'],
+                colModel: [
+                    { name: 'cUserId', index: 'cUserId', align: 'left' },
+                    { name: 'cUserName', index: 'cUserName', align: 'left' },
+                    { name: 'cWorkUnit', index: 'cWorkUnit', align: 'left' },
+                    { name: 'cRoleName', index: 'cRoleName', align: 'left' },
+                    { name: 'cMaintainUnit', index: 'cMaintainUnit', align: 'left' }
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 20,
+                rowList: [10, 20],
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records');
+
+
+                    if (cnt == 0) {
+                        $('#validationSummary').children().remove();
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '沒有符合查詢條件的資料，請重新輸入查詢條件！' + '</li>');
+
+                    } else
+                        $("#btnPrint").show();
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+        }
+    });
+
+
+</script>

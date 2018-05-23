@@ -1,0 +1,793 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="DbAccountModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="AwardCount">
+    <Key>
+      <PropertyRef Name="CBATCHNO" />
+      <PropertyRef Name="CAWARDKIND" />
+    </Key>
+    <Property Name="CBATCHNO" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="IACCOUNT" Type="Int32" Nullable="false" />
+    <Property Name="ITAX" Type="Int32" Nullable="false" />
+    <Property Name="CCRTDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CDELFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardDetail">
+    <Key>
+      <PropertyRef Name="CTEMPID" />
+    </Key>
+    <Property Name="CTEMPID" Type="String" MaxLength="16" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CBATCHNO" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CBATCHSEQ" Type="String" MaxLength="7" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAGENTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAGENTNAME" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="IACCOUNT" Type="Int32" Nullable="false" />
+    <Property Name="ITAX" Type="Int32" Nullable="false" />
+    <Property Name="CMEMO" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="CFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardMain">
+    <Key>
+      <PropertyRef Name="CBATCHNO" />
+    </Key>
+    <Property Name="CBATCHNO" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CREGIONCODE" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CREGIONNAME" Type="String" MaxLength="42" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUNITCODE" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CYEARMONTH" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CACTIVENAME" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="CWITHHOLDDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CTICKETNO" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CSTATUS" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="IACCOUNT" Type="Int32" Nullable="false" />
+    <Property Name="ITAX" Type="Int32" Nullable="false" />
+    <Property Name="CPRINTFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CDELFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AwardTemp">
+    <Key>
+      <PropertyRef Name="CID" />
+    </Key>
+    <Property Name="CID" Type="String" MaxLength="16" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CBATCHNO" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUNITCODE" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CYEARMONTH" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CACTIVENAME" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="CAGENTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAGENTNAME" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CAWARDKIND" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="IACCOUNT" Type="Int32" Nullable="false" />
+    <Property Name="ITAX" Type="Int32" Nullable="false" />
+    <Property Name="CMEMO" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="CFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CHalfword">
+    <Key>
+      <PropertyRef Name="Cbatchno" />
+      <PropertyRef Name="Cbatchseq" />
+    </Key>
+    <Property Name="Cbatchno" Type="Int32" Nullable="false" />
+    <Property Name="Cbatchseq" Type="Int32" Nullable="false" />
+    <Property Name="CtableToChk" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CfieldToChk" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CkeyPairs" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CbatchFin" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CcrtDateTime" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CodeSeqNo">
+    <Key>
+      <PropertyRef Name="CTYPE" />
+      <PropertyRef Name="CPRECODE" />
+    </Key>
+    <Property Name="CTYPE" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CPRECODE" Type="String" MaxLength="20" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="ICURRENTVALUE" Type="Int32" Nullable="false" />
+    <Property Name="CUPDDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PIA_EXEC_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="IN_NAME" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="OUT_NAME" Type="String" MaxLength="45" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_DATE" Type="DateTime" Precision="0" />
+    <Property Name="CRT_TIME" Type="Time" Precision="7" />
+    <Property Name="UPD_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="UPD_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="UPD_DATE" Type="DateTime" Precision="0" />
+    <Property Name="UPD_TIME" Type="Time" Precision="7" />
+    <NavigationProperty Name="PIA_LOG_MAIN" Relationship="Self.R_LOG_MAIN_EXEC_TYPE" FromRole="PIA_EXEC_TYPE" ToRole="PIA_LOG_MAIN" />
+  </EntityType>
+  <EntityType Name="PIA_LOG_MAIN">
+    <Key>
+      <PropertyRef Name="TRACKING_SEQ" />
+    </Key>
+    <Property Name="TRACKING_SEQ" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ACCESS_ACCOUNT" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ACCOUNT_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="FROM_IP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ACCESS_DATE" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="ACCESS_TIME" Type="Time" Nullable="false" Precision="7" />
+    <Property Name="PROGFUN_NAME" Type="String" MaxLength="128" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ACCESSOBJ_NAME" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="EXECUTION_CONTENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="AFFECT_ROWS" Type="Int32" />
+    <Property Name="PIA_OWNER1" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="PIA_OWNER2" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="PIA_TYPE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <NavigationProperty Name="PIA_EXEC_TYPE" Relationship="Self.R_LOG_MAIN_EXEC_TYPE" FromRole="PIA_LOG_MAIN" ToRole="PIA_EXEC_TYPE" />
+    <NavigationProperty Name="PIA_TRACK_TYPE" Relationship="Self.R_LOG_MAIN_TRACK_TYPE" FromRole="PIA_LOG_MAIN" ToRole="PIA_TRACK_TYPE" />
+  </EntityType>
+  <EntityType Name="PIA_TRACK_TYPE">
+    <Key>
+      <PropertyRef Name="STATUS_ID" />
+    </Key>
+    <Property Name="STATUS_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="IN_NAME" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="OUT_NAME" Type="String" MaxLength="45" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_DATE" Type="DateTime" Precision="0" />
+    <Property Name="CRT_TIME" Type="Time" Precision="7" />
+    <Property Name="UPD_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="UPD_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="UPD_DATE" Type="DateTime" Precision="0" />
+    <Property Name="UPD_TIME" Type="Time" Precision="7" />
+    <NavigationProperty Name="PIA_LOG_MAIN" Relationship="Self.R_LOG_MAIN_TRACK_TYPE" FromRole="PIA_TRACK_TYPE" ToRole="PIA_LOG_MAIN" />
+  </EntityType>
+  <EntityType Name="PIA_TRN_HIST">
+    <Key>
+      <PropertyRef Name="HIST_ID" />
+    </Key>
+    <Property Name="HIST_ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="TRACKSEQ_START" Type="Int64" Nullable="false" />
+    <Property Name="TRACKSEQ_END" Type="Int64" Nullable="false" />
+    <Property Name="EXEC_DATE" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="EXEC_TIME" Type="Time" Nullable="false" Precision="7" />
+  </EntityType>
+  <EntityType Name="SysPara">
+    <Key>
+      <PropertyRef Name="para_id" />
+    </Key>
+    <Property Name="para_id" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="para_value" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="remark" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="reserve1" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+    <Property Name="reserve2" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+    <Property Name="reserve3" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="TypeDefine">
+    <Key>
+      <PropertyRef Name="CTYPE" />
+      <PropertyRef Name="CCODE" />
+    </Key>
+    <Property Name="CTYPE" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCODE" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CVALUE" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ISORTBY" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Log">
+    <Key>
+      <PropertyRef Name="CDATE" />
+      <PropertyRef Name="CTIME" />
+      <PropertyRef Name="CFUNCTION" />
+      <PropertyRef Name="CUSERID" />
+      <PropertyRef Name="CACTION" />
+      <PropertyRef Name="CCONTENT" />
+    </Key>
+    <Property Name="CDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CFUNCTION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CUSERID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CACTION" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCONTENT" Type="String" MaxLength="250" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SignDescription">
+    <Key>
+      <PropertyRef Name="CCONTENT" />
+      <PropertyRef Name="CCRTDATE" />
+      <PropertyRef Name="CCRTTIME" />
+      <PropertyRef Name="CCRTID" />
+      <PropertyRef Name="CUPDDATE" />
+      <PropertyRef Name="CUPDTIME" />
+      <PropertyRef Name="CUPDID" />
+    </Key>
+    <Property Name="CCONTENT" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="CCRTDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CCRTID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDDATE" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDTIME" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="CUPDID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <Association Name="R_LOG_MAIN_EXEC_TYPE">
+    <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+  </Association>
+  <Association Name="R_LOG_MAIN_TRACK_TYPE">
+    <End Role="PIA_TRACK_TYPE" Type="Self.PIA_TRACK_TYPE" Multiplicity="1" />
+    <End Role="PIA_LOG_MAIN" Type="Self.PIA_LOG_MAIN" Multiplicity="*" />
+  </Association>
+  <EntityContainer Name="DbAccountEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="AwardCount" EntityType="Self.AwardCount" />
+    <EntitySet Name="AwardDetail" EntityType="Self.AwardDetail" />
+    <EntitySet Name="AwardMain" EntityType="Self.AwardMain" />
+    <EntitySet Name="AwardTemp" EntityType="Self.AwardTemp" />
+    <EntitySet Name="CHalfword" EntityType="Self.CHalfword" />
+    <EntitySet Name="CodeSeqNo" EntityType="Self.CodeSeqNo" />
+    <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" />
+    <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" />
+    <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" />
+    <EntitySet Name="PIA_TRN_HIST" EntityType="Self.PIA_TRN_HIST" />
+    <EntitySet Name="SysPara" EntityType="Self.SysPara" />
+    <EntitySet Name="TypeDefine" EntityType="Self.TypeDefine" />
+    <EntitySet Name="Log" EntityType="Self.Log" />
+    <EntitySet Name="SignDescription" EntityType="Self.SignDescription" />
+    <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
+      <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+    <AssociationSet Name="R_LOG_MAIN_TRACK_TYPE" Association="Self.R_LOG_MAIN_TRACK_TYPE">
+      <End Role="PIA_TRACK_TYPE" EntitySet="PIA_TRACK_TYPE" />
+      <End Role="PIA_LOG_MAIN" EntitySet="PIA_LOG_MAIN" />
+    </AssociationSet>
+    <FunctionImport Name="up_chkHWAwardDetail">
+      <Parameter Name="usr_CYEARMONTH" Mode="In" Type="String" />
+      <Parameter Name="usr_User" Mode="In" Type="String" />
+      <Parameter Name="exec_cnt" Mode="InOut" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="up_chkHWAwardMain">
+      <Parameter Name="usr_CYEARMONTH" Mode="In" Type="String" />
+      <Parameter Name="usr_User" Mode="In" Type="String" />
+      <Parameter Name="exec_cnt" Mode="InOut" Type="Int32" />
+    </FunctionImport>
+    <EntitySet Name="CODEUSERMAINTAINUNIT" EntityType="DbAccountModel.CODEUSERMAINTAINUNIT" />
+    <EntitySet Name="CODEUSERROLE" EntityType="DbAccountModel.CODEUSERROLE" />
+    <EntitySet Name="E_INVO_CANCELLATION" EntityType="DbAccountModel.E_INVO_CANCELLATION" />
+    <EntitySet Name="CODEFUNCTION" EntityType="DbAccountModel.CODEFUNCTION" />
+    <EntitySet Name="CODEROLEDETAIL" EntityType="DbAccountModel.CODEROLEDETAIL" />
+    <EntitySet Name="CODEROLEFUNCTION" EntityType="DbAccountModel.CODEROLEFUNCTION" />
+    <EntitySet Name="CODEUSEROPRUNITMAPPING" EntityType="DbAccountModel.CODEUSEROPRUNITMAPPING" />
+    <EntitySet Name="CODEUSERSRCHUNITMAPPING" EntityType="DbAccountModel.CODEUSERSRCHUNITMAPPING" />
+    <EntitySet Name="CODEROLE" EntityType="DbAccountModel.CODEROLE" />
+    <EntitySet Name="CodeRoleHis" EntityType="DbAccountModel.CodeRoleHis" />
+    <EntitySet Name="CODEUSER" EntityType="DbAccountModel.CODEUSER" />
+    <EntitySet Name="CodeUserHis" EntityType="DbAccountModel.CodeUserHis" />
+    <EntitySet Name="CodeRoleFunctionHis" EntityType="DbAccountModel.CodeRoleFunctionHis" />
+    <EntitySet Name="AuthReview" EntityType="DbAccountModel.AuthReview" />
+    <EntitySet Name="CodeUserRoleHis" EntityType="DbAccountModel.CodeUserRoleHis" />
+    <EntitySet Name="CodeUserMaintainUnitHis" EntityType="DbAccountModel.CodeUserMaintainUnitHis" />
+    <EntitySet Name="E_INVO_STOCK" EntityType="DbAccountModel.E_INVO_STOCK" />
+    <EntitySet Name="E_INVO_STOCK_TEMP" EntityType="DbAccountModel.E_INVO_STOCK_TEMP" />
+    <EntitySet Name="E_INVO_ITEM" EntityType="DbAccountModel.E_INVO_ITEM" />
+    <EntitySet Name="E_INVO_ITEM_TEMP" EntityType="DbAccountModel.E_INVO_ITEM_TEMP" />
+    <EntitySet Name="E_INVO_ALLOWANCE" EntityType="DbAccountModel.E_INVO_ALLOWANCE" />
+    <EntitySet Name="E_INVO_ALLOWANCE_TEMP" EntityType="DbAccountModel.E_INVO_ALLOWANCE_TEMP" />
+  </EntityContainer>
+  <EntityType Name="CODEUSERMAINTAINUNIT">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CENABLEDATE" />
+      <PropertyRef Name="CDISABLEDATE" />
+    </Key>
+    <Property Name="CAGENTID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="CENABLEDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CDISABLEDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITNAME" Type="String" Nullable="false" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="COPRDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="COPRTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEUSERROLE">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CENABLEDATE" />
+      <PropertyRef Name="CDISABLEDATE" />
+    </Key>
+    <Property Name="CAGENTID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CENABLEDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CDISABLEDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="COPRDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="COPRTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="E_INVO_CANCELLATION">
+    <Key>
+      <PropertyRef Name="BATCH_NO" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+    </Key>
+    <Property Name="BATCH_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="FORMAT_CD" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="PAY_NO" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="DATA_BL_YM" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="CTICKET_NO" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_O_STS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_STS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="CUP_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CUP_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="CODEFUNCTION">
+    <Key>
+      <PropertyRef Name="CFUNCTIONID" />
+      <PropertyRef Name="CPARENTFUNCTIONID" />
+      <PropertyRef Name="CFUNCTIONNAME" />
+      <PropertyRef Name="CFUNCTIONTYPE" />
+      <PropertyRef Name="IFUNCTIONLEVEL" />
+      <PropertyRef Name="VFUNCTIONMEMO" />
+      <PropertyRef Name="VFUNCTIONURL" />
+      <PropertyRef Name="ISORTBY" />
+      <PropertyRef Name="CFLAG" />
+      <PropertyRef Name="CCRTUSERID" />
+      <PropertyRef Name="CCRTUSERNAME" />
+      <PropertyRef Name="CCRTDATE" />
+      <PropertyRef Name="CCRTTIME" />
+      <PropertyRef Name="CUPDUSERID" />
+      <PropertyRef Name="CUPDUSERNAME" />
+      <PropertyRef Name="CUPDDATE" />
+      <PropertyRef Name="CUPDTIME" />
+    </Key>
+    <Property Name="CFUNCTIONID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CPARENTFUNCTIONID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CFUNCTIONNAME" Type="String" Nullable="false" MaxLength="50" FixedLength="true" Unicode="false" />
+    <Property Name="CFUNCTIONTYPE" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="IFUNCTIONLEVEL" Type="Int32" Nullable="false" />
+    <Property Name="VFUNCTIONMEMO" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+    <Property Name="VFUNCTIONURL" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+    <Property Name="ISORTBY" Type="Int32" Nullable="false" />
+    <Property Name="CFLAG" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEROLEDETAIL">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CROLEDETAILID" />
+      <PropertyRef Name="COPRUSERID" />
+      <PropertyRef Name="COPRUSERNAME" />
+      <PropertyRef Name="COPRDATE" />
+      <PropertyRef Name="COPRTIME" />
+    </Key>
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CROLEDETAILID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="COPRDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="COPRTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEROLEFUNCTION">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CFUNCTIONID" />
+      <PropertyRef Name="COPRUSERID" />
+      <PropertyRef Name="COPRUSERNAME" />
+      <PropertyRef Name="COPRDATE" />
+      <PropertyRef Name="COPRTIME" />
+    </Key>
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CFUNCTIONID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPRUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="COPRDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="COPRTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEUSEROPRUNITMAPPING">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CUNITTYPE" />
+      <PropertyRef Name="CUNITNAME" />
+      <PropertyRef Name="CLEVELCODE" />
+      <PropertyRef Name="REGIONCODE" />
+      <PropertyRef Name="REGIONSEQ" />
+    </Key>
+    <Property Name="CAGENTID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITTYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITNAME" Type="String" Nullable="false" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="CLEVELCODE" Type="String" Nullable="false" MaxLength="2" FixedLength="true" Unicode="false" />
+    <Property Name="REGIONCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="REGIONSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEUSERSRCHUNITMAPPING">
+    <Key>
+      <PropertyRef Name="CAGENTID" />
+      <PropertyRef Name="CROLEID" />
+      <PropertyRef Name="CUNITCODE" />
+      <PropertyRef Name="CUNITSEQ" />
+      <PropertyRef Name="CUNITTYPE" />
+      <PropertyRef Name="CUNITNAME" />
+      <PropertyRef Name="CLEVELCODE" />
+      <PropertyRef Name="REGIONCODE" />
+      <PropertyRef Name="REGIONSEQ" />
+    </Key>
+    <Property Name="CAGENTID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITTYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="CUNITNAME" Type="String" Nullable="false" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="CLEVELCODE" Type="String" Nullable="false" MaxLength="2" FixedLength="true" Unicode="false" />
+    <Property Name="REGIONCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="REGIONSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEROLE">
+    <Key>
+      <PropertyRef Name="CROLEID" />
+    </Key>
+    <Property Name="CROLEID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CROLENAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CSEARCHAREA" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="COPERATORAREA" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CFLAG" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="VMEMO" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+    <Property Name="CCRTUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="CREVIEWFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CodeRoleHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cRoleID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cRoleName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cSearchArea" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cOperatorArea" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cFlag" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="vMemo" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+    <Property Name="cExecType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODEUSER">
+    <Key>
+      <PropertyRef Name="CUSERID" />
+    </Key>
+    <Property Name="CAGENTID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CFLAG" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="CUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CUSERTYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="VMEMO" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="false" />
+    <Property Name="CWORKUNITCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="CWORKUNITSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="CWORKUNITNAME" Type="String" Nullable="false" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="CBELONGUNITCODE" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="CBELONGUNITSEQ" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="CBELONGUNITNAME" Type="String" Nullable="false" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CCRTTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDUSERNAME" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDDATE" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="CUPDTIME" Type="String" Nullable="false" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="cLoginDateTime" Type="DateTime" Precision="3" />
+    <Property Name="cLogoutDateTime" Type="DateTime" Precision="3" />
+    <Property Name="CREVIEWFLAG" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CodeUserHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cAgentID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cUserID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cUserName" Type="String" Nullable="false" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cUserType" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="cFlag" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="vMemo" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+    <Property Name="cExecType" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CodeRoleFunctionHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cRoleID" />
+      <PropertyRef Name="cFunctionID" />
+      <PropertyRef Name="cExecType" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cRoleID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cFunctionID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cExecType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="AuthReview">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewFlag" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewUserName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewDate" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewTime" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="cReviewMemo" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="cCrtUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cCrtUserName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cCrtDate" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cCrtTime" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="cUpdUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cUpdUserName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cUpdDate" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cUpdTime" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+    <Property Name="cMappingKey" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="CodeUserRoleHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cAgentID" />
+      <PropertyRef Name="cRoleID" />
+      <PropertyRef Name="cEnableDate" />
+      <PropertyRef Name="cDisableDate" />
+      <PropertyRef Name="cExecType" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cAgentID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cRoleID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cEnableDate" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cDisableDate" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cExecType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="cOprUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cOprUserName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cOprDate" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cOprTime" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CodeUserMaintainUnitHis">
+    <Key>
+      <PropertyRef Name="cReviewSeq" />
+      <PropertyRef Name="cAgentID" />
+      <PropertyRef Name="cUnitCode" />
+      <PropertyRef Name="cUnitSeq" />
+      <PropertyRef Name="cEnableDate" />
+      <PropertyRef Name="cDisableDate" />
+    </Key>
+    <Property Name="cReviewSeq" Type="String" Nullable="false" MaxLength="11" FixedLength="true" Unicode="false" />
+    <Property Name="cAgentID" Type="String" Nullable="false" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cUnitCode" Type="String" Nullable="false" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="cUnitSeq" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="false" />
+    <Property Name="cEnableDate" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cDisableDate" Type="String" Nullable="false" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cUnitName" Type="String" MaxLength="60" FixedLength="true" Unicode="false" />
+    <Property Name="cExecType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+    <Property Name="cOprUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="cOprUserName" Type="String" MaxLength="40" FixedLength="true" Unicode="false" />
+    <Property Name="cOprDate" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="cOprTime" Type="String" MaxLength="6" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="E_INVO_STOCK">
+    <Key>
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="TAX_TYPE" />
+    </Key>
+    <Property Name="FORMAT_CD" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="VAT_LOSN" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+    <Property Name="SEQ" Type="Int32" Nullable="false" />
+    <Property Name="DATA_BL_YM" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SELLER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="SALE_AMT" Type="Decimal" Nullable="false" Precision="17" Scale="0" />
+    <Property Name="TAX_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="TAX_AMT" Type="Decimal" Nullable="false" Precision="17" Scale="0" />
+    <Property Name="DED_CD" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SP_TAX_RATE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SUMY_MK" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CLEARANCE_MK" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CARRIER_TYPE" Type="String" MaxLength="6" FixedLength="false" Unicode="true" />
+    <Property Name="CARRIER_NO" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_O_STS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="BATCH_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_STS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CANCELLATION_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="CUP_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CUP_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="PAY_NO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="CTICKET_NO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="REVIEW_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="REVIEW_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="E_INVO_STOCK_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="DATA_BL_YM" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="TAX_TYPE" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="FORMAT_CD" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="VAT_LOSN" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+    <Property Name="SEQ" Type="Int32" Nullable="false" />
+    <Property Name="DATA_BL_YM" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SELLER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="SALE_AMT" Type="Decimal" Nullable="false" Precision="17" Scale="0" />
+    <Property Name="TAX_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="TAX_AMT" Type="Decimal" Nullable="false" Precision="17" Scale="0" />
+    <Property Name="DED_CD" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SP_TAX_RATE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SUMY_MK" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CLEARANCE_MK" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CARRIER_TYPE" Type="String" MaxLength="6" FixedLength="false" Unicode="true" />
+    <Property Name="CARRIER_NO" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_O_STS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="FILE_NAME" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="CUP_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CUP_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="E_INVO_ITEM">
+    <Key>
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SEQ" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="true" />
+    <Property Name="ITEM_DESC" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="QUANTITY" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="UNIT" Type="String" MaxLength="12" FixedLength="false" Unicode="true" />
+    <Property Name="UNIT_PRICE" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="String" MaxLength="80" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="REVIEW_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="REVIEW_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="E_INVO_ITEM_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="FILE_NAME" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SEQ" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="true" />
+    <Property Name="ITEM_DESC" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="QUANTITY" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="UNIT" Type="String" MaxLength="12" FixedLength="false" Unicode="true" />
+    <Property Name="UNIT_PRICE" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="String" MaxLength="80" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="E_INVO_ALLOWANCE">
+    <Key>
+      <PropertyRef Name="ALLOWANCE_NO" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="ALLOWANCE_STS" />
+      <PropertyRef Name="ALLOWANCE_TYPE" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="BUYER_BAN" />
+      <PropertyRef Name="SELLER_BAN" />
+      <PropertyRef Name="ITEM_DESC" />
+    </Key>
+    <Property Name="ALLOWANCE_NO" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="true" />
+    <Property Name="FORMAT_CD" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="ALLOWANCE_STS" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="ALLOWANCE_TYPE" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_NAME" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+    <Property Name="SELLER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SELLER_NAME" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+    <Property Name="SEND_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_DESC" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="ITEM_ALLOWANCE_AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ITEM_ALLOWANCE_TAX" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_TAX" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="ALLOWANCE_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+    <Property Name="REVIEW_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="REVIEW_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="E_INVO_ALLOWANCE_TEMP">
+    <Key>
+      <PropertyRef Name="EXEC_SEQ" />
+      <PropertyRef Name="FILE_NAME" />
+      <PropertyRef Name="ALLOWANCE_NO" />
+      <PropertyRef Name="FORMAT_CD" />
+      <PropertyRef Name="ALLOWANCE_STS" />
+      <PropertyRef Name="ALLOWANCE_TYPE" />
+      <PropertyRef Name="INVO_TRACK_NO" />
+      <PropertyRef Name="INVO_DATE" />
+      <PropertyRef Name="BUYER_BAN" />
+      <PropertyRef Name="SELLER_BAN" />
+      <PropertyRef Name="ITEM_DESC" />
+    </Key>
+    <Property Name="EXEC_SEQ" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="FILE_NAME" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="ALLOWANCE_NO" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="true" />
+    <Property Name="FORMAT_CD" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="ALLOWANCE_STS" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="ALLOWANCE_TYPE" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="INVO_TRACK_NO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVO_DATE" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="BUYER_NAME" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+    <Property Name="SELLER_BAN" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="SELLER_NAME" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+    <Property Name="SEND_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_DESC" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="ITEM_ALLOWANCE_AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ITEM_ALLOWANCE_TAX" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_AMT" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="ALLOWANCE_TAX" Type="Decimal" Precision="17" Scale="4" />
+    <Property Name="MEMO" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Name="ALLOWANCE_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CRT_UID" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CRT_DATE_TIME" Type="DateTime" Precision="3" />
+  </EntityType>
+</Schema>

@@ -1,0 +1,39 @@
+﻿@using Fubon.Utility
+@model List<Dictionary<string, string>>
+@{
+    ViewBag.Title = "PSCV4007 Tele Query Sample";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h1 class="text-danger">@ViewBag.Title</h1>
+    <br />
+    @if (@ViewBag.ErrorCode != 0) {
+        <div><font color="red">ErrorCode：@ViewBag.ErrorCode</font></div>
+        <div><font color="red">ErrorMsg：@ViewBag.ErrorMsg</font></div>
+        <br />
+    }
+    <table id="mytable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <td width='15%' nowrap>保單號碼</td>
+                <td width='15%' nowrap>要保人/被保險人</td>
+                <td>險種</td>
+                <td width='10%'>幣別</td>
+                <td width='15%' nowrap>保額(簽單)</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr>
+                    <td>@item["保單號碼"]@item["保單序號"]</td>
+                    <td>@item["要保人姓名"]</td>
+                    <td>@item["主約險種"]</td>
+                    <td>@item["保單幣別中文名稱"]</td>
+                    <td style='text-align:right'>@item["保險金額"] @item["保險金額單位"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

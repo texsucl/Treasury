@@ -1,0 +1,276 @@
+﻿@model Treasury.WebViewModels.UserMgrModel
+
+@{
+    ViewBag.Title = "使用者管理作業";
+
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+    var isDisabledList = ViewBag.isDisabledList as SelectList;
+    var CodeRoleList = ViewBag.CodeRoleList as SelectList;
+    var isMailList = ViewBag.isMailList as SelectList;
+    var CodeUserList = ViewBag.CodeUserList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.cUserID)：@Html.TextBoxFor(model => model.cUserID, new { @maxlength = "5" })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.cUserName)：@Html.TextBoxFor(model => model.cUserName, new { @maxlength = "12" })
+                        </td>
+
+                       
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.isDisabled)：@Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        </td>
+                        <td >
+                            @Html.DisplayNameFor(model => model.codeRole)：　　　@Html.DropDownList("codeRole", CodeRoleList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isMail)：　　　@Html.DropDownList("isMail", isMailList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cUpdUserID)：　@Html.DropDownList("cUpdUserID", CodeUserList, "請選擇")
+                        </td>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.cUpdDate)：
+                            <input id="updDateB" name="updDateB" type="text">
+                            ~
+                            <input id="updDateE" name="updDateE" type="text">
+                        </td>
+
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        <input type="submit" id="btnInsert" name="btnInsert" value="新增" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#updDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#updDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+            $('#btnQry').hide();
+            $('#btnClear').hide();
+            $('#btnInsert').hide();
+
+
+
+        } else {
+
+            var cUserID = '@Html.Raw(ViewBag.cUserID)';
+            if (cUserID != null) {
+                if (cUserID.length > 0) {
+
+                    $('#cUserID').val(cUserID);
+                    createGrid();
+                }
+
+            }
+
+        }
+
+
+        //新增
+        $("#btnInsert").click().on('click', function () {
+
+            //document.location = '@Url.Action("createUser","UserMgr")';
+            var param = 'A';
+            var url = '@Url.Action("detailUser", "UserMgr", new { execType = "__param__" })';
+            window.location.href = url.replace('__param__', encodeURIComponent(param));
+        });
+
+        //清除
+        $("#btnClear").click().on('click', function () {
+            $('#cUserID').val('');
+            $('#cUserName').val('');
+            $('#isDisabled').val('');
+            $('#isMail').val('');
+            $('#codeRole').val('');
+            $('#cUpdUserID').val('');
+            $('#updDateB').val('');
+            $('#updDateE').val('');
+
+
+
+            $('#qryResult').children().remove();
+
+            $('#validationSummary').children().remove();
+        });
+
+        //查詢
+        $("#btnQry").click().on('click', function () {
+
+            $('#cUserID').val($('#cUserID').val().toUpperCase());
+            $('#cUserName').val(halfToFull($('#cUserName').val().toUpperCase()));
+
+
+            createGrid();
+        });
+
+
+        function createGrid() {
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+
+            var para = {
+                userMgrModel: {
+                    'cUserID': $('#cUserID').val(),
+                    'cUserName': $('#cUserName').val(),
+                    'isDisabled': $('#isDisabled').val(),
+                    'isMail': $('#isMail').val(),
+                    'codeRole': $('#codeRole').val(),
+                    'cUpdUserID': $('#cUpdUserID').val(),
+                    'cUpdDateB': $('#updDateB').val(),
+                    'cUpdDateE': $('#updDateE').val()
+                }
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+
+
+            $("#grid").jqGrid({
+                url: '/UserMgr/LoadData/',
+                postData: para,
+                datatype: 'json',
+
+                jsonReader: {
+                    repeatitems: false, id: 'cUserID'
+                },
+                mtype: 'POST',
+                colNames: ['停用註記', '帳號', '姓名', '上班單位', '資料狀態', '資料凍結人員', '異動人員', '異動時間'],
+                colModel: [
+                    { name: 'isDisabledDesc', index: 'isDisabledDesc', align: 'center', width: 80 },
+                    { name: 'cUserID', align: 'center', width: 80,formatter: function (cellvalue, options, rowObject) {
+                        return '<a style="color:Blue;text-decoration:underline;" href="/UserMgr/detailUser/?userId=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+
+                    }
+                    },
+                    { name: 'cUserName', align: 'center', width: 70 },
+                    { name: 'cWorkUnitDesc', align: 'center', width: 180 },
+                    { name: 'dataStatusDesc', align: 'center', width: "100" },
+                    {
+                        name: 'frezzeUid', align: 'center', width: "140", formatter: function (cellvalue, options, rowObject) {
+
+                            return '<a style="color:Blue;text-decoration:underline;" href="/UserAppr/detailUser/?userId=' + options.rowId + ' "target="view_window">' + cellvalue + '</a>';
+
+                        }
+                    },
+                    { name: 'cUpdUserID', align: 'center', width: 120 },
+                    { name: 'cUpdDate', align: 'left', width: 150 }
+                    
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'cUserID',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+
+                    $.unblockUI(); //畫面打開
+                }
+
+            });
+        }
+
+    });
+</script>
+
+

@@ -1,0 +1,91 @@
+﻿@using Fubon.Utility;
+@{
+    ViewBag.Title = "CheckBox";
+}
+
+
+<h1>@ViewBag.Title</h1>
+
+<table id="mytable" class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th><input type="checkbox" name="selectAll" id="selectAll"></th>
+            <th>種類</th>
+            <th>IP</th>
+            <th>訊息</th>
+            <th>狀態</th>
+            <th>時間</th>
+        </tr>
+    </thead>
+</table>
+@section scripts{
+    <script>
+        $(function () {
+            var mytable = $('#mytable').DataTable({
+                aaSorting: [],
+                columnDefs: [{
+                    targets: "ErrorId",
+                    searchable: false,
+                    orderable: false,
+                    className: 'dt-body-center',
+                    render: function (data, type, full, meta) {
+                        return '<input type="checkbox" value="' + $('<div/>').text(data).html() + '" />';
+                    }
+                }],
+                ajax: {
+                    url: fb.url("DataTable/LoadData"),
+                    type: "POST",
+                    datatype: "json",
+                    data: function (d) {
+                        d.myType = $('#txtType').val();
+                        d.myStatus = $('#numStatus').val();
+                    }
+                },
+                columns: [
+                    { data: "ErrorId", width: "5%" },
+                    { data: "Type", width: "5%" },
+                    { data: "Host", width: "15%" },
+                    { data: "Message", width: "40%" },
+                    { data: "StatusCode", width: "15%" },
+                    { data: "CreateDateTime", width: "20%" }
+                ]
+            });
+            $("div.toolbar").append('<button id="selectData" class="btn btn-primary">選取</button>');
+
+            $('#selectData').on('click', function () {
+                var result = [];
+                // Iterate over all checkboxes in the table
+                mytable.$('input[type="checkbox"]').each(function () {
+                    // If checkbox is checked
+                    if (this.checked) {
+                        result.push(this.value);
+                    }
+                });
+                if (result.length === 0) {
+                    fb.msgError("請選取項目");
+                } else {
+                    fb.msg("已選取項目：" + _.join(result, ","));
+                }
+            });
+            $('#selectAll').on('click', function () {
+                // Get all rows with search applied
+                var rows = mytable.rows({ 'search': 'applied' }).nodes();
+                // Check/uncheck checkboxes for all rows in the table
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+            // Handle click on checkbox to set state of "Select all" control
+            $('#mytable tbody').on('change', 'input[type="checkbox"]', function () {
+                // If checkbox is not checked
+                if (!this.checked) {
+                    var el = $('#selectAll').get(0);
+                    // If "Select all" control is checked and has 'indeterminate' property
+                    if (el && el.checked && ('indeterminate' in el)) {
+                        // Set visual state of "Select all" control
+                        // as 'indeterminate'
+                        el.indeterminate = true;
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,111 @@
+﻿@using Fubon.Utility;
+@{
+    ViewBag.Title = "DataTable";
+}
+
+
+<h1>@ViewBag.Title</h1>
+<div class="row">
+    <div class="col-sm-2">
+        種類：
+    </div>
+    <div class="col-sm-6">
+        <input id="txtType" type="text" class="form-control" />
+    </div>
+    <div class="col-sm-2">
+        狀態：
+    </div>
+    <div class="col-sm-6">
+        <input id="numStatus" type="number" class="form-control" />
+    </div>
+    <div class="col-sm-8">
+        <button id="search" class="btn btn-success">查詢</button>
+    </div>
+</div>
+
+<table id="mytable" class="table table-striped table-bordered">
+    @*<thead>
+            <tr>
+                <th>ErrorId</th>
+                <th>種類</th>
+                <th>IP</th>
+                <th>訊息</th>
+                <th>狀態</th>
+                <th>時間</th>
+            </tr>
+        </thead>*@
+</table>
+@section scripts{
+    <script>
+        $(function () {
+            var mytable = $('#mytable').DataTable({
+                aaSorting: [],
+                info: false,
+                //pagingType: "full_numbers",
+                ordering: true,
+                lengthMenu: [10, 25, 50],
+                createdRow: function (row, data, index) {
+                    if (data['StatusCode'] !== 0) {
+                        $('td', row).eq(4).addClass('text-danger');
+                    }
+                },
+                columnDefs: [{
+                    targets: "ErrorId",
+                    searchable: false,
+                    orderable: false,
+                    className: 'dt-body-center',
+                    render: function (data, type, full, meta) {
+                        return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '"></input>';
+                    }
+                }, {
+                    targets: [2],
+                    orderData: [2],
+                    render: function (data, type, row) {
+                        return '<a href="http://th.yahoo.com">' + data + "</a>";
+                    }
+                }, {
+                    targets: [1],
+                    orderData: [1]
+                }, {
+                    targets: "StatusCode",
+                    orderData: [4, 0]
+                }, {
+                    targets: -1,
+                    data: null,
+                    defaultContent: '<button class="btn btn-info">編輯</button>&nbsp;&nbsp;<button class="btn btn-danger">刪除</button>'
+                }],
+                ajax: {
+                    url: fb.url("DataTable/LoadData"),
+                    type: "POST",
+                    datatype: "json",
+                    data: function (d) {
+                        d.myType = $('#txtType').val();
+                        d.myStatus = $('#numStatus').val();
+                    }
+                },
+                columns: [
+                    { title: "", data: "ErrorId", width: "5%"  },
+                    { title: "種類", data: "Type", width: "5%" },
+                    { title: "IP", data: "Host", width: "10%" },
+                    { title: "訊息", data: "Message", width: "40%" },
+                    { title: "狀態", data: "StatusCode", width: "15%" },
+                    { title: "時間", data: "CreateDateTime", width: "15%" },
+                    { title: "", data: "", width: "15%" }
+                ]
+            });
+            $("div.toolbar").append('<button id="addData" class="btn btn-primary">新增</button>');
+
+            $('#addData').on('click', function () {
+                //新增資料
+                fb.msg('新增資料尚未完成');
+            });
+            $('#mytable tbody').on('click', 'button', function () {
+                var data = mytable.row($(this).parents('tr')).data();
+                alert('預編輯資料：' + data['ErrorId']);
+            });
+            $("#search").click().on('click', function () {
+                mytable.draw();
+            });
+        });
+    </script>
+}

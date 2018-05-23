@@ -1,0 +1,149 @@
+﻿@model Treasury.WebViewModels.AuthReviewModel
+
+@{
+    ViewBag.Title = "使用者權限覆核作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            createGrid();
+        }
+
+
+        function createGrid() {
+            var CodeRole = $('#cReviewType').val();
+            //var cSearchArea = $('#cReviewFlag').val();
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                cReviewType: 'U'
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/UserAppr/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'aplyNo'
+                },
+                mtype: 'POST',
+                colNames: ['覆核單編號', '異動資料內容', '異動資料內容', '覆核狀態代碼', '覆核狀態', '申請人', '申請日期'],
+                colModel: [
+                    {
+                        name: 'aplyNo', align: 'center',
+                        formatter: function (cellvalue, options, rowObject) {
+                            var aplyNo = rowObject.aplyNo;
+                            return '<a style="color:Blue;text-decoration:underline;" href="/UserAppr/detailUser/?aplyNo=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+
+                        }
+                    },
+                    { name: 'cMappingKey', align: 'center', hidden: true },
+                    { name: 'cMappingKeyDesc', align: 'center' },
+                    { name: 'apprStatus', align: 'center', hidden: true },
+                    { name: 'apprStatusDesc', align: 'center', hidden: true },
+                    { name: 'createUid', align: 'center' },
+                    { name: 'createDt', align: 'left' }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+        @*var cRoleID = '@Html.Raw(ViewBag.cRoleID)';
+        if (cRoleID != null) {
+            if (cRoleID.length > 0) {
+
+                $('#CodeRole').val(cRoleID);
+                createGrid();
+            }
+
+        }*@
+    });
+</script>
+
+
