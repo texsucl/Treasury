@@ -75,24 +75,6 @@
     <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
-  <EntityType Name="CODE_ROLE">
-    <Key>
-      <PropertyRef Name="ROLE_ID" />
-    </Key>
-    <Property Name="ROLE_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ROLE_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
-    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-  </EntityType>
   <EntityType Name="CODE_ROLE_FUNC">
     <Key>
       <PropertyRef Name="ROLE_ID" />
@@ -117,21 +99,6 @@
     <Property Name="SYS_CD" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-  </EntityType>
-  <EntityType Name="CODE_ROLE_HIS">
-    <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="ROLE_ID" />
-    </Key>
-    <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ROLE_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ROLE_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="ROLE_NAME_B" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
-    <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
   </EntityType>
   <EntityType Name="CODE_ROLE_ITEM">
     <Key>
@@ -917,10 +884,8 @@
     <EntitySet Name="AUTH_APPR" EntityType="Self.AUTH_APPR" />
     <EntitySet Name="BLANK_NOTE_APLY" EntityType="Self.BLANK_NOTE_APLY" />
     <EntitySet Name="CODE_FUNC" EntityType="Self.CODE_FUNC" />
-    <EntitySet Name="CODE_ROLE" EntityType="Self.CODE_ROLE" />
     <EntitySet Name="CODE_ROLE_FUNC" EntityType="Self.CODE_ROLE_FUNC" />
     <EntitySet Name="CODE_ROLE_FUNC_HIS" EntityType="Self.CODE_ROLE_FUNC_HIS" />
-    <EntitySet Name="CODE_ROLE_HIS" EntityType="Self.CODE_ROLE_HIS" />
     <EntitySet Name="CODE_ROLE_ITEM" EntityType="Self.CODE_ROLE_ITEM" />
     <EntitySet Name="CODE_ROLE_ITEM_HIS" EntityType="Self.CODE_ROLE_ITEM_HIS" />
     <EntitySet Name="CODE_ROLE_TREA_ITEM" EntityType="Self.CODE_ROLE_TREA_ITEM" />
@@ -974,6 +939,8 @@
     <EntitySet Name="CODE_USER" EntityType="dbTreasuryModel.CODE_USER" />
     <EntitySet Name="CODE_USER_ROLE" EntityType="dbTreasuryModel.CODE_USER_ROLE" />
     <EntitySet Name="CODE_USER_ROLE_HIS" EntityType="dbTreasuryModel.CODE_USER_ROLE_HIS" />
+    <EntitySet Name="CODE_ROLE" EntityType="dbTreasuryModel.CODE_ROLE" />
+    <EntitySet Name="CODE_ROLE_HIS" EntityType="dbTreasuryModel.CODE_ROLE_HIS" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1018,5 +985,40 @@
     <Property Name="USER_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
     <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="ROLE_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+    <Property Name="ROLE_AUTH_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODE_ROLE_HIS">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="ROLE_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="ROLE_NAME_B" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="ROLE_AUTH_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
   </EntityType>
 </Schema>
