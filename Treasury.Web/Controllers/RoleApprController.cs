@@ -47,14 +47,11 @@ namespace Treasury.WebControllers
             UserAuthUtil authUtil = new UserAuthUtil();
 
             String opScope = "";
-            String roleId = "";
-            String funcType = "";
+
             String[] roleInfo = authUtil.chkUserFuncAuth(Session["UserID"].ToString(), "~/RoleAppr/");
             if (roleInfo != null && roleInfo.Length == 1)
-            {
                 opScope = roleInfo[0];
 
-            }
 
             ViewBag.opScope = opScope;
 
@@ -196,12 +193,15 @@ namespace Treasury.WebControllers
                     codeRole = CodeRoleDao.qryRoleByKey(authAppr.APPR_MAPPING_KEY);
 
                     roleData.roleId = StringUtil.toString(codeRole.ROLE_ID);
+                    roleData.roleAuthType = StringUtil.toString(codeRole.ROLE_AUTH_TYPE);
                     roleData.roleNameB = StringUtil.toString(codeRole.ROLE_NAME);
                     roleData.isDisabledB = StringUtil.toString(codeRole.IS_DISABLED);
                     roleData.memoB = StringUtil.toString(codeRole.MEMO);
                 }
                 else {
                     roleData.roleId = StringUtil.toString(codeRoleHis.ROLE_ID);
+                    roleData.roleAuthType = StringUtil.toString(codeRoleHis.ROLE_AUTH_TYPE);
+
                     if ("A".Equals(execAction))
                     {
                         roleData.roleName = StringUtil.toString(codeRoleHis.ROLE_NAME);
@@ -220,7 +220,19 @@ namespace Treasury.WebControllers
                 }
 
 
+                SysCodeDao sysCodeDao = new SysCodeDao();
+                SYS_CODE sysCode = new SYS_CODE();
+                sysCode = sysCodeDao.qryByKey("ROLE_AUTH_TYPE", StringUtil.toString(roleData.roleAuthType));
+                if (sysCode != null)
+                    roleData.roleAuthTypeDesc = StringUtil.toString(sysCode.CODE_VALUE);
 
+                sysCode = sysCodeDao.qryByKey("IS_DISABLED", StringUtil.toString(roleData.isDisabledB));
+                if (sysCode != null)
+                    roleData.isDisabledB = StringUtil.toString(sysCode.CODE_VALUE);
+
+                sysCode = sysCodeDao.qryByKey("IS_DISABLED", StringUtil.toString(roleData.isDisabled));
+                if (sysCode != null)
+                    roleData.isDisabled = StringUtil.toString(sysCode.CODE_VALUE);
                 
 
                 ViewBag.bHaveData = "Y";
@@ -349,6 +361,11 @@ namespace Treasury.WebControllers
                     AuthApprDao AuthApprDao = new AuthApprDao();
                     AUTH_APPR authAppr = AuthApprDao.qryByKey(aplyNo);
 
+                    if(StringUtil.toString(authAppr.CREATE_UID).Equals(Session["UserID"].ToString()))
+                        return Json(new { success = false, errors = "覆核人員與申請人員相同，不可執行覆核作業!!" }, JsonRequestBehavior.AllowGet);
+
+
+
                     //異動角色資料檔
                     string cExecType = "";
                     CodeRoleHisDao codeRoleHisDao = new CodeRoleHisDao();
@@ -379,6 +396,7 @@ namespace Treasury.WebControllers
                         {
                             cODEROLEO.ROLE_ID = StringUtil.toString(codeRoleHis.ROLE_ID);
                             cODEROLEO.ROLE_NAME = StringUtil.toString(codeRoleHis.ROLE_NAME);
+                            cODEROLEO.ROLE_AUTH_TYPE = StringUtil.toString(codeRoleHis.ROLE_AUTH_TYPE);
                             cODEROLEO.IS_DISABLED = codeRoleHis.IS_DISABLED;
                             cODEROLEO.MEMO = StringUtil.toString(codeRoleHis.MEMO);
                             cODEROLEO.DATA_STATUS = "1";
@@ -483,43 +501,44 @@ namespace Treasury.WebControllers
 
                     foreach (RoleFuncHisModel d in cRoleFuncList)
                     {
-                        if ("A".Equals(d.execAction))
-                        {
-                            CODE_ROLE_FUNC dFunc = new CODE_ROLE_FUNC();
-                            dFunc.ROLE_ID = roleId;
-                            dFunc.SYS_CD = "TREASURY";
-                            dFunc.FUNC_ID = d.cFunctionID;
-                            dFunc.LAST_UPDATE_UID = Session["UserID"].ToString();
-                            dFunc.LAST_UPDATE_DT = DateTime.Now;
+                        CODE_ROLE_FUNC dFunc = new CODE_ROLE_FUNC();
+                        Log log = new Log();
+                        switch (d.execAction) {
+                            case "A":                                
+                                dFunc.ROLE_ID = roleId;
+                                dFunc.SYS_CD = "TREASURY";
+                                dFunc.FUNC_ID = d.cFunctionID;
+                                dFunc.LAST_UPDATE_UID = Session["UserID"].ToString();
+                                dFunc.LAST_UPDATE_DT = DateTime.Now;
 
 
-                            //新增資料
-                            roleFuncDao.Insert(dFunc, conn, transaction);
+                                //新增資料
+                                roleFuncDao.Insert(dFunc, conn, transaction);
 
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(功能授權)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = roleFuncDao.logContent(dFunc);
-                            LogDao.Insert(log, Session["UserID"].ToString());
+                                //新增LOG
+                                log.CFUNCTION = "角色管理(功能授權)-新增";
+                                log.CACTION = "A";
+                                log.CCONTENT = roleFuncDao.logContent(dFunc);
+                                LogDao.Insert(log, Session["UserID"].ToString());
+
+                                break;
+                            case "D":
+                                dFunc = roleFuncDao.getFuncRoleByKey(roleId, d.cFunctionID);
+
+                                //新增LOG
+                                log.CFUNCTION = "角色管理(功能授權)-刪除";
+                                log.CACTION = "D";
+                                log.CCONTENT = roleFuncDao.logContent(dFunc);
+                                LogDao.Insert(log, Session["UserID"].ToString());
+
+                                //刪除資料
+                                roleFuncDao.Delete(dFunc, conn, transaction);
+                                break;
+                            default:
+                                break;
                         }
-                        else
-                        {
-                            CODE_ROLE_FUNC dFunc = roleFuncDao.getFuncRoleByKey(roleId, d.cFunctionID);
 
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(功能授權)-刪除";
-                            log.CACTION = "D";
-                            log.CCONTENT = roleFuncDao.logContent(dFunc);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-
-                            //刪除資料
-                            roleFuncDao.Delete(dFunc, conn, transaction);
-
-                        }
 
                     }
 
@@ -548,48 +567,38 @@ namespace Treasury.WebControllers
 
                     foreach (CodeRoleEquipModel d in cRoleEquipList)
                     {
-                        if ("A".Equals(d.execAction))
+                        CODE_ROLE_TREA_ITEM dEquip = new CODE_ROLE_TREA_ITEM();
+                        Log log = new Log();
+
+                        switch (d.execAction)
                         {
-                            CODE_ROLE_TREA_ITEM dEquip = new CODE_ROLE_TREA_ITEM();
-                            dEquip.ROLE_ID = roleId;
-                            dEquip.TREA_EQUIP_ID = StringUtil.toString(d.treaEquipId);
-                            dEquip.CUSTODY_MODE = StringUtil.toString(d.custodyMode);
-                            dEquip.CUSTODY_ORDER = Convert.ToInt16(d.custodyOrder);
-                            dEquip.LAST_UPDATE_UID = Session["UserID"].ToString();
-                            dEquip.LAST_UPDATE_DT = DateTime.Now;
+                            case "A":
+                                dEquip.ROLE_ID = roleId;
+                                dEquip.TREA_EQUIP_ID = StringUtil.toString(d.treaEquipId);
+                                dEquip.CUSTODY_MODE = StringUtil.toString(d.custodyMode);
+                                dEquip.CUSTODY_ORDER = Convert.ToInt16(d.custodyOrder);
+                                dEquip.LAST_UPDATE_UID = Session["UserID"].ToString();
+                                dEquip.LAST_UPDATE_DT = DateTime.Now;
 
 
-                            //新增資料
-                            codeRoleTreaItemDao.Insert(dEquip, conn, transaction);
+                                //新增資料
+                                codeRoleTreaItemDao.Insert(dEquip, conn, transaction);
 
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(金庫設備)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-                        }
-                        else
-                        {
-                            CODE_ROLE_TREA_ITEM dEquip = codeRoleTreaItemDao.getRoleEquipByKey(roleId, d.treaEquipId);
+                                //新增LOG
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
-
-                            if ("D".Equals(d.execAction))
-                            {
-                                
-                                log.CFUNCTION = "角色管理(金庫設備)-刪除";
-                                log.CACTION = "D";
-                                
+                                log.CFUNCTION = "角色管理(金庫設備)-新增";
+                                log.CACTION = "A";
+                                log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
                                 LogDao.Insert(log, Session["UserID"].ToString());
 
-                                //刪除資料
-                                codeRoleTreaItemDao.Delete(dEquip, conn, transaction);
-                            }
-                            else {
+                                break;
+                            case "U":
+                                dEquip = codeRoleTreaItemDao.getRoleEquipByKey(roleId, d.treaEquipId);
+
+                                //新增LOG
+                                log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
+
                                 log.CFUNCTION = "角色管理(金庫設備)-修改";
                                 log.CACTION = "U";
 
@@ -602,13 +611,27 @@ namespace Treasury.WebControllers
 
                                 //修改資料
                                 codeRoleTreaItemDao.Update(dEquip, conn, transaction);
-                            }
-                                
 
+                                break;
+                            case "D":
+                                dEquip = codeRoleTreaItemDao.getRoleEquipByKey(roleId, d.treaEquipId);
+
+                                //新增LOG
+                                log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
+
+                                log.CFUNCTION = "角色管理(金庫設備)-刪除";
+                                log.CACTION = "D";
+
+                                LogDao.Insert(log, Session["UserID"].ToString());
+
+                                //刪除資料
+                                codeRoleTreaItemDao.Delete(dEquip, conn, transaction);
+                                break;
+
+                            default:
+                                break;
                         }
-
                     }
-
                 }
             }
         }
@@ -639,44 +662,46 @@ namespace Treasury.WebControllers
 
                     foreach (CodeRoleItemModel d in cRoleItemList)
                     {
-                        if ("A".Equals(d.execAction))
+                        CODE_ROLE_ITEM dItem = new CODE_ROLE_ITEM();
+                        Log log = new Log();
+
+                        switch (d.execAction)
                         {
-                            CODE_ROLE_ITEM dItem = new CODE_ROLE_ITEM();
-                            dItem.ROLE_ID = roleId;
-                            dItem.ITEM_ID = d.itemId;
-                            dItem.AUTH_TYPE = d.authType;
-                            dItem.LAST_UPDATE_UID = Session["UserID"].ToString();
-                            dItem.LAST_UPDATE_DT = DateTime.Now;
+                            case "A":
+                                dItem.ROLE_ID = roleId;
+                                dItem.ITEM_ID = d.itemId;
+                                dItem.AUTH_TYPE = d.authType;
+                                dItem.LAST_UPDATE_UID = Session["UserID"].ToString();
+                                dItem.LAST_UPDATE_DT = DateTime.Now;
 
 
-                            //新增資料
-                            codeRoleItemDao.Insert(dItem, conn, transaction);
+                                //新增資料
+                                codeRoleItemDao.Insert(dItem, conn, transaction);
 
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(存取項目)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = codeRoleItemDao.logContent(dItem);
-                            LogDao.Insert(log, Session["UserID"].ToString());
+                                //新增LOG
+                                log.CFUNCTION = "角色管理(存取項目)-新增";
+                                log.CACTION = "A";
+                                log.CCONTENT = codeRoleItemDao.logContent(dItem);
+                                LogDao.Insert(log, Session["UserID"].ToString());
+
+                                break;
+                            case "D":
+                                dItem = codeRoleItemDao.getRoleItemByKey(roleId, d.itemId, d.authType);
+
+                                //新增LOG
+                                log.CFUNCTION = "角色管理(存取項目)-刪除";
+                                log.CACTION = "D";
+                                log.CCONTENT = codeRoleItemDao.logContent(dItem);
+                                LogDao.Insert(log, Session["UserID"].ToString());
+
+                                //刪除資料
+                                codeRoleItemDao.Delete(dItem, conn, transaction);
+
+                                break;
+                            default:
+                                break;
                         }
-                        else
-                        {
-                            CODE_ROLE_ITEM dItem = codeRoleItemDao.getRoleItemByKey(roleId, d.itemId, d.authType);
-
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(存取項目)-刪除";
-                            log.CACTION = "D";
-                            log.CCONTENT = codeRoleItemDao.logContent(dItem);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-
-                            //刪除資料
-                            codeRoleItemDao.Delete(dItem, conn, transaction);
-
-                        }
-
                     }
 
                 }

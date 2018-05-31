@@ -30,10 +30,8 @@ namespace Treasury.Web.Models
         public virtual DbSet<AUTH_APPR> AUTH_APPR { get; set; }
         public virtual DbSet<BLANK_NOTE_APLY> BLANK_NOTE_APLY { get; set; }
         public virtual DbSet<CODE_FUNC> CODE_FUNC { get; set; }
-        public virtual DbSet<CODE_ROLE> CODE_ROLE { get; set; }
         public virtual DbSet<CODE_ROLE_FUNC> CODE_ROLE_FUNC { get; set; }
         public virtual DbSet<CODE_ROLE_FUNC_HIS> CODE_ROLE_FUNC_HIS { get; set; }
-        public virtual DbSet<CODE_ROLE_HIS> CODE_ROLE_HIS { get; set; }
         public virtual DbSet<CODE_ROLE_ITEM> CODE_ROLE_ITEM { get; set; }
         public virtual DbSet<CODE_ROLE_ITEM_HIS> CODE_ROLE_ITEM_HIS { get; set; }
         public virtual DbSet<CODE_ROLE_TREA_ITEM> CODE_ROLE_TREA_ITEM { get; set; }
@@ -79,5 +77,7 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_USER> CODE_USER { get; set; }
         public virtual DbSet<CODE_USER_ROLE> CODE_USER_ROLE { get; set; }
         public virtual DbSet<CODE_USER_ROLE_HIS> CODE_USER_ROLE_HIS { get; set; }
+        public virtual DbSet<CODE_ROLE> CODE_ROLE { get; set; }
+        public virtual DbSet<CODE_ROLE_HIS> CODE_ROLE_HIS { get; set; }
     }
 }

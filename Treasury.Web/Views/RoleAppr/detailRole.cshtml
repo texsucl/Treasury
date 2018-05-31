@@ -71,7 +71,12 @@
             </tr>
 
                 <tr>
-                    <td colspan="3">
+                    <td>
+                        @Html.DisplayNameFor(model => model.roleAuthType)：
+                        @Html.DisplayTextFor(model => model.roleAuthTypeDesc)
+                        @Html.Hidden("roleAuthType", Model.roleAuthType)
+                    </td>
+                    <td colspan="2">
                         @Html.DisplayNameFor(model => model.memo)：
 
                         @Html.DisplayTextFor(model => model.memoB)
@@ -83,7 +88,7 @@
             </tr>
 
             <tr>
-                <td colspan="6">
+                <td colspan="3">
                     <span style="color:red;">紅色字體為修改後的值，黑色字體為目前的值!!</span>
                 </td>
             </tr>
@@ -162,10 +167,7 @@
 
         var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
 
-        if (bHaveData) {
-            createGridFunc();
-
-        } else {
+        if (bHaveData == "N") {
             var validationSummary = $('#validationSummary ul.validation-summary-errors');
 
             if (validationSummary.length == 0) {
@@ -174,7 +176,47 @@
             }
 
             validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+
+            return;
         }
+        
+
+
+        switch ($('#roleAuthType').val()) {
+            case 'F':
+                createGridFunc();
+
+                $("#qryResultEquip").hide();
+                $("#qryResultItem").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'E':
+                createGridEquip();
+
+                $("#qryResultFunc").hide();
+                $("#qryResultItem").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'I':
+                createGridItem();
+
+                $("#qryResultFunc").hide();
+                $("#qryResultEquip").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'A':
+                createGridFormAply();
+
+
+                $("#qryResultFunc").hide();
+                $("#qryResultEquip").hide();
+                $("#qryResultItem").hide();
+                break;
+            default:
+                break;
+        }
+
+
 
         /*------------------功能授權---------------------*/
         function createGridFunc() {
@@ -200,12 +242,13 @@
                 },
                 mtype: 'POST',
                 caption: '異動功能清單',
-                colNames: ['功能編號', '功能名稱', '執行功能代碼', '執行功能'],
+                colNames: ['執行功能', '功能編號', '功能名稱', '執行功能代碼' ],
                 colModel: [
+                    { name: 'execActionDesc', align: 'center' },
                     { name: 'cFunctionID', align: 'center', hidden: true },
-                    { name: 'cFunctionName', align: 'center', width:250},
-                    { name: 'execAction', align: 'center', hidden: true },
-                     { name: 'execActionDesc', align: 'center' }
+                    { name: 'cFunctionName', align: 'left', width:250},
+                    { name: 'execAction', align: 'center', hidden: true }
+                     
                 ],
                 autowidth: true,
                 shrinkToFit: false,
@@ -226,14 +269,11 @@
                     var cnt = $('#gridFunc').getGridParam('records')
                     $('#validationSummary').children().remove();
 
-
-                    createGridEquip();
-
                 }
 
             });
 
-
+            $.unblockUI(); //畫面打開
         }
 
 
@@ -263,15 +303,15 @@
                 caption: '金庫設備異動清單',
                 colNames: ['設備編號', '執行功能', '設備名稱', '修改前', '修改後', '修改前', '修改後'],
                 colModel: [
-                    { name: 'treaEquipId', align: 'center', hidden: true },
+                    { name: 'treaEquipId', align: 'center', hidden: true, width: '100' },
                     { name: 'execActionDesc', align: 'center' },
-                    { name: 'equipName', align: 'center' },
+                    { name: 'equipName', align: 'left', width: '350' },
 
-                    { name: 'custodyModeDescB', align: 'center' },
-                     { name: 'custodyModeDesc', align: 'center' },
+                    { name: 'custodyModeDescB', align: 'center', width: '80' },
+                     { name: 'custodyModeDesc', align: 'center', width: '80' },
                       
-                      { name: 'custodyOrderB', align: 'center' },
-                       { name: 'custodyOrder', align: 'center' }
+                      { name: 'custodyOrderB', align: 'center', width: '80' },
+                       { name: 'custodyOrder', align: 'center', width: '80' }
                         
 
                 ],
@@ -292,9 +332,7 @@
                 loadComplete: function () {
                     $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
                     $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
-
-
-                    createGridItem();
+                    
                 }
 
             });
@@ -306,6 +344,7 @@
                 ]
             });
 
+            $.unblockUI(); //畫面打開
         }
 
 
@@ -335,9 +374,9 @@
                 caption: '存取項目異動清單',
                 colNames: ['id','itemId', '執行功能', '作業類型', '存取項目'],
                 colModel: [
-                { name: 'id', align: 'center', hidden: true },
+                { name: 'id', align: 'center', hidden: true , width: '100'},
                 { name: 'itemId', align: 'center', hidden: true },
-                { name: 'execActionDesc', align: 'center' },
+                { name: 'execActionDesc', align: 'center', width: '100' },
                 { name: 'itemOpType', align: 'center', width: '350' },
                 { name: 'itemDesc', align: 'center' }
 
@@ -360,10 +399,13 @@
                     $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
                     $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
 
-                    createGridFormAply();
+                    
                 }
 
             });
+
+
+            $.unblockUI(); //畫面打開
 
         }
 
@@ -381,7 +423,7 @@
                 aplyNo: aplyNo, authType: '2'
             };
 
-
+            $.blockUI(); //畫面鎖起來
 
             $("#gridFormAply").jqGrid({
                 url: '/RoleAppr/qryRoleItemHis/',
@@ -396,7 +438,7 @@
                 colModel: [
                 { name: 'id', align: 'center', hidden: true },
                 { name: 'itemId', align: 'center', hidden: true },
-                { name: 'execActionDesc', align: 'center' },
+                { name: 'execActionDesc', align: 'center', width: '100' },
                 { name: 'itemOpType', align: 'center', width: '350' },
                 { name: 'itemDesc', align: 'center' }
 

@@ -322,14 +322,19 @@ namespace Treasury.WebControllers
             ViewBag.isMailList = isMailList;
 
 
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.jqGridList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
+
             ////查詢使用者資訊
             //CodeUserDao codeUserDao = new CodeUserDao();
             //CODEUSER codeUser = codeUserDao.qryByKey(cUserID);
 
 
-            //查詢角色
+            ////查詢角色
             CodeRoleDao codeRoleDao = new CodeRoleDao();
-            var roleStr = codeRoleDao.jqGridRoleList();
+            var roleStr = codeRoleDao.jqGridRoleList("");
             ViewBag.roleList = roleStr;
 
 
@@ -358,6 +363,31 @@ namespace Treasury.WebControllers
             {
                 ViewBag.bHaveData = false;
                 return View(userMgrModel);
+            }
+        }
+
+
+
+        /// <summary>
+        /// 依"角色群組"取得對應的角色
+        /// </summary>
+        /// <param name="roleAuthType"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult qryRoleList(string roleAuthType)
+        {
+            try
+            {
+                CodeRoleDao codeRoleDao = new CodeRoleDao();
+                var roleStr = codeRoleDao.jqGridRoleList(roleAuthType);
+           
+
+                return Json(new { success = true, roleList = roleStr });
+            }
+            catch (Exception e)
+            {
+                logger.Error("[qryEquip]:" + e.ToString());
+                return Json(new { success = false, err = "其它錯誤，請洽系統管理員!!" });
             }
         }
 
@@ -467,7 +497,7 @@ namespace Treasury.WebControllers
                             {
                                 bRoleChg = true;
                                 CodeUserRoleModel codeUserRoleModel = new CodeUserRoleModel();
-                                codeUserRoleModel.userId = StringUtil.toString(oRole.userId);
+                                codeUserRoleModel.userId = StringUtil.toString(userMgrModel.cUserID);
                                 codeUserRoleModel.roleId = StringUtil.toString(oRole.roleId);
                                 codeUserRoleModel.execAction = "D";
                                 roleList.Add(codeUserRoleModel);
@@ -555,10 +585,11 @@ namespace Treasury.WebControllers
                         CodeUserRoleHisDao codeUserRoleHisDao = new CodeUserRoleHisDao();
                         foreach (CodeUserRoleModel role in roleList)
                         {
-                            if (!"".Equals(role.execAction))
-                            {
-                                codeUserRoleHisDao.insert(aplyNo, role, conn, transaction);
-                            }
+                            codeUserRoleHisDao.insert(aplyNo, role, conn, transaction);
+                            //if (!"".Equals(role.execAction))
+                            //{
+                            //    codeUserRoleHisDao.insert(aplyNo, role, conn, transaction);
+                            //}
                         }
                     }
 

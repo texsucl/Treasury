@@ -341,6 +341,10 @@ namespace Treasury.WebControllers
                     AuthApprDao AuthApprDao = new AuthApprDao();
                     AUTH_APPR authAppr = AuthApprDao.qryByKey(aplyNo);
 
+                    if (StringUtil.toString(authAppr.CREATE_UID).Equals(Session["UserID"].ToString()))
+                        return Json(new { success = false, errors = "覆核人員與申請人員相同，不可執行覆核作業!!" }, JsonRequestBehavior.AllowGet);
+
+
                     //異動使用者資料檔
                     string cExecType = "";
                     CodeUserHisDao codeUserHisDao = new CodeUserHisDao();
@@ -447,399 +451,7 @@ namespace Treasury.WebControllers
 
         }
 
-
-        //        /// <summary>
-        //        /// 核可/退回(使用者覆核)
-        //        /// </summary>
-        //        /// <param name="cReviewSeq"></param>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cReviewMemo"></param>
-        //        /// <param name="cReviewFlag"></param>
-        //        /// <returns></returns>
-        //        [HttpPost]
-        //        public JsonResult execReviewU(string cReviewSeq, string cAgentID, string cReviewMemo, string cReviewFlag)
-        //        {
-        //            string strConn = DbUtil.GetDBAccountConnStr();
-        //            using (SqlConnection conn = new SqlConnection(strConn))
-        //            {
-        //                conn.Open();
-        //                SqlTransaction transaction = conn.BeginTransaction("Transaction");
-
-        //                try
-        //                {
-
-        //                    //異動使用者資料檔
-        //                    bool bSuccess = procCodeUser(cReviewSeq, cAgentID, cReviewMemo, cReviewFlag, conn, transaction);
-        //                    if(!bSuccess)
-        //                       return Json(new { success = false, errors = "使用者已不存在員工檔!!" }, JsonRequestBehavior.AllowGet);
-
-
-        //                    //異動使用者角色(覆核狀態=核可時)
-        //                    if ("2".Equals(cReviewFlag))
-        //                        procUserRoleHis(cAgentID, cReviewSeq, conn, transaction);
-
-        //                    //異動使用者指派單位(覆核狀態=核可時)
-        //                    if ("2".Equals(cReviewFlag))
-        //                        procUserUnitHis(cAgentID, cReviewSeq, conn, transaction);
-
-
-        //                    //異動覆核資料檔
-        //                    procAuthReview(cAgentID, cReviewSeq, cReviewFlag, cReviewMemo, conn, transaction);
-
-        //                    transaction.Commit();
-        //                    return Json(new { success = true });
-        //                }
-        //                catch (Exception e)
-        //                {
-        //                    transaction.Rollback();
-        //                    logger.Error("[execReviewU]其它錯誤：" + e.ToString());
-
-        //                    return Json(new { success = false, errors = "其它錯誤，請洽系統管理員!!" }, JsonRequestBehavior.AllowGet);
-        //                }
-
-        //            }
-
-        //        }
-
-
-        //        /// <summary>
-        //        /// 異動使用者指派單位
-        //        /// </summary>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cReviewSeq"></param>
-        //        /// <param name="conn"></param>
-        //        /// <param name="transaction"></param>
-        //        private void procUserUnitHis(string cAgentID, string cReviewSeq, SqlConnection conn, SqlTransaction transaction)
-        //        {
-        //            CodeUserMaintainUnitHisDao codeUserUnitHisDao = new CodeUserMaintainUnitHisDao();
-        //            List<CodeUserMaintainUnitHis> userUnitList = codeUserUnitHisDao.qryBySeq(cReviewSeq);
-
-        //            if (userUnitList.Where(x => x.cExecType != "T").Count() == 0)
-        //                return;
-
-        //            CodeUserMaintainUnitDao codeUserUnitDao = new CodeUserMaintainUnitDao();
-
-        //            //刪除原使用者指派單位資料
-        //            codeUserUnitDao.delByAgentID(cAgentID, conn, transaction);
-
-        //            //將使用者指派單位異動檔資料寫入正式檔
-        //            foreach (CodeUserMaintainUnitHis d in userUnitList)
-        //            {
-        //                CODEUSERMAINTAINUNIT unit = new CODEUSERMAINTAINUNIT();
-        //                unit.CAGENTID = d.cAgentID.Trim();
-        //                unit.CUNITCODE = d.cUnitCode.Trim();
-        //                unit.CUNITSEQ = d.cUnitSeq.Trim();
-        //                unit.CENABLEDATE = d.cEnableDate.Trim();
-        //                unit.CDISABLEDATE = d.cDisableDate.Trim();
-        //                unit.CUNITNAME = d.cUnitName.Trim();
-        //                unit.COPRUSERID = d.cOprUserID.Trim();
-        //                unit.COPRUSERNAME = d.cOprUserName.Trim();
-        //                unit.COPRDATE = d.cOprDate.Trim();
-        //                unit.COPRTIME = d.cOprTime.Trim();
-
-        //                if (!"D".Equals(d.cExecType))
-        //                    codeUserUnitDao.insert(unit, conn, transaction);
-
-
-        //                if (!"T".Equals(d.cExecType))
-        //                {
-        //                    //新增LOG
-        //                    string cContent = writeUserUnitLog(d.cExecType, codeUserUnitDao, unit);
-
-        //                    //新增稽核軌跡
-        //                    writeUserUnitPIALog(d.cExecType, unit.CAGENTID, cContent, 1, conn, transaction);
-        //                }
-        //            }
-        //        }
-
-        //        /// <summary>
-        //        /// 將"使用者指派單位檔"資料紀錄至LOG
-        //        /// </summary>
-        //        /// <param name="caction"></param>
-        //        /// <param name="codeUserMaintainUnitDao"></param>
-        //        /// <param name="userUnit"></param>
-        //        /// <returns></returns>
-        //        private string writeUserUnitLog(string caction, CodeUserMaintainUnitDao codeUserMaintainUnitDao, CODEUSERMAINTAINUNIT userUnit)
-        //        {
-        //            Log log = new Log();
-
-        //            switch (caction)
-        //            {
-        //                case "A":
-        //                    log.CFUNCTION = "使用者管理-單位-新增";
-        //                    log.CACTION = "A";
-        //                    break;
-        //                case "D":
-        //                    log.CFUNCTION = "使用者管理-單位-刪除";
-        //                    log.CACTION = "D";
-        //                    break;
-        //                default:
-        //                    log.CFUNCTION = "使用者管理-單位-修改";
-        //                    log.CACTION = "U";
-        //                    break;
-
-        //            }
-
-        //            log.CCONTENT = codeUserMaintainUnitDao.logContent(userUnit);
-        //            LogDao.Insert(log, Session["UserID"].ToString());
-
-        //            return log.CCONTENT;
-
-        //        }
-
-
-        //        /// <summary>
-        //        /// 將"使用者指派單位檔"資料紀錄至稽核軌跡
-        //        /// </summary>
-        //        /// <param name="action"></param>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cContent"></param>
-        //        /// <param name="cnt"></param>
-        //        /// <param name="conn"></param>
-        //        /// <param name="transaction"></param>
-        //        private void writeUserUnitPIALog(string action, string cAgentID, string cContent, int cnt, SqlConnection conn, SqlTransaction transaction)
-        //        {
-
-        //            PiaLogMainDao piaLogMainDao = new PiaLogMainDao();
-        //            PIA_LOG_MAIN piaLog = new PIA_LOG_MAIN();
-
-        //            piaLog.TRACKING_TYPE = "C";
-        //            piaLog.ACCESS_ACCOUNT = Session["UserID"].ToString();
-        //            piaLog.ACCOUNT_NAME = Session["UserName"].ToString();
-        //            piaLog.PROGFUN_NAME = "AuthReview";
-        //            piaLog.ACCESSOBJ_NAME = "CodeUserMaintainUnit";
-        //            piaLog.EXECUTION_TYPE = action == "U" ? "E" : action;
-        //            piaLog.EXECUTION_CONTENT = cContent;
-        //            piaLog.AFFECT_ROWS = cnt;
-        //            piaLog.PIA_OWNER1 = cAgentID;
-        //            piaLog.PIA_OWNER2 = "";
-        //            piaLog.PIA_TYPE = "0100000000";
-
-        //            piaLogMainDao.Insert(piaLog, conn, transaction);
-
-        //        }
-
-
-        //        /// <summary>
-        //        /// 異動使用者角色檔
-        //        /// </summary>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cReviewSeq"></param>
-        //        /// <param name="conn"></param>
-        //        /// <param name="transaction"></param>
-        //        private void procUserRoleHis(string cAgentID, string cReviewSeq, SqlConnection conn, SqlTransaction transaction) {
-        //            CodeUserRoleHisDao codeUserRoleHisDao = new CodeUserRoleHisDao();
-        //            List<CodeUserRoleHis> userRoleList = codeUserRoleHisDao.qryBySeq(cReviewSeq);
-
-        //            if (userRoleList.Where(x => x.cExecType != "T").Count() == 0)
-        //                return;
-
-        //            CodeUserRoleDao codeUserRoleDao = new CodeUserRoleDao();
-
-        //            //刪除原使用者角色資料
-        //            codeUserRoleDao.delByAgentID(cAgentID, conn, transaction);
-
-        //            //將使用者角色異動檔資料寫入正式檔
-        //            foreach (CodeUserRoleHis d in userRoleList) {
-        //                CODEUSERROLE user = new CODEUSERROLE();
-        //                user.CAGENTID = d.cAgentID.Trim();
-        //                user.CROLEID = d.cRoleID.Trim();
-        //                user.CENABLEDATE = d.cEnableDate.Trim();
-        //                user.CDISABLEDATE = d.cDisableDate.Trim();
-        //                user.COPRUSERID = d.cOprUserID.Trim();
-        //                user.COPRUSERNAME = d.cOprUserName.Trim();
-        //                user.COPRDATE = d.cOprDate.Trim();
-        //                user.COPRTIME = d.cOprTime.Trim();
-
-        //                if (!"D".Equals(d.cExecType))
-        //                    codeUserRoleDao.insert(user, conn, transaction);
-
-
-        //                if (!"T".Equals(d.cExecType)) {
-        //                    //新增LOG
-        //                    string cContent = writeUserRoleLog(d.cExecType, codeUserRoleDao, user);
-
-        //                    //新增稽核軌跡
-        //                    writeUserRolePIALog(d.cExecType, user.CAGENTID, cContent, 1, conn, transaction);
-        //                }
-        //            }
-        //        }
-
-
-        //        /// <summary>
-        //        /// 將"使用者角色檔"資料紀錄至LOG
-        //        /// </summary>
-        //        /// <param name="caction"></param>
-        //        /// <param name="codeUserRoleDao"></param>
-        //        /// <param name="userRole"></param>
-        //        /// <returns></returns>
-        //        private string writeUserRoleLog(string caction, CodeUserRoleDao codeUserRoleDao, CODEUSERROLE userRole)
-        //        {
-        //            Log log = new Log();
-
-        //            switch (caction)
-        //            {
-        //                case "A":
-        //                    log.CFUNCTION = "使用者管理-角色-新增";
-        //                    log.CACTION = "A";
-        //                    break;
-        //                case "D":
-        //                    log.CFUNCTION = "使用者管理-角色-刪除";
-        //                    log.CACTION = "D";
-        //                    break;
-        //                default:
-        //                    log.CFUNCTION = "使用者管理-角色-修改";
-        //                    log.CACTION = "U";
-        //                    break;
-
-        //            }
-
-        //            log.CCONTENT = codeUserRoleDao.logContent(userRole);
-        //            LogDao.Insert(log, Session["UserID"].ToString());
-
-        //            return log.CCONTENT;
-
-        //        }
-
-
-
-        //        /// <summary>
-        //        /// 將"使用者角色檔"資料紀錄至稽核軌跡
-        //        /// </summary>
-        //        /// <param name="action"></param>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cContent"></param>
-        //        /// <param name="cnt"></param>
-        //        /// <param name="conn"></param>
-        //        /// <param name="transaction"></param>
-        //        private void writeUserRolePIALog(string action, string cAgentID, string cContent, int cnt, SqlConnection conn, SqlTransaction transaction)
-        //        {
-
-        //            PiaLogMainDao piaLogMainDao = new PiaLogMainDao();
-        //            PIA_LOG_MAIN piaLog = new PIA_LOG_MAIN();
-
-        //            piaLog.TRACKING_TYPE = "C";
-        //            piaLog.ACCESS_ACCOUNT = Session["UserID"].ToString();
-        //            piaLog.ACCOUNT_NAME = Session["UserName"].ToString();
-        //            piaLog.PROGFUN_NAME = "AuthReview";
-        //            piaLog.ACCESSOBJ_NAME = "CodeUserRole";
-        //            piaLog.EXECUTION_TYPE = action == "U" ? "E" : action;
-        //            piaLog.EXECUTION_CONTENT = cContent;
-        //            piaLog.AFFECT_ROWS = cnt;
-        //            piaLog.PIA_OWNER1 = cAgentID;
-        //            piaLog.PIA_OWNER2 = "";
-        //            piaLog.PIA_TYPE = "0100000000";
-
-        //            piaLogMainDao.Insert(piaLog, conn, transaction);
-
-        //        }
-
-
-        //        /// <summary>
-        //        /// 異動"使用者資料檔"
-        //        /// </summary>
-        //        /// <param name="cReviewSeq"></param>
-        //        /// <param name="cAgentID"></param>
-        //        /// <param name="cReviewMemo"></param>
-        //        /// <param name="cReviewFlag"></param>
-        //        /// <param name="conn"></param>
-        //        /// <param name="transaction"></param>
-        //        /// <returns></returns>
-        //        private bool procCodeUser(string cReviewSeq, string cAgentID, string cReviewMemo, string cReviewFlag
-        //            , SqlConnection conn, SqlTransaction transaction) {
-        //            string cExecType = "";
-        //            CodeUserHisDao codeUserHisDao = new CodeUserHisDao();
-        //            CodeUserDao codeUserDao = new CodeUserDao();
-        //            CODEUSER cODEUSERO = new CODEUSER();
-
-        //            CodeUserHis codeUserHis = codeUserHisDao.qryByKey(cReviewSeq);  //本次是否有異動使用者資料
-        //            if (codeUserHis != null) //有異動使用者資料檔
-        //            {
-        //                cExecType = codeUserHis.cExecType.Trim();
-
-        //                if ("A".Equals(codeUserHis.cExecType))  //新增使用者
-        //                {
-
-        //                }
-        //                else
-        //                {  //異動使用者
-        //                    cODEUSERO = codeUserDao.qryByAgentId(cAgentID);
-        //                }
-
-        //            }
-        //            else
-        //            {
-        //                cODEUSERO = codeUserDao.qryByAgentId(cAgentID);  //本次僅異動使用者角色資料檔或使用者指派單位
-
-        //            }
-
-
-
-        //            if ("A".Equals(cExecType))
-        //            {
-        //                if ("2".Equals(cReviewFlag))
-        //                {
-        //                    UserAuthUtil userAuthUtil = new UserAuthUtil();
-        //                    cODEUSERO = userAuthUtil.qryUserUnit(cODEUSERO, codeUserHis.cUserType, codeUserHis.cAgentID);
-
-        //                    if (cODEUSERO == null)
-        //                        return false;
-
-        //                    cODEUSERO.CAGENTID = codeUserHis.cAgentID.Trim();
-        //                    cODEUSERO.CUSERTYPE = codeUserHis.cUserType.Trim();
-        //                    cODEUSERO.CFLAG = codeUserHis.cFlag.Trim();
-        //                    cODEUSERO.CUSERID = codeUserHis.cUserID.Trim();
-        //                    cODEUSERO.CUSERNAME = codeUserHis.cUserName.Trim();
-        //                    cODEUSERO.VMEMO = StringUtil.toString(codeUserHis.vMemo).Trim();
-        //                    cODEUSERO.CCRTUSERID = Session["UserID"].ToString();
-        //                    cODEUSERO.CCRTUSERNAME = Session["UserName"].ToString();
-        //                    cODEUSERO.CREVIEWFLAG = "2";
-
-        //                    cODEUSERO = codeUserDao.Create(cODEUSERO, conn, transaction);
-
-
-        //                    //新增LOG
-        //                    Log log = new Log();
-        //                    log.CFUNCTION = "使用者管理-新增";
-        //                    log.CACTION = "A";
-        //                    log.CCONTENT = codeUserDao.userLogContent(cODEUSERO);
-        //                    LogDao.Insert(log, Session["UserID"].ToString());
-
-        //                    //新增稽核軌跡
-        //                    procTrackLog("A", codeUserDao, cODEUSERO, conn, transaction);
-
-        //                }
-
-
-        //            }
-        //            else
-        //            {
-        //                //新增LOG
-        //                Log log = new Log();
-        //                log.CFUNCTION = "使用者管理-修改";
-        //                log.CACTION = "U";
-        //                log.CCONTENT = codeUserDao.userLogContent(cODEUSERO);
-        //                LogDao.Insert(log, Session["UserID"].ToString());
-
-        //                cODEUSERO.CREVIEWFLAG = cReviewFlag;
-        //                cODEUSERO.CUPDUSERID = Session["UserID"].ToString();
-        //                cODEUSERO.CUPDUSERNAME = Session["UserName"].ToString();
-
-        //                if ("U".Equals(cExecType) && "2".Equals(cReviewFlag))
-        //                {
-
-        //                    cODEUSERO.CUSERNAME = codeUserHis.cUserName.Trim();
-        //                    cODEUSERO.CUSERTYPE = codeUserHis.cUserType.Trim();
-        //                    cODEUSERO.CFLAG = codeUserHis.cFlag.Trim();
-        //                    cODEUSERO.VMEMO = codeUserHis.vMemo.Trim();
-        //                }
-
-        //                cODEUSERO = codeUserDao.updateUserInfo(cODEUSERO, conn, transaction);
-
-        //            }
-
-        //            return true;
-        //        }
+        
 
         /// <summary>
         /// 處理使用者角色異動
@@ -860,205 +472,52 @@ namespace Treasury.WebControllers
 
                     foreach (CodeUserRoleModel d in cRoleList)
                     {
-                        if ("A".Equals(d.execAction))
-                        {
-                            CODE_USER_ROLE dRole = new CODE_USER_ROLE();
-                            dRole.USER_ID = cODEUSERO.USER_ID;
-                            dRole.ROLE_ID = d.roleId;
-                            dRole.CREATE_UID = cODEUSERO.LAST_UPDATE_UID;
-                            dRole.CREATE_DT = cODEUSERO.LAST_UPDATE_DT;
+                        CODE_USER_ROLE dRole = new CODE_USER_ROLE();
+                        Log log = new Log();
+
+                        switch (d.execAction) {
+                            case "A":
+                                dRole.USER_ID = cODEUSERO.USER_ID;
+                                dRole.ROLE_ID = d.roleId;
+                                dRole.CREATE_UID = cODEUSERO.LAST_UPDATE_UID;
+                                dRole.CREATE_DT = cODEUSERO.LAST_UPDATE_DT;
 
 
-                            //新增資料
-                            codeUserRoleDao.insert(dRole, conn, transaction);
+                                //新增資料
+                                codeUserRoleDao.insert(dRole, conn, transaction);
 
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "使用者管理(角色授權)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = codeUserRoleDao.logContent(dRole);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-                        }
-                        else
-                        {
-                            CODE_USER_ROLE dRole = codeUserRoleDao.qryByKey(d.userId, d.roleId);
+                                //新增LOG
+                                log.CFUNCTION = "使用者管理(角色授權)-新增";
+                                log.CACTION = "A";
+                                log.CCONTENT = codeUserRoleDao.logContent(dRole);
+                                LogDao.Insert(log, Session["UserID"].ToString());
 
+                                break;
+                            case "D":
+                                dRole = codeUserRoleDao.qryByKey(d.userId, d.roleId);
 
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "使用者管理(角色授權)-刪除";
-                            log.CACTION = "D";
-                            log.CCONTENT = codeUserRoleDao.logContent(dRole);
-                            LogDao.Insert(log, Session["UserID"].ToString());
+                                //新增LOG
 
-                            //刪除資料
-                            codeUserRoleDao.delete(dRole, conn, transaction);
-
-                        }
-
-                    }
-
-                }
-            }
-        }
-
-
-
-        /// <summary>
-        /// 處理角色設備異動
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <param name="aplyNO"></param>
-        /// <param name="conn"></param>
-        /// <param name="transaction"></param>
-        private void procRoleEquipHis(string roleId, string aplyNo, SqlConnection conn, SqlTransaction transaction)
-        {
-            CodeRoleTreaItemHisDao codeRoleTreaItemHisDao = new CodeRoleTreaItemHisDao();
-            List<CodeRoleEquipModel> cRoleEquipList = codeRoleTreaItemHisDao.qryByAplyNo(aplyNo);
-            if (cRoleEquipList != null)
-            {
-                if (cRoleEquipList.Count > 0)
-                {
-                    CodeRoleTreaItemDao codeRoleTreaItemDao = new CodeRoleTreaItemDao();
-
-                    foreach (CodeRoleEquipModel d in cRoleEquipList)
-                    {
-                        if ("A".Equals(d.execAction))
-                        {
-                            CODE_ROLE_TREA_ITEM dEquip = new CODE_ROLE_TREA_ITEM();
-                            dEquip.ROLE_ID = roleId;
-                            dEquip.TREA_EQUIP_ID = StringUtil.toString(d.treaEquipId);
-                            dEquip.CUSTODY_MODE = StringUtil.toString(d.custodyMode);
-                            dEquip.CUSTODY_ORDER = Convert.ToInt16(d.custodyOrder);
-                            dEquip.LAST_UPDATE_UID = Session["UserID"].ToString();
-                            dEquip.LAST_UPDATE_DT = DateTime.Now;
-
-
-                            //新增資料
-                            codeRoleTreaItemDao.Insert(dEquip, conn, transaction);
-
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(金庫設備)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-                        }
-                        else
-                        {
-                            CODE_ROLE_TREA_ITEM dEquip = codeRoleTreaItemDao.getRoleEquipByKey(roleId, d.treaEquipId);
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CCONTENT = codeRoleTreaItemDao.logContent(dEquip);
-
-                            if ("D".Equals(d.execAction))
-                            {
-                                
-                                log.CFUNCTION = "角色管理(金庫設備)-刪除";
+                                log.CFUNCTION = "使用者管理(角色授權)-刪除";
                                 log.CACTION = "D";
-                                
+                                log.CCONTENT = codeUserRoleDao.logContent(dRole);
                                 LogDao.Insert(log, Session["UserID"].ToString());
 
                                 //刪除資料
-                                codeRoleTreaItemDao.Delete(dEquip, conn, transaction);
-                            }
-                            else {
-                                log.CFUNCTION = "角色管理(金庫設備)-修改";
-                                log.CACTION = "U";
-
-                                LogDao.Insert(log, Session["UserID"].ToString());
-
-                                dEquip.CUSTODY_MODE = StringUtil.toString(d.custodyMode);
-                                dEquip.CUSTODY_ORDER = Convert.ToInt16(d.custodyOrder);
-                                dEquip.LAST_UPDATE_UID = Session["UserID"].ToString();
-                                dEquip.LAST_UPDATE_DT = DateTime.Now;
-
-                                //修改資料
-                                codeRoleTreaItemDao.Update(dEquip, conn, transaction);
-                            }
-                                
+                                codeUserRoleDao.delete(dRole, conn, transaction);
+                                break;
+                            default:
+                                break;
 
                         }
-
                     }
 
                 }
             }
         }
 
-
-
-
-
-
-
-
-        /// <summary>
-        /// 處理角色存取項目異動
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <param name="aplyNO"></param>
-        /// <param name="conn"></param>
-        /// <param name="transaction"></param>
-        private void procRoleItemHis(string roleId, string aplyNo, SqlConnection conn, SqlTransaction transaction)
-        {
-            CodeRoleItemHisDao codeRoleItemHisDao = new CodeRoleItemHisDao();
-            List<CodeRoleItemModel> cRoleItemList = codeRoleItemHisDao.qryByAplyNo(aplyNo, "");
-            if (cRoleItemList != null)
-            {
-                if (cRoleItemList.Count > 0)
-                {
-                    CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
-
-                    foreach (CodeRoleItemModel d in cRoleItemList)
-                    {
-                        if ("A".Equals(d.execAction))
-                        {
-                            CODE_ROLE_ITEM dItem = new CODE_ROLE_ITEM();
-                            dItem.ROLE_ID = roleId;
-                            dItem.ITEM_ID = d.itemId;
-                            dItem.AUTH_TYPE = d.authType;
-                            dItem.LAST_UPDATE_UID = Session["UserID"].ToString();
-                            dItem.LAST_UPDATE_DT = DateTime.Now;
-
-
-                            //新增資料
-                            codeRoleItemDao.Insert(dItem, conn, transaction);
-
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(存取項目)-新增";
-                            log.CACTION = "A";
-                            log.CCONTENT = codeRoleItemDao.logContent(dItem);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-                        }
-                        else
-                        {
-                            CODE_ROLE_ITEM dItem = codeRoleItemDao.getRoleItemByKey(roleId, d.itemId, d.authType);
-
-
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "角色管理(存取項目)-刪除";
-                            log.CACTION = "D";
-                            log.CCONTENT = codeRoleItemDao.logContent(dItem);
-                            LogDao.Insert(log, Session["UserID"].ToString());
-
-                            //刪除資料
-                            codeRoleItemDao.Delete(dItem, conn, transaction);
-
-                        }
-
-                    }
-
-                }
-            }
-        }
-
+        
 
 
         /// <summary>

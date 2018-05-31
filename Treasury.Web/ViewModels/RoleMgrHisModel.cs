@@ -14,6 +14,9 @@ namespace Treasury.WebViewModels
         [Display(Name = "角色名稱")]
         public string cRoleName { get; set; }
 
+        [Display(Name = "角色群組")]
+        public string roleAuthType { get; set; }
+
 
         [Display(Name = "異動日期/時間")]
         public string cUpdDateTime { get; set; }
@@ -31,6 +34,7 @@ namespace Treasury.WebViewModels
         public RoleMgrHisModel() {
             cRoleID = "";
             cRoleName = "";
+            roleAuthType = "";
             cUpdDateTime = "";
             apprtatus = "";
         }

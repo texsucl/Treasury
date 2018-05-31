@@ -4,6 +4,7 @@
     ViewBag.Title = "角色歷史異動紀錄";
 
     var apprStatusList = ViewBag.apprStatusList as SelectList;
+    var roleAuthTypeList = ViewBag.roleAuthTypeList as SelectList;
 
 }
 
@@ -33,11 +34,17 @@
    
                     </td>
 
+                    <td>
+                        @Html.DisplayNameFor(model => model.roleAuthType)：
+                        @Html.DropDownList("roleAuthType", roleAuthTypeList, "請選擇")
+                        @Html.Hidden("hidroleAuthType", Model.roleAuthType)
+                    </td>
+
                 </tr>
 
 
                 <tr>
-                    <td>
+                    <td colspan="2">
                         @Html.DisplayNameFor(model => model.cUpdDateTime)：
                         <input id="updDateB" name="updDateB" type="text">
                         ~
@@ -109,6 +116,36 @@
         $("#qryItemHis").css("visibility", "hidden");
         $("#qryFormAplyHis").css("visibility", "hidden");
 
+        switch ($('#roleAuthType').val()) {
+            case 'F':
+                $("#qryEquipHis").hide();
+                $("#qryItemHis").hide();
+                $("#qryFormAplyHis").hide();
+                break;
+            case 'E':
+                $("#qryFuncHis").hide();
+                $("#qryItemHis").hide();
+                $("#qryFormAplyHis").hide();
+                break;
+            case 'I':
+                $("#qryFuncHis").hide();
+                $("#qryEquipHis").hide();
+                $("#qryFormAplyHis").hide();
+                break;
+            case 'A':
+                $("#qryFuncHis").hide();
+                $("#qryEquipHis").hide();
+                $("#qryItemHis").hide();
+                break;
+            default:
+                break;
+        }
+
+
+
+
+        $('#roleAuthType').attr('disabled', true);
+
 
 
 
@@ -165,13 +202,7 @@
                     success: function (data) {
 
                         if (data.success) {
-                            $("#qryRoleHis").css("visibility", "visible");
-                            $("#qryFuncHis").css("visibility", "visible");
-                            $("#qryEquipHis").css("visibility", "visible");
-                            $("#qryItemHis").css("visibility", "visible");
-                            $("#qryFormAplyHis").css("visibility", "visible");
-
-
+                            
                             //更新畫面GRID
                             jQuery("#gridRoleHis").jqGrid('clearGridData')
                                 .jqGrid('setGridParam', { data: data.roleHisList })
@@ -192,6 +223,31 @@
                             jQuery("#gridFormAplyHis").jqGrid('clearGridData')
                                .jqGrid('setGridParam', { data: data.roleFormAplyHisList })
                                .trigger("reloadGrid");
+
+                            $("#qryRoleHis").css("visibility", "visible");
+
+                            switch ($('#roleAuthType').val()) {
+                                case 'F':
+                                    $("#qryFuncHis").css("visibility", "visible");
+                                    $("#qryFuncHis").show();
+                                    break;
+                                case 'E':
+                                    $("#qryEquipHis").css("visibility", "visible");
+                                    $("#qryEquipHis").show();
+                                    break;
+                                case 'I':
+                                    $("#qryItemHis").css("visibility", "visible");
+                                    $("#qryItemHis").show();
+                                    break;
+                                case 'A':
+                                    $("#qryFormAplyHis").css("visibility", "visible");
+                                    $("#qryFormAplyHis").show();
+                                    break;
+                                default:
+                                    break;
+                            }
+
+
 
                         } else {
                             validationSummary.append('<li>' + data.err + '</li>');
@@ -216,10 +272,10 @@
                     //    repeatitems: false, id: 'aplyNo'
                     //},
                     mtype: 'POST',
-                    colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '修改前', '修改後', '修改前', '修改後'
+                    colNames: ['覆核單號', '覆核狀態', '申請日期', '申請人員', '執行功能', '修改前', '修改後', '修改前', '修改後'
                    , '修改前', '修改後'],
                     colModel: [
-                        { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                        { name: 'aplyNo', index: 'aplyNo', align: 'center', frozen: true },
                         { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
                         { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
                         { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
@@ -241,6 +297,10 @@
                 forceFit: true,
                 loadonce: true,
                 rownumbers: true,
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "desc",
                 viewrecords: true,
                 loadComplete: function () {
                     $.unblockUI(); //畫面打開
@@ -283,9 +343,9 @@
                 //    repeatitems: false, id: 'cFunctionName'
                 //},
                 mtype: 'POST',
-                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '功能名稱'],
+                colNames: ['覆核單號', '覆核狀態', '申請日期', '申請人員', '執行功能', '功能名稱'],
                 colModel: [
-                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', frozen: true },
                     { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
                     { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
                     { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
@@ -300,6 +360,10 @@
                 forceFit: true,
                 loadonce: true,
                 rownumbers: true,
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "desc",
                 viewrecords: true,
                 loadComplete: function () {
                     $.unblockUI(); //畫面打開
@@ -333,10 +397,10 @@
                 //    repeatitems: false, id: 'equipName'
                 //},
                 mtype: 'POST',
-                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '設備名稱', '控管模式'
+                colNames: ['覆核單號', '覆核狀態', '申請日期', '申請人員', '執行功能', '設備名稱', '控管模式'
                     , '修改前', '修改後', '修改前', '修改後'],
                 colModel: [
-                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', frozen: true },
                     { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
                     { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
                     { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
@@ -358,6 +422,10 @@
                 forceFit: true,
                 loadonce: true,
                 rownumbers: true,
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "desc",
                 viewrecords: true,
                 loadComplete: function () {
                     $.unblockUI(); //畫面打開
@@ -399,9 +467,9 @@
                 //    repeatitems: false, id: 'cFunctionName'
                 //},
                 mtype: 'POST',
-                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
+                colNames: ['覆核單號', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
                 colModel: [
-                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', frozen: true },
                     { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
                     { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
                     { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
@@ -419,6 +487,10 @@
                 forceFit: true,
                 loadonce: true,
                 rownumbers: true,
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "desc",
                 viewrecords: true,
                 loadComplete: function () {
                     $.unblockUI(); //畫面打開
@@ -452,9 +524,9 @@
                 //    repeatitems: false, id: 'cFunctionName'
                 //},
                 mtype: 'POST',
-                colNames: ['', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
+                colNames: ['覆核單號', '覆核狀態', '申請日期', '申請人員', '執行功能', '存取項目', '作業類型'],
                 colModel: [
-                    { name: 'aplyNo', index: 'aplyNo', align: 'center', hidden: true, frozen: true },
+                    { name: 'aplyNo', index: 'aplyNo', align: 'center', frozen: true },
                     { name: 'apprStatusDesc', index: 'apprStatusDesc', align: 'center', width: "90", frozen: true },
                     { name: 'updateDT', index: 'updateDT', align: 'center', width: "120", frozen: true },
                     { name: 'updateUid', index: 'updateUid', width: "100", align: 'center' },
@@ -472,6 +544,10 @@
                 forceFit: true,
                 loadonce: true,
                 rownumbers: true,
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "desc",
                 viewrecords: true,
                 loadComplete: function () {
                     $.unblockUI(); //畫面打開

@@ -17,11 +17,12 @@ namespace Treasury.WebViewModels
         [Display(Name = "角色名稱")]
         public string cRoleName { get; set; }
 
-
-
         [Display(Name = "停用註記")]
         public string isDisabled { get; set; }
 
+        [Display(Name = "角色群組")]
+        public string roleAuthType { get; set; }
+        public string roleAuthTypeDesc { get; set; }
 
         [MaxLength(250)]
         [Display(Name = "備註")]
@@ -54,6 +55,8 @@ namespace Treasury.WebViewModels
         public RoleMgrModel() {
             cRoleID = "";
             cRoleName = "";
+            roleAuthType = "";
+            roleAuthTypeDesc = "";
             isDisabled = "";
             vMemo = "";
             freezeUid = "";

@@ -32,8 +32,11 @@ namespace Treasury.WebDaos
         /// 查詢有效的角色
         /// </summary>
         /// <returns></returns>
-        public List<CODE_ROLE> qryValidRole()
+        public List<CODE_ROLE> qryValidRole(string roleAuthType)
         {
+
+            bool broleAuthType = StringUtil.isEmpty(roleAuthType);
+
             using (new TransactionScope(
                 TransactionScopeOption.Required,
                 new TransactionOptions
@@ -43,7 +46,9 @@ namespace Treasury.WebDaos
             {
                 using (dbTreasuryEntities db = new dbTreasuryEntities())
                 {
-                    List<CODE_ROLE> roleList = db.CODE_ROLE.Where(x => x.IS_DISABLED == "N").ToList<CODE_ROLE>();
+                    List<CODE_ROLE> roleList = db.CODE_ROLE
+                        .Where(x => x.IS_DISABLED == "N" && (broleAuthType || (x.ROLE_AUTH_TYPE == roleAuthType)))
+                        .ToList<CODE_ROLE>();
 
                     return roleList;
                 }
@@ -57,9 +62,9 @@ namespace Treasury.WebDaos
         /// </summary>
         /// <param name="cType"></param>
         /// <returns></returns>
-        public string jqGridRoleList()
+        public string jqGridRoleList(string roleAuthType)
         {
-            List<CODE_ROLE> roleList = qryValidRole();
+            List<CODE_ROLE> roleList = qryValidRole(roleAuthType);
 
             string controlStr = "";
             foreach (var item in roleList)
@@ -93,9 +98,10 @@ namespace Treasury.WebDaos
         }
 
 
-        public List<RoleMgrModel> roleMgrQry(String codeRole, String isDIsabled, String vMemo, String cUpdUserID)
+        public List<RoleMgrModel> roleMgrQry(string codeRole, string roleAuthType , string isDIsabled, string vMemo, string cUpdUserID)
         {
             bool bCodeRole = StringUtil.isEmpty(codeRole);
+            bool bRoleAuthType = StringUtil.isEmpty(roleAuthType);
             bool bisDIsabled = StringUtil.isEmpty(isDIsabled);
             bool bcUpdUserID = StringUtil.isEmpty(cUpdUserID);
 
@@ -116,16 +122,22 @@ namespace Treasury.WebDaos
                                                    join codeReview in db.SYS_CODE.Where(x => x.CODE_TYPE == "DATA_STATUS") on role.DATA_STATUS equals codeReview.CODE into psReview
                                                    from xReview in psReview.DefaultIfEmpty()
 
+                                                   join codeAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on role.ROLE_AUTH_TYPE equals codeAuthType.CODE into psAuthType
+                                                   from xAuthType in psAuthType.DefaultIfEmpty()
+
                                                    where 1 == 1
 
                                                        & (bCodeRole || (role.ROLE_ID == codeRole.Trim()))
+                                                       & (bRoleAuthType || (role.ROLE_AUTH_TYPE == roleAuthType.Trim()))
                                                        & (bisDIsabled || (role.IS_DISABLED == isDIsabled.Trim()))
                                                        & (bcUpdUserID || (role.LAST_UPDATE_UID == cUpdUserID.Trim()))
 
                                                    select new RoleMgrModel
                                                    {
                                                        cRoleID = role.ROLE_ID,
-                                                       cRoleName = role.ROLE_NAME,
+                                                       cRoleName = role.ROLE_NAME.Trim(),
+                                                       roleAuthType = role.ROLE_AUTH_TYPE,
+                                                       roleAuthTypeDesc = (xAuthType == null ? String.Empty : xAuthType.CODE_VALUE),
                                                        isDisabled = (xFlag == null ? String.Empty : xFlag.CODE_VALUE),
                                                        vMemo = role.MEMO,
                                                        freezeUid = role.FREEZE_UID == null ? "" : role.FREEZE_UID,
@@ -162,6 +174,7 @@ namespace Treasury.WebDaos
 INSERT INTO [dbo].[CODE_ROLE]
            ([ROLE_ID]
            ,[ROLE_NAME]
+           ,[ROLE_AUTH_TYPE]
            ,[IS_DISABLED]
            ,[MEMO]
            ,[DATA_STATUS]
@@ -176,6 +189,7 @@ INSERT INTO [dbo].[CODE_ROLE]
 (
  @ROLE_ID
 ,@ROLE_NAME
+,@ROLE_AUTH_TYPE
 ,@IS_DISABLED
 ,@MEMO
 ,@DATA_STATUS
@@ -185,8 +199,7 @@ INSERT INTO [dbo].[CODE_ROLE]
 ,@LAST_UPDATE_DT
 ,@APPR_UID
 ,@APPR_DT
-)
-        ";
+)";
 
 
             SqlCommand command = conn.CreateCommand();
@@ -200,6 +213,7 @@ INSERT INTO [dbo].[CODE_ROLE]
                 command.CommandText = sql;
                 command.Parameters.AddWithValue("@ROLE_ID", StringUtil.toString(cODEROLE.ROLE_ID));
                 command.Parameters.AddWithValue("@ROLE_NAME", StringUtil.toString(cODEROLE.ROLE_NAME));
+                command.Parameters.AddWithValue("@ROLE_AUTH_TYPE", StringUtil.toString(cODEROLE.ROLE_AUTH_TYPE));
                 command.Parameters.AddWithValue("@IS_DISABLED", StringUtil.toString(cODEROLE.IS_DISABLED));
                 command.Parameters.AddWithValue("@MEMO", StringUtil.toString(cODEROLE.MEMO));
                 command.Parameters.AddWithValue("@DATA_STATUS", StringUtil.toString(cODEROLE.DATA_STATUS));
@@ -317,6 +331,7 @@ INSERT INTO [dbo].[CODE_ROLE]
 
             content += StringUtil.toString(codeRole.ROLE_ID) + "|";
             content += StringUtil.toString(codeRole.ROLE_NAME) + "|";
+            content += StringUtil.toString(codeRole.ROLE_AUTH_TYPE) + "|";
             content += StringUtil.toString(codeRole.IS_DISABLED) + "|";
             content += StringUtil.toString(codeRole.MEMO) + "|";
             content += StringUtil.toString(codeRole.DATA_STATUS) + "|";

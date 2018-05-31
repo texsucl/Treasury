@@ -25,6 +25,11 @@ namespace Treasury.WebViewModels
 
         public string roleNameB { get; set; }
 
+        [Display(Name = "角色群組")]
+        public string roleAuthType { get; set; }
+
+        public string roleAuthTypeDesc { get; set; }
+
 
         [Display(Name = "停用註記")]
         public string isDisabled { get; set; }
@@ -43,6 +48,8 @@ namespace Treasury.WebViewModels
             roleId = "";
             roleName = "";
             roleNameB = "";
+            roleAuthType = "";
+            roleAuthTypeDesc = "";
             isDisabled = "";
             isDisabledB = "";
             memo = "";

@@ -23,5 +23,6 @@ namespace Treasury.Web.Models
         public string ROLE_NAME_B { get; set; }
         public string IS_DISABLED_B { get; set; }
         public string MEMO_B { get; set; }
+        public string ROLE_AUTH_TYPE { get; set; }
     }
 }

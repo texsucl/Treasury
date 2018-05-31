@@ -4,14 +4,14 @@
     ViewBag.Title = "角色明細畫面";
 
     var isDisabledList = ViewBag.isDisabledList as SelectList;
-    //var test = ViewBag.test as SelectList;
+    var roleAuthTypeList = ViewBag.roleAuthTypeList as SelectList;
 
     var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
     var userAuthJson = jss.Serialize(ViewBag.userAuthFuncList);
 
     var bHaveData = ViewBag.bHaveData as String;
 
-    
+
 }
 
 
@@ -62,16 +62,27 @@
                         @Html.ValidationMessageFor(model => model.isDisabled, "", new { @class = "text-danger" })
                         @Html.Hidden("hidisDisabled", Model.isDisabled)
                     </td>
+
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.roleAuthType)：
+                    </td>
+                    <td>
+                        @Html.DropDownList("roleAuthType", roleAuthTypeList, "請選擇", new { @onchange= "setTabDisabed()" })
+                        @Html.ValidationMessageFor(model => model.roleAuthType, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidroleAuthType", Model.roleAuthType)
+                    </td>
                 </tr>
 
                 <tr>
+                    
+
                     <td>
                         @Html.DisplayNameFor(model => model.vMemo)：
                     </td>
                     <td colspan="5">
-                        @Html.TextBoxFor(model => model.vMemo, new { style = "width:90%", @maxlength = "250" })
+                        @Html.TextBoxFor(model => model.vMemo, new { style = "width:70%", @maxlength = "250" })
                         @Html.Hidden("hidvMemo", Model.vMemo)
-                        <br />
                         (最多請輸入中/英文字共250字內)
                         @Html.ValidationMessageFor(model => model.vMemo, "", new { @class = "text-danger" })
                     </td>
@@ -115,7 +126,7 @@
 
     <div class="row">
         <div class="col-sm-24" style="text-align:center;">
-            <input type="button" id="btnConfirm" name="btnConfirm" value="修改(申請覆核)" class="btn btn-primary" />
+            <input type="button" id="btnConfirm" name="btnConfirm" value="申請覆核" class="btn btn-primary" />
             <input type="button" id="btnQryHis" name="btnQryHis" value="查詢歷史紀錄" class="btn btn-primary" />
             <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
             <input type="button" id="btnReturn" name="btnReturn" value="返回" class="btn btn-primary" />
@@ -132,7 +143,7 @@
     </div>
   
 
-    <div class="panel panel-primary">
+    <div class="panel panel-primary" >
         <div class="panel-body">
             <div id="exTab1" class="container">
                 <ul class="nav nav-pills">
@@ -274,51 +285,51 @@
         var currentOpType;
 
 
-        //切換tab
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = $(e.target).attr("href");
+        ////切換tab
+        //$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        //    var target = $(e.target).attr("href");
 
-            switch (target) {
+        //    switch (target) {
 
-                case '#tabFunct':
-                    $("#tabFunct").show();
-                    $("#tabEquip").hide();
-                    $("#tabItem").hide();
-                    $("#tabFormAply").hide();
-                    break;
-                case '#tabEquip':
-                    $("#tabEquip").attr('style', 'width:' + $("#tabMain").width());
+        //        case '#tabFunct':
+        //            $("#tabFunct").show();
+        //            $("#tabEquip").hide();
+        //            $("#tabItem").hide();
+        //            $("#tabFormAply").hide();
+        //            break;
+        //        case '#tabEquip':
+        //            $("#tabEquip").attr('style', 'width:' + $("#tabMain").width());
 
-                    $("#gridEquip").setGridWidth($('div.active').width());
+        //            $("#gridEquip").setGridWidth($('div.active').width());
 
-                    $("#tabFunct").hide();
-                    $("#tabEquip").show();
-                    $("#tabItem").hide();
-                    $("#tabFormAply").hide();
-                    break;
-                case '#tabItem':
-                    $("#tabItem").attr('style', 'width:' + $("#tabMain").width());
+        //            $("#tabFunct").hide();
+        //            $("#tabEquip").show();
+        //            $("#tabItem").hide();
+        //            $("#tabFormAply").hide();
+        //            break;
+        //        case '#tabItem':
+        //            $("#tabItem").attr('style', 'width:' + $("#tabMain").width());
 
-                    $("#gridItem").setGridWidth($('div.active').width());
+        //            $("#gridItem").setGridWidth($('div.active').width());
 
-                    $("#tabFunct").hide();
-                    $("#tabEquip").hide();
-                    $("#tabItem").show();
-                    $("#tabFormAply").hide();
-                    break;
-                case '#tabFormAply':
-                    $("#tabFormAply").attr('style', 'width:' + $("#tabMain").width());
+        //            $("#tabFunct").hide();
+        //            $("#tabEquip").hide();
+        //            $("#tabItem").show();
+        //            $("#tabFormAply").hide();
+        //            break;
+        //        case '#tabFormAply':
+        //            $("#tabFormAply").attr('style', 'width:' + $("#tabMain").width());
 
-                    $("#gridFormAply").setGridWidth($('div.active').width());
+        //            $("#gridFormAply").setGridWidth($('div.active').width());
 
-                    $("#tabFunct").hide();
-                    $("#tabEquip").hide();
-                    $("#tabItem").hide();
-                    $("#tabFormAply").show();
-                    break;
-            }
+        //            $("#tabFunct").hide();
+        //            $("#tabEquip").hide();
+        //            $("#tabItem").hide();
+        //            $("#tabFormAply").show();
+        //            break;
+        //    }
 
-        });
+        //});
 
 
 
@@ -373,8 +384,10 @@
 
             $("#gridFormAply").jqGrid('addRow', "new", { addParams: { position: "last" } });
             var sel_id = $('#gridFormAply').jqGrid('getGridParam', 'selrow');
+            $("#gridFormAply").jqGrid("setCell", sel_id, "itemOpType", '3');
 
-            getOpItem('FormAply', '1', '');
+
+            getOpItem('FormAply', '3', '');
 
             be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "', 'FormAply');\"  />";
             de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "', 'FormAply');\"  />";
@@ -548,6 +561,10 @@
 
         //依"作業類型"取得對應的存取項目
         function getOpItem(gridType, opType, itemId) {
+
+            
+
+
             $.ajax({
                 type: "POST",
                 data: JSON.stringify({
@@ -571,6 +588,8 @@
                     }
 
                     var sel = jQuery("#grid" + gridType).getGridParam('selrow');
+
+                    
                     $("select#" + sel + "_itemId").html(itemStr);
 
                     if(itemId != '')
@@ -582,16 +601,105 @@
         }
 
 
+        //依"角色群組"決定可以使用的授權類別
+        function setTabDisabed() {
+            $("#valueErr").val("");
+            jQuery("#gridEquip").jqGrid('clearGridData').trigger("reloadGrid");
+            jQuery("#gridItem").jqGrid('clearGridData').trigger("reloadGrid");
+            jQuery("#gridFormAply").jqGrid('clearGridData').trigger("reloadGrid");
+
+
+            switch ($('#roleAuthType').val()) {
+
+                case 'F':
+                    $("#liFunc").show();
+                    $("#liEquip").hide();
+                    $("#liItem").hide();
+                    $("#liFormAply").hide();
+
+                    $("#tabFunct").show();
+                    $("#tabEquip").hide();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").hide();
+
+                    break;
+                case 'E':
+                    
+
+                    $("#liFunc").hide();
+                    $("#liEquip").show();
+                    $("#liItem").hide();
+                    $("#liFormAply").hide();
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").show();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").hide();
+
+                    break;
+                case 'I':
+                   
+
+                    $("#liFunc").hide();
+                    $("#liEquip").hide();
+                    $("#liItem").show();
+                    $("#liFormAply").hide();
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").hide();
+                    $("#tabItem").show();
+                    $("#tabFormAply").hide();
+
+                    break;
+                case 'A':
+                    
+
+                    $("#liFunc").hide();
+                    $("#liEquip").hide();
+                    $("#liItem").hide();
+                    $("#liFormAply").show();
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").hide();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").show();
+
+                    break;
+                default:
+                    $("#liFunc").hide();
+                    $("#liEquip").hide();
+                    $("#liItem").hide();
+                    $("#liFormAply").hide();
+
+                    $("#tabFunct").hide();
+                    $("#tabEquip").hide();
+                    $("#tabItem").hide();
+                    $("#tabFormAply").hide();
+                    break;
+
+            }
+
+        }
+
+
+
+
 
         $(function () {
 
             var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
-            $("#tabEquip").hide();
-            $("#tabItem").hide();
-            $("#tabFormAply").hide();
+            //$("#tabEquip").hide();
+            //$("#tabItem").hide();
+            //$("#tabFormAply").hide();
+            $("#tabEquip").attr('style', 'width:' + $("#authDetail").width());
+            $("#gridEquip").setGridWidth($('authDetail').width());
 
-            if ($('#cRoleID').val() == '')
-                $("#btnQryHis").hide();
+            $("#tabItem").attr('style', 'width:' + $("#authDetail").width());
+            $("#gridItem").setGridWidth($('authDetail').width());
+
+            $("#tabFormAply").attr('style', 'width:' + $("#authDetail").width());
+            $("#gridFormAply").setGridWidth($('authDetail').width());
+
 
 
             if (bHaveData) {
@@ -601,10 +709,9 @@
                 $('#hidItemOpType').val('@Html.Raw(ViewBag.itemOpTypeList)');
                 $('#hidItem').val('@Html.Raw(ViewBag.itemList)');
 
-                $.blockUI();
+               
 
-                //授權功能
-                createFuncList();
+                
 
 
             } else {
@@ -618,6 +725,43 @@
                 validationSummary.append('<li>' + '無此角色資料' + '</li>');
             }
 
+            setTabDisabed();
+
+            if ($('#cRoleID').val() == '') {
+                $("#btnQryHis").hide();
+                $('#roleAuthType').attr('disabled', false);
+            } else {
+                $('#roleAuthType').attr('disabled', true);
+
+                $.blockUI();
+
+                switch ($('#roleAuthType').val()) {
+                    case 'F':
+                        //授權功能
+                        createFuncList();
+                        break;
+                    case 'E':
+                        //金庫設備權限
+                        qryEquip();
+                        break;
+                    case 'I':
+                        //存取項目權限
+                        qryItem();
+                        break;
+                    case 'A':
+                        //表單申請權限
+                        qryFormAply();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+                
+
+
+
+       
 
         //金庫設備權限下拉選單
             function getEquip() {
@@ -669,9 +813,31 @@
             //清空
             $("#btnClear").click().on('click', function () {
                 $('#cRoleName').val($('#hidcRoleName').val());
+                $('#roleAuthType').val($('#hidroleAuthType').val());
                 $('#isDisabled').val($('#hidisDisabled').val());
                 $('#vMemo').val($('#hidvMemo').val());
-                createFuncList();
+
+                $.blockUI();
+                switch ($('#roleAuthType').val()) {
+                    case 'F':
+                        //授權功能
+                        createFuncList();
+                        break;
+                    case 'E':
+                        //金庫設備權限
+                        qryEquip();
+                        break;
+                    case 'I':
+                        //存取項目權限
+                        qryItem();
+                        break;
+                    case 'A':
+                        //表單申請權限
+                        qryFormAply();
+                        break;
+                    default:
+                        break;
+                }
             });
 
 
@@ -706,7 +872,7 @@
 
                 if ($('#onEdit').val() == "Y") {
                     bPass = false;
-                    validationSummary.append('<li>' + '畫面尚有資料未存檔，請檢查"金庫設備權限"、"存取項目權限"、"表單申請權限"!!' + '</li>');
+                    validationSummary.append('<li>' + '畫面尚有資料未存檔!!' + '</li>');
                 }
 
 
@@ -729,10 +895,6 @@
 
                     }
                 }
-                //if (authFunc == "") {
-                //    bPass = false;
-                //    validationSummary.append('<li>' + '請授權一個以上的功能!!' + '</li>');
-                //}
 
 
                 if (bPass == false)
@@ -741,26 +903,12 @@
 
                 $.blockUI();
 
-                ////若有異動功能時
-                //var nonAuthFunc = "";
-                //var authFunc = "";
-
-
-                //if ($("#bChgFunc").val()) {
-
-
-                //    $("#auth option").each(function () {
-                //        var $this = $(this);
-                //        if ($this.length) {
-                //            authFunc = authFunc + $this.val() + '|';
-                //        }
-                //    });
-                //}
 
 
                 //若有異動角色資訊時
                 var bRoleChg = false;
                 if ($('#cRoleName').val() != $('#hidcRoleName').val() ||
+                    $('#roleAuthType').val() != $('#hidroleAuthType').val() ||
                     $('#isDisabled').val() != $('#hidisDisabled').val() ||
                     $('#vMemo').val() != $('#hidvMemo').val()
                     ) {
@@ -781,6 +929,7 @@
                             roleMgrModel: {
                                 'cRoleID': $('#cRoleID').val(),
                                 'cRoleName': $('#cRoleName').val(),
+                                'roleAuthType': $("#roleAuthType").val(),
                                 'isDisabled': $('#isDisabled').val(),
                                 'vMemo': $('#vMemo').val()
                             }, 'authFunc': authFunc, 'equipData': equipData, 'itemData': itemData, 'formAplyData': formAplyData
@@ -793,8 +942,8 @@
 
                             if (data.success) {
                                 $('#hidcRoleName').val($('#cRoleName').val())
-
-                                $('#hidcFlag').val($('#cFlag').val())
+                                $('#hidroleAuthType').val($('#roleAuthType').val())
+                                $('#hidisDisabled').val($('#isDisabled').val())
                                 $('#hidvMemo').val($('#vMemo').val())
 
 
@@ -804,6 +953,8 @@
                             } else {
                                 validationSummary.append('<li>' + data.errors + '</li>');
                             }
+
+                            
                         }
                     });
                 //} else {
@@ -829,9 +980,10 @@
 
                 }
 
+                $.unblockUI();
 
-                //金庫設備權限
-                qryEquip();
+
+               
 
 
 
@@ -871,15 +1023,14 @@
                                 .jqGrid('setGridParam', { data: data.roleEquipList })
                                 .trigger("reloadGrid");
 
-                            //存取項目權限
-                            qryItem();
-
 
 
                         } else {
                             validationSummary.append('<li>' + data.err + '</li>');
 
                         }
+
+                        $.unblockUI();
                     }
                 });
 
@@ -913,28 +1064,6 @@
                                     this.value = this.value.toUpperCase();
                                     var sel = jQuery("#gridEquip").getGridParam('selrow');
                                     getControlMode(sel, this.value);
-                                    @*$.ajax({
-                                        type: "POST",
-                                        data: JSON.stringify({
-                                            'equipId': this.value
-                                        }),
-                                        dataType: "json",
-                                        url: '@Url.Action("qryEquipByKey", "RoleMgr")',
-                                        contentType: 'application/json',
-
-                                        success: function (data) {
-
-                                            if (data.success) {
-                                                $("#gridEquip").jqGrid("setCell", sel, "controlMode", data.equip.CONTROL_MODE);
-
-                                            } else {
-                                                validationSummary.append('<li>' + data.err + '</li>');
-
-                                            }
-                                        }
-                                    });*@
-
-
                                 }
                             }]
                         }
@@ -970,6 +1099,8 @@
                     }
                 ],
                 autowidth: true,
+                height: 'auto',
+                width: 'auto',
                 shrinkToFit: true,
                 forceFit: true,
                 loadonce: true,
@@ -1058,9 +1189,8 @@
 
                         }
 
-                        //表單申請權限
-                        qryFormAply();
-
+                        
+                        $.unblockUI();
 
                     }
                 });
@@ -1079,11 +1209,11 @@
                 },
                 colModel: [
                     {
-                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width: "60"
+                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width: '120'
                     },
                     {
                         label: '作業類型',
-                        name: 'itemOpType', align: 'left', width: "200",
+                        name: 'itemOpType', align: 'left', width:'400',
                         editable: true,
                         edittype: "select",
                         formatter: 'select',
@@ -1117,8 +1247,10 @@
 
                 ],
                 autowidth: true,
-                shrinkToFit: true,
-                forceFit: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: false,
+                forceFit: false,
                 loadonce: true,
                 rownumbers: true,
                 viewrecords: true,
@@ -1198,7 +1330,7 @@
             }
 
 
-            //存取項目權限GRID
+            //表單申請權限GRID
             $("#gridFormAply").jqGrid({
                 editurl: 'clientArray',
                 datatype: "local",
@@ -1208,12 +1340,12 @@
                 },
                 colModel: [
                     {
-                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width: "60"
+                        label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width:'120'
                     },
                     {
                         label: '作業類型',
-                        name: 'itemOpType', align: 'left', width: "200",
-                        editable: true,
+                        name: 'itemOpType', align: 'left', width: '350',
+                        editable: false,
                         edittype: "select",
                         formatter: 'select',
                         sorttype: 'number',
@@ -1246,8 +1378,10 @@
 
                 ],
                 autowidth: true,
-                shrinkToFit: true,
-                forceFit: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: false,
+                forceFit: false,
                 loadonce: true,
                 rownumbers: true,
                 viewrecords: true,
@@ -1277,7 +1411,7 @@
                     }
                 }
             });
-            //*----------------查詢存取項目權限  end------------------*//
+            //*----------------查詢表單申請權限  end------------------*//
 
 
 

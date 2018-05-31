@@ -35,12 +35,14 @@ namespace Treasury.Web.Daos
 
                     List<CodeUserRoleModel> rows = new List<CodeUserRoleModel>();
                     rows = (from user in db.CODE_USER_ROLE
+                            join role in db.CODE_ROLE on user.ROLE_ID equals role.ROLE_ID
                             where user.USER_ID == userId.Trim()
 
                             select new CodeUserRoleModel()
                             {
                                 
                                 roleId = user.ROLE_ID.Trim(),
+                                roleAuthType = role.ROLE_AUTH_TYPE.Trim(),
                                 createUid = user.CREATE_UID.Trim(),
                                 createDt = user.CREATE_DT == null ? "" : SqlFunctions.DateName("year", user.CREATE_DT) + "/" +
                                                                          SqlFunctions.DatePart("m", user.CREATE_DT) + "/" +

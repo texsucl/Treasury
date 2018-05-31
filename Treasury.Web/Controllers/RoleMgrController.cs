@@ -64,6 +64,12 @@ namespace Treasury.WebControllers
             var isDisabledList = sysCodeDao.loadSelectList("IS_DISABLED");
             ViewBag.isDisabledList = isDisabledList;
 
+
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
+
             //角色名稱
             CodeRoleDao codeRoleDao = new CodeRoleDao();
             var CodeRoleList = codeRoleDao.loadSelectList();
@@ -105,6 +111,10 @@ namespace Treasury.WebControllers
             var isDisabledList = sysCodeDao.loadSelectList("IS_DISABLED");
             ViewBag.isDisabledList = isDisabledList;
 
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
             //角色名稱
             CodeRoleDao codeRoleDao = new CodeRoleDao();
             var CodeRoleList = codeRoleDao.loadSelectList();
@@ -126,6 +136,7 @@ namespace Treasury.WebControllers
 
                 roleMgrModel.cRoleID = StringUtil.toString(codeRole.ROLE_ID);
                 roleMgrModel.cRoleName = StringUtil.toString(codeRole.ROLE_NAME);
+                roleMgrModel.roleAuthType = StringUtil.toString(codeRole.ROLE_AUTH_TYPE);
                 roleMgrModel.isDisabled = StringUtil.toString(codeRole.IS_DISABLED);
                 roleMgrModel.vMemo = StringUtil.toString(codeRole.MEMO);
                 roleMgrModel.cUpdUserID = StringUtil.toString(codeRole.LAST_UPDATE_UID);
@@ -155,6 +166,10 @@ namespace Treasury.WebControllers
             var apprStatusList = sysCodeDao.loadSelectList("APPR_STATUS");
             ViewBag.apprStatusList = apprStatusList;
 
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
 
             RoleMgrHisModel roleMgrHisModel = new RoleMgrHisModel();
 
@@ -168,7 +183,7 @@ namespace Treasury.WebControllers
 
                 roleMgrHisModel.cRoleID = StringUtil.toString(codeRole.ROLE_ID);
                 roleMgrHisModel.cRoleName = StringUtil.toString(codeRole.ROLE_NAME);
-
+                roleMgrHisModel.roleAuthType = StringUtil.toString(codeRole.ROLE_AUTH_TYPE);
 
                 ViewBag.cRoleID = cRoleID;
                 return View(roleMgrHisModel);
@@ -193,13 +208,13 @@ namespace Treasury.WebControllers
         /// <param name="cUpdUserID"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult LoadData(String codeRole, String isDIsabled, String vMemo, String cUpdUserID)
+        public JsonResult LoadData(string codeRole, string roleAuthType, string isDIsabled, string vMemo, string cUpdUserID)
         {
             CodeRoleDao codeRoleDao = new CodeRoleDao();
             OaEmpDao oaEmpDao = new OaEmpDao();
 
             List<RoleMgrModel> rows = new List<RoleMgrModel>();
-            rows = codeRoleDao.roleMgrQry(codeRole, isDIsabled, vMemo, cUpdUserID);
+            rows = codeRoleDao.roleMgrQry(codeRole, roleAuthType, isDIsabled, vMemo, cUpdUserID);
 
             Dictionary<string, string> userNameMap = new Dictionary<string, string>();
             string userUId = "";
@@ -294,86 +309,109 @@ namespace Treasury.WebControllers
             List<FuncRoleModel> funcList = new List<FuncRoleModel>();
             string[] funcData = authFunc.Split('|');
 
-            CodeRoleFunctionDao CodeRoleFunctionDao = new CodeRoleFunctionDao();
-            List<FuncRoleModel> roleFuncListO = CodeRoleFunctionDao.qryForRoleMgr(roleId);
-            foreach (string item in funcData)
-            {
-                if (!"".Equals(StringUtil.toString(item))) {
-                    FuncRoleModel funcRoleModel = new FuncRoleModel();
-                    funcRoleModel.cRoleId = roleId;
-                    funcRoleModel.cFunctionID = item;
-                    if (roleFuncListO.Exists(x => x.cFunctionID == item))
-                    {
-                        funcRoleModel.execAction = "";
-                    }
-
-                    else {
-                        bChgFunc = true;
-                        funcRoleModel.execAction = "A";
-                    }
-                    funcList.Add(funcRoleModel);
-                }
-            }
-
-            foreach (FuncRoleModel oItem in roleFuncListO) {
-                if (!funcList.Exists(x => x.cFunctionID == oItem.cFunctionID))
+            if ("F".Equals(roleMgrModel.roleAuthType)) {
+                CodeRoleFunctionDao CodeRoleFunctionDao = new CodeRoleFunctionDao();
+                List<FuncRoleModel> roleFuncListO = CodeRoleFunctionDao.qryForRoleMgr(roleId);
+                foreach (string item in funcData)
                 {
-                    bChgFunc = true;
-                    FuncRoleModel funcRoleModel = new FuncRoleModel();
-                    funcRoleModel.cRoleId = roleId;
-                    funcRoleModel.cFunctionID = oItem.cFunctionID;
-                    funcRoleModel.execAction = "D";
-                    funcList.Add(funcRoleModel);
+                    if (!"".Equals(StringUtil.toString(item)))
+                    {
+                        FuncRoleModel funcRoleModel = new FuncRoleModel();
+                        funcRoleModel.cRoleId = roleId;
+                        funcRoleModel.cFunctionID = item;
+                        if (roleFuncListO.Exists(x => x.cFunctionID == item))
+                        {
+                            funcRoleModel.execAction = "";
+                        }
+
+                        else
+                        {
+                            bChgFunc = true;
+                            funcRoleModel.execAction = "A";
+                        }
+                        funcList.Add(funcRoleModel);
+                    }
                 }
+
+                foreach (FuncRoleModel oItem in roleFuncListO)
+                {
+                    if (!funcList.Exists(x => x.cFunctionID == oItem.cFunctionID))
+                    {
+                        bChgFunc = true;
+                        FuncRoleModel funcRoleModel = new FuncRoleModel();
+                        funcRoleModel.cRoleId = roleId;
+                        funcRoleModel.cFunctionID = oItem.cFunctionID;
+                        funcRoleModel.execAction = "D";
+                        funcList.Add(funcRoleModel);
+                    }
+                }
+
             }
+
 
 
             //比對是否有異動"金庫設備權限"
             List<CodeRoleEquipModel> equipList = new List<CodeRoleEquipModel>();
             CodeRoleTreaItemDao codeRoleTreaItemDao = new CodeRoleTreaItemDao();
-            List<CodeRoleEquipModel> roleEquipListO = codeRoleTreaItemDao.qryForRoleMgr(roleId);
+            if ("E".Equals(roleMgrModel.roleAuthType))
+            {
+                List<CodeRoleEquipModel> roleEquipListO = codeRoleTreaItemDao.qryForRoleMgr(roleId);
 
-            if (equipData != null) {
-                foreach (CodeRoleEquipModel item in equipData)
+                if (equipData != null)
                 {
-                    CodeRoleEquipModel codeRoleEquipModel = new CodeRoleEquipModel();
-                    codeRoleEquipModel.roleId = roleId;
-                    codeRoleEquipModel.treaEquipId = StringUtil.toString(item.treaEquipId);
-                    //codeRoleEquipModel.controlMode = StringUtil.toString(item.controlMode);
-                    codeRoleEquipModel.custodyMode = StringUtil.toString(item.custodyMode);
-                    codeRoleEquipModel.custodyOrder = StringUtil.toString(item.custodyOrder);
-                    codeRoleEquipModel.custodyModeB = "";
-                    codeRoleEquipModel.custodyOrderB = "";
-                    codeRoleEquipModel.execAction = "";
-                    if (roleEquipListO.Exists(x => x.treaEquipId == item.treaEquipId))
+                    foreach (CodeRoleEquipModel item in equipData)
                     {
-                        CodeRoleEquipModel itemO = roleEquipListO.Find(x => x.treaEquipId == item.treaEquipId);
-
-                        if (!(
-                            //item.controlMode.Equals(itemO.controlMode) && 
-                            item.custodyMode.Equals(itemO.custodyMode) && item.custodyOrder.Equals(itemO.custodyOrder)))
+                        CodeRoleEquipModel codeRoleEquipModel = new CodeRoleEquipModel();
+                        codeRoleEquipModel.roleId = roleId;
+                        codeRoleEquipModel.treaEquipId = StringUtil.toString(item.treaEquipId);
+                        //codeRoleEquipModel.controlMode = StringUtil.toString(item.controlMode);
+                        codeRoleEquipModel.custodyMode = StringUtil.toString(item.custodyMode);
+                        codeRoleEquipModel.custodyOrder = StringUtil.toString(item.custodyOrder);
+                        codeRoleEquipModel.custodyModeB = "";
+                        codeRoleEquipModel.custodyOrderB = "";
+                        codeRoleEquipModel.execAction = "";
+                        if (roleEquipListO.Exists(x => x.treaEquipId == item.treaEquipId))
                         {
-                            codeRoleEquipModel.execAction = "U";
-                            codeRoleEquipModel.custodyModeB = itemO.custodyMode;
-                            codeRoleEquipModel.custodyOrderB = itemO.custodyOrder;
+                            CodeRoleEquipModel itemO = roleEquipListO.Find(x => x.treaEquipId == item.treaEquipId);
+
+                            if (!(
+                                //item.controlMode.Equals(itemO.controlMode) && 
+                                item.custodyMode.Equals(itemO.custodyMode) && item.custodyOrder.Equals(itemO.custodyOrder)))
+                            {
+                                codeRoleEquipModel.execAction = "U";
+                                codeRoleEquipModel.custodyModeB = itemO.custodyMode;
+                                codeRoleEquipModel.custodyOrderB = itemO.custodyOrder;
+                                bChgEquip = true;
+                            }
+                        }
+                        else
+                        {
+                            codeRoleEquipModel.execAction = "A";
                             bChgEquip = true;
+                        }
+                        equipList.Add(codeRoleEquipModel);
+                    }
+                }
+
+
+                foreach (CodeRoleEquipModel oItem in roleEquipListO)
+                {
+                    if (equipList != null)
+                    {
+                        if (!equipList.Exists(x => x.treaEquipId == oItem.treaEquipId))
+                        {
+                            bChgEquip = true;
+                            CodeRoleEquipModel codeRoleEquipModel = new CodeRoleEquipModel();
+                            codeRoleEquipModel.roleId = roleId;
+                            codeRoleEquipModel.treaEquipId = StringUtil.toString(oItem.treaEquipId);
+                            codeRoleEquipModel.controlMode = StringUtil.toString(oItem.controlMode);
+                            codeRoleEquipModel.custodyMode = StringUtil.toString(oItem.custodyMode);
+                            codeRoleEquipModel.custodyOrder = StringUtil.toString(oItem.custodyOrder);
+                            codeRoleEquipModel.execAction = "D";
+                            equipList.Add(codeRoleEquipModel);
                         }
                     }
                     else
-                    {
-                        codeRoleEquipModel.execAction = "A";
-                        bChgEquip = true;
-                    }
-                    equipList.Add(codeRoleEquipModel);
-                }
-            }
-            
-
-            foreach (CodeRoleEquipModel oItem in roleEquipListO)
-            {
-                if (equipList != null)
-                {
-                    if (!equipList.Exists(x => x.treaEquipId == oItem.treaEquipId))
                     {
                         bChgEquip = true;
                         CodeRoleEquipModel codeRoleEquipModel = new CodeRoleEquipModel();
@@ -384,58 +422,59 @@ namespace Treasury.WebControllers
                         codeRoleEquipModel.custodyOrder = StringUtil.toString(oItem.custodyOrder);
                         codeRoleEquipModel.execAction = "D";
                         equipList.Add(codeRoleEquipModel);
+
                     }
-                }
-                else {
-                    bChgEquip = true;
-                    CodeRoleEquipModel codeRoleEquipModel = new CodeRoleEquipModel();
-                    codeRoleEquipModel.roleId = roleId;
-                    codeRoleEquipModel.treaEquipId = StringUtil.toString(oItem.treaEquipId);
-                    codeRoleEquipModel.controlMode = StringUtil.toString(oItem.controlMode);
-                    codeRoleEquipModel.custodyMode = StringUtil.toString(oItem.custodyMode);
-                    codeRoleEquipModel.custodyOrder = StringUtil.toString(oItem.custodyOrder);
-                    codeRoleEquipModel.execAction = "D";
-                    equipList.Add(codeRoleEquipModel);
 
                 }
-                
             }
 
-
-
-
-            CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
 
             //比對是否有異動"存取項目權限"
-            List<CodeRoleItemModel> itemDataO = codeRoleItemDao.qryForRoleMgr(roleId, "1");
+            CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
             List<CodeRoleItemModel> itemList = new List<CodeRoleItemModel>();
-            if (itemData != null) {
-                foreach (CodeRoleItemModel item in itemData)
-                {
-                    CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
-                    codeRoleItemModel.roleId = roleId;
-                    codeRoleItemModel.itemId = StringUtil.toString(item.itemId);
-                    codeRoleItemModel.authType = "1";
 
-                    if (itemDataO.Exists(x => x.itemId == item.itemId))
+            if ("I".Equals(roleMgrModel.roleAuthType)) {
+                List<CodeRoleItemModel> itemDataO = codeRoleItemDao.qryForRoleMgr(roleId, "1");
+
+                if (itemData != null)
+                {
+                    foreach (CodeRoleItemModel item in itemData)
                     {
-                        codeRoleItemModel.execAction = "";
+                        CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
+                        codeRoleItemModel.roleId = roleId;
+                        codeRoleItemModel.itemId = StringUtil.toString(item.itemId);
+                        codeRoleItemModel.authType = "1";
+
+                        if (itemDataO.Exists(x => x.itemId == item.itemId))
+                        {
+                            codeRoleItemModel.execAction = "";
+                        }
+                        else
+                        {
+                            bChgItem = true;
+                            codeRoleItemModel.execAction = "A";
+                        }
+                        itemList.Add(codeRoleItemModel);
+                    }
+                }
+
+
+                foreach (CodeRoleItemModel oItem in itemDataO)
+                {
+                    if (itemList != null)
+                    {
+                        if (!itemList.Exists(x => x.itemId == oItem.itemId))
+                        {
+                            bChgItem = true;
+                            CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
+                            codeRoleItemModel.roleId = roleId;
+                            codeRoleItemModel.itemId = StringUtil.toString(oItem.itemId);
+                            codeRoleItemModel.authType = "1";
+                            codeRoleItemModel.execAction = "D";
+                            itemList.Add(codeRoleItemModel);
+                        }
                     }
                     else
-                    {
-                        bChgItem = true;
-                        codeRoleItemModel.execAction = "A";
-                    }
-                    itemList.Add(codeRoleItemModel);
-                }
-            }
-            
-
-            foreach (CodeRoleItemModel oItem in itemDataO)
-            {
-                if (itemList != null)
-                {
-                    if (!itemList.Exists(x => x.itemId == oItem.itemId))
                     {
                         bChgItem = true;
                         CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
@@ -445,51 +484,59 @@ namespace Treasury.WebControllers
                         codeRoleItemModel.execAction = "D";
                         itemList.Add(codeRoleItemModel);
                     }
-                } else {
-                    bChgItem = true;
-                    CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
-                    codeRoleItemModel.roleId = roleId;
-                    codeRoleItemModel.itemId = StringUtil.toString(oItem.itemId);
-                    codeRoleItemModel.authType = "1";
-                    codeRoleItemModel.execAction = "D";
-                    itemList.Add(codeRoleItemModel);
                 }
+
             }
-               
-            
+
+
 
 
             //比對是否有異動"表單申請權限"
-            List<CodeRoleItemModel> formAplyDataO = codeRoleItemDao.qryForRoleMgr(roleId, "2");
+            
             List<CodeRoleItemModel> formAplyList = new List<CodeRoleItemModel>();
 
-            if (formAplyData != null) {
-                foreach (CodeRoleItemModel item in formAplyData)
+            if ("A".Equals(roleMgrModel.roleAuthType))
+            {
+                List<CodeRoleItemModel> formAplyDataO = codeRoleItemDao.qryForRoleMgr(roleId, "2");
+                if (formAplyData != null)
                 {
-                    CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
-                    codeRoleItemModel.roleId = roleId;
-                    codeRoleItemModel.itemId = StringUtil.toString(item.itemId);
-                    codeRoleItemModel.authType = "2";
-
-                    if (formAplyDataO.Exists(x => x.itemId == item.itemId))
+                    foreach (CodeRoleItemModel item in formAplyData)
                     {
-                        codeRoleItemModel.execAction = "";
+                        CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
+                        codeRoleItemModel.roleId = roleId;
+                        codeRoleItemModel.itemId = StringUtil.toString(item.itemId);
+                        codeRoleItemModel.authType = "2";
+
+                        if (formAplyDataO.Exists(x => x.itemId == item.itemId))
+                        {
+                            codeRoleItemModel.execAction = "";
+                        }
+                        else
+                        {
+                            bChgFormAply = true;
+                            codeRoleItemModel.execAction = "A";
+                        }
+                        formAplyList.Add(codeRoleItemModel);
+                    }
+                }
+
+
+                foreach (CodeRoleItemModel oItem in formAplyDataO)
+                {
+                    if (formAplyList != null)
+                    {
+                        if (!formAplyList.Exists(x => x.itemId == oItem.itemId))
+                        {
+                            bChgFormAply = true;
+                            CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
+                            codeRoleItemModel.roleId = roleId;
+                            codeRoleItemModel.itemId = StringUtil.toString(oItem.itemId);
+                            codeRoleItemModel.authType = "2";
+                            codeRoleItemModel.execAction = "D";
+                            formAplyList.Add(codeRoleItemModel);
+                        }
                     }
                     else
-                    {
-                        bChgFormAply = true;
-                        codeRoleItemModel.execAction = "A";
-                    }
-                    formAplyList.Add(codeRoleItemModel);
-                }
-            }
-            
-
-            foreach (CodeRoleItemModel oItem in formAplyDataO)
-            {
-                if (formAplyList != null)
-                {
-                    if (!formAplyList.Exists(x => x.itemId == oItem.itemId))
                     {
                         bChgFormAply = true;
                         CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
@@ -499,18 +546,12 @@ namespace Treasury.WebControllers
                         codeRoleItemModel.execAction = "D";
                         formAplyList.Add(codeRoleItemModel);
                     }
+
                 }
-                else {
-                    bChgFormAply = true;
-                    CodeRoleItemModel codeRoleItemModel = new CodeRoleItemModel();
-                    codeRoleItemModel.roleId = roleId;
-                    codeRoleItemModel.itemId = StringUtil.toString(oItem.itemId);
-                    codeRoleItemModel.authType = "2";
-                    codeRoleItemModel.execAction = "D";
-                    formAplyList.Add(codeRoleItemModel);
-                }
-                
             }
+
+
+                
 
 
             if(bChgRole == false && bChgFunc == false && bChgEquip == false && bChgItem == false && bChgFormAply == false)
@@ -556,6 +597,7 @@ namespace Treasury.WebControllers
                         codeRoleHis.APLY_NO = aplyNo;
                         codeRoleHis.ROLE_ID = StringUtil.toString(roleMgrModel.cRoleID);
                         codeRoleHis.ROLE_NAME = StringUtil.toString(roleMgrModel.cRoleName);
+                        codeRoleHis.ROLE_AUTH_TYPE = StringUtil.toString(roleMgrModel.roleAuthType);
                         codeRoleHis.IS_DISABLED = StringUtil.toString(roleMgrModel.isDisabled);
                         codeRoleHis.MEMO = StringUtil.toString(roleMgrModel.vMemo);
 
@@ -586,9 +628,11 @@ namespace Treasury.WebControllers
                     {
                         CodeRoleFuncHisDao codeRoleFuncHisDao = new CodeRoleFuncHisDao();
                         foreach (FuncRoleModel func in funcList) {
-                            if (!"".Equals(func.execAction)) {
-                                codeRoleFuncHisDao.insert(aplyNo, "Treasury", func, conn, transaction);
-                            }
+                            codeRoleFuncHisDao.insert(aplyNo, "Treasury", func, conn, transaction);
+
+                            //if (!"".Equals(func.execAction)) {
+                            //    codeRoleFuncHisDao.insert(aplyNo, "Treasury", func, conn, transaction);
+                            //}
                         }
                     }
 
@@ -599,10 +643,11 @@ namespace Treasury.WebControllers
                         CodeRoleTreaItemHisDao codeRoleTreaItemHisDao = new CodeRoleTreaItemHisDao();
                         foreach (CodeRoleEquipModel equip in equipList)
                         {
-                            if (!"".Equals(equip.execAction))
-                            {
-                                codeRoleTreaItemHisDao.insert(aplyNo, equip, conn, transaction);
-                            }
+                            codeRoleTreaItemHisDao.insert(aplyNo, equip, conn, transaction);
+                            //if (!"".Equals(equip.execAction))
+                            //{
+                            //    codeRoleTreaItemHisDao.insert(aplyNo, equip, conn, transaction);
+                            //}
                         }
                     }
 
@@ -613,10 +658,11 @@ namespace Treasury.WebControllers
                         CodeRoleItemHisDao codeRoleItemHisDao = new CodeRoleItemHisDao();
                         foreach (CodeRoleItemModel item in itemList)
                         {
-                            if (!"".Equals(item.execAction))
-                            {
-                                codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
-                            }
+                            codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
+                            //if (!"".Equals(item.execAction))
+                            //{
+                            //    codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
+                            //}
                         }
                     }
 
@@ -627,10 +673,11 @@ namespace Treasury.WebControllers
                         CodeRoleItemHisDao codeRoleItemHisDao = new CodeRoleItemHisDao();
                         foreach (CodeRoleItemModel item in formAplyList)
                         {
-                            if (!"".Equals(item.execAction))
-                            {
-                                codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
-                            }
+                            codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
+                            //if (!"".Equals(item.execAction))
+                            //{
+                            //    codeRoleItemHisDao.insert(aplyNo, item, conn, transaction);
+                            //}
                         }
                     }
 
@@ -718,6 +765,10 @@ namespace Treasury.WebControllers
             var isDisabledList = sysCodeDao.loadSelectList("IS_DISABLED");
             ViewBag.isDisabledList = isDisabledList;
 
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
             //控管模式
             ViewBag.controlList = sysCodeDao.jqGridList("CONTROL_MODE");
 
@@ -756,6 +807,7 @@ namespace Treasury.WebControllers
 
                 roleMgrModel.cRoleID = StringUtil.toString(codeRole.ROLE_ID);
                 roleMgrModel.cRoleName = StringUtil.toString(codeRole.ROLE_NAME);
+                roleMgrModel.roleAuthType = StringUtil.toString(codeRole.ROLE_AUTH_TYPE);
                 roleMgrModel.isDisabled = StringUtil.toString(codeRole.IS_DISABLED);
                 roleMgrModel.vMemo = StringUtil.toString(codeRole.MEMO);
                 roleMgrModel.dataStatus = StringUtil.toString(codeRole.DATA_STATUS) == "" ? "" : codeRole.DATA_STATUS + "." + dicReview[codeRole.DATA_STATUS];
@@ -801,7 +853,7 @@ namespace Treasury.WebControllers
 
                     roleMgrModel.cRoleID = "";
                     roleMgrModel.cRoleName = "";
-                    roleMgrModel.isDisabled = "";
+                    roleMgrModel.isDisabled = "N";
                     roleMgrModel.vMemo = "";
                     roleMgrModel.cCrtUserID = "";
                     roleMgrModel.cCrtDateTime = "";

@@ -77,6 +77,26 @@ namespace Treasury.Web.Daos
         }
 
 
+
+        /// <summary>
+        /// 以鍵項查詢
+        /// </summary>
+        /// <param name="codeType"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public SYS_CODE qryByKey(string codeType, string code)
+        {
+            dbTreasuryEntities context = new dbTreasuryEntities();
+
+            SYS_CODE sysCode = new SYS_CODE();
+            sysCode = context.SYS_CODE.Where(x => x.CODE_TYPE == codeType && x.CODE == code)
+                .OrderBy(x => x.ISORTBY).FirstOrDefault();
+
+
+            return sysCode;
+        }
+
+
         public Dictionary<string, string> qryByTypeDic(String cType)
         {
             dbTreasuryEntities context = new dbTreasuryEntities();

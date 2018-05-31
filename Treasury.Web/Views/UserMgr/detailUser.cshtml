@@ -21,8 +21,9 @@
             
             <table>
                 <tr>
-                    @Html.Hidden("hidRole", "")
-
+                    @Html.Hidden("hidRoleAuthType", "")
+                    @Html.Hidden("hidRoleList", "")
+                    
                     <td colspan="2">
                         <span style="color:red;">＊</span>
                         @Html.DisplayNameFor(model => model.cUserID)：
@@ -33,6 +34,7 @@
                         <span style="color:red;">＊</span>
                         @Html.DisplayNameFor(model => model.cUserName)：
                         @Html.TextBoxFor(model => model.cUserName, new { @maxlength = "10" })
+                        @Html.Hidden("hidUserName", Model.cUserName)
                     </td>
                     
                 </tr>
@@ -99,7 +101,7 @@
 
                 <div class="row">
                     <div class="col-sm-24" style="text-align:center;">
-                        <input type="submit" id="btnModify" name="btnModify" value="修改(申請覆核)" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
                         <input type="button" id="btnQryHis" name="btnQryHis" value="查詢歷史紀錄" class="btn btn-primary" />
                         <input type="submit" id="btnRtn" name="btnRtn" value="返回" class="btn btn-primary" />
                     </div>
@@ -161,7 +163,7 @@
             });
             $.unblockUI();
         }
-        
+
     }
 
 
@@ -171,8 +173,6 @@
         $("#grid").jqGrid('addRow', "new", { addParams: { position: "last" } });
         var sel_id = $('#grid').jqGrid('getGridParam', 'selrow');
 
-
-        var invoId = sel_id;
         be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "');\"  />";
         de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "');\"  />";
 
@@ -181,6 +181,15 @@
         jQuery("#grid").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
         $("#btn_edit_" + sel_id).hide();
         $("#btn_del_" + sel_id).hide();
+
+        var rowData = jQuery("#grid").jqGrid("getRowData", sel_id);
+
+        if ($("#hidRoleAuthType").val() != "")
+            getRole($("#hidRoleAuthType").val().substr(0,1), '');
+
+        
+
+
         $("#onEdit").val("Y");
 
     });
@@ -199,10 +208,18 @@
 
         var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
         var roleId = rowData.roleId;
-  
+
 
 
         jQuery("#grid").setSelection(rowid, true);
+
+
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+        var roleAuthType = rowData.roleAuthType;
+        var roleId = rowData.roleId;
+        getRole(roleAuthType, roleId);
+
+
         jQuery("#grid").editRow(rowid);
 
 
@@ -278,19 +295,90 @@
 
     }
 
+    //取得角色群組下拉選單
+    function getRoleAuthRole() {
+        return $('#hidRoleAuthType').val();
+
+    }
+
+
+
+    //作業類型下拉選單
+    function getRoleIdList() {
+        return $('#hidRoleList').val();
+
+    }
+
+
+
+    //依"角色群組"取得對應的角色
+    function getRole(roleAuthType, roleId) {
+
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                'roleAuthType': roleAuthType
+            }),
+            dataType: "json",
+            url: '@Url.Action("qryRoleList", "UserMgr")',
+            contentType: 'application/json',
+
+            success: function (data) {
+
+                if (data.success) {
+                    var roleIdStr = '';
+                    var res = data.roleList.split(";");
+                    for (var i = 0; i < res.length; i++) {
+                        var codeItem = res[i].split(":");
+                        roleIdStr += "<option value='" + codeItem[0] + "'>" + codeItem[1] + "</option>";
+                    }
+
+                    if (roleAuthType == "") {
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var sel = ids[i];
+                            
+                            $("select#" + sel + "_roleId").html(roleIdStr);
+                        }
+
+                    } else {
+                        var sel = jQuery("#grid").getGridParam('selrow');
+
+                        $("select#" + sel + "_roleId").html(roleIdStr);
+
+                        if (roleId != '')
+                            $("#" + sel + "_roleId").val(roleId);
+                    }
+
+                    
+
+                    
+
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                }
+            }
+        });
+
+    }
 
 
     $(function () {
 
         var bHaveData = '@ViewBag.bHaveData';
         $("#cUserName").attr('disabled', true);
-        $('#hidRole').val('@Html.Raw(ViewBag.roleList)');
+        $('#hidRoleAuthType').val('@Html.Raw(ViewBag.roleAuthTypeList)');
+        $('#hidRoleList').val('@Html.Raw(ViewBag.roleList)');
+
+
         if (bHaveData.toUpperCase() == "TRUE") {
             $('#isMail').val($('#hidisMail').val());
             $('#isDisabled').val($('#hidisDisabled').val());
             $("#cUserID").attr('disabled', true);
-            
-            qryRole();
+
+            qryRole('','');
 
         } else {
 
@@ -309,16 +397,7 @@
                 validationSummary.append('<li>' + '無此使用者資料' + '</li>');
         }
 
-        function getRole() {
-            return $('#hidRole').val();
-            //var sel = jQuery("#grid").getGridParam('selrow');
-            //$("select#" + sel + "_roleId").html($('#hidRole').val());
 
-            //if (roleId != '')
-            //    $("#" + sel + "_roleId").val(roleId);
-
-
-        }
 
         //返回
         $("#btnRtn").click().on('click', function () {
@@ -341,7 +420,7 @@
         //*-----------------------修改(申請覆核)  begin-----------------------*//
         $("#btnModify").click().on('click', function () {
             $('#validationSummary').children().remove();
-            
+
             var validationSummary = $('#validationSummary ul.validation-summary-errors');
 
             if (validationSummary.length == 0) {
@@ -388,7 +467,7 @@
             if (bPass == false)
                 return;
 
-            
+
 
 
             var execAction = "";
@@ -396,33 +475,33 @@
                 execAction = "A";
             else
                 execAction = "U";
-    
+
             $.blockUI();
 
 
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        userMgrModel: {
-                            'cUserID': $('#cUserID').val(),
-                            'isDisabled': $('#isDisabled').val(),
-                            'isMail': $('#isMail').val()
-                        }, 'roleData': roleData, 'execAction': execAction
-                    }),
-                    dataType: "json",
-                    url: '@Url.Action("updateUser", "UserMgr")',
-                    contentType: 'application/json',
-                    success: function (data) {
-                        
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    userMgrModel: {
+                        'cUserID': $('#cUserID').val(),
+                        'isDisabled': $('#isDisabled').val(),
+                        'isMail': $('#isMail').val()
+                    }, 'roleData': roleData, 'execAction': execAction
+                }),
+                dataType: "json",
+                url: '@Url.Action("updateUser", "UserMgr")',
+                contentType: 'application/json',
+                success: function (data) {
 
-                        if (data.success) {
-                            $("#btnModify").attr('disabled', true);
-                            validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
-                        } else {
-                            validationSummary.append('<li>' + data.err + '</li>');
-                        }
+
+                    if (data.success) {
+                        $("#btnModify").attr('disabled', true);
+                        validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
                     }
-                });
+                }
+            });
 
             $.unblockUI();
 
@@ -439,25 +518,12 @@
 
         //清除
         $("#btnClear").click().on('click', function () {
-            $('#cUserID').val('');
-            $('#cUserName').val('');
-            $('#cFlag').val('');
-            $('#cBelongUnitCode').val('');
-            $('#cBelongUnitSeq').val('');
-            $('#cWorkUnitCode').val('');
-            $('#cWorkUnitSeq').val('');
-            $('#cUnitCode').val('');
-            $('#cUnitCodeSeq').val('');
-            $('#codeRole').val('');
-            $('#cUserType').prop('checked', false);
-            $('#vMemo').val('');
-            $('#cUpdUserID').val('');
-            $('#cUpdDateB').val('');
-            $('#cUpdDateE').val('');
+            $('#cUserID').val($('#hidUserId').val());
+            $('#cUserName').val($('#hidUserName').val());
+            $('#isDisabled').val($('#hidisDisabled').val());
+            $('#isMail').val($('#hidisMail').val());
 
-
-
-            $('#qryResult').children().remove();
+            qryRole(true);
 
             $('#validationSummary').children().remove();
         });
@@ -521,33 +587,56 @@
             },
             colModel: [
                 {
-                    label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left'
+                    label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'left', width:'100'
                 },
                 {
-                    label: '角色名稱',
-                    name: 'roleId', align: 'left',
+                    label: '角色群組',
+                    name: 'roleAuthType', align: 'left', width: '120',
                     editable: true,
                     edittype: "select",
                     formatter: 'select',
                     editoptions: {
-                        value: getRole()
-                    }
+                        value: getRoleAuthRole(),
+                        dataEvents: [{
+                            type: 'change', fn: function (e) {
+
+                                this.value = this.value.toUpperCase();
+                                var sel = jQuery("#grid").getGridParam('selrow');
+                                getRole(this.value, '');
+
+
+                            }
+                        }]
+                    },
+                    editrules: { required: true }
+
+                },
+                {
+                    label: '角色名稱',
+                    name: 'roleId', align: 'left', width: '200',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRoleIdList()
+                    },
+                    editrules: { required: true }
 
                 },
                  {
-                     label: '授權人',
+                     label: '授權人', width: '100',
                      name: 'createUid',
                      align: 'center',
                      editable: false
                  }
                 ,
                  {
-                     label: '授權日期',
+                     label: '授權日期', width: '160',
                      name: 'createDt',
                      align: 'center',
                      editable: false
                  }
-                
+
             ],
             autowidth: true,
             shrinkToFit: true,

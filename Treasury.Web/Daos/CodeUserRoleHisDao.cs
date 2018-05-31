@@ -49,9 +49,12 @@ namespace Treasury.WebDaos
                            join appr in db.AUTH_APPR on m.APLY_NO equals appr.APLY_NO into psAppr
                            from xAppr in psAppr.DefaultIfEmpty()
 
-                           join role in db.CODE_ROLE on m.ROLE_ID equals role.ROLE_ID 
+                           join role in db.CODE_ROLE on m.ROLE_ID equals role.ROLE_ID
 
-                           where m.USER_ID == userId
+                               join cAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on role.ROLE_AUTH_TYPE equals cAuthType.CODE into psAuthType
+                               from xAuthType in psAuthType.DefaultIfEmpty()
+
+                               where m.USER_ID == userId
                              & (bapprStatus || xAppr.APPR_STATUS == apprStatus.Trim())
                              & (bDateB || xAppr.CREATE_DT >= sB)
                              & (bDateE || xAppr.CREATE_DT <= sE)
@@ -65,6 +68,7 @@ namespace Treasury.WebDaos
                                execAction = m.EXEC_ACTION.Trim(),
                                cRoleID = m.ROLE_ID.Trim(),
                                cRoleName = role.ROLE_NAME.Trim(),
+                               roleAuthType = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim(),
                                apprStatus = xAppr.APPR_STATUS.Trim()
                                
 
@@ -94,16 +98,21 @@ namespace Treasury.WebDaos
                                                     join cType in db.SYS_CODE.Where(x => x.CODE_TYPE == "EXEC_ACTION") on main.EXEC_ACTION equals cType.CODE into psCType
                                                     from xType in psCType.DefaultIfEmpty()
 
+                                                    join cAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on role.ROLE_AUTH_TYPE equals cAuthType.CODE into psAuthType
+                                                    from xAuthType in psAuthType.DefaultIfEmpty()
+
 
                                                     where main.APLY_NO == aplyNo
 
                                                     select new CodeUserRoleModel
                                                     {
+                                                        aplyNo = main.APLY_NO,
                                                         roleId = main.ROLE_ID,
                                                         roleName = role.ROLE_NAME.Trim(),
+                                                        roleAuthType = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim(),
                                                         execAction = main.EXEC_ACTION.Trim(),
                                                         execActionDesc = xType == null ? "" : xType.CODE_VALUE.Trim()
-                                                    }).ToList();
+                                                    }).OrderBy(x => x.aplyNo).ThenBy(x => x.roleId).ToList();
 
                     return rows;
                 }

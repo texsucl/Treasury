@@ -29,6 +29,9 @@ namespace Treasury.Web.ViewModels
         [Display(Name = "角色名稱")]
         public string cRoleName { get; set; }
 
+        [Display(Name = "角色群組")]
+        public string roleAuthType { get; set; }
+
 
         [Display(Name = "執行功能")]
         public string execAction { get; set; }
@@ -45,6 +48,7 @@ namespace Treasury.Web.ViewModels
             userId = "";
             cRoleID = "";
             cRoleName = "";
+            roleAuthType = "";
             execAction = "";
             execActionDesc = "";
         }

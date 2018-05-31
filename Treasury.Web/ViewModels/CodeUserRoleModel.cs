@@ -7,12 +7,15 @@ namespace Treasury.WebViewModels
 {
     public class CodeUserRoleModel
     {
+        public String aplyNo { get; set; }
 
         public String userId { get; set; }
 
         public String roleId { get; set; }
 
         public String roleName { get; set; }
+
+        public String roleAuthType { get; set; }
 
         public String createUid { get; set; }
 
@@ -24,9 +27,11 @@ namespace Treasury.WebViewModels
 
 
         public CodeUserRoleModel() {
+            aplyNo = "";
             userId = "";
             roleId = "";
             roleName = "";
+            roleAuthType = "";
             createUid = "";
             createDt = "";
             execAction = "";
