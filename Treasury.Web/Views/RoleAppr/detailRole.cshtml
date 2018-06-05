@@ -45,36 +45,36 @@
                     @Html.Hidden("roleId", Model.roleId)
                 </td>
 
+                
+                <td>
+                    @Html.DisplayNameFor(model => model.roleAuthType)：
+                    @Html.DisplayTextFor(model => model.roleAuthTypeDesc)
+                    @Html.Hidden("roleAuthType", Model.roleAuthType)
+                </td>
+                
                 <td>
                     @Html.DisplayNameFor(model => model.roleName)：
-                
+
                     @Html.DisplayTextFor(model => model.roleNameB)
-@if (Model.roleNameB != Model.roleName && Model.roleName != "")
-{
-                    <span style="color:red;">(@Html.DisplayTextFor(model => model.roleName))</span>
-}
+                    @if (Model.roleNameB != Model.roleName && Model.roleName != "")
+                    {
+                        <span style="color:red;">(@Html.DisplayTextFor(model => model.roleName))</span>
+                    }
                 </td>
-
-                <td>
-                    @Html.DisplayNameFor(model => model.isDisabled)：
-               
-                    @Html.DisplayTextFor(model => model.isDisabledB)
-@if (Model.isDisabledB != Model.isDisabled && Model.isDisabled != "")
-{
-    <span style="color:red;">(@Html.DisplayTextFor(model => model.isDisabled))</span>
-}
-                   
-
-                </td>
-
 
             </tr>
 
                 <tr>
                     <td>
-                        @Html.DisplayNameFor(model => model.roleAuthType)：
-                        @Html.DisplayTextFor(model => model.roleAuthTypeDesc)
-                        @Html.Hidden("roleAuthType", Model.roleAuthType)
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+
+                        @Html.DisplayTextFor(model => model.isDisabledB)
+                        @if (Model.isDisabledB != Model.isDisabled && Model.isDisabled != "")
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.isDisabled))</span>
+                        }
+
+
                     </td>
                     <td colspan="2">
                         @Html.DisplayNameFor(model => model.memo)：
@@ -149,7 +149,7 @@
 <script type="text/javascript">
 
     $(function () {
-        
+
         var bView = '@Html.Raw(ViewBag.bView)';
         if (bView == "Y") {
             $("#btnClose").show();
@@ -179,7 +179,7 @@
 
             return;
         }
-        
+
 
 
         switch ($('#roleAuthType').val()) {
@@ -228,6 +228,7 @@
             $('#qryResultFunc').append('<div id="' + "pagerFunc" + '"></div>');
 
             var para = {
+                roleId: $('#roleId').val(),
                 aplyNo: aplyNo
             };
 
@@ -248,7 +249,7 @@
                     { name: 'cFunctionID', align: 'center', hidden: true },
                     { name: 'cFunctionName', align: 'left', width:250},
                     { name: 'execAction', align: 'center', hidden: true }
-                     
+
                 ],
                 autowidth: true,
                 shrinkToFit: false,
@@ -269,6 +270,17 @@
                     var cnt = $('#gridFunc').getGridParam('records')
                     $('#validationSummary').children().remove();
 
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridFunc").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridFunc").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridFunc").jqGrid('setCell', ids[i], "cFunctionName", "", { color: 'red' });
+                        }
+
+                    }
+
+
                 }
 
             });
@@ -287,6 +299,7 @@
             $('#qryResultEquip').append('<div id="' + "pagerEquip" + '"></div>');
 
             var para = {
+                roleId: $('#roleId').val(),
                 aplyNo: aplyNo
             };
 
@@ -309,10 +322,10 @@
 
                     { name: 'custodyModeDescB', align: 'center', width: '80' },
                      { name: 'custodyModeDesc', align: 'center', width: '80' },
-                      
+
                       { name: 'custodyOrderB', align: 'center', width: '80' },
                        { name: 'custodyOrder', align: 'center', width: '80' }
-                        
+
 
                 ],
 
@@ -332,7 +345,21 @@
                 loadComplete: function () {
                     $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
                     $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
-                    
+
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridEquip").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridEquip").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "equipName", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyModeDescB", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyModeDesc", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyOrderB", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyOrder", "", { color: 'red' });
+                        }
+
+                    }
                 }
 
             });
@@ -358,6 +385,7 @@
             $('#qryResultItem').append('<div id="' + "pagerItem" + '"></div>');
 
             var para = {
+                roleId: $('#roleId').val(),
                 aplyNo: aplyNo, authType: '1'
             };
 
@@ -399,7 +427,17 @@
                     $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
                     $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
 
-                    
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridItem").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridItem").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridItem").jqGrid('setCell', ids[i], "itemOpType", "", { color: 'red' });
+                            $("#gridItem").jqGrid('setCell', ids[i], "itemDesc", "", { color: 'red' });
+
+                        }
+
+                    }
                 }
 
             });
@@ -420,6 +458,7 @@
             $('#qryResultFormAply').append('<div id="' + "pagerFormAply" + '"></div>');
 
             var para = {
+                roleId: $('#roleId').val(),
                 aplyNo: aplyNo, authType: '2'
             };
 
@@ -461,7 +500,17 @@
                     $("#gridFormAply").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
                     $("#gridFormAply").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
 
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridFormAply").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "itemOpType", "", { color: 'red' });
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "itemDesc", "", { color: 'red' });
 
+                        }
+
+                    }
                 }
 
             });
@@ -470,7 +519,7 @@
         }
 
 
-        
+
 
         //關閉
         $("#btnClose").click().on('click', function () {

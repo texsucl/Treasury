@@ -280,6 +280,9 @@ namespace Treasury.WebDaos
                                   join roleM in db.CODE_ROLE_HIS on m.APLY_NO equals roleM.APLY_NO into psRoleM
                                   from xRoleM in psRoleM.DefaultIfEmpty()
 
+                                  join cAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on xRoleM.ROLE_AUTH_TYPE equals cAuthType.CODE into psAuthType
+                                  from xAuthType in psCSts.DefaultIfEmpty()
+
                                   where (bReviewType || m.AUTH_APLY_TYPE.Trim() == cReviewType)
                                       & (bReviewFlag || m.APPR_STATUS.Trim() == cReviewFlag)
                                   select new AuthReviewModel
@@ -298,8 +301,8 @@ namespace Treasury.WebDaos
                                                  SqlFunctions.DateName("n", m.CREATE_DT).Trim() + ":" +
                                                  SqlFunctions.DateName("s", m.CREATE_DT).Trim(),
                                       cMappingKey = m.APPR_MAPPING_KEY.Trim() + (xRole == null ? "" : xRole.ROLE_NAME.Trim()),
-                                      cMappingKeyDesc = xRole == null ? (xRoleM == null ? "" : xRoleM.ROLE_NAME.Trim()) : xRole.ROLE_NAME.Trim()
-
+                                      cMappingKeyDesc = xRole == null ? (xRoleM == null ? "" : xRoleM.ROLE_NAME.Trim()) : xRole.ROLE_NAME.Trim(),
+                                      roleAuthType = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim()
                                   }).ToList();
 
             }

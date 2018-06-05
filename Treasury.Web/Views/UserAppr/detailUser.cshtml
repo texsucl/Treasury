@@ -107,7 +107,13 @@
                 <div id="pager"></div>
             </div>
         </div>
-
+            <br>
+            <div class="row">
+                <div id="qryRoleAuth" class="col-sm-24">
+                    <table id="gridRoleAuth"></table>
+                    <div id="pagerRoleAuth"></div>
+                </div>
+            </div>
     </div>
 </div>
 
@@ -117,6 +123,69 @@
 
 
 <script type="text/javascript">
+    //*-----------------------查詢角色所擁有的授權項目  begin-----------------------*//
+    function getRoleAuth(id) {
+        var rowId = id.id;
+        var rowData = $("#grid").jqGrid('getRowData', rowId);
+        jQuery("#grid").setSelection(rowId, true);
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowId);
+
+        $('#qryRoleAuth').children().remove();
+
+        $('#qryRoleAuth').append('<table id="' + "gridRoleAuth" + '"></table>');
+        $('#qryRoleAuth').append('<div id="' + "pagerRoleAuth" + '"></div>');
+
+        var para = {
+            roleAuthType: rowData.roleAuthType,
+            roleId: rowData.roleId
+        };
+
+        $.blockUI(); //畫面鎖起來
+
+        $("#gridRoleAuth").jqGrid({
+            url: '/UserMgr/qryRoleAuth/',
+            postData: para,
+            datatype: 'json',
+            jsonReader: {
+                repeatitems: false, id: 'authId'
+            },
+            mtype: 'POST',
+            //caption: '授權清單',
+            colNames: ['編號', '授權項目'],
+            colModel: [
+
+            { name: 'authId', align: 'left', hidden: true },
+                { name: 'authDesc', align: 'left', width: '300' }
+
+            ],
+            autowidth: true,
+            shrinkToFit: false,
+            forceFit: true,
+            pager: '#pagerRoleAuth',
+            width: 'auto',
+            height: 'auto',
+            rowNum: 10,
+            rowList: [10, 20],
+            sortname: 'authId',
+            sortorder: "acs",
+            viewrecords: true,
+            loadonce: true,
+            loadComplete: function () {
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+            }
+
+        });
+
+        $.unblockUI(); //畫面打開
+
+
+
+    }
+    //*-----------------------查詢角色所擁有的授權項目  end-----------------------*//
+
 
     $(function () {
         var bView = '@Html.Raw(ViewBag.bView)';
@@ -161,6 +230,7 @@
             $('#qryResult').append('<div id="' + "pager" + '"></div>');
 
             var para = {
+                userId: $('#userId').val(),
                 aplyNo: aplyNo
             };
 
@@ -175,13 +245,15 @@
                 },
                 mtype: 'POST',
                 caption: '角色異動清單',
-                colNames: ['執行功能代碼', '執行功能','角色群組','角色編號', '角色名稱'],
+                colNames: ['執行功能代碼', '執行功能', '角色群組', '角色群組', '角色編號', '角色名稱', '授權明細'],
                 colModel: [
                     { name: 'execAction', align: 'center', hidden: true },
                      { name: 'execActionDesc', align: 'center' },
-                     { name: 'roleAuthType', align: 'center', width: 120 },
+                     { name: 'roleAuthType', align: 'center', hidden: true },
+                     { name: 'roleAuthTypeDesc', align: 'center', width: 120 },
                     { name: 'roleId', align: 'center', hidden: true },
-                    { name: 'roleName', align: 'left', width: 250 }
+                    { name: 'roleName', align: 'left', width: 250 },
+                    { name: 'btnRoleAuth', index: 'btnRoleAuth', align: 'center', width: "100", search: false, editable: false, viewable: false, formatter: AuthRoleButton }
                     
                 ],
                 autowidth: true,
@@ -192,7 +264,7 @@
                 height: 'auto',
                 rowNum: 10,
                 rowList: [10, 20],
-                sortname: 'cRoleID',
+                sortname: 'roleId',
                 sortorder: "acs",
                 viewrecords: true,
                 loadonce: true,
@@ -216,12 +288,35 @@
                         //validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
 
                     }
+
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#grid").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#grid").jqGrid('setCell', ids[i], "roleAuthTypeDesc", "", { color: 'red' });
+                            $("#grid").jqGrid('setCell', ids[i], "roleName", "", { color: 'red' });
+                        }
+
+                    }
                 }
 
             });
 
             $.unblockUI(); //畫面打開
         }
+
+        function AuthRoleButton(cellvalue, options, rowObject) {
+            var id = ""+options.rowId;
+            var roleAuthType = rowObject.roleAuthType;
+            var roleId = rowObject.roleId;
+ 
+           // return "<input style='background-color: #FF8800;color:white;' type='button' name='btnItem' value='明細' onclick='getRoleAuth(" + roleAuthType + " , " + roleId + " )'/>";
+
+            return "<input style='background-color: #FF8800;color:white;' type='button' name='btnItem' value='明細' onclick='getRoleAuth(" + id + ")'/>";
+
+        }
+
 
         //關閉
         $("#btnClose").click().on('click', function () {

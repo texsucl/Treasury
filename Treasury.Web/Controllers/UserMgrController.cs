@@ -77,6 +77,10 @@ namespace Treasury.WebControllers
             var isMailList = sysCodeDao.loadSelectList("YN_FLAG");
             ViewBag.isMailList = isMailList;
 
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
+
             //角色名稱
             CodeRoleDao codeRoleDao = new CodeRoleDao();
             var CodeRoleList = codeRoleDao.loadSelectList();
@@ -86,6 +90,8 @@ namespace Treasury.WebControllers
             CodeUserDao codeUserDao = new CodeUserDao();
             var CodeUserList = codeUserDao.loadSelectList();
             ViewBag.CodeUserList = CodeUserList;
+
+            
 
             return View();
 
@@ -124,6 +130,10 @@ namespace Treasury.WebControllers
             //是否寄送MAIL
             var isMailList = sysCodeDao.loadSelectList("YN_FLAG");
             ViewBag.isMailList = isMailList;
+
+            //角色群組
+            var roleAuthTypeList = sysCodeDao.loadSelectList("ROLE_AUTH_TYPE");
+            ViewBag.roleAuthTypeList = roleAuthTypeList;
 
             //角色名稱
             CodeRoleDao codeRoleDao = new CodeRoleDao();
@@ -816,7 +826,83 @@ namespace Treasury.WebControllers
         }
 
 
+
+        [HttpPost]
+        public ActionResult qryRoleAuth(string roleAuthType, string roleId)
+        {
+            List<authItem> rows = new List<authItem>();
+
+
+            switch (roleAuthType) {
+                case "F":
+                    List<RoleFuncHisModel> rowsF = new List<RoleFuncHisModel>();
+                    CodeRoleFunctionDao codeRoleFuncDao = new CodeRoleFunctionDao();
+                    rowsF = codeRoleFuncDao.qryForAppr(roleId);
+
+                    foreach (RoleFuncHisModel d in rowsF) {
+                        authItem authItem = new authItem();
+                        authItem.authId = d.cFunctionID;
+                        authItem.authDesc = StringUtil.toString(d.cFunctionName);
+                        rows.Add(authItem);
+                    }
+                    break;
+                    //var jsonDataF = new { success = true, rows = rowsF };
+                    //return Json(jsonDataF, JsonRequestBehavior.AllowGet);
+
+                case "E":
+                    List<CodeRoleEquipModel> rowsE = new List<CodeRoleEquipModel>();
+
+                    CodeRoleTreaItemDao codeRoleTreaItemDao = new CodeRoleTreaItemDao();
+                    rowsE = codeRoleTreaItemDao.qryForRoleMgr(roleId);
+
+                    foreach (CodeRoleEquipModel d in rowsE)
+                    {
+                        authItem authItem = new authItem();
+                        authItem.authId = d.treaEquipId;
+                        authItem.authDesc = StringUtil.toString(d.equipName) + "；" + StringUtil.toString(d.controlModeDesc)
+                             + "；" + StringUtil.toString(d.custodyModeDesc) + "；" + StringUtil.toString(d.custodyOrder);
+                        rows.Add(authItem);
+                    }
+
+                    break;
+                    //var jsonDataE = new { success = true, rows = rowsE };
+                    //return Json(jsonDataE, JsonRequestBehavior.AllowGet);
+
+                case "I":
+                case "A":
+                    List<CodeRoleItemModel> rowsI = new List<CodeRoleItemModel>();
+                    CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
+                    rowsI = codeRoleItemDao.qryForAppr(roleId, roleAuthType == "I" ? "1" : "2");
+
+                    foreach (CodeRoleItemModel d in rowsI)
+                    {
+                        authItem authItem = new authItem();
+                        authItem.authId = d.itemId;
+                        authItem.authDesc = StringUtil.toString(d.itemDesc);
+                        rows.Add(authItem);
+                    }
+                    break;
+
+                    //var jsonDataI = new { success = true, rows = rowsI };
+                    //return Json(jsonDataI, JsonRequestBehavior.AllowGet);
+
+
+            }
+
+
+            var jsonData = new { success = true, rows };
+            return Json(jsonData, JsonRequestBehavior.AllowGet);
+
+
+            return Json(new { success = false, err = "其它錯誤，請洽系統管理員!!" });
+        }
+
+
+        }
+
+    internal class authItem
+    {
+        public string authId { get; set; }
+        public string authDesc { get; set; }
     }
-
-
 }

@@ -39,6 +39,9 @@ namespace Treasury.WebViewModels
         [Display(Name = "覆核意見")]
         public String cReviewMemo { get; set; }
 
+        [Display(Name = "角色群組")]
+        public String roleAuthType { get; set; }
+
         [Display(Name = "異動資料內容")]
         public String cMappingKey { get; set; }
 

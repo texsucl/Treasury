@@ -109,7 +109,8 @@ namespace Treasury.WebDaos
                                                         aplyNo = main.APLY_NO,
                                                         roleId = main.ROLE_ID,
                                                         roleName = role.ROLE_NAME.Trim(),
-                                                        roleAuthType = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim(),
+                                                        roleAuthType = role.ROLE_AUTH_TYPE,
+                                                        roleAuthTypeDesc = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim(),
                                                         execAction = main.EXEC_ACTION.Trim(),
                                                         execActionDesc = xType == null ? "" : xType.CODE_VALUE.Trim()
                                                     }).OrderBy(x => x.aplyNo).ThenBy(x => x.roleId).ToList();

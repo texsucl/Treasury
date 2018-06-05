@@ -58,7 +58,11 @@ namespace Treasury.WebViewModels
 
         public string cUpdDateE { get; set; }
 
-        [Display(Name = "角色")]
+        [Display(Name = "角色群組")]
+        public string roleAuthType { get; set; }
+        public string roleAuthTypeDesc { get; set; }
+
+        [Display(Name = "角色名稱")]
         public string codeRole { get; set; }
 
         [Display(Name = "覆核狀態")]
@@ -114,6 +118,8 @@ namespace Treasury.WebViewModels
             frezzeDt = "";
             dataStatus = "";
             dataStatusDesc = "";
+            roleAuthType = "";
+            roleAuthTypeDesc = "";
             roleName = "";
             apprtatus = "";
         }

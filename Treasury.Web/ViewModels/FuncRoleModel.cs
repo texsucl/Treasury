@@ -27,5 +27,8 @@ namespace Treasury.WebViewModels
 
         public string execAction { get; set; }
 
+        public string roleAuthType { get; set; }
+
+
     }
 }

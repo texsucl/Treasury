@@ -142,6 +142,38 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.ReportViewer.Common">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.DataVisualization">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.DataVisualization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Design">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Design.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebDesign">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebDesign.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WinForms">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MvcSiteMapProvider, Version=4.6.22.0, Culture=neutral, PublicKeyToken=1923abe4657913cc, processorArchitecture=MSIL">
       <HintPath>..\packages\MvcSiteMapProvider.MVC5.Core.4.6.22\lib\net45\MvcSiteMapProvider.dll</HintPath>
       <Private>True</Private>
@@ -293,6 +325,9 @@
     <Compile Include="BO\UserFunc.cs" />
     <Compile Include="BO\Utility.cs" />
     <Compile Include="BO\ValidateUtil.cs" />
+    <Compile Include="Controllers\CommonController.cs" />
+    <Compile Include="Controllers\BILLController.cs" />
+    <Compile Include="Controllers\TreasuryAccessController.cs" />
     <Compile Include="Controllers\UserApprController.cs" />
     <Compile Include="Controllers\RoleApprController.cs" />
     <Compile Include="Controllers\AuthReviewController.cs" />
@@ -329,6 +364,7 @@
     <Compile Include="Daos\TreaEquipDao.cs" />
     <Compile Include="Daos\UnitInfoDao.cs" />
     <Compile Include="Daos\UserAuthDao.cs" />
+    <Compile Include="Enum\Nlog.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -507,6 +543,7 @@
     <Compile Include="Models\SYS_SEQ.cs">
       <DependentUpon>dbTreasury.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\TreasuryDBEntities.cs" />
     <Compile Include="Models\TREA_APLY_REC.cs">
       <DependentUpon>dbTreasury.tt</DependentUpon>
     </Compile>
@@ -543,11 +580,23 @@
     <Compile Include="Scheduler\JobScheduler.cs" />
     <Compile Include="Scheduler\SrcOprUnitJob.cs" />
     <Compile Include="Scheduler\UserMaintainUnitJob.cs" />
+    <Compile Include="Service\Actual\TreasuryAccess.cs" />
+    <Compile Include="Service\Interface\ITreasuryAccess.cs" />
+    <Compile Include="SqlServerTypes\Loader.cs" />
+    <Compile Include="Utility\CacheList.cs" />
+    <Compile Include="Utility\Extension.cs" />
+    <Compile Include="Utility\Jqgrid.cs" />
+    <Compile Include="Utility\jqGridParam.cs" />
+    <Compile Include="Utility\MSGReturnModel.cs" />
+    <Compile Include="Utility\Report.cs" />
+    <Compile Include="Utility\TypeTransfer.cs" />
+    <Compile Include="Utility\Utility.cs" />
     <Compile Include="ViewModels\AuthReviewModel.cs" />
     <Compile Include="ViewModels\AuthReviewQryModel.cs" />
     <Compile Include="ViewModels\AuthReviewRoleModel.cs" />
     <Compile Include="ViewModels\AuthReviewUserModel.cs" />
     <Compile Include="ViewModels\AuthRptModel.cs" />
+    <Compile Include="ViewModels\BillViewModel.cs" />
     <Compile Include="ViewModels\CodeRoleModel.cs" />
     <Compile Include="ViewModels\CodeRoleItemModel.cs" />
     <Compile Include="ViewModels\CodeRoleEquipModel.cs" />
@@ -580,6 +629,7 @@
     <Content Include="Content\bootstrap-treeview.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\customerUtility.css" />
     <Content Include="Content\dataTables.bootstrap.css" />
     <Content Include="Content\datepicker.css" />
     <Content Include="Content\font-awesome.css" />
@@ -749,6 +799,7 @@
     <Content Include="Content\themes\start\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\start\minified\jquery.ui.theme.min.css" />
     <Content Include="Content\themes\start\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="Content\toastr.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -805,6 +856,8 @@
     <Content Include="Scripts\bootstrap-treeview.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\customerUtility.js" />
+    <Content Include="Scripts\customJqgrid.js" />
     <Content Include="Scripts\dataTables.bootstrap.js" />
     <Content Include="Scripts\datepicker.js" />
     <Content Include="fonts\FUBONLIFEKAIU.TTF" />
@@ -844,6 +897,7 @@
     </None>
     <Content Include="quartz_jobs.config" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
+    <Content Include="Scripts\i18n\datepicker-zh-TW.js" />
     <Content Include="Scripts\i18n\grid.locale-ar.js" />
     <Content Include="Scripts\i18n\grid.locale-bg.js" />
     <Content Include="Scripts\i18n\grid.locale-bg1251.js" />
@@ -906,6 +960,8 @@
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\message.js" />
+    <Content Include="Scripts\toastr.js" />
     <Content Include="Scripts\treasury.js" />
     <Content Include="Scripts\locales\datepicker.en.js" />
     <Content Include="Scripts\locales\datepicker.zh-TW.js" />
@@ -918,6 +974,20 @@
     <Content Include="Scripts\npm.js" />
     <Content Include="Scripts\respond.js" />
     <None Include="Scripts\_references.js" />
+    <Content Include="Scripts\verification.js" />
+    <Content Include="SqlServerTypes\readme.htm" />
+    <Content Include="SqlServerTypes\x64\msvcr120.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x64\SqlServerSpatial140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x86\msvcr120.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x86\SqlServerSpatial140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Template\MqOut.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -971,10 +1041,11 @@
     <Content Include="Views\UserAppr\Index.cshtml" />
     <Content Include="Views\UserAppr\detailUser.cshtml" />
     <Content Include="Views\UserMgr\userHis.cshtml" />
+    <Content Include="Views\TreasuryAccess\Index.cshtml" />
+    <Content Include="Views\BILL\InsertView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Enum\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

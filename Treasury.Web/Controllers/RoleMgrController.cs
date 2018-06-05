@@ -276,10 +276,17 @@ namespace Treasury.WebControllers
             bool bChgFormAply = false;
             bool bNewRole = false;
 
-            //比對是否有異動"角色資訊"
+            
             CodeRoleDao codeRoleDao = new CodeRoleDao();
             CODE_ROLE codeRoleO = new CODE_ROLE();
-            
+
+            bool bDupRoleName = codeRoleDao.dupRoleName(StringUtil.toString(roleMgrModel.cRoleID), 
+                StringUtil.toString(roleMgrModel.roleAuthType), StringUtil.toString(roleMgrModel.cRoleName));
+            if(bDupRoleName)
+                return Json(new { success = false, errors = "相同角色群組下,不能建置相同的角色名稱!!" }, JsonRequestBehavior.AllowGet);
+
+
+            //比對是否有異動"角色資訊"
             if ("".Equals(roleId))
             {
                 bNewRole = true;
@@ -1108,8 +1115,9 @@ namespace Treasury.WebControllers
                 {
                     Dictionary<string, string> userNameMap = new Dictionary<string, string>();
                     OaEmpDao oaEmpDao = new OaEmpDao();
-                    string createUid = "";
+                    string apprUid = "";
                     string userId = "";
+
 
                     //處理角色資訊人員&代碼
                     if (roleHisList != null)
@@ -1131,6 +1139,16 @@ namespace Treasury.WebControllers
                                     userNameMap = oaEmpDao.qryUsrName(userNameMap, userId, dbIntra);
                                 }
                                 role.updateUid = userNameMap[userId];
+                            }
+
+                            apprUid = StringUtil.toString(role.apprUid);
+                            if (!"".Equals(apprUid))
+                            {
+                                if (!userNameMap.ContainsKey(apprUid))
+                                {
+                                    userNameMap = oaEmpDao.qryUsrName(userNameMap, apprUid, dbIntra);
+                                }
+                                role.apprUid = userNameMap[apprUid];
                             }
                         }
 
@@ -1155,6 +1173,16 @@ namespace Treasury.WebControllers
                                 }
                                 d.updateUid = userNameMap[userId];
                             }
+
+                            apprUid = StringUtil.toString(d.apprUid);
+                            if (!"".Equals(apprUid))
+                            {
+                                if (!userNameMap.ContainsKey(apprUid))
+                                {
+                                    userNameMap = oaEmpDao.qryUsrName(userNameMap, apprUid, dbIntra);
+                                }
+                                d.apprUid = userNameMap[apprUid];
+                            }
                         }
                     }
 
@@ -1177,6 +1205,16 @@ namespace Treasury.WebControllers
                                 }
                                 d.updateUid = userNameMap[userId];
                             }
+
+                            apprUid = StringUtil.toString(d.apprUid);
+                            if (!"".Equals(apprUid))
+                            {
+                                if (!userNameMap.ContainsKey(apprUid))
+                                {
+                                    userNameMap = oaEmpDao.qryUsrName(userNameMap, apprUid, dbIntra);
+                                }
+                                d.apprUid = userNameMap[apprUid];
+                            }
                         }
                     }
 
@@ -1198,6 +1236,16 @@ namespace Treasury.WebControllers
                                     userNameMap = oaEmpDao.qryUsrName(userNameMap, userId, dbIntra);
                                 }
                                 d.updateUid = userNameMap[userId];
+                            }
+
+                            apprUid = StringUtil.toString(d.apprUid);
+                            if (!"".Equals(apprUid))
+                            {
+                                if (!userNameMap.ContainsKey(apprUid))
+                                {
+                                    userNameMap = oaEmpDao.qryUsrName(userNameMap, apprUid, dbIntra);
+                                }
+                                d.apprUid = userNameMap[apprUid];
                             }
                         }
 

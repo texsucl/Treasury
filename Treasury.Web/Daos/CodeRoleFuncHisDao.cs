@@ -58,6 +58,7 @@ namespace Treasury.WebDaos
                                select new RoleFuncHisModel
                                {
                                    aplyNo = m.APLY_NO.Trim(),
+                                   apprUid = xAppr.APPR_UID,
                                    apprStatus = xAppr.APPR_STATUS.Trim(),
                                    updateDT = SqlFunctions.DateName("year", xAppr.CREATE_DT) + "/" +
                                                             SqlFunctions.DatePart("m", xAppr.CREATE_DT) + "/" +

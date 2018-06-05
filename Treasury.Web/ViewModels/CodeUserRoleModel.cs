@@ -17,6 +17,8 @@ namespace Treasury.WebViewModels
 
         public String roleAuthType { get; set; }
 
+        public String roleAuthTypeDesc { get; set; }
+
         public String createUid { get; set; }
 
         public String createDt { get; set; }
@@ -32,6 +34,7 @@ namespace Treasury.WebViewModels
             roleId = "";
             roleName = "";
             roleAuthType = "";
+            roleAuthTypeDesc = "";
             createUid = "";
             createDt = "";
             execAction = "";

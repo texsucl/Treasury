@@ -15,14 +15,17 @@ namespace Treasury.Web
 
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js",
+                        "~/Scripts/message.js",
                         "~/Scripts/lodash.js",
                         "~/Scripts/moment.js",
                         "~/Scripts/moment-with-locales.js",
-                        "~/Scripts/jquery.blockUI.js",
-                        
+                        "~/Scripts/jquery.blockUI.js",                       
                         "~/Scripts/jquery.validate.min.js",
                         "~/Scripts/jquery.validate.js",
-                        "~/Scripts/jquery.unobtrusive-ajax.js"
+                        "~/Scripts/jquery.unobtrusive-ajax.js",
+                        "~/Scripts/datepicker.js",
+                        "~/Scripts/locales/datepicker.en.js",
+                        "~/Scripts/locales/datepicker.zh-TW.js"
                         ));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
@@ -50,10 +53,7 @@ namespace Treasury.Web
                       "~/Scripts/fubon.js",
                       "~/Scripts/jquery.dataTables.js",
                       "~/Scripts/dataTables.bootstrap.js",
-                      "~/Scripts/respond.js",
-                      "~/Scripts/datepicker.js",
-                      "~/Scripts/locales/datepicker.en.js",
-                      "~/Scripts/locales/datepicker.zh-TW.js"));
+                      "~/Scripts/respond.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/locales").Include(
                       "~/Scripts/locale/lang-" + "".CultureName() + ".js"));
@@ -61,18 +61,27 @@ namespace Treasury.Web
             bundles.Add(new ScriptBundle("~/bundles/treasury").Include(
                         "~/Scripts/treasury.js"));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include(
+            bundles.Add(new ScriptBundle("~/bundles/Customer").Include(
+                            "~/Scripts/i18n/datepicker-zh-TW.js",
+                            "~/Scripts/customerUtility.js",
+                            "~/Scripts/customJqgrid.js",
+                            "~/Scripts/toastr.js",
+                            "~/Scripts/verification.js"));
+
+            bundles.Add(new StyleBundle("~/Content/css").Include( 
+                      "~/Content/jquery.jqGrid/ui.jqgrid.css",
+                      "~/Content/datepicker.css",
+                      "~/Content/dataTables.bootstrap.css",
+                      themeFolder + "/jquery.ui.theme.css",
+                      themeFolder + "/minified/jquery-ui.min.css",
                       "~/Content/bootstrap.css",
                       "~/Content/bootstrap-dialog.css",
                       "~/Content/bootstrap-treeview.css",
-                      "~/Content/font-awesome.css",
-                      "~/Content/dataTables.bootstrap.css",
-                      "~/Content/datepicker.css",
                       "~/Content/fubon.css",
                       "~/Content/site.css",
-                      "~/Content/jquery.jqGrid/ui.jqgrid.css",
-                      themeFolder + "/jquery.ui.theme.css",
-                      themeFolder + "/minified/jquery-ui.min.css"));
+                      "~/Content/font-awesome.css",
+                      "~/Content/toastr.css",
+                      "~/Content/customerUtility.css"));
         }
     }
 }

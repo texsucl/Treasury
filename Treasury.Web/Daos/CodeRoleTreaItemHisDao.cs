@@ -70,6 +70,7 @@ namespace Treasury.WebDaos
                                     select new CodeRoleEquipModel
                                     {
                                         aplyNo = m.APLY_NO.Trim(),
+                                        apprUid = xAppr.APPR_UID.Trim(),
                                         apprStatus = xAppr.APPR_STATUS.Trim(),
                                         updateDT = SqlFunctions.DateName("year", xAppr.CREATE_DT) + "/" +
                                                                  SqlFunctions.DatePart("m", xAppr.CREATE_DT) + "/" +

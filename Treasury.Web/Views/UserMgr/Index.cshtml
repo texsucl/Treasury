@@ -9,6 +9,7 @@
     var CodeRoleList = ViewBag.CodeRoleList as SelectList;
     var isMailList = ViewBag.isMailList as SelectList;
     var CodeUserList = ViewBag.CodeUserList as SelectList;
+    var roleAuthTypeList = ViewBag.roleAuthTypeList as SelectList;
 }
 
 
@@ -27,35 +28,42 @@
                     <tr>
 
                         <td>
-                            @Html.DisplayNameFor(model => model.cUserID)：@Html.TextBoxFor(model => model.cUserID, new { @maxlength = "5" })
-                        </td>
-
-                        <td>
-                            @Html.DisplayNameFor(model => model.cUserName)：@Html.TextBoxFor(model => model.cUserName, new { @maxlength = "12" })
-                        </td>
-
+                            @Html.DisplayNameFor(model => model.cUserID)：　@Html.DropDownList("cUserID", CodeUserList, "請選擇")
                        
-                    </tr>
+                        </td>
 
-
-                    <tr>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.cUserName)：@Html.TextBoxFor(model => model.cUserName, new { @maxlength = "12" })
+                        </td>*@
 
                         <td>
                             @Html.DisplayNameFor(model => model.isDisabled)：@Html.DropDownList("isDisabled", isDisabledList, "請選擇")
                         </td>
-                        <td >
-                            @Html.DisplayNameFor(model => model.codeRole)：　　　@Html.DropDownList("codeRole", CodeRoleList, "請選擇")
-                        </td>
+
                         <td>
                             @Html.DisplayNameFor(model => model.isMail)：　　　@Html.DropDownList("isMail", isMailList, "請選擇")
                         </td>
+
+                        
+                    </tr>
+
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.roleAuthType)：@Html.DropDownList("roleAuthType", roleAuthTypeList, "請選擇")
+                        </td>
+                       
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.codeRole)：　　　@Html.DropDownList("codeRole", CodeRoleList, "請選擇")
+                        </td>
+                       
                     </tr>
 
                     <tr>
                         <td>
                             @Html.DisplayNameFor(model => model.cUpdUserID)：　@Html.DropDownList("cUpdUserID", CodeUserList, "請選擇")
                         </td>
-                        <td colspan="3">
+                        <td colspan="2">
                             @Html.DisplayNameFor(model => model.cUpdDate)：
                             <input id="updDateB" name="updDateB" type="text">
                             ~
@@ -169,8 +177,8 @@
         //查詢
         $("#btnQry").click().on('click', function () {
 
-            $('#cUserID').val($('#cUserID').val().toUpperCase());
-            $('#cUserName').val(halfToFull($('#cUserName').val().toUpperCase()));
+            //$('#cUserID').val($('#cUserID').val().toUpperCase());
+            //$('#cUserName').val(halfToFull($('#cUserName').val().toUpperCase()));
 
 
             createGrid();
@@ -193,6 +201,7 @@
                     'cUserName': $('#cUserName').val(),
                     'isDisabled': $('#isDisabled').val(),
                     'isMail': $('#isMail').val(),
+                    'roleAuthType': $('#roleAuthType').val(),
                     'codeRole': $('#codeRole').val(),
                     'cUpdUserID': $('#cUpdUserID').val(),
                     'cUpdDateB': $('#updDateB').val(),

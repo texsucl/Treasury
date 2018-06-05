@@ -119,6 +119,13 @@
             
             <br>
 
+            <div class="row">
+                <div id="qryRoleAuth" class="col-sm-24">
+                    <table id="gridRoleAuth"></table>
+                    <div id="pagerRoleAuth"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -197,6 +204,8 @@
 
     //jqgrid中的刪除
     function TheOnDelFunction(rowid) {
+        $('#qryRoleAuth').children().remove();
+
         $("#grid").jqGrid('delRowData', rowid);
         jQuery("#grid").trigger("reloadGrid");
 
@@ -240,6 +249,8 @@
 
     //jqgrid中的儲存
     function TheOnSaveFunction(rowid) {
+        $('#qryRoleAuth').children().remove();
+
         jQuery("#grid").saveRow(rowid, false);
         if ($("#valueErr").val() == "Y") {
         } else {
@@ -252,6 +263,8 @@
 
     //jqgrid中的取消
     function TheOnCancelFunction(rowid) {
+        $('#qryRoleAuth').children().remove();
+
         jQuery("#grid").restoreRow(rowid);
 
 
@@ -296,7 +309,7 @@
     }
 
     //取得角色群組下拉選單
-    function getRoleAuthRole() {
+    function getRoleAuthType() {
         return $('#hidRoleAuthType').val();
 
     }
@@ -347,8 +360,11 @@
 
                         $("select#" + sel + "_roleId").html(roleIdStr);
 
-                        if (roleId != '')
+                        if (roleId != '') {
                             $("#" + sel + "_roleId").val(roleId);
+                            
+                        }
+                        getRoleAuth(roleAuthType, $("#" + sel + "_roleId").val());
                     }
 
                     
@@ -364,6 +380,63 @@
 
     }
 
+    //*-----------------------查詢角色所擁有的授權項目  begin-----------------------*//
+    function getRoleAuth(roleAuthType, roleId) {
+        $('#qryRoleAuth').children().remove();
+
+        $('#qryRoleAuth').append('<table id="' + "gridRoleAuth" + '"></table>');
+        $('#qryRoleAuth').append('<div id="' + "pagerRoleAuth" + '"></div>');
+
+        var para = {
+            roleAuthType: roleAuthType,
+            roleId: roleId
+        };
+
+        $.blockUI(); //畫面鎖起來
+
+        $("#gridRoleAuth").jqGrid({
+            url: '/UserMgr/qryRoleAuth/',
+            postData: para,
+            datatype: 'json',
+            jsonReader: {
+                repeatitems: false, id: 'authId'
+            },
+            mtype: 'POST',
+            //caption: '授權清單',
+            colNames: ['編號','授權項目'],
+            colModel: [
+                
+            { name: 'authId', align: 'left', hidden: true },
+                { name: 'authDesc', align: 'left', width: '300' }
+
+            ],
+            autowidth: true,
+            shrinkToFit: false,
+            forceFit: true,
+            pager: '#pagerRoleAuth',
+            width: 'auto',
+            height: 'auto',
+            rowNum: 10,
+            rowList: [10, 20],
+            sortname: 'authId',
+            sortorder: "acs",
+            viewrecords: true,
+            loadonce: true,
+            loadComplete: function () {
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+            }
+
+        });
+
+        $.unblockUI(); //畫面打開
+
+
+
+    }
+    //*-----------------------查詢角色所擁有的授權項目  end-----------------------*//
 
     $(function () {
 
@@ -596,7 +669,7 @@
                     edittype: "select",
                     formatter: 'select',
                     editoptions: {
-                        value: getRoleAuthRole(),
+                        value: getRoleAuthType(),
                         dataEvents: [{
                             type: 'change', fn: function (e) {
 
@@ -618,7 +691,18 @@
                     edittype: "select",
                     formatter: 'select',
                     editoptions: {
-                        value: getRoleIdList()
+                        value: getRoleIdList(),
+                         dataEvents: [{
+                                type: 'change', fn: function (e) {
+
+                                    this.value = this.value.toUpperCase();
+                                    var sel = jQuery("#grid").getGridParam('selrow');
+
+                                    getRoleAuth($("#" + sel + "_roleAuthType").val(), this.value);
+
+
+                                }
+                            }]
                     },
                     editrules: { required: true }
 

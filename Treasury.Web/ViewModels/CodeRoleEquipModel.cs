@@ -9,6 +9,8 @@ namespace Treasury.Web.ViewModels
     {
         public string roleId { get; set; }
 
+        public string roleName { get; set; }
+
         public string treaEquipId { get; set; }
 
         public string equipName { get; set; }
@@ -40,6 +42,8 @@ namespace Treasury.Web.ViewModels
         public string updateDT { get; set; }
 
         public string updateUid { get; set; }
+
+        public string apprUid { get; set; }
 
         public string apprStatus { get; set; }
 

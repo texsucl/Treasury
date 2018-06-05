@@ -38,11 +38,18 @@ namespace Treasury.Web.Daos
                             join role in db.CODE_ROLE on user.ROLE_ID equals role.ROLE_ID
                             where user.USER_ID == userId.Trim()
 
+                            join cAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on role.ROLE_AUTH_TYPE equals cAuthType.CODE into psAuthType
+                            from xAuthType in psAuthType.DefaultIfEmpty()
+
                             select new CodeUserRoleModel()
                             {
-                                
+                                aplyNo = "",
                                 roleId = user.ROLE_ID.Trim(),
-                                roleAuthType = role.ROLE_AUTH_TYPE.Trim(),
+                                roleName = role.ROLE_NAME.Trim(),
+                                roleAuthType = role.ROLE_AUTH_TYPE,
+                                roleAuthTypeDesc = xAuthType == null ? "" : xAuthType.CODE_VALUE.Trim(),
+                                execAction = "",
+                                execActionDesc = "",
                                 createUid = user.CREATE_UID.Trim(),
                                 createDt = user.CREATE_DT == null ? "" : SqlFunctions.DateName("year", user.CREATE_DT) + "/" +
                                                                          SqlFunctions.DatePart("m", user.CREATE_DT) + "/" +

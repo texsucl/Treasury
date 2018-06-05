@@ -15,6 +15,8 @@ namespace Treasury.WebViewModels
 
         public string updateUid { get; set; }
 
+        public string apprUid { get; set; }
+
         public string apprStatus { get; set; }
 
         public string apprStatusDesc { get; set; }

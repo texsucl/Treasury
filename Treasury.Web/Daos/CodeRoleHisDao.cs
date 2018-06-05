@@ -71,6 +71,7 @@ namespace Treasury.WebDaos
                                    isDisabledB = m.IS_DISABLED_B.Trim(),
                                    memo = m.MEMO.Trim(),
                                    memoB = m.MEMO_B.Trim(),
+                                   apprUid = xAppr.APPR_UID,
                                    apprStatus = xAppr.APPR_STATUS.Trim()
 
                                }).ToList<CodeRoleModel>();
@@ -136,6 +137,7 @@ namespace Treasury.WebDaos
                    ([APLY_NO]
                    ,[ROLE_ID]
                    ,[ROLE_NAME]
+                   ,[ROLE_AUTH_TYPE]
                    ,[IS_DISABLED]
                    ,[MEMO]
                    ,[ROLE_NAME_B]
@@ -146,6 +148,7 @@ namespace Treasury.WebDaos
                    (@APLY_NO
                    ,@ROLE_ID
                    ,@ROLE_NAME
+                   ,@ROLE_AUTH_TYPE
                    ,@IS_DISABLED
                    ,@MEMO
                    ,@ROLE_NAME_B
@@ -164,6 +167,7 @@ namespace Treasury.WebDaos
                 cmd.Parameters.AddWithValue("@APLY_NO", StringUtil.toString(codeRoleHis.APLY_NO));
                 cmd.Parameters.AddWithValue("@ROLE_ID", StringUtil.toString(codeRoleHis.ROLE_ID));
                 cmd.Parameters.AddWithValue("@ROLE_NAME", StringUtil.toString(codeRoleHis.ROLE_NAME));
+                cmd.Parameters.AddWithValue("@ROLE_AUTH_TYPE", StringUtil.toString(codeRoleHis.ROLE_AUTH_TYPE));
                 cmd.Parameters.AddWithValue("@IS_DISABLED", StringUtil.toString(codeRoleHis.IS_DISABLED));
                 cmd.Parameters.AddWithValue("@MEMO", StringUtil.toString(codeRoleHis.MEMO));
                 cmd.Parameters.AddWithValue("@ROLE_NAME_B", StringUtil.toString(codeRoleHis.ROLE_NAME_B));

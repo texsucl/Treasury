@@ -293,16 +293,19 @@ namespace Treasury.WebControllers
         /// <param name="aplyNo"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult qryUserRoleHis(String aplyNo)
+        public JsonResult qryUserRoleHis(string userId, string aplyNo)
         {
             CodeUserRoleHisDao codeUserRoleHisDao = new CodeUserRoleHisDao();
 
             try
             {
                 List<CodeUserRoleModel> rows = new List<CodeUserRoleModel>();
-
                 rows = codeUserRoleHisDao.qryByAplyNo(aplyNo);
 
+                if (rows.Count == 0) {
+                    CodeUserRoleDao codeUserRoleDao = new CodeUserRoleDao();
+                    rows = codeUserRoleDao.qryByUserID(userId);
+                }
 
 
                 var jsonData = new { success = true, rows };

@@ -100,6 +100,7 @@ namespace Treasury.Web.Daos
                         select new UserMgrModel()
                         {
                             cUserID = u.USER_ID.Trim(),
+                            roleAuthType = r.ROLE_AUTH_TYPE.Trim(),
                             roleName = r.ROLE_NAME.Trim()
                         }).Distinct()
                         .ToList<UserMgrModel>();
@@ -251,6 +252,7 @@ INSERT INTO [dbo].[CODE_USER]
             bool bisMail = StringUtil.isEmpty(userMgrModel.isMail);
             //bool bcBelongUnitCode = StringUtil.isEmpty(userMgrModel.cBelongUnitCode);
             //bool bcBelongUnitSeq = StringUtil.isEmpty(userMgrModel.cBelongUnitSeq);
+            bool broleAuthType = StringUtil.isEmpty(userMgrModel.roleAuthType);
             bool bcodeRole = StringUtil.isEmpty(userMgrModel.codeRole);
             bool bcUpdUserID = StringUtil.isEmpty(userMgrModel.cUpdUserID);
             bool bcUpdDateB = StringUtil.isEmpty(userMgrModel.cUpdDateB);
@@ -287,7 +289,10 @@ INSERT INTO [dbo].[CODE_USER]
                         join codeMail in db.SYS_CODE.Where(x => x.CODE_TYPE == "YN_FLAG") on user.IS_DISABLED equals codeMail.CODE into psMail
                         from xMail in psMail.DefaultIfEmpty()
 
-                        join role in db.CODE_USER_ROLE on user.USER_ID equals role.USER_ID into psRole
+                        join userRole in db.CODE_USER_ROLE on user.USER_ID equals userRole.USER_ID into psUserRole
+                        from xUserRole in psUserRole.DefaultIfEmpty()
+
+                        join role in db.CODE_ROLE on xUserRole.ROLE_ID equals role.ROLE_ID into psRole
                         from xRole in psRole.DefaultIfEmpty()
 
                         join codeStatus in db.SYS_CODE.Where(x => x.CODE_TYPE == "DATA_STATUS") on user.DATA_STATUS equals codeStatus.CODE into psStatus
@@ -297,7 +302,8 @@ INSERT INTO [dbo].[CODE_USER]
                             & (bcUserID || (user.USER_ID == userMgrModel.cUserID.Trim()))
                             & (bisDisabled || (user.IS_DISABLED == userMgrModel.isDisabled.Trim()))
                             & (bisMail || (user.IS_MAIL == userMgrModel.isMail.Trim()))
-                            & (bcodeRole || (xRole.ROLE_ID == userMgrModel.codeRole.Trim()))
+                            & (broleAuthType || (xRole.ROLE_AUTH_TYPE == userMgrModel.roleAuthType.Trim()))
+                            & (bcodeRole || (xUserRole.ROLE_ID == userMgrModel.codeRole.Trim()))
                             & (bcUpdUserID || (user.LAST_UPDATE_UID == userMgrModel.cUpdUserID.Trim()))
                             & (bcUpdDateB || user.LAST_UPDATE_DT >= sB)
                             & (bcUpdDateE || user.LAST_UPDATE_DT <= sE)

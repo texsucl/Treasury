@@ -7250,6 +7250,7 @@ function Datepicker() {
 		yearSuffix: "" // Additional text to append to the year in the month headers
 	};
 	this._defaults = { // Global defaults for all the date picker instances
+	    language: 'zh-TW',
 		showOn: "focus", // "focus" for popup on focus,
 			// "button" for trigger button, or "both" for either
 		showAnim: "fadeIn", // Name of jQuery animation for popup

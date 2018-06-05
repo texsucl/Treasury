@@ -15,6 +15,41 @@ namespace Treasury.WebDaos
 {
     public class CodeRoleFunctionDao
     {
+
+        /// <summary>
+        /// 依角色查詢
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public List<RoleFuncHisModel> qryForAppr(string roleId)
+        {
+            using (new TransactionScope(
+                   TransactionScopeOption.Required,
+                   new TransactionOptions
+                   {
+                       IsolationLevel = System.Transactions.IsolationLevel.ReadUncommitted
+                   }))
+            {
+                using (dbTreasuryEntities db = new dbTreasuryEntities())
+                {
+                    List<RoleFuncHisModel> rows = (from main in db.CODE_ROLE_FUNC
+                                                   join func in db.CODE_FUNC on main.FUNC_ID equals func.FUNC_ID
+                                                   where main.ROLE_ID == roleId
+                                                   select new RoleFuncHisModel
+                                                   {
+                                                       aplyNo = "",
+                                                       cFunctionID = main.FUNC_ID.Trim(),
+                                                       cFunctionName = func.FUNC_NAME.Trim(),
+                                                       execAction = "",
+                                                       execActionDesc = ""
+                                                   }).ToList();
+
+                    return rows;
+                }
+            }
+        }
+
+
         //角色管理-查詢存取項目權限
         public List<FuncRoleModel> qryForRoleMgr(string roleId)
         {

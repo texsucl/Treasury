@@ -254,7 +254,7 @@ namespace Treasury.WebControllers
         /// <param name="aplyNo"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult qryRoleFuncHis(String aplyNo)
+        public JsonResult qryRoleFuncHis(string roleId, string aplyNo)
         {
             CodeRoleFuncHisDao codeRoleFuncHisDao = new CodeRoleFuncHisDao();
 
@@ -263,6 +263,12 @@ namespace Treasury.WebControllers
                 List<RoleFuncHisModel> rows = new List<RoleFuncHisModel>();
 
                 rows = codeRoleFuncHisDao.qryByAplyNo(aplyNo);
+
+                if (rows.Count == 0) {
+                    CodeRoleFunctionDao codeRoleFuncDao = new CodeRoleFunctionDao();
+                    rows = codeRoleFuncDao.qryForAppr(roleId);
+
+                }
 
 
 
@@ -285,7 +291,7 @@ namespace Treasury.WebControllers
         /// <param name="aplyNo"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult qryRoleEquipHis(String aplyNo)
+        public JsonResult qryRoleEquipHis(string roleId, string aplyNo)
         {
             CodeRoleTreaItemHisDao codeRoleTreaItemHisDao = new CodeRoleTreaItemHisDao();
 
@@ -295,7 +301,12 @@ namespace Treasury.WebControllers
 
                 rows = codeRoleTreaItemHisDao.qryByAplyNo(aplyNo);
 
+                if (rows.Count == 0)
+                {
+                    CodeRoleTreaItemDao codeRoleTreaItemDao = new CodeRoleTreaItemDao();
+                    rows = codeRoleTreaItemDao.qryForRoleMgr(roleId);
 
+                }
 
                 var jsonData = new { success = true, rows };
                 return Json(jsonData, JsonRequestBehavior.AllowGet);
@@ -315,7 +326,7 @@ namespace Treasury.WebControllers
         /// <param name="authType"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult qryRoleItemHis(string aplyNo, string authType)
+        public JsonResult qryRoleItemHis(string roleId,string aplyNo, string authType)
         {
             CodeRoleItemHisDao codeRoleItemHisDao = new CodeRoleItemHisDao();
 
@@ -325,7 +336,12 @@ namespace Treasury.WebControllers
 
                 rows = codeRoleItemHisDao.qryByAplyNo(aplyNo, authType);
 
+                if (rows.Count == 0)
+                {
+                    CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
+                    rows = codeRoleItemDao.qryForAppr(roleId, authType);
 
+                }
 
                 var jsonData = new { success = true, rows };
                 return Json(jsonData, JsonRequestBehavior.AllowGet);

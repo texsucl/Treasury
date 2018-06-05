@@ -12,6 +12,7 @@ using Treasury.Web;
 using Treasury.Web.Daos;
 using Treasury.Web.Models;
 using Treasury.WebActionFilter;
+using Treasury.Web.ViewModels;
 
 /// <summary>
 /// 功能說明：權限報表作業
@@ -87,16 +88,26 @@ namespace Treasury.WebControllers
             if ("userRole".Equals(cRptType))
                 return printUserRole();
             else
-                return printRoleFunc();
+                return printRoleAuth();
 
 
         }
 
 
-        private ActionResult printRoleFunc()
+
+        /// <summary>
+        /// 列印角色授權報表
+        /// </summary>
+        /// <returns></returns>
+        private ActionResult printRoleAuth()
         {
-            CodeRoleFunctionDao codeRoleFunctionDao = new CodeRoleFunctionDao();
-            List<FuncRoleModel> rptData = codeRoleFunctionDao.qryFuncRole();
+
+            CodeRoleDao codeRoleDao = new CodeRoleDao();
+            List<CODE_ROLE> rptData = codeRoleDao.qryValidRole("");
+
+
+            //CodeRoleFunctionDao codeRoleFunctionDao = new CodeRoleFunctionDao();
+            //List<FuncRoleModel> rptData = codeRoleFunctionDao.qryFuncRole();
 
             if (rptData.Count == 0)
             {
@@ -108,9 +119,74 @@ namespace Treasury.WebControllers
 
                 try
                 {
-                    String htmlText = "";
+                    string htmlText = "";
 
-                    htmlText = genRptRoleFunc(rptData);
+                    int totCnt = 0;
+
+                    htmlText += "<html><span style='font-size:12px;'>";
+                    
+
+                    //處理功能授權
+                    List<CODE_ROLE> rptDataF = rptData.Where(x => x.ROLE_AUTH_TYPE == "F").ToList();
+                    if (rptDataF != null) {
+                        htmlText += "<table border='0' width='100%' style='font-size:16px;'>";
+                        htmlText += genRptHeader("funcRole", "", "", "F");
+
+                        htmlText += genRptRoleFunc(rptDataF);
+                        totCnt = totCnt + rptDataF.Count;
+                    }
+
+                    //處理金庫設備授權
+                    List<CODE_ROLE> rptDataE = rptData.Where(x => x.ROLE_AUTH_TYPE == "E").ToList();
+                    if (rptDataE != null)
+                    {
+                        if (totCnt == 0)
+                            htmlText += htmlText + "<table border='0' width='100%' style='font-size:16px;'>";
+
+                        else
+                            htmlText += "<table border='0' width='100%' style='font-size:16px;page-break-before:always;'>";
+
+                        htmlText += genRptHeader("funcRole", "", "", "E");
+
+                        htmlText += genRptRoleEquip(rptDataE);
+                        totCnt = totCnt + rptDataE.Count;
+                    }
+
+                    //處理存取項目
+                    List<CODE_ROLE> rptDataI = rptData.Where(x => x.ROLE_AUTH_TYPE == "I").ToList();
+                    if (rptDataI != null)
+                    {
+                        if (totCnt == 0)
+                            htmlText += htmlText + "<table border='0' width='100%' style='font-size:16px;'>";
+
+                        else
+                            htmlText += "<table border='0' width='100%' style='font-size:16px;page-break-before:always;'>";
+
+                        htmlText += genRptHeader("funcRole", "", "", "I");
+
+                        htmlText += genRptRoleItem(rptDataI, "1");
+                        totCnt = totCnt + rptDataI.Count;
+                    }
+
+                    //處理表單申請
+                    List<CODE_ROLE> rptDataA = rptData.Where(x => x.ROLE_AUTH_TYPE == "A").ToList();
+                    if (rptDataA != null)
+                    {
+                        if (totCnt == 0)
+                            htmlText += htmlText + "<table border='0' width='100%' style='font-size:16px;'>";
+
+                        else
+                            htmlText += "<table border='0' width='100%' style='font-size:16px;page-break-before:always;'>";
+
+                        htmlText += genRptHeader("funcRole", "", "", "A");
+
+                        htmlText += genRptRoleItem(rptDataI, "2");
+                        totCnt = totCnt + rptDataA.Count;
+                    }
+
+
+                    htmlText += genRptFooter();
+                    htmlText += "</span></html>";
 
 
                     ReportUtil reportUtil = new ReportUtil();
@@ -186,12 +262,14 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <param name="rptData"></param>
         /// <returns></returns>
-        private String genRptRoleFunc(List<FuncRoleModel> rptData)
+        private String genRptRoleFunc(List<CODE_ROLE> rptDataRole)
         {
+            CodeRoleFunctionDao codeRoleFunctionDao = new CodeRoleFunctionDao();
+            List<FuncRoleModel> rptData = codeRoleFunctionDao.qryFuncRole();
 
             int totCnt = 0;
 
-            string strTable = "<html><span style='font-size:12px;'>";
+            string strTable = "";
 
 
             //查出要列印的角色LIST
@@ -204,10 +282,10 @@ namespace Treasury.WebControllers
                 }).ToList<FuncRoleModel>();
 
 
-            //表頭
-            strTable = strTable + "<table border='0' width='100%' style='font-size:16px;'>";
+            ////表頭
+            //strTable = strTable + "<table border='0' width='100%' style='font-size:16px;'>";
 
-            strTable += genRptHeader("funcRole", "", "");
+            //strTable += genRptHeader("funcRole", "", "");
 
 
             foreach (FuncRoleModel funcRoleModel in roleList)
@@ -218,12 +296,12 @@ namespace Treasury.WebControllers
 
                 strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + funcRoleModel.cRoleName.Trim() + "</td>";
+                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(funcRoleModel.cRoleName) + "</td>";
                 strTable = strTable + "</tr>";
 
 
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>備註：" + funcRoleModel.vMemo.Trim() + "</td>";
+                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>備註：" + StringUtil.toString(funcRoleModel.vMemo) + "</td>";
                 strTable = strTable + "</tr>";
 
                 strTable = strTable + "<tr>";
@@ -236,33 +314,34 @@ namespace Treasury.WebControllers
                                                             .Select(group => new FuncRoleModel
                                                             {
                                                                 cParentFunctionID = group.Key.cParentFunctionID
-                                                                ,cParentFunctionName = group.Key.cParentFunctionName
+                                                                ,
+                                                                cParentFunctionName = group.Key.cParentFunctionName
                                                             }).ToList<FuncRoleModel>()
 
                                                             )
                 {
                     int dCnt = 0;
                     strTable = strTable + "<tr>";
-                    strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>　　　" + pFunc.cParentFunctionName.Trim() + "＞＞</td>";
+                    strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>　　　" + StringUtil.toString(pFunc.cParentFunctionName) + "＞＞</td>";
                     strTable = strTable + "</tr>";
 
                     foreach (FuncRoleModel cFunc in rptData.Where(
                         x => x.cParentFunctionID.Equals(pFunc.cParentFunctionID)
-                        && x.cRoleId.Equals(funcRoleModel.cRoleId.Trim())
+                        && x.cRoleId.Equals(StringUtil.toString(funcRoleModel.cRoleId))
                         ))
                     {
                         if ((dCnt % 3).CompareTo(0) == 0)
                         {
                             strTable = strTable + "<tr>";
-                            strTable = strTable + "<td ></td><td >" + cFunc.cFunctionName + "</td>";
+                            strTable = strTable + "<td ></td><td >" + StringUtil.toString(cFunc.cFunctionName) + "</td>";
                         }
                         else if ((dCnt % 3).CompareTo(1) == 0)
                         {
-                            strTable = strTable + "<td >" + cFunc.cFunctionName + "</td>";
+                            strTable = strTable + "<td >" + StringUtil.toString(cFunc.cFunctionName) + "</td>";
                         }
                         else
                         {
-                            strTable = strTable + "<td style='border-right:#000000 1px solid;'>" + cFunc.cFunctionName + "</td></tr>";
+                            strTable = strTable + "<td style='border-right:#000000 1px solid;'>" + StringUtil.toString(cFunc.cFunctionName) + "</td></tr>";
                         }
 
 
@@ -283,12 +362,161 @@ namespace Treasury.WebControllers
                 strTable = strTable + "</table>";
 
             }
-            //表尾
-            strTable += genRptFooter();
+            ////表尾
+            //strTable += genRptFooter();
 
-            //strTable = strTable + "</table>";
+            ////strTable = strTable + "</table>";
 
-            strTable = strTable + "</span></html>";
+            //strTable = strTable + "</span></html>";
+
+
+            return strTable;
+
+        }
+
+
+        /// <summary>
+        /// 產生角色金庫設備報表
+        /// </summary>
+        /// <param name="rptData"></param>
+        /// <returns></returns>
+        private String genRptRoleEquip(List<CODE_ROLE> rptDataEquip)
+        {
+            CodeRoleTreaItemDao codeRoleTreaItemDao = new CodeRoleTreaItemDao();
+            List<CodeRoleEquipModel> rptData = codeRoleTreaItemDao.qryRoleEquip();
+
+            string strTable = "";
+
+
+            //查出要列印的角色LIST
+            List<CodeRoleEquipModel> roleList = rptData.GroupBy(o => new { o.roleId, o.roleName })
+                .Select(group => new CodeRoleEquipModel
+                {
+                    roleId = group.Key.roleId,
+                    roleName = group.Key.roleName
+                }).ToList<CodeRoleEquipModel>();
+
+
+            ////表頭
+            //strTable = strTable + "<table border='0' width='100%' style='font-size:16px;'>";
+
+            //strTable += genRptHeader("funcRole", "", "");
+
+
+            foreach (CodeRoleEquipModel codeRoleEquipModel in roleList)
+            {
+
+                strTable += "<br/>";
+
+                strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(codeRoleEquipModel.roleName) + "</td>";
+                strTable = strTable + "</tr>";
+
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='55%'>設備名稱</td>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管模式</td>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管方式</td>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%' >保管順位</td>";
+                strTable = strTable + "</tr>";
+
+                foreach (CodeRoleEquipModel d in rptData.Where(
+                                        x => x.roleId.Equals(codeRoleEquipModel.roleId)
+                                        ))
+                {
+
+                    strTable = strTable + "<tr>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(d.equipName) + "</td>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(d.controlModeDesc) + "</td>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(d.custodyModeDesc) + "</td>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(d.custodyOrder) + "</td>";
+
+                    strTable = strTable + "</tr>";
+
+
+
+                }
+
+                strTable = strTable + "</table>";
+
+            }
+            ////表尾
+            //strTable += genRptFooter();
+
+            ////strTable = strTable + "</table>";
+
+            //strTable = strTable + "</span></html>";
+
+
+            return strTable;
+
+        }
+
+
+        /// <summary>
+        /// 產生角色存取項目報表
+        /// </summary>
+        /// <param name="rptData"></param>
+        /// <returns></returns>
+        private String genRptRoleItem(List<CODE_ROLE> rptDataEquip, string roleAuthType)
+        {
+            CodeRoleItemDao codeRoleItemDao = new CodeRoleItemDao();
+            List<CodeRoleItemModel> rptData = codeRoleItemDao.qryRoleForAuthRpt(roleAuthType);
+
+            string strTable = "";
+
+
+            //查出要列印的角色LIST
+            List<CodeRoleItemModel> roleList = rptData.GroupBy(o => new { o.roleId, o.roleName })
+                .Select(group => new CodeRoleItemModel
+                {
+                    roleId = group.Key.roleId,
+                    roleName = group.Key.roleName
+                }).ToList<CodeRoleItemModel>();
+
+
+
+
+            foreach (CodeRoleItemModel codeRoleItemModel in roleList)
+            {
+
+                strTable += "<br/>";
+
+                strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td colspan='2' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(codeRoleItemModel.roleName) + "</td>";
+                strTable = strTable + "</tr>";
+
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='60%'>作業類型</td>";
+                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='40%'>存取項目</td>";
+
+                strTable = strTable + "</tr>";
+
+                foreach (CodeRoleItemModel d in rptData.Where(
+                                        x => x.roleId.Equals(codeRoleItemModel.roleId)
+                                        ))
+                {
+
+                    strTable = strTable + "<tr>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left'>" + StringUtil.toString(d.itemOpTypeDesc) + "</td>";
+                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(d.itemDesc) + "</td>";
+                   
+                    strTable = strTable + "</tr>";
+
+
+
+                }
+
+                strTable = strTable + "</table>";
+
+            }
+            ////表尾
+            //strTable += genRptFooter();
+
+            ////strTable = strTable + "</table>";
+
+            //strTable = strTable + "</span></html>";
 
 
             return strTable;
@@ -394,7 +622,7 @@ namespace Treasury.WebControllers
                 catch (Exception e)
                 {
                 }
-                strTable += genRptHeader("userRole", dptCd, dptName);
+                strTable += genRptHeader("userRole", dptCd, dptName, "");
 
 
 
@@ -408,52 +636,99 @@ namespace Treasury.WebControllers
                         cUserID = group.Key.cUserID
                     }).ToList<UserMgrModel>();
 
-                    strTable += "<br/>";
-                    strTable = strTable + "<table border='0' width='100%' style='font-size:12px;'>";
-                    strTable = strTable + "<tr>";
-                    strTable = strTable + "<td align='left'>" + "單位：" + StringUtil.toString(authRptModel.cWorkUnitCode)
-                        + StringUtil.toString(authRptModel.cWorkUnitDesc) + "</td>";
-                    strTable = strTable + "</tr>";
-                    strTable = strTable + "</table>";
+                    //strTable += "<br/>";
+                    //strTable = strTable + "<table border='0' width='100%' style='font-size:12px;'>";
+                    //strTable = strTable + "<tr>";
+                    //strTable = strTable + "<td align='left'>" + "單位：" + StringUtil.toString(authRptModel.cWorkUnitCode)
+                    //    + StringUtil.toString(authRptModel.cWorkUnitDesc) + "</td>";
+                    //strTable = strTable + "</tr>";
+                    //strTable = strTable + "</table>";
 
-                    strTable = strTable + "<table align='center' cellpadding='6' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
-                    strTable = strTable + "<tr>";
+                    //strTable = strTable + "<table align='center' cellpadding='6' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
+                    //strTable = strTable + "<tr>";
 
-                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='10%'>網路帳號</td>";
-                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='10%'>中文姓名</td>";
-                    //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>單位</td>";
-                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%' >角色</td>";
-                    strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
+                    //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='10%'>網路帳號</td>";
+                    //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='10%'>中文姓名</td>";
+                    ////strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>單位</td>";
+                    //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%' >角色</td>";
+                    //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
 
-                    strTable = strTable + "</tr>";
+                    //strTable = strTable + "</tr>";
 
                     foreach (UserMgrModel authUser in userList)
                     {
-
-
                         List<UserMgrModel> roleList = rptData.Where(x => x.cUserID == authUser.cUserID).ToList<UserMgrModel>();
-                        string strRole = "";
+                        string strRoleF = "";
+                        string strRoleE = "";
+                        string strRoleI = "";
+                        string strRoleA = "";
+
                         foreach (UserMgrModel role in roleList)
                         {
-                            strRole += role.roleName + "<br/>";
+                            switch (role.roleAuthType) {
+                                case "F":
+                                    strRoleF += role.roleName + "<br/>";
+                                    break;
+                                case "E":
+                                    strRoleE += role.roleName + "<br/>";
+                                    break;
+                                case "I":
+                                    strRoleI += role.roleName + "<br/>";
+                                    break;
+                                case "A":
+                                    strRoleA += role.roleName + "<br/>";
+                                    break;
+                            }
+                            
                         }
 
 
+                        strTable += "<br/>";
+                        strTable = strTable + "<table border='0' width='100%' style='font-size:12px;'>";
                         strTable = strTable + "<tr>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(authUser.cUserID) + "</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(roleList[0].cUserName) + "</td>";
-                        //strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + StringUtil.toString(roleList[0].cWorkUnitDesc) + "</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRole + "</td>";
+                        strTable = strTable + "<td align='left'>" + "單位：" + StringUtil.toString(authRptModel.cWorkUnitCode)
+                            + StringUtil.toString(authRptModel.cWorkUnitDesc) + "</td>";
 
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>  </td>";
+                        strTable = strTable + "<td align='left'>" + "網路帳號：" + StringUtil.toString(authUser.cUserID) + "</td>";
+
+                        strTable = strTable + "<td align='left'>" + "中文姓名：" + StringUtil.toString(roleList[0].cUserName) + "</td>";
+
+
+                        strTable = strTable + "</tr>";
+                        strTable = strTable + "</table>";
+
+                        strTable = strTable + "<table align='center' cellpadding='5' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
+                        strTable = strTable + "<tr>";
+
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
+                        strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'></td>";
+                        strTable = strTable + "</tr>";
+
+                        strTable = strTable + "<tr>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='10%'>角色群組</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>授權功能</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>金庫設備權限</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%' >存取項目權限</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>表單申請權限</td>";
+                        strTable = strTable + "</tr>";
+
+
+
+                        strTable = strTable + "<tr>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>角色名稱</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleF + "</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleE + "</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleI + "</td>";
+                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleA + "</td>";
+                        
                         strTable = strTable + "</tr>";
 
 
 
 
-
+                        strTable = strTable + "</table>";
                     }
-                    strTable = strTable + "</table>";
+                    
 
 
                 }
@@ -473,7 +748,7 @@ namespace Treasury.WebControllers
         }
 
 
-        private String genRptHeader(String rptType, string pDetCd, string pDetName)
+        private String genRptHeader(string rptType, string pDetCd, string pDetName, string roleAuthType)
         {
             String strTable = "";
 
@@ -500,8 +775,30 @@ namespace Treasury.WebControllers
             strTable = strTable + "<tr>";
             strTable = strTable + "<td>" + "<br/> 製表人：" + Session["UserName"].ToString() + "</td>";
             strTable = strTable + "<td  align='right'>" + "<br/> 製表時間：" + DateUtil.formatDateTimeDbToSc(DateTime.Now.ToString("yyyyMMdd HHmmss"), "DT") + "</td>";
-
             strTable = strTable + "</tr>";
+
+            if (!"userRole".Equals(rptType))
+            {
+                strTable = strTable + "<tr>";
+                switch (roleAuthType) {
+                    case "F":
+                        strTable = strTable + "<td>" + "<br/>角色群組：功能權限</td>";
+                        break;
+                    case "E":
+                        strTable = strTable + "<td>" + "<br/>角色群組：金庫設備權限</td>";
+                        break;
+                    case "I":
+                        strTable = strTable + "<td>" + "<br/>角色群組：存取項目</td>";
+                        break;
+                    case "A":
+                        strTable = strTable + "<td>" + "<br/>角色群組：表單申請</td>";
+                        break;
+
+                }
+                
+                strTable = strTable + "</tr>";
+            }
+                
 
             strTable = strTable + "</table>";
 

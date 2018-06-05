@@ -12,8 +12,101 @@ namespace Treasury.Web.Daos
 {
     public class CodeRoleItemDao
     {
+        //角色存取項目、表單申請報表
+        public List<CodeRoleItemModel> qryRoleForAuthRpt( string authType)
+        {
 
-        
+
+            using (new TransactionScope(
+                   TransactionScopeOption.Required,
+                   new TransactionOptions
+                   {
+                       IsolationLevel = IsolationLevel.ReadUncommitted
+                   }))
+            {
+
+
+                using (dbTreasuryEntities db = new dbTreasuryEntities())
+                {
+                    var rows = (from main in db.CODE_ROLE_ITEM
+
+                                join role in db.CODE_ROLE on main.ROLE_ID equals role.ROLE_ID
+
+                                join d in db.TREA_ITEM on main.ITEM_ID equals d.ITEM_ID into psItem
+                                from xItem in psItem.DefaultIfEmpty()
+
+                                join opType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ITEM_OP_TYPE") on xItem.ITEM_OP_TYPE equals opType.CODE into psOpType
+                                from xOpType in psOpType.DefaultIfEmpty()
+
+                                where 1 == 1
+                                    & main.AUTH_TYPE == authType
+                                    & role.IS_DISABLED == "N"
+                                    & xItem.IS_DISABLED == "N"
+                                select new CodeRoleItemModel
+                                {
+                                    id = main.AUTH_TYPE + main.ITEM_ID,
+                                    roleId = main.ROLE_ID,
+                                    roleName = role.ROLE_NAME.Trim(),
+                                    itemId = main.ITEM_ID,
+                                    authType = main.AUTH_TYPE,
+                                    itemOpType = xItem.ITEM_OP_TYPE,
+                                    itemOpTypeDesc = xOpType == null ? "" : xOpType.CODE_VALUE,
+                                    itemDesc = xItem.ITEM_DESC.Trim()
+
+
+                                }).ToList<CodeRoleItemModel>();
+                    return rows;
+
+                }
+
+            }
+
+        }
+
+
+
+        /// <summary>
+        /// 依角色查詢
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        public List<CodeRoleItemModel> qryForAppr(string roleId, string authType)
+        {
+            using (new TransactionScope(
+                   TransactionScopeOption.Required,
+                   new TransactionOptions
+                   {
+                       IsolationLevel = System.Transactions.IsolationLevel.ReadUncommitted
+                   }))
+            {
+                using (dbTreasuryEntities db = new dbTreasuryEntities())
+                {
+
+                    bool bAuthType = StringUtil.isEmpty(authType);
+
+
+                    List<CodeRoleItemModel> rows = (from main in db.CODE_ROLE_ITEM
+                                                    join item in db.TREA_ITEM on main.ITEM_ID equals item.ITEM_ID
+
+                                                    join opType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ITEM_OP_TYPE") on item.ITEM_OP_TYPE equals opType.CODE into psOpType
+                                                    from xOpType in psOpType.DefaultIfEmpty()
+                                                    where main.ROLE_ID == roleId
+                                                      & (bAuthType || main.AUTH_TYPE == authType)
+                                                    select new CodeRoleItemModel
+                                                    {
+                                                        id = main.AUTH_TYPE + main.ITEM_ID,
+                                                        itemId = main.ITEM_ID,
+                                                        authType = main.AUTH_TYPE,
+                                                        itemOpType = xOpType == null ? item.ITEM_OP_TYPE : xOpType.CODE_VALUE.Trim(),
+                                                        itemDesc = item.ITEM_DESC.Trim(),
+                                                        execAction = "",
+                                                        execActionDesc = ""
+                                                    }).ToList();
+
+                    return rows;
+                }
+            }
+        }
 
 
         //角色管理-查詢存取項目權限

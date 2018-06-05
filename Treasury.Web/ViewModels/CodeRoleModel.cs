@@ -32,6 +32,8 @@ namespace Treasury.Web.ViewModels
 
         public string memoB { get; set; }
 
+        public string apprUid { get; set; }
+
         public string apprStatus { get; set; }
 
         public string apprStatusDesc { get; set; }
@@ -49,6 +51,7 @@ namespace Treasury.Web.ViewModels
             isDisabledB = "";
             memo = "";
             memoB = "";
+            apprUid = "";
             apprStatus = "";
             apprStatusDesc = "";
         }

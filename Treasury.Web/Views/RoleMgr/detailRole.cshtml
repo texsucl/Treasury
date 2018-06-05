@@ -26,6 +26,33 @@
             <table>
                 <tr>
                     <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.roleAuthType)：
+                    </td>
+                    <td>
+                        @Html.DropDownList("roleAuthType", roleAuthTypeList, "請選擇", new { @onchange = "setTabDisabed()" })
+                        @Html.ValidationMessageFor(model => model.roleAuthType, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidroleAuthType", Model.roleAuthType)
+                    </td>
+
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+                    </td>
+                    <td>
+                        @Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        @Html.ValidationMessageFor(model => model.isDisabled, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidisDisabled", Model.isDisabled)
+                    </td>
+
+
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
                         @Html.DisplayNameFor(model => model.cRoleID)：
                     </td>
                     <td>
@@ -42,10 +69,7 @@
                         @Html.Hidden("hidcRoleName", Model.cRoleName)
                     </td>
 
-                </tr>
 
-
-                <tr>
                     <td>
                         @Html.DisplayNameFor(model => model.dataStatus)：
                     </td>
@@ -53,25 +77,9 @@
                         @Html.DisplayTextFor(model => model.dataStatus)
                         @Html.Hidden("hidDataStatus", Model.dataStatus)
                     </td>
-                    <td>
-                        <span style="color:red;">＊</span>
-                        @Html.DisplayNameFor(model => model.isDisabled)：
-                    </td>
-                    <td>
-                        @Html.DropDownList("isDisabled", isDisabledList, "請選擇")
-                        @Html.ValidationMessageFor(model => model.isDisabled, "", new { @class = "text-danger" })
-                        @Html.Hidden("hidisDisabled", Model.isDisabled)
-                    </td>
+                   
 
-                    <td>
-                        <span style="color:red;">＊</span>
-                        @Html.DisplayNameFor(model => model.roleAuthType)：
-                    </td>
-                    <td>
-                        @Html.DropDownList("roleAuthType", roleAuthTypeList, "請選擇", new { @onchange= "setTabDisabed()" })
-                        @Html.ValidationMessageFor(model => model.roleAuthType, "", new { @class = "text-danger" })
-                        @Html.Hidden("hidroleAuthType", Model.roleAuthType)
-                    </td>
+                   
                 </tr>
 
                 <tr>
@@ -247,8 +255,8 @@
                         <table id="gridEquip"></table>
                         <div id="pagerEquip"></div>
 
-                        @Html.Hidden("onEdit", "");
-                        @Html.Hidden("valueErr", "");
+                        @Html.Hidden("onEdit", "")
+                        @Html.Hidden("valueErr", "")
                     </div>
                 </div>
 

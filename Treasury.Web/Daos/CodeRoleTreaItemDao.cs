@@ -13,6 +13,68 @@ namespace Treasury.Web.Daos
     public class CodeRoleTreaItemDao
     {
 
+
+
+        /// <summary>
+        /// 角色金庫設備報表清單
+        /// </summary>
+        /// <returns></returns>
+        public List<CodeRoleEquipModel> qryRoleEquip()
+        {
+
+            using (new TransactionScope(
+                   TransactionScopeOption.Required,
+                   new TransactionOptions
+                   {
+                       IsolationLevel = IsolationLevel.ReadUncommitted
+                   }))
+            {
+
+
+                using (dbTreasuryEntities db = new dbTreasuryEntities())
+                {
+                    var rows = (from main in db.CODE_ROLE_TREA_ITEM
+
+                                join role in db.CODE_ROLE on main.ROLE_ID equals role.ROLE_ID
+
+                                join d in db.TREA_EQUIP on main.TREA_EQUIP_ID equals d.TREA_EQUIP_ID into psEquip
+                                from xEquip in psEquip.DefaultIfEmpty()
+
+                                join custody in db.SYS_CODE.Where(x => x.CODE_TYPE == "CUSTODY_MODE") on main.CUSTODY_MODE equals custody.CODE into psCustody
+                                from xCustody in psCustody.DefaultIfEmpty()
+
+                                join control in db.SYS_CODE.Where(x => x.CODE_TYPE == "CONTROL_MODE") on xEquip.CONTROL_MODE equals control.CODE into psControl
+                                from xControl in psControl.DefaultIfEmpty()
+
+
+                                where 1 == 1
+                                    & role.IS_DISABLED == "N"
+
+                                select new CodeRoleEquipModel
+                                {
+
+                                    roleId = main.ROLE_ID,
+                                    roleName = role.ROLE_NAME.Trim(),
+                                    execAction = "",
+                                    execActionDesc = "",
+                                    treaEquipId = main.TREA_EQUIP_ID,
+                                    equipName = xEquip.EQUIP_NAME.Trim(),
+                                    controlMode = xEquip.CONTROL_MODE,
+                                    controlModeDesc = xControl.CODE_VALUE.Trim(),
+                                    custodyMode = main.CUSTODY_MODE,
+                                    custodyModeDesc = xCustody.CODE_VALUE.Trim(),
+                                    custodyOrder = main.CUSTODY_ORDER.ToString()
+
+
+                                }).ToList<CodeRoleEquipModel>();
+                    return rows;
+
+                }
+
+            }
+        }
+
+
         //角色管理-查詢金庫設備權限
         public List<CodeRoleEquipModel> qryForRoleMgr(string roleId)
         {
@@ -48,6 +110,8 @@ namespace Treasury.Web.Daos
                                 {
 
                                     roleId = main.ROLE_ID,
+                                    execAction = "",
+                                    execActionDesc = "",
                                     treaEquipId = main.TREA_EQUIP_ID,
                                     equipName = xEquip.EQUIP_NAME.Trim(),
                                     controlMode = xEquip.CONTROL_MODE,

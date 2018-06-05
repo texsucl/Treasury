@@ -1,0 +1,158 @@
+﻿<div class="row">
+    <div>
+        <input id="BILLInsert" value="新增存入明細" class="btn btn-primary"/>
+    </div>
+    <div id="BILLjqgridDiv1" class="col-sm-24">
+
+    </div>
+    <div id="BILLjqgridDiv2"  class="col-sm-24">
+
+    </div>
+    <div style="text-align:center">
+        <input id="BILLApply" value="申請覆核" class="btn btn-primary" />
+        <input id="BILLCancel" value="取消申請" class="btn btn-primary" />
+        <input id="BILLBack" value="回到功能選擇" class="btn btn-primary" />
+    </div>
+    <div style="display:none;">
+        <form id="BILLForm">
+            <table>
+                <tr>
+                    <td >
+                        <label>發票行庫 : </label>
+                    </td>
+                    <td>
+                        <div class="select-editable">
+                            <select id="sBILL_Issuing_Bank" onchange="this.nextElementSibling.value = this.value" ></select>
+                            <input type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value="" />
+                        </div>
+                    </td>
+                    <td>
+                        <label>類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type)
+                    </td>
+                    <td>
+                        <label>字軌 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tBILL_Check_No_Track" onkeyup="this.value=this.value.toUpperCase()" name="tBILL_Check_No_Track"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>票號(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tBILL_Check_No_B" name="tBILL_Check_No_B"/>
+                    </td>
+                    <td>
+                        <label>票號(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tBILL_Check_No_E" name="tBILL_Check_No_E" />
+                    </td>
+                    <td>
+                        <label>總張數 : </label>
+                    </td>
+                    <td>
+                        <label id="BILL_total"></label>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+
+        //#region 參數設定
+        var BILLFormId = 'BILLForm'; //formId
+        var BILL_Check_No_TrackId = 'tBILL_Check_No_Track'; //字軌Id
+        var BILL_Check_No_BId = 'tBILL_Check_No_B'; //票號(起)Id
+        var BILL_Check_No_EId = 'tBILL_Check_No_E'; //票號(迄)Id
+        var BILL_totalId = 'BILL_total'; //總張數Id
+        //#endregion
+
+        //#region url設定
+        var BILLurl = {};
+        BILLurl.Insert = '@Url.Action("InsertView", "BILL")';
+        //#endregion
+
+        //#region 註冊verified
+        function setBILLVerified() {
+            verified.english(BILLFormId, BILL_Check_No_TrackId); //字軌僅能輸入英文
+            verified.required(BILLFormId, BILL_Check_No_TrackId, message.required('字軌')); //字軌為必填
+            verified.maxlength(BILLFormId, BILL_Check_No_TrackId, 4); //字軌最大長度(4)
+            verified.positiveInt(BILLFormId, BILL_Check_No_BId); //票號(起) 僅能輸入數字(正)
+            verified.required(BILLFormId, BILL_Check_No_BId, message.required('票號(起)')); //票號(起)為必填
+            verified.maxlength(BILLFormId, BILL_Check_No_BId, 8); //票號(起)最大長度(8)
+            verified.positiveInt(BILLFormId, BILL_Check_No_EId); //票號(迄) 僅能輸入數字(正)
+            verified.required(BILLFormId, BILL_Check_No_EId, message.required('票號(迄)')); //票號(迄)為必填        
+            verified.maxlength(BILLFormId, BILL_Check_No_EId, 8); //票號(迄)最大長度(8)
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'BILLInsert':
+                    $('#' + id).on('click', function () { BILLInsert(); });
+                    break;
+                case 'BILLApply':
+                    $('#' + id).on('click', function () { BILLApply(); });
+                    break;
+                case 'BILLCancel':
+                    $('#' + id).on('click', function () { BILLCancel(); });
+                    break;
+                case 'BILLBack':
+                    $('#' + id).on('click', function () { BILLBack(); });
+                    break;
+            }
+        });
+        //計算總張數
+        $('#' + BILL_Check_No_BId + ',#' + BILL_Check_No_EId).on('blur', function () {
+            setBILL_total();
+        });
+
+        function setBILL_total()
+        {
+            var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
+            var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
+            if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E > _Check_No_B) {
+                $('#' + BILL_totalId).val(_Check_No_E - _Check_No_B + 1);
+            }
+            if (!isNaN(_Check_No_B))
+                $('#' + BILL_Check_No_BId).val(created.padLeft(_Check_No_B, 8, '0'));
+            if (!isNaN(_Check_No_E))
+                $('#' + BILL_Check_No_EId).val(created.padLeft(_Check_No_E, 8, '0'));
+        }
+        //#endregion
+
+        //#region function
+        function BILLInsert() {
+            var colModelArray = [
+                { name: "act", index: "act", width: 100, sortable: false},
+                { name: "rowNum", index: "rowNum", width: 40, sortable: false },
+
+            ];
+        }
+
+        function BILLApply() {
+
+        }
+
+        function BILLCancel() {
+            resetTAInsertDeatil();
+        }
+
+        function BILLBack() {
+            resetTAInsertDeatil();
+        }
+        //#endregion
+
+
+    });
+</script>

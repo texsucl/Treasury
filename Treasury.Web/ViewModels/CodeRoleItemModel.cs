@@ -10,11 +10,15 @@ namespace Treasury.Web.ViewModels
         public string id { get; set; }
         public string roleId { get; set; }
 
+        public string roleName { get; set; }
+
         public string itemId { get; set; }
 
         public string authType { get; set; }
 
         public string itemOpType { get; set; }
+
+        public string itemOpTypeDesc { get; set; }
 
         public string itemDesc { get; set; }
 
@@ -27,6 +31,8 @@ namespace Treasury.Web.ViewModels
         public string updateDT { get; set; }
 
         public string updateUid { get; set; }
+
+        public string apprUid { get; set; }
 
         public string apprStatus { get; set; }
 

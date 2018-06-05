@@ -92,6 +92,7 @@ namespace Treasury.Web.Controllers
                                     {
                                         Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
                                         Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
+                                        Session["CustodyFlag"] = StringUtil.toString(emp.DPT_CD) == "VE303";
                                     }
                                 }
                                 

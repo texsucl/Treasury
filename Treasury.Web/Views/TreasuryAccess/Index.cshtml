@@ -1,0 +1,263 @@
+﻿
+@{
+    ViewBag.Title = "金庫進出管理作業-金庫物品存取申請作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form>
+                     <table >
+                         <tr>
+                             <td width="120px">
+                                 <span class="red">＊</span>
+                                 <label class="red">執行功能:</label>
+                             </td>
+                             <td width="250px">
+                                 @Html.RadioButton("cIFeaturesType", "TAInsert", new { @checked = true }) 新增申請
+                                 @Html.RadioButton("cIFeaturesType", "TASearch") 查詢
+                             </td>
+                             <td width="120px">
+                                 <span class="red TAInsert">＊</span>
+                                 <label class="red TAInsert">存取申請項目:</label>
+                                 <label class="TASearch" style="display:none">存取項目:</label>
+                             </td>
+                             <td>
+                                 @Html.DropDownList("aProject",(SelectList)ViewBag.aProject)
+                             </td>
+                         </tr>
+                         <tr class="TAInsert">
+                             <td>
+                                 <span class="red">＊</span>
+                                 <label class="red">申請單位:</label>
+                             </td>
+                             <td>
+                                 @Html.DropDownList("aIUnit", (SelectList)ViewBag.aUnit)
+                             </td>
+                             <td>
+                                 <span class="red">＊</span>
+                                 <label class="red">申請人:</label>
+                             </td>
+                             <td>
+                                 @Html.DropDownList("applicant", (SelectList)ViewBag.applicant)
+                             </td>
+                         </tr>
+                         <tr class="TAInsert">
+                             <td>
+                                 <span class="red">＊</span>
+                                 <label class="red">填寫申請原因:</label>
+                             </td>
+                             <td colspan="3">
+                                 @Html.TextBox("TAReason", null, new { @style = "width:80%"  })
+                             </td>
+                         </tr>
+                         <tr class="TAInsert">
+                             <td>
+                                 <span class="red">＊</span>
+                                 <label class="red">預計存取日期:</label>
+                             </td>
+                             <td >
+                                 <input type="text" id="EXP_ACCESS_DATE" />
+                             </td>
+                             <td>
+                                 <span class="red">＊</span>
+                                 <label class="red">申請作業:</label>
+                             </td>
+                             <td>
+                                 @Html.RadioButton("cProjectType", "deposit", new { @checked = true }) 存入
+                                 @Html.RadioButton("cProjectType", "takeOut") 取出
+                             </td>
+                         </tr>
+                         <tr class="TASearch" style="display:none">
+                             <td>
+                                 <label>申請日期:</label>
+                             </td>
+                             <td colspan="3">
+                                 <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                 <label> ~&ensp;</label>
+                                 <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                             </td>
+                         <tr class="TASearch" style="display:none">
+                             <td>
+                                 <label>申請單號:</label>
+                             </td>
+                             <td >
+                                 <input type="text" id="APLY_NO" />                           
+                             </td>
+                             <td>
+                                 <label style="padding-right:20px">申請單位:</label>
+                             </td>
+                             <td>
+                                 @Html.DropDownList("aSUnit", (SelectList)ViewBag.aUnit)
+                             </td>
+                         </tr>
+                         </tr>
+                         <tr class="TASearch" style="display:none">
+                             <td>
+                                 <label>實際存取日期:</label>
+                             </td>
+                             <td colspan="3">                                
+                                 <input type="text" id="CONFIRM_DT_From" name="CONFIRM_DT_From" />
+                                 <label> ~&ensp;</label>
+                                 <input type="text" id="CONFIRM_DT_To" name="CONFIRM_DT_To" />
+                             </td>
+                         </tr>
+                         <tr class="TASearch" style="display:none">
+                             <td>
+                                 <label>金庫登記簿單號:</label>
+                             </td>
+                             <td colspan="3">
+                                 <input type="text" id="TREA_REGISTER_ID" />
+                             </td>
+                         </tr>
+                         <tr class="searchShow" style="display:none;">
+                             <td>
+                                 <label>填表單位 : </label>
+                             </td>
+                             <td>
+                                 <label id=""></label>
+                             </td>
+                             <td>
+                                 <label>填表人 :</label>
+                             </td>
+                             <td>
+                                 <label id=""></label>
+                             </td>
+                         </tr>
+                         <tr  style="text-align:center">
+                             <td colspan="4">
+                                 <input type="button" class="TAInsert btn btn-primary" id="TAI_Insert" value="新增" />
+                                 <input type="button" class="TASearch btn btn-primary" id="TAI_Search" value="查詢" style="display:none" />
+                             </td>
+                         </tr>
+                     </table>
+                    <div id="TASearchDetail">
+                    </div>
+                    <div id="TAInsertDetail">
+
+                    </div>
+                </form>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+
+        //#region url設定
+        var TAurl = {};
+        TAurl.openBILL = '@Url.Action("InsertView", "BILL")';
+
+        var insertDetailId = 'TAInsertDetail';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else
+        {
+
+            //#region 初始設定
+
+            created.createDatepicker("EXP_ACCESS_DATE", null);
+            created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
+            created.createDatepickerRange('CONFIRM_DT_From', 'CONFIRM_DT_To');
+
+            $('.TASearch').hide();
+            $('input[name=cIFeaturesType]').on('change', function () {
+                var type = $('input[name=cIFeaturesType]:checked').val();
+                $('.TAInsert,.TASearch').hide();
+                reset();
+                $('.' + type).show();
+            });
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TAI_Insert':
+                        $('#' + id).on('click', function () { TAInsert(); });
+                        break;
+                    case 'TAI_Search':
+
+                        break;
+                }
+            });
+
+            //#endregion
+
+        }
+
+        //#region 初始設定
+        function reset()
+        {
+            resetInsertDeatil();
+        }
+        //#endregion
+
+        //#region 新增事件
+        function TAInsert() {
+            resetTAInsertDeatil();
+            $('#TAI_Insert').hide();
+            var _aProject = $('#aProject').val();
+            _aProject = 'BILL';
+            switch (_aProject) {
+                case 'BILL':
+                    openBILL();
+                    break;
+                case '':
+                    break;
+            }
+        }
+        //#endregion
+
+        //#region 重設新增畫面
+        function resetTAInsertDeatil()
+        {
+            $('#' + insertDetailId).children().remove();
+            $('#TAI_Insert').show();
+        }
+        //#endregion
+
+        //#region 新增事件(開啟空白票據)
+        function openBILL() {
+            $.ajax({
+                type: 'GET',
+                url: TAurl.openBILL,
+                success: function (data, textStatus, jqXHR) {
+                    debugger
+                    $('#' + insertDetailId).html(data);
+                }
+            })
+        }
+        //#endregion
+
+
+    });
+</script>
+
+

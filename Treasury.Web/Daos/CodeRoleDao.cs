@@ -28,6 +28,33 @@ namespace Treasury.WebDaos
     {
 
 
+        public bool dupRoleName(string roleId, string authType, string roleName) {
+            bool bDup = false;
+
+            using (new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions
+                {
+                    IsolationLevel = System.Transactions.IsolationLevel.ReadUncommitted
+                }))
+            {
+                using (dbTreasuryEntities db = new dbTreasuryEntities())
+                {
+                    CODE_ROLE role = db.CODE_ROLE
+                        .Where(x => x.ROLE_ID != roleId && x.ROLE_AUTH_TYPE == authType && x.ROLE_NAME == roleName.Trim())
+                        .FirstOrDefault();
+
+                    if (role != null) {
+                        if (!"".Equals(StringUtil.toString(role.ROLE_ID)))
+                            bDup = true;
+                    }
+                }
+            }
+
+            return bDup;
+        }
+
+
         /// <summary>
         /// 查詢有效的角色
         /// </summary>
