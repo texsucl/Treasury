@@ -241,7 +241,7 @@ namespace Treasury.Web.Daos
             string sql = @"
         delete  CODE_USER_ROLE 
          where USER_ID = @USER_ID 
-           and CROLEID = @CROLEID
+           and ROLE_ID = @ROLE_ID
         ";
             SqlCommand command = conn.CreateCommand();
 
@@ -252,7 +252,7 @@ namespace Treasury.Web.Daos
             {
                 command.CommandText = sql;
                 command.Parameters.AddWithValue("@USER_ID", StringUtil.toString(userRole.USER_ID));
-                command.Parameters.AddWithValue("@CROLEID", StringUtil.toString(userRole.ROLE_ID));
+                command.Parameters.AddWithValue("@ROLE_ID", StringUtil.toString(userRole.ROLE_ID));
 
 
 
