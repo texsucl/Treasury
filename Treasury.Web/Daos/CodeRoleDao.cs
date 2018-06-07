@@ -48,6 +48,20 @@ namespace Treasury.WebDaos
                         if (!"".Equals(StringUtil.toString(role.ROLE_ID)))
                             bDup = true;
                     }
+
+
+                    if (!bDup) {
+                        string roleH = (from roleHis in db.CODE_ROLE_HIS
+                                                join aply in db.AUTH_APPR.Where(x => x.AUTH_APLY_TYPE == "R" & x.APPR_STATUS == "1") on roleHis.ROLE_ID equals aply.APPR_MAPPING_KEY
+                                                where roleHis.ROLE_ID != roleId
+                                                   & roleHis.ROLE_AUTH_TYPE == authType
+                                                    & roleHis.ROLE_NAME == roleName.Trim()
+                                                select roleHis.ROLE_ID).FirstOrDefault();
+
+                        if (!"".Equals(StringUtil.toString(roleH)))
+                            bDup = true;
+
+                    }
                 }
             }
 

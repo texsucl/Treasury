@@ -164,6 +164,12 @@ namespace Treasury.WebControllers
 
             //覆核狀態
             var apprStatusList = sysCodeDao.loadSelectList("APPR_STATUS");
+            apprStatusList = new SelectList(apprStatusList
+                             .Where(x => x.Value != "4")
+                             .ToList(),
+                             "Value",
+                             "Text");
+
             ViewBag.apprStatusList = apprStatusList;
 
             //角色群組
@@ -777,11 +783,16 @@ namespace Treasury.WebControllers
             ViewBag.roleAuthTypeList = roleAuthTypeList;
 
             //控管模式
-            ViewBag.controlList = sysCodeDao.jqGridList("CONTROL_MODE");
+            var controlList = sysCodeDao.loadSelectList("CONTROL_MODE");
+            ViewBag.controlList = controlList;
+            //ViewBag.controlList = sysCodeDao.jqGridList("CONTROL_MODE");
 
 
             //控管方式
-            ViewBag.custodyList = sysCodeDao.jqGridList("CUSTODY_MODE");
+            var custodyList = sysCodeDao.loadSelectList("CUSTODY_MODE");
+            ViewBag.custodyList = custodyList;
+            //ViewBag.custodyList = sysCodeDao.jqGridList("CUSTODY_MODE");
+
 
             //入庫作業類型
             ViewBag.itemOpTypeList = sysCodeDao.jqGridList("ITEM_OP_TYPE");

@@ -675,6 +675,12 @@ namespace Treasury.WebControllers
 
             //覆核狀態
             var apprStatusList = sysCodeDao.loadSelectList("APPR_STATUS");
+            apprStatusList = new SelectList(apprStatusList
+                             .Where(x => x.Value != "4")
+                             .ToList(),
+                             "Value",
+                             "Text");
+
             ViewBag.apprStatusList = apprStatusList;
 
 
