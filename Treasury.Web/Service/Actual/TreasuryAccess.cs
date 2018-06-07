@@ -21,12 +21,13 @@ namespace Treasury.Web.Service.Actual
         /// <param name="cUserID">userId</param>
         /// <param name="custodyFlag">管理科Flag</param>
         /// <returns></returns>
-        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>> TreasuryAccessDetail(string cUserID, bool custodyFlag)
+        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string> TreasuryAccessDetail(string cUserID, bool custodyFlag)
         {
             List<SelectOption> applicationProject = new List<SelectOption>(); //申請項目
             List<SelectOption> applicationUnit = new List<SelectOption>(); //申請單位
             List<SelectOption> applicant = new List<SelectOption>(); //申請人
-
+            string createUser = string.Empty; //填表人
+            string createDep = string.Empty; //填表單位
             try
             {
                 using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
@@ -34,6 +35,14 @@ namespace Treasury.Web.Service.Actual
                     var depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
                     using (TreasuryDBEntities db = new TreasuryDBEntities())
                     {
+                        var _emply = dbINTRA.V_EMPLY2.AsNoTracking()
+                            .FirstOrDefault(x => x.USR_ID == cUserID);
+                        if (_emply != null)
+                        {
+                            createUser = _emply.EMP_NAME;
+                            createDep = _emply.DPT_NAME;
+                        }
+                        #region 保管科人員
                         if (custodyFlag) //是保管科人員
                         {
                             applicationProject = db.TREA_ITEM.AsNoTracking()
@@ -69,6 +78,8 @@ namespace Treasury.Web.Service.Actual
                             }
 
                         }
+                        #endregion
+                        #region 非保管科人員
                         else
                         {
                             applicationProject =
@@ -90,9 +101,6 @@ namespace Treasury.Web.Service.Actual
                                     Text = x.ITEM_DESC
                                 }).ToList();
 
-                            var _emply = dbINTRA.V_EMPLY2.AsNoTracking()
-                                 .FirstOrDefault(x => x.USR_ID == cUserID);
-
                             if (_emply != null)
                             {
                                 applicationUnit.Add(new SelectOption()
@@ -107,6 +115,7 @@ namespace Treasury.Web.Service.Actual
                                 });
                             }
                         }
+                        #endregion
                     }
                 }
             }
@@ -116,8 +125,7 @@ namespace Treasury.Web.Service.Actual
                 throw ex;
             }
 
-
-            return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>>(applicationProject, applicationUnit, applicant);
+            return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string>(applicationProject, applicationUnit, applicant, createUser, createDep);
         }
 
         public List<SelectOption> ChangeUnit(string DPT_CD)

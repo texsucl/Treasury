@@ -4,6 +4,7 @@ using System.Linq;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
+using Treasury.WebDaos;
 using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 
@@ -78,19 +79,95 @@ namespace Treasury.Web.Service.Actual
         #endregion
 
         #region SaveData
+        /// <summary>
+        /// 申請覆核動作
+        /// </summary>
+        /// <param name="insertDatas"></param>
+        /// <param name="taData"></param>
+        /// <returns></returns>
         public MSGReturnModel<ITreaItem> ApplyAudit(IEnumerable<ITreaItem> insertDatas, TreasuryAccessViewModel taData)
         {
             var result = new MSGReturnModel<ITreaItem>();
             result.RETURN_FLAG = false;
-
-            var datas = (List<BillViewModel>)insertDatas;
+            DateTime dt = DateTime.Now;
+           
             if (insertDatas != null)
             {
+                var datas = (List<BillViewModel>)insertDatas;
+                if (datas.Any())
+                {
+                    using (TreasuryDBEntities db = new TreasuryDBEntities())
+                    {
+                        SysSeqDao sysSeqDao = new SysSeqDao();
+                        var cId = sysSeqDao.qrySeqNo("G6",  dt.ToString("MMdd")).ToString();
+                        //申請單紀錄檔
+                        var _TAR = new TREA_APLY_REC()
+                        {
+                            APLY_NO = "", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
+                            APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
+                            ITEM_ID = taData.vItem,
+                            ACCESS_TYPE = AccessProjectTradeType.P.ToString(), //存入
+                            ACCESS_REASON = taData.vAccessReason,
+                            APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
+                            EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate),
+                            APLY_UNIT = taData.vAplyUnit,
+                            APLY_UID = taData.vAplyUid,
+                            APLY_DT = dt,
+                            CREATE_UID = taData.vCreateUid,
+                            CREATE_DT = dt,
+                            LAST_UPDATE_UID = taData.vCreateUid,
+                            LAST_UPDATE_DT = dt
+                        };
+                        
+                        db.TREA_APLY_REC.Add(_TAR);
 
+                        //申請單歷程檔
+                        db.APLY_REC_HIS.Add(
+                            new APLY_REC_HIS() {
+                                APLY_NO = _TAR.APLY_NO,
+                                APLY_STATUS = _TAR.APLY_STATUS,
+                                PROC_UID = _TAR.CREATE_UID,
+                                PROC_DT = dt
+                            });
+
+                        //空白票據申請資料檔
+                        datas.ForEach(x =>
+                        {
+                            db.BLANK_NOTE_APLY.Add(new BLANK_NOTE_APLY()
+                            {
+                                APLY_NO = _TAR.APLY_NO,
+                                DATA_SEQ = 0 , //??? 流水號
+                                ITEM_ID = sysSeqDao.qrySeqNo("E2", dt.ToString("MMdd")).ToString(),
+                                CHECK_TYPE = x.vCheckType,
+                                ISSUING_BANK = x.vIssuingBank,
+                                CHECK_NO_TRACK = x.vCheckNoTrack,
+                                CHECK_NO_B = x.vCheckNoB,
+                                CHECK_NO_E = x.vCheckNoE
+                            });
+                        });
+
+                        //log
+
+
+                        try
+                        {
+                            db.SaveChanges();
+                            result.RETURN_FLAG = true;
+                            //result.DESCRIPTION =
+                        }
+                        catch {
+                            //result.DESCRIPTION =
+                        }
+                    }
+                }
+                else
+                {
+                    //result.DESCRIPTION =
+                }
             }
             else
             {
-
+                result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
             }
             return result;
         }

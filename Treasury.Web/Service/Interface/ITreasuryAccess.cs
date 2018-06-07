@@ -15,7 +15,7 @@ namespace Treasury.Web.Service.Interface
         /// <param name="cUserID">userId</param>
         /// <param name="custodyFlag">管理科Flag</param>
         /// <returns></returns>
-        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>> TreasuryAccessDetail(string cUserID, bool custodyFlag);
+        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string> TreasuryAccessDetail(string cUserID, bool custodyFlag);
 
         /// <summary>
         /// 申請單位 變更時 變更申請人
