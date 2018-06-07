@@ -6,6 +6,9 @@
     var isDisabledList = ViewBag.isDisabledList as SelectList;
     var roleAuthTypeList = ViewBag.roleAuthTypeList as SelectList;
 
+    var controlList = ViewBag.controlList as SelectList;
+    var custodyList = ViewBag.custodyList as SelectList;
+
     var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
     var userAuthJson = jss.Serialize(ViewBag.userAuthFuncList);
 
@@ -250,7 +253,27 @@
 
                 <div class="tab-pane active" id="tabEquip">
                     <div id="qryEquip" class="col-sm-24">
-                        <button id="btnNewEquip" name="btnNewEquip" class="btn btn-primary">新增設備</button>
+                        <table>
+                            <tr>
+                                <td>
+                                    <button id="btnNewEquip" name="btnNewEquip" class="btn btn-primary">新增設備</button>
+                                </td>
+                                <td>
+                                    <span>控管模式：</span>
+                                    @Html.DropDownList("controlMode", controlList, "請選擇")
+                                </td>
+                                <td>
+                                    <span>控管方式：</span>
+                                   @Html.DropDownList("custodyMode", custodyList, "請選擇")
+                                </td>
+                                <td>
+                                    <span>保管順位：</span>
+                                    <input type="text" id="custodyOrder" name="custodyOrder" maxlength="1" size="2" />
+                                </td>
+                            </tr>
+                        </table>
+                        
+
                         <br/>
                         <table id="gridEquip"></table>
                         <div id="pagerEquip"></div>
@@ -346,6 +369,27 @@
 
         //新增金庫設備
         $("#btnNewEquip").on("click", function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#controlMode").val() == "" || $("#custodyMode").val() == "" || $("#custodyOrder").val() == "") {
+                validationSummary.append('<li>請先設定此角色的 控管方式、控管模式、保管順序 !! </li>');
+                return;
+            } else if ($("#custodyOrder").val() != "1" && $("#custodyOrder").val() != "2") {
+                validationSummary.append('<li>保管順位需為"1"或"2"</li>');
+                return;
+            }
+
+            $('#controlMode').attr('disabled', true);
+            $('#custodyMode').attr('disabled', true);
+            $('#custodyOrder').attr('disabled', true);
+                
 
             $("#gridEquip").jqGrid('addRow', "new", { addParams: { position: "last" } });
             var sel_id = $('#gridEquip').jqGrid('getGridParam', 'selrow');
@@ -480,6 +524,8 @@
             $("#btn_del_" + rowid).show();
             $("#btn_save_" + rowid).hide();
             $("#btn_cancel_" + rowid).hide();
+
+            $("#valueErr").val("");
 
         }
 
@@ -738,8 +784,17 @@
             if ($('#cRoleID').val() == '') {
                 $("#btnQryHis").hide();
                 $('#roleAuthType').attr('disabled', false);
+
+                $('#controlMode').attr('disabled', false);
+                $('#custodyMode').attr('disabled', false);
+                $('#custodyOrder').attr('disabled', false);
+
             } else {
                 $('#roleAuthType').attr('disabled', true);
+
+                $('#controlMode').attr('disabled', true);
+                $('#custodyMode').attr('disabled', true);
+                $('#custodyOrder').attr('disabled', true);
 
                 $.blockUI();
 
@@ -1064,6 +1119,7 @@
                         editable: true,
                         edittype: "select",
                         formatter: 'select',
+                        editrules: { custom: true, custom_func: checkEquip },
                         editoptions: {
                             value: getEquip(),
                             dataEvents: [{
@@ -1081,28 +1137,31 @@
                         label: '控管模式',
                         name: 'controlMode',
                         align: 'center',
-                        editable: false,
-                        edittype: "select",
-                        formatter: 'select',
-                        editoptions: { value: getControl() }
+                        hidden: true,
+                        //editable: false,
+                        //edittype: "select",
+                        //formatter: 'select',
+                        //editoptions: { value: getControl() }
                     }
                     ,
                     {
                         label: '控管方式',
                         name: 'custodyMode',
                         align: 'center',
-                        editable: true,
-                        edittype: "select",
-                        formatter: 'select',
-                        editoptions: { value: getCustody() }
+                        hidden: true,
+                        //editable: true,
+                        //edittype: "select",
+                        //formatter: 'select',
+                        //editoptions: { value: getCustody() }
 
                     },
                     {
                         label: '保管順位',
                         name: 'custodyOrder',
                         align: 'center',
-                        editable: true,
-                        editrules: {  custom: true, custom_func: checkCustodyOrder }
+                        hidden: true,
+                        //editable: true,
+                        //editrules: {  custom: true, custom_func: checkCustodyOrder }
 
                     }
                 ],
@@ -1125,6 +1184,8 @@
                     } else {
                         var ids = jQuery("#gridEquip").jqGrid('getDataIDs');
                         for (var i = 0; i < ids.length; i++) {
+                           
+
                             var treaEquipId = ids[i];
                             //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"jQuery('#gridEquip').editRow('" + treaEquipId + "', true, TheOnEditFunction );\"  />";
                             be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"TheOnEditFunction('" + treaEquipId + "', 'Equip');\"  />";
@@ -1138,6 +1199,15 @@
                             $("#btn_save_" + treaEquipId).hide();
                             $("#btn_cancel_" + treaEquipId).hide();
 
+
+                            if (i == 0) {
+                                var rowData = $("#gridEquip").jqGrid('getRowData', ids[i]);
+                                $('#controlMode').val(rowData.controlMode);
+                                $('#custodyMode').val(rowData.custodyMode);
+                                $('#custodyOrder').val(rowData.custodyOrder);
+                            }
+                            
+
                         }
                     }
 
@@ -1145,6 +1215,23 @@
 
                 }
             });
+            //欄位檢核-設備名稱
+            function checkEquip(value, colname) {
+                var sel = jQuery("#gridEquip").getGridParam('selrow');
+                var rowData = $("#gridEquip").jqGrid('getRowData', sel);
+
+                if (rowData.controlMode != $("#controlMode").val()) {
+                    $("#valueErr").val("Y");
+                    return [false, '此設備的控管模式與角色設定的控管模式不同，不可新增!!'];
+                } else {
+                    $("#valueErr").val("");
+                    $("#gridEquip").jqGrid("setCell", sel, "custodyMode", $("#custodyMode").val());
+                    $("#gridEquip").jqGrid("setCell", sel, "custodyOrder", $("#custodyOrder").val());
+
+                    return [true, ""];
+                }
+            }
+
 
 
             //欄位檢核-保管順位
