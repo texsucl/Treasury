@@ -13,7 +13,7 @@ using System.Data.Entity.SqlServer;
 using System.Transactions;
 using System.Data.SqlClient;
 
-/// <summary>
+/// <summary>    
 /// 功能說明：
 /// 初版作者：20171023 黃黛鈺
 /// 修改歷程：20171023 黃黛鈺 
