@@ -281,7 +281,7 @@ namespace Treasury.WebDaos
                                   from xRoleM in psRoleM.DefaultIfEmpty()
 
                                   join cAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on xRoleM.ROLE_AUTH_TYPE equals cAuthType.CODE into psAuthType
-                                  from xAuthType in psCSts.DefaultIfEmpty()
+                                  from xAuthType in psAuthType.DefaultIfEmpty()
 
                                   where (bReviewType || m.AUTH_APLY_TYPE.Trim() == cReviewType)
                                       & (bReviewFlag || m.APPR_STATUS.Trim() == cReviewFlag)
