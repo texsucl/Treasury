@@ -19,7 +19,8 @@ namespace Treasury.Web
                         "~/Scripts/lodash.js",
                         "~/Scripts/moment.js",
                         "~/Scripts/moment-with-locales.js",
-                        "~/Scripts/jquery.blockUI.js",                       
+                        "~/Scripts/jquery.blockUI.js",
+                        "~/Scripts/jquery.blockUI.dialog.js",
                         "~/Scripts/jquery.validate.min.js",
                         "~/Scripts/jquery.validate.js",
                         "~/Scripts/jquery.unobtrusive-ajax.js",
@@ -68,15 +69,15 @@ namespace Treasury.Web
                             "~/Scripts/toastr.js",
                             "~/Scripts/verification.js"));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include( 
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                      "~/Content/bootstrap.css",
+                      "~/Content/bootstrap-dialog.css",
+                      "~/Content/bootstrap-treeview.css",
                       "~/Content/jquery.jqGrid/ui.jqgrid.css",
                       "~/Content/datepicker.css",
                       "~/Content/dataTables.bootstrap.css",
                       themeFolder + "/jquery.ui.theme.css",
                       themeFolder + "/minified/jquery-ui.min.css",
-                      "~/Content/bootstrap.css",
-                      "~/Content/bootstrap-dialog.css",
-                      "~/Content/bootstrap-treeview.css",
                       "~/Content/fubon.css",
                       "~/Content/site.css",
                       "~/Content/font-awesome.css",

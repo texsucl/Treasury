@@ -5,6 +5,8 @@ using Treasury.Web.Service.Interface;
 using Treasury.Web.Service.Actual;
 using System.Collections.Generic;
 using Treasury.WebUtility;
+using Treasury.Web.Controllers;
+using Treasury.Web.ViewModels;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 初始畫面
@@ -41,10 +43,31 @@ namespace Treasury.WebControllers
             var _CustodyFlag = Convert.ToBoolean(Session["CustodyFlag"]);
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryAccess/");
-            ViewBag.aProject = new SelectList(new List<SelectOption>(),"Value","Text");
-            ViewBag.aUnit = new SelectList(new List<SelectOption>(), "Value", "Text");
-            ViewBag.applicant = new SelectList(new List<SelectOption>(), "Value", "Text");
+            //var data = TreasuryAccess.TreasuryAccessDetail(
+            //     AccountController.CurrentUserId, AccountController.CustodianFlag
+            //    );
+            var data = TreasuryAccess.TreasuryAccessDetail(
+                  AccountController.CurrentUserId, true
+            );
+            
+            var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
+            var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
+            var All = new SelectOption() { Text = "All", Value = "All" };
+            _aProjectAll.Insert(0, All);
+            _aUnitAll.Insert(0, All);
+
+            ViewBag.aProject = new SelectList(data.Item1, "Value", "Text");
+            ViewBag.aUnit = new SelectList(data.Item2, "Value", "Text");
+            ViewBag.applicant = new SelectList(data.Item3, "Value", "Text");
+            ViewBag.aProjectAll = new SelectList(_aProjectAll, "Value", "Text");
+            ViewBag.aUnitAll = new SelectList(_aUnitAll, "Value", "Text");
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult ChangeUnit(string DPT_CD)
+        {
+            return Json(TreasuryAccess.ChangeUnit(DPT_CD));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
 @{
     ViewBag.Title = "金庫進出管理作業-金庫物品存取申請作業";
     //Layout = "~/Views/Shared/_Layout.cshtml";
@@ -14,7 +15,7 @@
             </div>
             @if (opScope != "" && opScope != "0")
             {
-                <form>
+                <form id="TAForm">
                      <table >
                          <tr>
                              <td width="120px">
@@ -31,7 +32,8 @@
                                  <label class="TASearch" style="display:none">存取項目:</label>
                              </td>
                              <td>
-                                 @Html.DropDownList("aProject",(SelectList)ViewBag.aProject)
+                                 @Html.DropDownList("aProject",(SelectList)ViewBag.aProject ,new {@class = "TAInsert" })
+                                 @Html.DropDownList("aProjectAll", (SelectList)ViewBag.aProjectAll, new {@class= "TASearch", @style="display:none;"})
                              </td>
                          </tr>
                          <tr class="TAInsert">
@@ -65,15 +67,15 @@
                                  <label class="red">預計存取日期:</label>
                              </td>
                              <td >
-                                 <input type="text" id="EXP_ACCESS_DATE" />
+                                 <input type="text" id="EXP_ACCESS_DATE" name="EXP_ACCESS_DATE" />
                              </td>
                              <td>
                                  <span class="red">＊</span>
                                  <label class="red">申請作業:</label>
                              </td>
                              <td>
-                                 @Html.RadioButton("cProjectType", "deposit", new { @checked = true }) 存入
-                                 @Html.RadioButton("cProjectType", "takeOut") 取出
+                                 @Html.RadioButton("cProjectType", "存入", new { @checked = true }) 存入
+                                 @Html.RadioButton("cProjectType", "取出") 取出
                              </td>
                          </tr>
                          <tr class="TASearch" style="display:none">
@@ -96,9 +98,8 @@
                                  <label style="padding-right:20px">申請單位:</label>
                              </td>
                              <td>
-                                 @Html.DropDownList("aSUnit", (SelectList)ViewBag.aUnit)
+                                 @Html.DropDownList("aSUnitAll", (SelectList)ViewBag.aUnitAll)
                              </td>
-                         </tr>
                          </tr>
                          <tr class="TASearch" style="display:none">
                              <td>
@@ -141,15 +142,14 @@
                      </table>
                     <div id="TASearchDetail">
                     </div>
-                    <div id="TAInsertDetail">
 
-                    </div>
                 </form>
             }
-
         </div>
     </div>
-
+    <div id="TAInsertDialog" style="display:none" role="dialog" class="myDialog">
+        <div id="TAInsertDetail"></div>
+    </div>
 </div>
 
 
@@ -162,8 +162,10 @@
         //#region url設定
         var TAurl = {};
         TAurl.openBILL = '@Url.Action("InsertView", "BILL")';
-
+        TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")'
         var insertDetailId = 'TAInsertDetail';
+        var TAFormId = 'TAForm';
+        var EXP_ACCESS_DATEId = 'EXP_ACCESS_DATE';
         //#endregion
 
         var opScope = '@Html.Raw(ViewBag.opScope)';
@@ -184,9 +186,12 @@
 
             //#region 初始設定
 
-            created.createDatepicker("EXP_ACCESS_DATE", null);
+            created.createDatepicker(EXP_ACCESS_DATEId, null);
             created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
             created.createDatepickerRange('CONFIRM_DT_From', 'CONFIRM_DT_To');
+            verified.datepicker(TAFormId, EXP_ACCESS_DATEId, $('#' + EXP_ACCESS_DATEId).val());
+            verified.required(TAFormId, 'TAReason', message.required('字軌')); //字軌為必填
+            verified.required(TAFormId, EXP_ACCESS_DATEId, message.required('預計存取日期')); //預計存取日期為必填
 
             $('.TASearch').hide();
             $('input[name=cIFeaturesType]').on('change', function () {
@@ -208,29 +213,53 @@
                 }
             });
 
+            $('#aIUnit').on('change', function () {
+                setApplicant($(this).val())
+            });
+
             //#endregion
 
         }
 
+        //#region 申請單位變更=>變更申請人
+        function setApplicant(DPT_CD)
+        {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    DPT_CD: DPT_CD
+                }),
+                dataType:"json",
+                url: TAurl.changeUnit,
+                contentType:'application/json'
+            }).done(function (result) {
+                customerUtility.addoption('applicant',result);
+            })
+
+        }
+        //#endregion
+
         //#region 初始設定
         function reset()
         {
-            resetInsertDeatil();
+            resetTAInsertDeatil();
         }
         //#endregion
 
         //#region 新增事件
         function TAInsert() {
-            resetTAInsertDeatil();
-            $('#TAI_Insert').hide();
-            var _aProject = $('#aProject').val();
-            _aProject = 'BILL';
-            switch (_aProject) {
-                case 'BILL':
-                    openBILL();
-                    break;
-                case '':
-                    break;
+            if ($('#TAForm').valid())
+            {
+                resetTAInsertDeatil();
+                var _aProject = $('#aProject').val();
+                switch (_aProject) {
+                    case 'BILL':
+                        openBILL();
+                        break;
+                    default:
+                        customerUtility.alert('功能尚未完成', 'w')
+                        break;
+                }
             }
         }
         //#endregion
@@ -239,8 +268,28 @@
         function resetTAInsertDeatil()
         {
             $('#' + insertDetailId).children().remove();
-            $('#TAI_Insert').show();
+            //$('#TAI_Insert').show();
         }
+        //#endregion
+
+        //#region 新增事件(打開新增Dialog)
+        function openTAInsertDialog(title)
+        {
+            title = title || '';
+            title += '明細';
+            var dialogId = 'TAInsertDialog';
+            $('#' + dialogId).dialog({
+                position: {my:"top+30%",at:"center top",of:window},
+                title: title,
+                width: 'auto',
+                autoOpen : false,
+                resizable: false,
+                closeText : '取消'
+            });
+            $('#' + dialogId).dialog('open');
+            $.blockUI();
+        }
+        
         //#endregion
 
         //#region 新增事件(開啟空白票據)
@@ -248,9 +297,9 @@
             $.ajax({
                 type: 'GET',
                 url: TAurl.openBILL,
-                success: function (data, textStatus, jqXHR) {
-                    debugger
+                success: function (data, textStatus, jqXHR) {                    
                     $('#' + insertDetailId).html(data);
+                    openTAInsertDialog('@Ref.TreaItemType.BILL.GetDescription()');
                 }
             })
         }

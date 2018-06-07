@@ -5,20 +5,28 @@
     /// </summary>
     public static class CacheList
     {
-        #region 資料庫資料
-        public static string TempData { get; private set; }
+        #region Cache資料
+        /// <summary>
+        /// 明細資料(空白票據)
+        /// </summary>
+        public static string BILLTempData { get; private set; }
+        /// <summary>
+        /// 當日庫存明細表(空白票據)
+        /// </summary>
+        public static string BILLDayData { get; private set; }
 
-        #endregion 資料庫資料
+        #endregion Cache資料
 
 
 
         static CacheList()
         {
-            #region 資料庫資料
+            #region Cache資料
 
-            TempData = "TempData";
+            BILLTempData = "BILLTempData";
+            BILLDayData = "BILLDayData";
 
-            #endregion 資料庫資料
+            #endregion Cache資料
 
         }
     }

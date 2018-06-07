@@ -1,6 +1,8 @@
 ﻿using Treasury.WebBO;
 using System;
 using Treasury.Web;
+using Treasury.Web.Service.Interface;
+using Treasury.Web.Service.Actual;
 
 /// <summary>
 /// 功能說明：共用 controller
@@ -20,6 +22,12 @@ namespace Treasury.WebControllers
 
     public class CommonController : BaseController
     {
+        internal ICacheProvider Cache { get; set; }
+
+        public CommonController()
+        {
+            Cache = new DefaultCacheProvider();
+        }
 
         protected string GetopScope(string funcId)
         {

@@ -26,6 +26,25 @@ namespace Treasury.Web.Controllers
     {
         static private NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+        static public string CurrentUserId {
+            get {
+                var httpContext = System.Web.HttpContext.Current;                
+                var _userId = httpContext.Session["UserID"];
+                if (_userId != null)
+                    return _userId.ToString();
+                return null;
+            }
+        }
+
+        static public bool CustodianFlag { get {
+                var httpContext = System.Web.HttpContext.Current;
+                var _Unit = httpContext.Session["UserUnit"];
+                if(_Unit != null)
+                   return _Unit.ToString() == "VE303"; //VE303 後續改為動態?
+                return false;
+            }
+        }
+
         public ActionResult Error()
         {
             return View();
@@ -92,7 +111,6 @@ namespace Treasury.Web.Controllers
                                     {
                                         Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
                                         Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
-                                        Session["CustodyFlag"] = StringUtil.toString(emp.DPT_CD) == "VE303";
                                     }
                                 }
                                 

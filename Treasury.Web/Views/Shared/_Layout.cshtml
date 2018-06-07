@@ -1,7 +1,4 @@
-﻿
-
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -10,14 +7,14 @@
     <title>@ViewBag.Title - 金庫管理系統</title>
 
     @*@Html.Analytics(AppConfig.GoogleAnalyticsNum())*@
-   
+    @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryjqgrid")
     @Scripts.Render("~/bundles/locales")
     @Scripts.Render("~/bundles/treasury")   
-    @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryui")
     <script>
         baseUrl = '@Url.Content("~/")';
 
@@ -33,23 +30,15 @@
 <body>
 
     <div class="container margin-top-5" >
-
             @{ Html.RenderAction("MenuByUser", "Navigation", null); }
-
             @RenderBody()
-
             @*<hr class="colorgraph" />*@
             <footer class="text-center">
                 <p>&copy; @DateTime.Now.Year -金庫管理系統</p>
             </footer>
+    </div>
 
-        </div>
-
-    
-
-    @*@Scripts.Render("~/bundles/bootstrap")*@
     @Scripts.Render("~/bundles/Customer")
-    @Styles.Render("~/Content/css")
     @RenderSection("scripts", required: false)
 
     <script>

@@ -29,11 +29,7 @@
         }
     }
 
-    created.padLeft(str, lenght, padStr) = padLeft(str, lenght, padStr);
-    created.padRight(str, lenght, padStr) = padRight(str, lenght, padStr);
-
-
-    verifird.positiveInt = function (formid, elementid, msg) {
+    verified.positiveInt = function (formid, elementid, msg) {
         msg = msg || message.english;
         $("#" + formid).validate({
             errorPlacement: function (error, element) {
@@ -45,7 +41,7 @@
 
         $.validator.addMethod("positiveInt",
         function (value, element, arg) {
-            return verified.isEnglish(value);
+            return verified.isPositiveInt(value);
         }, message.positiveInt);
         //#endregion
         $('#' + elementid).rules('add', {
@@ -160,7 +156,7 @@
         var d = null;
         if (!(date === d)) {
 
-                if (verified.isDate(date, false)) {
+                if (verified.isDate(date)) {
                     d = verified.datepickerStrToDate(date);
                 }
                 else {
@@ -358,13 +354,13 @@
 
     function verifiedReportDate(value) {
         if (dateFormat.test(value)) {           
-            let datepicker = verified.datepickerStrToDate(value);
+            var datepicker = verified.datepickerStrToDate(value);
             if (!datepicker) {
                 return false;
             }
             if (datepicker.getDate() === 25)
                 return true;
-            let d = getOnlyDate();
+            var d = getOnlyDate();
             d.setFullYear(datepicker.getFullYear());
             d.setDate(1);
             d.setMonth(datepicker.getMonth());
@@ -384,7 +380,19 @@
         return d;
     }
 
-    function padLeft(str, lenght, padStr) {
+    created.uuid = function _uuid() {
+        var d = Date.now();
+        if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+            d += performance.now(); //use high-precision timer if available
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    };
+
+    created.padLeft = function padLeft(str, lenght, padStr) {
         str = (str || '') + '';
         if (typeof lenght != 'number')
             return str;
@@ -394,7 +402,7 @@
         else
             return padLeft(padStr + str, lenght , padStr);
     }
-    function padRight(str, lenght, padStr) {
+    created.padRight = function padRight(str, lenght, padStr) {
         str = (str || '') + '';
         if (typeof lenght != 'number')
             return str;

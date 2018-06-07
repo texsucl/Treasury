@@ -6927,7 +6927,8 @@ $.widget( "ui.button", {
 			this._addClass( this.icon, "ui-button-icon", "ui-icon" );
 
 			if ( !this.options.showLabel ) {
-				this._addClass( "ui-button-icon-only" );
+			    this._addClass("ui-button-icon-only");
+			    this._addClass("ui-state-default"); //mark customer
 			}
 		} else if ( icon ) {
 
@@ -6955,7 +6956,8 @@ $.widget( "ui.button", {
 			// space if it does not exist
 			if ( !this.iconSpace ) {
 				this.iconSpace = $( "<span> </span>" );
-				this._addClass( this.iconSpace, "ui-button-icon-space" );
+			    //this._addClass(this.iconSpace, "ui-button-icon-space"); //mark customer
+				this._addClass(this.iconSpace, "ui-button-text"); //mark customer
 			}
 			this._removeClass( this.icon, null, "ui-wiget-icon-block" );
 			this._attachIconSpace( position );
@@ -12128,7 +12130,8 @@ $.widget( "ui.dialog", {
 	disable: $.noop,
 	enable: $.noop,
 
-	close: function( event ) {
+	close: function (event) {
+
 		var that = this;
 
 		if ( !this._isOpen || this._trigger( "beforeClose", event ) === false ) {
@@ -12150,7 +12153,8 @@ $.widget( "ui.dialog", {
 
 		this._hide( this.uiDialog, this.options.hide, function() {
 			that._trigger( "close", event );
-		} );
+		});
+        $('#customer' + that.element.attr('id') + 'ui-widget-overlay').remove();
 	},
 
 	isOpen: function() {
@@ -12179,7 +12183,8 @@ $.widget( "ui.dialog", {
 		return moved;
 	},
 
-	open: function() {
+	open: function () {
+
 		var that = this;
 		if ( this._isOpen ) {
 			if ( this._moveToTop() ) {
@@ -12213,7 +12218,9 @@ $.widget( "ui.dialog", {
 		// dialog is focused (#10152)
 		this._makeFocusTarget();
 
-		this._trigger( "open" );
+		this._trigger("open");
+		var id = 'customer' + that.element.attr('id') + 'ui-widget-overlay';
+		that.element.parent('div').before('<div id="' + id + '" class="ui-widget-overlay"></div>');
 	},
 
 	_focusTabbable: function() {
@@ -12345,9 +12352,9 @@ $.widget( "ui.dialog", {
 		// Support: IE
 		// Use type="button" to prevent enter keypresses in textboxes from closing the
 		// dialog in IE (#9312)
-		this.uiDialogTitlebarClose = $( "<button type='button'></button>" )
+		this.uiDialogTitlebarClose = $("<button type='button' title='" + this.options.closeText + "'></button>")
 			.button( {
-				label: $( "<a>" ).text( this.options.closeText ).html(),
+				//label: $( "<a>" ).text( this.options.closeText ).html(), mark customer
 				icon: "ui-icon-closethick",
 				showLabel: false
 			} )
@@ -12646,7 +12653,7 @@ $.widget( "ui.dialog", {
 			this.uiDialogTitlebarClose.button( {
 
 				// Ensure that we always pass a string
-				label: $( "<a>" ).text( "" + this.options.closeText ).html()
+				//label: $( "<a>" ).text( "" + this.options.closeText ).html() //mark customer
 			} );
 		}
 
@@ -12797,10 +12804,8 @@ $.widget( "ui.dialog", {
 				}
 			} );
 		}
-
-		this.overlay = $( "<div>" )
+		this.overlay = $("<div>")
 			.appendTo( this._appendTo() );
-
 		this._addClass( this.overlay, null, "ui-widget-overlay ui-front" );
 		this._on( this.overlay, {
 			mousedown: "_keepFocus"

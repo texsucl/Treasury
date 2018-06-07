@@ -617,5 +617,8 @@
       setup(jQuery);
    }
 
+    //default setting and have the UI blocked for all ajax request
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+
 })();
 

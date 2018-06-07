@@ -4,16 +4,17 @@
     window.customerUtility = customerUtility;
 
     customerUtility.addoption = function (selectId, obj) {
+        $('#' + selectId + ' option').remove();
         $.each(obj, function (key, data) {
-            let value = data.value || '';
-            let text = data.text || '';
-            let Value = data.Value || '';
-            let Text = data.Text || '';
+            var value = data.value || '' ;
+            var text = data.text || '';
+            var Value = data.Value || '';
+            var Text = data.Text || '';
             if (value != '' && text != '')
                 $("#" + selectId).append($("<option></option>").attr("value", data.value).text(data.text));
-            if(Value != '' && Text != '')
+            if (Value != '' && Text != '')
                 $("#" + selectId).append($("<option></option>").attr("value", data.Value).text(data.Text));
-        })
+        });
     }
 
     customerUtility.readCookie = function readCookie(name) {
@@ -132,11 +133,30 @@
         $('.checkbox').find('input[type=checkbox]').next('[type=hidden]').remove();
     }
 
+    customerUtility.closeDialog = function(i)
+    {
+        $(i).parent().closest('.ui-dialog-content').dialog('close');
+    }
+
+    customerUtility.alertAuto = function (result)
+    {
+        var flag = result.RETURN_FLAG;
+        flag = flag || false;
+        var msg = result.DESCRIPTION;
+        msg = msg || '';
+        if (flag) {
+            customerUtility.alert(msg, 's');
+        }
+        else {
+            customerUtility.alert(msg, 'e');
+        }
+    }
+
     customerUtility.alert = function (message, type)
     {
-        let flag = '';
-        //flag = 'toastr';
-        flag = 'alert';
+        var flag = '';
+        flag = 'toastr';
+        //flag = 'alert';
         if (flag == 'toastr')
         {
             type = type || '';

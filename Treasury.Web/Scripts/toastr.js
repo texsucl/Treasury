@@ -198,7 +198,7 @@
                     titleClass: 'toast-title',
                     messageClass: 'toast-message',
                     target: 'body',
-                    closeHtml: '<button type="button">&times;</button>',
+                    closeHtml: '<button type="button" >&times;</button>',
                     newestOnTop: true,
                     preventDuplicates: false,
                     progressBar: false
@@ -335,7 +335,7 @@
                         $messageElement.append(map.message).addClass(options.messageClass);
                         $toastElement.append($messageElement);
                     }
-                    let confirm = $('<button type="button" style="margin-top:10px">確認</button>');
+                    var confirm = $('<button type="btn btn-primary"  style="margin-top:10px;color:black;">確認</button>');
                     confirm.click(function () { hideToast(true); });
                     $messageElement.append('</br>');
                     $messageElement.append(confirm);

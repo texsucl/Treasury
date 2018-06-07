@@ -2,8 +2,14 @@
 
 namespace Treasury.Web.ViewModels
 {
-    public class BillViewModel
+    public class BillViewModel : ITreaItem
     {
+        /// <summary>
+        /// 物品單號
+        /// </summary>
+        [Description("物品單號")]
+        public string vItemId { get; set; }
+
         /// <summary>
         /// 申請單號
         /// </summary>
@@ -21,6 +27,12 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("項次")]       
         public string vRowNum { get; set; }
+
+        /// <summary>
+        /// 庫存狀態
+        /// </summary>
+        [Description("庫存狀態")]
+        public string vStatus { get; set; }
 
         /// <summary>
         /// 發票行庫
@@ -51,5 +63,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("支票號碼(迄)")]
         public string vCheckNoE { get; set; }
+
+        /// <summary>
+        /// 總張數
+        /// </summary>
+        [Description("總張數")]
+        public string vCheckTotalNum { get; set; }
     }
 }

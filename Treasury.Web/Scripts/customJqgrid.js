@@ -32,15 +32,15 @@
         };
 
         $.each(data, function (dkey, dvalue) {
-            let tr = '<tr id="' + dialogid + dvalue.name + 'tr'+ '" ';
-            let tdtitle = '<td style="white-space:nowrap; text-align:right">';
-            let tdinput = '<td style="white-space:nowrap;padding-bottom: 5px;padding-top: 5px;">';
-            let tdinput2 = '';
-            let name = dialogid + dvalue.name;
-            let type = '';
-            let text = '';
-            let beforeStr = '';
-            let afterStr = '';
+            var tr = '<tr id="' + dialogid + dvalue.name + 'tr'+ '" ';
+            var tdtitle = '<td style="white-space:nowrap; text-align:right">';
+            var tdinput = '<td style="white-space:nowrap;padding-bottom: 5px;padding-top: 5px;">';
+            var tdinput2 = '';
+            var name = dialogid + dvalue.name;
+            var type = '';
+            var text = '';
+            var beforeStr = '';
+            var afterStr = '';
             $.each(dvalue, function (key, value) {
                 if (key === 'name')
                     name = (dialogid + value);
@@ -224,8 +224,9 @@
             height = height || defaultheight;
             width = width || defaultwidth;
             rownumberFlag = rownumberFlag || false;
-            $('#' + jqgridDivId).append('<table id="' + listId + '"><table>');
-            $('#' + jqgridDivId).append('div id="' + pagerId + '"');
+            clearJqgrid(jqgridDivId);
+            $('#' + jqgridDivId).append('<table id="' + listId + '"></table>');
+            $('#' + jqgridDivId).append('<div id="' + pagerId + '"></div>');
             $('#' + listId).jqGrid({
                 url: url,
                 datatype: 'json',
@@ -247,9 +248,9 @@
                 viewrecords: true,
                 caption: caption,
                 resizable: false,
-                autoencode: true,
+                //autoencode: true,
                 viewsortcols: [true, 'vertival', true],
-                ajaxRpwOption: { contentType: "application/json" },
+                ajaxRowOptions: { contentType: "application/json" },
                 serializeRowData: function (data) {
                     return JSON.stringify(data);
                 },
@@ -258,7 +259,7 @@
                         completeFun(listId);
                 }
             });
-            $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false });
+            $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false, search: false, refresh: false });
         }
 
     jqgridCustom.createJqgridByLocal =
@@ -282,8 +283,9 @@
             height = height || defaultheight;
             width = width || defaultwidth;
             rownumberFlag = rownumberFlag || false;
-            $('#' + jqgridDivId).append('<table id="' + listId + '"><table>');
-            $('#' + jqgridDivId).append('div id="' + pagerId + '"');
+            clearJqgrid(jqgridDivId);
+            $('#' + jqgridDivId).append('<table id="' + listId + '"></table>');
+            $('#' + jqgridDivId).append('<div id="' + pagerId + '"></div>');
             $('#' + listId).jqGrid({
                 data: localdata,
                 datatype: 'local',
@@ -300,9 +302,9 @@
                 caption: caption,
                 resizable: false,
                 shrinkToFit: false,
-                autoencode: true,
+                //autoencode: true,
                 viewsortcols: [true, 'vertival', true],
-                ajaxRpwOption: { contentType: "application/json" },
+                ajaxRowOptions: { contentType: "application/json" },
                 serializeRowData: function (data) {
                     return JSON.stringify(data);
                 },
@@ -311,7 +313,7 @@
                         completeFun(listId);
                 }
             });
-            $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false });
+            $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false ,search: false,refresh : false});
         }
 
     //#region jqgridCustom.updatePagerIcons 範例
@@ -417,4 +419,9 @@
     function () {
         $('.ui-jqgrid-view > .frozen-div').find('.ui-jqgrid-resize').hide()
     }
+
+    function clearJqgrid(gridDivId) {
+        $('#' + gridDivId).children().remove();
+    }
+
 })(window);

@@ -1,19 +1,21 @@
-﻿<div class="row">
-    <div>
-        <input id="BILLInsert" value="新增存入明細" class="btn btn-primary"/>
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="row">
+    <div style="padding-bottom:5px;">
+        <input type="button" id="BILLInsert" value="新增存入明細" class="btn btn-primary"/>
     </div>
-    <div id="BILLjqgridDiv1" class="col-sm-24">
+    <div id="BILLjqgridDiv1" class="col-sm-24" style="padding-bottom:5px;">
 
     </div>
     <div id="BILLjqgridDiv2"  class="col-sm-24">
 
     </div>
-    <div style="text-align:center">
-        <input id="BILLApply" value="申請覆核" class="btn btn-primary" />
-        <input id="BILLCancel" value="取消申請" class="btn btn-primary" />
-        <input id="BILLBack" value="回到功能選擇" class="btn btn-primary" />
+    <div style="text-align:center;padding-top:5px;">
+        <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary" />
+        <input type="button" id="BILLCancel" value="取消申請"  class="btn btn-primary" />
+        <input type="button" id="BILLBack" value="回到功能選擇"  class="btn btn-primary" />
     </div>
-    <div style="display:none;">
+    <div id="BillInsertDialog" style="display:none;">
         <form id="BILLForm">
             <table>
                 <tr>
@@ -22,21 +24,21 @@
                     </td>
                     <td>
                         <div class="select-editable">
-                            <select id="sBILL_Issuing_Bank" onchange="this.nextElementSibling.value = this.value" ></select>
-                            <input type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value="" />
+                            <select class="BILLInsertType" id="sBILL_Issuing_Bank" onchange="this.nextElementSibling.value = this.value" ></select>
+                            <input class="BILLInsertType" type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value=""/>
                         </div>
                     </td>
                     <td>
                         <label>類型 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type)
+                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type,new { @class = "BILLInsertType" })
                     </td>
                     <td>
                         <label>字軌 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tBILL_Check_No_Track" onkeyup="this.value=this.value.toUpperCase()" name="tBILL_Check_No_Track"/>
+                        <input type="text" class="BILLInsertType" id="tBILL_Check_No_Track" onkeyup="this.value=this.value.toUpperCase()" name="tBILL_Check_No_Track"/>
                     </td>
                 </tr>
                 <tr>
@@ -44,19 +46,36 @@
                         <label>票號(起) : </label>
                     </td>
                     <td>
-                        <input type="text" id="tBILL_Check_No_B" name="tBILL_Check_No_B"/>
+                        <input type="text" class="BILLInsertType" id="tBILL_Check_No_B" name="tBILL_Check_No_B"/>
                     </td>
                     <td>
                         <label>票號(迄) : </label>
                     </td>
                     <td>
-                        <input type="text" id="tBILL_Check_No_E" name="tBILL_Check_No_E" />
+                        <input type="text" class="BILLInsertType" id="tBILL_Check_No_E" name="tBILL_Check_No_E" />
                     </td>
                     <td>
                         <label>總張數 : </label>
                     </td>
                     <td>
                         <label id="BILL_total"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <input type="hidden" id="tAplyNo" />
+                        <input type="hidden" id="tDataSeq" />
+                        <input type="hidden" id="tItemId" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="BILLInsertTemp" value="新增" class="btn btn-primary" style="display:none"/>
+                        <input type="button" id="BILLUpdateTemp" value="修改" class="btn btn-primary" style="display:none"/>
+                        <input type="button" id="BILLDeleteTemp" value="刪除" class="btn btn-primary" style="display:none"/>
+                    </td>
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="BILLCancelTemp" value="取消" class="btn btn-primary" />
                     </td>
                 </tr>
             </table>
@@ -69,15 +88,36 @@
 
         //#region 參數設定
         var BILLFormId = 'BILLForm'; //formId
+        var BILL_AplyNoId = 'tAplyNo'; //申請單號Id
+        var BILL_DataSeqId = 'tDataSeq'; //明細流水號Id
+        var BILL_ItemId = 'tItemId'; //物品編號Id
+        var BILL_Check_TypeId = 'dBILL_Check_Type'; //支票類型Id
+        var BILL_Issuing_BankId = 'tBILL_Issuing_Bank'; //行庫Id
         var BILL_Check_No_TrackId = 'tBILL_Check_No_Track'; //字軌Id
         var BILL_Check_No_BId = 'tBILL_Check_No_B'; //票號(起)Id
         var BILL_Check_No_EId = 'tBILL_Check_No_E'; //票號(迄)Id
         var BILL_totalId = 'BILL_total'; //總張數Id
+        var type = $('input[name=cProjectType]:checked').val();
+        if (type == '取出')
+        {
+            $('#BILLInsert').hide();
+        }
         //#endregion
 
         //#region url設定
         var BILLurl = {};
         BILLurl.Insert = '@Url.Action("InsertView", "BILL")';
+        BILLurl.getData = '@Url.Action("GetCacheData", "BILL")';
+        BILLurl.InsertTempData = '@Url.Action("InsertTempData", "BILL")';
+        BILLurl.UpdateTempData = '@Url.Action("UpdateTempData", "BILL")';
+        BILLurl.DeleteTempData = '@Url.Action("DeleteTempData", "BILL")';
+        BILLurl.ResetTempData = '@Url.Action("ResetTempData", "BILL")';
+        //#endregion
+
+        //#region 初始動作
+        BILLTempGrid();
+        BILLDayGrid();
+        setBILLVerified();
         //#endregion
 
         //#region 註冊verified
@@ -89,7 +129,7 @@
             verified.required(BILLFormId, BILL_Check_No_BId, message.required('票號(起)')); //票號(起)為必填
             verified.maxlength(BILLFormId, BILL_Check_No_BId, 8); //票號(起)最大長度(8)
             verified.positiveInt(BILLFormId, BILL_Check_No_EId); //票號(迄) 僅能輸入數字(正)
-            verified.required(BILLFormId, BILL_Check_No_EId, message.required('票號(迄)')); //票號(迄)為必填        
+            verified.required(BILLFormId, BILL_Check_No_EId, message.required('票號(迄)')); //票號(迄)為必填
             verified.maxlength(BILLFormId, BILL_Check_No_EId, 8); //票號(迄)最大長度(8)
         }
         //#endregion
@@ -99,19 +139,31 @@
             var id = $(this).attr('id');
             switch (id) {
                 case 'BILLInsert':
-                    $('#' + id).on('click', function () { BILLInsert(); });
+                    $('#' + id).on('click', function () { BILLInsertFun(); });
                     break;
                 case 'BILLApply':
-                    $('#' + id).on('click', function () { BILLApply(); });
+                    $('#' + id).on('click', function () { BILLApplyFun(); });
                     break;
                 case 'BILLCancel':
-                    $('#' + id).on('click', function () { BILLCancel(); });
+                    $('#' + id).on('click', function () { BILLCancelFun(); });
                     break;
                 case 'BILLBack':
-                    $('#' + id).on('click', function () { BILLBack(); });
+                case 'BILLCancelTemp':
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
                     break;
+                case 'BILLInsertTemp':
+                    $('#' + id).on('click', function () { BILLInsertTempFun(); });
+                    break;
+                case 'BILLUpdateTemp':
+                    $('#' + id).on('click', function () { BILLUpdateTempFun(); });
+                    break;
+                case 'BILLDeleteTemp':
+                    $('#' + id).on('click', function () { BILLDeleteTempFun(); });
+                    break;
+
             }
         });
+
         //計算總張數
         $('#' + BILL_Check_No_BId + ',#' + BILL_Check_No_EId).on('blur', function () {
             setBILL_total();
@@ -119,37 +171,334 @@
 
         function setBILL_total()
         {
-            var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
-            var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
-            if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E > _Check_No_B) {
-                $('#' + BILL_totalId).val(_Check_No_E - _Check_No_B + 1);
+            if ($('#' + BILL_Check_No_BId).val().length <= 8 && $('#' + BILL_Check_No_EId).val().length <= 8) {
+                var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
+                var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
+                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E > _Check_No_B) {
+                    $('#' + BILL_totalId).html(_Check_No_E - _Check_No_B + 1);
+                }
+                else {
+                    $('#' + BILL_totalId).html('');
+                }
+                if (!isNaN(_Check_No_B))
+                    $('#' + BILL_Check_No_BId).val(created.padLeft(_Check_No_B, 8, '0'));
+                if (!isNaN(_Check_No_E))
+                    $('#' + BILL_Check_No_EId).val(created.padLeft(_Check_No_E, 8, '0'));
             }
-            if (!isNaN(_Check_No_B))
-                $('#' + BILL_Check_No_BId).val(created.padLeft(_Check_No_B, 8, '0'));
-            if (!isNaN(_Check_No_E))
-                $('#' + BILL_Check_No_EId).val(created.padLeft(_Check_No_E, 8, '0'));
+            else {
+                $('#' + BILL_totalId).html('');
+            }
         }
         //#endregion
 
-        //#region function
-        function BILLInsert() {
+        function BILLApplyFun() {
+
+        }
+
+        function BILLCancelFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: BILLurl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog();
+                BILLTempGrid();
+                BILLDayGrid();
+            })
+        }
+
+
+
+        function BILLTempGrid(){
+            var colNameArray = ['動作', '項次', '發票行庫', '類型', '字軌',
+                '支票號碼(起)', '支票號碼(迄)', '總張數',
+                '物品單號', '申請單號', '明細流水號'];
             var colModelArray = [
-                { name: "act", index: "act", width: 100, sortable: false},
-                { name: "rowNum", index: "rowNum", width: 40, sortable: false },
-
+                { name: "act", index: "act", width: 90, sortable: false},
+                { name: "vRowNum", index: "vRowNum", width: 40, sortable: false },
+                { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
+                { name: "vCheckType", index: "vCheckType", width: 80, sortable: false },
+                { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
+                { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false },
+                { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false },
+                { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 80, sortable: false },
+                { name: "vItemId", index: "vItemId", hidden: true },
+                { name: "vAplyNo", index: "vAplyNo", hidden: true },
+                { name: "vDataSeq", index: "vDataSeq", hidden: true },
             ];
+            jqgridCustom.createJqgridByCache(
+                'BILLjqgridDiv1',
+                'BILLTempList',
+                'BILLTempPeger',
+                BILLurl.getData,
+                {
+                    type: 'Temp'
+                },
+                colNameArray,
+                colModelArray,
+                type + '明細資料',
+                BILLTempCompleteFun
+                );
         }
 
-        function BILLApply() {
-
+        function BILLDayGrid() {
+            var colNameArray = ['項次', '庫存狀態', '發票行庫', '類型',
+                '字軌', '支票號碼(起)', '支票號碼(迄)', '總張數',
+                '物品單號', '申請單號', '明細流水號'];
+            var colModelArray = [
+                { name: "vRowNum", index: "vRowNum", width: 40, sortable: false },
+                { name: "vStatus", index: "vStatus", width: 90, sortable: false },
+                { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
+                { name: "vCheckType", index: "vCheckType", width: 80, sortable: false },
+                { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
+                { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false },
+                { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false },
+                { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 80, sortable: false },
+                { name: "vItemId", index: "vItemId", hidden: true },
+                { name: "vAplyNo", index: "vAplyNo", hidden: true },
+                { name: "vDataSeq", index: "vDataSeq", hidden: true },
+            ];
+            jqgridCustom.createJqgridByCache(
+                'BILLjqgridDiv2',
+                'BILLDayList',
+                'BILLDayPeger',
+                BILLurl.getData,
+                {
+                    type: 'Day'
+                },
+                colNameArray,
+                colModelArray,
+                '當日庫存明細資料'
+                );
         }
 
-        function BILLCancel() {
-            resetTAInsertDeatil();
+        function BILLTempCompleteFun(listId){
+            jqgridCustom.randerAction(listId, 'BILLTemp', tempActFun);
         }
 
-        function BILLBack() {
-            resetTAInsertDeatil();
+        var tempActFun = {};
+        tempActFun.Edit = function(i)
+        {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function(i)
+        {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function(i)
+        {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function BILLInsertFun() {
+
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid)
+        {
+            var dialogId = 'BillInsertDialog';
+            var listId = 'BILLTempList';
+            var BILLInsertClass = 'BILLInsertType';
+            var title = '';
+            $('#BILLInsertTemp,#BILLUpdateTemp,#BILLDeleteTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+                ResetInsertDialog();
+                $('#BILLInsertTemp').show();
+                title = '@Ref.ActionType.Add.GetDescription()';
+                $('.' + BILLInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#BILLDeleteTemp').show();
+                title = '@Ref.ActionType.Dele.GetDescription()';
+                $('.' + BILLInsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#BILLUpdateTemp').show();
+                title = '@Ref.ActionType.Edit.GetDescription()';
+                $('.' + BILLInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                title = '@Ref.ActionType.View.GetDescription()';
+                $('.' + BILLInsertClass).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '空白票券',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+
+            $('#' + BILLFormId).validate().resetForm();
+            if ($('#' + BILL_Check_TypeId + ' option').length > 0)
+            {
+                $('#' + BILL_Check_TypeId).val($($('#' + BILL_Check_TypeId + ' option')[0]).val())               
+            }
+            $('#' + BILL_AplyNoId).val('');
+            $('#' + BILL_DataSeqId).val('');
+            $('#' + BILL_ItemId).val('');
+            $('#' + BILL_Issuing_BankId).val('');
+            $('#' + BILL_Check_No_TrackId).val('');
+            $('#' + BILL_Check_No_BId).val('');
+            $('#' + BILL_Check_No_EId).val('');
+            $('#' + BILL_totalId).html('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + BILL_AplyNoId).val(data.vAplyNo);
+                $('#' + BILL_DataSeqId).val(data.vDataSeq);
+                $('#' + BILL_ItemId).val(data.vItemId);
+                $('#' + BILL_Check_TypeId).val(data.vCheckType);
+                $('#' + BILL_Issuing_BankId).val(data.vIssuingBank);
+                $('#' + BILL_Check_No_TrackId).val(data.vCheckNoTrack);
+                $('#' + BILL_Check_No_BId).val(data.vCheckNoB);
+                $('#' + BILL_Check_No_EId).val(data.vCheckNoE);
+                $('#' + BILL_totalId).html(data.vCheckTotalNum);
+            }
+        }
+
+        //新增暫存空白票據明細
+        function BILLInsertTempFun() {
+            if ($('#' + BILLFormId).valid())
+            {
+                var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
+                var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
+                if(_Check_No_B > _Check_No_E)
+                {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: BillViewModel(
+                            created.uuid(),
+                            $('#' + BILL_AplyNoId).val(),
+                            $('#' + BILL_DataSeqId).val(),
+                            $('#' + BILL_Issuing_BankId).val(),
+                            $('#' + BILL_Check_TypeId).val(),
+                            $('#' + BILL_Check_No_TrackId).val(),
+                            $('#' + BILL_Check_No_BId).val(),
+                            $('#' + BILL_Check_No_EId).val(),
+                            $('#' + BILL_totalId).html())
+                    }),
+                    dataType: "json",
+                    url: BILLurl.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG)
+                    {
+                        customerUtility.closeDialog($('#BILLInsertTemp'));
+                        BILLTempGrid();
+                        BILLDayGrid();
+                    }
+                })
+            }
+        }
+
+        function BILLUpdateTempFun()
+        {
+            if ($('#' + BILLFormId).valid()) {
+                var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
+                var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
+                if (_Check_No_B > _Check_No_E) {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: BillViewModel(
+                            $('#' + BILL_ItemId).val(),
+                            $('#' + BILL_AplyNoId).val(),
+                            $('#' + BILL_DataSeqId).val(),
+                            $('#' + BILL_Issuing_BankId).val(),
+                            $('#' + BILL_Check_TypeId).val(),
+                            $('#' + BILL_Check_No_TrackId).val(),
+                            $('#' + BILL_Check_No_BId).val(),
+                            $('#' + BILL_Check_No_EId).val(),
+                            $('#' + BILL_totalId).html())
+                    }),
+                    dataType: "json",
+                    url: BILLurl.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#BILLUpdateTemp'));
+                        BILLTempGrid();
+                        BILLDayGrid();
+                    }
+                })
+            }
+        }
+
+        function BILLDeleteTempFun() {
+            if ($('#' + BILLFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: BillViewModel(
+                            $('#' + BILL_ItemId).val())
+                    }),
+                    dataType: "json",
+                    url: BILLurl.DeleteTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#BILLDeleteTemp'));
+                        BILLTempGrid();
+                        BILLDayGrid();
+                    }
+                })
+            }
+        }
+
+        function BillViewModel(
+            vItemId,
+            vAplyNo,
+            vDataSeq,
+            vIssuingBank,
+            vCheckType,
+            vCheckNoTrack,
+            vCheckNoB,
+            vCheckNoE,
+            vCheckTotalNum
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vAplyNo'] = vAplyNo;
+            obj['vDataSeq'] = vDataSeq;
+            obj['vIssuingBank'] = vIssuingBank;
+            obj['vCheckType'] = vCheckType;
+            obj['vCheckNoTrack'] = vCheckNoTrack;
+            obj['vCheckNoB'] = vCheckNoB;
+            obj['vCheckNoE'] = vCheckNoE;
+            obj['vCheckTotalNum'] = vCheckTotalNum;
+            return obj;
         }
         //#endregion
 
