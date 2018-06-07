@@ -54,6 +54,7 @@
                     <td>
                         @Html.DisplayNameFor(model => model.dataStatus)：
                         @Html.DisplayTextFor(model => model.dataStatusDesc)
+                        @Html.Hidden("hidDataStatus", Model.dataStatus)
                     </td>
                 </tr>
 
@@ -470,7 +471,11 @@
                 validationSummary.append('<li>' + '無此使用者資料' + '</li>');
         }
 
-
+        if ($("#hidDataStatus").val() != null) {
+            if ($("#hidDataStatus").val().substring(0, 1) == "2") {
+                $("#btnModify").attr('disabled', true);
+            }
+        }
 
         //返回
         $("#btnRtn").click().on('click', function () {
