@@ -43,18 +43,14 @@ namespace Treasury.WebControllers
             var _CustodyFlag = Convert.ToBoolean(Session["CustodyFlag"]);
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryAccess/");
-            //var data = TreasuryAccess.TreasuryAccessDetail(
-            //     AccountController.CurrentUserId, AccountController.CustodianFlag
-            //    );
             var data = TreasuryAccess.TreasuryAccessDetail(
-     AccountController.CurrentUserId, true
-    );
+                 AccountController.CurrentUserId, AccountController.CustodianFlag
+                );
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
             var All = new SelectOption() { Text = "All", Value = "All" };
             _aProjectAll.Insert(0, All);
             _aUnitAll.Insert(0, All);
-
             ViewBag.aProject = new SelectList(data.Item1, "Value", "Text");
             ViewBag.aUnit = new SelectList(data.Item2, "Value", "Text");
             ViewBag.applicant = new SelectList(data.Item3, "Value", "Text");

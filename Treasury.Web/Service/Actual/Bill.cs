@@ -207,8 +207,6 @@ namespace Treasury.Web.Service.Actual
                             {
                                 try
                                 {
-
-
                                     db.SaveChanges();
 
                                     #region LOG
