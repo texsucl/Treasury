@@ -6,6 +6,11 @@
     public static class CacheList
     {
         #region Cache資料
+
+        /// <summary>
+        /// 金庫物品申取畫面(新增資料欄位)
+        /// </summary>
+        public static string TreasuryAccessViewData { get; private set; }
         /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
@@ -22,7 +27,7 @@
         static CacheList()
         {
             #region Cache資料
-
+            TreasuryAccessViewData = "TreasuryAccessViewData";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
 

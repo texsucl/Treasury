@@ -137,6 +137,18 @@ namespace Treasury.Web.Enum
             time_Out,
 
             /// <summary>
+            /// 申請複核成功
+            /// </summary>
+            [Description("申請複核成功!")]
+            Apply_Audit_Success,
+
+            /// <summary>
+            /// 申請複核失敗
+            /// </summary>
+            [Description("申請複核失敗!")]
+            Apply_Audit_Fail,
+
+            /// <summary>
             /// 呈送複核成功
             /// </summary>
             [Description("呈送複核成功!")]

@@ -74,8 +74,8 @@
                                  <label class="red">申請作業:</label>
                              </td>
                              <td>
-                                 @Html.RadioButton("cProjectType", "存入", new { @checked = true }) 存入
-                                 @Html.RadioButton("cProjectType", "取出") 取出
+                                 @Html.RadioButton("cProjectType", "P", new { @checked = true }) 存入
+                                 @Html.RadioButton("cProjectType", "G") 取出
                              </td>
                          </tr>
                          <tr class="TASearch" style="display:none">
@@ -122,16 +122,14 @@
                          <tr class="TAInsert" >
                              <td>
                                  <span class="red">＊</span>
-                                 <label>填表單位 : </label>
+                                 <label class="red">填表單位 : </label>
                              </td>
                              <td>
                                  @Html.Label("lCREATE_Dep", (string)ViewBag.lCREATE_Dep)
                              </td>
-                         </tr>
-                         <tr class="TAInsert" >
                              <td>
                                  <span class="red">＊</span>
-                                 <label>填表人 :</label>
+                                 <label class="red">填表人 :</label>
                              </td>
                              <td>
                                  @Html.Label("lCREATE_User", (string)ViewBag.lCREATE_User)
@@ -299,7 +297,10 @@
         //#region 新增事件(開啟空白票據)
         function openBILL() {
             $.ajax({
-                type: 'GET',
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null
+                }),
                 url: TAurl.openBILL,
                 success: function (data, textStatus, jqXHR) {                    
                     $('#' + insertDetailId).html(data);
