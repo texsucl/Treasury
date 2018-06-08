@@ -8,6 +8,7 @@ using Treasury.WebUtility;
 using Treasury.Web.ViewModels;
 using static Treasury.Web.Enum.Ref;
 using System.Linq;
+using Treasury.Web.Controllers;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 初始畫面
@@ -39,11 +40,14 @@ namespace Treasury.WebControllers
         /// 空白票據 新增畫面
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        //[ChildActionOnly]
+        [HttpPost]
         public ActionResult InsertView(string AplyNo)
         {
             ViewBag.dBILL_Check_Type = new SelectList(Bill.GetCheckType(), "Value", "Text");
+            var ibs = Bill.GetIssuing_Bank();
+            ibs.Add(new SelectOption() { Text = "1", Value = "1" });
+            ibs.Add(new SelectOption() { Text = "2", Value = "2" });
+            ViewBag.dBILL_Issuing_Bank = new SelectList(ibs, "Value", "Text");
             Cache.Invalidate(CacheList.BILLTempData);
             Cache.Invalidate(CacheList.BILLDayData);
             if (AplyNo.IsNullOrWhiteSpace())
@@ -62,6 +66,7 @@ namespace Treasury.WebControllers
         public JsonResult ApplyTempData(TreasuryAccessViewModel data)
         {
             MSGReturnModel<ITreaItem> result = new MSGReturnModel<ITreaItem>();
+            data.vCreateUid = AccountController.CurrentUserId;
             result = Bill.ApplyAudit((List<BillViewModel>)Cache.Get(CacheList.BILLTempData), data);
             return Json(result);
         }
@@ -80,6 +85,7 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.BILLTempData))
             {
                 var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
+                model.vStatus = "預約存入";
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.BILLTempData);
                 Cache.Set(CacheList.BILLTempData, tempData);
@@ -200,7 +206,7 @@ namespace Treasury.WebControllers
             {
                 case "Temp":
                     if (Cache.IsSet(CacheList.BILLTempData))
-                        return Json(jdata.modelToJqgridResult((List<BillViewModel>)Cache.Get(CacheList.BILLTempData)));
+                        return Json(jdata.modelToJqgridResult(setBillViewModelOrder((List<BillViewModel>)Cache.Get(CacheList.BILLTempData))));
                     break;
                 case "Day":
                     if (Cache.IsSet(CacheList.BILLDayData))
@@ -208,6 +214,15 @@ namespace Treasury.WebControllers
                     break;
             }
             return null;
+        }
+
+        private List<BillViewModel> setBillViewModelOrder(List<BillViewModel> data)
+        {
+            if (data.Any())
+            {
+                data = data.OrderBy(x => x.vRowNum).ToList();
+            }
+            return data;
         }
 
         /// <summary>

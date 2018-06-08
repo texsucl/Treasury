@@ -317,6 +317,7 @@ namespace Treasury.WebUtility
         }
 
         #endregion List to DataTable
+
         /// <summary>
         /// class 轉 jqGridData
         /// </summary>
@@ -835,6 +836,26 @@ namespace Treasury.WebUtility
         }
 
         private static Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
+        public static string modelToString<T>(this T model) 
+        {
+            var result = string.Empty;
+            if (model != null)
+            {
+                StringBuilder sb = new StringBuilder();
+                var Pros = model.GetType().GetProperties();
+                Pros.ToList().ForEach(x =>
+                {
+                    sb.Append($@"{x.Name}:{TypeTransfer.objToString(x.GetValue(model))}|");
+                });
+                if (sb.Length > 0)
+                {
+                    result = sb.ToString();
+                    result = result.Substring(0, result.Length - 1);
+                }
+            }
+            return result;
+        }
 
         /// <summary>
         /// Nlog 寫入

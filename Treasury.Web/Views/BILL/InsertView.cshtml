@@ -24,7 +24,8 @@
                     </td>
                     <td>
                         <div class="select-editable">
-                            <select class="BILLInsertType" id="sBILL_Issuing_Bank" onchange="this.nextElementSibling.value = this.value" ></select>
+                            @Html.DropDownList("sBILL_Issuing_Bank", (SelectList)ViewBag.dBILL_Issuing_Bank, new { @class = "BILLInsertType" , @onchange = "this.nextElementSibling.value = this.value" })
+                            @*<select class="BILLInsertType" id="sBILL_Issuing_Bank" onchange="this.nextElementSibling.value = this.value" ></select>*@
                             <input class="BILLInsertType" type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value=""/>
                         </div>
                     </td>
@@ -112,6 +113,7 @@
         BILLurl.UpdateTempData = '@Url.Action("UpdateTempData", "BILL")';
         BILLurl.DeleteTempData = '@Url.Action("DeleteTempData", "BILL")';
         BILLurl.ResetTempData = '@Url.Action("ResetTempData", "BILL")';
+        BILLurl.ApplyTempData = '@Url.Action("ApplyTempData", "BILL")';
         //#endregion
 
         //#region 初始動作
@@ -174,7 +176,7 @@
             if ($('#' + BILL_Check_No_BId).val().length <= 8 && $('#' + BILL_Check_No_EId).val().length <= 8) {
                 var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
                 var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
-                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E > _Check_No_B) {
+                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E >= _Check_No_B) {
                     $('#' + BILL_totalId).html(_Check_No_E - _Check_No_B + 1);
                 }
                 else {
@@ -192,7 +194,26 @@
         //#endregion
 
         function BILLApplyFun() {
-
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    data: TreasuryAccessViewModel(
+                     $('#aProject').val(),
+                     $('#aIUnit').val(),
+                     $('#applicant').val(),
+                     $('#TAReason').val(),
+                     $('#EXP_ACCESS_DATE').val(),
+                     $('input[name=cProjectType]:checked').val())
+                }),
+                dataType: "json",
+                url: BILLurl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#BILLApply'));
+                }
+            })
         }
 
         function BILLCancelFun() {
@@ -498,6 +519,24 @@
             obj['vCheckNoB'] = vCheckNoB;
             obj['vCheckNoE'] = vCheckNoE;
             obj['vCheckTotalNum'] = vCheckTotalNum;
+            return obj;
+        }
+
+        function TreasuryAccessViewModel(
+        vItem,
+        vAplyUnit,
+        vAplyUid,
+        vAccessReason,
+        vExpectedAccessDate,
+        vAccessType
+        ) {
+            var obj = {};
+            obj['vItem'] = vItem;
+            obj['vAplyUnit'] = vAplyUnit;
+            obj['vAplyUid'] = vAplyUid;
+            obj['vAccessReason'] = vAccessReason;
+            obj['vExpectedAccessDate'] = vExpectedAccessDate;
+            obj['vAccessType'] = vAccessType;
             return obj;
         }
         //#endregion

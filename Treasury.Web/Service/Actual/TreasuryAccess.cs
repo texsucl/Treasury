@@ -55,9 +55,21 @@ namespace Treasury.Web.Service.Actual
                                     Text = x.ITEM_DESC
                                 }).ToList();
 
-                            applicationUnit = db.ITEM_CHARGE_UNIT.AsNoTracking()
-                                .Where(x => x.IS_DISABLED == "N") //自【保管單位設定檔】中挑出啟用中的單位
-                                .Select(x => x.CHARGE_DEPT).Distinct()
+                            var Units = new List<string>();
+
+                            //自【保管單位設定檔】中挑出啟用中的單位
+                            db.ITEM_CHARGE_UNIT.AsNoTracking()
+                                .Where(x => x.IS_DISABLED == "N").ToList()
+                                .ForEach(x => {
+                                    if (!x.CHARGE_SECT.IsNullOrWhiteSpace())
+                                        Units.Add(x.CHARGE_SECT.Trim());
+                                    else
+                                        Units.Add(x.CHARGE_DEPT.Trim());
+                                });
+
+                           
+
+                            applicationUnit = Units.Distinct().OrderBy(x => x)
                                 .AsEnumerable()
                                 .Select(x => new SelectOption()
                                 {
@@ -105,7 +117,7 @@ namespace Treasury.Web.Service.Actual
                             {
                                 applicationUnit.Add(new SelectOption()
                                 {
-                                    Value = _emply.DPT_CD,
+                                    Value = _emply.DPT_CD?.Trim(),
                                     Text = _emply.DPT_NAME
                                 });
                                 applicant.Add(new SelectOption()

@@ -43,13 +43,12 @@ namespace Treasury.WebControllers
             var _CustodyFlag = Convert.ToBoolean(Session["CustodyFlag"]);
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryAccess/");
-            var data = TreasuryAccess.TreasuryAccessDetail(
-                 AccountController.CurrentUserId, AccountController.CustodianFlag
-                );
             //var data = TreasuryAccess.TreasuryAccessDetail(
-            //      AccountController.CurrentUserId, true
-            //);
-
+            //     AccountController.CurrentUserId, AccountController.CustodianFlag
+            //    );
+            var data = TreasuryAccess.TreasuryAccessDetail(
+     AccountController.CurrentUserId, true
+    );
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
             var All = new SelectOption() { Text = "All", Value = "All" };
@@ -61,7 +60,8 @@ namespace Treasury.WebControllers
             ViewBag.applicant = new SelectList(data.Item3, "Value", "Text");
             ViewBag.aProjectAll = new SelectList(_aProjectAll, "Value", "Text");
             ViewBag.aUnitAll = new SelectList(_aUnitAll, "Value", "Text");
-
+            ViewBag.lCREATE_User = data.Item4;
+            ViewBag.lCREATE_Dep = data.Item5;
             return View();
         }
 

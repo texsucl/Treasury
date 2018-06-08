@@ -11,5 +11,7 @@ namespace Treasury.Web.Service.Interface
     public interface IBill : IApply
     {
         List<SelectOption> GetCheckType();
+
+        List<SelectOption> GetIssuing_Bank();
     }
 }
