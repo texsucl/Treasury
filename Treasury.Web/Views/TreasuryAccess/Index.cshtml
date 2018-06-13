@@ -74,8 +74,8 @@
                                  <label class="red">申請作業:</label>
                              </td>
                              <td>
-                                 @Html.RadioButton("cProjectType", "P", new { @checked = true }) 存入
-                                 @Html.RadioButton("cProjectType", "G") 取出
+                                 @Html.RadioButton("cProjectType", Ref.AccessProjectTradeType.P.ToString(), new { @checked = true }) @Ref.AccessProjectTradeType.P.GetDescription()
+                                 @Html.RadioButton("cProjectType", Ref.AccessProjectTradeType.G.ToString()) @Ref.AccessProjectTradeType.G.GetDescription()
                              </td>
                          </tr>
                          <tr class="TASearch" style="display:none">
@@ -254,12 +254,16 @@
             {
                 resetTAInsertDeatil();
                 var _aProject = $('#aProject').val();
+                _aProject = _aProject || '';
                 switch (_aProject) {
                     case 'BILL':
                         openBILL();
                         break;
+                    case '':
+                        customerUtility.alert('無申請項目', 'w');
+                        break;
                     default:
-                        customerUtility.alert('功能尚未完成', 'w')
+                        customerUtility.alert('申請項目 : ' + $('#aProject option:selected').html() + ' 功能尚未完成', 'w');
                         break;
                 }
             }
@@ -275,15 +279,16 @@
         //#endregion
 
         //#region 新增事件(打開新增Dialog)
-        function openTAInsertDialog(title)
+        function openTAInsertDialog(title,width)
         {
             title = title || '';
+            width = width || 'auto';
             title += '明細';
             var dialogId = 'TAInsertDialog';
             $('#' + dialogId).dialog({
                 position: {my:"top+30%",at:"center top",of:window},
                 title: title,
-                width: 'auto',
+                width: width,
                 autoOpen : false,
                 resizable: false,
                 closeText : '取消'
@@ -296,21 +301,49 @@
 
         //#region 新增事件(開啟空白票據)
         function openBILL() {
+            var AccessType = $('input[name=cProjectType]:checked').val();
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
-                    AplyNo: null
+                    AplyNo: null,
+                    data: TreasuryAccessViewModel(
+                     $('#aProject').val(),
+                     $('#aIUnit').val(),
+                     $('#applicant').val(),
+                     $('#TAReason').val(),
+                     $('#EXP_ACCESS_DATE').val(),
+                     $('input[name=cProjectType]:checked').val())
                 }),
                 url: TAurl.openBILL,
+                contentType: 'application/json',
                 success: function (data, textStatus, jqXHR) {                    
                     $('#' + insertDetailId).html(data);
-                    openTAInsertDialog('@Ref.TreaItemType.BILL.GetDescription()');
+                    var width = '730px';
+                    if (AccessType == 'G')
+                        width = '850px';
+                    openTAInsertDialog('@Ref.TreaItemType.BILL.GetDescription()', width);
                 }
             })
         }
         //#endregion
 
-
+        function TreasuryAccessViewModel(
+            vItem,
+            vAplyUnit,
+            vAplyUid,
+            vAccessReason,
+            vExpectedAccessDate,
+            vAccessType
+            ) {
+            var obj = {};
+            obj['vItem'] = vItem;
+            obj['vAplyUnit'] = vAplyUnit;
+            obj['vAplyUid'] = vAplyUid;
+            obj['vAccessReason'] = vAccessReason;
+            obj['vExpectedAccessDate'] = vExpectedAccessDate;
+            obj['vAccessType'] = vAccessType;
+            return obj;
+        }
     });
 </script>
 

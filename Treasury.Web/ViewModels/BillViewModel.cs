@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace Treasury.Web.ViewModels
 {
@@ -69,5 +70,30 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("總張數")]
         public string vCheckTotalNum { get; set; }
+
+        /// <summary>
+        /// 取出號碼(迄)
+        /// </summary>
+        [Description("取出號碼(迄)")]
+        public string vTakeOutE { get; set; }
+
+        /// <summary>
+        /// 取出總張數
+        /// </summary>
+        [Description("取出總張數")]
+        public string vTakeOutTotalNum { get; set; }
+
+        /// <summary>
+        /// 剩餘總張數
+        /// </summary>
+        [Description("剩餘總張數")]
+        public string vReMainTotalNum { get; set; }
+
+        /// <summary>
+        /// 最後更新時間 (庫存資料才有)
+        /// </summary>
+
+        [Description("最後更新時間")]
+        public DateTime? vLast_Update_Time { get; set; }
     }
 }

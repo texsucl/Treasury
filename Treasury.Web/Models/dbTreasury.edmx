@@ -289,7 +289,7 @@
           <Key>
             <PropertyRef Name="ITEM_ID" />
           </Key>
-          <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ITEM_ID" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
           <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
@@ -1292,25 +1292,6 @@
           <Property Name="DEP_CHK_ITEM_DESC_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="ITEM_BLANK_NOTE">
-          <Key>
-            <PropertyRef Name="ITEM_ID" />
-          </Key>
-          <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
-          <Property Name="CHECK_TYPE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHECK_NO_TRACK" Type="String" MaxLength="4" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="CHECK_NO_B" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHECK_NO_E" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APLY_DEPT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APLY_SECT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APLY_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_DEPT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_SECT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
         <EntityType Name="ITEM_CA">
           <Key>
             <PropertyRef Name="ITEM_ID" />
@@ -1986,7 +1967,6 @@
           <EntitySet Name="CODE_USER_HIS" EntityType="Self.CODE_USER_HIS" />
           <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" />
           <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" />
-          <EntitySet Name="ITEM_BLANK_NOTE" EntityType="Self.ITEM_BLANK_NOTE" />
           <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" />
           <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" />
           <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="Self.ITEM_DEP_ORDER_D" />
@@ -2034,6 +2014,7 @@
           <EntitySet Name="CODE_USER_ROLE_HIS" EntityType="dbTreasuryModel.CODE_USER_ROLE_HIS" />
           <EntitySet Name="CODE_ROLE" EntityType="dbTreasuryModel.CODE_ROLE" />
           <EntitySet Name="CODE_ROLE_HIS" EntityType="dbTreasuryModel.CODE_ROLE_HIS" />
+          <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2113,6 +2094,25 @@
           <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="ROLE_AUTH_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="ITEM_BLANK_NOTE">
+          <Key>
+            <PropertyRef Name="ITEM_ID" />
+          </Key>
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="CHECK_NO_TRACK" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="true" />
+          <Property Name="CHECK_NO_B" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="CHECK_NO_E" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="APLY_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APLY_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -2310,26 +2310,6 @@
                 <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
                 <ScalarProperty Name="DEP_CHK_ITEM_DESC_B" ColumnName="DEP_CHK_ITEM_DESC_B" />
                 <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ITEM_BLANK_NOTE">
-            <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_BLANK_NOTE">
-              <MappingFragment StoreEntitySet="ITEM_BLANK_NOTE">
-                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
-                <ScalarProperty Name="INVENTORY_STATUS" ColumnName="INVENTORY_STATUS" />
-                <ScalarProperty Name="ISSUING_BANK" ColumnName="ISSUING_BANK" />
-                <ScalarProperty Name="CHECK_TYPE" ColumnName="CHECK_TYPE" />
-                <ScalarProperty Name="CHECK_NO_TRACK" ColumnName="CHECK_NO_TRACK" />
-                <ScalarProperty Name="CHECK_NO_B" ColumnName="CHECK_NO_B" />
-                <ScalarProperty Name="CHECK_NO_E" ColumnName="CHECK_NO_E" />
-                <ScalarProperty Name="APLY_DEPT" ColumnName="APLY_DEPT" />
-                <ScalarProperty Name="APLY_SECT" ColumnName="APLY_SECT" />
-                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
-                <ScalarProperty Name="CHARGE_DEPT" ColumnName="CHARGE_DEPT" />
-                <ScalarProperty Name="CHARGE_SECT" ColumnName="CHARGE_SECT" />
-                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
-                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3078,6 +3058,26 @@
                 <ScalarProperty Name="ROLE_NAME" ColumnName="ROLE_NAME" />
                 <ScalarProperty Name="ROLE_ID" ColumnName="ROLE_ID" />
                 <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ITEM_BLANK_NOTE">
+            <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_BLANK_NOTE">
+              <MappingFragment StoreEntitySet="ITEM_BLANK_NOTE">
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CHARGE_SECT" ColumnName="CHARGE_SECT" />
+                <ScalarProperty Name="CHARGE_DEPT" ColumnName="CHARGE_DEPT" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_SECT" ColumnName="APLY_SECT" />
+                <ScalarProperty Name="APLY_DEPT" ColumnName="APLY_DEPT" />
+                <ScalarProperty Name="CHECK_NO_E" ColumnName="CHECK_NO_E" />
+                <ScalarProperty Name="CHECK_NO_B" ColumnName="CHECK_NO_B" />
+                <ScalarProperty Name="CHECK_NO_TRACK" ColumnName="CHECK_NO_TRACK" />
+                <ScalarProperty Name="CHECK_TYPE" ColumnName="CHECK_TYPE" />
+                <ScalarProperty Name="ISSUING_BANK" ColumnName="ISSUING_BANK" />
+                <ScalarProperty Name="INVENTORY_STATUS" ColumnName="INVENTORY_STATUS" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

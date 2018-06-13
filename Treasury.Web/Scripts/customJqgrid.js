@@ -212,18 +212,23 @@
             colNameArray,
             colModelArray,
             caption,
+            page,
             completeFun,
             rownumberFlag,
+            width,
+            height,
             rowNum,
             rowList,
-            height,
-            width)
+            overflowFlag
+            )
         {
             rowNum = rowNum || defaultrowNum;
             rowList = rowList || defaultrowList;
             height = height || defaultheight;
             width = width || defaultwidth;
             rownumberFlag = rownumberFlag || false;
+            overflowFlag = overflowFlag || true;
+            page = page || '1';
             clearJqgrid(jqgridDivId);
             $('#' + jqgridDivId).append('<table id="' + listId + '"></table>');
             $('#' + jqgridDivId).append('<div id="' + pagerId + '"></div>');
@@ -243,6 +248,7 @@
                 rownumbers: rownumberFlag,
                 rownumWidth:40,
                 pager: '#' + pagerId,
+                page: page,
                 height: height,
                 width: width,
                 viewrecords: true,
@@ -255,8 +261,29 @@
                     return JSON.stringify(data);
                 },
                 loadComplete: function () {
+                    if (page != '1' && $("#" + listId).getRowData().length == 0)
+                    {
+                        jqgridCustom.createJqgridByCache(
+                        jqgridDivId,
+                        listId,
+                        pagerId,
+                        url,
+                        postData,
+                        colNameArray,
+                        colModelArray,
+                        caption,
+                        "1",
+                        completeFun,
+                        rownumberFlag,
+                        rowNum,
+                        rowList,
+                        height,
+                        width)
+                    }
                     if (typeof completeFun != "undefined" && typeof completeFun == "function")
                         completeFun(listId);
+                    if (overflowFlag)
+                        $('#' + jqgridDivId).find('.ui-jqgrid-bdiv').css('overflow', 'unset');
                 }
             });
             $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false, search: false, refresh: false });
@@ -271,18 +298,23 @@
             colNameArray,
             colModelArray,
             caption,
+            page,
             completeFun,
             rownumberFlag,
+            width,
+            height,
             rowNum,
             rowList,
-            height,
-            width)
+            overflowFlag
+            )
         {
             rowNum = rowNum || defaultrowNum;
             rowList = rowList || defaultrowList;
             height = height || defaultheight;
             width = width || defaultwidth;
+            page = page || '1';
             rownumberFlag = rownumberFlag || false;
+            overflowFlag = overflowFlag || true;
             clearJqgrid(jqgridDivId);
             $('#' + jqgridDivId).append('<table id="' + listId + '"></table>');
             $('#' + jqgridDivId).append('<div id="' + pagerId + '"></div>');
@@ -296,6 +328,7 @@
                 rownumbers: rownumberFlag,
                 rownumWidth: 40,
                 pager: '#' + pagerId,
+                page : page,
                 height: height,
                 width: width,
                 viewrecords: true,
@@ -309,8 +342,27 @@
                     return JSON.stringify(data);
                 },
                 loadComplete: function () {
+                    if (page != '1' && $("#" + listId).getRowData().length == 0) {
+                        jqgridCustom.createJqgridByLocal(
+                        jqgridDivId,
+                        listId,
+                        pagerId,
+                        localdata,
+                        colNameArray,
+                        colModelArray,
+                        caption,
+                        "1",
+                        completeFun,
+                        rownumberFlag,
+                        rowNum,
+                        rowList,
+                        height,
+                        width)
+                    }
                     if (typeof completeFun != "undefined" && typeof completeFun == "function")
                         completeFun(listId);
+                    if (overflowFlag)
+                        $('#' + jqgridDivId).find('.ui-jqgrid-bdiv').css('overflow', 'unset');
                 }
             });
             $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false ,search: false,refresh : false});
@@ -413,6 +465,10 @@
         {
             return $('#' + tableId).find('.cbox:checked').length == 0;
         }
+    }
+
+    jqgridCustom.getPage = function (id) {
+        return $('#' + id).find('.ui-pg-input').val() || '1' ;
     }
 
     jqgridCustom.hideFrozenTitle =

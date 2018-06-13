@@ -46,6 +46,9 @@ namespace Treasury.WebControllers
             var data = TreasuryAccess.TreasuryAccessDetail(
                  AccountController.CurrentUserId, AccountController.CustodianFlag
                 );
+    //        var data = TreasuryAccess.TreasuryAccessDetail(
+    // AccountController.CurrentUserId, true
+    //);
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
             var All = new SelectOption() { Text = "All", Value = "All" };

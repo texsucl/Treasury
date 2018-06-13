@@ -305,6 +305,8 @@
 
     verified.isPositiveInt = function (value) {
         value = value || '';
+        if (value == '')
+            return true;
         return positiveInt.test(value);
     }
 

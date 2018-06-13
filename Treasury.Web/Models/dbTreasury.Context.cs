@@ -39,7 +39,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_USER_HIS> CODE_USER_HIS { get; set; }
         public virtual DbSet<DEP_CHK_ITEM> DEP_CHK_ITEM { get; set; }
         public virtual DbSet<DEP_CHK_ITEM_HIS> DEP_CHK_ITEM_HIS { get; set; }
-        public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
         public virtual DbSet<ITEM_CA> ITEM_CA { get; set; }
         public virtual DbSet<ITEM_CHARGE_UNIT> ITEM_CHARGE_UNIT { get; set; }
         public virtual DbSet<ITEM_DEP_ORDER_D> ITEM_DEP_ORDER_D { get; set; }
@@ -79,5 +78,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_USER_ROLE_HIS> CODE_USER_ROLE_HIS { get; set; }
         public virtual DbSet<CODE_ROLE> CODE_ROLE { get; set; }
         public virtual DbSet<CODE_ROLE_HIS> CODE_ROLE_HIS { get; set; }
+        public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
     }
 }
