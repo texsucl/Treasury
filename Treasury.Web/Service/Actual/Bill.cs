@@ -14,9 +14,11 @@ namespace Treasury.Web.Service.Actual
 {
     public class Bill : IBill
     {
+        protected INTRA intra { private set; get; }
+
         public Bill()
         {
-
+            intra = new INTRA();
         }
 
         #region GetData
@@ -47,25 +49,31 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 當日庫存明細資料(空白票據)
+        /// 抓取庫存明細資料
         /// </summary>
-        /// <param name="aplyNo"></param>
+        /// <param name="vAplyUnit">申請部門</param>
+        /// <param name="accessType">存入(P)取出(G)</param>
+        /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        public IEnumerable<ITreaItem> GetDayData(string aplyNo = null)
+        public IEnumerable<ITreaItem> GetDayData(string vAplyUnit = null, string accessType = null, string aplyNo = null)
         {
             var result = new List<BillViewModel>();
             if (!aplyNo.IsNullOrWhiteSpace())
             {
                 result.AddRange((List<BillViewModel>)GetTempData(aplyNo));
             }
+            var dept = intra.getDept(vAplyUnit);
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
                 var _Inventory_types = sys_codes
                     .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
                 result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
+                    .Where(x => x.INVENTORY_STATUS == "1",accessType == AccessProjectTradeType.G.ToString()) //取出時只抓庫存狀態為庫存的項目
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT== dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04")
+                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(),!dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03")
                     .AsEnumerable()
-                    .Select(x => ItemBlankNoteToBillViewModel(x, sys_codes)));
+                    .Select(x => ItemBlankNoteToBillViewModel(x, _Inventory_types)));
             }
             return result;
         }
@@ -133,6 +141,12 @@ namespace Treasury.Web.Service.Actual
                 if (insertDatas != null)
                 {
                     var datas = (List<BillViewModel>)insertDatas;
+
+                    //取出只抓狀態為預約取出的資料
+                    if (taData.vAccessType == AccessProjectTradeType.G.ToString())
+                    {
+                        datas = datas.Where(x => x.vStatus == AccessInventoryTyp._4.GetDescription()).ToList();
+                    }
                     if (datas.Any())
                     {
                         using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -144,13 +158,43 @@ namespace Treasury.Web.Service.Actual
                             var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
                             string logStr = string.Empty;
 
+                            if (taData.vAccessType == AccessProjectTradeType.G.ToString())
+                            {
+                                bool _changFlag = false;
+                                datas.ForEach(x =>
+                                {
+                                    var _blank_Note = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.vItemId);
+                                    if (_blank_Note != null)
+                                    {
+                                        if (_blank_Note.LAST_UPDATE_DT > x.vLast_Update_Time || _blank_Note.INVENTORY_STATUS != "1")
+                                        {
+                                            _changFlag = true;
+                                        }
+                                        else
+                                        {
+                                            _blank_Note.INVENTORY_STATUS = "4"; //預約取出
+                                            _blank_Note.LAST_UPDATE_DT = dt;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _changFlag = true;                                       
+                                    }
+                                });
+                                if (_changFlag)
+                                {
+                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                    return result;
+                                }
+                            }
+
                             #region 申請單紀錄檔
                             var _TAR = new TREA_APLY_REC()
                             {
                                 APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
                                 APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
                                 ITEM_ID = taData.vItem,
-                                ACCESS_TYPE = taData.vAccessType, //存入
+                                ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
                                 ACCESS_REASON = taData.vAccessReason,
                                 APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
                                 EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate),
@@ -191,13 +235,14 @@ namespace Treasury.Web.Service.Actual
                                     ISSUING_BANK = x.vIssuingBank,
                                     CHECK_NO_TRACK = x.vCheckNoTrack,
                                     CHECK_NO_B = x.vCheckNoB,
-                                    CHECK_NO_E = x.vCheckNoE
+                                    CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE
                                 };
                                 db.BLANK_NOTE_APLY.Add(_BNA);
                                 logStr += "|";
                                 logStr += _BNA.modelToString() ;
                             });
                             #endregion
+
                             var validateMessage = db.GetValidationErrors().getValidateString();
                             if (validateMessage.Any())
                             {
@@ -230,12 +275,12 @@ namespace Treasury.Web.Service.Actual
                     }
                     else
                     {
-                        result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+                        result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
                     }
                 }
                 else
                 {
-                    result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+                    result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
             catch (Exception ex)
@@ -287,7 +332,8 @@ namespace Treasury.Web.Service.Actual
                 vCheckNoTrack = data.CHECK_NO_TRACK, 
                 vCheckNoB = data.CHECK_NO_B,
                 vCheckNoE = data.CHECK_NO_E,
-                vCheckTotalNum = (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString()
+                vCheckTotalNum = (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString(),
+                vLast_Update_Time = data.LAST_UPDATE_DT
             };
         }
 

@@ -83,6 +83,12 @@ namespace Treasury.Web.Enum
             not_Find_Update_Data,
 
             /// <summary>
+            /// 無申請覆核資料
+            /// </summary>
+            [Description("無申請覆核資料!")]
+            not_Find_Audit_Data,
+
+            /// <summary>
             /// 沒有找到搜尋的資料
             /// </summary>
             [Description("沒有找到搜尋的資料!")]

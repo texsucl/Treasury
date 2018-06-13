@@ -28,8 +28,10 @@ namespace Treasury.Web.Service.Interface
         /// <summary>
         /// 抓取庫存明細資料
         /// </summary>
+        /// <param name="vAplyUnit">申請部門</param>
+        /// <param name="accessType">存入(P)取出(G)</param>
         /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        IEnumerable<ITreaItem> GetDayData(string aplyNo = null);
+        IEnumerable<ITreaItem> GetDayData(string vAplyUnit = null, string accessType = null, string aplyNo = null);
     }
 }
