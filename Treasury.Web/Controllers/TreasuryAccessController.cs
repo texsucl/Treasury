@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Treasury.WebUtility;
 using Treasury.Web.Controllers;
 using Treasury.Web.ViewModels;
+using System.Linq;
+using static Treasury.Web.Enum.Ref;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 初始畫面
@@ -43,12 +45,12 @@ namespace Treasury.WebControllers
             var _CustodyFlag = Convert.ToBoolean(Session["CustodyFlag"]);
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryAccess/");
+            //var data = TreasuryAccess.TreasuryAccessDetail(
+            //     AccountController.CurrentUserId, AccountController.CustodianFlag
+            //    );
             var data = TreasuryAccess.TreasuryAccessDetail(
-                 AccountController.CurrentUserId, AccountController.CustodianFlag
-                );
-    //        var data = TreasuryAccess.TreasuryAccessDetail(
-    // AccountController.CurrentUserId, true
-    //);
+     AccountController.CurrentUserId, true
+    );
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
             var All = new SelectOption() { Text = "All", Value = "All" };
@@ -64,10 +66,115 @@ namespace Treasury.WebControllers
             return View();
         }
 
+        /// <summary>
+        /// 改變申請單位時,變動申請人
+        /// </summary>
+        /// <param name="DPT_CD"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult ChangeUnit(string DPT_CD)
         {
             return Json(TreasuryAccess.ChangeUnit(DPT_CD));
+        }
+
+        [HttpPost]
+        public JsonResult Search(TreasuryAccessSearchViewModel searchModel)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+            Cache.Invalidate(CacheList.TreasuryAccessSearchData);
+            Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
+            searchModel.vCreateUid = AccountController.CurrentUserId;
+            var datas = TreasuryAccess.getSearchDetail(searchModel);
+            if (datas.Any())
+            {
+                Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, datas);
+                result.RETURN_FLAG = true;
+            }
+
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 取消申請
+        /// </summary>
+        /// <param name="AplyNo"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Cancel(string AplyNo)
+        {
+            MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
+            var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+            var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
+            if (data != null)
+            {
+                result = TreasuryAccess.Cancel(searchData, data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="AplyNo"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Invalidate(string AplyNo)
+        {
+            MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
+            var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+            var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
+            if (data != null)
+            {
+                result = TreasuryAccess.Invalidate(searchData, data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// jqgrid cache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCacheData(jqGridParam jdata, string type)
+        {
+            if (Cache.IsSet(CacheList.TreasuryAccessSearchDetailViewData))
+            {
+                var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                var AccessStatus = new List<string>() {
+                    AccessProjectFormStatus.A01.ToString(),
+                    AccessProjectFormStatus.A03.ToString(),
+                    AccessProjectFormStatus.A04.ToString()
+                 };
+                switch (type)
+                {
+                    case "Access":
+                            return Json(jdata.modelToJqgridResult(datas.Where(x=> AccessStatus.Contains(x.vAPLY_STATUS)).ToList()));
+                    case "Report":
+                            return Json(jdata.modelToJqgridResult(datas.Where(x => !AccessStatus.Contains(x.vAPLY_STATUS)).ToList()));
+                }
+            }
+            return null;
         }
     }
 }

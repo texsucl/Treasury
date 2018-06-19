@@ -261,6 +261,7 @@
                     return JSON.stringify(data);
                 },
                 loadComplete: function () {
+                    jqgridCustom.updatePagerIcons($(this));
                     if (page != '1' && $("#" + listId).getRowData().length == 0)
                     {
                         jqgridCustom.createJqgridByCache(
@@ -342,6 +343,7 @@
                     return JSON.stringify(data);
                 },
                 loadComplete: function () {
+                    jqgridCustom.updatePagerIcons($(this));
                     if (page != '1' && $("#" + listId).getRowData().length == 0) {
                         jqgridCustom.createJqgridByLocal(
                         jqgridDivId,
@@ -377,30 +379,33 @@
     function updatePagerIcons(table,div)  //table => loadComplete this.table
     {
         div = div || '';
-        var replacement =
-        {
-            'ui-icon-seek-first': 'ace-icon fa fa-angle-double-left bigger-140',
-            'ui-icon-seek-prev': 'ace-icon fa fa-angle-left bigger-140',
-            'ui-icon-seek-next': 'ace-icon fa fa-angle-right bigger-140',
-            'ui-icon-seek-end': 'ace-icon fa fa-angle-double-right bigger-140'
-        };
-        if (div != '') {
-            $('#' + div + ' .ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function () {
-                var icon = $(this);
-                var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+        //var replacement =
+        //{
+        //    'ui-icon-seek-first': 'ace-icon fa fa-angle-double-left bigger-140',
+        //    'ui-icon-seek-prev': 'ace-icon fa fa-angle-left bigger-140',
+        //    'ui-icon-seek-next': 'ace-icon fa fa-angle-right bigger-140',
+        //    'ui-icon-seek-end': 'ace-icon fa fa-angle-double-right bigger-140'
+        //};
+        //if (div != '') {
+        //    $('#' + div + ' .ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function () {
+        //        var icon = $(this);
+        //        var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
 
-                if ($class in replacement) icon.attr('class', 'ui-icon ' + replacement[$class]);
-            })
-        }
-        else {
-            $('.ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function () {
-                var icon = $(this);
-                var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+        //        if ($class in replacement) icon.attr('class', 'ui-icon ' + replacement[$class]);
+        //    })
+        //}
+        //else {
+        //    $('.ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function () {
+        //        var icon = $(this);
+        //        var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
 
-                if ($class in replacement) icon.attr('class', 'ui-icon ' + replacement[$class]);
-            })
-        }
-
+        //        if ($class in replacement) icon.attr('class', 'ui-icon ' + replacement[$class]);
+        //    })
+        //}
+        $(table).parents('.jqd:first').find('.openDialog').each(function () {
+            var title = $(this).attr('title');
+            $(this).parent('td:first').attr('title', title);
+        });
         $(table).parents('.jqd:first').find('.cbox').each(function () {
             var id = $(this).attr('id');
             if (id.indexOf("cb") > -1) //全選按鈕

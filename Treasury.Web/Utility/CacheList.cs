@@ -11,6 +11,17 @@
         /// 金庫物品申取畫面(新增資料欄位)
         /// </summary>
         public static string TreasuryAccessViewData { get; private set; }
+
+        /// <summary>
+        /// 金庫物品查詢畫面(查詢條件)
+        /// </summary>
+        public static string TreasuryAccessSearchData { get; private set; }
+
+        /// <summary>
+        /// 金庫物品查詢畫面(資料)
+        /// </summary>
+        public static string TreasuryAccessSearchDetailViewData { get; private set; }
+
         /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
@@ -28,6 +39,8 @@
         {
             #region Cache資料
             TreasuryAccessViewData = "TreasuryAccessViewData";
+            TreasuryAccessSearchData = "TreasuryAccessSearchData";
+            TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
 

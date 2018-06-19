@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Treasury.Web.ViewModels;
 using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
@@ -23,5 +24,29 @@ namespace Treasury.Web.Service.Interface
         /// <param name="DPT_CD"></param>
         /// <returns></returns>
         List<SelectOption> ChangeUnit(string DPT_CD);
+
+        /// <summary>
+        /// 查詢
+        /// </summary>
+        /// <param name="data">畫面資料</param>
+        /// <returns></returns>
+
+        List<TreasuryAccessSearchDetailViewModel> getSearchDetail(TreasuryAccessSearchViewModel data);
+
+        /// <summary>
+        /// 取消申請
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
     }
 }

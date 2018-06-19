@@ -15,7 +15,7 @@ namespace Treasury.WebUtility
         /// 回傳資料
         /// </summary>
         [DataMember]
-        public IEnumerable<T> Datas { get; set; }
+        public T Datas { get; set; }
 
         /// <summary>
         /// 回傳訊息

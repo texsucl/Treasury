@@ -22,6 +22,20 @@ namespace Treasury.Web.Service.Actual
         }
 
         #region GetData
+
+        public string GetAccessType(string aplyNo)
+        {
+            var result = string.Empty;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (_TAR != null)
+                    result = _TAR.ACCESS_TYPE;
+            }
+            return result;
+        }
+
         /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
@@ -34,15 +48,21 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
+                var _code = "3"; //預約存入 , 4=> 預約取出
                 var _Inventory_types = sys_codes
-                    .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
+                    .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList(); //抓庫存狀態設定
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                    .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (_TAR != null)
+                    _code = _TAR.ACCESS_TYPE == AccessProjectTradeType.P.ToString() ? "3" :
+                           _TAR.ACCESS_TYPE == AccessProjectTradeType.G.ToString() ? "4" : "3";
                 result = db.BLANK_NOTE_APLY.AsNoTracking()
                     .Where(x => x.APLY_NO == aplyNo)
                     .OrderBy(x => x.ISSUING_BANK)
                     .ThenBy(x => x.CHECK_TYPE)
                     .ThenBy(x => x.CHECK_NO_TRACK)
                     .AsEnumerable()
-                    .Select((x, y) => BlankNoteAplyToBillViewModel(x, y, _Inventory_types)).ToList();
+                    .Select((x, y) => BlankNoteAplyToBillViewModel(x, _code, y, _Inventory_types,true)).ToList();
             }
 
             return result;
@@ -52,28 +72,73 @@ namespace Treasury.Web.Service.Actual
         /// 抓取庫存明細資料
         /// </summary>
         /// <param name="vAplyUnit">申請部門</param>
-        /// <param name="accessType">存入(P)取出(G)</param>
+        /// <param name="inventoryStatus">庫存狀態</param>
         /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        public IEnumerable<ITreaItem> GetDayData(string vAplyUnit = null, string accessType = null, string aplyNo = null)
+        public IEnumerable<ITreaItem> GetDayData(string vAplyUnit = null, string inventoryStatus = null, string aplyNo = null)
         {
-            var result = new List<BillViewModel>();
-            if (!aplyNo.IsNullOrWhiteSpace())
-            {
-                result.AddRange((List<BillViewModel>)GetTempData(aplyNo));
-            }
-            var dept = intra.getDept(vAplyUnit);
+            var result = new List<BillViewModel>();         
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                if (!aplyNo.IsNullOrWhiteSpace())
+                {
+                    //result.AddRange((List<BillViewModel>)GetTempData(aplyNo));
+                    var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                         .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                    if (_TAR != null)
+                        vAplyUnit = _TAR.APLY_UNIT;
+                }
+                var dept = intra.getDept(vAplyUnit); //抓取單位
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
                 var _Inventory_types = sys_codes
                     .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
-                result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
-                    .Where(x => x.INVENTORY_STATUS == "1",accessType == AccessProjectTradeType.G.ToString()) //取出時只抓庫存狀態為庫存的項目
-                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT== dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04")
-                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(),!dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03")
+                     result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
+                    .Where(x => x.INVENTORY_STATUS == inventoryStatus, !inventoryStatus.IsNullOrWhiteSpace()) //取出時只抓庫存狀態為庫存的項目
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT== dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
+                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(),!dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
                     .AsEnumerable()
                     .Select(x => ItemBlankNoteToBillViewModel(x, _Inventory_types)));
+            }
+
+            if (inventoryStatus != "1") //排除只抓庫存其他都需要申請紀錄檔
+            {
+                result.AddRange(getTreaAplyRec(vAplyUnit));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 抓取申請紀錄檔
+        /// </summary>
+        /// <param name="vAplyUnit"></param>
+        /// <returns></returns>
+        private List<BillViewModel> getTreaAplyRec(string vAplyUnit)
+        {
+            var result = new List<BillViewModel>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var nonShowStatus = new List<string>()
+                {
+                    AccessProjectFormStatus.E02.ToString()
+                };
+                var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
+                var _Inventory_types = sys_codes
+                    .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
+                db.TREA_APLY_REC.AsNoTracking()
+                    .Where(x => !nonShowStatus.Contains(x.APLY_STATUS)) //要確認是否須排除不能顯示的
+                    .Where(x => x.APLY_UNIT == vAplyUnit).ToList()
+                    .ForEach(x =>
+                    {
+                        var _accessType = x.ACCESS_TYPE; //P(存入) , G(取出)
+                        var code = _accessType == "P" ? "3"  //預約存入
+                        : _accessType == "G" ? "4"  //預約取出
+                        : "";
+                        result.AddRange(db.BLANK_NOTE_APLY.AsNoTracking()
+                        .Where(y => y.APLY_NO == x.APLY_NO)
+                        .AsEnumerable()
+                        .Select((a, b) => BlankNoteAplyToBillViewModel(a, code, b, _Inventory_types,false)));
+                    });
             }
             return result;
         }
@@ -154,8 +219,7 @@ namespace Treasury.Web.Service.Actual
                             //取得流水號
                             SysSeqDao sysSeqDao = new SysSeqDao();
 
-                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                            var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+                            string _ITEM_BLANK_NOTE_ITEM_ID = null;
                             string logStr = string.Empty;
 
                             if (taData.vAccessType == AccessProjectTradeType.G.ToString())
@@ -172,7 +236,17 @@ namespace Treasury.Web.Service.Actual
                                         }
                                         else
                                         {
-                                            _blank_Note.INVENTORY_STATUS = "4"; //預約取出
+                                            _ITEM_BLANK_NOTE_ITEM_ID = _blank_Note.ITEM_ID;
+                                            //全部取出
+                                            if (x.vTakeOutE == _blank_Note.CHECK_NO_E)
+                                            {
+                                                _blank_Note.INVENTORY_STATUS = "4"; //預約取出
+                                            }
+                                            //分段取出
+                                            else
+                                            {
+                                                _blank_Note.CHECK_NO_B = (TypeTransfer.stringToInt(x.vTakeOutE) + 1).ToString().PadLeft(8,'0');
+                                            }                                     
                                             _blank_Note.LAST_UPDATE_DT = dt;
                                         }
                                     }
@@ -187,6 +261,9 @@ namespace Treasury.Web.Service.Actual
                                     return result;
                                 }
                             }
+
+                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+                            var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
 
                             #region 申請單紀錄檔
                             var _TAR = new TREA_APLY_REC()
@@ -235,7 +312,8 @@ namespace Treasury.Web.Service.Actual
                                     ISSUING_BANK = x.vIssuingBank,
                                     CHECK_NO_TRACK = x.vCheckNoTrack,
                                     CHECK_NO_B = x.vCheckNoB,
-                                    CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE
+                                    CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
+                                    ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
                                 };
                                 db.BLANK_NOTE_APLY.Add(_BNA);
                                 logStr += "|";
@@ -294,21 +372,28 @@ namespace Treasury.Web.Service.Actual
 
         #region privation function
 
-        private BillViewModel BlankNoteAplyToBillViewModel(BLANK_NOTE_APLY data ,int num, List<SYS_CODE> Inventory_types)
+        private BillViewModel BlankNoteAplyToBillViewModel(BLANK_NOTE_APLY data, string code ,int num, List<SYS_CODE> Inventory_types,bool tempFlag)
         {
             return new BillViewModel()
             {
-                vRowNum = (num +1).ToString(),
+                vRowNum = (num + 1).ToString(),
                 vItemId = data.ITEM_ID,
                 vAplyNo = data.APLY_NO,
                 vDataSeq = data.DATA_SEQ.ToString(),
-                vStatus = Inventory_types.FirstOrDefault(x => x.CODE == "3")?.CODE_VALUE,//預約存入
+                vStatus = Inventory_types.FirstOrDefault(x => x.CODE == code)?.CODE_VALUE,
                 vIssuingBank = data.ISSUING_BANK,
                 vCheckType = data.CHECK_TYPE,
                 vCheckNoTrack = data.CHECK_NO_TRACK,
                 vCheckNoB = data.CHECK_NO_B,
                 vCheckNoE = data.CHECK_NO_E,
-                vCheckTotalNum = (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString()
+                vCheckTotalNum = tempFlag ?
+                ((code == "3") ?
+                (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString() : string.Empty) :
+                (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString(),
+                vTakeOutTotalNum = tempFlag ? 
+                ((code == "4") ?
+                (TypeTransfer.stringToInt(data.CHECK_NO_E) - TypeTransfer.stringToInt(data.CHECK_NO_B) + 1).ToString() : string.Empty) : null,
+                vTakeOutE = tempFlag ? ((code == "4") ? data.CHECK_NO_E : string.Empty) : null
             };
         }
 

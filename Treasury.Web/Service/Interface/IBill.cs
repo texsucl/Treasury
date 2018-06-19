@@ -13,5 +13,7 @@ namespace Treasury.Web.Service.Interface
         List<SelectOption> GetCheckType();
 
         List<SelectOption> GetIssuing_Bank();
+
+        string GetAccessType(string aplyNo);
     }
 }
