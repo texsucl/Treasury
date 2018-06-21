@@ -574,6 +574,10 @@
         //#region 取消申請
         function TACancelFun(listId, rowid) {
             var data = $("#" + listId).getRowData(rowid);
+            if (!confirm('是否取消申請單號為' + data.vAPLY_NO + '的資料!'))
+            {
+                return false;
+            }           
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -594,6 +598,9 @@
         //#region 作廢
         function TAInvalidateFun(listId, rowid) {
             var data = $("#" + listId).getRowData(rowid);
+            if (!confirm('是否作廢單號為' + data.vAPLY_NO + '的資料!')) {
+                return false;
+            }
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -604,7 +611,6 @@
             }).done(function (result) {
                 customerUtility.alertAuto(result);
                 if (result.RETURN_FLAG) {
-
                     TAAccessGrid();
                     TAReportGrid();
                 }

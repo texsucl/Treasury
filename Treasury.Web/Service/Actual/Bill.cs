@@ -93,6 +93,7 @@ namespace Treasury.Web.Service.Actual
                 var _Inventory_types = sys_codes
                     .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
                      result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存資料表只抓庫存 其他由申請紀錄檔 抓取
                     .Where(x => x.INVENTORY_STATUS == inventoryStatus, !inventoryStatus.IsNullOrWhiteSpace()) //取出時只抓庫存狀態為庫存的項目
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT== dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(),!dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部

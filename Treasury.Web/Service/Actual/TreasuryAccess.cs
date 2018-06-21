@@ -203,7 +203,7 @@ namespace Treasury.Web.Service.Actual
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
                 if (_TREA_APLY_REC != null)
                 {
-                    if (_TREA_APLY_REC.LAST_UPDATE_DT >= data.vLast_Update_Time)
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > data.vLast_Update_Time)
                     {
                         return result;
                     }
@@ -337,7 +337,7 @@ namespace Treasury.Web.Service.Actual
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
                 if (_TREA_APLY_REC != null)
                 {
-                    if (_TREA_APLY_REC.LAST_UPDATE_DT >= data.vLast_Update_Time)
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > data.vLast_Update_Time)
                     {
                         return result;
                     }

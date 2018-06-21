@@ -142,38 +142,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.ReportViewer.Common">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.DataVisualization">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.DataVisualization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.Design">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Design.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.WebDesign">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebDesign.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.WebForms">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebForms.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ReportViewer.WinForms">
-      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WinForms.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="MvcSiteMapProvider, Version=4.6.22.0, Culture=neutral, PublicKeyToken=1923abe4657913cc, processorArchitecture=MSIL">
       <HintPath>..\packages\MvcSiteMapProvider.MVC5.Core.4.6.22\lib\net45\MvcSiteMapProvider.dll</HintPath>
       <Private>True</Private>
@@ -328,6 +296,7 @@
     <Compile Include="BO\ValidateUtil.cs" />
     <Compile Include="Controllers\CommonController.cs" />
     <Compile Include="Controllers\BILLController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\TreasuryAccessController.cs" />
     <Compile Include="Controllers\UserApprController.cs" />
     <Compile Include="Controllers\RoleApprController.cs" />
@@ -583,6 +552,27 @@
     <Compile Include="Models\V_EMPLY2.cs">
       <DependentUpon>DBIntra.tt</DependentUpon>
     </Compile>
+    <Compile Include="Report\Data\BILL.cs" />
+    <Compile Include="Report\Data\ReportData.cs" />
+    <Compile Include="Report\Interface\IReportData.cs" />
+    <Compile Include="Report\Rdlc\TestRptDataSet.cs">
+      <DependentUpon>TestRptDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Report\Rdlc\TestRptDataSet.Designer.cs">
+      <DependentUpon>TestRptDataSet.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Report\Rdlc\TestRptDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestRptDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Report\ReportViewer.aspx.cs">
+      <DependentUpon>ReportViewer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Report\ReportViewer.aspx.designer.cs">
+      <DependentUpon>ReportViewer.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Scheduler\CodeUserJob.cs" />
     <Compile Include="Scheduler\EInvoErrRptJob.cs" />
     <Compile Include="Scheduler\GLSISynJob.cs" />
@@ -597,7 +587,6 @@
     <Compile Include="Service\Interface\IApply.cs" />
     <Compile Include="Service\Interface\ICacheProvider.cs" />
     <Compile Include="Service\Interface\ITreasuryAccess.cs" />
-    <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="Utility\CacheList.cs" />
     <Compile Include="Utility\Extension.cs" />
     <Compile Include="Utility\Jqgrid.cs" />
@@ -870,6 +859,7 @@
     <Content Include="RefDlls\itextsharp.xmlworker.dll" />
     <Content Include="RefDlls\Renci.SshNet.dll" />
     <Content Include="RefDlls\System.Data.EasycomClient.dll" />
+    <Content Include="Report\ReportViewer.aspx" />
     <Content Include="Scripts\ai.0.15.0-build58334.js" />
     <Content Include="Scripts\bootstrap-dialog.js" />
     <Content Include="Scripts\bootstrap-treeview.js" />
@@ -916,6 +906,17 @@
       <SubType>Designer</SubType>
     </None>
     <Content Include="quartz_jobs.config" />
+    <Content Include="Report\Rdlc\TestRptDataSet.xsc">
+      <DependentUpon>TestRptDataSet.xsd</DependentUpon>
+    </Content>
+    <None Include="Report\Rdlc\TestRptDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>TestRptDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Report\Rdlc\TestRptDataSet.xss">
+      <DependentUpon>TestRptDataSet.xsd</DependentUpon>
+    </Content>
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="Scripts\i18n\datepicker-zh-TW.js" />
     <Content Include="Scripts\i18n\grid.locale-ar.js" />
@@ -995,19 +996,6 @@
     <Content Include="Scripts\respond.js" />
     <None Include="Scripts\_references.js" />
     <Content Include="Scripts\verification.js" />
-    <Content Include="SqlServerTypes\readme.htm" />
-    <Content Include="SqlServerTypes\x64\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x64\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Template\MqOut.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -1076,6 +1064,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Report\Rdlc\BILL.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\Impairment01.rdlc" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

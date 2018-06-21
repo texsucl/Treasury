@@ -383,10 +383,16 @@ namespace Treasury.WebControllers
                             rownum += 1;
                         }
                         var _groupvCheckTotalNum =
-                        (x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
-                          .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
-                         x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
-                          .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
+                             x.Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum));
+                           //(x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
+                           //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
+                           // x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
+                           //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
+                        ////var _groupvCheckTotalNum =
+                        //(x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
+                        //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
+                        // x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()))
+                        //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
                         total += _groupvCheckTotalNum;
                         newResult.Add(new BillViewModel()
                         { 
@@ -436,11 +442,12 @@ namespace Treasury.WebControllers
                 {
                     result.AddRange(x);
                     //資料欄位狀態文字為未包含'取出'的資料 - 料欄位狀態文字為包含'取出'的資料
-                    var _groupvCheckTotalNum =
-                    (x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) || !y.vTakeOutE.IsNullOrWhiteSpace())
-                      .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
-                     x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) && y.vTakeOutE.IsNullOrWhiteSpace())
-                      .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
+                    var _groupvCheckTotalNum = x.Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum));
+                    //var _groupvCheckTotalNum =
+                    //(x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) || !y.vTakeOutE.IsNullOrWhiteSpace())
+                    //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
+                    // x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) && y.vTakeOutE.IsNullOrWhiteSpace())
+                    //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
                     var _group = new BillViewModel()
                     {
                         vStatus = "小計",
