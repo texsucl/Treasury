@@ -15,6 +15,9 @@ namespace Treasury.Web.Service.Actual
 
     public class TreasuryAccess : ITreasuryAccess
     {
+        /// <summary>
+        /// 報表可以列印狀態
+        /// </summary>
         private List<string> printsStatus { get; set; }
 
         public TreasuryAccess()
@@ -34,13 +37,33 @@ namespace Treasury.Web.Service.Actual
             printsStatus.Add(AccessProjectFormStatus.E01.ToString());
         }
 
+        #region Get Date
+
+        /// <summary>
+        /// 取得 存入or取出
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        public string GetAccessType(string aplyNo)
+        {
+            var result = string.Empty;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (_TAR != null)
+                    result = _TAR.ACCESS_TYPE;
+            }
+            return result;
+        }
+
         /// <summary>
         /// 金庫進出管理作業-金庫物品存取申請作業 初始畫面顯示
         /// </summary>
         /// <param name="cUserID">userId</param>
         /// <param name="custodyFlag">管理科Flag</param>
         /// <returns></returns>
-        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string> TreasuryAccessDetail(string cUserID, bool custodyFlag)
+        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, string, string> TreasuryAccessDetail(string cUserID, bool custodyFlag)
         {
             List<SelectOption> applicationProject = new List<SelectOption>(); //申請項目
             List<SelectOption> applicationUnit = new List<SelectOption>(); //申請單位
@@ -86,7 +109,7 @@ namespace Treasury.Web.Service.Actual
                                         Units.Add(x.CHARGE_DEPT.Trim());
                                 });
 
-                           
+
 
                             applicationUnit = Units.Distinct().OrderBy(x => x)
                                 .AsEnumerable()
@@ -156,7 +179,7 @@ namespace Treasury.Web.Service.Actual
                 throw ex;
             }
 
-            return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string>(applicationProject, applicationUnit, applicant, createUser, createDep);
+            return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, string, string>(applicationProject, applicationUnit, applicant, createUser, createDep);
         }
 
         /// <summary>
@@ -182,12 +205,114 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
+        /// 查詢
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public List<TreasuryAccessSearchDetailViewModel> GetSearchDetail(TreasuryAccessSearchViewModel data)
+        {
+            List<TreasuryAccessSearchDetailViewModel> result = new List<TreasuryAccessSearchDetailViewModel>();
+            var depts = new List<VW_OA_DEPT>();
+            var emps = new List<V_EMPLY2>();
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+            }
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
+                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E);
+                DateTime? _vActualAccessDate_S = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_S);
+                DateTime? _vActualAccessDate_E = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_E);
+                var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
+                var treaItemTypes = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "TREA_ITEM_TYPE").ToList();
+
+                var _data = db.TREA_APLY_REC.AsNoTracking()
+                    .Where(x => data.vItem.Contains(x.ITEM_ID) && data.vAplyUnit.Contains(x.APLY_UNIT)) //項目 & 申請單位 
+                    .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
+                    .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
+                    .Where(x => x.APLY_NO == data.vAPLY_NO, !data.vAPLY_NO.IsNullOrWhiteSpace()) //申請單號
+                    .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace()); //金庫登記簿單號
+
+                if (_vActualAccessDate_S != null || _vActualAccessDate_E != null) //實際存取
+                {
+                    var status = new List<string>() {
+                        AccessProjectFormStatus.D03.ToString(),
+                        AccessProjectFormStatus .E01.ToString()}; //狀態須符合這兩個
+                    _data = _data.Where(x => status.Contains(x.APLY_STATUS))
+                        .Join(db.TREA_OPEN_REC.AsNoTracking()
+                        .Where(x => x.REGI_APPR_DT >= _vActualAccessDate_S, _vActualAccessDate_S != null)
+                        .Where(x => x.REGI_APPR_DT <= _vActualAccessDate_E, _vActualAccessDate_E != null),
+                        x => x.TREA_REGISTER_ID,
+                        y => y.TREA_REGISTER_ID,
+                        (x, y) => x);
+                }
+                result.AddRange(_data.AsEnumerable()
+                    .Select(x => TreaAplyRecToTASDViewModel(data.vCreateUid, x, treaItemTypes, formStatus, depts, emps)));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 查詢申請單紀錄資料by單號
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        public TreasuryAccessViewModel GetByAplyNo(string aplyNo)
+        {
+            var result = new TreasuryAccessViewModel();
+            var depts = new List<VW_OA_DEPT>();
+            var emps = new List<V_EMPLY2>();
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+            }
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
+                var treaItemTypes = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "TREA_ITEM_TYPE").ToList();
+                var data = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (data != null)
+                {
+                    result.vAplyNo = data.APLY_NO;
+                    result.vItem = treaItemTypes.FirstOrDefault(x => x.CODE == data.ITEM_ID)?.CODE_VALUE;
+                    result.vAplyUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME;
+                    result.vAplyUid = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME;
+                    result.vAccessType = data.ACCESS_TYPE == "P" ? "存入" : data.ACCESS_TYPE == "G" ? "取出" : ""; //存入(P) or 取出(G)
+                    result.vExpectedAccessDate = data.EXPECTED_ACCESS_DATE?.ToSimpleTaiwanDate();
+                    result.vCreateDt = data.CREATE_DT?.ToSimpleTaiwanDate();
+                    var _createEmp = emps.FirstOrDefault(x => x.USR_ID == data.CREATE_UID);
+                    result.vCreateUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == _createEmp?.DPT_CD?.Trim())?.DPT_NAME;
+                    result.vCreateUid = _createEmp?.EMP_NAME;
+                    result.vAccessReason = data.ACCESS_REASON;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 覆核查詢 (待完成)
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public List<TreasuryAccessApprSearchDetailViewModel> GetApprSearchDetail(TreasuryAccessApprSearchViewModel data)
+        {
+            List<TreasuryAccessApprSearchDetailViewModel> result = new List<TreasuryAccessApprSearchDetailViewModel>();
+            return result;
+        }
+        #endregion
+
+        #region Save Data
+
+        /// <summary>
         /// 取消申請
         /// </summary>
         /// <param name="searchData"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData,TreasuryAccessSearchDetailViewModel data)
+        public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
         {
             var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -199,7 +324,7 @@ namespace Treasury.Web.Service.Actual
             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             var _status = AccessProjectFormStatus.E02.ToString();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {          
+            {
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
                 if (_TREA_APLY_REC != null)
                 {
@@ -215,60 +340,12 @@ namespace Treasury.Web.Service.Actual
                         #region BILL (空白票據)
                         if (_TREA_APLY_REC.ITEM_ID == TreaItemType.BILL.ToString()) //空白票據
                         {
-                            var _changeFlag = false;
-                            //以「申請單號」為鍵項讀取【空白票據申請資料檔】
-                            db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO).ToList()
-                                .ForEach(x =>
-                                {
-                                    var _CHECK_NO_E = TypeTransfer.stringToInt(x.CHECK_NO_E) + 1;
-                                    //依【空白票據申請資料檔】的「ITEM_BLANK_NOTE_ITEM_ID」查【空白票據庫存資料檔】
-                                    //異動欄位：「庫存狀態」= 1在庫
-                                    //最後異動日期時間：系統時間
-                                    var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
-                                    if (_ITEM_BLANK_NOTE != null)
-                                    {
-                                        if (_ITEM_BLANK_NOTE.INVENTORY_STATUS == "1" &&
-                                        TypeTransfer.stringToInt(_ITEM_BLANK_NOTE.CHECK_NO_B) == _CHECK_NO_E) //在庫 且 申請資料的迄號(+1) = 庫存起號
-                                        {
-                                            _ITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
-                                            _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            logStr += "|";
-                                            logStr += _ITEM_BLANK_NOTE.modelToString();
-                                        }
-                                        else if (
-                                        _ITEM_BLANK_NOTE.INVENTORY_STATUS == "4" &&
-                                        _ITEM_BLANK_NOTE.CHECK_NO_B == x.CHECK_NO_B &&
-                                        _ITEM_BLANK_NOTE.CHECK_NO_E == x.CHECK_NO_E) //全部都被預約取出 且 起訖號相同
-                                        {
-                                            _ITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
-                                            _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            logStr += "|";
-                                            logStr += _ITEM_BLANK_NOTE.modelToString();
-                                        }
-                                        else //其他情形 須新增一筆 空白票據庫存資料檔
-                                        {
-                                            var cId = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(3, '0');
-                                            var _newITEM_BLANK_NOTE = _ITEM_BLANK_NOTE.ModelConvert<ITEM_BLANK_NOTE, ITEM_BLANK_NOTE>();
-                                            _newITEM_BLANK_NOTE.ITEM_ID = $@"E2{qPreCode}{cId}";
-                                            _newITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
-                                            _newITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
-                                            _newITEM_BLANK_NOTE.CHECK_NO_E = x.CHECK_NO_E;
-                                            _newITEM_BLANK_NOTE.CREATE_DT = dt;
-                                            _newITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            db.ITEM_BLANK_NOTE.Add(_newITEM_BLANK_NOTE);
-                                            logStr += "|";
-                                            logStr += _newITEM_BLANK_NOTE.modelToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        _changeFlag = true;
-                                    }
-                                });
-                            if (_changeFlag)
+                            var _recover = new Bill().Recover(db, _TREA_APLY_REC.APLY_NO, logStr, dt);
+                            if (!_recover.Item1) //失敗
                             {
                                 return result;
                             }
+                            logStr = _recover.Item2;
                         }
                         #endregion
                     }
@@ -306,7 +383,7 @@ namespace Treasury.Web.Service.Actual
                             #endregion
 
                             result.RETURN_FLAG = true;
-                            result.DESCRIPTION =  $@"單號{data.vAPLY_NO} 取消申請成功!";
+                            result.DESCRIPTION = $@"單號{data.vAPLY_NO} 取消申請成功!";
                         }
                         catch (DbUpdateException ex)
                         {
@@ -316,12 +393,18 @@ namespace Treasury.Web.Service.Actual
                 }
                 if (result.RETURN_FLAG)
                 {
-                    result.Datas = getSearchDetail(searchData);
+                    result.Datas = GetSearchDetail(searchData);
                 }
             }
             return result;
         }
 
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
         {
             var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
@@ -333,7 +416,7 @@ namespace Treasury.Web.Service.Actual
             SysSeqDao sysSeqDao = new SysSeqDao();
             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {             
+            {
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
                 if (_TREA_APLY_REC != null)
                 {
@@ -347,62 +430,12 @@ namespace Treasury.Web.Service.Actual
                         #region BILL (空白票據)
                         if (_TREA_APLY_REC.ITEM_ID == TreaItemType.BILL.ToString()) //空白票據
                         {
-                            var _changeFlag = false;
-                            //以「申請單號」為鍵項讀取【空白票據申請資料檔】
-                            db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO).ToList()
-                                .ForEach(x =>
-                                {
-                                    logStr += "|";
-                                    logStr += x.modelToString();
-                                    var _CHECK_NO_E = TypeTransfer.stringToInt(x.CHECK_NO_E) + 1;
-                                //依【空白票據申請資料檔】的「ITEM_BLANK_NOTE_ITEM_ID」查【空白票據庫存資料檔】
-                                //異動欄位：「庫存狀態」= 1在庫
-                                //最後異動日期時間：系統時間
-                                var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
-                                    if (_ITEM_BLANK_NOTE != null)
-                                    {
-                                        if (_ITEM_BLANK_NOTE.INVENTORY_STATUS == "1" &&
-                                        TypeTransfer.stringToInt(_ITEM_BLANK_NOTE.CHECK_NO_B) == _CHECK_NO_E) //在庫 且 申請資料的迄號(+1) = 庫存起號
-                                    {
-                                            _ITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
-                                            _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            logStr += "|";
-                                            logStr += _ITEM_BLANK_NOTE.modelToString();
-                                        }
-                                        else if (
-                                        _ITEM_BLANK_NOTE.INVENTORY_STATUS == "4" &&
-                                        _ITEM_BLANK_NOTE.CHECK_NO_B == x.CHECK_NO_B &&
-                                        _ITEM_BLANK_NOTE.CHECK_NO_E == x.CHECK_NO_E) //全部都被預約取出 且 起訖號相同
-                                    {
-                                            _ITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
-                                            _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            logStr += "|";
-                                            logStr += _ITEM_BLANK_NOTE.modelToString();
-                                        }
-                                        else //其他情形 須新增一筆 空白票據庫存資料檔
-                                    {
-                                            var cId = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(3, '0');
-                                            var _newITEM_BLANK_NOTE = _ITEM_BLANK_NOTE.ModelConvert<ITEM_BLANK_NOTE, ITEM_BLANK_NOTE>();
-                                            _newITEM_BLANK_NOTE.ITEM_ID = $@"E2{qPreCode}{cId}";
-                                            _newITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
-                                            _newITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
-                                            _newITEM_BLANK_NOTE.CHECK_NO_E = x.CHECK_NO_E;
-                                            _newITEM_BLANK_NOTE.CREATE_DT = dt;
-                                            _newITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                            db.ITEM_BLANK_NOTE.Add(_newITEM_BLANK_NOTE);
-                                            logStr += "|";
-                                            logStr += _newITEM_BLANK_NOTE.modelToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        _changeFlag = true;
-                                    }
-                                });
-                            if (_changeFlag)
+                            var _recover = new Bill().Recover(db, _TREA_APLY_REC.APLY_NO, logStr, dt);
+                            if (!_recover.Item1) //失敗
                             {
                                 return result;
                             }
+                            logStr = _recover.Item2;
                         }
                         #endregion
 
@@ -451,62 +484,26 @@ namespace Treasury.Web.Service.Actual
                 }
                 if (result.RETURN_FLAG)
                 {
-                    result.Datas = getSearchDetail(searchData);
+                    result.Datas = GetSearchDetail(searchData);
                 }
             }
             return result;
         }
+
+        #endregion
+
+        #region private function
 
         /// <summary>
-        /// 查詢
+        /// 資料庫資料轉檔 ViewModel
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="data"></param>
+        /// <param name="treaItemTypes"></param>
+        /// <param name="formStatus"></param>
+        /// <param name="depts"></param>
+        /// <param name="emps"></param>
         /// <returns></returns>
-        public List<TreasuryAccessSearchDetailViewModel> getSearchDetail(TreasuryAccessSearchViewModel data)
-        {
-            List<TreasuryAccessSearchDetailViewModel> result = new List<TreasuryAccessSearchDetailViewModel>();
-            var depts = new List<VW_OA_DEPT>();
-            var emps = new List<V_EMPLY2>();
-            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-            {
-                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
-                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
-            }
-            using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {
-                DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
-                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E);
-                DateTime? _vActualAccessDate_S = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_S);
-                DateTime? _vActualAccessDate_E = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_E);
-                var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
-                var treaItemTypes = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "TREA_ITEM_TYPE").ToList();
-
-                var _data = db.TREA_APLY_REC.AsNoTracking()
-                    .Where(x => data.vItem.Contains(x.ITEM_ID) && data.vAplyUnit.Contains(x.APLY_UNIT)) //項目 & 申請單位 
-                    .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
-                    .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
-                    .Where(x => x.APLY_NO == data.vAPLY_NO, !data.vAPLY_NO.IsNullOrWhiteSpace()) //申請單號
-                    .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace()); //金庫登記簿單號
-
-                if (_vActualAccessDate_S != null || _vActualAccessDate_E != null) //實際存取
-                {
-                    var status = new List<string>() {
-                        AccessProjectFormStatus.D03.ToString(),
-                        AccessProjectFormStatus .E01.ToString()}; //狀態須符合這兩個
-                    _data = _data.Where(x => status.Contains(x.APLY_STATUS))
-                        .Join(db.TREA_OPEN_REC.AsNoTracking()
-                        .Where(x => x.REGI_APPR_DT >= _vActualAccessDate_S, _vActualAccessDate_S != null)
-                        .Where(x => x.REGI_APPR_DT <= _vActualAccessDate_E, _vActualAccessDate_E != null),
-                        x => x.TREA_REGISTER_ID,
-                        y => y.TREA_REGISTER_ID,
-                        (x, y) => x);
-                }
-                result.AddRange(_data.AsEnumerable()
-                    .Select(x => TreaAplyRecToTASDViewModel(data.vCreateUid, x, treaItemTypes, formStatus, depts, emps)));
-            }
-            return result;
-        }
-
         private TreasuryAccessSearchDetailViewModel TreaAplyRecToTASDViewModel(
             string userId,
             TREA_APLY_REC data,
@@ -521,7 +518,7 @@ namespace Treasury.Web.Service.Actual
                 vAPLY_DT = data.APLY_DT?.ToString("yyyy/MM/dd"),
                 vAPLY_NO = data.APLY_NO,
                 vAPLY_STATUS = data.APLY_STATUS,
-                vAPLY_STATUS_D = formStatus.FirstOrDefault(x=>x.CODE == data.APLY_STATUS)?.CODE_VALUE,
+                vAPLY_STATUS_D = formStatus.FirstOrDefault(x => x.CODE == data.APLY_STATUS)?.CODE_VALUE,
                 vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME,
                 vAPLY_UID = data.APLY_UID,
                 vAPLY_UID_NAME = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME,
@@ -531,10 +528,12 @@ namespace Treasury.Web.Service.Actual
                               data.CREATE_UID == userId ? "Y" : "N",
                 vPrintFlag = printsStatus.Contains(data.APLY_STATUS) ? "Y" : "N",
                 vItem = treaItemTypes.FirstOrDefault(x => x.CODE == data.ITEM_ID)?.CODE_VALUE,
-                vDESC = !data.APLY_APPR_DESC.IsNullOrWhiteSpace() ? data.APLY_APPR_DESC : data.CUSTODY_APPR_DESC, 
+                vDESC = !data.APLY_APPR_DESC.IsNullOrWhiteSpace() ? data.APLY_APPR_DESC : data.CUSTODY_APPR_DESC,
                 vACCESS_TYPE = data.ACCESS_TYPE,
                 vLast_Update_Time = data.LAST_UPDATE_DT
             };
         }
+
+        #endregion
     }
 }

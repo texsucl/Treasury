@@ -86,7 +86,7 @@ namespace Treasury.WebControllers
             Cache.Invalidate(CacheList.TreasuryAccessSearchData);
             Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
             searchModel.vCreateUid = AccountController.CurrentUserId;
-            var datas = TreasuryAccess.getSearchDetail(searchModel);
+            var datas = TreasuryAccess.GetSearchDetail(searchModel);
             if (datas.Any())
             {
                 Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);

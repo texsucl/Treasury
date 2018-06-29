@@ -9,7 +9,7 @@ using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 using System.Reflection;
 using System.Linq;
-////using Microsoft.Reporting.WebForms;
+using Microsoft.Reporting.WebForms;
 using System.Data;
 
 /// <summary>
@@ -67,40 +67,40 @@ namespace Treasury.WebControllers
             result.RETURN_FLAG = false;
             try
             {
-                //string title = "報表名稱";
-                //if (data.className.IsNullOrWhiteSpace())
-                //{
-                //    result.DESCRIPTION = "報表錯誤請聯絡IT人員";
-                //    //result.DESCRIPTION = MessageType.parameter_Error.GetDescription(null, "無呼叫的className");
-                //    return Json(result);
-                //}
-                //if (!data.title.IsNullOrWhiteSpace())
-                //    title = data.title;
-                //object obj = Activator.CreateInstance(Assembly.Load("Treasury.Web").GetType($"Treasury.Web.Report.Data.{data.className}"));
-                //MethodInfo[] methods = obj.GetType().GetMethods();
-                //MethodInfo mi = methods.FirstOrDefault(x => x.Name == "GetData");
-                //if (mi == null)
-                //{
-                //    //檢查是否有實作資料獲取
-                //    result.DESCRIPTION = "報表錯誤請聯絡IT人員";
-                //    return Json(result);
-                //}
-                //DataSet ds = (DataSet)mi.Invoke(obj, new object[] { parms });
-                //List<reportParm> eparm = (List<reportParm>)(obj.GetType().GetProperty("extensionParms").GetValue(obj));
-                //ReportWrapper rw = new ReportWrapper();
-                //rw.ReportPath = Server.MapPath($"~/Report/Rdlc/{data.className}.rdlc");
-                //for (int i = 0; i < ds.Tables.Count; i++)
-                //{
-                //    rw.ReportDataSources.Add(new ReportDataSource("DataSet" + (i + 1).ToString(), ds.Tables[i]));
-                //}
-                //rw.ReportParameters.Add(new ReportParameter("Title", title));
-                //if (extensionParms != null)
-                //    rw.ReportParameters.AddRange(extensionParms.Select(x => new ReportParameter(x.key, x.value)));
-                //if (eparm.Any())
-                //    rw.ReportParameters.AddRange(eparm.Select(x => new ReportParameter(x.key, x.value)));
-                //rw.IsDownloadDirectly = false;
-                //Session["ReportWrapper"] = rw;
-                //result.RETURN_FLAG = true;
+                string title = "報表名稱";
+                if (data.className.IsNullOrWhiteSpace())
+                {
+                    result.DESCRIPTION = "報表錯誤請聯絡IT人員";
+                    //result.DESCRIPTION = MessageType.parameter_Error.GetDescription(null, "無呼叫的className");
+                    return Json(result);
+                }
+                if (!data.title.IsNullOrWhiteSpace())
+                    title = data.title;
+                object obj = Activator.CreateInstance(Assembly.Load("Treasury.Web").GetType($"Treasury.Web.Report.Data.{data.className}"));
+                MethodInfo[] methods = obj.GetType().GetMethods();
+                MethodInfo mi = methods.FirstOrDefault(x => x.Name == "GetData");
+                if (mi == null)
+                {
+                    //檢查是否有實作資料獲取
+                    result.DESCRIPTION = "報表錯誤請聯絡IT人員";
+                    return Json(result);
+                }
+                DataSet ds = (DataSet)mi.Invoke(obj, new object[] { parms });
+                List<reportParm> eparm = (List<reportParm>)(obj.GetType().GetProperty("extensionParms").GetValue(obj));
+                ReportWrapper rw = new ReportWrapper();
+                rw.ReportPath = Server.MapPath($"~/Report/Rdlc/{data.className}.rdlc");
+                for (int i = 0; i < ds.Tables.Count; i++)
+                {
+                    rw.ReportDataSources.Add(new ReportDataSource("DataSet" + (i + 1).ToString(), ds.Tables[i]));
+                }
+                rw.ReportParameters.Add(new ReportParameter("Title", title));
+                if (extensionParms != null)
+                    rw.ReportParameters.AddRange(extensionParms.Select(x => new ReportParameter(x.key, x.value)));
+                if (eparm.Any())
+                    rw.ReportParameters.AddRange(eparm.Select(x => new ReportParameter(x.key, x.value)));
+                rw.IsDownloadDirectly = false;
+                Session["ReportWrapper"] = rw;
+                result.RETURN_FLAG = true;
             }
             catch (Exception ex){
                 result.DESCRIPTION = ex.exceptionMessage();

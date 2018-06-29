@@ -167,7 +167,6 @@
 </div>
 
 
-
 <script type="text/javascript">
 
 
@@ -175,7 +174,7 @@
 
         //#region url設定
         var TAurl = {};
-        TAurl.openBILL = '@Url.Action("View", "BILL")';
+        TAurl.openBILL = '@Url.Action("View", "Bill")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -230,6 +229,9 @@
                         break;
                     case 'TAI_Search':
                         $('#' + id).on('click', function () { TASearch(); });
+                        break;
+                    case 'TAI_Print':
+                        $('#' + id).on('click', function () { TAReport(); });
                         break;
                 }
             });
@@ -352,6 +354,29 @@
         }
         //#endregion
 
+        //#region 呼叫報表
+        function TAReport() {
+            $('.TAReortCs:checked').each(function () {
+                var listId = 'TAReportList';
+                var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
+                var reportType = '';
+                var title = '';
+                var parms = [];
+                var itemData = GetItemData(item);
+                if (itemData.reportType != null)
+                {
+                    parms.push(customerUtility.reportParm('aply_No', aply_No));
+                    customerUtility.report(
+                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                        parms,
+                        null
+                        );
+                }
+            });
+        }
+        //#endregion
+
         //#region 重設新增畫面
         function resetTAInsertDeatil()
         {
@@ -390,7 +415,7 @@
             let str = '';
             if (cellvalue == 'Y') {
                 str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
-                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox customerCheck'></div>";
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox TAReortCs customerCheck'></div>";
             }
             return str;
         }
@@ -501,11 +526,9 @@
 
         //#endregion
 
-
-
         //#region 新增事件(開啟空白票據)
         function openBILL() {
-            var AccessType = $('input[name=cProjectType]:checked').val();
+            //var AccessType = $('input[name=cProjectType]:checked').val();
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -522,9 +545,7 @@
                 contentType: 'application/json',
                 success: function (data, textStatus, jqXHR) {
                     $('#' + openInsertDetailId).html(data);
-                    var width = '730px';
-                    if (AccessType == 'G')
-                        width = '850px';
+                    var width = '850px';
                     openTADialog(_BILL, width, 'TAOpenInsertDialog');
                 }
             })
@@ -577,7 +598,7 @@
             if (!confirm('是否取消申請單號為' + data.vAPLY_NO + '的資料!'))
             {
                 return false;
-            }           
+            }
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -621,25 +642,48 @@
         //#region 開啟申請單號
         function TAOpenAPLYNOFun(listId,rowid) {
             var data = $("#" + listId).getRowData(rowid);
-            var _accessType = data.vACCESS_TYPE;
-            $.ajax({
-                type: 'POST',
-                data: JSON.stringify({
-                    AplyNo: data.vAPLY_NO,
-                    data: null
-                }),
-                url: TAurl.openBILL,
-                contentType: 'application/json',
-                success: function (data, textStatus, jqXHR) {
-                    $('#' + openSearchDetailId).html(data);
-                    var width = '730px';
-                    if (_accessType == 'G')
-                    var width = '850px';
-                    openTADialog(_BILL, width, 'TAOpenSearchDialog');
-                }
-            })
+            var itemId = data.vItem;
+            //var _accessType = data.vACCESS_TYPE;
+            var itemData = GetItemData(itemId);
+            if (itemData.url != null)
+            {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAPLY_NO,
+                        data: null
+                    }),
+                    url: itemData.url,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + openSearchDetailId).html(data);
+                        openTADialog(_BILL, itemData.openDialogWidth, 'TAOpenSearchDialog');
+                    }
+                })
+            }
+
         }
         //#endregion
+
+        function GetItemData(item)
+        {
+            item = item || '';
+            var obj = {};
+            obj.url = null; //開啟金庫物品的頁面
+            obj.openDialogWidth = '850px'; //開啟金庫物品的頁面 寬度
+            obj.reportTitle = null; //報表Title
+            obj.reportType = null; //報表類型
+            switch (item)
+            {
+                case '@Ref.TreaItemType.BILL.GetDescription()' :
+                    obj.url = TAurl.openBILL;
+                    obj.openDialogWidth = '850px';
+                    obj.reportTitle = '金庫物品存取申請單';
+                    obj.reportType = 'BILL';
+                    break;
+            }
+            return obj;
+        }
 
         function TreasuryAccessSearchViewModel(
             vItem,

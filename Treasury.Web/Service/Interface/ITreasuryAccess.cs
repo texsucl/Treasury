@@ -31,7 +31,7 @@ namespace Treasury.Web.Service.Interface
         /// <param name="data">畫面資料</param>
         /// <returns></returns>
 
-        List<TreasuryAccessSearchDetailViewModel> getSearchDetail(TreasuryAccessSearchViewModel data);
+        List<TreasuryAccessSearchDetailViewModel> GetSearchDetail(TreasuryAccessSearchViewModel data);
 
         /// <summary>
         /// 取消申請
@@ -48,5 +48,19 @@ namespace Treasury.Web.Service.Interface
         /// <param name="data"></param>
         /// <returns></returns>
         MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
+
+        /// <summary>
+        /// 查詢申請單紀錄資料by單號
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        TreasuryAccessViewModel GetByAplyNo(string aplyNo);
+
+        /// <summary>
+        /// 取得 存入or取出
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        string GetAccessType(string aplyNo);
     }
 }

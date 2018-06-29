@@ -1,6 +1,88 @@
 ﻿@using Treasury.Web.Enum;
 @using Treasury.WebUtility;
 <div class="row">
+    <div  style="display:none;" class="aplyNoDetail">
+        <table style="width:95%" >
+            <tr>
+                <td style="width:150px">
+                    <label>申請單號 : </label>
+                </td>
+                <td style="width:250px">
+                    <label id="TAVMvAplyNo"></label>
+                </td>
+                <td style="width:150px">
+                    <label>存取申請項目 : </label>
+                </td>
+                <td style="width:250px">
+                    <label id="TAVMvItem"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>申請單位 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvAplyUnit"></label>
+                </td>
+                <td>
+                    <label>申請人 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvAplyUid"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>權責部門 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvChargeUnit"></label>
+                </td>
+                <td>
+                    <label>申請作業 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvAccessType"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>預計存取日期 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvExpectedAccessDate"></label>
+                </td>
+                <td>
+                    <label>填表日期 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvCreateDt"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>填表單位 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvCreateUnit"></label>
+                </td>
+                <td>
+                    <label>填表人 : </label>
+                </td>
+                <td>
+                    <label id="TAVMvCreateUid"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>申請原因 : </label>
+                </td>
+                <td colspan="3">
+                    <textarea id="TAVMvAccessReason" style="width:100%" disabled></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
     <div style="padding-bottom:5px;">
         <input type="button" id="BILLInsert" value="新增存入明細" class="btn btn-primary"/>
     </div>
@@ -24,7 +106,7 @@
                     </td>
                     <td>
                         <div class="select-editable">
-                            @Html.DropDownList("sBILL_Issuing_Bank", (SelectList)ViewBag.dBILL_Issuing_Bank, new { @class = "BILLInsertType" , @onchange = "this.nextElementSibling.value = this.value" })
+                            @Html.DropDownList("sBILL_Issuing_Bank", (SelectList)ViewBag.dBILL_Issuing_Bank, new { @class = "BILLInsertType", @onchange = "this.nextElementSibling.value = this.value" })
                             <input class="BILLInsertType" type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value=""/>
                         </div>
                     </td>
@@ -32,7 +114,7 @@
                         <label>類型 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type,new { @class = "BILLInsertType" })
+                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type, new { @class = "BILLInsertType" })
                     </td>
                     <td>
                         <label>字軌 : </label>
@@ -154,7 +236,6 @@
 
 <script>
     $(function () {
-
         //#region 參數設定
         var BILLFormId = 'BILLForm'; //formId
         var BILL_AplyNoId = 'tAplyNo'; //申請單號Id
@@ -169,13 +250,26 @@
         var BILL_totalId = 'BILL_total'; //總張數Id
         var BILL_Take_OutId = 'tTakeOutE'; //取出票號(迄)Id
         var BILL_Take_Out_TotalId = 'tTakeOutTotalNum'; //取出總張數
-        var BILL_Act_Type = 'True' == '@ViewBag.dActType';       
+        var BILL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態      
         var type = $('input[name=cProjectType]:checked').val();
-        if (!BILL_Act_Type) {
+        if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
             $('.BILLAct').hide();
             type = '@ViewBag.dAccess';
+            $('.aplyNoDetail').show();
+            var TARdata = @Html.Raw(Json.Encode(ViewBag.TAR));
+            $('#TAVMvAplyNo').text(TARdata.vAplyNo);
+            $('#TAVMvItem').text(TARdata.vItem)
+            $('#TAVMvAplyUnit').text(TARdata.vAplyUnit);
+            $('#TAVMvAplyUid').text(TARdata.vAplyUid);
+            $('#TAVMvChargeUnit').text(TARdata.vAplyUnit);
+            $('#TAVMvAccessType').text(TARdata.vAccessType);
+            $('#TAVMvExpectedAccessDate').text(TARdata.vExpectedAccessDate);
+            $('#TAVMvCreateDt').text(TARdata.vCreateDt);
+            $('#TAVMvCreateUnit').text(TARdata.vCreateUnit);
+            $('#TAVMvCreateUid').text(TARdata.vCreateUid);
+            $('#TAVMvAccessReason').val(TARdata.vAccessReason);
         }
-        else {
+        else { //是覆核狀態 (為存入 or 取出 動作)
             $('.BILLAct').show();
         }
         var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
@@ -190,15 +284,15 @@
 
         //#region url設定
         var BILLurl = {};
-        BILLurl.Insert = '@Url.Action("InsertView", "BILL")';
-        BILLurl.getData = '@Url.Action("GetCacheData", "BILL")';
-        BILLurl.InsertTempData = '@Url.Action("InsertTempData", "BILL")';
-        BILLurl.UpdateTempData = '@Url.Action("UpdateTempData", "BILL")';
-        BILLurl.DeleteTempData = '@Url.Action("DeleteTempData", "BILL")';
-        BILLurl.ResetTempData = '@Url.Action("ResetTempData", "BILL")';
-        BILLurl.TakeOutData = '@Url.Action("TakeOutData","BILL")';
-        BILLurl.ApplyTempData = '@Url.Action("ApplyTempData", "BILL")';
-        BILLurl.RepeatData = '@Url.Action("RepeatData", "BILL")';
+        BILLurl.Insert = '@Url.Action("InsertView", "Bill")';
+        BILLurl.getData = '@Url.Action("GetCacheData", "Bill")';
+        BILLurl.InsertTempData = '@Url.Action("InsertTempData", "Bill")';
+        BILLurl.UpdateTempData = '@Url.Action("UpdateTempData", "Bill")';
+        BILLurl.DeleteTempData = '@Url.Action("DeleteTempData", "Bill")';
+        BILLurl.ResetTempData = '@Url.Action("ResetTempData", "Bill")';
+        BILLurl.TakeOutData = '@Url.Action("TakeOutData", "Bill")';
+        BILLurl.ApplyTempData = '@Url.Action("ApplyTempData", "Bill")';
+        BILLurl.RepeatData = '@Url.Action("RepeatData", "Bill")';
         //#endregion
 
         //#region 初始動作
@@ -405,7 +499,7 @@
                 colModelArray.push({ name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false });
                 colModelArray.push({ name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", width: 80, sortable: false, align: 'right' });
+                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", width: 200, sortable: false, align: 'right' });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 colModelArray.push({ name: "vAplyNo", index: "vAplyNo", hidden: true });
                 colModelArray.push({ name: "vDataSeq", index: "vDataSeq", hidden: true });
@@ -425,8 +519,8 @@
                     );
             }
             else {
-                var colNameArray = [ '項次', '取出', '發票行庫', '類型', '字軌',
-                    '票號(起)', '票號(迄)', '取出票號(迄)', '取出總張數',
+                var colNameArray = ['項次', '取出', '發票行庫', '類型',
+                    '字軌', '票號(起)', '票號(迄)', '取出票號(迄)', '取出總張數',
                     '總張數', '剩餘總張數', '物品單號'];
                 var colModelArray = [{ name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' }];
                 if (BILL_Act_Type) {
@@ -466,17 +560,18 @@
         function BILLDayGrid() {
             if(typeFlag){
                 var colNameArray = ['項次', '庫存狀態', '發票行庫', '類型',
-                    '字軌', '支票號碼(起)', '支票號碼(迄)', '總張數',
+                    '總張數', '剩餘總張數', '字軌', '支票號碼(起)', '支票號碼(迄)',
                     '物品單號', '申請單號', '明細流水號'];
                 var colModelArray = [
                     { name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' },
                     { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
                     { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
                     { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: BILLformatterCheckType, unformat: BILLunformatterCheckType },
+                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
+                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
                     { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
                     { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
                     { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 80, sortable: false, align: 'right' },
                     { name: "vItemId", index: "vItemId", hidden: true },
                     { name: "vAplyNo", index: "vAplyNo", hidden: true },
                     { name: "vDataSeq", index: "vDataSeq", hidden: true },
@@ -497,18 +592,18 @@
             }
             else{
                 var colNameArray = ['項次', '庫存狀態', '發票行庫', '類型',
-                    '字軌', '支票號碼(起)', '支票號碼(迄)', '總張數', '剩餘總張數',
+                    '總張數', '剩餘總張數', '字軌', '支票號碼(起)', '支票號碼(迄)',
                     '物品單號'];
                 var colModelArray = [
                     { name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' },
                     { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
                     { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
                     { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: BILLformatterCheckType, unformat: BILLunformatterCheckType },
+                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
+                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
                     { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
                     { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
                     { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
-                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
                     { name: "vItemId", index: "vItemId", hidden: true },
                 ];
                 jqgridCustom.createJqgridByCache(

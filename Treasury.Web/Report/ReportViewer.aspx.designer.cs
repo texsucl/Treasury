@@ -11,7 +11,7 @@ namespace Treasury.Web.Report {
     
     
     public partial class ReportViewer {
-        
+
         /// <summary>
         /// form1 控制項。
         /// </summary>
@@ -19,8 +19,8 @@ namespace Treasury.Web.Report {
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        //protected global::System.Web.UI.HtmlControls.HtmlForm form1;
-        
+        protected global::System.Web.UI.HtmlControls.HtmlForm form1;
+
         /// <summary>
         /// rptViewer 控制項。
         /// </summary>
@@ -28,6 +28,6 @@ namespace Treasury.Web.Report {
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        //protected global::Microsoft.Reporting.WebForms.ReportViewer rptViewer;
+        protected global::Microsoft.Reporting.WebForms.ReportViewer rptViewer;
     }
 }

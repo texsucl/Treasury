@@ -63,6 +63,13 @@ namespace Treasury.Web.ViewModels
         /// 填表人員
         /// </summary>
         [Description("填表人員")]
-        public string vCreateUid { get; set; } 
+        public string vCreateUid { get; set; }
+
+        /// <summary>
+        /// 填表日期
+        /// </summary>
+        [Description("填表日期")]
+        public string vCreateDt { get; set; } 
+
     }
 }

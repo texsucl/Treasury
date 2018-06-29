@@ -16,6 +16,7 @@ using static Treasury.Web.Enum.Ref;
 using System.Reflection.Emit;
 using System.Data.Entity;
 using NLog;
+using System.Globalization;
 
 namespace Treasury.WebUtility
 {
@@ -174,6 +175,47 @@ namespace Treasury.WebUtility
                                     (this string str)
         {
             return string.IsNullOrWhiteSpace(str);
+        }
+
+        /// <summary>
+        /// To the simple taiwan date.
+        /// </summary>
+        /// <param name="datetime">The datetime.</param>
+        /// <returns></returns>
+        public static string ToSimpleTaiwanDate(this DateTime datetime)
+        {
+            TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
+            return string.Format("{0}/{1}/{2}",
+                taiwanCalendar.GetYear(datetime),
+                datetime.Month,
+                datetime.Day);
+        }
+
+        /// <summary>
+        /// 西元時間轉台灣文字時間
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <returns></returns>
+        public static string DateToTaiwanDate(this DateTime datetime)
+        {
+            TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
+            return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Date.ToString().PadLeft(2, '0')}";
+        }
+
+        /// <summary>
+        /// 台灣文字時間轉西元時間
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <returns></returns>
+        public static DateTime TaiwanDateToDate(this string datetime)
+        {
+            DateTime result = DateTime.MinValue;
+            if (!datetime.IsNullOrWhiteSpace() && 
+                DateTime.TryParseExact(datetime.PadLeft(7,'0'),"yyyMMdd", null,DateTimeStyles.AllowWhiteSpaces ,out result))
+            {
+                result = result.AddYears(1911);
+            }
+            return result;
         }
 
         #region 時間相減 取年
