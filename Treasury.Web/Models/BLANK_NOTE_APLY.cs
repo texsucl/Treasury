@@ -22,5 +22,6 @@ namespace Treasury.Web.Models
         public string CHECK_NO_TRACK { get; set; }
         public string CHECK_NO_B { get; set; }
         public string CHECK_NO_E { get; set; }
+        public string ITEM_BLANK_NOTE_ITEM_ID { get; set; }
     }
 }

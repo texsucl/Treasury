@@ -16,22 +16,6 @@ namespace Treasury.Web.Service.Interface
         /// <param name="insertDatas">新增明細資料</param>
         /// <param name="taData">申請資料</param>
         /// <returns></returns>
-        MSGReturnModel<ITreaItem> ApplyAudit(IEnumerable<ITreaItem> insertDatas, TreasuryAccessViewModel taData);
-
-        /// <summary>
-        /// 抓取明細資料
-        /// </summary>
-        /// <param name="aplyNo">申請單號</param>
-        /// <returns></returns>
-        IEnumerable<ITreaItem> GetTempData(string aplyNo);
-
-        /// <summary>
-        /// 抓取庫存明細資料
-        /// </summary>
-        /// <param name="vAplyUnit">申請部門</param>
-        /// <param name="accessType">存入(P)取出(G)</param>
-        /// <param name="aplyNo">申請單號</param>
-        /// <returns></returns>
-        IEnumerable<ITreaItem> GetDayData(string vAplyUnit = null, string accessType = null, string aplyNo = null);
+        MSGReturnModel<IEnumerable<ITreaItem>> ApplyAudit(IEnumerable<ITreaItem> insertDatas, TreasuryAccessViewModel taData);
     }
 }

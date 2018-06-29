@@ -13,6 +13,14 @@ namespace Treasury.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.IgnoreRoute("{*botdetect}",
+                new { botdetect = @"(.*)BotDetectCaptcha\.ashx" });
+
+            routes.MapRoute(
+                name: "Report",
+                url : "Report/{aspx}.aspx",
+                defaults: new  { httproute = true}
+                );
             
 
             routes.MapRoute(

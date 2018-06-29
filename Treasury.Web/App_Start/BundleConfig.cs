@@ -73,6 +73,7 @@ namespace Treasury.Web
                       "~/Content/bootstrap.css",
                       "~/Content/bootstrap-dialog.css",
                       "~/Content/bootstrap-treeview.css",
+                      "~/Content/build.css",
                       "~/Content/jquery.jqGrid/ui.jqgrid.css",
                       "~/Content/datepicker.css",
                       "~/Content/dataTables.bootstrap.css",
