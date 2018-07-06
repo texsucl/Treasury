@@ -294,12 +294,12 @@ namespace Treasury.Web.Service.Actual
                             int seq = 0;
                             datas.ForEach(x =>
                             {
-                                var item_id = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(3, '0');
+                                var item_id = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(8, '0');
                                 seq += 1;
                                 var _BNA = new BLANK_NOTE_APLY() {
                                     APLY_NO = _TAR.APLY_NO,
                                     DATA_SEQ = seq,
-                                    ITEM_ID = $@"E2{qPreCode}{item_id}",
+                                    ITEM_ID = $@"E2{item_id}",
                                     CHECK_TYPE = x.vCheckType,
                                     ISSUING_BANK = x.vIssuingBank,
                                     CHECK_NO_TRACK = x.vCheckNoTrack,
