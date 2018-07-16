@@ -14,61 +14,79 @@ namespace Treasury.Web.Enum
             /// 空白票據
             /// </summary>
             [Description("空白票據")]
-            BILL,
+            D1012,
 
             /// <summary>
             /// 不動產權狀
             /// </summary>
             [Description("不動產權狀")]
-            ESTATE,
+            D1014,
 
             /// <summary>
             /// 股票
             /// </summary>
             [Description("股票")]
-            STOCK,
+            D1015,
 
             /// <summary>
-            /// 印章
+            /// 公司大章B
             /// </summary>
-            [Description("印章")]
-            SEAL,
+            [Description("公司大章B")]
+            D1008,
+
+            /// <summary>
+            /// 公司小章B
+            /// </summary>
+            [Description("公司小章B")]
+            D1009,
+
+            /// <summary>
+            /// 退管會大章B
+            /// </summary>
+            [Description("退管會大章B")]
+            D1010,
+
+            /// <summary>
+            /// 抽退票章
+            /// </summary>
+            [Description("抽退票章")]
+            D1011,
 
             /// <summary>
             /// 電子憑證
             /// </summary>
             [Description("電子憑證")]
-            CA,
+            D1024,
 
             /// <summary>
             /// 存出保證金
             /// </summary>
             [Description("存出保證金")]
-            MARGING,
+            D1016,
 
             /// <summary>
             /// 存入保證金
             /// </summary>
             [Description("存入保證金")]
-            MARGINP,
+            D1017,
 
             /// <summary>
             /// 重要物品
             /// </summary>
             [Description("重要物品")]
-            ITEMIMP,
+            D1018,
 
             /// <summary>
             /// 其他物品
             /// </summary>
             [Description("其他物品")]
-            ITEMOTH,
+            D1019,
 
             /// <summary>
             /// 定期存單
             /// </summary>
             [Description("定期存單")]
-            DEPOSIT,
+            D1013,
         }
     }
 

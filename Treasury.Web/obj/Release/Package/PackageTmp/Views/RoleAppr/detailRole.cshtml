@@ -1,0 +1,625 @@
+﻿@model Treasury.WebViewModels.AuthReviewRoleModel
+
+@{
+    ViewBag.Title = "角色覆核明細資訊";
+
+
+    var bHaveData = ViewBag.bHaveData as String;
+}
+
+
+<div class="container-fluid"  id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+                
+                    @Html.DisplayTextFor(model => model.aplyNo)
+                </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createUid)：
+                    
+                        @Html.DisplayTextFor(model => model.createUid)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createDt)：
+                    
+                        @Html.DisplayTextFor(model => model.createDt)
+                    </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.roleId)：
+                    @Html.DisplayTextFor(model => model.roleId)
+                    @Html.Hidden("roleId", Model.roleId)
+                </td>
+
+                
+                <td>
+                    @Html.DisplayNameFor(model => model.roleAuthType)：
+                    @Html.DisplayTextFor(model => model.roleAuthTypeDesc)
+                    @Html.Hidden("roleAuthType", Model.roleAuthType)
+                </td>
+                
+                <td>
+                    @Html.DisplayNameFor(model => model.roleName)：
+
+                    @Html.DisplayTextFor(model => model.roleNameB)
+                    @if (Model.roleNameB != Model.roleName && Model.roleName != "")
+                    {
+                        <span style="color:red;">(@Html.DisplayTextFor(model => model.roleName))</span>
+                    }
+                </td>
+
+            </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+
+                        @Html.DisplayTextFor(model => model.isDisabledB)
+                        @if (Model.isDisabledB != Model.isDisabled && Model.isDisabled != "")
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.isDisabled))</span>
+                        }
+
+
+                    </td>
+                    <td colspan="2">
+                        @Html.DisplayNameFor(model => model.memo)：
+
+                        @Html.DisplayTextFor(model => model.memoB)
+@if (Model.memoB != Model.memo && Model.memo != "")
+{
+                        <span style="color:red;">(@Html.DisplayTextFor(model => model.memo))</span>
+}
+                    </td>
+            </tr>
+
+            <tr>
+                <td colspan="3">
+                    <span style="color:red;">紅色字體為修改後的值，黑色字體為目前的值!!</span>
+                </td>
+            </tr>
+
+           
+        </table>
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+                    <input type="button" id="btnClose" name="btnClose" value="關閉" class="btn btn-primary" />
+                </div>
+            </div>
+
+
+            <br>
+            <div class="row">
+                <div id="qryResultFunc" class="col-sm-24">
+                    <table id="gridFunc"></table>
+                    <div id="pagerFunc"></div>
+                </div>
+            </div>
+
+            <br>
+            <div class="row">
+                <div id="qryResultEquip" class="col-sm-24">
+                    <table id="gridEquip"></table>
+                    <div id="pagerEquip"></div>
+                </div>
+            </div>
+
+            <br>
+            <div class="row">
+                <div id="qryResultItem" class="col-sm-24">
+                    <table id="gridItem"></table>
+                    <div id="pagerItem"></div>
+                </div>
+            </div>
+
+            <br>
+            <div class="row">
+                <div id="qryResultFormAply" class="col-sm-24">
+                    <table id="gridFormAply"></table>
+                    <div id="pagerFormAply"></div>
+                </div>
+            </div>
+
+    </div>
+</div>
+
+</div>
+@*<table id="grid" class="table table-striped table-bordered"></table>*@
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+
+        var bView = '@Html.Raw(ViewBag.bView)';
+        if (bView == "Y") {
+            $("#btnClose").show();
+            $("#btnConfirm").hide();
+            $("#btnReturn").hide();
+            $("#btnPrepage").hide();
+
+
+        } else {
+            $("#btnClose").hide();
+            $("#btnConfirm").show();
+            $("#btnReturn").show();
+            $("#btnPrepage").show();
+        }
+
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData == "N") {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+
+            return;
+        }
+
+
+
+        switch ($('#roleAuthType').val()) {
+            case 'F':
+                createGridFunc();
+
+                $("#qryResultEquip").hide();
+                $("#qryResultItem").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'E':
+                createGridEquip();
+
+                $("#qryResultFunc").hide();
+                $("#qryResultItem").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'I':
+                createGridItem();
+
+                $("#qryResultFunc").hide();
+                $("#qryResultEquip").hide();
+                $("#qryResultFormAply").hide();
+                break;
+            case 'A':
+                createGridFormAply();
+
+
+                $("#qryResultFunc").hide();
+                $("#qryResultEquip").hide();
+                $("#qryResultItem").hide();
+                break;
+            default:
+                break;
+        }
+
+
+
+        /*------------------功能授權---------------------*/
+        function createGridFunc() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResultFunc').children().remove();
+
+            $('#qryResultFunc').append('<table id="' + "gridFunc" + '"></table>');
+            $('#qryResultFunc').append('<div id="' + "pagerFunc" + '"></div>');
+
+            var para = {
+                roleId: $('#roleId').val(),
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridFunc").jqGrid({
+                url: '/RoleAppr/qryRoleFuncHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                caption: '異動功能清單',
+                colNames: ['執行功能', '功能編號', '功能名稱', '執行功能代碼' ],
+                colModel: [
+                    { name: 'execActionDesc', align: 'center' },
+                    { name: 'cFunctionID', align: 'center', hidden: true },
+                    { name: 'cFunctionName', align: 'left', width:250},
+                    { name: 'execAction', align: 'center', hidden: true }
+
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pagerFunc',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'cFunctionID',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridFunc").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridFunc").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    var cnt = $('#gridFunc').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridFunc").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridFunc").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridFunc").jqGrid('setCell', ids[i], "cFunctionName", "", { color: 'red' });
+                        }
+
+                    }
+
+
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+        /*---------------------金庫設備-------------------------*/
+        function createGridEquip() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResultEquip').children().remove();
+
+            $('#qryResultEquip').append('<table id="' + "gridEquip" + '"></table>');
+            $('#qryResultEquip').append('<div id="' + "pagerEquip" + '"></div>');
+
+            var para = {
+                roleId: $('#roleId').val(),
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridEquip").jqGrid({
+                url: '/RoleAppr/qryRoleEquipHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                caption: '金庫設備異動清單',
+                colNames: ['設備編號', '執行功能', '設備名稱', '修改前', '修改後', '修改前', '修改後'],
+                colModel: [
+                    { name: 'treaEquipId', align: 'center', hidden: true, width: '100' },
+                    { name: 'execActionDesc', align: 'center' },
+                    { name: 'equipName', align: 'left', width: '350' },
+
+                    { name: 'custodyModeDescB', align: 'center', width: '80' },
+                     { name: 'custodyModeDesc', align: 'center', width: '80' },
+
+                      { name: 'custodyOrderB', align: 'center', width: '80' },
+                       { name: 'custodyOrder', align: 'center', width: '80' }
+
+
+                ],
+
+
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pagerEquip',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'treaEquipId',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridEquip").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridEquip").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridEquip").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "equipName", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyModeDescB", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyModeDesc", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyOrderB", "", { color: 'red' });
+                            $("#gridEquip").jqGrid('setCell', ids[i], "custodyOrder", "", { color: 'red' });
+                        }
+
+                    }
+                }
+
+            });
+            jQuery("#gridEquip").jqGrid('setGroupHeaders', {
+                useColSpanStyle: false,
+                groupHeaders: [
+                  { startColumnName: 'custodyModeDescB', numberOfColumns: 2, titleText: '控管方式' },
+                  { startColumnName: 'custodyOrderB', numberOfColumns: 2, titleText: '保管順位' }
+                ]
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+        /*---------------------存取項目-------------------------*/
+        function createGridItem() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResultItem').children().remove();
+
+            $('#qryResultItem').append('<table id="' + "gridItem" + '"></table>');
+            $('#qryResultItem').append('<div id="' + "pagerItem" + '"></div>');
+
+            var para = {
+                roleId: $('#roleId').val(),
+                aplyNo: aplyNo, authType: '1'
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridItem").jqGrid({
+                url: '/RoleAppr/qryRoleItemHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'id'
+                },
+                mtype: 'POST',
+                caption: '存取項目異動清單',
+                colNames: ['id','itemId', '執行功能', '作業類型', '存取項目'],
+                colModel: [
+                { name: 'id', align: 'center', hidden: true , width: '100'},
+                { name: 'itemId', align: 'center', hidden: true },
+                { name: 'execActionDesc', align: 'center', width: '100' },
+                { name: 'itemOpType', align: 'center', width: '350' },
+                { name: 'itemDesc', align: 'center' }
+
+                ],
+
+
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pagerItem',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'id',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridItem").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridItem").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridItem").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridItem").jqGrid('setCell', ids[i], "itemOpType", "", { color: 'red' });
+                            $("#gridItem").jqGrid('setCell', ids[i], "itemDesc", "", { color: 'red' });
+
+                        }
+
+                    }
+                }
+
+            });
+
+
+            $.unblockUI(); //畫面打開
+
+        }
+
+
+        /*---------------------表單申請-------------------------*/
+        function createGridFormAply() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResultFormAply').children().remove();
+
+            $('#qryResultFormAply').append('<table id="' + "gridFormAply" + '"></table>');
+            $('#qryResultFormAply').append('<div id="' + "pagerFormAply" + '"></div>');
+
+            var para = {
+                roleId: $('#roleId').val(),
+                aplyNo: aplyNo, authType: '2'
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridFormAply").jqGrid({
+                url: '/RoleAppr/qryRoleItemHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'id'
+                },
+                mtype: 'POST',
+                caption: '表單申請異動清單',
+                colNames: ['id', 'itemId', '執行功能', '作業類型', '存取項目'],
+                colModel: [
+                { name: 'id', align: 'center', hidden: true },
+                { name: 'itemId', align: 'center', hidden: true },
+                { name: 'execActionDesc', align: 'center', width: '100' },
+                { name: 'itemOpType', align: 'center', width: '350' },
+                { name: 'itemDesc', align: 'center' }
+
+                ],
+
+
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pagerFormAply',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'id',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridFormAply").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridFormAply").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    ids = $(this).jqGrid('getDataIDs');
+                    for (i = 0; i <= ids.length - 1; i++) {
+                        rowData = $("#gridFormAply").jqGrid('getRowData', ids[i]);
+                        if (rowData.execActionDesc != "") {
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "execActionDesc", "", { color: 'red' });
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "itemOpType", "", { color: 'red' });
+                            $("#gridFormAply").jqGrid('setCell', ids[i], "itemDesc", "", { color: 'red' });
+
+                        }
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            history.go(-1)
+        })
+
+        //退回
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        roleId: $("#roleId").val(),
+                        apprStatus: "3"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execReviewR", "RoleAppr")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+                    }
+                });
+            $.unblockUI();
+
+
+
+
+        });
+
+
+
+        //確定
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        roleId: $("#roleId").val(),
+                        apprStatus: "2"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execReviewR", "RoleAppr")',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+                    }
+                });
+            $.unblockUI();
+
+        });
+
+
+
+
+    });
+
+
+</script>
+
+

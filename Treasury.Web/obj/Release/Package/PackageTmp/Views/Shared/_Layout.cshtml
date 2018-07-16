@@ -1,16 +1,20 @@
-﻿@using Fubon.Utility;
-@using Demo.Service.Function;
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - @Html.OutputText("Demo".ToI18N())</title>
+    <title>@ViewBag.Title - 金庫管理系統</title>
+
     @*@Html.Analytics(AppConfig.GoogleAnalyticsNum())*@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryjqgrid")
+    @Scripts.Render("~/bundles/locales")
+    @Scripts.Render("~/bundles/treasury")   
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryui")
     <script>
         baseUrl = '@Url.Content("~/")';
 
@@ -20,18 +24,38 @@
         }
     </script>
 </head>
+
+
+
 <body>
-    <div class="container margin-top-5">
-        @RenderBody()
-        <hr class="colorgraph" />
-        <footer class="text-center">
-            <p>&copy; @DateTime.Now.Year - @Html.OutputText("Demo".ToI18N())</p>
-        </footer>
+
+    <div class="container margin-top-5" >
+            @{ Html.RenderAction("MenuByUser", "Navigation", null); }
+            @RenderBody()
+            @*<hr class="colorgraph" />*@
+            <footer class="text-center">
+                <p>&copy; @DateTime.Now.Year -金庫管理系統</p>
+            </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/locales")
-    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/Customer")
     @RenderSection("scripts", required: false)
+
+    <script>
+        $(function () {
+            if ($('.menu-list') != null) {
+                $('ul.main-menu li a').each(function () {
+                    if ($($(this))[0].href == String(window.location))
+                        $(this).parent().addClass('active');
+                });
+            }
+            customerUtility.reportUrl = '@Url.HttpRouteUrl("Report", new { aspx = "ReportViewer"})';
+            customerUtility.reportCommonUrl = '@Url.Action("GetReport","Common")';
+        })
+
+    </script>
+
 </body>
 </html>
+
+

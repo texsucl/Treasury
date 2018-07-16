@@ -50,6 +50,7 @@ namespace Treasury.WebControllers
             ViewBag.dActType = AplyNo.IsNullOrWhiteSpace();
             if (AplyNo.IsNullOrWhiteSpace())
             {
+                ViewBag.dAccess = null;
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
                 resetBillViewModel(data.vAccessType);
@@ -58,7 +59,6 @@ namespace Treasury.WebControllers
             {
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
                 resetBillViewModel(null, AplyNo);
-                ViewBag.TAR = TreasuryAccess.GetByAplyNo(AplyNo);
             }
             return PartialView();
         }

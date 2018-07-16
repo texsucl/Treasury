@@ -1,0 +1,354 @@
+﻿@model Treasury.WebViewModels.AuthReviewUserModel
+
+@{
+    ViewBag.Title = "使用者覆核明細資訊";
+
+    var bHaveData = ViewBag.bHaveData as String;
+}
+
+
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cReviewSeq)：
+
+                        @Html.DisplayTextFor(model => model.cReviewSeq)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtUserID)：
+
+                        @Html.DisplayTextFor(model => model.cCrtUserID)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtDateTime)：
+
+                        @Html.DisplayTextFor(model => model.cCrtDateTime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cReviewFlagDesc)：
+                        @Html.DisplayTextFor(model => model.cReviewFlagDesc)
+                    </td>
+
+                    
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cReviewUser)：
+                        @Html.DisplayTextFor(model => model.cReviewUser)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cReviewDate)：
+                        @Html.DisplayTextFor(model => model.cReviewDate)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cReviewMemo)：
+                        @Html.DisplayTextFor(model => model.cReviewMemo)
+                    </td>
+
+                </tr>
+
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cAgentID)：
+                        @Html.DisplayTextFor(model => model.cAgentID)
+
+                        @if (Model.cAgentID != null)
+                        {
+                            @Html.Hidden("cAgentID", Model.cAgentID)
+                        }
+                        else
+                        {
+                            @Html.Hidden("cAgentID", Model.cAgentIDHis)
+                        }
+                        
+                        @if (Model.cAgentID != Model.cAgentIDHis && Model.cAgentIDHis != null)
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.cAgentIDHis))</span>
+                        }
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUserID)：
+                        @Html.DisplayTextFor(model => model.cUserID)
+                        @Html.Hidden("cUserID", Model.cUserID)
+                        @if (Model.cUserID != Model.cUserIDHis && Model.cUserIDHis != null)
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.cUserIDHis))</span>
+                        }
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUserName)：
+
+                        @Html.DisplayTextFor(model => model.cUserName)
+                        @if (Model.cUserName != Model.cUserNameHis && Model.cUserNameHis != null)
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.cUserNameHis))</span>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUserType)：
+
+                        @Html.DisplayTextFor(model => model.cUserType)
+                        @if (Model.cUserType != Model.cUserTypeHis && Model.cUserTypeHis != null && Model.cUserTypeHis != "")
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.cUserTypeHis))</span>
+                        }
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.cFlag)：
+
+                        @Html.DisplayTextFor(model => model.cFlag)
+                        @if (Model.cFlag != Model.cFlagHis && Model.cFlagHis != null)
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.cFlagHis))</span>
+                        }
+                    </td>
+
+                    <td colspan="3">
+                        @Html.DisplayNameFor(model => model.vMemo)：
+
+                        @Html.DisplayTextFor(model => model.vMemo)
+                        @if (Model.vMemo != Model.vMemoHis && Model.vMemoHis != null)
+                        {
+                            <span style="color:red;">(@Html.DisplayTextFor(model => model.vMemoHis))</span>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="6">
+                        <span style="color:red;">紅色字體為修改後的值，黑色字體為修改前的值!!</span>
+                    </td>
+                </tr>
+
+
+            </table>
+
+            
+        <div class="row">
+            <div class="col-sm-24" style="text-align:center;">
+                <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+            </div>
+        </div>
+
+
+        <br>
+        <div class="row">
+            <div id="qryResult" class="col-sm-24">
+                <table id="grid"></table>
+                <div id="pager"></div>
+            </div>
+        </div>
+            <br>
+            <div class="row">
+                <div id="qryUnitResult" class="col-sm-24">
+                    <table id="gridUnit"></table>
+                    <div id="pagerUnit"></div>
+                </div>
+            </div>
+
+    </div>
+</div>
+
+</div>
+@*<table id="grid" class="table table-striped table-bordered"></table>*@
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            createGrid();
+            createGridUnit();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+        //使用者角色清單
+        function createGrid() {
+            var cReviewSeq = '@Html.Raw(ViewBag.cReviewSeq)';
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                cReviewSeq: cReviewSeq
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/AuthReviewQry/qryUserRoleHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cAgentID'
+                },
+                mtype: 'POST',
+                caption: '角色異動清單',
+                colNames: ['角色編號', '角色名稱', '生效日期', '終止日期', '執行功能代碼', '執行功能'],
+                colModel: [
+                    { name: 'cRoleID', align: 'center', hidden: true },
+                    { name: 'cRoleName', align: 'center', width: 250 },
+                     { name: 'cEnableDate', align: 'center', width: 100 },
+                      { name: 'cDisableDate', align: 'center', width: 100 },
+                    { name: 'cExecType', align: 'center', hidden: true },
+                     { name: 'cExecTypeDesc', align: 'center'}
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'cReviewSeq',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        //validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+        //使用者指派單位清單
+        function createGridUnit() {
+            var cReviewSeq = '@Html.Raw(ViewBag.cReviewSeq)';
+
+            $('#qryUnitResult').children().remove();
+
+            $('#qryUnitResult').append('<table id="' + "gridUnit" + '"></table>');
+            $('#qryUnitResult').append('<div id="' + "pagerUnit" + '"></div>');
+
+            var para = {
+                cReviewSeq: cReviewSeq
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridUnit").jqGrid({
+                url: '/AuthReviewQry/qryUserUnitHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cAgentID'
+                },
+                mtype: 'POST',
+                caption: '指派單位異動清單',
+                colNames: ['單位代碼', '單位序號', '單位名稱', '生效日期', '終止日期', '執行功能代碼', '執行功能'],
+                colModel: [
+                    { name: 'cUnitCode', align: 'center', width: 70 },
+                    { name: 'cUnitSeq', align: 'center', width: 70 },
+                    { name: 'cUnitName', align: 'center', width: 150 },
+                     { name: 'cEnableDate', align: 'center', width: 100 },
+                      { name: 'cDisableDate', align: 'center', width: 100 },
+                    { name: 'cExecType', align: 'center', hidden: true },
+                     { name: 'cExecTypeDesc', align: 'center' }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pagerUnit',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'cReviewSeq',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridUnit").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridUnit").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+                    var cnt = $('#gridUnit').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        //validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            history.go(-1)
+        })
+    });
+
+
+</script>
+
+

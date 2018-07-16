@@ -199,7 +199,7 @@ namespace Treasury.WebUtility
         public static string DateToTaiwanDate(this DateTime datetime)
         {
             TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
-            return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Date.ToString().PadLeft(2, '0')}";
+            return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
         }
 
         /// <summary>

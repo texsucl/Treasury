@@ -28,55 +28,115 @@ namespace Treasury.WebControllers
     [CheckSessionFilterAttribute]
     public class EstateController : CommonController
     {
-        private IBill Bill;
+        private IEstate Estate;
         private ITreasuryAccess TreasuryAccess;
 
         public EstateController()
         {
-            Bill = new Bill();
+            Estate = new Estate();
             TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
-        /// 空白票據 新增畫面
+        /// 不動產 新增畫面
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
         {
-            //ViewBag.dBILL_Check_Type = new SelectList(Bill.GetCheckType(), "Value", "Text");
-            //var ibs = Bill.GetIssuing_Bank();
-            //ViewBag.dBILL_Issuing_Bank = new SelectList(ibs, "Value", "Text");
-            //ViewBag.dActType = AplyNo.IsNullOrWhiteSpace();
-            //if (AplyNo.IsNullOrWhiteSpace())
-            //{
-            //    Cache.Invalidate(CacheList.TreasuryAccessViewData);
-            //    Cache.Set(CacheList.TreasuryAccessViewData, data);
-            //    resetBillViewModel(data.vAccessType);
-            //}
-            //else
-            //{
-            //    ViewBag.dAccess = Bill.GetAccessType(AplyNo);
-            //    resetBillViewModel(null, AplyNo);
-            //    ViewBag.TAR = TreasuryAccess.GetByAplyNo(AplyNo);
-            //}
+            ViewBag.ESTATE_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
+            ViewBag.dActType = AplyNo.IsNullOrWhiteSpace();
+            if (AplyNo.IsNullOrWhiteSpace())
+            {
+                if (data.vAccessType == AccessProjectTradeType.P.ToString())
+                {
+                    ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(), "Value", "Text");
+                    ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(), "Value", "Text");
+                }
+                else if (data.vAccessType == AccessProjectTradeType.G.ToString())
+                {
+                    ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(data.vAplyUnit), "Value", "Text");
+                    ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(data.vAplyUnit), "Value", "Text");
+                }                
+                Cache.Invalidate(CacheList.TreasuryAccessViewData);
+                Cache.Set(CacheList.TreasuryAccessViewData, data);
+                resetEstateViewModel();
+            }
+            else
+            {
+                ViewBag.ESTATE_Book_No = new SelectList(new List<SelectOption>(), "Value", "Text");
+                ViewBag.ESTATE_Building_Name = new SelectList(new List<SelectOption>(), "Value", "Text");
+                ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
+                resetEstateViewModel(AplyNo);
+            }
             return PartialView();
         }
 
         [HttpPost]
-        public JsonResult ApplyTempData()
+        public JsonResult ApplyTempData(EstateModel model)
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
-            if (Cache.IsSet(CacheList.TreasuryAccessViewData))
+            var _detail = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
+            if (!_detail.Any())
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 data.vCreateUid = AccountController.CurrentUserId;
-                result = Bill.ApplyAudit((List<BillViewModel>)Cache.Get(CacheList.BILLTempData), data);
+                var _data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
+                _data.vItem_Book = model;
+                _data.vDetail = _detail;
+                List<EstateViewModel> _datas = new List<EstateViewModel>();
+                _datas.Add(_data);
+                result = Estate.ApplyAudit(_datas, data);
             }
             else
             {
                 result.RETURN_FLAG = false;
                 result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult GetItemBook(int groupNo,bool accessType)
+        {
+            MSGReturnModel<EstateModel> result = new MSGReturnModel<EstateModel>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            if (groupNo == 0 && Cache.IsSet(CacheList.ESTATEAllData))
+            {
+                var data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
+                result.RETURN_FLAG = true;
+                result.Datas = data.vItem_Book;
+            }
+            else if (groupNo == -1)
+            {
+                Cache.Invalidate(CacheList.ESTATEData);
+                Cache.Set(CacheList.ESTATEData, new List<EstateDetailViewModel>());
+                result.RETURN_FLAG = false;
+            }
+            else
+            {
+                if (Cache.IsSet(CacheList.TreasuryAccessViewData) && accessType)
+                {
+                    TreasuryAccessViewModel viewdata = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
+                    var _data = Estate.GetDataByGroupNo(groupNo, viewdata.vAplyUnit);
+                    Cache.Invalidate(CacheList.ESTATEData);
+                    Cache.Set(CacheList.ESTATEData, _data);
+                }
+                var data = Estate.GetItemBook(groupNo);
+                if (Cache.IsSet(CacheList.ESTATEAllData) && !data.BOOK_NO.IsNullOrWhiteSpace())
+                {
+                    var vdata = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
+                    vdata.vItem_Book = data;
+                    Cache.Invalidate(CacheList.ESTATEAllData);
+                    Cache.Set(CacheList.ESTATEAllData, vdata);
+                    result.RETURN_FLAG = true;
+                    result.Datas = data;
+                }
             }
             return Json(result);
         }
@@ -87,24 +147,18 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult InsertTempData(BillViewModel model)
+        public JsonResult InsertTempData(EstateDetailViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
+            if (Cache.IsSet(CacheList.ESTATEData))
             {
-                var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
+                var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
                 model.vStatus = AccessInventoryTyp._3.GetDescription();
                 tempData.Add(model);
-                Cache.Invalidate(CacheList.BILLTempData);
-                Cache.Set(CacheList.BILLTempData, setBillViewRowNum(tempData));
-                var dayData = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
-                Cache.Invalidate(CacheList.BILLDayData);
-                //Cache.Set(CacheList.BILLDayData, setBillViewModelGroup(dayData));
-                Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(dayData));
+                Cache.Invalidate(CacheList.ESTATEData);
+                Cache.Set(CacheList.ESTATEData, tempData);
                 result.RETURN_FLAG = true;
                 result.DESCRIPTION = MessageType.insert_Success.GetDescription();
             }
@@ -118,31 +172,26 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult UpdateTempData(BillViewModel model )
+        public JsonResult UpdateTempData(EstateDetailViewModel model )
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
+            if (Cache.IsSet(CacheList.ESTATEData))
             {
-                var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
-                var dayData =  (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);                
+                var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);                
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null )
                 {
-                    updateTempData.vIssuingBank = model.vIssuingBank;
-                    updateTempData.vCheckType = model.vCheckType;
-                    updateTempData.vCheckNoTrack = model.vCheckNoTrack;
-                    updateTempData.vCheckNoB = model.vCheckNoB;
-                    updateTempData.vCheckNoE = model.vCheckNoE;
-                    updateTempData.vCheckTotalNum = model.vCheckTotalNum;
-                    Cache.Invalidate(CacheList.BILLTempData);
-                    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(tempData));
-                    dayData.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
-                    Cache.Invalidate(CacheList.BILLDayData);
-                    //Cache.Set(CacheList.BILLDayData, setBillViewModelGroup(dayData));
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(dayData));
+                    updateTempData.vEstate_From_No = model.vEstate_From_No;
+                    updateTempData.vEstate_Date = model.vEstate_Date;
+                    updateTempData.vOwnership_Cert_No = model.vOwnership_Cert_No;
+                    updateTempData.vLand_Building_No = model.vLand_Building_No;
+                    updateTempData.vHouse_No = model.vHouse_No;
+                    updateTempData.vEstate_Seq = model.vEstate_Seq;
+                    updateTempData.vMemo = model.vMemo;
+                    Cache.Invalidate(CacheList.ESTATEData);
+                    Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.update_Success.GetDescription();
                 }
@@ -161,26 +210,21 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult DeleteTempData(BillViewModel model)
+        public JsonResult DeleteTempData(EstateDetailViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
+            if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
-                var dayData = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
+                var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
                 var deleteTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (deleteTempData != null )
                 {
                     tempData.Remove(deleteTempData);
-                    Cache.Invalidate(CacheList.BILLTempData);
-                    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(tempData));
-                    dayData.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
-                    Cache.Invalidate(CacheList.BILLDayData);
-                    //Cache.Set(CacheList.BILLDayData, setBillViewModelGroup(dayData));
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(dayData));
+                    Cache.Invalidate(CacheList.ESTATEData);
+                    Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.delete_Success.GetDescription();
                 }
@@ -199,28 +243,28 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult TakeOutData(BillViewModel model)
+        public JsonResult TakeOutData(EstateDetailViewModel model,bool takeoutFlag)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.BILLTempData))
+            if (Cache.IsSet(CacheList.ESTATEData))
             {
-                var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
+                var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null)
                 {
-                    updateTempData.vStatus = AccessInventoryTyp._4.GetDescription();
-                    updateTempData.vTakeOutE = model.vTakeOutE;
-                    updateTempData.vTakeOutTotalNum = model.vTakeOutTotalNum;
-                    Cache.Invalidate(CacheList.BILLTempData);
-                    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(tempData));
-                    var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                    var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
-                    _data2.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
-                    Cache.Invalidate(CacheList.BILLDayData);
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(_data2));
+                    if (takeoutFlag)
+                    {
+                        updateTempData.vStatus = AccessInventoryTyp._4.GetDescription();                    
+                    }
+                    else
+                    {
+                        updateTempData.vStatus = AccessInventoryTyp._1.GetDescription();
+                    }
+                    updateTempData.vtakeoutFlag = takeoutFlag;
+                    Cache.Invalidate(CacheList.ESTATEData);
+                    Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.update_Success.GetDescription();
                 }
@@ -234,47 +278,6 @@ namespace Treasury.WebControllers
         }
 
         /// <summary>
-        /// 重設事件動作(復原該筆庫存)
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public JsonResult RepeatData(BillViewModel model)
-        {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
-            result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.BILLTempData))
-            {
-                var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
-                var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
-                if (updateTempData != null)
-                {
-                    updateTempData.vStatus = AccessInventoryTyp._1.GetDescription();
-                    updateTempData.vTakeOutE = null;
-                    updateTempData.vTakeOutTotalNum = null;
-                    updateTempData.vReMainTotalNum = null;
-                    Cache.Invalidate(CacheList.BILLTempData);
-                    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(tempData));
-                    var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                    var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
-                    _data2.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
-                    Cache.Invalidate(CacheList.BILLDayData);
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(_data2));
-                    result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
-                }
-                else
-                {
-                    result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
-                }
-            }
-            return Json(result);
-        }
-
-        /// <summary>
         /// 取消申請(清空tempData)
         /// </summary>
         /// <returns></returns>
@@ -282,7 +285,7 @@ namespace Treasury.WebControllers
         public JsonResult ResetTempData(string AccessType)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
-            resetBillViewModel(AccessType);
+            resetEstateViewModel();
             return Json(result);
         }
 
@@ -290,166 +293,36 @@ namespace Treasury.WebControllers
         /// jqgrid cache data
         /// </summary>
         /// <param name="jdata"></param>
-        /// <param name="type"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetCacheData(jqGridParam jdata, string type)
+        public JsonResult GetCacheData(jqGridParam jdata)
         {
-            switch (type)
-            {
-                case "Temp":
-                    if (Cache.IsSet(CacheList.BILLTempData))
-                        return Json(jdata.modelToJqgridResult(setBillViewModelOrder((List<BillViewModel>)Cache.Get(CacheList.BILLTempData))));
-                    break;
-                case "Day":
-                    if (Cache.IsSet(CacheList.BILLDayData))
-                        return Json(jdata.modelToJqgridResult((List<BillViewModel>)Cache.Get(CacheList.BILLDayData)));
-                    break;
-            }
+            if (Cache.IsSet(CacheList.ESTATEData))
+                return Json(jdata.modelToJqgridResult((List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData)));
             return null;
         }
 
-        private void resetBillViewModel(string AccessType,string AplyNo = null)
+        /// <summary>
+        /// 不動產預設資料
+        /// </summary>
+        /// <param name="AccessType"></param>
+        /// <param name="AplyNo"></param>
+        private void resetEstateViewModel(string AplyNo = null)
         {
-            Cache.Invalidate(CacheList.BILLTempData);
-            Cache.Invalidate(CacheList.BILLDayData);
+            Cache.Invalidate(CacheList.ESTATEAllData);
+            Cache.Invalidate(CacheList.ESTATEData);          
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                if (AccessType == AccessProjectTradeType.P.ToString())
-                {
-                    Cache.Set(CacheList.BILLTempData, new List<BillViewModel>());
-                    //Cache.Set(CacheList.BILLDayData, setBillViewModelGroup((List<BillViewModel>)Bill.GetDayData(data.vAplyUnit)));
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup((List<BillViewModel>)Bill.GetDayData(data.vAplyUnit)));                   
-                }
-                if (AccessType == AccessProjectTradeType.G.ToString())
-                {
-                    var _data = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit, "1");//只抓庫存
-                    var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
-                    _data2.AddRange(_data.ModelConvert<BillViewModel, BillViewModel>());
-                    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(_data));
-                    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(_data2));
-                }
+                Cache.Set(CacheList.ESTATEAllData, new EstateViewModel());
+                Cache.Set(CacheList.ESTATEData, new List<EstateDetailViewModel>());
             }
             else
             {
-                //var _data = (List<BillViewModel>)Bill.GetTempData(AplyNo);
-                //var _data2 = (List<BillViewModel>)Bill.GetDayData(null,null,AplyNo);
-                //var _AccessType = Bill.GetAccessType(AplyNo);
-                //if (_AccessType == AccessProjectTradeType.P.ToString())
-                //{
-                //    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(_data));
-                //    //Cache.Set(CacheList.BILLDayData, setBillViewModelGroup(_data2));
-                //    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(_data2));
-                //}
-                //if (_AccessType == AccessProjectTradeType.G.ToString())
-                //{
-                //    Cache.Set(CacheList.BILLTempData, setBillViewRowNum(_data));
-                //    Cache.Set(CacheList.BILLDayData, setBillTakeOutViewModelGroup(_data2));
-                //}
+                var data = Estate.GetDataByAplyNo(AplyNo);
+                Cache.Set(CacheList.ESTATEAllData, data);
+                Cache.Set(CacheList.ESTATEData, data.vDetail);
             }
-
         }
 
-        private List<BillViewModel> getOut(List<BillViewModel> data)
-        {
-            return data.Where(x => x.vStatus != AccessInventoryTyp._1.GetDescription()).ToList();
-        }
-
-        private List<BillViewModel> setBillViewModelOrder(List<BillViewModel> data)
-        {
-            if (data.Any())
-            {
-                data = data.OrderBy(x => x.vRowNum).ToList();
-            }
-            return data;
-        }
-
-        private List<BillViewModel> setBillViewRowNum(List<BillViewModel> data)
-        {
-            int rownum = 1;
-            data.OrderBy(x => x.vIssuingBank)
-                .ThenBy(x => x.vCheckType).ToList()
-                .ForEach(x =>
-            {
-                x.vRowNum = rownum.ToString();
-                rownum += 1;
-            });
-            return data;
-        }
-
-        /// <summary>
-        /// 加入 小計&總計
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        private List<BillViewModel> setBillTakeOutViewModelGroup(List<BillViewModel> data)
-        {
-            var result = new List<BillViewModel>();
-            if (data.Any())
-            {
-                int _vCheckTotalNum = 0;
-                int _intReMainTotalNum = 0;
-                int rownum = 1;
-                data = data.OrderBy(x => x.vIssuingBank)
-                    .ThenBy(x => x.vCheckType)
-                    .ToList();
-
-                data.ForEach(x =>
-                    {
-                        x.vRowNum = rownum.ToString();
-                        if (x.vStatus == AccessInventoryTyp._3.GetDescription())
-                        {
-                            x.vReMainTotalNum = x.vCheckTotalNum;
-                            _intReMainTotalNum += TypeTransfer.stringToInt(x.vReMainTotalNum);
-                            x.vCheckTotalNum = "";
-                        }
-                        else
-                        {
-                            var _vReMainTotalNum =
-                            (x.vStatus == AccessInventoryTyp._1.GetDescription() || !x.vTakeOutE.IsNullOrWhiteSpace()) ?
-                            TypeTransfer.stringToInt(x.vCheckTotalNum) - TypeTransfer.stringToInt(x.vTakeOutTotalNum) : 0;
-                            _intReMainTotalNum += _vReMainTotalNum;
-                            x.vReMainTotalNum = _vReMainTotalNum == 0 ? "" : _vReMainTotalNum.ToString();
-                        }
-
-                        rownum += 1;
-                    });
-
-                data.GroupBy(x => new { x.vIssuingBank, x.vCheckType })
-                    .OrderBy(x => x.Key.vIssuingBank)
-                    .ThenBy(x => x.Key.vCheckType)
-                    .ToList()
-                    .ForEach(x =>
-                {
-                    result.AddRange(x);
-                    //資料欄位狀態文字為未包含'取出'的資料 - 料欄位狀態文字為包含'取出'的資料
-                    var _groupvCheckTotalNum = x.Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum));
-                    //var _groupvCheckTotalNum =
-                    //(x.Where(y => !y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) || !y.vTakeOutE.IsNullOrWhiteSpace())
-                    //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)) -
-                    // x.Where(y => y.vStatus.Contains(AccessProjectTradeType.G.GetDescription()) && y.vTakeOutE.IsNullOrWhiteSpace())
-                    //  .Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum)));
-                    var _group = new BillViewModel()
-                    {
-                        vStatus = "小計",
-                        vIssuingBank = x.Key.vIssuingBank,
-                        vCheckType = x.Key.vCheckType,
-                        vCheckTotalNum = _groupvCheckTotalNum.ToString(),
-                        vReMainTotalNum = x.Sum(y => TypeTransfer.stringToInt(y.vReMainTotalNum)).ToString()
-                    };
-                    _vCheckTotalNum += _groupvCheckTotalNum;
-                    result.Add(_group);
-                });
-                result.Add(new BillViewModel()
-                {
-                    vStatus = "總計",
-                    vCheckTotalNum = _vCheckTotalNum.ToString(),
-                    vReMainTotalNum = _intReMainTotalNum.ToString()
-                });
-            }
-            return result;
-        }
     }
 }

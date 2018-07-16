@@ -45,6 +45,12 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("已被取出，計庫存")]
             _6,
+
+            /// <summary>
+            /// 取消申請
+            /// </summary>
+            [Description("取消申請")]
+            _7,
         }
     }
 

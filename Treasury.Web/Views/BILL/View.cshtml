@@ -1,88 +1,6 @@
 ﻿@using Treasury.Web.Enum;
 @using Treasury.WebUtility;
 <div class="row">
-    <div  style="display:none;" class="aplyNoDetail">
-        <table style="width:95%" >
-            <tr>
-                <td style="width:150px">
-                    <label>申請單號 : </label>
-                </td>
-                <td style="width:250px">
-                    <label id="TAVMvAplyNo"></label>
-                </td>
-                <td style="width:150px">
-                    <label>存取申請項目 : </label>
-                </td>
-                <td style="width:250px">
-                    <label id="TAVMvItem"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>申請單位 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAplyUnit"></label>
-                </td>
-                <td>
-                    <label>申請人 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAplyUid"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>權責部門 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvChargeUnit"></label>
-                </td>
-                <td>
-                    <label>申請作業 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAccessType"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>預計存取日期 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvExpectedAccessDate"></label>
-                </td>
-                <td>
-                    <label>填表日期 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateDt"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>填表單位 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateUnit"></label>
-                </td>
-                <td>
-                    <label>填表人 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateUid"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>申請原因 : </label>
-                </td>
-                <td colspan="3">
-                    <textarea id="TAVMvAccessReason" style="width:100%" disabled></textarea>
-                </td>
-            </tr>
-        </table>
-    </div>
     <div style="padding-bottom:5px;">
         <input type="button" id="BILLInsert" value="新增存入明細" class="btn btn-primary"/>
     </div>
@@ -255,19 +173,6 @@
         if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
             $('.BILLAct').hide();
             type = '@ViewBag.dAccess';
-            $('.aplyNoDetail').show();
-            var TARdata = @Html.Raw(Json.Encode(ViewBag.TAR));
-            $('#TAVMvAplyNo').text(TARdata.vAplyNo);
-            $('#TAVMvItem').text(TARdata.vItem)
-            $('#TAVMvAplyUnit').text(TARdata.vAplyUnit);
-            $('#TAVMvAplyUid').text(TARdata.vAplyUid);
-            $('#TAVMvChargeUnit').text(TARdata.vAplyUnit);
-            $('#TAVMvAccessType').text(TARdata.vAccessType);
-            $('#TAVMvExpectedAccessDate').text(TARdata.vExpectedAccessDate);
-            $('#TAVMvCreateDt').text(TARdata.vCreateDt);
-            $('#TAVMvCreateUnit').text(TARdata.vCreateUnit);
-            $('#TAVMvCreateUid').text(TARdata.vCreateUid);
-            $('#TAVMvAccessReason').val(TARdata.vAccessReason);
         }
         else { //是覆核狀態 (為存入 or 取出 動作)
             $('.BILLAct').show();
@@ -781,7 +686,16 @@
             var dialogId = 'BillInsertDialog';
             var listId = 'BILLTempList';
             var BILLInsertClass = 'BILLInsertType';
-            var title = '';
+            var title = customerUtility.getDialogType(type);
+            
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '空白票券',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+            });
             $('#BILLInsertTemp,#BILLUpdateTemp,#BILLDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()')
             {
@@ -810,14 +724,6 @@
                 title = '@Ref.ActionType.View.GetDescription()';
                 $('.' + BILLInsertClass).prop('disabled', true);
             }
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: title + '空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
             $('#' + dialogId).dialog('open');
         }
 

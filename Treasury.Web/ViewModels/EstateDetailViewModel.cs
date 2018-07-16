@@ -72,10 +72,10 @@ namespace Treasury.Web.ViewModels
         public string vMemo { get; set; }
 
         /// <summary>
-        /// 修改註記
+        /// 取出註記
         /// </summary>
-        [Description("修改註記")]
-        public bool changeFlag { get; set; }
+        [Description("取出註記")]
+        public bool vtakeoutFlag { get; set; }
 
         /// <summary>
         /// 最後更新時間 (庫存資料才有)

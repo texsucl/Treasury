@@ -36,6 +36,12 @@ namespace Treasury.Web.ViewModels
         public string vItem { get; set; }
 
         /// <summary>
+        /// 申請項目中文
+        /// </summary>
+        [Description("存取申請項目中文")]
+        public string vItemDec { get; set; }
+
+        /// <summary>
         /// 申請日期
         /// </summary>
         [Description("申請日期")]

@@ -1,0 +1,258 @@
+﻿@model Treasury.WebViewModels.AuthReviewQryModel
+
+@{
+    ViewBag.Title = "使用者及角色權限覆核資料查詢作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var ReviewTypeList = ViewBag.ReviewTypeList as SelectList;
+    var ReviewFlagList = ViewBag.ReviewFlagList as SelectList;
+    var CodeRoleList = ViewBag.CodeRoleList as SelectList;
+    var CodeUserList = ViewBag.CodeUserList as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cReviewType)：@Html.DropDownList("cReviewType", ReviewTypeList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cRoleId)：@Html.DropDownList("cRoleId", CodeRoleList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cUserId)：@Html.DropDownList("cUserId", CodeUserList, "請選擇")
+                        </td>
+                        
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cReviewFlag)：@Html.DropDownList("cReviewFlag", ReviewFlagList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cReviewUserID)：
+                            @Html.TextBoxFor(model => model.cReviewUserID, new { @size = "7", @maxlength = "5", @class = "myCssClass" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cReviewDateB)：
+                            <input id="cReviewDateB" name="cReviewDateB" type="text">
+                            ~
+                            <input id="cReviewDateE" name="cReviewDateE" type="text">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cCrtUserID)：
+                            @Html.TextBoxFor(model => model.cCrtUserID, new { @size = "7", @maxlength = "5", @class = "myCssClass" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cCrtDateB)：
+                            <input id="cCrtDateB" name="cCrtDateB" type="text">
+                            ~
+                            <input id="cCrtDateE" name="cCrtDateE" type="text">
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清除" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+
+
+    $(function () {
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+            $("#btnQry").hide();
+
+        } else {
+            $('#cCrtDateB').datepicker({
+                dateFormat: 'yyyy-mm-dd'
+            });
+
+            $('#cCrtDateE').datepicker({
+                dateFormat: 'yyyy-mm-dd'
+            });
+
+            $('#cReviewDateB').datepicker({
+                dateFormat: 'yyyy-mm-dd'
+            });
+
+            $('#cReviewDateE').datepicker({
+                dateFormat: 'yyyy-mm-dd'
+            });
+        }
+
+        //清除
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#qryResult').children().remove();
+
+            $('#cReviewType').val("");
+            $('#cRoleId').val("");
+            $('#cUserId').val("");
+            $('#cReviewFlag').val("");
+            $('#cReviewUserID').val("");
+            $('#cReviewDateB').val("");
+            $('#cReviewDateE').val("");
+            $('#cCrtUserID').val("");
+            $('#cCrtDateB').val("");
+            $('#cCrtDateE').val("");
+
+        });
+
+
+        //查詢
+        $("#btnQry").click().on('click', function () {
+
+            createGrid();
+        });
+
+
+        function createGrid() {
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                AuthReviewQryModel: {
+                    'cReviewType': $('#cReviewType').val(),
+                    'cRoleId': $('#cRoleId').val(),
+                    'cUserId': $('#cUserId').val(),
+                    'cReviewFlag': $('#cReviewFlag').val(),
+                    'cReviewUserID': $('#cReviewUserID').val(),
+                    'cReviewDateB': $('#cReviewDateB').val(),
+                    'cReviewDateE': $('#cReviewDateE').val(),
+                    'cCrtUserID': $('#cCrtUserID').val(),
+                    'cCrtDateB': $('#cCrtDateB').val(),
+                    'cCrtDateE': $('#cCrtDateE').val()
+                }
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/AuthReviewQry/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'cReviewSeq'
+                },
+                mtype: 'POST',
+                colNames: ['覆核單編號', '覆核單種類代碼', '覆核單種類', '異動資料內容', '申請人', '申請日期', '覆核狀態代碼', '覆核狀態', '覆核人', '覆核日期', '覆核意見'],
+                colModel: [
+                    {
+                        name: 'cReviewSeq', align: 'center',width:120,
+                        formatter: function (cellvalue, options, rowObject) {
+                            var cReviewType = rowObject.cReviewType;
+
+                            if ("U" == cReviewType)
+                                return '<a style="color:Blue;text-decoration:underline;" href="/AuthReviewQry/detailUser/?cReviewSeq=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+                            else
+                                return '<a style="color:Blue;text-decoration:underline;" href="/AuthReviewQry/detailRole/?cReviewSeq=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+
+                        }
+                    },
+                    { name: 'cReviewType', align: 'center', width: 70, hidden: true },
+                    { name: 'cReviewTypeDesc', align: 'center', width: 100 },
+                    { name: 'cMappingKeyDesc', align: 'center', width: 140 },
+                    { name: 'cCrtUserID', align: 'center', width: 120 },
+                    { name: 'cCrtDate', align: 'center', width: 170 },
+                    { name: 'cReviewFlag', align: 'center', hidden: true },
+                    { name: 'cReviewFlagDesc', align: 'center', width: 90 },
+                    { name: 'cReviewUserID', align: 'center', width: 120 },
+                    { name: 'cReviewDate', align: 'center', width: 170 },
+                    { name: 'cReviewMemo', align: 'left', width: 200 }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'cReviewSeq',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+    });
+</script>
+
+

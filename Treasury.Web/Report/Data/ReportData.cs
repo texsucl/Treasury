@@ -39,7 +39,7 @@ namespace Treasury.Web.Report.Data
             }
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var sys = db.SYS_CODE.AsNoTracking().ToList();
+                var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
                 var data = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.APLY_NO == aply_No);
                 var _dept = new INTRA().getDept(data.APLY_UNIT);
                 if (_dept != null)
@@ -61,7 +61,7 @@ namespace Treasury.Web.Report.Data
                 _REC.APLY_NO = data.APLY_NO; //申請單號
                 _REC.ACCESS_TYPE = data.ACCESS_TYPE == "P" ? "存入" : data.ACCESS_TYPE == "G" ? "取出" : ""; //動作 存入/取出
                 _REC.APLY_DT = data.CREATE_DT?.ToSimpleTaiwanDate(); //申請日期
-                _REC.ITEM_ID = sys.FirstOrDefault(x => x.CODE_TYPE == "TREA_ITEM_TYPE" && x.CODE == data.ITEM_ID)?.CODE_VALUE; //作業項目
+                _REC.ITEM_ID = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC; //作業項目
                 _REC.APLY_UNIT = getEmpName(depts, data.APLY_UNIT); //權責部門
                 _REC.ACCESS_REASON = data.ACCESS_REASON; //申請原因
                 _REC.EXPECTED_ACCESS_DATE = data.EXPECTED_ACCESS_DATE?.ToSimpleTaiwanDate(); //預計存取日期

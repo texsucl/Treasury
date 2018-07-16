@@ -175,4 +175,26 @@
             alert(message);
     }
 
+    customerUtility.getDialogType = function (action)
+    {
+        action = action || '';
+        var result = '';
+        switch (action)
+        {
+            case 'Add':
+                result = '新增';
+                break;
+            case 'Dele':
+                result = '刪除';
+                break;
+            case 'Edit':
+                result = '修改';
+                break;
+            case 'View':
+                result = '檢視';
+                break;
+        }
+        return result;
+    }
+
 })(window);
