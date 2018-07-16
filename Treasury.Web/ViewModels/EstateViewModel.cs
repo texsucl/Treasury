@@ -7,10 +7,10 @@ namespace Treasury.Web.ViewModels
     public class EstateViewModel : ITreaItem
     {
         /// <summary>
-        /// 存取作業編號
+        /// 申請單號
         /// </summary>
-        [Description("存取作業編號")]
-        public string vItemId { get; set; }
+        [Description("申請單號")]
+        public string vAplyNo { get; set; }
 
         /// <summary>
         /// 群組編號

@@ -435,6 +435,7 @@
     <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
     <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="STOCK_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
   </EntityType>
   <EntityType Name="MAIL_CONTENT">
     <Key>
@@ -794,20 +795,6 @@
     <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
-  <EntityType Name="ITEM_BOOK">
-    <Key>
-      <PropertyRef Name="ITEM_ID" />
-      <PropertyRef Name="GROUP_NO" />
-      <PropertyRef Name="COL" />
-      <PropertyRef Name="COL_NAME" />
-      <PropertyRef Name="COL_VALUE" />
-    </Key>
-    <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
-    <Property Name="COL" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="COL_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="COL_VALUE" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
-  </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT_HIS">
     <Key>
       <PropertyRef Name="APLY_NO" />
@@ -906,7 +893,6 @@
     <EntitySet Name="TREA_ITEM" EntityType="Self.TREA_ITEM" />
     <EntitySet Name="TREA_ITEM_HIS" EntityType="Self.TREA_ITEM_HIS" />
     <EntitySet Name="TREA_OPEN_REC" EntityType="Self.TREA_OPEN_REC" />
-    <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" />
     <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" />
     <EntitySet Name="Log" EntityType="Self.Log" />
     <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
@@ -923,6 +909,7 @@
     <EntitySet Name="CODE_ROLE" EntityType="dbTreasuryModel.CODE_ROLE" />
     <EntitySet Name="CODE_ROLE_HIS" EntityType="dbTreasuryModel.CODE_ROLE_HIS" />
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
+    <EntitySet Name="ITEM_BOOK" EntityType="dbTreasuryModel.ITEM_BOOK" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1021,5 +1008,17 @@
     <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="ITEM_BOOK">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="GROUP_NO" />
+      <PropertyRef Name="COL" />
+    </Key>
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
+    <Property Name="COL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="COL_NAME" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="COL_VALUE" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
   </EntityType>
 </Schema>

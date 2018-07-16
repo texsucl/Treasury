@@ -70,7 +70,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<TREA_ITEM> TREA_ITEM { get; set; }
         public virtual DbSet<TREA_ITEM_HIS> TREA_ITEM_HIS { get; set; }
         public virtual DbSet<TREA_OPEN_REC> TREA_OPEN_REC { get; set; }
-        public virtual DbSet<ITEM_BOOK> ITEM_BOOK { get; set; }
         public virtual DbSet<ITEM_CHARGE_UNIT_HIS> ITEM_CHARGE_UNIT_HIS { get; set; }
         public virtual DbSet<Log> Log { get; set; }
         public virtual DbSet<CODE_USER> CODE_USER { get; set; }
@@ -79,5 +78,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_ROLE> CODE_ROLE { get; set; }
         public virtual DbSet<CODE_ROLE_HIS> CODE_ROLE_HIS { get; set; }
         public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
+        public virtual DbSet<ITEM_BOOK> ITEM_BOOK { get; set; }
     }
 }

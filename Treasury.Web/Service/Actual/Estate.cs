@@ -31,7 +31,9 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public List<SelectOption> GetEstateFromNo()
         {
-            List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Text = " ", Value = " " } };
+            List<SelectOption> result = new List<SelectOption>() {
+                //new SelectOption() { Text = " ", Value = " " }
+            };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(
@@ -51,9 +53,9 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="vAplyUnit"></param>
         /// <returns></returns>
-        public List<SelectOption> GetBuildName(string vAplyUnit)
+        public List<SelectOption> GetBuildName(string vAplyUnit = null)
         {
-            return getBuildNameorBookNo(vAplyUnit, "BUILDING_NAME");
+            return getBuildNameorBookNo("BUILDING_NAME" , vAplyUnit);
         }
 
         /// <summary>
@@ -61,9 +63,69 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="vAplyUnit"></param>
         /// <returns></returns>
-        public List<SelectOption> GetBookNo(string vAplyUnit)
+        public List<SelectOption> GetBookNo(string vAplyUnit = null)
         {
-            return getBuildNameorBookNo(vAplyUnit, "BOOK_NO");
+            return getBuildNameorBookNo("BOOK_NO" , vAplyUnit );
+        }
+
+        /// <summary>
+        /// 由group No 抓取 存取項目冊號資料檔
+        /// </summary>
+        /// <param name="groupNo"></param>
+        /// <returns></returns>
+        public EstateModel GetItemBook(int groupNo)
+        {
+            EstateModel result = new EstateModel();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var itemId = TreaItemType.D1014.ToString();
+                result = getEstateModel(db.ITEM_BOOK.AsNoTracking()
+                    .Where(x => x.ITEM_ID == itemId && x.GROUP_NO == groupNo).ToList());
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 使用 申請單號 抓取資料
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        public EstateViewModel GetDataByAplyNo(string aplyNo)
+        {
+            var result = new EstateViewModel();
+            //result.
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (_TAR != null)
+                {
+                    //使用單號去其他存取項目檔抓取物品編號
+                    result.vAplyNo = _TAR.APLY_NO;
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    //使用物品編號去不動產庫存資料檔抓取資料
+                    var details = db.ITEM_REAL_ESTATE.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+                    if (details.Any())
+                    {
+                        var _groupNo = details.First().GROUP_NO;
+                        result.vGroupNo = _groupNo.ToString();
+                        //去存取項目冊號檔抓取冊號資料
+                        var _ItemBooks = db.ITEM_BOOK.AsNoTracking()
+                            .Where(x => x.GROUP_NO == _groupNo).ToList();
+                        if (_ItemBooks.Any())
+                        {
+                            result.vItem_Book = getEstateModel(_ItemBooks);
+                        }
+                        var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                        var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
+                        result.vDetail = getdetailModel(details, _Inventory_types).ToList();
+                    }
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -71,41 +133,23 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="groupNo"></param>
         /// <returns></returns>
-        public EstateViewModel GetData(int groupNo)
+        public List<EstateDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit )
         {
-            var result = new EstateViewModel();
+            var result = new List<EstateDetailViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _itemType = TreaItemType.ESTATE.ToString(); //不動產權狀
-                var itemId = db.TREA_ITEM.AsNoTracking().FirstOrDefault(x => x.TREA_ITEM_TYPE == _itemType)?.ITEM_ID; //D1014
+                var dept = intra.getDept(vAplyUnit); //抓取單位
+                var itemId = TreaItemType.D1014.ToString(); //不動產權狀
                 var _ItemBooks = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO == groupNo && x.ITEM_ID == itemId).ToList();
-                if (_ItemBooks.Any())
-                {
-                    result.vItem_Book = new EstateModel()
-                    {
-                        BOOK_NO = _ItemBooks.FirstOrDefault(x => x.COL == "BOOK_NO")?.COL_VALUE, //冊號
-                        BUILDING_NAME = _ItemBooks.FirstOrDefault(x => x.COL == "BUILDING_NAME")?.COL_VALUE, //大樓名稱
-                        LOCATED = _ItemBooks.FirstOrDefault(x => x.COL == "LOCATED")?.COL_VALUE, //坐落
-                        MEMO = _ItemBooks.FirstOrDefault(x => x.COL == "MEMO")?.COL_VALUE //備註
-                    };
-                }
                 var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                result.vDetail = db.ITEM_REAL_ESTATE.AsNoTracking().Where(x => x.GROUP_NO == groupNo)
-                    .AsEnumerable().Select(x => new EstateDetailViewModel() {
-                        vItemId = x.ITEM_ID, //物品編號
-                        vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                        vGroupNo = x.GROUP_NO.ToString(), //群組編號
-                        vEstate_From_No = x.ESTATE_FORM_NO, //狀別
-                        vEstate_Date = x.ESTATE_DATE.DateToTaiwanDate(), //發狀日
-                        vOwnership_Cert_No = x.OWNERSHIP_CERT_NO, //字號
-                        vLand_Building_No = x.LAND_BUILDING_NO, //地/建號
-                        vHouse_No = x.HOUSE_NO, //門牌號
-                        vEstate_Seq = x.ESTATE_SEQ, //流水號/編號
-                        vMemo = x.MEMO, //備註
-                        changeFlag = false, //修改註記
-                        vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
-                    }).ToList();
+                result =
+                    getdetailModel(db.ITEM_REAL_ESTATE.AsNoTracking()
+                    .Where(x => x.GROUP_NO == groupNo)
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
+                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .AsEnumerable(), _Inventory_types).ToList();
             }
             return result;
         }
@@ -180,51 +224,55 @@ namespace Treasury.Web.Service.Actual
                             });
                             #endregion
 
-                            #region 其它存取項目申請資料檔
 
-                            #endregion
 
                             #region 存取項目冊號資料檔
-                            var _ItemBook = _first.vItem_Book;
-                            var _itemType = TreaItemType.ESTATE.ToString(); //不動產權狀
-                            var itemId = db.TREA_ITEM.AsNoTracking().FirstOrDefault(x => x.TREA_ITEM_TYPE == _itemType)?.ITEM_ID; //D1014                           
-                            var _BUILDING_NAME = _ItemBook.BUILDING_NAME?.Trim();
-                            if (db.ITEM_BOOK.Any(x => x.ITEM_ID == itemId && x.COL == "BUILDING_NAME" && x.COL_VALUE == _BUILDING_NAME))
-                            {
-                                result.DESCRIPTION = "重複的大樓名稱";
-                                return result;
-                            }
                             int groupUp = 1; //群組編號
-                            if (_ItemBook.BOOK_NO == null) //新增存取項目冊號資料檔
+                            bool insertGroupFlag = false;
+                            if (taData.vAccessType == AccessProjectTradeType.P.ToString())
                             {
-                                var _itemBooks = db.ITEM_BOOK.Where(x => x.ITEM_ID == itemId);
-                                
-                                if (_itemBooks.Any())
+                                var _ItemBook = _first.vItem_Book;
+                                var _BUILDING_NAME = _ItemBook.BUILDING_NAME?.Trim();
+                                if (_ItemBook.BOOK_NO == null) //新增存取項目冊號資料檔
                                 {
-                                    groupUp = _itemBooks.Max(x => x.GROUP_NO) + 1; //群組編號 + 1 = 新的冊號
-                                }
-                                _ItemBook.BOOK_NO = groupUp.ToString();
-                                foreach (var pro in _ItemBook.GetType().GetProperties())
-                                {
-                                    db.ITEM_BOOK.Add(new ITEM_BOOK()
+                                    if (db.ITEM_BOOK.Any(x => x.ITEM_ID == taData.vItem && x.COL == "BUILDING_NAME" && x.COL_VALUE == _BUILDING_NAME))
                                     {
-                                        ITEM_ID = itemId,
-                                        GROUP_NO = groupUp,
-                                        COL = pro.Name,
-                                        COL_NAME = (pro.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute).Description,
-                                        COL_VALUE  = pro.GetValue(_ItemBook)?.ToString()?.Trim()
-                                    });
-                                }                              
-                            }
-                            else //修改 存取項目冊號資料檔
-                            {
-                                groupUp = TypeTransfer.stringToInt(_ItemBook.BOOK_NO);
-                                var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == groupUp && x.ITEM_ID == itemId).ToList();
-                                foreach (var pro in _ItemBook.GetType().GetProperties())
+                                        result.DESCRIPTION = "重複的大樓名稱";
+                                        return result;
+                                    }
+                                    insertGroupFlag = true;
+                                    var _itemBooks = db.ITEM_BOOK.Where(x => x.ITEM_ID == taData.vItem);
+
+                                    if (_itemBooks.Any())
+                                    {
+                                        groupUp = _itemBooks.Max(x => x.GROUP_NO) + 1; //群組編號 + 1 = 新的冊號
+                                    }
+                                    _ItemBook.BOOK_NO = groupUp.ToString();
+                                    foreach (var pro in _ItemBook.GetType().GetProperties())
+                                    {
+                                        db.ITEM_BOOK.Add(new ITEM_BOOK()
+                                        {
+                                            ITEM_ID = taData.vItem,
+                                            GROUP_NO = groupUp,
+                                            COL = pro.Name,
+                                            COL_NAME = (pro.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute).Description,
+                                            COL_VALUE = pro.GetValue(_ItemBook)?.ToString()?.Trim()
+                                        });
+                                    }
+                                }
+                                else //修改 存取項目冊號資料檔
                                 {
-                                    var _chang = _ItemBooks.FirstOrDefault(x => x.COL == pro.Name);
-                                    if (_chang != null)
-                                        _chang.COL_VALUE = pro.GetValue(_ItemBook).ToString()?.Trim();
+                                    groupUp = TypeTransfer.stringToInt(_ItemBook.BOOK_NO);
+                                    var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == groupUp && x.ITEM_ID == taData.vItem).ToList();
+                                    foreach (var pro in _ItemBook.GetType().GetProperties())
+                                    {
+                                        if (!(pro.Name == "BOOK_NO" || pro.Name == "BUILDING_NAME"))
+                                        {
+                                            var _chang = _ItemBooks.FirstOrDefault(x => x.COL == pro.Name);
+                                            if (_chang != null)
+                                                _chang.COL_VALUE = pro.GetValue(_ItemBook)?.ToString()?.Trim();
+                                        }
+                                    }
                                 }
                             }
                             #endregion
@@ -232,38 +280,19 @@ namespace Treasury.Web.Service.Actual
                             #region 不動產庫存資料檔
                             var details = _first.vDetail;
                             var _dept = intra.getDept_Sect(taData.vAplyUnit);
+                            var _seq = 1;
+                            //抓取有修改註記的
                             foreach (var item in details)
                             {
-                                if (item.changeFlag) //修改資料
+                                var _IRE_Item_Id = string.Empty;
+                                if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
                                 {
-                                    var _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                    if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
-                                    {
-                                        result.DESCRIPTION = MessageType.already_Change.GetDescription();
-                                        return result;
-                                    }
-                                    if (_IRE != null)
-                                    {
-                                        _IRE.ESTATE_FORM_NO = item.vEstate_From_No; //狀別
-                                        _IRE.ESTATE_DATE = item.vEstate_Date.TaiwanDateToDate(); //發狀日
-                                        _IRE.OWNERSHIP_CERT_NO = item.vOwnership_Cert_No; //字號
-                                        _IRE.LAND_BUILDING_NO = item.vLand_Building_No; // 地/建號
-                                        _IRE.HOUSE_NO = item.vHouse_No; //門牌號
-                                        _IRE.ESTATE_SEQ = item.vEstate_Seq; //流水號/編號
-                                        _IRE.MEMO = item.vMemo; //備註
-                                        //_IRE.APLY_DEPT = _dept.Item1; //申請人部門
-                                        //_IRE.APLY_SECT = _dept.Item2; //申請人科別
-                                        //_IRE.APLY_UID = taData.vAplyUid; //申請人
-                                        _IRE.LAST_UPDATE_DT = dt; //最後修改時間
-                                    }
-                                }
-                                else
-                                {
-                                    //預約存入
+                                    //只抓取預約存入
                                     if (item.vStatus == AccessInventoryTyp._3.GetDescription())
                                     {
-                                        var item_id = sysSeqDao.qrySeqNo("E3", qPreCode).ToString().PadLeft(3, '0');
-                                        db.ITEM_REAL_ESTATE.Add(new ITEM_REAL_ESTATE()
+                                        var item_id = sysSeqDao.qrySeqNo("E3", qPreCode).ToString().PadLeft(8, '0');
+                                        _IRE_Item_Id = item_id;
+                                        var _IRE = new ITEM_REAL_ESTATE()
                                         {
                                             ITEM_ID = item_id, //物品編號
                                             INVENTORY_STATUS = "3", //預約存入
@@ -282,12 +311,19 @@ namespace Treasury.Web.Service.Actual
                                             CHARGE_SECT = _dept.Item2, //權責科別
                                             //PUT_DATE = dt, //存入日期時間
                                             LAST_UPDATE_DT = dt, //最後修改時間
-                                        });
+                                        };
+                                        db.ITEM_REAL_ESTATE.Add(_IRE);
+                                        logStr += "|";
+                                        logStr += _IRE.modelToString();
                                     }
-                                    //預約取出
-                                    else if (item.vStatus == AccessInventoryTyp._4.GetDescription())
+                                }
+                                else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                {
+                                    //只抓取預約取出
+                                    if (item.vStatus == AccessInventoryTyp._4.GetDescription())
                                     {
                                         var _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                        _IRE_Item_Id = _IRE.ITEM_ID;
                                         if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
                                         {
                                             result.DESCRIPTION = MessageType.already_Change.GetDescription();
@@ -298,6 +334,18 @@ namespace Treasury.Web.Service.Actual
                                         _IRE.LAST_UPDATE_DT = dt;  //最後修改時間
                                     }
                                 }
+
+
+                                #region 其它存取項目申請資料檔
+                                db.OTHER_ITEM_APLY.Add(
+                                new OTHER_ITEM_APLY()
+                                {
+                                    APLY_NO = _TAR.APLY_NO,
+                                    DATA_SEQ = _seq,
+                                    ITEM_ID = _IRE_Item_Id
+                                });
+                                #endregion
+                                _seq += 1;
                             }
                             #endregion
 
@@ -323,7 +371,8 @@ namespace Treasury.Web.Service.Actual
                                     #endregion
 
                                     result.RETURN_FLAG = true;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                    var addstr = insertGroupFlag ? (",新增冊號:" + groupUp.ToString()) : string.Empty;
+                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
                                 }
                                 catch (DbUpdateException ex)
                                 {
@@ -355,31 +404,77 @@ namespace Treasury.Web.Service.Actual
 
         #region privateFunction
 
-        private List<SelectOption> getBuildNameorBookNo(string vAplyUnit, string parm)
+        /// <summary>
+        /// 抓取大樓名稱或冊號
+        /// </summary>
+        /// <param name="vAplyUnit"></param>
+        /// <param name="parm"></param>
+        /// <returns></returns>
+        private List<SelectOption> getBuildNameorBookNo(string parm,string vAplyUnit = null)
         {
             List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Value = " ", Text = " " } };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
-                var groupNos = db.ITEM_REAL_ESTATE.AsNoTracking()
+                var groupNos = new List<int>();
+                if (!vAplyUnit.IsNullOrWhiteSpace())
+                {
+                    groupNos = db.ITEM_REAL_ESTATE.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .Select(x => x.GROUP_NO).ToList();
-                var _itemType = TreaItemType.ESTATE.ToString(); //不動產權狀
-                var itemId = db.TREA_ITEM.AsNoTracking().FirstOrDefault(x => x.TREA_ITEM_TYPE == _itemType)?.ITEM_ID; //D1014
-                if (itemId != null && !parm.IsNullOrWhiteSpace())
+                }
+                var itemId = TreaItemType.D1014.ToString(); //不動產權狀
+                if (!parm.IsNullOrWhiteSpace())
                 {
                     result.AddRange(db.ITEM_BOOK.AsNoTracking()
-                        .Where(x => x.ITEM_ID == itemId && groupNos.Contains(x.GROUP_NO) && x.COL == parm)
+                        .Where(x => x.ITEM_ID == itemId && x.COL == parm)
+                        .Where(x => groupNos.Contains(x.GROUP_NO), !vAplyUnit.IsNullOrWhiteSpace())
                         .OrderBy(x => x.GROUP_NO)
                         .AsEnumerable().Select(x => new SelectOption()
                         {
                             Value = x.GROUP_NO.ToString(),
-                            Text = x.COL_VALUE
+                            Text = parm == "BUILDING_NAME" ? $@"{x.COL_VALUE}(冊號:{x.GROUP_NO})" : x.COL_VALUE
                         }));
                 }
             }
             return result;
+        }
+
+        private EstateModel getEstateModel(List<ITEM_BOOK> _ItemBooks)
+        {
+            EstateModel result = new EstateModel();
+            if (_ItemBooks.Any())
+            {
+                result = new EstateModel()
+                {
+                    BOOK_NO = _ItemBooks.FirstOrDefault(x => x.COL == "BOOK_NO")?.COL_VALUE, //冊號
+                    BUILDING_NAME = _ItemBooks.FirstOrDefault(x => x.COL == "BUILDING_NAME")?.COL_VALUE, //大樓名稱
+                    LOCATED = _ItemBooks.FirstOrDefault(x => x.COL == "LOCATED")?.COL_VALUE, //坐落
+                    MEMO = _ItemBooks.FirstOrDefault(x => x.COL == "MEMO")?.COL_VALUE //備註
+                };
+            }
+            return result;
+        }
+
+        private IEnumerable<EstateDetailViewModel> getdetailModel(IEnumerable<ITEM_REAL_ESTATE> data,List<SYS_CODE> _Inventory_types)
+        {
+            return data.Select(x => new EstateDetailViewModel()
+            {
+                vItemId = x.ITEM_ID, //物品編號
+                vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
+                vGroupNo = x.GROUP_NO.ToString(), //群組編號
+                vEstate_From_No = x.ESTATE_FORM_NO, //狀別
+                vEstate_Date = x.ESTATE_DATE.DateToTaiwanDate(), //發狀日
+                vOwnership_Cert_No = x.OWNERSHIP_CERT_NO, //字號
+                vLand_Building_No = x.LAND_BUILDING_NO, //地/建號
+                vHouse_No = x.HOUSE_NO, //門牌號
+                vEstate_Seq = x.ESTATE_SEQ, //流水號/編號
+                vMemo = x.MEMO, //備註
+                vtakeoutFlag = false, //取出註記
+                vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
+            });
         }
 
         #endregion

@@ -45,12 +45,12 @@ namespace Treasury.WebControllers
             var _CustodyFlag = Convert.ToBoolean(Session["CustodyFlag"]);
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryAccess/");
-            //var data = TreasuryAccess.TreasuryAccessDetail(
-            //     AccountController.CurrentUserId, AccountController.CustodianFlag
-            //    );
             var data = TreasuryAccess.TreasuryAccessDetail(
-     AccountController.CurrentUserId, true
-    );
+                 AccountController.CurrentUserId, AccountController.CustodianFlag
+                );
+    //        var data = TreasuryAccess.TreasuryAccessDetail(
+    // AccountController.CurrentUserId, true
+    //);
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
             var All = new SelectOption() { Text = "All", Value = "All" };
@@ -145,6 +145,23 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
                     Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
                 }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 使用單號抓取基本資料
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetByAplyNo(string AplyNo)
+        {
+            MSGReturnModel<TreasuryAccessViewModel> result = new MSGReturnModel<TreasuryAccessViewModel>();
+            result.RETURN_FLAG = false;
+            if (!AplyNo.IsNullOrWhiteSpace())
+            {
+                result.RETURN_FLAG = true;
+                result.Datas  = TreasuryAccess.GetByAplyNo(AplyNo);
             }
             return Json(result);
         }

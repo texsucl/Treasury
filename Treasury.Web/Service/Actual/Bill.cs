@@ -383,7 +383,7 @@ namespace Treasury.Web.Service.Actual
                                     //依【空白票據申請資料檔】的「ITEM_BLANK_NOTE_ITEM_ID」查【空白票據庫存資料檔】
                                     //異動欄位：「庫存狀態」= 1在庫
                                     //最後異動日期時間：系統時間
-                                    var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
+                    var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
                     if (_ITEM_BLANK_NOTE != null)
                     {
                         if (_ITEM_BLANK_NOTE.INVENTORY_STATUS == "1" &&

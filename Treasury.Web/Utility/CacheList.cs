@@ -26,10 +26,21 @@
         /// 明細資料(空白票據)
         /// </summary>
         public static string BILLTempData { get; private set; }
+
         /// <summary>
         /// 當日庫存明細表(空白票據)
         /// </summary>
         public static string BILLDayData { get; private set; }
+
+        /// <summary>
+        /// 分頁全部資料(不動產)
+        /// </summary>
+        public static string ESTATEAllData { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(不動產)
+        /// </summary>
+        public static string ESTATEData { get; private set; }
 
         #endregion Cache資料
 
@@ -43,7 +54,8 @@
             TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
-
+            ESTATEAllData = "ESTATEAllData";
+            ESTATEData = "ESTATEData";
             #endregion Cache資料
 
         }
