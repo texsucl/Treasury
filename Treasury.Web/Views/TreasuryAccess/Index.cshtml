@@ -178,6 +178,7 @@
         var TAurl = {};
         TAurl.openBILL = '@Url.Action("View", "Bill")';
         TAurl.openESTATE = '@Url.Action("View", "ESTATE")';
+        TAurl.openSTOCK = '@Url.Action("View", "Stock")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -557,6 +558,32 @@
                     $('#' + openInsertDetailId).html(data);
                     var width = '850px';
                     openTADialog(_data.title, width, 'TAOpenInsertDialog');
+                }
+            })
+        }
+        //#endregion
+
+        //#region 新增事件(開啟股票)
+        function openSTOCK() {
+            //var AccessType = $('input[name=cProjectType]:checked').val();
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null,
+                    data: TreasuryAccessViewModel(
+                     $('#aProject').val(),
+                     $('#aIUnit').val(),
+                     $('#applicant').val(),
+                     $('#TAReason').val(),
+                     $('#EXP_ACCESS_DATE').val(),
+                     $('input[name=cProjectType]:checked').val())
+                }),
+                url: TAurl.openSTOCK,
+                contentType: 'application/json',
+                success: function (data, textStatus, jqXHR) {
+                    $('#' + openInsertDetailId).html(data);
+                    var width = '850px';
+                    openTADialog(_BILL, width, 'TAOpenInsertDialog');
                 }
             })
         }

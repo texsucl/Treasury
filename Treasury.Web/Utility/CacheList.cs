@@ -42,6 +42,10 @@
         /// </summary>
         public static string ESTATEData { get; private set; }
 
+        /// <summary>
+        /// 明細資料(股票)
+        /// </summary>
+        public static string StockTempData { get; private set; }
         #endregion Cache資料
 
 
@@ -56,6 +60,8 @@
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
+            StockTempData = "StockTempData";
+
             #endregion Cache資料
 
         }
