@@ -287,6 +287,9 @@
                     case '@Ref.TreaItemType.D1014.ToString()':
                         open(_aProject);
                         break;
+                    case '@Ref.TreaItemType.D1015.ToString()':
+                        open(_aProject);
+                        break;
                     case '':
                         customerUtility.alert('無申請項目', 'w');
                         break;
@@ -554,7 +557,7 @@
                 }),
                 url: _data.url,
                 contentType: 'application/json',
-                success: function (data, textStatus, jqXHR) {              
+                success: function (data, textStatus, jqXHR) {
                     $('#' + openInsertDetailId).html(data);
                     var width = '850px';
                     openTADialog(_data.title, width, 'TAOpenInsertDialog');
@@ -747,6 +750,13 @@
                     obj.url = TAurl.openESTATE;
                     obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
                     obj.openDialogWidth = '850px';
+                    obj.reportTitle = '金庫物品存取申請單';
+                    obj.reportType = 'ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1015.ToString()':
+                    obj.url = TAurl.openSTOCK;
+                    obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                    obj.openDialogWidth = 'Auto';
                     obj.reportTitle = '金庫物品存取申請單';
                     obj.reportType = 'ESTATE';
                     break;
