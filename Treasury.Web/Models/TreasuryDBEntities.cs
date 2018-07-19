@@ -12,4 +12,11 @@ namespace Treasury.Web.Models
 
         }
     }
+
+    // 針對PIA_LOG_MAIN 單獨加入下面兩個屬性
+    public partial class PIA_LOG_MAIN
+    {
+        public string TRACKING_TYPE { get; set; }
+        public string EXECUTION_TYPE { get; set; }
+    }
 }

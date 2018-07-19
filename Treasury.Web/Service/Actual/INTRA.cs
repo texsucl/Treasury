@@ -9,7 +9,7 @@ namespace Treasury.Web.Service.Actual
     public class INTRA
     {
         /// <summary>
-        /// 回傳 dept 資料
+        /// 回傳 部門 資料
         /// </summary>
         /// <param name="DPT_CD"></param>
         /// <returns></returns>
@@ -24,7 +24,7 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 回傳 DEPT SECT
+        /// 回傳 1.部門 2.科別
         /// </summary>
         /// <param name="DPT_CD"></param>
         /// <returns></returns>

@@ -8,7 +8,7 @@ namespace Treasury.Web.Enum
         /// <summary>
         /// 庫存狀態
         /// </summary>
-        public enum AccessInventoryTyp
+        public enum AccessInventoryType
         {
             /// <summary>
             /// 在庫

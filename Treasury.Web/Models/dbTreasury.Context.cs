@@ -28,7 +28,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<APLY_REC_HIS> APLY_REC_HIS { get; set; }
         public virtual DbSet<AUTH_APLY_REC> AUTH_APLY_REC { get; set; }
         public virtual DbSet<AUTH_APPR> AUTH_APPR { get; set; }
-        public virtual DbSet<BLANK_NOTE_APLY> BLANK_NOTE_APLY { get; set; }
         public virtual DbSet<CODE_FUNC> CODE_FUNC { get; set; }
         public virtual DbSet<CODE_ROLE_FUNC> CODE_ROLE_FUNC { get; set; }
         public virtual DbSet<CODE_ROLE_FUNC_HIS> CODE_ROLE_FUNC_HIS { get; set; }
@@ -56,7 +55,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<MAIL_RECEIVE_HIS> MAIL_RECEIVE_HIS { get; set; }
         public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<MAIL_TIME_HIS> MAIL_TIME_HIS { get; set; }
-        public virtual DbSet<OTHER_ITEM_APLY> OTHER_ITEM_APLY { get; set; }
         public virtual DbSet<PIA_EXEC_TYPE> PIA_EXEC_TYPE { get; set; }
         public virtual DbSet<PIA_LOG_MAIN> PIA_LOG_MAIN { get; set; }
         public virtual DbSet<PIA_TRACK_TYPE> PIA_TRACK_TYPE { get; set; }
@@ -77,7 +75,9 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_USER_ROLE_HIS> CODE_USER_ROLE_HIS { get; set; }
         public virtual DbSet<CODE_ROLE> CODE_ROLE { get; set; }
         public virtual DbSet<CODE_ROLE_HIS> CODE_ROLE_HIS { get; set; }
-        public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
         public virtual DbSet<ITEM_BOOK> ITEM_BOOK { get; set; }
+        public virtual DbSet<BLANK_NOTE_APLY> BLANK_NOTE_APLY { get; set; }
+        public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
+        public virtual DbSet<OTHER_ITEM_APLY> OTHER_ITEM_APLY { get; set; }
     }
 }

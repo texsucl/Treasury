@@ -15,7 +15,6 @@ namespace Treasury.Web.Models
     public partial class BLANK_NOTE_APLY
     {
         public string APLY_NO { get; set; }
-        public int DATA_SEQ { get; set; }
         public string ITEM_ID { get; set; }
         public string ISSUING_BANK { get; set; }
         public string CHECK_TYPE { get; set; }

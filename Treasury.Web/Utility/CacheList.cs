@@ -42,6 +42,11 @@
         /// </summary>
         public static string ESTATEData { get; private set; }
 
+        /// <summary>
+        /// 庫存資料(印章)
+        /// </summary>
+        public static string SEALData { get; private set; }
+
         #endregion Cache資料
 
 
@@ -56,6 +61,7 @@
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
+            SEALData = "SEALData";
             #endregion Cache資料
 
         }
