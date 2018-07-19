@@ -175,6 +175,10 @@
         var ESTATE_SeqTId = 'tESTATE_SEQ'; //流水號/編號Id(text)
         var ESTATE_Memo_DTId = 'tESTATE_MEMO_D'; //備註Id(text)
         var ESTATE_Item_IdHlId = 'hESTATE_ITEM_ID'; //物品標號Id(hidden)
+
+
+        var ESTATE_Aply_No = $('#TAR_AplyNo').val(); //獲取主畫面單號
+        var ESTATE_Aply_No_Flag = ESTATE_Aply_No == ''; //是否有申請單號(如果有則為對該筆單號修改)
         var ESTATE_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
         if (!ESTATE_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -184,15 +188,15 @@
         else { //是覆核狀態 (為存入 or 取出 動作)
             $('.ESTATE_Act').show();
         }
-        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
-        if (typeFlag && ESTATE_Act_Type) {
+        var tradeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (tradeFlag && ESTATE_Act_Type) {
             $('.Estate_P').show();
             $('#ESTATEInsert').show();
             $('#' + ESTATE_Building_NameTId).prop('disabled', false);
             $('#' + ESTATE_LocatedTId).prop('disabled', false);
             $('#' + ESTATE_MemoTId).prop('disabled', false);
         }
-        else if (!typeFlag && ESTATE_Act_Type)
+        else if (!tradeFlag && ESTATE_Act_Type)
         {
             $('.Estate_G').show();
         }
@@ -203,7 +207,7 @@
                 type: "POST",
                 data: JSON.stringify({
                     groupNo: 0,
-                    accessType: typeFlag
+                    accessType: tradeFlag
                 }),
                 dataType: "json",
                 url: ESTATEurl.GetItemBook,
@@ -229,8 +233,9 @@
             $('.' + type).show();
         });
 
+        //大樓名稱變更抓取對應資料
         $('#' + ESTATE_Building_NameDId).on('change', function () {
-            if (typeFlag) {
+            if (tradeFlag) {
                 $('#' + ESTATE_BookNoLId).text('');
             }
             else {
@@ -247,7 +252,8 @@
                 type: "POST",
                 data: JSON.stringify({
                     groupNo: _val,
-                    accessType: !typeFlag
+                    accessType: tradeFlag,
+                    aplyNo: ESTATE_Aply_No
                 }),
                 dataType: "json",
                 url: ESTATEurl.GetItemBook,
@@ -255,10 +261,10 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     var data = result.Datas;
-                    if (typeFlag) {
+                    if (tradeFlag) { //存入
                         $('#' + ESTATE_BookNoLId).text(data.BOOK_NO);
                     }
-                    else {
+                    else { //取出
                         $('#' + ESTATE_BookNoDId).val(data.BOOK_NO);
                     }
                     $('#' + ESTATE_LocatedTId).val(data.LOCATED);
@@ -285,7 +291,7 @@
                 type: "POST",
                 data: JSON.stringify({
                     groupNo: _val,
-                    accessType: !typeFlag
+                    accessType: !tradeFlag
                 }),
                 dataType: "json",
                 url: ESTATEurl.GetItemBook,
@@ -359,10 +365,6 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { ESTATEDeleteTempFun(); });
                     break;
-                case 'ESTATETakeOutTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { ESTATETakeOutTempFun(); });
-                    break;
             }
         });
 
@@ -385,7 +387,7 @@
             {
                 var _BOOK_NO = '';
                 var _BUILDING_NAME = '';
-                if(typeFlag)
+                if(tradeFlag)
                 {
                     var tradetype = $('input[name=cTradeType]:checked').val();
                     if (tradetype == 'Estate_New')
@@ -440,7 +442,7 @@
                 contentType: 'application/json',
             }).done(function (result) {
 
-                if (typeFlag) {
+                if (tradeFlag) {
                     $('input[name="cTradeType"]').each(function () {
                         if ($(this).val() == 'Estate_New')
                             $(this).click();
@@ -470,7 +472,7 @@
 
         function ESTATETempGrid() {
 
-            if (typeFlag) { //存入
+            if (tradeFlag) { //存入
                 var colNameArray = ['動作', '狀別', '發狀日', '字號', '地/建號',
                     '門牌號', '流水號/編號', '備註', '物品編號'];
                 var colModelArray = [];
@@ -525,7 +527,6 @@
                     'ESTATETempPeger',
                     ESTATEurl.getData,
                     {
-                        type: 'Temp'
                     },
                     colNameArray,
                     colModelArray,

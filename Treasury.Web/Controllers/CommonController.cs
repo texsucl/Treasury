@@ -31,10 +31,17 @@ namespace Treasury.WebControllers
     public class CommonController : BaseController
     {
         internal ICacheProvider Cache { get; set; }
+        internal List<string> Aply_Appr_Type { get; set; }
 
         public CommonController()
         {
             Cache = new DefaultCacheProvider();
+            Aply_Appr_Type = new List<string>()
+            {
+                AccessProjectFormStatus.A01.ToString(),
+                AccessProjectFormStatus.A03.ToString(),
+                AccessProjectFormStatus.A04.ToString()
+            };
         }
 
         protected string GetopScope(string funcId)

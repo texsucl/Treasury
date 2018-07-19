@@ -39,6 +39,8 @@ namespace Treasury.Web.Service.Actual
 
         #region Get Date
 
+
+
         /// <summary>
         /// 取得 存入or取出
         /// </summary>
@@ -55,6 +57,27 @@ namespace Treasury.Web.Service.Actual
                     result = _TAR.ACCESS_TYPE;
             }
             return result;
+        }
+
+        /// <summary>
+        /// 取得是否可以修改狀態
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <param name="uid"></param>
+        /// <param name="actionType"></param>
+        /// <returns></returns>
+        public bool GetActType(string aplyNo,string uid, List<string> actionType)
+        {
+            bool result = false;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo && x.APLY_UID == uid);
+                if (_TAR != null)
+                    result = actionType.Contains(_TAR.APLY_STATUS);
+            }
+            return result;
+
         }
 
         /// <summary>

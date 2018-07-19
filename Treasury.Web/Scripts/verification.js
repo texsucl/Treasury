@@ -117,8 +117,8 @@
     verified.required = function (formid, elementid, message) {
         message = message || message.required('該欄位');
         $("#" + formid).validate({
-            errorPlacement: function (error, elementid) {
-                errorPlacementfun(error, elementid);
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
             }
         });
         $('#' + elementid).rules('add', {

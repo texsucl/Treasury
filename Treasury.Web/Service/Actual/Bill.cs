@@ -190,166 +190,275 @@ namespace Treasury.Web.Service.Actual
             {
                 if (insertDatas != null)
                 {
+                    //取得流水號
+                    SysSeqDao sysSeqDao = new SysSeqDao();
+                    String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
                     var datas = (List<BillViewModel>)insertDatas;
-
-                    //取出只抓狀態為預約取出的資料
-                    if (taData.vAccessType == AccessProjectTradeType.G.ToString())
-                    {
-                        datas = datas.Where(x => x.vStatus == AccessInventoryTyp._4.GetDescription()).ToList();
-                    }
-                    if (datas.Any())
-                    {
-                        using (TreasuryDBEntities db = new TreasuryDBEntities())
+                    string logStr = string.Empty; //log                  
+                    if (!taData.vAplyNo.IsNullOrWhiteSpace()) //修改已存在申請單
+                    {                     
+                        if (datas.Any())
                         {
-                            //取得流水號
-                            SysSeqDao sysSeqDao = new SysSeqDao();
-
-                            string _ITEM_BLANK_NOTE_ITEM_ID = null; //紀錄空白票據申請資料檔 對應空白票據庫存資料檔 物品編號
-                            string logStr = string.Empty; //log
-
-                            #region 取出時要把空白票據資料 做切段動作
-                            if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //取出時要把空白票據資料 做切段動作
+                            using (TreasuryDBEntities db = new TreasuryDBEntities())
                             {
-                                bool _changFlag = false;
-                                datas.ForEach(x =>
+                                var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+
+                                #region 申請單紀錄檔
+                                var _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
+                                _TAR.APLY_STATUS = _APLY_STATUS;
+                                _TAR.LAST_UPDATE_DT = dt;
+
+                                logStr += _TAR.modelToString();
+                                #endregion
+
+                                #region 申請單歷程檔
+                                var _ARH =  db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
+                                _ARH.APLY_STATUS = _APLY_STATUS;
+                                _ARH.PROC_DT = dt;
+                                #endregion
+
+                                #region 空白票據申請資料檔
+                                List<BLANK_NOTE_APLY> updates = new List<BLANK_NOTE_APLY>();
+                                List<BLANK_NOTE_APLY> inserts = new List<BLANK_NOTE_APLY>();
+
+                                foreach (var item in datas)
                                 {
-                                    var _blank_Note = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.vItemId);
-                                    if (_blank_Note != null)
+                                    if (item.vItemId.StartsWith("E2")) // 舊有資料
                                     {
-                                        if (_blank_Note.LAST_UPDATE_DT > x.vLast_Update_Time || _blank_Note.INVENTORY_STATUS != "1")
-                                        {
-                                            _changFlag = true;
-                                        }
-                                        else
-                                        {
-                                            _ITEM_BLANK_NOTE_ITEM_ID = _blank_Note.ITEM_ID;
-                                            //全部取出
-                                            if (x.vTakeOutE == _blank_Note.CHECK_NO_E)
-                                            {
-                                                _blank_Note.INVENTORY_STATUS = "4"; //預約取出
-                                            }
-                                            //分段取出
-                                            else
-                                            {
-                                                _blank_Note.CHECK_NO_B = (TypeTransfer.stringToInt(x.vTakeOutE) + 1).ToString().PadLeft(8, '0');
-                                            }
-                                            _blank_Note.LAST_UPDATE_DT = dt;
-                                        }
+                                        var _BNA = db.BLANK_NOTE_APLY.First(
+                                             x => x.ITEM_ID == item.vItemId &&
+                                                  x.APLY_NO == taData.vAplyNo);
+                                        _BNA.CHECK_TYPE = item.vCheckType;
+                                        _BNA.ISSUING_BANK = item.vIssuingBank;
+                                        _BNA.CHECK_NO_TRACK = item.vCheckNoTrack;
+                                        _BNA.CHECK_NO_B = item.vCheckNoB;
+                                        _BNA.CHECK_NO_E = item.vCheckNoE;
+                                        updates.Add(_BNA);
                                     }
                                     else
                                     {
-                                        _changFlag = true;
+                                        var item_id = sysSeqDao.qrySeqNo("E2", string.Empty).ToString().PadLeft(8, '0');
+                                        var _BNA = new BLANK_NOTE_APLY()
+                                        {
+                                            APLY_NO = _TAR.APLY_NO,
+                                            ITEM_ID = $@"E2{item_id}",
+                                            CHECK_TYPE = item.vCheckType,
+                                            ISSUING_BANK = item.vIssuingBank,
+                                            CHECK_NO_TRACK = item.vCheckNoTrack,
+                                            CHECK_NO_B = item.vCheckNoB,
+                                            CHECK_NO_E = item.vCheckNoE
+                                        };
+                                        inserts.Add(_BNA);
                                     }
+                                }
+
+                                updates.AddRange(inserts);
+
+                                updates.ForEach(
+                                x =>
+                                {
+                                    logStr += "|";
+                                    logStr += x.modelToString();
                                 });
-                                if (_changFlag)
+
+                                db.BLANK_NOTE_APLY.RemoveRange(db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == taData.vAplyNo));
+                                db.BLANK_NOTE_APLY.AddRange(updates);
+
+                                #endregion
+
+                                #region Save Db
+
+                                var validateMessage = db.GetValidationErrors().getValidateString();
+                                if (validateMessage.Any())
                                 {
-                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
-                                    return result;
+                                    result.DESCRIPTION = validateMessage;
                                 }
-                            }
-                            #endregion
-
-                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                            var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
-
-                            #region 申請單紀錄檔
-                            var _TAR = new TREA_APLY_REC()
-                            {
-                                APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
-                                ITEM_ID = taData.vItem, //申請項目
-                                ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
-                                ACCESS_REASON = taData.vAccessReason, //申請原因
-                                APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
-                                EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
-                                APLY_UNIT = taData.vAplyUnit, //申請單位
-                                APLY_UID = taData.vAplyUid, //申請人
-                                APLY_DT = dt,
-                                CREATE_UID = taData.vCreateUid, //新增人
-                                CREATE_DT = dt,
-                                LAST_UPDATE_UID = taData.vCreateUid,
-                                LAST_UPDATE_DT = dt
-                            };
-                            if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為覆核單位代申請)
-                            {
-                                _TAR.CUSTODY_UID = taData.vCreateUid; //覆核單位直接帶 新增人
-                                _TAR.CONFIRM_DT = dt;
-                            }
-                            logStr += _TAR.modelToString();
-                            db.TREA_APLY_REC.Add(_TAR);
-                            #endregion
-
-                            #region 申請單歷程檔
-                            db.APLY_REC_HIS.Add(
-                            new APLY_REC_HIS()
-                            {
-                                APLY_NO = _TAR.APLY_NO,
-                                APLY_STATUS = _TAR.APLY_STATUS,
-                                PROC_UID = _TAR.CREATE_UID,
-                                PROC_DT = dt
-                            });
-                            #endregion
-
-                            #region 空白票據申請資料檔
-                            int seq = 0;
-                            datas.ForEach(x =>
-                            {
-                                var item_id = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(8, '0');
-                                seq += 1;
-                                var _BNA = new BLANK_NOTE_APLY() {
-                                    APLY_NO = _TAR.APLY_NO,
-                                    DATA_SEQ = seq,
-                                    ITEM_ID = $@"E2{item_id}",
-                                    CHECK_TYPE = x.vCheckType,
-                                    ISSUING_BANK = x.vIssuingBank,
-                                    CHECK_NO_TRACK = x.vCheckNoTrack,
-                                    CHECK_NO_B = x.vCheckNoB,
-                                    CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
-                                    ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
-                                };
-                                db.BLANK_NOTE_APLY.Add(_BNA);
-                                logStr += "|";
-                                logStr += _BNA.modelToString() ;
-                            });
-                            #endregion
-
-                            #region Save Db
-
-                            var validateMessage = db.GetValidationErrors().getValidateString();
-                            if (validateMessage.Any())
-                            {
-                                result.DESCRIPTION = validateMessage;
-                            }
-                            else
-                            {
-                                try
+                                else
                                 {
-                                    db.SaveChanges();
+                                    try
+                                    {
+                                        db.SaveChanges();
 
-                                    #region LOG
-                                    //新增LOG
-                                    Log log = new Log();
-                                    log.CFUNCTION = "申請覆核-新增空白票據";
-                                    log.CACTION = "A";
-                                    log.CCONTENT = logStr;
-                                    LogDao.Insert(log, _TAR.CREATE_UID);
-                                    #endregion
+                                        #region LOG
+                                        //新增LOG
+                                        Log log = new Log();
+                                        log.CFUNCTION = "申請覆核-修改空白票據";
+                                        log.CACTION = "U";
+                                        log.CCONTENT = logStr;
+                                        LogDao.Insert(log, _TAR.CREATE_UID);
+                                        #endregion
 
-                                    result.RETURN_FLAG = true;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                        result.RETURN_FLAG = true;
+                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                    }
+                                    catch (DbUpdateException ex)
+                                    {
+                                        result.DESCRIPTION = ex.exceptionMessage();
+                                    }
                                 }
-                                catch (DbUpdateException ex)
-                                {
-                                    result.DESCRIPTION = ex.exceptionMessage();
-                                }
+                                #endregion
                             }
-                            #endregion
+                        }
+                        else
+                        {
+                            result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
                         }
                     }
-                    else
+                    else //新增申請單
                     {
-                        result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                        //取出只抓狀態為預約取出的資料
+                        if (taData.vAccessType == AccessProjectTradeType.G.ToString())
+                        {
+                            datas = datas.Where(x => x.vStatus == AccessInventoryType._4.GetDescription()).ToList();
+                        }
+                        if (datas.Any())
+                        {
+                            using (TreasuryDBEntities db = new TreasuryDBEntities())
+                            {
+                                string _ITEM_BLANK_NOTE_ITEM_ID = null; //紀錄空白票據申請資料檔 對應空白票據庫存資料檔 物品編號                              
+
+                                #region 取出時要把空白票據資料 做切段動作
+                                if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //取出時要把空白票據資料 做切段動作
+                                {
+                                    bool _changFlag = false;
+                                    datas.ForEach(x =>
+                                    {
+                                        var _blank_Note = db.ITEM_BLANK_NOTE.FirstOrDefault(y => y.ITEM_ID == x.vItemId);
+                                        if (_blank_Note != null)
+                                        {
+                                            if (_blank_Note.LAST_UPDATE_DT > x.vLast_Update_Time || _blank_Note.INVENTORY_STATUS != "1")
+                                            {
+                                                _changFlag = true;
+                                            }
+                                            else
+                                            {
+                                                _ITEM_BLANK_NOTE_ITEM_ID = _blank_Note.ITEM_ID;
+                                                //全部取出
+                                                if (x.vTakeOutE == _blank_Note.CHECK_NO_E)
+                                                {
+                                                    _blank_Note.INVENTORY_STATUS = "4"; //預約取出
+                                                }
+                                                //分段取出
+                                                else
+                                                {
+                                                    _blank_Note.CHECK_NO_B = (TypeTransfer.stringToInt(x.vTakeOutE) + 1).ToString().PadLeft(8, '0');
+                                                }
+                                                _blank_Note.LAST_UPDATE_DT = dt;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            _changFlag = true;
+                                        }
+                                    });
+                                    if (_changFlag)
+                                    {
+                                        result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                        return result;
+                                    }
+                                }
+                                #endregion
+                              
+                                var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+
+                                #region 申請單紀錄檔
+                                var _TAR = new TREA_APLY_REC()
+                                {
+                                    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
+                                    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
+                                    ITEM_ID = taData.vItem, //申請項目
+                                    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
+                                    ACCESS_REASON = taData.vAccessReason, //申請原因
+                                    APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
+                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
+                                    APLY_UNIT = taData.vAplyUnit, //申請單位
+                                    APLY_UID = taData.vAplyUid, //申請人
+                                    APLY_DT = dt,
+                                    CREATE_UID = taData.vCreateUid, //新增人
+                                    CREATE_DT = dt,
+                                    LAST_UPDATE_UID = taData.vCreateUid,
+                                    LAST_UPDATE_DT = dt
+                                };
+                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為覆核單位代申請)
+                                {
+                                    _TAR.CUSTODY_UID = taData.vCreateUid; //覆核單位直接帶 新增人
+                                    _TAR.CONFIRM_DT = dt;
+                                }
+                                logStr += _TAR.modelToString();
+                                db.TREA_APLY_REC.Add(_TAR);
+                                #endregion
+
+                                #region 申請單歷程檔
+                                db.APLY_REC_HIS.Add(
+                                new APLY_REC_HIS()
+                                {
+                                    APLY_NO = _TAR.APLY_NO,
+                                    APLY_STATUS = _TAR.APLY_STATUS,
+                                    PROC_UID = _TAR.CREATE_UID,
+                                    PROC_DT = dt
+                                });
+                                #endregion
+
+                                #region 空白票據申請資料檔
+                                datas.ForEach(x =>
+                                {
+                                    var item_id = sysSeqDao.qrySeqNo("E2", string.Empty).ToString().PadLeft(8, '0');
+                                    var _BNA = new BLANK_NOTE_APLY()
+                                    {
+                                        APLY_NO = _TAR.APLY_NO,
+                                        ITEM_ID = $@"E2{item_id}",
+                                        CHECK_TYPE = x.vCheckType,
+                                        ISSUING_BANK = x.vIssuingBank,
+                                        CHECK_NO_TRACK = x.vCheckNoTrack,
+                                        CHECK_NO_B = x.vCheckNoB,
+                                        CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
+                                        ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
+                                    };
+                                    db.BLANK_NOTE_APLY.Add(_BNA);
+                                    logStr += "|";
+                                    logStr += _BNA.modelToString();
+                                });
+                                #endregion
+
+                                #region Save Db
+
+                                var validateMessage = db.GetValidationErrors().getValidateString();
+                                if (validateMessage.Any())
+                                {
+                                    result.DESCRIPTION = validateMessage;
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        db.SaveChanges();
+
+                                        #region LOG
+                                        //新增LOG
+                                        Log log = new Log();
+                                        log.CFUNCTION = "申請覆核-新增空白票據";
+                                        log.CACTION = "A";
+                                        log.CCONTENT = logStr;
+                                        LogDao.Insert(log, _TAR.CREATE_UID);
+                                        #endregion
+
+                                        result.RETURN_FLAG = true;
+                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                    }
+                                    catch (DbUpdateException ex)
+                                    {
+                                        result.DESCRIPTION = ex.exceptionMessage();
+                                    }
+                                }
+                                #endregion
+                            }
+                        }
+                        else
+                        {
+                            result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                        }
                     }
+
                 }
                 else
                 {
@@ -365,7 +474,7 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 取消申請 & 作廢 空白票據資料庫要復原的事件
+        /// 申請刪除 & 作廢 空白票據資料庫要復原的事件
         /// </summary>
         /// <param name="db"></param>
         /// <param name="aply_No"></param>
@@ -453,7 +562,7 @@ namespace Treasury.Web.Service.Actual
                 vRowNum = (num + 1).ToString(),
                 vItemId = data.ITEM_ID,
                 vAplyNo = data.APLY_NO,
-                vDataSeq = data.DATA_SEQ.ToString(),
+                vDataSeq = null,
                 vStatus = Inventory_types.FirstOrDefault(x => x.CODE == code)?.CODE_VALUE,
                 vIssuingBank = data.ISSUING_BANK,
                 vCheckType = data.CHECK_TYPE,

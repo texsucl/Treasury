@@ -33,16 +33,20 @@ namespace Treasury.Web.Service.Interface
         /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
-        /// <param name="aplyNo"></param>
+        /// <param name="aplyNo">單號</param>
+        /// <param name="EditFlag">可否修改,可以也需抓取庫存資料</param>
         /// <returns></returns>
-        EstateViewModel GetDataByAplyNo(string aplyNo);
+        EstateViewModel GetDataByAplyNo(string aplyNo, bool EditFlag = false);
+
 
         /// <summary>
         /// 使用 存取項目冊號資料檔ITEM_BOOK 的 群組編號 抓取資料
         /// </summary>
-        /// <param name="groupNo"></param>
+        /// <param name="groupNo">群組號</param>
+        /// <param name="vAplyUnit">申請單位</param>
+        /// <param name="aplyNo">單號</param>
         /// <returns></returns>
-        List<EstateDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit);
+        List<EstateDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit, string aplyNo = null);
 
         /// <summary>
         /// 由group No 抓取 存取項目冊號資料檔

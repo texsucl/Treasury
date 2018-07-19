@@ -11,6 +11,7 @@
 
     </div>
     <div style="text-align:center;padding-top:5px;display:none;"  class="BILLAct">
+        <input type="hidden" id="BILLAplyNo" />
         <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary" />
         <input type="button" id="BILLCancel" value="取消申請"  class="btn btn-primary" />
         <input type="button" id="BILLBack" value="回到功能選擇"  class="btn btn-primary" />
@@ -321,6 +322,9 @@
         function BILLApplyFun() {
             $.ajax({
                 type: "POST",
+                data: JSON.stringify({
+                    AplyNo: $('AplyNo').val()
+                }),
                 dataType: "json",
                 url: BILLurl.ApplyTempData,
                 contentType: 'application/json',

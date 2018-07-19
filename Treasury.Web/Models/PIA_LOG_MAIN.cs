@@ -27,10 +27,7 @@ namespace Treasury.Web.Models
         public string PIA_OWNER1 { get; set; }
         public string PIA_OWNER2 { get; set; }
         public string PIA_TYPE { get; set; }
-
-        public string TRACKING_TYPE { get; set; }
-        public string EXECUTION_TYPE { get; set; }
-
+    
         public virtual PIA_EXEC_TYPE PIA_EXEC_TYPE { get; set; }
         public virtual PIA_TRACK_TYPE PIA_TRACK_TYPE { get; set; }
     }

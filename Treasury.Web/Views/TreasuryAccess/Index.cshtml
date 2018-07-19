@@ -137,6 +137,7 @@
                          </tr>
                          <tr  style="text-align:center">
                              <td colspan="4">
+                                 <input type="hidden" id="TAR_AplyNo" />
                                  <input type="button" class="TAInsert btn btn-primary" id="TAI_Insert" value="新增" />
                                  <input type="button" class="TASearch btn btn-primary" id="TAI_Search" value="查詢" style="display:none" />
                              </td>
@@ -155,8 +156,8 @@
         </div>
         <div id="TAjqgridDiv2" class="col-sm-24 jqd">
         </div>
-        <div class="TAPrintClass">
-            <input type="button" class="TAPrint btn btn-primary" id="TAI_Print" value="列印" />
+        <div class="TAPrintClass" style="text-align:center">
+            <input type="button" class="TAPrint btn btn-primary" id="TAI_Print"  value="列印" />
         </div>
     </div>
 
@@ -177,7 +178,8 @@
         //#region url設定
         var TAurl = {};
         TAurl.openBILL = '@Url.Action("View", "Bill")';
-        TAurl.openESTATE = '@Url.Action("View", "ESTATE")';
+        TAurl.openESTATE = '@Url.Action("View", "Estate")';
+        TAurl.openSEAL = '@Url.Action("View", "Seal")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -286,6 +288,12 @@
                     case '@Ref.TreaItemType.D1014.ToString()':
                         open(_aProject);
                         break;
+                    case '@Ref.TreaItemType.D1008.ToString()':
+                    case '@Ref.TreaItemType.D1009.ToString()':
+                    case '@Ref.TreaItemType.D1010.ToString()':
+                    case '@Ref.TreaItemType.D1011.ToString()':
+                        open(_aProject);
+                        break;
                     case '':
                         customerUtility.alert('無申請項目', 'w');
                         break;
@@ -362,30 +370,35 @@
 
         //#region 呼叫報表
         function TAReport() {
-            $('.TAReportCs:checked').each(function () {
-                var listId = 'TAReportList';
-                var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
-                var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
-                var reportType = '';
-                var title = '';
-                var parms = [];
-                var itemData = GetItemData(item);
-                if (itemData.reportType != null)
-                {
-                    parms.push(customerUtility.reportParm('aply_No', aply_No));
-                    customerUtility.report(
-                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
-                        parms,
-                        null
-                        );
-                }
-            });
+            if ($('.TAReportCs:checked').length > 0) {
+                $('.TAReportCs:checked').each(function () {
+                    var listId = 'TAReportList';
+                    var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                    var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
+                    var reportType = '';
+                    var title = '';
+                    var parms = [];
+                    var itemData = GetItemData(item);
+                    if (itemData.reportType != null) {
+                        parms.push(customerUtility.reportParm('aply_No', aply_No));
+                        customerUtility.report(
+                            customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                            parms,
+                            null
+                            );
+                    }
+                });
+            }
+            else {
+                customerUtility.alert('無選擇列印報表', 'w');
+            }
         }
         //#endregion
 
         //#region 重設新增畫面
         function resetTADialogDeatil()
         {
+            $('#AplyNo').val('');
             $('#' + openInsertDetailId).children().remove();
             $('#' + openSearchDetailId).children().remove();
         }
@@ -553,10 +566,9 @@
                 }),
                 url: _data.url,
                 contentType: 'application/json',
-                success: function (data, textStatus, jqXHR) {              
+                success: function (data, textStatus, jqXHR) {
                     $('#' + openInsertDetailId).html(data);
-                    var width = '850px';
-                    openTADialog(_data.title, width, 'TAOpenInsertDialog');
+                    openTADialog(_data.title, _data.openDialogWidth, 'TAOpenInsertDialog');
                 }
             })
         }
@@ -657,6 +669,7 @@
             var itemData = GetItemData(itemId);
             if (itemData.url != null)
             {
+                $('#AplyNo').val(data.vAPLY_NO);
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
@@ -702,26 +715,45 @@
         //#region 申請項目設定檔案
         function GetItemData(item) {
             item = item || '';
+            var _reportTitle = '金庫物品存取申請單';
             var obj = {};
             obj.url = null; //開啟金庫物品的頁面 url
             obj.title = null; //開啟金庫物品的頁面 Title
             obj.openDialogWidth = '850px'; //開啟金庫物品的頁面 寬度
-            obj.reportTitle = null; //報表Title
+            obj.reportTitle = _reportTitle; //報表Title
             obj.reportType = null; //報表類型
+
             switch (item) {
                 case '@Ref.TreaItemType.D1012.ToString()':
                     obj.url = TAurl.openBILL;
                     obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
                     obj.openDialogWidth = '850px';
-                    obj.reportTitle = '金庫物品存取申請單';
                     obj.reportType = 'BILL';
                     break;
                 case '@Ref.TreaItemType.D1014.ToString()':
                     obj.url = TAurl.openESTATE;
                     obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
-                    obj.openDialogWidth = '850px';
-                    obj.reportTitle = '金庫物品存取申請單';
                     obj.reportType = 'ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1008.ToString()':
+                    obj.url = TAurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1009.ToString()':
+                    obj.url = TAurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1010.ToString()':
+                    obj.url = TAurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1011.ToString()':
+                    obj.url = TAurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                    obj.reportType = 'SEAL';
                     break;
             }
             return obj;

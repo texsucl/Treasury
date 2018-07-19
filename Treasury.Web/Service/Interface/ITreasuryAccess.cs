@@ -62,5 +62,13 @@ namespace Treasury.Web.Service.Interface
         /// <param name="aplyNo"></param>
         /// <returns></returns>
         string GetAccessType(string aplyNo);
+
+        /// <summary>
+        /// 取得是否可以修改狀態
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <param name="actionType"></param>
+        /// <returns></returns>
+        bool GetActType(string aplyNo, string uid, List<string> actionType);
     }
 }
