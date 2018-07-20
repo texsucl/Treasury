@@ -67,20 +67,38 @@ namespace Treasury.WebControllers
             else
             {
                 _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
-                ViewBag.ESTATE_Book_No = new SelectList(new List<SelectOption>(), "Value", "Text");
-                ViewBag.ESTATE_Building_Name = new SelectList(new List<SelectOption>(), "Value", "Text");
-                ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
-                Cache.Invalidate(CacheList.TreasuryAccessViewData);
-                Cache.Set(CacheList.TreasuryAccessViewData, new TreasuryAccessViewModel()
+                var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                ViewBag.dAccess = viewModel.vAccessType;
+                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
                 {
-                    vAplyNo = AplyNo
-                });
-                ResetEstateViewModel(AplyNo);
+                    ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(), "Value", "Text");
+                    ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(), "Value", "Text");
+                }
+                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && _dActType)
+                {
+                    ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(viewModel.vAplyUnit, AplyNo), "Value", "Text");
+                    ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(viewModel.vAplyUnit, AplyNo), "Value", "Text");
+                }
+                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && !_dActType)
+                {
+                    ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(viewModel.vAplyUnit), "Value", "Text");
+                    ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(viewModel.vAplyUnit), "Value", "Text");
+                }
+                Cache.Invalidate(CacheList.TreasuryAccessViewData);
+                Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
+                ResetEstateViewModel(AplyNo, _dActType);
+                var _data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
+                ViewBag.group = _data.vGroupNo;
             }
             ViewBag.dActType = _dActType;
             return PartialView();
         }
 
+        /// <summary>
+        /// 申請覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult ApplyTempData(EstateModel model)
         {
@@ -320,7 +338,8 @@ namespace Treasury.WebControllers
         public JsonResult GetCacheData(jqGridParam jdata)
         {
             if (Cache.IsSet(CacheList.ESTATEData))
-                return Json(jdata.modelToJqgridResult((List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData)));
+                return Json(jdata.modelToJqgridResult(
+                    ((List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData)).OrderBy(x => x.vItemId).ToList()));
             return null;
         }
 

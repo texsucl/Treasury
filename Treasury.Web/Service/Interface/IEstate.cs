@@ -21,14 +21,14 @@ namespace Treasury.Web.Service.Interface
         /// </summary>
         /// <param name="vAplyUnit"></param>
         /// <returns></returns>
-        List<SelectOption> GetBuildName(string vAplyUnit = null);
+        List<SelectOption> GetBuildName(string vAplyUnit = null, string aplyNo = null);
 
         /// <summary>
         /// 抓取冊號
         /// </summary>
         /// <param name="vAplyUnit"></param>
         /// <returns></returns>
-        List<SelectOption> GetBookNo(string vAplyUnit = null);
+        List<SelectOption> GetBookNo(string vAplyUnit = null, string aplyNo = null);
 
         /// <summary>
         /// 使用 申請單號 抓取資料

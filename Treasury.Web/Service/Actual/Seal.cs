@@ -11,7 +11,19 @@ using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
-
+/// <summary>
+/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 印章
+/// 初版作者：20180716 張家華
+/// 修改歷程：20180716 張家華 
+///           需求單號：
+///           初版
+/// ==============================================
+/// 修改日期/修改人：
+/// 需求單號：
+/// 修改內容：
+/// ==============================================
+/// </summary>
+/// 
 namespace Treasury.Web.Service.Actual
 {
     public class Seal : ISeal
@@ -22,12 +34,13 @@ namespace Treasury.Web.Service.Actual
         {
             intra = new INTRA();
         }
+
         #region Get Date
 
         /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
-        /// <param name="aplyNo"></param>
+        /// <param name="aplyNo">單號</param>
         /// <returns></returns>
         public List<SealViewModel> GetDataByAplyNo(string aplyNo)
         {
@@ -57,12 +70,13 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 查詢庫存資料
+        /// 查詢畫面資料
         /// </summary>
-        /// <param name="itemId"></param>
-        /// <param name="vAplyUnit"></param>
+        /// <param name="itemId">物品標號</param>
+        /// <param name="vAplyUnit">申請單位</param>
+        /// <param name="aplyNo">取出單號</param>
         /// <returns></returns>
-        public List<SealViewModel> GetDbDataByUnit(string itemId, string vAplyUnit = null)
+        public List<SealViewModel> GetDbDataByUnit(string itemId, string vAplyUnit = null, string aplyNo = null)
         {
             var result = new List<SealViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -78,13 +92,31 @@ namespace Treasury.Web.Service.Actual
                     .Select(x => 
                     new SealViewModel() {
                         vItemId = x.ITEM_ID,
-                        vStatus = "在庫",
+                        vStatus = AccessInventoryType._1.GetDescription(),
                         vSeal_Desc = x.SEAL_DESC,
                         vMemo = x.MEMO,
                         vtakeoutFlag = false,
                         vTrea_Item_Name = x.TREA_ITEM_NAME,
                         vLast_Update_Time = x.LAST_UPDATE_DT
                     }).ToList();
+                }
+                if (!aplyNo.IsNullOrWhiteSpace())
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
+                        result.AddRange(db.ITEM_SEAL.AsNoTracking().Where(
+                        x => itemIds.Contains(x.ITEM_ID)).AsEnumerable()
+                        .Select(x =>
+                         new SealViewModel()
+                         {
+                             vItemId = x.ITEM_ID,
+                             vStatus = AccessInventoryType._4.GetDescription(),
+                             vSeal_Desc = x.SEAL_DESC,
+                             vMemo = x.MEMO,
+                             vtakeoutFlag = true,
+                             vTrea_Item_Name = x.TREA_ITEM_NAME,
+                             vLast_Update_Time = x.LAST_UPDATE_DT
+                         }));
                 }
             }
             return result;
@@ -95,10 +127,10 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 申請覆核 不動產
+        /// 申請覆核 印章
         /// </summary>
-        /// <param name="insertDatas"></param>
-        /// <param name="taData"></param>
+        /// <param name="insertDatas">資料</param>
+        /// <param name="taData">申請單資料</param>
         /// <returns></returns>
         public MSGReturnModel<IEnumerable<ITreaItem>> ApplyAudit(IEnumerable<ITreaItem> insertDatas, TreasuryAccessViewModel taData)
         {
@@ -136,14 +168,13 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單歷程檔
                                 var _ARH = db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
                                 _ARH.APLY_STATUS = _APLY_STATUS;
-                                _ARH.PROC_DT = dt;
                                 #endregion
 
 
                                 #region 印章庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
-                                List<string> oldItemIds = new List<string>(); //原有 itemId
+                                List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId 
                                 List<string> updateItemIds = new List<string>(); //更新 itemId
                                 List<string> cancelItemIds = new List<string>(); //取消 itemId
                                 List<ITEM_SEAL> inserts = new List<ITEM_SEAL>(); //新增資料
@@ -159,7 +190,7 @@ namespace Treasury.Web.Service.Actual
                                         {
                                             var _IS = new ITEM_SEAL();
 
-                                            if (item.vItemId.StartsWith("E3"))
+                                            if (item.vItemId.StartsWith("E4"))
                                             {
                                                 _IS = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                                 if (_IS.LAST_UPDATE_DT > item.vLast_Update_Time)
@@ -177,8 +208,7 @@ namespace Treasury.Web.Service.Actual
                                             }
                                             else
                                             {
-                                                var item_id = sysSeqDao.qrySeqNo("E4", string.Empty).ToString().PadLeft(8, '0');
-                                                _IS_Item_Id = item_id;
+                                                var item_id = sysSeqDao.qrySeqNo("E4", string.Empty).ToString().PadLeft(8, '0');                                               
                                                 _IS = new ITEM_SEAL()
                                                 {
                                                     ITEM_ID = $@"E4{item_id}", //物品編號
@@ -194,6 +224,7 @@ namespace Treasury.Web.Service.Actual
                                                                                //PUT_DATE = dt, //存入日期時間
                                                     LAST_UPDATE_DT = dt, //最後修改時間
                                                 };
+                                                _IS_Item_Id = _IS.ITEM_ID;
                                                 inserts.Add(_IS);
                                                 logStr += "|";
                                                 logStr += _IS.modelToString();
@@ -217,6 +248,10 @@ namespace Treasury.Web.Service.Actual
                                                 _IS.LAST_UPDATE_DT = dt;  //最後修改時間
                                                 updateItemIds.Add(_IS.ITEM_ID);
                                             }
+                                            else if (_IS.INVENTORY_STATUS == "4") //原先為預約取出
+                                            {
+                                                updateItemIds.Add(_IS.ITEM_ID);
+                                            }
                                         }
                                         else
                                         {
@@ -224,32 +259,31 @@ namespace Treasury.Web.Service.Actual
                                             {
                                                 _IS.INVENTORY_STATUS = "1"; //預約取出
                                                 _IS.LAST_UPDATE_DT = dt;  //最後修改時間
-                                                updateItemIds.Add(_IS.ITEM_ID);
                                             }
                                         }
                                     }
+                                }
 
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                {
+                                    var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
+                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
+                                    db.ITEM_SEAL.RemoveRange(db.ITEM_SEAL.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
+                                    db.OTHER_ITEM_APLY.AddRange(inserts.Select(x => new OTHER_ITEM_APLY()
                                     {
-                                        var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x));
-                                        db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)));
-                                        db.ITEM_SEAL.RemoveRange(db.ITEM_SEAL.Where(x => delItemId.Contains(x.ITEM_ID)));
-                                        db.OTHER_ITEM_APLY.AddRange(inserts.Select(x => new OTHER_ITEM_APLY()
-                                        {
-                                            APLY_NO = taData.vAplyNo,
-                                            ITEM_ID = x.ITEM_ID
-                                        }));
-                                        db.ITEM_SEAL.AddRange(inserts);
-                                    }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                        APLY_NO = taData.vAplyNo,
+                                        ITEM_ID = x.ITEM_ID
+                                    }));
+                                    db.ITEM_SEAL.AddRange(inserts);
+                                }
+                                else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                {
+                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).ToList());
+                                    db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
                                     {
-                                        db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && cancelItemIds.Contains(x.ITEM_ID)));
-                                        db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
-                                        {
-                                            APLY_NO = taData.vAplyNo,
-                                            ITEM_ID = x
-                                        }));
-                                    }
+                                        APLY_NO = taData.vAplyNo,
+                                        ITEM_ID = x
+                                    }));
                                 }
                                 #endregion
                             }
@@ -307,7 +341,6 @@ namespace Treasury.Web.Service.Actual
                                         if (item.vStatus == AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo("E4", string.Empty).ToString().PadLeft(8, '0');
-                                            _IS_Item_Id = item_id;
                                             var _IS = new ITEM_SEAL()
                                             {
                                                 ITEM_ID = $@"E4{item_id}", //物品編號
@@ -323,6 +356,7 @@ namespace Treasury.Web.Service.Actual
                                                                            //PUT_DATE = dt, //存入日期時間
                                                 LAST_UPDATE_DT = dt, //最後修改時間
                                             };
+                                            _IS_Item_Id = _IS.ITEM_ID;
                                             db.ITEM_SEAL.Add(_IS);
                                             logStr += "|";
                                             logStr += _IS.modelToString();
@@ -348,12 +382,15 @@ namespace Treasury.Web.Service.Actual
 
 
                                     #region 其它存取項目申請資料檔
-                                    db.OTHER_ITEM_APLY.Add(
-                                    new OTHER_ITEM_APLY()
+                                    if (!_IS_Item_Id.IsNullOrWhiteSpace())
                                     {
-                                        APLY_NO = _TAR.APLY_NO,
-                                        ITEM_ID = _IS_Item_Id
-                                    });
+                                        db.OTHER_ITEM_APLY.Add(
+                                        new OTHER_ITEM_APLY()
+                                        {
+                                            APLY_NO = _TAR.APLY_NO,
+                                            ITEM_ID = _IS_Item_Id
+                                        });
+                                    }
                                     #endregion
                                 }
                                 #endregion
@@ -413,6 +450,12 @@ namespace Treasury.Web.Service.Actual
 
         #region privateFunction
 
+        /// <summary>
+        /// 印章資料轉畫面資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="_Inventory_types"></param>
+        /// <returns></returns>
         private IEnumerable<SealViewModel> GetDetailModel(IEnumerable<ITEM_SEAL> data,List<SYS_CODE> _Inventory_types)
         {
             return data.Select(x => new SealViewModel()

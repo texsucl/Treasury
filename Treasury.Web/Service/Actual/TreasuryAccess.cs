@@ -39,7 +39,32 @@ namespace Treasury.Web.Service.Actual
 
         #region Get Date
 
-
+        /// <summary>
+        /// 使用單號抓取 申請表單資料
+        /// </summary>
+        /// <param name="aplyNo">單號</param>
+        /// <returns></returns>
+        public TreasuryAccessViewModel GetTreasuryAccessViewModel(string aplyNo)
+        {
+            var result = new TreasuryAccessViewModel();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var TAR = db.TREA_APLY_REC.AsNoTracking()
+                    .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (TAR != null)
+                {
+                    result.vAplyNo = TAR.APLY_NO;
+                    result.vAccessReason = TAR.ACCESS_REASON;
+                    result.vAccessType = TAR.ACCESS_TYPE;
+                    result.vAplyUid = TAR.APLY_UID;
+                    result.vAplyUnit = TAR.APLY_UNIT;
+                    result.vItem = TAR.ITEM_ID;
+                    result.vExpectedAccessDate = TAR.EXPECTED_ACCESS_DATE?.ToString("yyyy/MM/dd");
+                    result.vCreateUid = TAR.CREATE_UID;
+                }
+            }
+            return result;
+        }
 
         /// <summary>
         /// 取得 存入or取出

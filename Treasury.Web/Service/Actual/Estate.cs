@@ -11,7 +11,19 @@ using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
-
+/// <summary>
+/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 不動產權狀
+/// 初版作者：20180628 張家華
+/// 修改歷程：20180628 張家華 
+///           需求單號：
+///           初版
+/// ==============================================
+/// 修改日期/修改人：
+/// 需求單號：
+/// 修改內容：
+/// ==============================================
+/// </summary>
+/// 
 namespace Treasury.Web.Service.Actual
 {
     public class Estate : IEstate
@@ -52,20 +64,22 @@ namespace Treasury.Web.Service.Actual
         /// 抓取大樓名稱
         /// </summary>
         /// <param name="vAplyUnit"></param>
+        /// <param name="aplyNo"></param>
         /// <returns></returns>
-        public List<SelectOption> GetBuildName(string vAplyUnit = null)
+        public List<SelectOption> GetBuildName(string vAplyUnit = null, string aplyNo = null)
         {
-            return GetBuildNameorBookNo("BUILDING_NAME" , vAplyUnit);
+            return GetBuildNameorBookNo("BUILDING_NAME" , vAplyUnit , aplyNo);
         }
 
         /// <summary>
         /// 抓取冊號
         /// </summary>
         /// <param name="vAplyUnit"></param>
+        /// <param name="aplyNo"></param>
         /// <returns></returns>
-        public List<SelectOption> GetBookNo(string vAplyUnit = null)
+        public List<SelectOption> GetBookNo(string vAplyUnit = null, string aplyNo = null)
         {
-            return GetBuildNameorBookNo("BOOK_NO" , vAplyUnit );
+            return GetBuildNameorBookNo("BOOK_NO" , vAplyUnit , aplyNo);
         }
 
         /// <summary>
@@ -134,6 +148,7 @@ namespace Treasury.Web.Service.Actual
                                 var dept = intra.getDept(_TAR.APLY_UNIT); //抓取單位
                                 _vDetail.AddRange( //加入庫存資料
                                        GetDetailModel(db.ITEM_REAL_ESTATE.AsNoTracking()
+                                       .Where(x => !OIAs.Contains(x.ITEM_ID))
                                        .Where(x => x.GROUP_NO == _groupNo)
                                        .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                                        .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
@@ -166,13 +181,17 @@ namespace Treasury.Web.Service.Actual
                 //var _ItemBooks = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO == groupNo && x.ITEM_ID == itemId).ToList();
                 var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
+                List<string> itemIds = new List<string>();
                 if (!aplyNo.IsNullOrWhiteSpace()) //有單號須加單號資料
                 {
-                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aplyNo).Select(x=>x.ITEM_ID).ToList();
-                    result.AddRange(GetDetailModel(db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)).AsEnumerable(), _Inventory_types));
+                    itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aplyNo).Select(x=>x.ITEM_ID).ToList();
+                    result.AddRange(GetDetailModel(db.ITEM_REAL_ESTATE.Where(x => 
+                    x.GROUP_NO == groupNo &&
+                    itemIds.Contains(x.ITEM_ID)).AsEnumerable(), _Inventory_types));
                 }
                 result.AddRange(
                     GetDetailModel(db.ITEM_REAL_ESTATE.AsNoTracking()
+                    .Where(x => !itemIds.Contains(x.ITEM_ID) , !aplyNo.IsNullOrWhiteSpace())
                     .Where(x => x.GROUP_NO == groupNo)
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
@@ -248,7 +267,6 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單歷程檔
                                 var _ARH = db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
                                 _ARH.APLY_STATUS = _APLY_STATUS;
-                                _ARH.PROC_DT = dt;
                                 #endregion
 
                                 #region 存取項目冊號資料檔
@@ -257,17 +275,47 @@ namespace Treasury.Web.Service.Actual
                                 {
                                     var _ItemBook = _first.vItem_Book;
                                     var _BUILDING_NAME = _ItemBook.BUILDING_NAME?.Trim();
-                                    groupUp = TypeTransfer.stringToInt(_ItemBook.BOOK_NO);
-                                    var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == groupUp && x.ITEM_ID == taData.vItem).ToList();
-                                    foreach (var pro in _ItemBook.GetType().GetProperties())
+                                    if (_ItemBook.BOOK_NO == null) //新增存取項目冊號資料檔
                                     {
-                                        if (!(pro.Name == "BOOK_NO" || pro.Name == "BUILDING_NAME"))
+                                        if (db.ITEM_BOOK.Any(x => x.ITEM_ID == taData.vItem && x.COL == "BUILDING_NAME" && x.COL_VALUE == _BUILDING_NAME))
                                         {
-                                            var _chang = _ItemBooks.FirstOrDefault(x => x.COL == pro.Name);
-                                            if (_chang != null)
-                                                _chang.COL_VALUE = pro.GetValue(_ItemBook)?.ToString()?.Trim();
+                                            result.DESCRIPTION = "重複的大樓名稱";
+                                            return result;
                                         }
-                                    }                                       
+                                        insertGroupFlag = true;
+                                        var _itemBooks = db.ITEM_BOOK.Where(x => x.ITEM_ID == taData.vItem);
+
+                                        if (_itemBooks.Any())
+                                        {
+                                            groupUp = _itemBooks.Max(x => x.GROUP_NO) + 1; //群組編號 + 1 = 新的冊號
+                                        }
+                                        _ItemBook.BOOK_NO = groupUp.ToString();
+                                        foreach (var pro in _ItemBook.GetType().GetProperties())
+                                        {
+                                            db.ITEM_BOOK.Add(new ITEM_BOOK()
+                                            {
+                                                ITEM_ID = taData.vItem,
+                                                GROUP_NO = groupUp,
+                                                COL = pro.Name,
+                                                COL_NAME = (pro.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute).Description,
+                                                COL_VALUE = pro.GetValue(_ItemBook)?.ToString()?.Trim()
+                                            });
+                                        }
+                                    }
+                                    else //修改 存取項目冊號資料檔
+                                    {
+                                        groupUp = TypeTransfer.stringToInt(_ItemBook.BOOK_NO);
+                                        var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == groupUp && x.ITEM_ID == taData.vItem).ToList();
+                                        foreach (var pro in _ItemBook.GetType().GetProperties())
+                                        {
+                                            if (!(pro.Name == "BOOK_NO" || pro.Name == "BUILDING_NAME"))
+                                            {
+                                                var _chang = _ItemBooks.FirstOrDefault(x => x.COL == pro.Name);
+                                                if (_chang != null)
+                                                    _chang.COL_VALUE = pro.GetValue(_ItemBook)?.ToString()?.Trim();
+                                            }
+                                        }
+                                    }
                                 }
                                 #endregion
 
@@ -278,7 +326,6 @@ namespace Treasury.Web.Service.Actual
                                
                                 List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId
                                 List<string> updateItemIds = new List<string>(); //更新 itemId
-                                List<string> cancelItemIds = new List<string>(); //取消 itemId
                                 List<ITEM_REAL_ESTATE> inserts = new List<ITEM_REAL_ESTATE>(); //新增資料
 
                                 foreach (var item in details)
@@ -316,7 +363,6 @@ namespace Treasury.Web.Service.Actual
                                             else
                                             {
                                                 var item_id = sysSeqDao.qrySeqNo("E3", string.Empty).ToString().PadLeft(8, '0');
-                                                _IRE_Item_Id = item_id;
                                                 _IRE = new ITEM_REAL_ESTATE()
                                                 {
                                                     ITEM_ID = $@"E3{item_id}", //物品編號
@@ -337,6 +383,7 @@ namespace Treasury.Web.Service.Actual
                                                     //PUT_DATE = dt, //存入日期時間
                                                     LAST_UPDATE_DT = dt, //最後修改時間
                                                 };
+                                                _IRE_Item_Id = _IRE.ITEM_ID; 
                                                 inserts.Add(_IRE);
                                             }
                                             logStr += "|";
@@ -352,23 +399,26 @@ namespace Treasury.Web.Service.Actual
                                             result.DESCRIPTION = MessageType.already_Change.GetDescription();
                                             return result;
                                         }
-                                        //預約取出
+                                        //預約取出 
                                         if (item.vtakeoutFlag)
                                         {
                                             if (_IRE.INVENTORY_STATUS == "1") //原先為在庫
                                             {
-                                                _IRE.INVENTORY_STATUS = "4"; //預約取出
+                                                _IRE.INVENTORY_STATUS = "4"; //改為預約取出
                                                 _IRE.LAST_UPDATE_DT = dt;  //最後修改時間
                                                 updateItemIds.Add(_IRE.ITEM_ID);
-                                            }                                            
+                                            }
+                                            else if (_IRE.INVENTORY_STATUS == "4") //原先為預約取出
+                                            {
+                                                updateItemIds.Add(_IRE.ITEM_ID);
+                                            }                                   
                                         }
                                         else
                                         {
-                                            if (_IRE.INVENTORY_STATUS == "4") //原先為在庫
+                                            if (_IRE.INVENTORY_STATUS == "4") //原先為預約取出
                                             {
-                                                _IRE.INVENTORY_STATUS = "1"; //預約取出
+                                                _IRE.INVENTORY_STATUS = "1"; //改為在庫
                                                 _IRE.LAST_UPDATE_DT = dt;  //最後修改時間
-                                                updateItemIds.Add(_IRE.ITEM_ID);
                                             }
                                         }
                                     }
@@ -376,9 +426,9 @@ namespace Treasury.Web.Service.Actual
 
                                 if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
                                 {
-                                    var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x));
-                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)));
-                                    db.ITEM_REAL_ESTATE.RemoveRange(db.ITEM_REAL_ESTATE.Where(x => delItemId.Contains(x.ITEM_ID)));
+                                    var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
+                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
+                                    db.ITEM_REAL_ESTATE.RemoveRange(db.ITEM_REAL_ESTATE.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
                                     db.OTHER_ITEM_APLY.AddRange(inserts.Select(x=>new OTHER_ITEM_APLY() {
                                         APLY_NO = taData.vAplyNo,
                                         ITEM_ID = x.ITEM_ID
@@ -387,7 +437,16 @@ namespace Treasury.Web.Service.Actual
                                 }
                                 else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
                                 {
-                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && cancelItemIds.Contains(x.ITEM_ID)));
+                                    foreach (var backItemId in db.OTHER_ITEM_APLY.Where(x =>
+                                     x.APLY_NO == taData.vAplyNo &&
+                                     !updateItemIds.Contains(x.ITEM_ID)
+                                    ).Select(x => x.ITEM_ID))
+                                    {
+                                        var back = db.ITEM_REAL_ESTATE.First(x => x.ITEM_ID == backItemId);
+                                        back.INVENTORY_STATUS = "1";
+                                    }
+
+                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).ToList());
                                     db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
                                     {
                                         APLY_NO = taData.vAplyNo,
@@ -503,7 +562,6 @@ namespace Treasury.Web.Service.Actual
                                         if (item.vStatus == AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo("E3", qPreCode).ToString().PadLeft(8, '0');
-                                            _IRE_Item_Id = item_id;
                                             var _IRE = new ITEM_REAL_ESTATE()
                                             {
                                                 ITEM_ID = $@"E3{item_id}", //物品編號
@@ -524,6 +582,7 @@ namespace Treasury.Web.Service.Actual
                                                 //PUT_DATE = dt, //存入日期時間
                                                 LAST_UPDATE_DT = dt, //最後修改時間
                                             };
+                                            _IRE_Item_Id = _IRE.ITEM_ID;
                                             db.ITEM_REAL_ESTATE.Add(_IRE);
                                             logStr += "|";
                                             logStr += _IRE.modelToString();
@@ -549,12 +608,15 @@ namespace Treasury.Web.Service.Actual
 
 
                                     #region 其它存取項目申請資料檔
-                                    db.OTHER_ITEM_APLY.Add(
-                                    new OTHER_ITEM_APLY()
+                                    if (!_IRE_Item_Id.IsNullOrWhiteSpace())
                                     {
-                                        APLY_NO = _TAR.APLY_NO,
-                                        ITEM_ID = _IRE_Item_Id
-                                    });
+                                        db.OTHER_ITEM_APLY.Add(
+                                        new OTHER_ITEM_APLY()
+                                        {
+                                            APLY_NO = _TAR.APLY_NO,
+                                            ITEM_ID = _IRE_Item_Id
+                                        });
+                                    }
                                     #endregion
                                 }
                                 #endregion
@@ -621,7 +683,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit"></param>
         /// <param name="parm"></param>
         /// <returns></returns>
-        private List<SelectOption> GetBuildNameorBookNo(string parm,string vAplyUnit = null)
+        private List<SelectOption> GetBuildNameorBookNo(string parm,string vAplyUnit = null, string aplyNo = null)
         {
             List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Value = " ", Text = " " } };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -635,6 +697,15 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .Select(x => x.GROUP_NO).ToList();
+                }
+                if (!aplyNo.IsNullOrWhiteSpace())
+                {
+                    var _itemId = db.OTHER_ITEM_APLY.AsNoTracking()
+                                 .FirstOrDefault(x => x.APLY_NO == aplyNo)?.ITEM_ID;
+                    if (!_itemId.IsNullOrWhiteSpace())
+                    {
+                        groupNos.Add(db.ITEM_REAL_ESTATE.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == _itemId).GROUP_NO);
+                    }
                 }
                 var itemId = TreaItemType.D1014.ToString(); //不動產權狀
                 if (!parm.IsNullOrWhiteSpace())
@@ -695,7 +766,7 @@ namespace Treasury.Web.Service.Actual
                 vHouse_No = x.HOUSE_NO, //門牌號
                 vEstate_Seq = x.ESTATE_SEQ, //流水號/編號
                 vMemo = x.MEMO, //備註
-                vtakeoutFlag = takeoutFlag, //取出註記
+                vtakeoutFlag = (x.INVENTORY_STATUS == "4"), //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
         }

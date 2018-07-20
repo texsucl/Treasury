@@ -16,8 +16,6 @@ namespace Treasury.Web.Report.Data
         {
             var resultsTable = new DataSet();
 
-            var depts = new List<VW_OA_DEPT>();
-            var emps = new List<V_EMPLY2>();
             var _Parameters = new List<SqlParameter>(); 
             string aply_No = parms.Where(x => x.key == "aply_No").FirstOrDefault()?.value ?? string.Empty;
             SetDetail(aply_No);

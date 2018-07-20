@@ -59,13 +59,15 @@ namespace Treasury.WebControllers
             else
             {
                 _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
-                ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
-                Cache.Invalidate(CacheList.TreasuryAccessViewData);
-                Cache.Set(CacheList.TreasuryAccessViewData, new TreasuryAccessViewModel()
+                var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                ViewBag.dAccess = viewModel.vAccessType;
+                if (viewModel.vAccessType == AccessProjectTradeType.G.ToString())
                 {
-                    vAplyNo = AplyNo
-                });
-                ResetBillViewModel(null, AplyNo);
+                    _dActType = false; ///空白票據 取出預設只能檢視
+                }
+                Cache.Invalidate(CacheList.TreasuryAccessViewData);
+                Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
+                ResetBillViewModel(viewModel.vAccessType, AplyNo);
             }
             ViewBag.dActType = _dActType;
             return PartialView();
@@ -113,6 +115,10 @@ namespace Treasury.WebControllers
                 Cache.Invalidate(CacheList.BILLTempData);
                 Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(tempData));
                 var dayData = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
+                if (!data.vAplyNo.IsNullOrWhiteSpace())
+                {
+                    dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
+                }
                 dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
                 Cache.Invalidate(CacheList.BILLDayData);
                 Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
@@ -149,7 +155,11 @@ namespace Treasury.WebControllers
                     updateTempData.vCheckTotalNum = model.vCheckTotalNum;
                     Cache.Invalidate(CacheList.BILLTempData);
                     Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(tempData));
-                    dayData.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
+                    if (!data.vAplyNo.IsNullOrWhiteSpace())
+                    {
+                        dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
+                    }
+                    dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());             
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                     result.RETURN_FLAG = true;
@@ -186,6 +196,10 @@ namespace Treasury.WebControllers
                     tempData.Remove(deleteTempData);
                     Cache.Invalidate(CacheList.BILLTempData);
                     Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(tempData));
+                    if (!data.vAplyNo.IsNullOrWhiteSpace())
+                    {
+                        dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
+                    }
                     dayData.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
@@ -225,7 +239,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(tempData));
                     var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                     var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
+                    _data2 = GetOut(_data2);
                     _data2.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(_data2));
@@ -266,7 +280,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(tempData));
                     var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                     var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
+                    _data2 = GetOut(_data2);
                     _data2.AddRange(tempData.ModelConvert<BillViewModel,BillViewModel>());
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(_data2));
@@ -289,9 +303,8 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult ResetTempData(string AccessType)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
             ResetBillViewModel(AccessType);
-            return Json(result);
+            return Json(new MSGReturnModel<string>());
         }
 
         /// <summary>
@@ -317,6 +330,11 @@ namespace Treasury.WebControllers
             return null;
         }
 
+        /// <summary>
+        /// 重設空白票券
+        /// </summary>
+        /// <param name="AccessType"></param>
+        /// <param name="AplyNo"></param>
         private void ResetBillViewModel(string AccessType,string AplyNo = null)
         {
             Cache.Invalidate(CacheList.BILLTempData);
@@ -333,7 +351,7 @@ namespace Treasury.WebControllers
                 {
                     var _data = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit, "1");//只抓庫存
                     var _data2 = (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);
-                    _data2 = getOut(_data2);
+                    _data2 = GetOut(_data2);
                     _data2.AddRange(_data.ModelConvert<BillViewModel, BillViewModel>());
                     Cache.Set(CacheList.BILLTempData, SetBillViewRowNum(_data));
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(_data2));
@@ -358,11 +376,21 @@ namespace Treasury.WebControllers
 
         }
 
-        private List<BillViewModel> getOut(List<BillViewModel> data)
+        /// <summary>
+        /// 取出過濾在庫資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private List<BillViewModel> GetOut(List<BillViewModel> data)
         {
             return data.Where(x => x.vStatus != AccessInventoryType._1.GetDescription()).ToList();
         }
 
+        /// <summary>
+        /// 輸出資料排序
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private List<BillViewModel> SetBillViewModelOrder(List<BillViewModel> data)
         {
             if (data.Any())
@@ -372,6 +400,11 @@ namespace Treasury.WebControllers
             return data;
         }
 
+        /// <summary>
+        /// 加入排序
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private List<BillViewModel> SetBillViewRowNum(List<BillViewModel> data)
         {
             int rownum = 1;

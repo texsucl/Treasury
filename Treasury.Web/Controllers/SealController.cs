@@ -56,16 +56,20 @@ namespace Treasury.WebControllers
             {
                 _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
+                var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
-                Cache.Set(CacheList.TreasuryAccessViewData, new TreasuryAccessViewModel() {
-                    vAplyNo = AplyNo
-                });
-                resetSealViewModel(null,AplyNo);
+                Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
+                resetSealViewModel(viewModel.vAccessType, AplyNo , _dActType);
             }
             ViewBag.dActType = _dActType;
             return PartialView();
         }
 
+        /// <summary>
+        /// 申請覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult ApplyTempData(EstateModel model)
         {
@@ -120,7 +124,6 @@ namespace Treasury.WebControllers
             }
             return Json(result);
         }
-
 
         /// <summary>
         /// 修改明細資料
@@ -248,7 +251,9 @@ namespace Treasury.WebControllers
         public JsonResult GetCacheData(jqGridParam jdata)
         {
             if (Cache.IsSet(CacheList.SEALData))
-                return Json(jdata.modelToJqgridResult((List<SealViewModel>)Cache.Get(CacheList.SEALData)));
+                return Json(jdata.modelToJqgridResult(
+                    ((List<SealViewModel>)Cache.Get(CacheList.SEALData)).OrderBy(x=>x.vItemId).ToList()
+                    ));
             return null;
         }
 
@@ -257,25 +262,31 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <param name="AccessType"></param>
         /// <param name="AplyNo"></param>
-        private void resetSealViewModel(string AccessType, string AplyNo = null)
+        private void resetSealViewModel(string AccessType, string AplyNo = null, bool EditFlag = false)
         {
             Cache.Invalidate(CacheList.SEALData);     
+            var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 if (AccessType == AccessProjectTradeType.P.ToString())
                 {
                     Cache.Set(CacheList.SEALData, new List<SealViewModel>());
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem,data.vAplyUnit));//只抓庫存
+                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit));//只抓庫存
                 }              
             }
             else
             {
-                var data = Seal.GetDataByAplyNo(AplyNo);
-                Cache.Set(CacheList.SEALData, data);
+                if (AccessType == AccessProjectTradeType.P.ToString())
+                {
+                    Cache.Set(CacheList.SEALData, Seal.GetDataByAplyNo(AplyNo));
+                }
+                if (AccessType == AccessProjectTradeType.G.ToString())
+                {
+                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit , AplyNo));//只抓庫存
+                }
             }
         }
 

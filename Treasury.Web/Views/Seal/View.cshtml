@@ -10,7 +10,7 @@
     <div style="text-align:center;display:none;" class="SEAL_Act">
         <input type="button" id="SEALApply" value="申請覆核" class="btn btn-primary" />
         <input type="button" id="SEALCancel" value="取消申請" class="btn btn-primary" />
-        <input type="button" id="SEALBack" value="回到功能選擇" class="btn btn-primary" />
+        <input type="button" id="SEALBack" value="回上一頁" class="btn btn-primary" />
     </div>
     <div id="SEALDialog" style="display:none">
         <form id="SEALDialogForm">
@@ -72,8 +72,15 @@
         var SEAL_DescDId = 'tSEAL_DESC'; //印章內容Id(text)
         var SEAL_MemoId = 'tSEAL_MEMO'; //備註Id(texarea)
         var SEAL_Item_IdHlId = 'hSEAL_ITEM_ID'; //物品標號Id(hidden)
+
         var SEAL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+        var SEAL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (SEAL_Aply_No_Flag) {
+            $('#SEALCancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+
         if (!SEAL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
             $('.SEAL_Act').hide();
             type = '@ViewBag.dAccess';
@@ -360,7 +367,7 @@
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
                 $('#' + SEAL_DescDId).val(data.vSeal_Desc);
-                $('#' + SEAL_MemoId).val(data.vSEAL_Date);
+                $('#' + SEAL_MemoId).val(data.vMemo);
                 $('#' + SEAL_Item_IdHlId).val(data.vItemId);
             }
         }
