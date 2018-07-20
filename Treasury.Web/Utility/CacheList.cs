@@ -47,6 +47,15 @@
         /// </summary>
         public static string SEALData { get; private set; }
 
+        /// <summary>
+        /// 庫存資料(股票)
+        /// </summary>
+        public static string StockMainData { get; private set; }
+
+        /// <summary>
+        /// 明細資料(股票)
+        /// </summary>
+        public static string StockTempData { get; private set; }
         #endregion Cache資料
 
 
@@ -62,6 +71,7 @@
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
             SEALData = "SEALData";
+            StockTempData = "StockTempData";            
             #endregion Cache資料
 
         }
