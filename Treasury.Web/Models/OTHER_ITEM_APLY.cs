@@ -15,7 +15,6 @@ namespace Treasury.Web.Models
     public partial class OTHER_ITEM_APLY
     {
         public string APLY_NO { get; set; }
-        public int DATA_SEQ { get; set; }
         public string ITEM_ID { get; set; }
     }
 }

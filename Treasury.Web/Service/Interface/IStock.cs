@@ -29,7 +29,7 @@ namespace Treasury.Web.Service.Interface
         /// 股票名稱
         /// </summary>
         /// <returns></returns>
-        List<SelectOption> GetStockName();
+        List<SelectOption> GetStockName(string vAplyUnit = null);
 
         /// <summary>
         /// 區域
@@ -49,6 +49,22 @@ namespace Treasury.Web.Service.Interface
         /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
         IEnumerable<ITreaItem> GetTempData(string aplyNo);
+
+        /// <summary>
+        /// 使用 群組編號 抓取在庫股票資料
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="vAplyUnit">申請部門</param>
+        /// <returns></returns>
+        List<StockViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit);
+
+        /// <summary>
+        /// 使用 群組編號及入庫批號 抓取在庫股票明細資料
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
+        /// <returns></returns>
+        List<StockViewModel> GetDetailData(int groupNo, int treaBatchNo);
 
     }
 }

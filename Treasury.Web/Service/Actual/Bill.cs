@@ -298,7 +298,7 @@ namespace Treasury.Web.Service.Actual
                                 seq += 1;
                                 var _BNA = new BLANK_NOTE_APLY() {
                                     APLY_NO = _TAR.APLY_NO,
-                                    DATA_SEQ = seq,
+                                    //DATA_SEQ = seq,
                                     ITEM_ID = $@"E2{item_id}",
                                     CHECK_TYPE = x.vCheckType,
                                     ISSUING_BANK = x.vIssuingBank,
@@ -453,7 +453,7 @@ namespace Treasury.Web.Service.Actual
                 vRowNum = (num + 1).ToString(),
                 vItemId = data.ITEM_ID,
                 vAplyNo = data.APLY_NO,
-                vDataSeq = data.DATA_SEQ.ToString(),
+                //vDataSeq = data.DATA_SEQ.ToString(),
                 vStatus = Inventory_types.FirstOrDefault(x => x.CODE == code)?.CODE_VALUE,
                 vIssuingBank = data.ISSUING_BANK,
                 vCheckType = data.CHECK_TYPE,

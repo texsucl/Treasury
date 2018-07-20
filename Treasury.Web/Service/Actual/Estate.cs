@@ -341,7 +341,7 @@ namespace Treasury.Web.Service.Actual
                                 new OTHER_ITEM_APLY()
                                 {
                                     APLY_NO = _TAR.APLY_NO,
-                                    DATA_SEQ = _seq,
+                                    //DATA_SEQ = _seq,
                                     ITEM_ID = _IRE_Item_Id
                                 });
                                 #endregion

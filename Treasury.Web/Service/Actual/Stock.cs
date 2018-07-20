@@ -10,12 +10,18 @@ using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
+using System.ComponentModel;
 
 namespace Treasury.Web.Service.Actual
 {
     public class Stock : IStock
     {
+        protected INTRA intra { private set; get; }
 
+        public Stock()
+        {
+            intra = new INTRA();
+        }
         #region GetData
         /// <summary>
         /// 明細資料(股票)
@@ -59,7 +65,7 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result = db.ITEM_BOOK.AsNoTracking()
-                    .Where(x => x.ITEM_ID == "STOCK")
+                    .Where(x => x.ITEM_ID == TreaItemType.D1015.ToString())
                     .Max(x => x.GROUP_NO);
             }
             return result;
@@ -74,9 +80,9 @@ namespace Treasury.Web.Service.Actual
             var result = new List<ItemBookStock>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var vObj = from A in db.ITEM_BOOK.Where(x => x.ITEM_ID == "STOCK" & x.COL == "AREA")
-                           join M in db.ITEM_BOOK.Where(x => x.ITEM_ID == "STOCK" & x.COL == "MEMO") on A.GROUP_NO equals M.GROUP_NO
-                           join NBN in db.ITEM_BOOK.Where(x => x.ITEM_ID == "STOCK" & x.COL == "NEXT_BATCH_NO") on A.GROUP_NO equals NBN.GROUP_NO
+                var vObj = from A in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "AREA")
+                           join M in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "MEMO") on A.GROUP_NO equals M.GROUP_NO
+                           join NBN in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "NEXT_BATCH_NO") on A.GROUP_NO equals NBN.GROUP_NO
                            where A.GROUP_NO == GroupNo
                            select new ItemBookStock
                            {
@@ -94,21 +100,33 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 股票名稱
         /// </summary>
+        /// <param name="vAplyUnit"></param>
         /// <returns></returns>
-        public List<SelectOption> GetStockName()
+        public List<SelectOption> GetStockName(string vAplyUnit = null)
         {
-            var result = new List<SelectOption>();
+            List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Value = " ", Text = " " } };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                result = db.ITEM_BOOK.AsNoTracking()
-                    .Where(x => x.ITEM_ID == "STOCK" & x.COL== "NAME")
+                var dept = intra.getDept(vAplyUnit); //抓取單位
+                var groupNos = new List<int>();
+                if (!vAplyUnit.IsNullOrWhiteSpace())
+                {
+                    groupNos = db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
+                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .Select(x => x.GROUP_NO).ToList();
+                }
+
+                result.AddRange(db.ITEM_BOOK.AsNoTracking()
+                    .Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() && x.COL == "NAME")
+                    .Where(x => groupNos.Contains(x.GROUP_NO), !vAplyUnit.IsNullOrWhiteSpace())
                     .OrderBy(x => x.GROUP_NO)
-                    .AsEnumerable()
-                    .Select(x => new SelectOption()
+                    .AsEnumerable().Select(x => new SelectOption()
                     {
                         Value = x.GROUP_NO.ToString(),
                         Text = x.COL_VALUE
-                    }).ToList();
+                    }));
             }
             return result;
         }
@@ -154,6 +172,54 @@ namespace Treasury.Web.Service.Actual
                         Text = x.CODE_VALUE
                     }).ToList();
             }
+            return result;
+        }
+
+        /// <summary>
+        /// 使用 群組編號 抓取在庫股票資料
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="vAplyUnit">申請部門</param>
+        /// <returns></returns>
+        public List<StockViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit)
+        {
+            var result = new List<StockViewModel>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var dept = intra.getDept(vAplyUnit); //抓取單位
+                var _emply = intra.getEmply();   //抓取員工資料
+
+                result =
+                    getMainModel(db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.GROUP_NO == groupNo)
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
+                    .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .AsEnumerable(), _emply).ToList();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 使用 群組編號及入庫批號 抓取在庫股票明細資料
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
+        /// <returns></returns>
+        public List<StockViewModel> GetDetailData(int groupNo, int treaBatchNo)
+        {
+            var result = new List<StockViewModel>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                result =
+                    getdetailModel(db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.GROUP_NO == groupNo)
+                    .Where(x => x.TREA_BATCH_NO == treaBatchNo)
+                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .AsEnumerable()).ToList();
+            }
+
             return result;
         }
         #endregion
@@ -231,59 +297,137 @@ namespace Treasury.Web.Service.Actual
                             });
                             #endregion
 
-                            #region 其它存取項目申請資料檔
-                            int seq = 0;
-                            datas.ForEach(x =>
-                            {
-                                var item_id = sysSeqDao.qrySeqNo("E7", qPreCode).ToString().PadLeft(8, '0');
-                                seq += 1;
-                                var _OIA = new OTHER_ITEM_APLY()
-                                {
-                                    APLY_NO = _TAR.APLY_NO,
-                                    DATA_SEQ = seq,
-                                    ITEM_ID = $@"E7{item_id}"
-                                };
-                                db.OTHER_ITEM_APLY.Add(_OIA);
-                                logStr += "|";
-                                logStr += _OIA.modelToString();
-                            });
-                            #endregion
-
                             #region 存取項目冊號資料檔
-                            //判斷存入資料
-                            switch(datas[0].vStockDate.StockFeaturesType)
+                            var _first = datas.First();
+                            var _StockModel = _first.vStockModel;
+                            bool insertGroupFlag = false;
+                            //判斷申請作業
+                            if (taData.vAccessType == AccessProjectTradeType.P.ToString())
                             {
-                                case "StockInsert"://新增股票
-                                    break;
-                                case "StockFromDB"://從資料庫選取股票
-                                    break;
-                                default:
-                                    break;
+                                //判斷存入資料
+                                switch (_first.vStockDate.StockFeaturesType)
+                                {
+                                    case "StockInsert"://新增股票
+                                        _first.vStockDate.GroupNo = GetMaxStockNo() + 1;
+                                        foreach (var pro in _StockModel.GetType().GetProperties())
+                                        {
+                                            db.ITEM_BOOK.Add(new ITEM_BOOK()
+                                            {
+                                                ITEM_ID = taData.vItem,
+                                                GROUP_NO = _first.vStockDate.GroupNo,
+                                                COL = pro.Name,
+                                                COL_NAME = (pro.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute).Description,
+                                                COL_VALUE = pro.GetValue(_StockModel)?.ToString()?.Trim()
+                                            });
+                                        }
+                                        insertGroupFlag = true;
+                                        break;
+                                    case "StockFromDB"://從資料庫選取股票
+                                        var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == _first.vStockDate.GroupNo && x.ITEM_ID == taData.vItem).ToList();
+                                        foreach (var pro in _StockModel.GetType().GetProperties())
+                                        {
+                                            if (!(pro.Name == "NAME"))
+                                            {
+                                                var _chang = _ItemBooks.FirstOrDefault(x => x.COL == pro.Name);
+                                                if (_chang != null)
+                                                    _chang.COL_VALUE = pro.GetValue(_StockModel)?.ToString()?.Trim();
+                                            }
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                             #endregion
 
-                            #region 股票申請資料檔
-                            //int seq = 0;
-                            //datas.ForEach(x =>
-                            //{
-                            //    var item_id = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(8, '0');
-                            //    seq += 1;
-                            //    var _BNA = new BLANK_NOTE_APLY()
-                            //    {
-                            //        APLY_NO = _TAR.APLY_NO,
-                            //        DATA_SEQ = seq,
-                            //        ITEM_ID = $@"E2{item_id}",
-                            //        CHECK_TYPE = x.vCheckType,
-                            //        ISSUING_BANK = x.vIssuingBank,
-                            //        CHECK_NO_TRACK = x.vCheckNoTrack,
-                            //        CHECK_NO_B = x.vCheckNoB,
-                            //        CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
-                            //        ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
-                            //    };
-                            //    db.BLANK_NOTE_APLY.Add(_BNA);
-                            //    logStr += "|";
-                            //    logStr += _BNA.modelToString();
-                            //});
+                            #region 儲存資料
+                            //判斷申請作業-存入
+                            if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                            {
+                                datas.ForEach(x =>
+                                {
+                                    var item_id = sysSeqDao.qrySeqNo("E7", string.Empty).ToString().PadLeft(8, '0');
+
+                                    #region 其它存取項目申請資料檔
+                                    var _OIA = new OTHER_ITEM_APLY()
+                                    {
+                                        APLY_NO = _TAR.APLY_NO,
+                                        ITEM_ID = $@"E7{item_id}"
+                                    };
+                                    db.OTHER_ITEM_APLY.Add(_OIA);
+                                    logStr += "|";
+                                    logStr += _OIA.modelToString();
+                                    #endregion
+
+                                    #region 股票申請資料檔
+                                    var _dept = intra.getDept_Sect(taData.vAplyUnit);
+                                    var _IS = new ITEM_STOCK()
+                                    {
+                                        ITEM_ID = $@"E7{item_id}", //物品編號
+                                        INVENTORY_STATUS = "3", //預約存入
+                                        GROUP_NO = _first.vStockDate.GroupNo, //群組編號
+                                        TREA_BATCH_NO = int.Parse(_first.vStockDate.Next_Batch_No),  //入庫批號
+                                        STOCK_TYPE = x.vStockType,    //股票類型
+                                        STOCK_NO_PREAMBLE = x.vStockNoPreamble,   //序號前置碼
+                                        STOCK_NO_B = x.vStockNoB.ToString(),  //股票序號(起)
+                                        STOCK_NO_E = x.vStockNoE.ToString(),  //股票序號(迄)
+                                        STOCK_CNT = x.vStockTotal,    //股票張數
+                                        DENOMINATION = x.vDenomination,   //面額
+                                        NUMBER_OF_SHARES = x.vNumberOfShares,   //股數
+                                        MEMO = x.vMemo,//備註
+                                        APLY_DEPT = _dept.Item1, //申請人部門
+                                        APLY_SECT = _dept.Item2, //申請人科別
+                                        APLY_UID = taData.vAplyUid, //申請人
+                                        CHARGE_DEPT = _dept.Item1, //權責部門
+                                        CHARGE_SECT = _dept.Item2, //權責科別
+                                        PUT_DATE = dt, //存入日期時間
+                                        LAST_UPDATE_DT = dt, //最後修改時間
+                                    };
+                                    db.ITEM_STOCK.Add(_IS);
+                                    logStr += "|";
+                                    logStr += _IS.modelToString();
+                                    #endregion
+                                });
+                            }
+                            //判斷申請作業-取出
+                            if (taData.vAccessType == AccessProjectTradeType.G.ToString())
+                            {
+                                foreach(var item in datas)
+                                {
+                                    //取得股票明細資料
+                                    var StockDetail = db.ITEM_STOCK.AsNoTracking()
+                                                        .Where(x => x.GROUP_NO == item.vStockDate.GroupNo)
+                                                        .Where(x => x.TREA_BATCH_NO == item.vTreaBatchNo)
+                                                        .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                                                        .AsEnumerable().ToList();
+
+                                    foreach(var detail in StockDetail)
+                                    {
+                                        #region 股票申請資料檔
+                                        var _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == detail.ITEM_ID);
+                                        if (_IS.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                        {
+                                            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                            return result;
+                                        }
+                                        _IS.INVENTORY_STATUS = "4"; //預約取出
+                                        _IS.GET_DATE = dt;  //取出日期時間
+                                        _IS.LAST_UPDATE_DT = dt;  //最後修改時間
+                                        #endregion
+
+                                        #region 其它存取項目申請資料檔
+                                        var _OIA = new OTHER_ITEM_APLY()
+                                        {
+                                            APLY_NO = _TAR.APLY_NO,
+                                            ITEM_ID = detail.ITEM_ID
+                                        };
+                                        db.OTHER_ITEM_APLY.Add(_OIA);
+                                        logStr += "|";
+                                        logStr += _OIA.modelToString();
+                                        #endregion
+                                    }
+                                }
+                            }
                             #endregion
 
                             #region Save Db
@@ -309,7 +453,8 @@ namespace Treasury.Web.Service.Actual
                                     #endregion
 
                                     result.RETURN_FLAG = true;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                    var addstr = insertGroupFlag ? (",新增股票:" + _first.vStockDate.Name) : string.Empty;
+                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
                                 }
                                 catch (DbUpdateException ex)
                                 {
@@ -373,7 +518,101 @@ namespace Treasury.Web.Service.Actual
             };
         }
 
+        /// <summary>
+        /// 在庫股票主檔資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="_emply"></param>
+        /// <returns></returns>
+        private IEnumerable<StockViewModel> getMainModel(IEnumerable<ITEM_STOCK> data, List<V_EMPLY2> _emply)
+        {
+            data = data.Distinct(new ItemStockComparer());
+            return data.Select(x => new StockViewModel()
+            {
+                vTakeoutFlag = false, //取出註記
+                vTreaBatchNo = x.TREA_BATCH_NO,   //入庫批號
+                vPutDate = string.IsNullOrEmpty(x.PUT_DATE.ToString()) ? "" : DateTime.Parse(x.PUT_DATE.ToString()).ToString("yyyy/MM/dd"),    //申請日期
+                vAplyName = _emply.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,   //申請人
+                vNumberOfSharesTotal = GetNumberOfSharesTotal(x.GROUP_NO, x.TREA_BATCH_NO), //總股數
+                vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
+            });
+        }
 
+        /// <summary>
+        /// 在庫股票明細資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="_emply"></param>
+        /// <returns></returns>
+        private IEnumerable<StockViewModel> getdetailModel(IEnumerable<ITEM_STOCK> data)
+        {
+            return data.Select(x => new StockViewModel()
+            {
+                vTreaBatchNo = x.TREA_BATCH_NO,   //入庫批號
+                vStockType = x.STOCK_TYPE,    //類型
+                vStockNoPreamble = x.STOCK_NO_PREAMBLE,   //序號前置碼
+                vStockNoB = int.Parse(x.STOCK_NO_B),  //序號(起)
+                vStockNoE = int.Parse(x.STOCK_NO_E),  //序號(迄)
+                vStockTotal = x.STOCK_CNT,    //張數
+                vDenomination = x.DENOMINATION,   //單張面額
+                vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,  //面額小計
+                vNumberOfShares = x.NUMBER_OF_SHARES,   //股數
+                vMemo = x.MEMO  //備註說明
+            });
+        }
+
+        //在庫股票Distinct
+        class ItemStockComparer : IEqualityComparer<ITEM_STOCK>
+        {
+            public bool Equals(ITEM_STOCK x, ITEM_STOCK y)
+            {
+
+                //Check whether the compared objects reference the same data.
+                if (Object.ReferenceEquals(x, y)) return true;
+
+                //Check whether any of the compared objects is null.
+                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                    return false;
+
+                //Check whether the products' properties are equal.
+                return x.TREA_BATCH_NO == y.TREA_BATCH_NO && x.PUT_DATE == y.PUT_DATE && x.APLY_UID == y.APLY_UID;
+            }
+
+            // If Equals() returns true for a pair of objects 
+            // then GetHashCode() must return the same value for these objects.
+
+            public int GetHashCode(ITEM_STOCK ItemStock)
+            {
+                //Check whether the object is null
+                if (Object.ReferenceEquals(ItemStock, null)) return 0;
+
+                //Get hash code for the TreaBatchNo field.
+                int hashItemStockTreaBatchNo = ItemStock.TREA_BATCH_NO.GetHashCode();
+
+                //Get hash code for the PutDate field if it is not null.
+                int hashItemStockPutDate = ItemStock.PUT_DATE == null ? 0 : ItemStock.PUT_DATE.GetHashCode();
+
+                //Get hash code for the AplyUid field if it is not null.
+                int hashItemStockAplyUid = ItemStock.APLY_UID == null ? 0 : ItemStock.APLY_UID.GetHashCode();
+
+                //Calculate the hash code for the product.
+                return hashItemStockTreaBatchNo ^ hashItemStockPutDate ^ hashItemStockAplyUid;
+            }
+        }
+
+        //計算總股數
+        private int GetNumberOfSharesTotal(int GroupNo, int TreaBatchNo)
+        {
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var NumberOfSharesTotal= db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.GROUP_NO == GroupNo)
+                    .Where(x => x.TREA_BATCH_NO == TreaBatchNo)
+                    .Sum(x => x.NUMBER_OF_SHARES);
+
+                return (int)NumberOfSharesTotal;
+            }
+        }
         #endregion
     }
 }

@@ -44,5 +44,27 @@ namespace Treasury.Web.Service.Actual
             }
             return new Tuple<string, string>(null,null);
         }
+
+        /// <summary>
+        /// 回傳 Emply 資料
+        /// </summary>
+        /// <param name="USR_ID"></param>
+        /// <returns></returns>
+        public List<V_EMPLY2> getEmply(string USR_ID=null)
+        {
+            var result = new List<V_EMPLY2>();
+            using (DB_INTRAEntities db = new DB_INTRAEntities())
+            {
+                if(string.IsNullOrEmpty(USR_ID))
+                {
+                    result = db.V_EMPLY2.ToList();
+                }
+                else
+                {
+                    result = db.V_EMPLY2.Where(x => x.USR_ID == USR_ID).ToList();
+                }
+            }
+            return result;
+        }
     }
 }

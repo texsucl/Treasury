@@ -1,92 +1,10 @@
 ﻿@using Treasury.Web.Enum;
 @using Treasury.WebUtility;
 <div class="row">
-    <div style="display:none;" class="aplyNoDetail">
-        <table style="width:95%">
-            <tr>
-                <td style="width:150px">
-                    <label>申請單號 : </label>
-                </td>
-                <td style="width:250px">
-                    <label id="TAVMvAplyNo"></label>
-                </td>
-                <td style="width:150px">
-                    <label>存取申請項目 : </label>
-                </td>
-                <td style="width:250px">
-                    <label id="TAVMvItem"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>申請單位 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAplyUnit"></label>
-                </td>
-                <td>
-                    <label>申請人 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAplyUid"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>權責部門 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvChargeUnit"></label>
-                </td>
-                <td>
-                    <label>申請作業 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvAccessType"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>預計存取日期 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvExpectedAccessDate"></label>
-                </td>
-                <td>
-                    <label>填表日期 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateDt"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>填表單位 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateUnit"></label>
-                </td>
-                <td>
-                    <label>填表人 : </label>
-                </td>
-                <td>
-                    <label id="TAVMvCreateUid"></label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>申請原因 : </label>
-                </td>
-                <td colspan="3">
-                    <textarea id="TAVMvAccessReason" style="width:100%" disabled></textarea>
-                </td>
-            </tr>
-        </table>
-    </div>
     <div class="col-sm-24">
         <form id="StockMainForm">
             <table>
-                <tr>
+                <tr class="Stock_P" style="display:none">
                     <td>
                         <label>存入資料:</label>
                     </td>
@@ -99,14 +17,14 @@
                     <td>
                         <label>編號:</label>
                     </td>
-                    <td>
-                        @Html.TextBox("tStock_No", (int)ViewBag.tStock_No)
+                    <td style="width:200px">
+                        <label id="lStock_No"></label>
                     </td>
                     <td>
                         <label>股票名稱:</label>
                     </td>
                     <td>
-                        <input type="text" id="tStock_Name" name="tStock_Name" style="width:200px" />
+                        <input type="text" id="tStock_Name" name="tStock_Name" style="200px"/>
                         @Html.DropDownList("dStock_Name", (SelectList)ViewBag.dStock_Name, new { @style = "display:none;width:200px;" })
                     </td>
                     <td>
@@ -124,7 +42,7 @@
                         <input type="text" id="tStock_Memo" name="tStock_Memo" style="width:500px" />
                     </td>
                 </tr>
-                <tr>
+                <tr class="Stock_P" style="display:none">
                     <td>
                         <label>入庫批號:</label>
                     </td>
@@ -144,10 +62,10 @@
     <div style="padding-bottom:5px;">
         <input type="button" id="StockInsert" value="新增存入明細" class="btn btn-primary" />
     </div>
-    <div id="STOCKjqgridDiv1" class="col-sm-24" style="padding-bottom:5px;">
+    <div id="STOCKjqgridDiv1"  class="jqd" style="padding-bottom:5px;">
 
     </div>
-    <div id="STOCKjqgridDiv2" class="col-sm-24">
+    <div id="STOCKjqgridDiv2"  class="jqd">
 
     </div>
     <div style="text-align:center;padding-top:5px;display:none;" class="StockAct">
@@ -220,8 +138,6 @@
                 </tr>
                 <tr>
                     <td colspan="6">
-                        <input type="hidden" id="tAplyNo" />
-                        <input type="hidden" id="tDataSeq" />
                         <input type="hidden" id="tItemId" />
                     </td>
                 </tr>
@@ -249,7 +165,8 @@
         var StockDataSeqId = 'tDataSeq'; //明細流水號Id
         var StockItemId = 'tItemId'; //物品編號Id
 
-        var Stock_Name = 'tStock_Name'; //股票名稱Id
+        var Stock_Name_T = 'tStock_Name'; //股票名稱Id
+        var Stock_Name_D = 'dStock_Name'; //股票名稱Id
         var Stock_Memo = 'tStock_Memo'; //備註Id
 
         var Stock_Type = 'dStock_Type'; //類型Id
@@ -287,10 +204,14 @@
 
         var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
         if (typeFlag && Stock_Act_Type) {
+            $('.Stock_P').show();
             $('#StockInsert').show();
         }
         else {
             $('#StockInsert').hide();
+            $("#tStock_Name").hide();
+            $("#dStock_Name").show();
+            $("#dStock_Area_Type").attr("Disabled", true);
         }
         //#endregion
 
@@ -303,17 +224,25 @@
         StockUrl.DeleteTempData = '@Url.Action("DeleteTempData", "Stock")';
         StockUrl.ApplyTempData = '@Url.Action("ApplyTempData", "Stock")';
         StockUrl.ResetTempData = '@Url.Action("ResetTempData", "Stock")';
+        StockUrl.Number_Of_Shares_Total = '@Url.Action("Number_Of_Shares_Total", "Stock")';
+        StockUrl.GetItemBook = '@Url.Action("GetItemBook", "Stock")';
+        StockUrl.TakeOutData = '@Url.Action("TakeOutData", "Stock")';
+        StockUrl.GetStockDetailDate = '@Url.Action("GetStockDetailDate", "Stock")';
 
         //#endregion
 
         //#region 初始動作
         StockTempGrid();
         setStockVerified();
+
+        if (!typeFlag){
+            StockDetailGrid();
+        }
         //#endregion
 
         //#region 註冊verified
         function setStockVerified() {
-            verified.maxlength(StockMainFormId, Stock_Name, 10); //股票名稱最大長度(10)
+            verified.maxlength(StockMainFormId, Stock_Name_T, 10); //股票名稱最大長度(10)
             verified.maxlength(StockMainFormId, Stock_Memo, 30); //備註最大長度(30)
 
             verified.maxlength(StockFormId, Stock_No_Preamble, 7); //序號前置碼最大長度(7)
@@ -344,6 +273,38 @@
                 case 'StockFromDB'://從資料庫選取股票
                     SetFromDB();
                     break;
+            }
+        });
+
+        //股票名稱下拉選項
+        $('#dStock_Name').on('change', function () {
+            if (typeFlag) {
+                GetStockDate();
+            }
+            else
+            {
+                GetStockDate();
+
+                var _val = -1;
+                if ($(this).val().trim() != '')
+                    _val = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        groupNo: _val,
+                        accessType: !typeFlag
+                }),
+                    dataType: "json",
+                    url: StockUrl.GetItemBook,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        StockTempGrid();
+                    }
+                    else {
+                        StockTempGrid();
+                    }
+                })
             }
         });
 
@@ -433,7 +394,7 @@
             $("#tStock_Name").show();
             $("#dStock_Name").hide();
             $("#dStock_Area_Type").attr("Disabled", false);
-            $("#tStock_No").val('@ViewBag.tStock_No');
+            $("#lStock_No").html('');
             $("#tStock_Memo").val("");
             $("#lStock_Trea_Batch_No").html("1");
         }
@@ -449,21 +410,58 @@
 
         //取得股票資料
         function GetStockDate() {
-            $.ajax({
-                url: StockUrl.GetStockDate,
-                type: "POST",
-                data: {
-                    GroupNo: $("#dStock_Name").val()
-                },
-                success: function (result) {
-                    if (result !== "undefined") {
-                        $("#tStock_No").val(result[0].GroupNo);
-                        $("#dStock_Area_Type").val(result[0].Area);
-                        $("#tStock_Memo").val(result[0].Memo);
-                        $("#lStock_Trea_Batch_No").html(result[0].Next_Batch_No);
+            if($("#dStock_Name").val().trim() != "")
+            {
+                $.ajax({
+                    url: StockUrl.GetStockDate,
+                    type: "POST",
+                    data: {
+                        GroupNo: $("#dStock_Name").val()
+                    },
+                    success: function (result) {
+                        if (result !== "undefined") {
+                            $("#lStock_No").html(result[0].GroupNo);
+                            $("#tStock_No").attr("Disabled", true);
+                            $("#dStock_Area_Type").val(result[0].Area);
+                            $("#tStock_Memo").val(result[0].Memo);
+                            $("#lStock_Trea_Batch_No").html(result[0].Next_Batch_No);
+                        }
                     }
+                });
+            }
+            else
+            {
+                $("#tStock_No").val('');
+                $("#tStock_No").attr("Disabled", true);
+                $("#tStock_Memo").val('');
+                $("#lStock_Trea_Batch_No").html('');
+            }
+        }
+
+        //取得股票明細內容
+        function GetStockDetailDate(rowid)
+        {
+            var listId = 'StockTempList';
+            var data = $("#" + listId).getRowData(rowid);
+            debugger;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    groupNo: $("#dStock_Name").val(),
+                    treaBatchNo:data.vTreaBatchNo
+                }),
+                dataType: "json",
+                url: StockUrl.GetStockDetailDate,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    StockDetailGrid();
                 }
-            });
+                else {
+                    StockDetailGrid();
+                }
+            })
+
         }
 
         //股票類型
@@ -540,10 +538,24 @@
             }
         }
 
+        //計算總股數
+        function GetNumber_Of_Shares_Total() {
+            $.ajax({
+                url: StockUrl.Number_Of_Shares_Total,
+                type: "POST",
+                success: function (result) {
+                    $("#lNumber_Of_Shares_Total").html(result);
+                }
+            });
+        }
+
         function StockApplyFun()
         {
             $.ajax({
                 type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
                 dataType: "json",
                 url: StockUrl.ApplyTempData,
                 contentType: 'application/json',
@@ -567,17 +579,25 @@
             }).done(function (result) {
                 ResetInsertDialog();
                 StockTempGrid();
+
+                if (typeFlag) {
+                    GetNumber_Of_Shares_Total();
+                }
+                else
+                {
+                    if ($('#' + Stock_Name_D + ' option').length > 0) {
+                        $('#' + Stock_Name_D).val($($('#' + Stock_Name_D + ' option')[0]).val())
+                    }
+                    $("#lStock_No").html('');
+                    $("#tStock_Memo").val("");
+                    StockDetailGrid();
+                }
             })
         }
 
         function formatterTakeOut(cellvalue, options, rdata) {
-            let str = '';
-            str += '<div class="btn-group">';
-            str += '<a title="取出" class="btn actionTakeout" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="BILL' + options.gid + 'TakeOut' + options.rowId + '" return:false;="">';
-            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
-            str += '<a title="重設" class="btn actionRepeat" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="BILL' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
-            str += '<i class="fa fa-repeat fa-lg"></i></a>';
-            str += '</div>';
+            var  str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox StockTakeOuts customerCheck'></div>";
             return str;
         }
 
@@ -608,7 +628,7 @@
 
         function StockTempGrid()
         {
-            if (typeFlag) {
+            if (typeFlag) {//存入
                 var colNameArray = ['項次', '動作', '類型', '序號前置碼', '序號(起)', '序號(迄)',
                         '張數', '單張面額', '面額小計', '股數', '備註說明',
                         '物品單號', '申請單號', '明細流水號'];
@@ -622,14 +642,14 @@
                     colModelArray.push({ name: "act", index: "act", width: 0, sortable: false, hidden: true });
                 }
                 colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 60, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatterCheckType });
-                colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false });
+                colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDenomination_Total", index: "vDenomination_Total", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vNumber_Of_Shares", index: "vNumber_Of_Shares", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false });
+                colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 colModelArray.push({ name: "vAplyNo", index: "vAplyNo", hidden: true });
                 colModelArray.push({ name: "vDataSeq", index: "vDataSeq", hidden: true });
@@ -648,14 +668,112 @@
                     StockTempCompleteFun
                     );
             }
-            else {
-
+            else {//取出
+                var colNameArray = ['取出', '入庫批號', '申請日期', '申請人', '總股數', '明細'];
+                var colModelArray = [];
+                if (Stock_Act_Type) {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                }
+                else {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                }
+                colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vPutDate", index: "vPutDate", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAplyName", index: "vAplyName", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vNumberOfSharesTotal", index: "vNumberOfSharesTotal", width: 100, sortable: false, align: 'center' });
+                if (Stock_Act_Type) {
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                }
+                else {
+                    colModelArray.push({ name: "act", index: "act", width: 0, sortable: false, hidden: true });
+                }
+                jqgridCustom.createJqgridByCache(
+                    'STOCKjqgridDiv1',
+                    'StockTempList',
+                    'StockTempPeger',
+                    StockUrl.getData,
+                    {
+                        type: 'Stock'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '在庫股票',
+                    jqgridCustom.getPage('STOCKjqgridDiv1'),
+                    StockTempTakeOutFun,
+                    true
+                    );
             }
+        }
+
+        function StockDetailGrid()
+        {
+            var colNameArray = ['入庫批號', '類型', '序號前置碼', '序號(起)', '序號(迄)',
+                    '張數', '單張面額', '面額小計', '股數', '備註說明'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 60, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatterCheckType });
+            colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
+            jqgridCustom.createJqgridByCache(
+                'STOCKjqgridDiv2',
+                'StockDetailList',
+                'StockDetailPeger',
+                StockUrl.getData,
+                {
+                    type: 'Temp'
+                },
+                colNameArray,
+                colModelArray,
+                '明細內容',
+                jqgridCustom.getPage('STOCKjqgridDiv2')
+                );
         }
 
         function StockTempCompleteFun(listId){
             jqgridCustom.randerAction(listId, 'StockTemp', tempActFun);
         }
+
+        function StockTempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'StockTemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.StockTakeOuts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function takeout(rowid, flag) {
+            var listId = 'StockTempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: StockTakeOutModel(
+                        data.vTreaBatchNo,
+                        $('#lStock_No').html()),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: StockUrl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    StockTempGrid();
+                }
+            });
+        }
+
 
         var tempActFun = {};
         tempActFun.Edit = function (i) {
@@ -665,7 +783,14 @@
             dialogOpen('@Ref.ActionType.Dele.ToString()', i);
         }
         tempActFun.View = function (i) {
-            dialogOpen('@Ref.ActionType.View.ToString()', i);
+            if(typeFlag)
+            {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            else
+            {
+                GetStockDetailDate(i);
+            }
         }
 
         //#region function
@@ -679,11 +804,16 @@
                             dialogOpen('@Ref.ActionType.Add.ToString()', null);
                         }
                         else {
-                            alert("股票名稱必填");
+                            customerUtility.alert('股票名稱必填', 'w');
                         }
                         break;
                     case 'StockFromDB'://從資料庫選取股票
-                        dialogOpen('@Ref.ActionType.Add.ToString()', null);
+                        if ($("#dStock_Name").val().trim() != "") {
+                            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+                        }
+                        else {
+                            customerUtility.alert('請選取股票名稱', 'w');
+                        }
                         break;
                 }
                 Type_S();
@@ -767,10 +897,10 @@
                     if($("#dStock_Area_Type").val()=="D")//國內
                     {
                         $('#' + Denomination).val(data.vDenomination);
-                        $('#' + Denomination_Total).html(data.vDenomination_Total);
+                        $('#' + Denomination_Total).html(data.vDenominationTotal);
                     }
                 }
-                $('#' + Number_Of_Shares).val(data.vNumber_Of_Shares);
+                $('#' + Number_Of_Shares).val(data.vNumberOfShares);
                 $('#' + Memo).val(data.vMemo);
             }
         }
@@ -812,7 +942,7 @@
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val(),
                             $('input[name=rStockFeaturesType]:checked').val(),
-                            $('#tStock_No').val(),
+                            $('#lStock_No').html(),
                             $('#tStock_Name').val(),
                             $('#dStock_Area_Type').val(),
                             $('#tStock_Memo').val(),
@@ -828,6 +958,7 @@
                     {
                         customerUtility.closeDialog($('#StockInsertTemp'));
                         StockTempGrid();
+                        GetNumber_Of_Shares_Total();
                     }
                 })
             }
@@ -871,7 +1002,7 @@
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val(),
                             $('input[name=rStockFeaturesType]:checked').val(),
-                            $('#tStock_No').val(),
+                            $('#lStock_No').html(),
                             $('#tStock_Name').val(),
                             $('#dStock_Area_Type').val(),
                             $('#tStock_Memo').val(),
@@ -886,6 +1017,7 @@
                     {
                         customerUtility.closeDialog($('#StockUpdateTemp'));
                         StockTempGrid();
+                        GetNumber_Of_Shares_Total();
                     }
                 })
             }
@@ -910,6 +1042,7 @@
                     {
                         customerUtility.closeDialog($('#StockDeleteTemp'));
                         StockTempGrid();
+                        GetNumber_Of_Shares_Total();
                     }
                 })
             }
@@ -919,29 +1052,29 @@
         function Check_D() {
             if ($("#tStock_No_Preamble").val().trim() == "")
             {
-                alert("序號前置碼必填");
+                customerUtility.alert('序號前置碼必填', 'w');
                 return false;
             }
 
             if ($("#tStock_No_B").val().trim() == "")
             {
-                alert("序號(起)必填");
+                customerUtility.alert('序號(起)必填', 'w');
                 return false;
             }
 
             if ($("#tStock_No_E").val().trim() == "")
             {
-                alert("序號(迄)必填");
+                customerUtility.alert('序號(迄)必填', 'w');
                 return false;
             }
 
             if ($("#tStock_Total").val().trim() == "") {
-                alert("張數不可為空白");
+                customerUtility.alert('張數不可為空白', 'w');
                 return false;
             }
 
             if ($("#tDenomination").val().trim() == "") {
-                alert("單張面額必填");
+                customerUtility.alert('單張面額必填', 'w');
                 return false;
             }
 
@@ -952,7 +1085,7 @@
         function Check_F()
         {
             if ($("#tStock_Total").val().trim() == "") {
-                alert("張數必填");
+                customerUtility.alert('張數必填', 'w');
                 return false;
             }
 
@@ -967,8 +1100,8 @@
             vStockNoE,
             vStockTotal,
             vDenomination,
-            vDenomination_Total,
-            vNumber_Of_Shares,
+            vDenominationTotal,
+            vNumberOfShares,
             vMemo,
             vStockFeaturesType,
             vStockNo,
@@ -985,8 +1118,8 @@
             obj['vStockNoE'] = vStockNoE;
             obj['vStockTotal'] = vStockTotal;
             obj['vDenomination'] = vDenomination;
-            obj['vDenomination_Total'] = vDenomination_Total;
-            obj['vNumber_Of_Shares'] = vNumber_Of_Shares;
+            obj['vDenominationTotal'] = vDenominationTotal;
+            obj['vNumberOfShares'] = vNumberOfShares;
             obj['vMemo'] = vMemo;
             obj['vStockDate'] = ItemBookStock(
                 vStockFeaturesType,
@@ -994,6 +1127,12 @@
                 vStockName,
                 vStockAreaType,
                 vStockMemo,
+                vStockTreaBatchNo
+                );
+            obj['vStockModel'] = ItemBookStockModel(
+                vStockAreaType,
+                vStockMemo,
+                vStockName,
                 vStockTreaBatchNo
                 );
             return obj;
@@ -1015,6 +1154,35 @@
             obj['Area'] = vStockAreaType;
             obj['Memo'] = vStockMemo;
             obj['Next_Batch_No'] = vStockTreaBatchNo;
+            return obj;
+        }
+
+        function ItemBookStockModel(
+            vStockAreaType,
+            vStockMemo,
+            vStockName,
+            vStockTreaBatchNo
+            )
+        {
+            var obj={};
+            obj['AREA'] = vStockAreaType;
+            obj['MEMO'] = vStockMemo;
+            obj['NAME'] = vStockName;
+            obj['NEXT_BATCH_NO'] = parseInt(vStockTreaBatchNo)+1;
+            return obj;
+        }
+
+        function StockTakeOutModel(
+            vTreaBatchNo,
+            vStockNo
+            )
+        {
+            var obj={};
+            obj['vTreaBatchNo'] = vTreaBatchNo;
+            obj['vStockDate'] = ItemBookStock(
+                "",
+                vStockNo
+                );
             return obj;
         }
     });

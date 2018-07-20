@@ -43,6 +43,11 @@
         public static string ESTATEData { get; private set; }
 
         /// <summary>
+        /// 庫存資料(股票)
+        /// </summary>
+        public static string StockMainData { get; private set; }
+
+        /// <summary>
         /// 明細資料(股票)
         /// </summary>
         public static string StockTempData { get; private set; }

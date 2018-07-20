@@ -12,18 +12,6 @@ namespace Treasury.Web.ViewModels
         public string vItemId { get; set; }
 
         /// <summary>
-        /// 申請單號
-        /// </summary>
-        [Description("申請單號")]
-        public string vAplyNo { get; set; }
-
-        /// <summary>
-        /// 明細流水號
-        /// </summary>
-        [Description("明細流水號")]
-        public string vDataSeq { get; set; }
-
-        /// <summary>
         /// 項次
         /// </summary>
         [Description("項次")]
@@ -36,10 +24,28 @@ namespace Treasury.Web.ViewModels
         public string vStatus { get; set; }
 
         /// <summary>
+        /// 取出註記
+        /// </summary>
+        [Description("取出註記")]
+        public bool vTakeoutFlag { get; set; }
+
+        /// <summary>
+        /// 入庫批號
+        /// </summary>
+        [Description("入庫批號")]
+        public int vTreaBatchNo { get; set; }
+
+        /// <summary>
         /// 股票資料
         /// </summary>
         [Description("股票資料")]
         public ItemBookStock vStockDate { get; set; }
+
+        /// <summary>
+        /// 股票模型
+        /// </summary>
+        [Description("股票模型")]
+        public ItemBookStockModel vStockModel { get; set; }
 
         /// <summary>
         /// 類型
@@ -69,31 +75,56 @@ namespace Treasury.Web.ViewModels
         /// 張數
         /// </summary>
         [Description("張數")]
-        public int vStockTotal { get; set; }
+        public int? vStockTotal { get; set; }
 
         /// <summary>
         /// 單張面額
         /// </summary>
         [Description("單張面額")]
-        public int vDenomination { get; set; }
+        public decimal? vDenomination { get; set; }
 
         /// <summary>
         /// 面額小計
         /// </summary>
         [Description("面額小計")]
-        public int vDenomination_Total { get; set; }
+        public decimal? vDenominationTotal { get; set; }
 
         /// <summary>
         /// 股數
         /// </summary>
         [Description("股數")]
-        public int vNumber_Of_Shares { get; set; }
+        public decimal? vNumberOfShares { get; set; }
 
         /// <summary>
         /// 備註說明
         /// </summary>
         [Description("備註說明")]
         public string vMemo { get; set; }
+
+        /// <summary>
+        /// 申請日期
+        /// </summary>
+        [Description("申請日期")]
+        public string vPutDate { get; set; }
+
+        /// <summary>
+        /// 申請人
+        /// </summary>
+        [Description("申請人")]
+        public string vAplyName { get; set; }
+
+        /// <summary>
+        /// 最後更新時間 (庫存資料才有)
+        /// </summary>
+        [Description("最後更新時間")]
+        public DateTime? vLast_Update_Time { get; set; }
+
+        /// <summary>
+        /// 總股數
+        /// </summary>
+        [Description("總股數")]
+        public int vNumberOfSharesTotal { get; set; }
+
     }
 
     public class ItemBookStock
@@ -133,5 +164,32 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("下一次入庫批號")]
         public string Next_Batch_No { get; set; }
+    }
+
+    public class ItemBookStockModel
+    {
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Description("區域")]
+        public string AREA { get; set; }
+
+        /// <summary>
+        /// MEMO
+        /// </summary>
+        [Description("MEMO")]
+        public string MEMO { get; set; }
+
+        /// <summary>
+        /// 股票名稱
+        /// </summary>
+        [Description("股票名稱")]
+        public string NAME { get; set; }
+
+        /// <summary>
+        /// 下一次入庫批號
+        /// </summary>
+        [Description("下一次入庫批號")]
+        public string NEXT_BATCH_NO { get; set; }
     }
 }

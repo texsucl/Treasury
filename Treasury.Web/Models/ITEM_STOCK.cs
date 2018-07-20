@@ -33,5 +33,6 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
         public string STOCK_TYPE { get; set; }
+        public Nullable<int> STOCK_CNT { get; set; }
     }
 }
