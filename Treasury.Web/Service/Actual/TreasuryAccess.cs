@@ -355,7 +355,7 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 取消申請
+        /// 取消申請 (刪除資料)
         /// </summary>
         /// <param name="searchData"></param>
         /// <param name="data"></param>
@@ -368,8 +368,6 @@ namespace Treasury.Web.Service.Actual
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
             //取得流水號
-            SysSeqDao sysSeqDao = new SysSeqDao();
-            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             var _status = AccessProjectFormStatus.E02.ToString();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -448,7 +446,7 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 作廢
+        /// 作廢 (保留資料)
         /// </summary>
         /// <param name="searchData"></param>
         /// <param name="data"></param>

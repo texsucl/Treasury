@@ -553,6 +553,16 @@ namespace Treasury.Web.Service.Actual
             return new Tuple<bool,string>(true, logStr);
         }
 
+        public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt)
+        {
+            return Recover(db, aply_No, logStr, dt);
+        }
+
+        public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt)
+        {
+            return Recover(db, aply_No, logStr, dt);
+        }
+
         #endregion
 
         #region privation function

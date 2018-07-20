@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 空白票據
     /// </summary>
-    public interface IBill : IApply
+    public interface IBill : IApply, IAgency
     {
         /// <summary>
         /// 類型

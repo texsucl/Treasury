@@ -6,7 +6,7 @@ namespace Treasury.Web.Enum
     public partial class Ref
     {
         /// <summary>
-        /// CRUD
+        /// 動作
         /// </summary>
         public enum ActionType
         {
@@ -32,7 +32,19 @@ namespace Treasury.Web.Enum
             /// 檢視
             /// </summary>
             [Description("檢視")]
-            View
+            View,
+
+            /// <summary>
+            /// 作廢
+            /// </summary>
+            [Description("作廢")]
+            ObSolete,
+
+            /// <summary>
+            /// 取消申請
+            /// </summary>
+            [Description("取消申請")]
+            CancelApply,
         }
     }
 
