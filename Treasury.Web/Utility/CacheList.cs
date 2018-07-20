@@ -71,7 +71,8 @@
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
             SEALData = "SEALData";
-            StockTempData = "StockTempData";            #endregion Cache資料
+            StockTempData = "StockTempData";            
+            #endregion Cache資料
 
         }
     }

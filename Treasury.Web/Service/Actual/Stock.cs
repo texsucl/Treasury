@@ -245,7 +245,7 @@ namespace Treasury.Web.Service.Actual
                     //取出只抓狀態為預約取出的資料
                     if (taData.vAccessType == AccessProjectTradeType.G.ToString())
                     {
-                        datas = datas.Where(x => x.vStatus == AccessInventoryTyp._4.GetDescription()).ToList();
+                        datas = datas.Where(x => x.vStatus == AccessInventoryType._4.GetDescription()).ToList();
                     }
                     if (datas.Any())
                     {

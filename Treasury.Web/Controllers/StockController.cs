@@ -174,7 +174,7 @@ namespace Treasury.WebControllers
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockTempData);
-                model.vStatus = AccessInventoryTyp._3.GetDescription();
+                model.vStatus = AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.StockTempData);
                 Cache.Set(CacheList.StockTempData, setStockViewRowNum(tempData));
@@ -277,11 +277,11 @@ namespace Treasury.WebControllers
                 {
                     if (takeoutFlag)
                     {
-                        updateTempData.vStatus = AccessInventoryTyp._4.GetDescription();
+                        updateTempData.vStatus = AccessInventoryType._4.GetDescription();
                     }
                     else
                     {
-                        updateTempData.vStatus = AccessInventoryTyp._1.GetDescription();
+                        updateTempData.vStatus = AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vTakeoutFlag = takeoutFlag;
                     updateTempData.vStockDate = model.vStockDate;
