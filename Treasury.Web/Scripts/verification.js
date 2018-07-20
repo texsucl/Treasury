@@ -331,7 +331,7 @@
         }
         else if (len == 6)
         {
-            return dateFormat.test(Number(value.substr(0, 2)) + 1911) + '/' + value.substr(2, 2) + '/' + value.substr(4, 2);
+            return dateFormat.test((Number(value.substr(0, 2)) + 1911) + '/' + value.substr(2, 2) + '/' + value.substr(4, 2));
         }
         return false;
     }

@@ -371,23 +371,28 @@
         //#region 呼叫報表
         function TAReport() {
             if ($('.TAReportCs:checked').length > 0) {
-                $('.TAReportCs:checked').each(function () {
-                    var listId = 'TAReportList';
-                    var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
-                    var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
-                    var reportType = '';
-                    var title = '';
-                    var parms = [];
-                    var itemData = GetItemData(item);
-                    if (itemData.reportType != null) {
-                        parms.push(customerUtility.reportParm('aply_No', aply_No));
-                        customerUtility.report(
-                            customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
-                            parms,
-                            null
-                            );
-                    }
-                });
+                $('.TAReportCs:checked').each(                
+                    function () {
+                        var listId = 'TAReportList';
+                        var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                        var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
+                        var reportType = '';
+                        var title = '';
+                        var parms = [];
+                        var itemData = GetItemData(item);
+                        if (itemData.reportType != null) {
+                            setTimeout(
+                                function () {
+                                    parms.push(customerUtility.reportParm('aply_No', aply_No));
+                                    customerUtility.report(
+                                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                                        parms,
+                                        null
+                                        );
+                                }, 500);
+                        }
+                    }                   
+                );
             }
             else {
                 customerUtility.alert('無選擇列印報表', 'w');
@@ -398,7 +403,7 @@
         //#region 重設新增畫面
         function resetTADialogDeatil()
         {
-            $('#AplyNo').val('');
+            $('#TAR_AplyNo').val('');
             $('#' + openInsertDetailId).children().remove();
             $('#' + openSearchDetailId).children().remove();
         }
@@ -669,7 +674,7 @@
             var itemData = GetItemData(itemId);
             if (itemData.url != null)
             {
-                $('#AplyNo').val(data.vAPLY_NO);
+                $('#TAR_AplyNo').val(data.vAPLY_NO);
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
@@ -812,7 +817,7 @@
         //#region 申請單號基本資料(點選單號時使用)
         function GetAplyNoDetail() {
             var str = '';
-            str += '<div  class="aplyNoDetail" style="border-bottom:1px solid #000">';
+            str += '<div  class="aplyNoDetail" style="border-bottom:1px solid #000;margin-bottom:10px;">';
             str += '<table style="width:95%" >';
             str += '<tr>';
             str += '<td style="width:150px">';

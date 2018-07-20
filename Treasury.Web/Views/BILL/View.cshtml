@@ -11,10 +11,9 @@
 
     </div>
     <div style="text-align:center;padding-top:5px;display:none;"  class="BILLAct">
-        <input type="hidden" id="BILLAplyNo" />
         <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary" />
         <input type="button" id="BILLCancel" value="取消申請"  class="btn btn-primary" />
-        <input type="button" id="BILLBack" value="回到功能選擇"  class="btn btn-primary" />
+        <input type="button" id="BILLBack" value="回上一頁"  class="btn btn-primary" />
     </div>
     <div id="BillInsertDialog" style="display:none;">
         <form id="BILLForm">
@@ -82,7 +81,7 @@
             </table>
         </form>
     </div>
-    <div id="BillTakeOutDialog" style="display:none">
+    <div id="BillTakeOutDialog" style="display:none;z-index:1" >
         <form id="BILLTakeOutForm">
             <table>
                 <tr>
@@ -169,6 +168,11 @@
         var BILL_totalId = 'BILL_total'; //總張數Id
         var BILL_Take_OutId = 'tTakeOutE'; //取出票號(迄)Id
         var BILL_Take_Out_TotalId = 'tTakeOutTotalNum'; //取出總張數
+        var BILL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (BILL_Aply_No_Flag)
+        {
+            $('#BILLCancel').hide(); //已經申請故無法取消申請
+        }
         var BILL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態      
         var type = $('input[name=cProjectType]:checked').val();
         if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -574,6 +578,14 @@
             $('#' + BILLTakeOutFormId).validate().resetForm();
             var dialogId = 'BillTakeOutDialog';
             var listId = 'BILLTempList';
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: '取出空白票券',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+            });
             var data = $("#" + listId).getRowData(rowid);
             $('#lBILL_Issuing_Bank').text('');
             $('#lBILL_Issuing_Bank').text(data.vIssuingBank);
@@ -595,14 +607,6 @@
             $('#tTakeOutE').val(data.vTakeOutE);
             $('#tTakeOutTotalNum').val('');
             $('#tTakeOutTotalNum').val(data.vTakeOutTotalNum);
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: '取出空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
             $('#' + dialogId).dialog('open');
         }
 
@@ -699,6 +703,7 @@
                 autoOpen: false,
                 resizable: false,
                 closeText: '取消',
+                close: function () { $('body').css('overflow', 'scroll'); }
             });
             $('#BILLInsertTemp,#BILLUpdateTemp,#BILLDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()')
@@ -729,6 +734,7 @@
                 $('.' + BILLInsertClass).prop('disabled', true);
             }
             $('#' + dialogId).dialog('open');
+            $('body').css('overflow', 'hidden');
         }
 
         function ResetInsertDialog() {

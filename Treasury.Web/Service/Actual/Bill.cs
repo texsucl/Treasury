@@ -10,6 +10,20 @@ using Treasury.WebDaos;
 using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 
+/// <summary>
+/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 空白票券
+/// 初版作者：20180604 張家華
+/// 修改歷程：20180604 張家華 
+///           需求單號：
+///           初版
+/// ==============================================
+/// 修改日期/修改人：
+/// 需求單號：
+/// 修改內容：
+/// ==============================================
+/// </summary>
+/// 
+
 namespace Treasury.Web.Service.Actual
 {
     public class Bill : IBill
@@ -214,7 +228,6 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單歷程檔
                                 var _ARH =  db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
                                 _ARH.APLY_STATUS = _APLY_STATUS;
-                                _ARH.PROC_DT = dt;
                                 #endregion
 
                                 #region 空白票據申請資料檔
@@ -234,6 +247,8 @@ namespace Treasury.Web.Service.Actual
                                         _BNA.CHECK_NO_B = item.vCheckNoB;
                                         _BNA.CHECK_NO_E = item.vCheckNoE;
                                         updates.Add(_BNA);
+                                        logStr += "|";
+                                        logStr += _BNA.modelToString();
                                     }
                                     else
                                     {
@@ -249,20 +264,16 @@ namespace Treasury.Web.Service.Actual
                                             CHECK_NO_E = item.vCheckNoE
                                         };
                                         inserts.Add(_BNA);
+                                        logStr += "|";
+                                        logStr += _BNA.modelToString();
                                     }
                                 }
 
-                                updates.AddRange(inserts);
+                                var ups = updates.Select(x => x.ITEM_ID).ToList();
 
-                                updates.ForEach(
-                                x =>
-                                {
-                                    logStr += "|";
-                                    logStr += x.modelToString();
-                                });
-
-                                db.BLANK_NOTE_APLY.RemoveRange(db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == taData.vAplyNo));
-                                db.BLANK_NOTE_APLY.AddRange(updates);
+                                db.BLANK_NOTE_APLY.RemoveRange(
+                                    db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == taData.vAplyNo && !ups.Contains( x.ITEM_ID)).ToList());
+                                db.BLANK_NOTE_APLY.AddRange(inserts);
 
                                 #endregion
 

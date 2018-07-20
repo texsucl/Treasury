@@ -14,16 +14,17 @@ namespace Treasury.Web.Service.Interface
         /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
-        /// <param name="aplyNo"></param>
+        /// <param name="aplyNo">單號</param>
         /// <returns></returns>
         List<SealViewModel> GetDataByAplyNo(string aplyNo);
 
         /// <summary>
-        /// 查詢庫存資料
+        /// 查詢畫面資料
         /// </summary>
-        /// <param name="itemId"></param>
-        /// <param name="vAplyUnit"></param>
+        /// <param name="itemId">物品標號</param>
+        /// <param name="vAplyUnit">申請單位</param>
+        /// <param name="aplyNo">取出單號</param>
         /// <returns></returns>
-        List<SealViewModel> GetDbDataByUnit(string itemId, string vAplyUnit = null);
+        List<SealViewModel> GetDbDataByUnit(string itemId, string vAplyUnit = null,string aplyNo = null);
     }
 }

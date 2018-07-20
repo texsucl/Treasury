@@ -67,8 +67,16 @@ namespace Treasury.Web.Service.Interface
         /// 取得是否可以修改狀態
         /// </summary>
         /// <param name="aplyNo"></param>
+        /// <param name="uid"></param>
         /// <param name="actionType"></param>
         /// <returns></returns>
         bool GetActType(string aplyNo, string uid, List<string> actionType);
+
+        /// <summary>
+        /// 使用單號抓取 申請表單資料
+        /// </summary>
+        /// <param name="aplyNo">單號</param>
+        /// <returns></returns>
+        TreasuryAccessViewModel GetTreasuryAccessViewModel(string aplyNo);
     }
 }
