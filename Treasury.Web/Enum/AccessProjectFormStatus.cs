@@ -23,16 +23,28 @@ namespace Treasury.Web.Enum
             A02,
 
             /// <summary>
+            /// 保管科退回申請單位
+            /// </summary>
+            [Description("保管科退回申請單位")]
+            A03,
+
+            /// <summary>
+            /// 金庫人員退回申請單位
+            /// </summary>
+            [Description("金庫人員退回申請單位")]
+            A04,
+
+            /// <summary>
+            /// 表單重新申請
+            /// </summary>
+            [Description("表單重新申請")]
+            A05,
+
+            /// <summary>
             /// 申請單位覆核完成，保管科確認中
             /// </summary>
             [Description("申請單位覆核完成，保管科確認中")]
             B01,
-
-            /// <summary>
-            /// 申請單位退回作廢
-            /// </summary>
-            [Description("申請單位退回作廢")]
-            E03,
 
             /// <summary>
             /// 保管科覆核中
@@ -52,11 +64,6 @@ namespace Treasury.Web.Enum
             [Description("保管科覆核退回，保管科確認中")]
             B04,
 
-            /// <summary>
-            /// 保管科退回申請單位
-            /// </summary>
-            [Description("保管科退回申請單位")]
-            A03,
 
             /// <summary>
             /// 入庫確認中
@@ -75,12 +82,6 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("金庫登記簿檢核")]
             D01,
-
-            /// <summary>
-            /// 金庫人員退回申請單位
-            /// </summary>
-            [Description("金庫人員退回申請單位")]
-            A04,
 
             /// <summary>
             /// 金庫登記簿覆核中
@@ -112,6 +113,11 @@ namespace Treasury.Web.Enum
             [Description("申請人刪除")]
             E02,
 
+            /// <summary>
+            /// 申請單位退回作廢
+            /// </summary>
+            [Description("申請單位退回作廢")]
+            E03,
         }
     }
 

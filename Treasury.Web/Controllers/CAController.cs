@@ -10,9 +10,9 @@ using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 
 /// <summary>
-/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 印章
-/// 初版作者：20180716 張家華
-/// 修改歷程：20180716 張家華 
+/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 電子憑證
+/// 初版作者：20180723 張家華
+/// 修改歷程：20180723 張家華 
 ///           需求單號：
 ///           初版
 /// ==============================================
@@ -26,31 +26,33 @@ namespace Treasury.WebControllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
-    public class SealController : CommonController
+    public class CAController : CommonController
     {
-        private ISeal Seal;
+        private ICA CA;
         private ITreasuryAccess TreasuryAccess;
 
-        public SealController()
+        public CAController()
         {
-            Seal = new Seal();
+            CA = new CA();
             TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
-        /// 印章 新增畫面
+        /// 電子憑證 新增畫面
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
         {
             var _dActType = false;
+            ViewBag.CAUse = new SelectList(CA.GetCA_Use(), "Value", "Text"); 
+            ViewBag.CADesc = new SelectList(CA.GetCA_Desc(), "Value", "Text"); 
             if (AplyNo.IsNullOrWhiteSpace())
             {
                 _dActType = AplyNo.IsNullOrWhiteSpace();
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
-                resetSealViewModel(data.vAccessType);
+                resetCAViewModel(data.vAccessType);
             }
             else
             {
@@ -59,7 +61,7 @@ namespace Treasury.WebControllers
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
-                resetSealViewModel(viewModel.vAccessType, AplyNo , _dActType);
+                resetCAViewModel(viewModel.vAccessType, AplyNo);
             }
             ViewBag.dActType = _dActType;
             return PartialView();
@@ -71,11 +73,11 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult ApplyTempData(EstateModel model)
+        public JsonResult ApplyTempData()
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
             result.RETURN_FLAG = false;
-            var _detail = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
+            var _detail = (List<CAViewModel>)Cache.Get(CacheList.CAData);
             if (!_detail.Any())
             {
                 result.DESCRIPTION = "無申請任何資料";
@@ -84,14 +86,14 @@ namespace Treasury.WebControllers
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 data.vCreateUid = AccountController.CurrentUserId;
-                var _data = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
+                var _data = (List<CAViewModel>)Cache.Get(CacheList.CAData);
                 if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
                 {
                     result.DESCRIPTION = "無申請任何資料";
                 }
                 else
                 {
-                    result = Seal.ApplyAudit(_data, data);
+                    result = CA.ApplyAudit(_data, data);
                 }
             }
             else
@@ -107,18 +109,18 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult InsertTempData(SealViewModel model)
+        public JsonResult InsertTempData(CAViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.SEALData))
+            if (Cache.IsSet(CacheList.CAData))
             {
-                var tempData = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
+                var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
                 model.vStatus = AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
-                Cache.Invalidate(CacheList.SEALData);
-                Cache.Set(CacheList.SEALData, tempData);
+                Cache.Invalidate(CacheList.CAData);
+                Cache.Set(CacheList.CAData, tempData);
                 result.RETURN_FLAG = true;
                 result.DESCRIPTION = MessageType.insert_Success.GetDescription();
             }
@@ -131,21 +133,24 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult UpdateTempData(SealViewModel model )
+        public JsonResult UpdateTempData(CAViewModel model )
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.SEALData))
+            if (Cache.IsSet(CacheList.CAData))
             {
-                var tempData = (List<SealViewModel>)Cache.Get(CacheList.SEALData);                
+                var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);                
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null )
                 {
-                    updateTempData.vSeal_Desc = model.vSeal_Desc;
+                    updateTempData.vCA_Desc = model.vCA_Desc;
+                    updateTempData.vCA_Use = model.vCA_Use;
+                    updateTempData.vCA_Number = model.vCA_Number;
+                    updateTempData.vBank = model.vBank;
                     updateTempData.vMemo = model.vMemo;
-                    Cache.Invalidate(CacheList.SEALData);
-                    Cache.Set(CacheList.SEALData, tempData);
+                    Cache.Invalidate(CacheList.CAData);
+                    Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.update_Success.GetDescription();
                 }
@@ -164,20 +169,20 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult DeleteTempData(SealViewModel model)
+        public JsonResult DeleteTempData(CAViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.SEALData))
+            if (Cache.IsSet(CacheList.CAData))
             {
-                var tempData = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
+                var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
                 var deleteTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (deleteTempData != null )
                 {
                     tempData.Remove(deleteTempData);
-                    Cache.Invalidate(CacheList.SEALData);
-                    Cache.Set(CacheList.SEALData, tempData);
+                    Cache.Invalidate(CacheList.CAData);
+                    Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.delete_Success.GetDescription();
                 }
@@ -196,14 +201,14 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult TakeOutData(SealViewModel model,bool takeoutFlag)
+        public JsonResult TakeOutData(CAViewModel model,bool takeoutFlag)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.SEALData))
+            if (Cache.IsSet(CacheList.CAData))
             {
-                var tempData = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
+                var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null)
                 {
@@ -216,8 +221,8 @@ namespace Treasury.WebControllers
                         updateTempData.vStatus = AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vtakeoutFlag = takeoutFlag;
-                    Cache.Invalidate(CacheList.SEALData);
-                    Cache.Set(CacheList.SEALData, tempData);
+                    Cache.Invalidate(CacheList.CAData);
+                    Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.update_Success.GetDescription();
                 }
@@ -238,7 +243,7 @@ namespace Treasury.WebControllers
         public JsonResult ResetTempData(string AccessType)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
-            resetSealViewModel(AccessType);
+            resetCAViewModel(AccessType);
             return Json(result);
         }
 
@@ -250,42 +255,42 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult GetCacheData(jqGridParam jdata)
         {
-            if (Cache.IsSet(CacheList.SEALData))
+            if (Cache.IsSet(CacheList.CAData))
                 return Json(jdata.modelToJqgridResult(
-                    ((List<SealViewModel>)Cache.Get(CacheList.SEALData)).OrderBy(x=>x.vItemId).ToList()
+                    ((List<CAViewModel>)Cache.Get(CacheList.CAData)).OrderBy(x=>x.vItemId).ToList()
                     ));
             return null;
         }
 
         /// <summary>
-        /// 印章預設資料
+        /// 電子憑證預設資料
         /// </summary>
         /// <param name="AccessType"></param>
         /// <param name="AplyNo"></param>
-        private void resetSealViewModel(string AccessType, string AplyNo = null, bool EditFlag = false)
+        private void resetCAViewModel(string AccessType, string AplyNo = null)
         {
-            Cache.Invalidate(CacheList.SEALData);     
+            Cache.Invalidate(CacheList.CAData);     
             var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
             if (AplyNo.IsNullOrWhiteSpace())
             {
                 if (AccessType == AccessProjectTradeType.P.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, new List<SealViewModel>());
+                    Cache.Set(CacheList.CAData, new List<CAViewModel>());
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit));//只抓庫存
+                    Cache.Set(CacheList.CAData, CA.GetDbDataByUnit(data.vAplyUnit, AplyNo));//只抓庫存
                 }              
             }
             else
             {
                 if (AccessType == AccessProjectTradeType.P.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, Seal.GetDataByAplyNo(AplyNo));//抓單號
+                    Cache.Set(CacheList.CAData, CA.GetDataByAplyNo(AplyNo));//抓單號
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit , AplyNo));//抓庫存+單號
+                    Cache.Set(CacheList.CAData, CA.GetDbDataByUnit(data.vAplyUnit, AplyNo));//抓庫存+單號
                 }
             }
         }

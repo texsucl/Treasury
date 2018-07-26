@@ -879,13 +879,17 @@ namespace Treasury.WebUtility
 
         private static Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public static string modelToString<T>(this T model) 
+        public static string modelToString<T>(this T model,string log = null) 
         {
             var result = string.Empty;
             if (model != null)
             {
+                if (!log.IsNullOrWhiteSpace())
+                    result += "|";
                 StringBuilder sb = new StringBuilder();
-                var Pros = model.GetType().GetProperties();
+                var Type = model.GetType();
+                sb.Append($@"TableName:{Type.Name}|");
+                var Pros = Type.GetProperties();
                 Pros.ToList().ForEach(x =>
                 {
                     sb.Append($@"{x.Name}:{TypeTransfer.objToString(x.GetValue(model))}|");

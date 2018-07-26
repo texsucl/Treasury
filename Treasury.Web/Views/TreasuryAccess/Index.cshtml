@@ -181,6 +181,7 @@
         TAurl.openESTATE = '@Url.Action("View", "Estate")';
         TAurl.openSEAL = '@Url.Action("View", "Seal")';
         TAurl.openSTOCK = '@Url.Action("View", "Stock")';
+        TAurl.openCA = '@Url.Action("View","CA")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -284,18 +285,13 @@
                 _aProject = _aProject || '';
                 switch (_aProject) {
                     case '@Ref.TreaItemType.D1012.ToString()':
-                        open(_aProject);
-                        break;
                     case '@Ref.TreaItemType.D1014.ToString()':
-                        open(_aProject);
-                        break;
                     case '@Ref.TreaItemType.D1008.ToString()':
                     case '@Ref.TreaItemType.D1009.ToString()':
                     case '@Ref.TreaItemType.D1010.ToString()':
                     case '@Ref.TreaItemType.D1011.ToString()':
-                        open(_aProject);
-                        break;
                     case '@Ref.TreaItemType.D1015.ToString()':
+                    case '@Ref.TreaItemType.D1024.ToString()':
                         open(_aProject);
                         break;
                     case '':
@@ -335,7 +331,7 @@
 
             var dialogId = 'TASearchDialog';
             $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
+                position: { my: "top", at: "center top", of: window },
                 title: '查詢畫面',
                 width: 1300,
                 autoOpen: false,
@@ -420,8 +416,8 @@
             if (cellvalue == 'Y')
             {
                 str += '<div class="btn-group">';
-                str += '<a title="取消申請" class="btn actionCancle" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="TA' + options.gid + 'Cancle' + options.rowId + '" return:false;="">';
-                str += '<i class="fa fa-reply fa-lg"></i></a>';
+                str += '<a title="刪除申請" class="btn actionCancle" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="TA' + options.gid + 'Cancle' + options.rowId + '" return:false;="">';
+                str += '<i class="fa fa-trash fa-lg"></i></a>';
                 str += '</div>';
             }
             return str;
@@ -433,7 +429,7 @@
             {
                 str += '<div class="btn-group">';
                 str += '<a title="作廢" class="btn actionInvalid" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="TA' + options.gid + 'Delete' + options.rowId + '" return:false;="">';
-                str += '<i class="fa fa-trash fa-lg"></i></a>';
+                str += '<i class="fa fa-reply fa-lg"></i></a>';
                 str += '</div>';
             }
             return str;
@@ -460,7 +456,7 @@
 
         //#region 查詢表單
         function TAAccessGrid() {
-            var colNameArray = ['取消申請', '作廢',
+            var colNameArray = ['刪除申請', '作廢',
                 '存取申請項目', '申請日期', '申請單號',
                 '申請單位', '申請人', '入庫原因',
                 '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
@@ -542,9 +538,9 @@
             title = title || '';
             width = width || 'auto';
             title += '明細';
-            var dialogId = dialogId; 'TAOpenInsertDialog';
+            var dialogId = dialogId; 
             $('#' + dialogId).dialog({
-                position: {my:"top+30%",at:"center top",of:window},
+                position: {my:"top",at:"center top",of:window},
                 title: title,
                 width: width,
                 autoOpen : false,
@@ -794,8 +790,12 @@
                     obj.url = TAurl.openSTOCK;
                     obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
                     obj.openDialogWidth = '1000px';
-                    obj.reportTitle = '金庫物品存取申請單';
                     obj.reportType = 'STOCK';
+                    break;
+                case '@Ref.TreaItemType.D1024.ToString()':
+                    obj.url = TAurl.openCA;
+                    obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                    obj.reportType = 'CA';
                     break;
             }
             return obj;

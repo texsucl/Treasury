@@ -99,27 +99,27 @@ namespace Treasury.Web.Controllers
                             Session["UserID"] = loginModel.UserId;
                             //Session["AgentID"] = codeUser.CAGENTID;
 
-                            Session["UserName"] = "侯蔚鑫";
-                            Session["UserUnit"] = "VLX01";
-                            //OaEmpDao oaEmpDao = new OaEmpDao();
-                            //try
-                            //{
-                            //    using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
-                            //    {
-                            //        V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
-                            //        if (emp != null)
-                            //        {
-                            //            Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
-                            //            Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
-                            //        }
-                            //    }
-                                
-                               
-                            //}
-                            //catch (Exception e)
-                            //{
+                            Session["UserName"] = "";
+                            Session["UserUnit"] = "";
+                            //Session["UserName"] = "侯蔚鑫";
+                            //Session["UserUnit"] = "VLX01";
+                            OaEmpDao oaEmpDao = new OaEmpDao();
+                            try
+                            {
+                                using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
+                                {
+                                    V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
+                                    if (emp != null)
+                                    {
+                                        Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
+                                        Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
 
-                            //}
+                            }
 
                             writeLog("I", true, loginModel.UserId, codeUser);
 

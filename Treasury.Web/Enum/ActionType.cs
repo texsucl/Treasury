@@ -34,17 +34,17 @@ namespace Treasury.Web.Enum
             [Description("檢視")]
             View,
 
-            /// <summary>
-            /// 作廢
-            /// </summary>
-            [Description("作廢")]
-            ObSolete,
+            ///// <summary>
+            ///// 作廢
+            ///// </summary>
+            //[Description("作廢")]
+            //ObSolete,
 
-            /// <summary>
-            /// 取消申請
-            /// </summary>
-            [Description("取消申請")]
-            CancelApply,
+            ///// <summary>
+            ///// 取消申請
+            ///// </summary>
+            //[Description("取消申請")]
+            //CancelApply,
         }
     }
 
