@@ -135,7 +135,12 @@
 
     customerUtility.closeDialog = function(i)
     {
-        $(i).parent().closest('.ui-dialog-content').dialog('close');
+        if ($(i).hasClass('ui-dialog-content')) {
+            $(i).dialog('close').dialog('destroy');
+        }
+        else {
+            $(i).parent().closest('.ui-dialog-content').dialog('close');
+        }        
     }
 
     customerUtility.alertAuto = function (result)

@@ -190,11 +190,21 @@
             type = '@ViewBag.dAccess';
             $('#ESTATECancel').hide(); //已經申請故無法取消申請
             //跳到資料庫選取
+
             setTimeout(
             function () {
                 $("input[name='cTradeType'][value='Estate_Db']").click();
-                $('#' + ESTATE_Building_NameDId).val('@ViewBag.group').change();
-            }, 500);
+                $.when(
+                      $('#' + ESTATE_Building_NameDId).val('@ViewBag.group').change()
+                    )
+                .done(function(){
+                    $("input[name='cTradeType']").prop('disabled', true);
+                    $('#' + ESTATE_LocatedTId).prop('disabled', true);
+                    $('#' + ESTATE_MemoTId).prop('disabled', true);
+                })
+            }, 100);
+            $('#' + ESTATE_Building_NameDId).prop('disabled', true);
+            $('#' + ESTATE_BookNoDId).prop('disabled', true);
         }
         var tradeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
         if (tradeFlag && ESTATE_Act_Type) {
@@ -238,6 +248,16 @@
             $('.Estate_New,.Estate_Db').hide();
             ESTATEReset();
             $('.' + type).show();
+            if (type == 'Estate_New')
+            {
+                $('#' + ESTATE_LocatedTId).prop('disabled', false);
+                $('#' + ESTATE_MemoTId).prop('disabled', false);
+            }
+            else if (type == 'Estate_Db')
+            {
+                $('#' + ESTATE_LocatedTId).prop('disabled', true);
+                $('#' + ESTATE_MemoTId).prop('disabled', true);
+            }
         });
 
         //大樓名稱變更抓取對應資料

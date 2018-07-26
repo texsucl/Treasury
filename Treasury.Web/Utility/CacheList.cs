@@ -56,6 +56,11 @@
         /// 明細資料(股票)
         /// </summary>
         public static string StockTempData { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(電子憑證)
+        /// </summary>
+        public static string CAData { get; private set; }
         #endregion Cache資料
 
 
@@ -71,7 +76,8 @@
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
             SEALData = "SEALData";
-            StockTempData = "StockTempData";            
+            StockTempData = "StockTempData";
+            CAData = "CAData";
             #endregion Cache資料
 
         }

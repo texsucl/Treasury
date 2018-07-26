@@ -97,7 +97,7 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
-                            .FirstOrDefault(x => x.APLY_NO == aplyNo && x.APLY_UID == uid);
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo && x.CREATE_UID == uid);
                 if (_TAR != null)
                     result = actionType.Contains(_TAR.APLY_STATUS);
             }
@@ -355,7 +355,7 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 取消申請
+        /// 刪除申請 (刪除資料)
         /// </summary>
         /// <param name="searchData"></param>
         /// <param name="data"></param>
@@ -370,6 +370,99 @@ namespace Treasury.Web.Service.Actual
             //取得流水號
             SysSeqDao sysSeqDao = new SysSeqDao();
             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
+                if (_TREA_APLY_REC != null)
+                {
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > data.vLast_Update_Time)
+                    {
+                        return result;
+                    }
+                    logStr += _TREA_APLY_REC.modelToString();
+
+                    var sampleFactory = new SampleFactory();
+
+                    #region 
+                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                    if (getAgenct != null)
+                    {
+                        var _recover = getAgenct.CancelApply(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
+                        if (!_recover.Item1) //失敗
+                        {
+                            return result;
+                        }
+                        logStr = _recover.Item2;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+                    #endregion
+
+                    #region 刪除 申請單歷程檔
+                    db.APLY_REC_HIS.RemoveRange(db.APLY_REC_HIS.Where(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO));
+                    #endregion
+
+                    #region 刪除 申請單紀錄檔
+                    db.TREA_APLY_REC.Remove(_TREA_APLY_REC);
+                    #endregion
+
+                    var validateMessage = db.GetValidationErrors().getValidateString();
+                    if (validateMessage.Any())
+                    {
+                        result.DESCRIPTION = validateMessage;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            db.SaveChanges();
+
+                            #region LOG
+                            //新增LOG
+                            Log log = new Log();
+                            log.CFUNCTION = "刪除申請-金庫物品存取申請作業";
+                            log.CACTION = "D";
+                            log.CCONTENT = logStr;
+                            LogDao.Insert(log, searchData.vCreateUid);
+                            #endregion
+
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = $@"單號{data.vAPLY_NO} 已刪除!";
+                        }
+                        catch (DbUpdateException ex)
+                        {
+                            result.DESCRIPTION = ex.exceptionMessage();
+                        }
+                    }
+                }
+                if (result.RETURN_FLAG)
+                {
+                    result.Datas = GetSearchDetail(searchData);
+                }
+            }
+            return result;
+
+
+
+
+        }
+
+        /// <summary>
+        /// 作廢 (保留資料)
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
+        {
+            var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            DateTime dt = DateTime.Now;
+            string logStr = string.Empty;
+            //取得流水號
             var _status = AccessProjectFormStatus.E02.ToString();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -385,15 +478,21 @@ namespace Treasury.Web.Service.Actual
                     logStr += _TREA_APLY_REC.modelToString();
                     if (_TREA_APLY_REC.ACCESS_TYPE == AccessProjectTradeType.G.ToString()) //取出情況下 取號須加回庫存
                     {
-                        #region BILL (空白票據)
-                        if (_TREA_APLY_REC.ITEM_ID == TreaItemType.D1012.ToString()) //空白票據
+                        var sampleFactory = new SampleFactory();
+                        #region 
+                        var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                        if (getAgenct != null)
                         {
-                            var _recover = new Bill().Recover(db, _TREA_APLY_REC.APLY_NO, logStr, dt);
+                            var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
                             if (!_recover.Item1) //失敗
                             {
                                 return result;
                             }
                             logStr = _recover.Item2;
+                        }
+                        else
+                        {
+                            return result;
                         }
                         #endregion
                     }
@@ -424,106 +523,14 @@ namespace Treasury.Web.Service.Actual
                             #region LOG
                             //新增LOG
                             Log log = new Log();
-                            log.CFUNCTION = "取消申請-金庫物品存取申請作業";
+                            log.CFUNCTION = "作廢-金庫物品存取申請作業";
                             log.CACTION = "U";
                             log.CCONTENT = logStr;
                             LogDao.Insert(log, searchData.vCreateUid);
                             #endregion
 
                             result.RETURN_FLAG = true;
-                            result.DESCRIPTION = $@"單號{data.vAPLY_NO} 取消申請成功!";
-                        }
-                        catch (DbUpdateException ex)
-                        {
-                            result.DESCRIPTION = ex.exceptionMessage();
-                        }
-                    }
-                }
-                if (result.RETURN_FLAG)
-                {
-                    result.Datas = GetSearchDetail(searchData);
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 作廢
-        /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
-        {
-            var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
-            result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
-            DateTime dt = DateTime.Now;
-            string logStr = string.Empty;
-            //取得流水號
-            SysSeqDao sysSeqDao = new SysSeqDao();
-            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-            using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {
-                var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
-                if (_TREA_APLY_REC != null)
-                {
-                    if (_TREA_APLY_REC.LAST_UPDATE_DT > data.vLast_Update_Time)
-                    {
-                        return result;
-                    }
-                    logStr += _TREA_APLY_REC.modelToString();
-                    if (_TREA_APLY_REC.ACCESS_TYPE == AccessProjectTradeType.G.ToString()) //取出情況下 取號須加回庫存
-                    {
-                        #region BILL (空白票據)
-                        if (_TREA_APLY_REC.ITEM_ID == TreaItemType.D1012.ToString()) //空白票據
-                        {
-                            var _recover = new Bill().Recover(db, _TREA_APLY_REC.APLY_NO, logStr, dt);
-                            if (!_recover.Item1) //失敗
-                            {
-                                return result;
-                            }
-                            logStr = _recover.Item2;
-                        }
-                        #endregion
-
-                    }
-
-
-                    #region 刪除 空白票據申請資料檔
-                    db.BLANK_NOTE_APLY.RemoveRange(db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO));
-                    #endregion
-
-                    #region 刪除 申請單歷程檔
-                    db.APLY_REC_HIS.RemoveRange(db.APLY_REC_HIS.Where(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO));
-                    #endregion
-
-                    #region 刪除 申請單紀錄檔
-                    db.TREA_APLY_REC.Remove(_TREA_APLY_REC);
-                    #endregion
-
-                    var validateMessage = db.GetValidationErrors().getValidateString();
-                    if (validateMessage.Any())
-                    {
-                        result.DESCRIPTION = validateMessage;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            db.SaveChanges();
-
-                            #region LOG
-                            //新增LOG
-                            Log log = new Log();
-                            log.CFUNCTION = "作廢-金庫物品存取申請作業";
-                            log.CACTION = "D";
-                            log.CCONTENT = logStr;
-                            LogDao.Insert(log, searchData.vCreateUid);
-                            #endregion
-
-                            result.RETURN_FLAG = true;
-                            result.DESCRIPTION = $@"單號{data.vAPLY_NO} 作廢成功!";
+                            result.DESCRIPTION = $@"單號{data.vAPLY_NO} 已作廢!";
                         }
                         catch (DbUpdateException ex)
                         {

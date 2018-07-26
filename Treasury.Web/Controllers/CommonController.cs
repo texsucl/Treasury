@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Linq;
 using Microsoft.Reporting.WebForms;
 using System.Data;
+using Treasury.Web.ViewModels;
 
 /// <summary>
 /// 功能說明：共用 controller

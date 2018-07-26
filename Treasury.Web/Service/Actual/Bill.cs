@@ -208,7 +208,8 @@ namespace Treasury.Web.Service.Actual
                     SysSeqDao sysSeqDao = new SysSeqDao();
                     String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
                     var datas = (List<BillViewModel>)insertDatas;
-                    string logStr = string.Empty; //log                  
+                    string logStr = string.Empty; //log         
+                    var item_Seq = "E2"; //空白票卷流水號開頭編碼         
                     if (!taData.vAplyNo.IsNullOrWhiteSpace()) //修改已存在申請單
                     {                     
                         if (datas.Any())
@@ -216,18 +217,27 @@ namespace Treasury.Web.Service.Actual
                             using (TreasuryDBEntities db = new TreasuryDBEntities())
                             {
                                 var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+                                
 
                                 #region 申請單紀錄檔
                                 var _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 _TAR.APLY_STATUS = _APLY_STATUS;
+                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.LAST_UPDATE_DT = dt;
-
-                                logStr += _TAR.modelToString();
+                                logStr += _TAR.modelToString(logStr);
                                 #endregion
 
                                 #region 申請單歷程檔
-                                var _ARH =  db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
-                                _ARH.APLY_STATUS = _APLY_STATUS;
+                                var _ARH = new APLY_REC_HIS()
+                                {
+                                    APLY_NO = taData.vAplyNo,
+                                    APLY_STATUS = _APLY_STATUS,
+                                    PROC_DT = dt,
+                                    PROC_UID = taData.vCreateUid
+                                };
+                                logStr += _ARH.modelToString(logStr);
+                                db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
                                 #region 空白票據申請資料檔
@@ -236,7 +246,7 @@ namespace Treasury.Web.Service.Actual
 
                                 foreach (var item in datas)
                                 {
-                                    if (item.vItemId.StartsWith("E2")) // 舊有資料
+                                    if (item.vItemId.StartsWith(item_Seq)) // 舊有資料
                                     {
                                         var _BNA = db.BLANK_NOTE_APLY.First(
                                              x => x.ITEM_ID == item.vItemId &&
@@ -247,16 +257,15 @@ namespace Treasury.Web.Service.Actual
                                         _BNA.CHECK_NO_B = item.vCheckNoB;
                                         _BNA.CHECK_NO_E = item.vCheckNoE;
                                         updates.Add(_BNA);
-                                        logStr += "|";
-                                        logStr += _BNA.modelToString();
+                                        logStr += _BNA.modelToString(logStr);
                                     }
                                     else
                                     {
-                                        var item_id = sysSeqDao.qrySeqNo("E2", string.Empty).ToString().PadLeft(8, '0');
+                                        var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
                                         var _BNA = new BLANK_NOTE_APLY()
                                         {
                                             APLY_NO = _TAR.APLY_NO,
-                                            ITEM_ID = $@"E2{item_id}",
+                                            ITEM_ID = $@"{item_Seq}{item_id}",
                                             CHECK_TYPE = item.vCheckType,
                                             ISSUING_BANK = item.vIssuingBank,
                                             CHECK_NO_TRACK = item.vCheckNoTrack,
@@ -264,8 +273,7 @@ namespace Treasury.Web.Service.Actual
                                             CHECK_NO_E = item.vCheckNoE
                                         };
                                         inserts.Add(_BNA);
-                                        logStr += "|";
-                                        logStr += _BNA.modelToString();
+                                        logStr += _BNA.modelToString(logStr);
                                     }
                                 }
 
@@ -390,34 +398,35 @@ namespace Treasury.Web.Service.Actual
                                     LAST_UPDATE_UID = taData.vCreateUid,
                                     LAST_UPDATE_DT = dt
                                 };
-                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為覆核單位代申請)
+                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
                                 {
-                                    _TAR.CUSTODY_UID = taData.vCreateUid; //覆核單位直接帶 新增人
+                                    _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
                                     _TAR.CONFIRM_DT = dt;
                                 }
-                                logStr += _TAR.modelToString();
+                                logStr += _TAR.modelToString(logStr);
                                 db.TREA_APLY_REC.Add(_TAR);
                                 #endregion
 
                                 #region 申請單歷程檔
-                                db.APLY_REC_HIS.Add(
-                                new APLY_REC_HIS()
+                                var _ARH = new APLY_REC_HIS()
                                 {
-                                    APLY_NO = _TAR.APLY_NO,
+                                    APLY_NO = taData.vAplyNo,
                                     APLY_STATUS = _TAR.APLY_STATUS,
-                                    PROC_UID = _TAR.CREATE_UID,
-                                    PROC_DT = dt
-                                });
+                                    PROC_DT = dt,
+                                    PROC_UID = _TAR.CREATE_UID
+                                };
+                                logStr += _ARH.modelToString(logStr);
+                                db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
                                 #region 空白票據申請資料檔
                                 datas.ForEach(x =>
                                 {
-                                    var item_id = sysSeqDao.qrySeqNo("E2", string.Empty).ToString().PadLeft(8, '0');
+                                    var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
                                     var _BNA = new BLANK_NOTE_APLY()
                                     {
                                         APLY_NO = _TAR.APLY_NO,
-                                        ITEM_ID = $@"E2{item_id}",
+                                        ITEM_ID = $@"{item_Seq}{item_id}",
                                         CHECK_TYPE = x.vCheckType,
                                         ISSUING_BANK = x.vIssuingBank,
                                         CHECK_NO_TRACK = x.vCheckNoTrack,
@@ -426,8 +435,7 @@ namespace Treasury.Web.Service.Actual
                                         ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
                                     };
                                     db.BLANK_NOTE_APLY.Add(_BNA);
-                                    logStr += "|";
-                                    logStr += _BNA.modelToString();
+                                    logStr += _BNA.modelToString(logStr);
                                 });
                                 #endregion
 
@@ -491,12 +499,14 @@ namespace Treasury.Web.Service.Actual
         /// <param name="aply_No"></param>
         /// <param name="logStr"></param>
         /// <param name="dt"></param>
+        /// <param name="deleFlag"></param>
         /// <returns></returns>
-        public Tuple<bool,string> Recover(TreasuryDBEntities db,string aply_No,string logStr,DateTime dt)
+        public Tuple<bool,string> Recover(TreasuryDBEntities db,string aply_No,string logStr,DateTime dt,bool deleFlag)
         {
             var _changeFlag = false;
             //以「申請單號」為鍵項讀取【空白票據申請資料檔】
-            db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == aply_No).ToList()
+            var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == aply_No).ToList();
+            _BLANK_NOTE_APLY
                 .ForEach(x =>
                 {
                     var _CHECK_NO_E = TypeTransfer.stringToInt(x.CHECK_NO_E) + 1;
@@ -511,8 +521,7 @@ namespace Treasury.Web.Service.Actual
                                         {
                             _ITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
                             _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                            logStr += "|";
-                            logStr += _ITEM_BLANK_NOTE.modelToString();
+                            logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
                         }
                         else if (
                         _ITEM_BLANK_NOTE.INVENTORY_STATUS == "4" &&
@@ -521,24 +530,21 @@ namespace Treasury.Web.Service.Actual
                                         {
                             _ITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
                             _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                            logStr += "|";
-                            logStr += _ITEM_BLANK_NOTE.modelToString();
+                            logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
                         }
                         else //其他情形 須新增一筆 空白票據庫存資料檔
                         {
                             SysSeqDao sysSeqDao = new SysSeqDao();
-                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                            var cId = sysSeqDao.qrySeqNo("E2", qPreCode).ToString().PadLeft(3, '0');
+                            var cId = sysSeqDao.qrySeqNo("E2", string.Empty).ToString().PadLeft(8, '0');
                             var _newITEM_BLANK_NOTE = _ITEM_BLANK_NOTE.ModelConvert<ITEM_BLANK_NOTE, ITEM_BLANK_NOTE>();
-                            _newITEM_BLANK_NOTE.ITEM_ID = $@"E2{qPreCode}{cId}";
+                            _newITEM_BLANK_NOTE.ITEM_ID = $@"E2{cId}";
                             _newITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
                             _newITEM_BLANK_NOTE.CHECK_NO_B = x.CHECK_NO_B;
                             _newITEM_BLANK_NOTE.CHECK_NO_E = x.CHECK_NO_E;
                             _newITEM_BLANK_NOTE.CREATE_DT = dt;
                             _newITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
                             db.ITEM_BLANK_NOTE.Add(_newITEM_BLANK_NOTE);
-                            logStr += "|";
-                            logStr += _newITEM_BLANK_NOTE.modelToString();
+                            logStr += _newITEM_BLANK_NOTE.modelToString(logStr);
                         }
                     }
                     else
@@ -548,9 +554,58 @@ namespace Treasury.Web.Service.Actual
                 });
             if (_changeFlag)
             {
-                return new Tuple<bool,string>(false, logStr);
+                return new Tuple<bool, string>(false, logStr);
             }
-            return new Tuple<bool,string>(true, logStr);
+            else
+            {
+                if(deleFlag)
+                    db.BLANK_NOTE_APLY.RemoveRange(_BLANK_NOTE_APLY);
+                return new Tuple<bool, string>(true, logStr);
+            }
+            
+        }
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            {
+                return Recover(db, aply_No, logStr, dt, false);
+            }
+            else
+            {
+                return new Tuple<bool, string>(true, logStr);
+            }
+        }
+
+        /// <summary>
+        /// 刪除申請
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            {
+                return Recover(db, aply_No, logStr, dt, true);
+            }
+            else
+            {
+                db.BLANK_NOTE_APLY.RemoveRange(db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == aply_No));
+                return new Tuple<bool, string>(true, logStr);
+            }
         }
 
         #endregion

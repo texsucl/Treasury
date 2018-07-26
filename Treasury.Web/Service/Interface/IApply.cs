@@ -8,6 +8,9 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
 {
+    /// <summary>
+    /// 申請覆核
+    /// </summary>
     public interface IApply
     {
         /// <summary>
