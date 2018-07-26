@@ -23,13 +23,13 @@ namespace Treasury.Web.Service.Interface
         /// 股票資料
         /// </summary>
         /// <returns></returns>
-        List<ItemBookStock> GetStockDate(int GroupNo);
+        List<ItemBookStock> GetStockDate(int GroupNo, string vAplyNo = null);
 
         /// <summary>
         /// 股票名稱
         /// </summary>
         /// <returns></returns>
-        List<SelectOption> GetStockName(string vAplyUnit = null);
+        List<SelectOption> GetStockName(string vAplyUnit = null, string vAplyNo = null);
 
         /// <summary>
         /// 區域
@@ -44,19 +44,13 @@ namespace Treasury.Web.Service.Interface
         List<SelectOption> GetStockType();
 
         /// <summary>
-        /// 抓取明細資料
-        /// </summary>
-        /// <param name="aplyNo">申請單號</param>
-        /// <returns></returns>
-        IEnumerable<ITreaItem> GetTempData(string aplyNo);
-
-        /// <summary>
         /// 使用 群組編號 抓取在庫股票資料
         /// </summary>
         /// <param name="groupNo">群組編號</param>
         /// <param name="vAplyUnit">申請部門</param>
+        /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        List<StockViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit);
+        List<StockDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit, string aplyNo = null);
 
         /// <summary>
         /// 使用 群組編號及入庫批號 抓取在庫股票明細資料
@@ -64,7 +58,15 @@ namespace Treasury.Web.Service.Interface
         /// <param name="groupNo">群組編號</param>
         /// <param name="treaBatchNo">入庫批號</param>
         /// <returns></returns>
-        List<StockViewModel> GetDetailData(int groupNo, int treaBatchNo);
+        List<StockDetailViewModel> GetDetailData(int groupNo, int treaBatchNo);
 
+        /// <summary>
+        /// 使用 申請單號 抓取資料
+        /// </summary>
+        /// <param name="aplyNo">單號</param>
+        /// <param name="EditFlag">可否修改,可以也需抓取庫存資料</param>
+        /// <returns></returns>
+        StockViewModel GetDataByAplyNo(string aplyNo, bool EditFlag = false);
+        
     }
 }

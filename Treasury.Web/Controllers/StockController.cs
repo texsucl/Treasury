@@ -41,6 +41,8 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 股票 新增畫面
         /// </summary>
+        /// <param name="AplyNo">申請單號</param>
+        /// <param name="data">金庫物品存取主畫面ViewModel</param>
         /// <returns></returns>
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
@@ -48,10 +50,11 @@ namespace Treasury.WebControllers
             ViewBag.dStock_Area_Type = new SelectList(Stock.GetAreaType(), "Value", "Text");
             ViewBag.dStock_Type = new SelectList(Stock.GetStockType(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
-            ViewBag.dActType = AplyNo.IsNullOrWhiteSpace();
 
+            var _dActType = false;
             if (AplyNo.IsNullOrWhiteSpace())
             {
+                _dActType = AplyNo.IsNullOrWhiteSpace();
                 if (data.vAccessType == AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(), "Value", "Text");
@@ -63,14 +66,35 @@ namespace Treasury.WebControllers
 
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
-                resetStockViewModel(data.vAccessType);
+                resetStockViewModel();
             }
             else
             {
+                _dActType = TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
-                //resetBillViewModel(null, AplyNo);
-                ViewBag.TAR = TreasuryAccess.GetByAplyNo(AplyNo);
+
+                var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
+                {
+                    ViewBag.dStock_Name = new SelectList(Stock.GetStockName(), "Value", "Text");
+                }
+                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && _dActType)
+                {
+                    ViewBag.dStock_Name = new SelectList(Stock.GetStockName(viewModel.vAplyUnit, AplyNo), "Value", "Text");
+                }
+                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && !_dActType)
+                {
+                    ViewBag.dStock_Name = new SelectList(Stock.GetStockName(viewModel.vAplyUnit), "Value", "Text");
+                }
+                Cache.Invalidate(CacheList.TreasuryAccessViewData);
+                Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
+                resetStockViewModel(AplyNo);
+                var _data = (StockViewModel)Cache.Get(CacheList.StockData);
+                ViewBag.group = _data.vStockDate.GroupNo;
+
             }
+
+            ViewBag.dActType = _dActType;
 
             return PartialView();
         }
@@ -78,24 +102,42 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 覆核資料
         /// </summary>
-        /// <param name="AccessType"></param>
+        /// <param name="vStockDate">股票資料</param>
+        /// <param name="vStockModel">股票模型</param>
+        /// <param name="AccessType">申請作業</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult ApplyTempData(string AccessType)
+        public JsonResult ApplyTempData(ItemBookStock vStockDate, ItemBookStockModel vStockModel, string AccessType)
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
-            if (Cache.IsSet(CacheList.TreasuryAccessViewData) && Cache.IsSet(CacheList.StockTempData))
+            if (Cache.IsSet(CacheList.TreasuryAccessViewData) && Cache.IsSet(CacheList.StockData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 data.vCreateUid = AccountController.CurrentUserId;
+                var _data = (StockViewModel)Cache.Get(CacheList.StockData);
+                _data.vStockDate = vStockDate;
+                _data.vStockModel = vStockModel;
                 if (AccessType == AccessProjectTradeType.P.ToString())
                 {
-                    result = Stock.ApplyAudit((List<StockViewModel>)Cache.Get(CacheList.StockTempData), data);
+                    _data.vDetail = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    result = Stock.ApplyAudit((List<StockViewModel>)Cache.Get(CacheList.StockMainData), data);
+                    //判斷至少勾選一筆資料
+                    var vDetail = ((List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData)).Where(x => x.vTakeoutFlag == true).ToList();
+                    if(vDetail.Any())
+                    {
+                        _data.vDetail = (List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData);
+                    }
+                    else
+                    {
+                        _data.vDetail = new List<StockDetailViewModel>();
+                    }
                 }
+
+                List<StockViewModel> _datas = new List<StockViewModel>();
+                _datas.Add(_data);
+                result = Stock.ApplyAudit(_datas, data);
             }
             else
             {
@@ -108,32 +150,36 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 取得在庫股票
         /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetItemBook(int groupNo, bool accessType)
+        public JsonResult GetItemBook(int groupNo, string aplyNo)
         {
-            MSGReturnModel<StockViewModel> result = new MSGReturnModel<StockViewModel>();
+            MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
             if (groupNo == 0 && Cache.IsSet(CacheList.StockMainData))
             {
-                var data = (StockViewModel)Cache.Get(CacheList.StockMainData);
+                var data = (StockDetailViewModel)Cache.Get(CacheList.StockMainData);
                 result.RETURN_FLAG = true;
             }
             else if (groupNo == -1)
             {
                 Cache.Invalidate(CacheList.StockMainData);
-                Cache.Set(CacheList.StockMainData, new List<StockViewModel>());
+                Cache.Set(CacheList.StockMainData, new List<StockDetailViewModel>());
                 result.RETURN_FLAG = false;
             }
             else
             {
-                if (Cache.IsSet(CacheList.TreasuryAccessViewData) && accessType)
+                if (Cache.IsSet(CacheList.TreasuryAccessViewData))
                 {
                     TreasuryAccessViewModel viewdata = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                    var _data = Stock.GetDataByGroupNo(groupNo, viewdata.vAplyUnit);
+                    var _data = Stock.GetDataByGroupNo(groupNo, viewdata.vAplyUnit, aplyNo);
                     Cache.Invalidate(CacheList.StockMainData);
+                    Cache.Invalidate(CacheList.StockTempData);
                     Cache.Set(CacheList.StockMainData, _data);
+                    Cache.Set(CacheList.StockTempData, new List<StockDetailViewModel>());
                     result.RETURN_FLAG = true;
                 }
             }
@@ -143,11 +189,13 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 取得在庫股票明細
         /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
         /// <returns></returns>
         [HttpPost]
         public JsonResult GetStockDetailDate(int groupNo, int treaBatchNo)
         {
-            MSGReturnModel<StockViewModel> result = new MSGReturnModel<StockViewModel>();
+            MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
 
@@ -162,10 +210,10 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 新增明細資料
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">股票明細資料</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult InsertTempData(StockViewModel model)
+        public JsonResult InsertTempData(StockDetailViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
@@ -173,11 +221,11 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockTempData);
+                var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
                 model.vStatus = AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.StockTempData);
-                Cache.Set(CacheList.StockTempData, setStockViewRowNum(tempData));
+                Cache.Set(CacheList.StockTempData, tempData);
                 result.RETURN_FLAG = true;
                 result.DESCRIPTION = MessageType.insert_Success.GetDescription();
             }
@@ -187,10 +235,10 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 修改明細資料
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">股票明細資料</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult UpdateTempData(StockViewModel model)
+        public JsonResult UpdateTempData(StockDetailViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
@@ -198,7 +246,7 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockTempData);
+                var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null)
                 {
@@ -212,7 +260,7 @@ namespace Treasury.WebControllers
                     updateTempData.vNumberOfShares = model.vNumberOfShares;
                     updateTempData.vMemo = model.vMemo;
                     Cache.Invalidate(CacheList.StockTempData);
-                    Cache.Set(CacheList.StockTempData, setStockViewRowNum(tempData));
+                    Cache.Set(CacheList.StockTempData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.update_Success.GetDescription();
                 }
@@ -228,10 +276,10 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 刪除明細資料
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">股票明細資料</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult DeleteTempData(StockViewModel model)
+        public JsonResult DeleteTempData(StockDetailViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
@@ -239,13 +287,13 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockTempData);
+                var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
                 var deleteTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (deleteTempData != null)
                 {
                     tempData.Remove(deleteTempData);
                     Cache.Invalidate(CacheList.StockTempData);
-                    Cache.Set(CacheList.StockTempData, setStockViewRowNum(tempData));
+                    Cache.Set(CacheList.StockTempData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = MessageType.delete_Success.GetDescription();
                 }
@@ -261,17 +309,18 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 取出事件動作
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">股票明細資料</param>
+        /// <param name="takeoutFlag">取出註記</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult TakeOutData(StockViewModel model, bool takeoutFlag)
+        public JsonResult TakeOutData(StockDetailViewModel model, bool takeoutFlag)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.StockMainData))
             {
-                var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockMainData);
+                var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vTreaBatchNo == model.vTreaBatchNo);
                 if (updateTempData != null)
                 {
@@ -284,7 +333,6 @@ namespace Treasury.WebControllers
                         updateTempData.vStatus = AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vTakeoutFlag = takeoutFlag;
-                    updateTempData.vStockDate = model.vStockDate;
                     Cache.Invalidate(CacheList.StockMainData);
                     Cache.Set(CacheList.StockMainData, tempData);
                     result.RETURN_FLAG = true;
@@ -304,10 +352,10 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult ResetTempData(string AccessType)
+        public JsonResult ResetTempData()
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
-            resetStockViewModel(AccessType);
+            resetStockViewModel();
             return Json(result);
         }
 
@@ -315,11 +363,12 @@ namespace Treasury.WebControllers
         /// 取得股票資料
         /// </summary>
         /// <param name="GroupNo">股票群組編號</param>
+        /// <param name="vAplyNo">申請單號</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetStockDate(string GroupNo)
+        public JsonResult GetStockDate(string GroupNo, string vAplyNo = null)
         {
-            var result = Stock.GetStockDate(int.Parse(GroupNo));
+            var result = Stock.GetStockDate(int.Parse(GroupNo), vAplyNo);
             
             return Json(result);
         }
@@ -337,53 +386,50 @@ namespace Treasury.WebControllers
             {
                 case "Temp":
                     if (Cache.IsSet(CacheList.StockTempData))
-                        return Json(jdata.modelToJqgridResult(setStockViewModelOrder((List<StockViewModel>)Cache.Get(CacheList.StockTempData))));
+                        return Json(jdata.modelToJqgridResult(((List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData)).OrderBy(x=>x.vItemId).ToList()));
                     break;
                 case "Stock":
                     if (Cache.IsSet(CacheList.StockMainData))
-                        return Json(jdata.modelToJqgridResult((List<StockViewModel>)Cache.Get(CacheList.StockMainData)));
+                        return Json(jdata.modelToJqgridResult(((List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData)).OrderBy(x=>x.vTreaBatchNo).ToList()));
                     break;
             }
             return null;
         }
 
-        private void resetStockViewModel(string AccessType, string AplyNo = null)
+        /// <summary>
+        /// 設定股票Cache資料
+        /// </summary>
+        /// <param name="GroupNo">申請單號</param>
+        /// <param name="GroupNo">修改狀態</param>
+        /// <returns></returns>
+        private void resetStockViewModel(string AplyNo = null, bool EditFlag = false)
         {
+            Cache.Invalidate(CacheList.StockData);
             Cache.Invalidate(CacheList.StockMainData);
             Cache.Invalidate(CacheList.StockTempData);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                Cache.Set(CacheList.StockMainData, new List<StockViewModel>());
-                Cache.Set(CacheList.StockTempData, new List<StockViewModel>());
+                Cache.Set(CacheList.StockData, new StockViewModel());
+                Cache.Set(CacheList.StockMainData, new List<StockDetailViewModel>());
+                Cache.Set(CacheList.StockTempData, new List<StockDetailViewModel>());
             }
             else
             {
+                var data = Stock.GetDataByAplyNo(AplyNo, EditFlag);
+                Cache.Set(CacheList.StockData, data);
 
-            }
-
-        }
-
-        private List<StockViewModel> setStockViewModelOrder(List<StockViewModel> data)
-        {
-            if (data.Any())
-            {
-                data = data.OrderBy(x => x.vRowNum).ToList();
-            }
-            return data;
-        }
-
-        private List<StockViewModel> setStockViewRowNum(List<StockViewModel> data)
-        {
-            int rownum = 1;
-            data.OrderBy(x => x.vStockNoPreamble)
-                .ThenBy(x => x.vStockType).ToList()
-                .ForEach(x =>
+                var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
                 {
-                    x.vRowNum = rownum.ToString();
-                    rownum += 1;
-                });
-            return data;
+                    Cache.Set(CacheList.StockTempData, data.vDetail);
+                }
+                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString())
+                {
+                    Cache.Set(CacheList.StockMainData, data.vDetail);
+                    Cache.Set(CacheList.StockTempData, new List<StockDetailViewModel>());
+                }
+            }
+
         }
 
         /// <summary>
@@ -393,7 +439,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult Number_Of_Shares_Total()
         {
-            var tempData = (List<StockViewModel>)Cache.Get(CacheList.StockTempData);
+            var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
 
             int result = 0;
 
