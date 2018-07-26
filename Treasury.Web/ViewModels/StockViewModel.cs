@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Treasury.Web.ViewModels
@@ -6,16 +7,97 @@ namespace Treasury.Web.ViewModels
     public class StockViewModel : ITreaItem
     {
         /// <summary>
+        /// 股票資料
+        /// </summary>
+        [Description("股票資料")]
+        public ItemBookStock vStockDate { get; set; }
+
+        /// <summary>
+        /// 股票模型
+        /// </summary>
+        [Description("股票模型")]
+        public ItemBookStockModel vStockModel { get; set; }
+
+        /// <summary>
+        /// 股票庫存資料檔
+        /// </summary>
+        [Description("股票庫存資料檔")]
+        public List<StockDetailViewModel> vDetail { get; set; }
+    }
+
+    public class ItemBookStock
+    {
+        /// <summary>
+        /// 存入資料
+        /// </summary>
+        [Description("存入資料")]
+        public string StockFeaturesType { get; set; }
+
+        /// <summary>
+        /// 群組編號
+        /// </summary>
+        [Description("群組編號")]
+        public int GroupNo { get; set; }
+
+        /// <summary>
+        /// 股票名稱
+        /// </summary>
+        [Description("股票名稱")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Description("區域")]
+        public string Area { get; set; }
+
+        /// <summary>
+        /// 備註
+        /// </summary>
+        [Description("備註")]
+        public string Memo { get; set; }
+
+        /// <summary>
+        /// 下一次入庫批號
+        /// </summary>
+        [Description("下一次入庫批號")]
+        public string Next_Batch_No { get; set; }
+    }
+
+    public class ItemBookStockModel
+    {
+        /// <summary>
+        /// 區域
+        /// </summary>
+        [Description("區域")]
+        public string AREA { get; set; }
+
+        /// <summary>
+        /// 備註
+        /// </summary>
+        [Description("備註")]
+        public string MEMO { get; set; }
+
+        /// <summary>
+        /// 股票名稱
+        /// </summary>
+        [Description("股票名稱")]
+        public string NAME { get; set; }
+
+        /// <summary>
+        /// 下一次入庫批號
+        /// </summary>
+        [Description("下一次入庫批號")]
+        public string NEXT_BATCH_NO { get; set; }
+    }
+
+    public class StockDetailViewModel
+    {
+        /// <summary>
         /// 物品單號
         /// </summary>
         [Description("物品單號")]
         public string vItemId { get; set; }
-
-        /// <summary>
-        /// 項次
-        /// </summary>
-        [Description("項次")]
-        public string vRowNum { get; set; }
 
         /// <summary>
         /// 庫存狀態
@@ -34,18 +116,6 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("入庫批號")]
         public int vTreaBatchNo { get; set; }
-
-        /// <summary>
-        /// 股票資料
-        /// </summary>
-        [Description("股票資料")]
-        public ItemBookStock vStockDate { get; set; }
-
-        /// <summary>
-        /// 股票模型
-        /// </summary>
-        [Description("股票模型")]
-        public ItemBookStockModel vStockModel { get; set; }
 
         /// <summary>
         /// 類型
@@ -105,7 +175,7 @@ namespace Treasury.Web.ViewModels
         /// 申請日期
         /// </summary>
         [Description("申請日期")]
-        public string vPutDate { get; set; }
+        public string vAplyDate { get; set; }
 
         /// <summary>
         /// 申請人
@@ -124,72 +194,5 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("總股數")]
         public int vNumberOfSharesTotal { get; set; }
-
-    }
-
-    public class ItemBookStock
-    {
-        /// <summary>
-        /// 存入資料
-        /// </summary>
-        [Description("存入資料")]
-        public string StockFeaturesType { get; set; }
-
-        /// <summary>
-        /// 群組編號
-        /// </summary>
-        [Description("群組編號")]
-        public int GroupNo { get; set; }
-
-        /// <summary>
-        /// 股票名稱
-        /// </summary>
-        [Description("股票名稱")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// 區域
-        /// </summary>
-        [Description("區域")]
-        public string Area { get; set; }
-
-        /// <summary>
-        /// 備註
-        /// </summary>
-        [Description("備註")]
-        public string Memo { get; set; }
-
-        /// <summary>
-        /// 下一次入庫批號
-        /// </summary>
-        [Description("下一次入庫批號")]
-        public string Next_Batch_No { get; set; }
-    }
-
-    public class ItemBookStockModel
-    {
-        /// <summary>
-        /// 區域
-        /// </summary>
-        [Description("區域")]
-        public string AREA { get; set; }
-
-        /// <summary>
-        /// MEMO
-        /// </summary>
-        [Description("MEMO")]
-        public string MEMO { get; set; }
-
-        /// <summary>
-        /// 股票名稱
-        /// </summary>
-        [Description("股票名稱")]
-        public string NAME { get; set; }
-
-        /// <summary>
-        /// 下一次入庫批號
-        /// </summary>
-        [Description("下一次入庫批號")]
-        public string NEXT_BATCH_NO { get; set; }
     }
 }
