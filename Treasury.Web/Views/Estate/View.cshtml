@@ -212,7 +212,12 @@
             $('#ESTATEInsert').show();
             $('#' + ESTATE_Building_NameTId).prop('disabled', false);
             $('#' + ESTATE_LocatedTId).prop('disabled', false);
-            $('#' + ESTATE_MemoTId).prop('disabled', false);
+            if ('@ViewBag.CustodianFlag' == "True") {
+                $("#" + ESTATE_MemoTId).attr("Disabled", false);
+            }
+            else {
+                $("#" + ESTATE_MemoTId).attr("Disabled", true);
+            }
         }
         else if (!tradeFlag && ESTATE_Act_Type) {
             $('.Estate_G').show();
@@ -251,7 +256,12 @@
             if (type == 'Estate_New')
             {
                 $('#' + ESTATE_LocatedTId).prop('disabled', false);
-                $('#' + ESTATE_MemoTId).prop('disabled', false);
+                if ('@ViewBag.CustodianFlag' == "True") {
+                    $("#" + ESTATE_MemoTId).attr("Disabled", false);
+                }
+                else {
+                    $("#" + ESTATE_MemoTId).attr("Disabled", true);
+                }
             }
             else if (type == 'Estate_Db')
             {
@@ -631,6 +641,9 @@
                 autoOpen: false,
                 resizable: false,
                 closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
             });
             $('#ESTATEInsertTemp,#ESTATEUpdateTemp,#ESTATEDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {

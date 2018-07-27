@@ -23,7 +23,15 @@ namespace Treasury.Web.Service.Actual
             {
                 case TreaItemType.D1012:
                     return new Bill();
-                
+                case TreaItemType.D1008:
+                case TreaItemType.D1009:
+                case TreaItemType.D1010:
+                case TreaItemType.D1011:
+                    return new Seal();
+                case TreaItemType.D1014:
+                    return new Estate();
+                case TreaItemType.D1024:
+                    return new CA();
             }
             return null;
         }

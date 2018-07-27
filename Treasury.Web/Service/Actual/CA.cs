@@ -37,10 +37,14 @@ namespace Treasury.Web.Service.Actual
 
         #region Get Date
 
+        /// <summary>
+        /// 抓取 電子憑證用途 項目
+        /// </summary>
+        /// <returns></returns>
         public List<SelectOption> GetCA_Use()
         {
             var result = new List<SelectOption>();
-            using (dbTreasuryEntities db = new dbTreasuryEntities())
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "CA_USE")
                     .Select( x => new SelectOption() {
@@ -51,10 +55,14 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 抓取 電子憑證品項 項目
+        /// </summary>
+        /// <returns></returns>
         public List<SelectOption> GetCA_Desc()
         {
             var result = new List<SelectOption>();
-            using (dbTreasuryEntities db = new dbTreasuryEntities())
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "CA_DESC")
                 .Select(x => new SelectOption()
@@ -489,6 +497,72 @@ namespace Treasury.Web.Service.Actual
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原
+            {
+                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "1"; //復原為在庫
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                return new Tuple<bool, string>(true, logStr);
+            }
+            else //存入狀態改為已取消
+            {
+                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "7"; //改為已取消
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                return new Tuple<bool, string>(true, logStr);
+            }
+        }
+
+        /// <summary>
+        /// 刪除申請
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            var otherItemAplys = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == aply_No).ToList();
+            var itemIds = otherItemAplys.Select(y => y.ITEM_ID).ToList();
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
+            {
+                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "1"; //復原為在庫
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
+                return new Tuple<bool, string>(true, logStr);
+            }
+            else //存入狀態 刪除電子憑證庫存資料檔,其它存取項目申請資料檔
+            {
+                db.ITEM_CA.RemoveRange(db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)));
+                db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
+                return new Tuple<bool, string>(true, logStr);
+            }
         }
 
         #endregion

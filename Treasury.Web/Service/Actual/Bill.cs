@@ -221,9 +221,9 @@ namespace Treasury.Web.Service.Actual
 
                                 #region 申請單紀錄檔
                                 var _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
-                                _TAR.APLY_STATUS = _APLY_STATUS;
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
                                     _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
                                 logStr += _TAR.modelToString(logStr);
                                 #endregion
@@ -410,7 +410,7 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單歷程檔
                                 var _ARH = new APLY_REC_HIS()
                                 {
-                                    APLY_NO = taData.vAplyNo,
+                                    APLY_NO = _TAR.APLY_NO,
                                     APLY_STATUS = _TAR.APLY_STATUS,
                                     PROC_DT = dt,
                                     PROC_UID = _TAR.CREATE_UID

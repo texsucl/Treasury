@@ -259,6 +259,8 @@ namespace Treasury.Web.Service.Actual
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
+                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -683,6 +685,72 @@ namespace Treasury.Web.Service.Actual
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原
+            {
+                foreach (var item in db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "1"; //復原為在庫
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                return new Tuple<bool, string>(true, logStr);
+            }
+            else //存入狀態改為已取消
+            {
+                foreach (var item in db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "7"; //改為已取消
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                return new Tuple<bool, string>(true, logStr);
+            }
+        }
+
+        /// <summary>
+        /// 刪除申請
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            var otherItemAplys = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == aply_No).ToList();
+            var itemIds = otherItemAplys.Select(y => y.ITEM_ID).ToList();
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
+            {
+                foreach (var item in db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)))
+                {
+                    item.INVENTORY_STATUS = "1"; //復原為在庫
+                    item.LAST_UPDATE_DT = dt;
+                    logStr += item.modelToString(logStr);
+                }
+                db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
+                return new Tuple<bool, string>(true, logStr);
+            }
+            else //存入狀態 刪除不動產權狀庫存資料檔,其它存取項目申請資料檔
+            {
+                db.ITEM_REAL_ESTATE.RemoveRange(db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)));
+                db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
+                return new Tuple<bool, string>(true, logStr);
+            }
         }
 
         #endregion

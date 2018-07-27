@@ -45,7 +45,7 @@ namespace Treasury.WebControllers
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
         {
             ViewBag.ESTATE_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
-            
+            ViewBag.CustodianFlag = AccountController.CustodianFlag;
             var _dActType = false;
             if (AplyNo.IsNullOrWhiteSpace())
             {
@@ -124,6 +124,10 @@ namespace Treasury.WebControllers
                 else
                 {
                     result = Estate.ApplyAudit(_datas, data);
+                    if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
+                    {
+                        new TreasuryAccessController().ResetSearchData();
+                    }
                 }            
             }
             else
