@@ -49,6 +49,24 @@ namespace Treasury.Web.Service.Actual
         #region Get Date
 
         /// <summary>
+        /// 取得單號狀態
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        public string GetStatus(string aplyNo)
+        {
+            var result = string.Empty;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                if (_TAR != null)
+                    result = _TAR.APLY_STATUS;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 使用單號抓取 申請表單資料
         /// </summary>
         /// <param name="aplyNo">單號</param>

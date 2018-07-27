@@ -42,21 +42,6 @@
     <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
-  <EntityType Name="BLANK_NOTE_APLY">
-    <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="DATA_SEQ" />
-    </Key>
-    <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DATA_SEQ" Type="Int32" Nullable="false" />
-    <Property Name="ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
-    <Property Name="CHECK_TYPE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CHECK_NO_TRACK" Type="String" MaxLength="4" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="CHECK_NO_B" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CHECK_NO_E" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
-  </EntityType>
   <EntityType Name="CODE_FUNC">
     <Key>
       <PropertyRef Name="SYS_CD" />
@@ -199,26 +184,6 @@
     <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="DEP_CHK_ITEM_DESC_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
     <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-  </EntityType>
-  <EntityType Name="ITEM_CA">
-    <Key>
-      <PropertyRef Name="ITEM_ID" />
-    </Key>
-    <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="INVENTORY_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CA_USE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CA_DESC" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="BANK" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="CA_NUMBER" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="APLY_DEPT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="APLY_SECT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="APLY_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CHARGE_DEPT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CHARGE_SECT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
-    <Property Name="GET_DATE" Type="DateTime" Precision="3" />
-    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT">
     <Key>
@@ -435,6 +400,8 @@
     <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
     <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="STOCK_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="STOCK_CNT" Type="Int32" />
   </EntityType>
   <EntityType Name="MAIL_CONTENT">
     <Key>
@@ -545,15 +512,6 @@
     <Property Name="EXEC_TIME_E_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="MAIL_CONTENT_ID_B" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
     <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-  </EntityType>
-  <EntityType Name="OTHER_ITEM_APLY">
-    <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="DATA_SEQ" />
-    </Key>
-    <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DATA_SEQ" Type="Int32" Nullable="false" />
-    <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
   </EntityType>
   <EntityType Name="PIA_EXEC_TYPE">
     <Key>
@@ -794,20 +752,6 @@
     <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
-  <EntityType Name="ITEM_BOOK">
-    <Key>
-      <PropertyRef Name="ITEM_ID" />
-      <PropertyRef Name="GROUP_NO" />
-      <PropertyRef Name="COL" />
-      <PropertyRef Name="COL_NAME" />
-      <PropertyRef Name="COL_VALUE" />
-    </Key>
-    <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
-    <Property Name="COL" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="COL_NAME" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="COL_VALUE" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
-  </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT_HIS">
     <Key>
       <PropertyRef Name="APLY_NO" />
@@ -864,7 +808,6 @@
     <EntitySet Name="APLY_REC_HIS" EntityType="Self.APLY_REC_HIS" />
     <EntitySet Name="AUTH_APLY_REC" EntityType="Self.AUTH_APLY_REC" />
     <EntitySet Name="AUTH_APPR" EntityType="Self.AUTH_APPR" />
-    <EntitySet Name="BLANK_NOTE_APLY" EntityType="Self.BLANK_NOTE_APLY" />
     <EntitySet Name="CODE_FUNC" EntityType="Self.CODE_FUNC" />
     <EntitySet Name="CODE_ROLE_FUNC" EntityType="Self.CODE_ROLE_FUNC" />
     <EntitySet Name="CODE_ROLE_FUNC_HIS" EntityType="Self.CODE_ROLE_FUNC_HIS" />
@@ -875,7 +818,6 @@
     <EntitySet Name="CODE_USER_HIS" EntityType="Self.CODE_USER_HIS" />
     <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" />
     <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" />
-    <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" />
     <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" />
     <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="Self.ITEM_DEP_ORDER_D" />
     <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="Self.ITEM_DEP_ORDER_M" />
@@ -892,7 +834,6 @@
     <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="Self.MAIL_RECEIVE_HIS" />
     <EntitySet Name="MAIL_TIME" EntityType="Self.MAIL_TIME" />
     <EntitySet Name="MAIL_TIME_HIS" EntityType="Self.MAIL_TIME_HIS" />
-    <EntitySet Name="OTHER_ITEM_APLY" EntityType="Self.OTHER_ITEM_APLY" />
     <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" />
     <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" />
     <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" />
@@ -906,7 +847,6 @@
     <EntitySet Name="TREA_ITEM" EntityType="Self.TREA_ITEM" />
     <EntitySet Name="TREA_ITEM_HIS" EntityType="Self.TREA_ITEM_HIS" />
     <EntitySet Name="TREA_OPEN_REC" EntityType="Self.TREA_OPEN_REC" />
-    <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" />
     <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" />
     <EntitySet Name="Log" EntityType="Self.Log" />
     <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
@@ -922,7 +862,11 @@
     <EntitySet Name="CODE_USER_ROLE_HIS" EntityType="dbTreasuryModel.CODE_USER_ROLE_HIS" />
     <EntitySet Name="CODE_ROLE" EntityType="dbTreasuryModel.CODE_ROLE" />
     <EntitySet Name="CODE_ROLE_HIS" EntityType="dbTreasuryModel.CODE_ROLE_HIS" />
+    <EntitySet Name="ITEM_BOOK" EntityType="dbTreasuryModel.ITEM_BOOK" />
+    <EntitySet Name="BLANK_NOTE_APLY" EntityType="dbTreasuryModel.BLANK_NOTE_APLY" />
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
+    <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
+    <EntitySet Name="ITEM_CA" EntityType="dbTreasuryModel.ITEM_CA" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1003,11 +947,37 @@
     <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
     <Property Name="ROLE_AUTH_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
   </EntityType>
+  <EntityType Name="ITEM_BOOK">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="GROUP_NO" />
+      <PropertyRef Name="COL" />
+    </Key>
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
+    <Property Name="COL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="COL_NAME" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="COL_VALUE" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BLANK_NOTE_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+    <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="CHECK_NO_TRACK" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="true" />
+    <Property Name="CHECK_NO_B" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="CHECK_NO_E" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
+  </EntityType>
   <EntityType Name="ITEM_BLANK_NOTE">
     <Key>
       <PropertyRef Name="ITEM_ID" />
     </Key>
-    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
     <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
     <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
@@ -1020,6 +990,34 @@
     <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="OTHER_ITEM_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="ITEM_CA">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CA_USE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CA_DESC" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="BANK" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
+    <Property Name="CA_NUMBER" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="APLY_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APLY_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
+    <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
 </Schema>

@@ -1,0 +1,581 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="row">
+    <div style="padding-bottom:5px;">
+        <input type="button" id="CAInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="CAjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CA_Act">
+        <input type="button" id="CAApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CACancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="CABack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CADialog" style="display:none">
+        <form id="CADialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>用途 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dCA_Use", (SelectList)ViewBag.CAUse, new { @class = "CAInsertType", @style = "width:207px" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dCA_Desc", (SelectList)ViewBag.CADesc, new { @class = "CAInsertType", @style = "width:207px" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>銀行 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCA_Bank" name="tCA_Bank" class="CAInsertType" maxlength="8" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>號碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCA_Number" name="tCA_Number" class="CAInsertType" maxlength="13" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tCA_MEMO" name="tCA_MEMO" class="CAInsertType" style="width:207px;height:80px;" maxlength="200" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" id="hCA_ITEM_ID" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="CAInsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="CAUpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="CADeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="CACancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CAurl = {};
+        CAurl.getData = '@Url.Action("GetCacheData", "CA")';
+        CAurl.InsertTempData = '@Url.Action("InsertTempData", "CA")';
+        CAurl.UpdateTempData = '@Url.Action("UpdateTempData", "CA")';
+        CAurl.DeleteTempData = '@Url.Action("DeleteTempData", "CA")';
+        CAurl.ResetTempData = '@Url.Action("ResetTempData", "CA")';
+        CAurl.TakeOutData = '@Url.Action("TakeOutData", "CA")';
+        CAurl.ApplyTempData = '@Url.Action("ApplyTempData", "CA")';
+        //#endregion
+
+        //#region 參數設定
+
+        //庫存資料
+        var CADialogId = 'CADialog'; //dialogId
+        var CADialogFormId = 'CADialogForm'; //dialogFormId
+        var CA_UseId = 'dCA_Use'; //用途Id(droupdownlist)
+        var CA_DescId = 'dCA_Desc'; //類型Id(droupdownlist)
+        var CA_BankId = 'tCA_Bank'; //銀行Id(text)
+        var CA_NumberId = 'tCA_Number'; // 號碼Id(text)
+        var CA_MemoId = 'tCA_MEMO'; //備註Id(texarea)
+        var CA_Item_IdHlId = 'hCA_ITEM_ID'; //物品標號Id(hidden)
+
+
+        var CA_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+        var CA_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (CA_Aply_No_Flag) {
+            $('#CACancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+
+        if (!CA_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.CA_Act').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.CA_Act').show();
+        }
+        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (typeFlag && CA_Act_Type) {
+            $('#CAInsert').show();
+        }
+        //#endregion
+
+        function clearJqgrid(gridDivId) {
+            $('#' + gridDivId).children().remove();
+        }
+
+        //#region 初始動作
+        CATempGrid();
+        setCAVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setCAVerified() {
+            verified.required(CADialogFormId, CA_NumberId, message.required('號碼')); //號碼為必填
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CAInsert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CAInsertFun(); });
+                    break;
+                case 'CAApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CAApplyFun(); });
+                    break;
+                case 'CACancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CACancelFun(); });
+                    break;
+                case 'CABack':
+                case 'CACancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    break;
+                case 'CAInsertTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CAInsertTempFun(); });
+                    break;
+                case 'CAUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CAUpdateTempFun(); });
+                    break;
+                case 'CADeleteTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CADeleteTempFun(); });
+                    break;
+            }
+        });
+
+        function CAReset() {
+            $('#' + CA_LocatedTId).val('');
+            $('#' + CA_MemoTId).val('');
+        }
+
+        function CAApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CAurl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CAApply'));
+                }
+            })
+        }
+
+        function CACancelFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
+                dataType: "json",
+                url: CAurl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog();
+                CATempGrid();
+            })
+        }
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox CAtakeouts customerCheck'></div>";
+            return str;
+        }
+
+        function formatterCA_Use(cellvalue, options, rdata) {
+            switch (cellvalue) {
+                @{
+                    foreach (var item in ((SelectList)ViewBag.CAUse))
+                    {
+                    <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                    </text>
+                    }
+                }
+                default:
+                    return '';
+            }
+        }
+
+        function UnformatterCA_Use(cellvalue, options, rdata) {
+            switch (cellvalue) {
+                @{
+                    foreach (var item in ((SelectList)ViewBag.CAUse))
+                    {
+                        <text>
+                        case '@item.Text':
+                        return '@item.Value';
+                        </text>
+                    }
+                }
+                default:
+        return '';
+        }
+        }
+
+        function formatterCA_Desc(cellvalue, options, rdata) {
+            switch (cellvalue) {
+                @{
+                    foreach (var item in ((SelectList)ViewBag.CADesc))
+                    {
+                        <text>
+                        case '@item.Value':
+                              return '@item.Text';
+                        </text>
+                    }
+                }
+                default:
+                   return '';
+            }
+            return '';
+        }
+
+        function UnformatterCA_Desc(cellvalue, options, rdata) {
+            switch (cellvalue) {
+               @{
+                    foreach (var item in ((SelectList)ViewBag.CADesc))
+                    {
+                        <text>
+                        case '@item.Text':
+                        return '@item.Value';
+                        </text>
+                    }
+                }
+                default:
+            return '';
+            }
+        return '';
+        }
+
+        function CATempGrid() {
+
+            if (typeFlag) { //存入
+                var colNameArray = ['動作', '電子憑證用途', '電子憑證品項', '銀行/廠商', '電子憑證號碼', '備註', '物品編號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vCA_Use", index: "vCA_Use", width: 100, sortable: false, formatter: formatterCA_Use, unformat: UnformatterCA_Use });
+                colModelArray.push({ name: "vCA_Desc", index: "vCA_Desc", width: 100, sortable: false, formatter: formatterCA_Desc, unformat: UnformatterCA_Desc });
+                colModelArray.push({ name: "vBank", index: "vBank", width: 100, sortable: false });
+                colModelArray.push({ name: "vCA_Number", index: "vCA_Number", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'CAjqgridDiv',
+                    'CATempList',
+                    'CATempPeger',
+                    CAurl.getData,
+                    {
+
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '存入明細資料',
+                    jqgridCustom.getPage('CAjqgridDiv'),
+                    CATempCompleteFun,
+                    true
+                    );
+            }
+            else { //取出
+                var colNameArray = ['取出', '動作', '電子憑證用途', '電子憑證品項', '銀行/廠商', '電子憑證號碼', '備註', '物品編號'];
+                var colModelArray = [];
+                if (!CA_Act_Type) {
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                }
+                else {
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                }
+                colModelArray.push({ name: "vCA_Use", index: "vCA_Use", width: 100, sortable: false, formatter: formatterCA_Use, unformat: UnformatterCA_Use });
+                colModelArray.push({ name: "vCA_Desc", index: "vCA_Desc", width: 100, sortable: false, formatter: formatterCA_Desc, unformat: UnformatterCA_Desc });
+                colModelArray.push({ name: "vBank", index: "vBank", width: 100, sortable: false });
+                colModelArray.push({ name: "vCA_Number", index: "vCA_Number", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'CAjqgridDiv',
+                    'CATempList',
+                    'CATempPeger',
+                    CAurl.getData,
+                    {
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '取出明細資料',
+                    jqgridCustom.getPage('CAjqgridDiv'),
+                    CATempTakeOutFun,
+                    true
+                    );
+            }
+        }
+
+        function CATempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'CATemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.CAtakeouts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function takeout(rowid, flag) {
+            var listId = 'CATempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: CAViewModel(data.vItemId),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: CAurl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CATempGrid();
+                }
+            });
+        }
+
+        function CATempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'CATemp', tempActFun);
+            if (!CA_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function CAInsertFun() {
+
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid) {
+            $('#' + CADialogFormId).validate().resetForm();
+            var dialogId = 'CADialog';
+            var listId = 'CATempList';
+            var CAInsertClass = 'CAInsertType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '印章',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CAInsertTemp,#CAUpdateTemp,#CADeleteTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog();
+                $('#CAInsertTemp').show();
+                $('.' + CAInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#CADeleteTemp').show();
+                $('.' + CAInsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#CAUpdateTemp').show();
+                $('.' + CAInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + CAInsertClass).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            if ($('#' + CA_UseId + ' option').length > 0) {
+                $('#' + CA_UseId).val($($('#' + CA_UseId + ' option')[0]).val())
+            }
+            if ($('#' + CA_DescId + ' option').length > 0) {
+                $('#' + CA_DescId).val($($('#' + CA_DescId + ' option')[0]).val())
+            }
+            $('#' + CA_BankId).val('');
+            $('#' + CA_NumberId).val('');
+            $('#' + CA_MemoId).val('');
+            $('#' + CA_Item_IdHlId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + CA_UseId).val(data.vCA_Use);
+                $('#' + CA_DescId).val(data.vCA_Desc);
+                $('#' + CA_BankId).val(data.vBank);
+                $('#' + CA_NumberId).val(data.vCA_Number);
+                $('#' + CA_MemoId).val(data.vMemo);
+                $('#' + CA_Item_IdHlId).val(data.vItemId);
+            }
+        }
+
+        //新增暫存不動產明細
+        function CAInsertTempFun() {
+            if (!CATempCheck()) {
+                return false;
+            }
+            if ($('#' + CADialogFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CAViewModel(
+                            created.uuid(),
+                            $('#' + CA_UseId).val().trim(),
+                            $('#' + CA_DescId).val().trim(),
+                            $('#' + CA_BankId).val().trim(),
+                            $('#' + CA_NumberId).val().trim(),
+                            $('#' + CA_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CAurl.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CAInsertTemp'));
+                        CATempGrid();
+                    }
+                })
+            }
+        }
+
+        function CAUpdateTempFun() {
+            if (!CATempCheck()) {
+                return false;
+            }
+            if ($('#' + CADialogFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CAViewModel(
+                            $('#' + CA_Item_IdHlId).val(),
+                            $('#' + CA_UseId).val().trim(),
+                            $('#' + CA_DescId).val().trim(),
+                            $('#' + CA_BankId).val().trim(),
+                            $('#' + CA_NumberId).val().trim(),
+                            $('#' + CA_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CAurl.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CAUpdateTemp'));
+                        CATempGrid();
+                    }
+                })
+            }
+        }
+
+        function CADeleteTempFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: CAViewModel(
+                        $('#' + CA_Item_IdHlId).val())
+                }),
+                dataType: "json",
+                url: CAurl.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CADeleteTemp'));
+                    CATempGrid();
+                }
+            })
+        }
+
+        function CATempCheck() {
+            var _checkFlag = true;
+            if ($('#' + CA_UseId).val() == '1' && $('#' + CA_BankId).val().trim() == '') {
+                customerUtility.alert('用途為網銀時銀行必輸', 'w');
+                _checkFlag = false;
+            }
+            return _checkFlag
+        }
+
+        function CAViewModel(
+            vItemId,
+            vCA_Use,
+            vCA_Desc,
+            vBank,
+            vCA_Number,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vCA_Use'] = vCA_Use;
+            obj['vCA_Desc'] = vCA_Desc;
+            obj['vBank'] = vBank;
+            obj['vCA_Number'] = vCA_Number;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>

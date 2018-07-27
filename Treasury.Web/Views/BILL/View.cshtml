@@ -168,15 +168,15 @@
         var BILL_totalId = 'BILL_total'; //總張數Id
         var BILL_Take_OutId = 'tTakeOutE'; //取出票號(迄)Id
         var BILL_Take_Out_TotalId = 'tTakeOutTotalNum'; //取出總張數
-        var BILL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
-        if (BILL_Aply_No_Flag)
-        {
-            $('#BILLCancel').hide(); //已經申請故無法取消申請
-        }
         var BILL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態      
         var type = $('input[name=cProjectType]:checked').val();
         if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
             $('.BILLAct').hide();
+        }
+        var BILL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (BILL_Aply_No_Flag)
+        {
+            $('#BILLCancel').hide(); //已經申請故無法取消申請
             type = '@ViewBag.dAccess';
         }
         else { //是覆核狀態 (為存入 or 取出 動作)

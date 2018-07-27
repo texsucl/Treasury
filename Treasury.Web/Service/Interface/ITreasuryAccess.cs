@@ -73,6 +73,13 @@ namespace Treasury.Web.Service.Interface
         bool GetActType(string aplyNo, string uid, List<string> actionType);
 
         /// <summary>
+        /// 取得單號狀態
+        /// </summary>
+        /// <param name="aplyNo"></param>
+        /// <returns></returns>
+        string GetStatus(string aplyNo);
+
+        /// <summary>
         /// 使用單號抓取 申請表單資料
         /// </summary>
         /// <param name="aplyNo">單號</param>

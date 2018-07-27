@@ -13,7 +13,7 @@
     <div style="text-align:center;padding-top:5px;display:none;"  class="BILLAct">
         <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary" />
         <input type="button" id="BILLCancel" value="取消申請"  class="btn btn-primary" />
-        <input type="button" id="BILLBack" value="回到功能選擇"  class="btn btn-primary" />
+        <input type="button" id="BILLBack" value="回上一頁"  class="btn btn-primary" />
     </div>
     <div id="BillInsertDialog" style="display:none;">
         <form id="BILLForm">
@@ -81,7 +81,7 @@
             </table>
         </form>
     </div>
-    <div id="BillTakeOutDialog" style="display:none">
+    <div id="BillTakeOutDialog" style="display:none;z-index:1" >
         <form id="BILLTakeOutForm">
             <table>
                 <tr>
@@ -172,8 +172,12 @@
         var type = $('input[name=cProjectType]:checked').val();
         if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
             $('.BILLAct').hide();
+        }
+        var BILL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (BILL_Aply_No_Flag)
+        {
+            $('#BILLCancel').hide(); //已經申請故無法取消申請
             type = '@ViewBag.dAccess';
-            $('.aplyNoDetail').show();
         }
         else { //是覆核狀態 (為存入 or 取出 動作)
             $('.BILLAct').show();
@@ -322,6 +326,9 @@
         function BILLApplyFun() {
             $.ajax({
                 type: "POST",
+                data: JSON.stringify({
+                    AplyNo: $('AplyNo').val()
+                }),
                 dataType: "json",
                 url: BILLurl.ApplyTempData,
                 contentType: 'application/json',
@@ -493,7 +500,8 @@
                     colNameArray,
                     colModelArray,
                     '當日庫存明細資料',
-                    jqgridCustom.getPage('BILLjqgridDiv2')
+                    jqgridCustom.getPage('BILLjqgridDiv2'),
+                    BILLDayCompleteFun
                     );
             }
             else{
@@ -523,10 +531,24 @@
                     colNameArray,
                     colModelArray,
                     '當日庫存明細資料',
-                    jqgridCustom.getPage('BILLjqgridDiv2')
+                    jqgridCustom.getPage('BILLjqgridDiv2'),
+                    BILLDayCompleteFun
                     );
             }
+        }
 
+        function BILLDayCompleteFun(listId)
+        {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function () {
+                let tr = $(this);
+                let status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status == '小計' || status == '總計')
+                tr.find('td').each(function () {
+                    $(this).css('font-weight', 'bold');
+                    if(status== '總計')
+                        $(this).css('font-size', '15px');
+                });
+            });
         }
 
         function BILLTempTakeOutFun(listId) {
@@ -571,6 +593,14 @@
             $('#' + BILLTakeOutFormId).validate().resetForm();
             var dialogId = 'BillTakeOutDialog';
             var listId = 'BILLTempList';
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: '取出空白票券',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+            });
             var data = $("#" + listId).getRowData(rowid);
             $('#lBILL_Issuing_Bank').text('');
             $('#lBILL_Issuing_Bank').text(data.vIssuingBank);
@@ -592,14 +622,6 @@
             $('#tTakeOutE').val(data.vTakeOutE);
             $('#tTakeOutTotalNum').val('');
             $('#tTakeOutTotalNum').val(data.vTakeOutTotalNum);
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: '取出空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
             $('#' + dialogId).dialog('open');
         }
 
@@ -687,7 +709,19 @@
             var dialogId = 'BillInsertDialog';
             var listId = 'BILLTempList';
             var BILLInsertClass = 'BILLInsertType';
-            var title = '';
+            var title = customerUtility.getDialogType(type);
+            
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '空白票券',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
             $('#BILLInsertTemp,#BILLUpdateTemp,#BILLDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()')
             {
@@ -716,15 +750,8 @@
                 title = '@Ref.ActionType.View.GetDescription()';
                 $('.' + BILLInsertClass).prop('disabled', true);
             }
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: title + '空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
             $('#' + dialogId).dialog('open');
+            $('body').css('overflow', 'hidden');
         }
 
         function ResetInsertDialog() {
