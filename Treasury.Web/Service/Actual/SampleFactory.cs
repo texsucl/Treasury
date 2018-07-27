@@ -23,7 +23,8 @@ namespace Treasury.Web.Service.Actual
             {
                 case TreaItemType.D1012:
                     return new Bill();
-                
+                case TreaItemType.D1015:
+                    return new Stock();
             }
             return null;
         }

@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 股票
     /// </summary>
-    public interface IStock : IApply
+    public interface IStock : IApply, IAgency
     {
         /// <summary>
         /// 股票編號(新增股票)
@@ -67,6 +67,6 @@ namespace Treasury.Web.Service.Interface
         /// <param name="EditFlag">可否修改,可以也需抓取庫存資料</param>
         /// <returns></returns>
         StockViewModel GetDataByAplyNo(string aplyNo, bool EditFlag = false);
-        
+
     }
 }

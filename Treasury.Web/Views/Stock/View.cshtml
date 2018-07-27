@@ -1,6 +1,6 @@
 ﻿@using Treasury.Web.Enum;
 @using Treasury.WebUtility;
-<div class="row">
+<div>
     <div class="col-sm-24">
         <form id="StockMainForm">
             <table>
@@ -189,7 +189,7 @@
             $('.StockAct').show();
         }
         var Stock_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
-        if (Stock_Aply_No_Flag && Stock_Act_Type) {
+        if (Stock_Aply_No_Flag) {
             type = '@ViewBag.dAccess';
             $('#StockCancel').hide(); //已經申請故無法取消申請
             //查詢不可修改股票資料
@@ -203,7 +203,8 @@
                 $('#' + Stock_Name_D).val('@ViewBag.group').change();
                 if (type == '@Ref.AccessProjectTradeType.P.ToString()') //存入自動計算總股數
                 {
-                        GetNumber_Of_Shares_Total();
+                    $('.Stock_P').show();
+                    GetNumber_Of_Shares_Total();
                 }
             }, 500);
         }
@@ -290,22 +291,26 @@
             {
                 GetStockDate();
 
-                var _val = -1;
-                if ($(this).val().trim() != '')
-                    _val = $(this).val();
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        groupNo: _val,
-                        aplyNo: $('#TAR_AplyNo').val()
-                }),
-                    dataType: "json",
-                    url: StockUrl.GetItemBook,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    StockTempGrid();
-                    StockDetailGrid();
-                })
+                //審核狀態重新載入取出清單
+                if (Stock_Act_Type)
+                {
+                    var _val = -1;
+                    if ($(this).val().trim() != '')
+                        _val = $(this).val();
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            groupNo: _val,
+                            aplyNo: $('#TAR_AplyNo').val()
+                        }),
+                        dataType: "json",
+                        url: StockUrl.GetItemBook,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        StockTempGrid();
+                        StockDetailGrid();
+                    })
+                }
             }
         });
 

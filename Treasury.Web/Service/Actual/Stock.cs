@@ -185,7 +185,12 @@ namespace Treasury.Web.Service.Actual
                 if (!aplyNo.IsNullOrWhiteSpace()) //有單號須加單號資料
                 {
                     itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
-                    result.AddRange(getMainModel(db.ITEM_STOCK.Where(x=>x.GROUP_NO==groupNo && itemIds.Contains(x.ITEM_ID)).AsEnumerable(),_emply, _Inventory_types));
+                    result.AddRange(
+                        getMainModel(db.ITEM_STOCK.AsNoTracking()
+                        .Where(x=>x.GROUP_NO==groupNo)
+                        .Where(x=>itemIds.Contains(x.ITEM_ID))
+                        .Where(x=>x.INVENTORY_STATUS == "4") //預約取出
+                        .AsEnumerable(),_emply, _Inventory_types));
                 }
 
                 result.AddRange(
@@ -501,6 +506,8 @@ namespace Treasury.Web.Service.Actual
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
+                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -608,7 +615,7 @@ namespace Treasury.Web.Service.Actual
                                             }
 
                                             //預約取出
-                                            if(item.vTakeoutFlag)
+                                            if (item.vTakeoutFlag)
                                             {
                                                 if (_IS.INVENTORY_STATUS == "1") //原先為在庫
                                                 {
@@ -717,6 +724,105 @@ namespace Treasury.Web.Service.Actual
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 刪除申請
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            {
+                return Recover(db, aply_No, logStr, dt, true);
+            }
+            else if (access_Type == AccessProjectTradeType.P.ToString())    //存入處理作業
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+                if (_TAR != null)
+                {
+                    //使用單號去其他存取項目檔抓取物品編號
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    //使用物品編號去股票庫存資料檔抓取資料
+                    var details = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                    if (details.Any())
+                    {
+                        db.ITEM_STOCK.RemoveRange(db.ITEM_STOCK.Where(x => OIAs.Contains(x.ITEM_ID)));
+                        db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+                    }
+                    else
+                    {
+                        return new Tuple<bool, string>(false, logStr);
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="aply_No">作廢單號</param>
+        /// <param name="access_Type">取出或存入</param>
+        /// <param name="logStr">log 字串</param>
+        /// <param name="dt">更新時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
+        {
+            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            {
+                return Recover(db, aply_No, logStr, dt, false);
+            }
+            else if (access_Type == AccessProjectTradeType.P.ToString())    //存入處理作業
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+                if (_TAR != null)
+                {
+                    //使用單號去其他存取項目檔抓取物品編號
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    //使用物品編號去股票庫存資料檔抓取資料
+                    var details = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                    if (details.Any())
+                    {
+                        foreach(var item in details)
+                        {
+                            var _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                            _IS.INVENTORY_STATUS = "7"; //已取消
+                            _IS.LAST_UPDATE_DT = dt;
+                            logStr += _IS.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        return new Tuple<bool, string>(false, logStr);
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
         #endregion
 
@@ -837,6 +943,65 @@ namespace Treasury.Web.Service.Actual
                     .Sum(x => x.NUMBER_OF_SHARES);
 
                 return (int)NumberOfSharesTotal;
+            }
+        }
+
+        /// <summary>
+        /// 申請刪除 & 作廢 股票資料庫要復原的事件
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aply_No"></param>
+        /// <param name="logStr"></param>
+        /// <param name="dt"></param>
+        /// <param name="deleFlag"></param>
+        /// <returns></returns>
+        public Tuple<bool, string> Recover(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt, bool deleFlag)
+        {
+            var _changeFlag = false;
+
+            var _TAR = db.TREA_APLY_REC.AsNoTracking()
+            .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+            if (_TAR != null)
+            {
+                //使用單號去其他存取項目檔抓取物品編號
+                var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                    .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                //使用物品編號去股票庫存資料檔抓取資料
+                var details = db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                if (details.Any())
+                {
+                    foreach(var item in details)
+                    {
+                        var _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                        _IS.INVENTORY_STATUS = "1"; //返回在庫
+                        _IS.LAST_UPDATE_DT = dt;
+                        logStr += _IS.modelToString(logStr);
+                    }
+
+                    //刪除其他存取項目檔
+                    if (deleFlag)
+                        db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+                }
+                else
+                {
+                    _changeFlag = true;
+                }
+            }
+            else
+            {
+                _changeFlag = true;
+            }
+
+            if (_changeFlag)
+            {
+                return new Tuple<bool, string>(false, logStr);
+            }
+            else
+            {
+                return new Tuple<bool, string>(true, logStr);
             }
         }
         #endregion
