@@ -83,9 +83,9 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+            searchModel.vCreateUid = AccountController.CurrentUserId;
             Cache.Invalidate(CacheList.TreasuryAccessSearchData);
             Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
-            searchModel.vCreateUid = AccountController.CurrentUserId;
             var datas = TreasuryAccess.GetSearchDetail(searchModel);
             if (datas.Any())
             {
@@ -178,20 +178,27 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.TreasuryAccessSearchDetailViewData))
             {
                 var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                var AccessStatus = new List<string>() {
-                    AccessProjectFormStatus.A01.ToString(),
-                    AccessProjectFormStatus.A03.ToString(),
-                    AccessProjectFormStatus.A04.ToString()
-                 };
                 switch (type)
                 {
                     case "Access":
-                            return Json(jdata.modelToJqgridResult(datas.Where(x=> AccessStatus.Contains(x.vAPLY_STATUS)).ToList()));
+                            return Json(jdata.modelToJqgridResult(datas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
                     case "Report":
-                            return Json(jdata.modelToJqgridResult(datas.Where(x => !AccessStatus.Contains(x.vAPLY_STATUS)).ToList()));
+                            return Json(jdata.modelToJqgridResult(datas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
                 }
             }
             return null;
+        }
+
+        public void ResetSearchData()
+        {
+            var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
+            Cache.Set(CacheList.TreasuryAccessSearchData, searchData);
+            var datas = TreasuryAccess.GetSearchDetail(searchData);
+            if (datas.Any())
+            {
+                Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, datas);
+            }
         }
     }
 }

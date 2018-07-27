@@ -8,7 +8,10 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
 {
-    public interface IEstate : IApply
+    /// <summary>
+    /// 不動產權狀
+    /// </summary>
+    public interface IEstate : IApply , IAgency
     {
         /// <summary>
         /// 抓取狀別 土地,建物,他項權利,其他

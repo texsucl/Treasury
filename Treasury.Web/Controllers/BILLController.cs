@@ -86,6 +86,10 @@ namespace Treasury.WebControllers
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 data.vCreateUid = AccountController.CurrentUserId;
                 result = Bill.ApplyAudit((List<BillViewModel>)Cache.Get(CacheList.BILLTempData), data);
+                if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
+                {
+                    new TreasuryAccessController().ResetSearchData();
+                }
             }
             else
             {

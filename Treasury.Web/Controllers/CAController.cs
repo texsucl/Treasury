@@ -94,6 +94,10 @@ namespace Treasury.WebControllers
                 else
                 {
                     result = CA.ApplyAudit(_data, data);
+                    if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
+                    {
+                        new TreasuryAccessController().ResetSearchData();
+                    }
                 }
             }
             else

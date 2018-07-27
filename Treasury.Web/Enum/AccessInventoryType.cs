@@ -47,9 +47,9 @@ namespace Treasury.Web.Enum
             _6,
 
             /// <summary>
-            /// 取消申請
+            /// 已取消
             /// </summary>
-            [Description("取消申請")]
+            [Description("已取消")]
             _7,
         }
     }

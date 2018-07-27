@@ -20,6 +20,11 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         private List<string> printsStatus { get; set; }
 
+        /// <summary>
+        /// 報表可以作廢狀態
+        /// </summary>
+        private List<string> invalidStatus { get; set; }
+
         public TreasuryAccess()
         {
             printsStatus = new List<string>();
@@ -35,6 +40,10 @@ namespace Treasury.Web.Service.Actual
             printsStatus.Add(AccessProjectFormStatus.D03.ToString());
             printsStatus.Add(AccessProjectFormStatus.D04.ToString());
             printsStatus.Add(AccessProjectFormStatus.E01.ToString());
+            invalidStatus = new List<string>();
+            invalidStatus.Add(AccessProjectFormStatus.A03.ToString());
+            invalidStatus.Add(AccessProjectFormStatus.A04.ToString());
+            invalidStatus.Add(AccessProjectFormStatus.A05.ToString());
         }
 
         #region Get Date
@@ -255,11 +264,14 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 查詢
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">金庫物品存取主畫面查詢ViewModel</param>
         /// <returns></returns>
         public List<TreasuryAccessSearchDetailViewModel> GetSearchDetail(TreasuryAccessSearchViewModel data)
         {
             List<TreasuryAccessSearchDetailViewModel> result = new List<TreasuryAccessSearchDetailViewModel>();
+
+            if (!data.vItem.Any() || !data.vAplyUnit.Any()) //無查詢項目 or 申請單位 表示沒有權限查詢
+                return result;
             var depts = new List<VW_OA_DEPT>();
             var emps = new List<V_EMPLY2>();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
@@ -357,8 +369,8 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 刪除申請 (刪除資料)
         /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="data"></param>
+        /// <param name="searchData">金庫物品存取主畫面查詢ViewModel</param>
+        /// <param name="data">申請表單查詢顯示區塊ViewModel</param>
         /// <returns></returns>
         public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
         {
@@ -452,8 +464,8 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 作廢 (保留資料)
         /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="data"></param>
+        /// <param name="searchData">金庫物品存取主畫面查詢ViewModel</param>
+        /// <param name="data">申請表單查詢顯示區塊ViewModel</param>
         /// <returns></returns>
         public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data)
         {
@@ -475,27 +487,23 @@ namespace Treasury.Web.Service.Actual
                     }
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = _status;
-                    logStr += _TREA_APLY_REC.modelToString();
-                    if (_TREA_APLY_REC.ACCESS_TYPE == AccessProjectTradeType.G.ToString()) //取出情況下 取號須加回庫存
+                    var sampleFactory = new SampleFactory();
+                    #region 
+                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                    if (getAgenct != null)
                     {
-                        var sampleFactory = new SampleFactory();
-                        #region 
-                        var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
-                        if (getAgenct != null)
-                        {
-                            var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
-                            if (!_recover.Item1) //失敗
-                            {
-                                return result;
-                            }
-                            logStr = _recover.Item2;
-                        }
-                        else
+                        var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
+                        if (!_recover.Item1) //失敗
                         {
                             return result;
                         }
-                        #endregion
+                        logStr = _recover.Item2;
                     }
+                    else
+                    {
+                        return result;
+                    }
+                    #endregion
 
                     #region 申請單歷程檔
                     //「取消申請」：新增「E02」申請人刪除的狀態資料。
@@ -579,8 +587,7 @@ namespace Treasury.Web.Service.Actual
                 vAPLY_UID = data.APLY_UID,
                 vAPLY_UID_NAME = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME,
                 vCancleFlag = data.APLY_STATUS == AccessProjectFormStatus.A01.ToString() && data.CREATE_UID == userId ? "Y" : "N",
-                vInvalidFlag = (data.APLY_STATUS == AccessProjectFormStatus.A04.ToString() ||
-                             data.APLY_STATUS == AccessProjectFormStatus.A03.ToString()) &&
+                vInvalidFlag = invalidStatus.Contains(data.APLY_STATUS) &&
                               data.CREATE_UID == userId ? "Y" : "N",
                 vPrintFlag = printsStatus.Contains(data.APLY_STATUS) ? "Y" : "N",
                 vItem = data.ITEM_ID,

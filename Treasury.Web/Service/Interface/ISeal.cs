@@ -8,7 +8,10 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
 {
-    public interface ISeal : IApply
+    /// <summary>
+    /// 印章
+    /// </summary>
+    public interface ISeal : IApply , IAgency
     {
 
         /// <summary>

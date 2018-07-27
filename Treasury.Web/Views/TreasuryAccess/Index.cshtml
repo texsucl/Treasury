@@ -389,7 +389,7 @@
                                         parms,
                                         null
                                         );
-                                }, 500);
+                                }, 100);
                         }
                     }                   
                 );
@@ -533,7 +533,7 @@
         //#endregion
 
         //#region 新增事件(打開Dialog)
-        function openTADialog(title, width, dialogId)
+        function openTADialog(title, width, dialogId, closeFalg)
         {
             title = title || '';
             width = width || 'auto';
@@ -545,7 +545,14 @@
                 width: width,
                 autoOpen : false,
                 resizable: false,
-                closeText : '取消'
+                closeText : '取消',
+                close: function () {
+                    if (dialogId == 'TAOpenSearchDialog' && $('#TAR_AplyNo').val() != '' && closeFalg)
+                    {
+                        TAAccessGrid();
+                        TAReportGrid();
+                    }
+                }
             });
             $('#' + dialogId).dialog('open');
         }
@@ -555,7 +562,6 @@
         //#region 新增事件
 
         function open(itemId) {
-            //var AccessType = $('input[name=cProjectType]:checked').val();
             var _data = GetItemData(itemId);
             $.ajax({
                 type: 'POST',
@@ -573,33 +579,7 @@
                 contentType: 'application/json',
                 success: function (data, textStatus, jqXHR) {
                     $('#' + openInsertDetailId).html(data);
-                    openTADialog(_data.title, _data.openDialogWidth, 'TAOpenInsertDialog');
-                }
-            })
-        }
-        //#endregion
-
-        //#region 新增事件(開啟股票)
-        function openSTOCK() {
-            //var AccessType = $('input[name=cProjectType]:checked').val();
-            $.ajax({
-                type: 'POST',
-                data: JSON.stringify({
-                    AplyNo: null,
-                    data: TreasuryAccessViewModel(
-                     $('#aProject').val(),
-                     $('#aIUnit').val(),
-                     $('#applicant').val(),
-                     $('#TAReason').val(),
-                     $('#EXP_ACCESS_DATE').val(),
-                     $('input[name=cProjectType]:checked').val())
-                }),
-                url: TAurl.openSTOCK,
-                contentType: 'application/json',
-                success: function (data, textStatus, jqXHR) {
-                    $('#' + openInsertDetailId).html(data);
-                    var width = '850px';
-                    openTADialog(_BILL, width, 'TAOpenInsertDialog');
+                    openTADialog(_data.title, _data.openDialogWidth, 'TAOpenInsertDialog',false);
                 }
             })
         }
@@ -626,7 +606,7 @@
                 $(this).find('td').find('a.DialogAPLYNO').each(function () {
                     $(this).off('click');
                     $(this).on('click', function () {
-                        TAOpenAPLYNOFun(listId, i + 1);
+                        TAOpenAPLYNOFun(listId, i + 1, true);
                     });
                 });
             });
@@ -638,7 +618,7 @@
                 $(this).find('td').find('a.DialogAPLYNO').each(function () {
                     $(this).off('click');
                     $(this).on('click', function () {
-                        TAOpenAPLYNOFun(listId, i + 1);
+                        TAOpenAPLYNOFun(listId, i + 1, false);
                     });
                 });
             });
@@ -693,7 +673,7 @@
         //#endregion
 
         //#region 開啟申請單號
-        function TAOpenAPLYNOFun(listId,rowid) {
+        function TAOpenAPLYNOFun(listId, rowid, closeFalg) {
             var data = $("#" + listId).getRowData(rowid);
             var itemId = data.vItem;
             //var _accessType = data.vACCESS_TYPE;
@@ -734,7 +714,7 @@
                                 $('#TAVMvCreateUnit').text(aplyNoData.vCreateUnit);
                                 $('#TAVMvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMvAccessReason').val(aplyNoData.vAccessReason);
-                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAOpenSearchDialog');
+                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAOpenSearchDialog', closeFalg);
                             }
                         })
                     }

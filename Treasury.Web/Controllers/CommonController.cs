@@ -41,7 +41,8 @@ namespace Treasury.WebControllers
             {
                 AccessProjectFormStatus.A01.ToString(),
                 AccessProjectFormStatus.A03.ToString(),
-                AccessProjectFormStatus.A04.ToString()
+                AccessProjectFormStatus.A04.ToString(),
+                AccessProjectFormStatus.A05.ToString()
             };
         }
 

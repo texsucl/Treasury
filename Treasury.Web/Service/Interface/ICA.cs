@@ -8,7 +8,10 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
 {
-    public interface ICA : IApply
+    /// <summary>
+    /// 電子憑證
+    /// </summary>
+    public interface ICA : IApply , IAgency
     {
         /// <summary>
         /// 抓取電子憑證用途設定

@@ -500,7 +500,8 @@
                     colNameArray,
                     colModelArray,
                     '當日庫存明細資料',
-                    jqgridCustom.getPage('BILLjqgridDiv2')
+                    jqgridCustom.getPage('BILLjqgridDiv2'),
+                    BILLDayCompleteFun
                     );
             }
             else{
@@ -530,10 +531,24 @@
                     colNameArray,
                     colModelArray,
                     '當日庫存明細資料',
-                    jqgridCustom.getPage('BILLjqgridDiv2')
+                    jqgridCustom.getPage('BILLjqgridDiv2'),
+                    BILLDayCompleteFun
                     );
             }
+        }
 
+        function BILLDayCompleteFun(listId)
+        {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function () {
+                let tr = $(this);
+                let status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status == '小計' || status == '總計')
+                tr.find('td').each(function () {
+                    $(this).css('font-weight', 'bold');
+                    if(status== '總計')
+                        $(this).css('font-size', '15px');
+                });
+            });
         }
 
         function BILLTempTakeOutFun(listId) {
@@ -703,7 +718,9 @@
                 autoOpen: false,
                 resizable: false,
                 closeText: '取消',
-                close: function () { $('body').css('overflow', 'scroll'); }
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
             });
             $('#BILLInsertTemp,#BILLUpdateTemp,#BILLDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()')
