@@ -45,11 +45,10 @@
   <EntityType Name="BLANK_NOTE_APLY">
     <Key>
       <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="DATA_SEQ" />
+      <PropertyRef Name="ITEM_ID" />
     </Key>
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
-    <Property Name="DATA_SEQ" Type="int" Nullable="false" />
-    <Property Name="ITEM_ID" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
     <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
     <Property Name="CHECK_NO_TRACK" Type="nvarchar" MaxLength="4" Nullable="false" />
@@ -285,7 +284,7 @@
     <Key>
       <PropertyRef Name="ITEM_ID" />
     </Key>
-    <Property Name="ITEM_ID" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
     <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
@@ -300,21 +299,17 @@
     <Property Name="CREATE_DT" Type="datetime" />
     <Property Name="LAST_UPDATE_DT" Type="datetime" />
   </EntityType>
-  <!--產生期間發現錯誤:
-警告 6002: 資料表/檢視 'dbTreasury.dbo.ITEM_BOOK' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
   <EntityType Name="ITEM_BOOK">
     <Key>
       <PropertyRef Name="ITEM_ID" />
       <PropertyRef Name="GROUP_NO" />
       <PropertyRef Name="COL" />
-      <PropertyRef Name="COL_NAME" />
-      <PropertyRef Name="COL_VALUE" />
     </Key>
     <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="GROUP_NO" Type="int" Nullable="false" />
     <Property Name="COL" Type="nvarchar" MaxLength="50" Nullable="false" />
     <Property Name="COL_NAME" Type="nvarchar" MaxLength="50" Nullable="false" />
-    <Property Name="COL_VALUE" Type="nvarchar" MaxLength="200" Nullable="false" />
+    <Property Name="COL_VALUE" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <EntityType Name="ITEM_CA">
     <Key>
@@ -324,7 +319,7 @@
     <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="CA_USE" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="CA_DESC" Type="varchar" MaxLength="1" Nullable="false" />
-    <Property Name="BANK" Type="nvarchar" MaxLength="8" Nullable="false" />
+    <Property Name="BANK" Type="nvarchar" MaxLength="8" />
     <Property Name="CA_NUMBER" Type="varchar" MaxLength="50" Nullable="false" />
     <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
     <Property Name="APLY_DEPT" Type="varchar" MaxLength="5" Nullable="false" />
@@ -567,9 +562,11 @@
     <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="GROUP_NO" Type="int" Nullable="false" />
     <Property Name="TREA_BATCH_NO" Type="int" Nullable="false" />
+    <Property Name="STOCK_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="STOCK_NO_PREAMBLE" Type="nvarchar" MaxLength="7" />
     <Property Name="STOCK_NO_B" Type="nvarchar" MaxLength="8" />
     <Property Name="STOCK_NO_E" Type="nvarchar" MaxLength="8" />
+    <Property Name="STOCK_CNT" Type="int" />
     <Property Name="DENOMINATION" Type="decimal" Precision="18" Scale="2" />
     <Property Name="NUMBER_OF_SHARES" Type="decimal" Precision="18" Scale="2" />
     <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
@@ -713,10 +710,9 @@
   <EntityType Name="OTHER_ITEM_APLY">
     <Key>
       <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="DATA_SEQ" />
+      <PropertyRef Name="ITEM_ID" />
     </Key>
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
-    <Property Name="DATA_SEQ" Type="int" Nullable="false" />
     <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
   </EntityType>
   <EntityType Name="PIA_EXEC_TYPE">
@@ -1000,6 +996,7 @@
     <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="Self.ITEM_BLANK_NOTE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="Self.ITEM_DEP_ORDER_D" Schema="dbo" store:Type="Tables" />
@@ -1038,15 +1035,6 @@
     [CODE_USER_ROLE_HIS].[ROLE_ID] AS [ROLE_ID], 
     [CODE_USER_ROLE_HIS].[EXEC_ACTION] AS [EXEC_ACTION]
     FROM [dbo].[CODE_USER_ROLE_HIS] AS [CODE_USER_ROLE_HIS]</DefiningQuery>
-    </EntitySet>
-    <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" store:Type="Tables" store:Schema="dbo">
-      <DefiningQuery>SELECT 
-    [ITEM_BOOK].[ITEM_ID] AS [ITEM_ID], 
-    [ITEM_BOOK].[GROUP_NO] AS [GROUP_NO], 
-    [ITEM_BOOK].[COL] AS [COL], 
-    [ITEM_BOOK].[COL_NAME] AS [COL_NAME], 
-    [ITEM_BOOK].[COL_VALUE] AS [COL_VALUE]
-    FROM [dbo].[ITEM_BOOK] AS [ITEM_BOOK]</DefiningQuery>
     </EntitySet>
     <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" store:Type="Tables" store:Schema="dbo">
       <DefiningQuery>SELECT 

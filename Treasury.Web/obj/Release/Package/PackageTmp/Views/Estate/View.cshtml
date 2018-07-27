@@ -1,143 +1,136 @@
 ﻿@using Treasury.Web.Enum;
 @using Treasury.WebUtility;
-<div class="row">
-    <div style="padding-bottom:5px;">
-        <input type="button" id="ESTATEInsert" value="新增存入明細" class="btn btn-primary"/>
-    </div>
-    <div id="ESTATEjqgridDiv1" class="col-sm-24" style="padding-bottom:5px;">
+<div class="">
+    <form id="ESTATEForm">
+        <table>
+            <tr class="Estate_P" style="display:none">
+                <td>
+                    <label>存入資料 : </label>
+                </td>
+                <td colspan="3">
+                    @Html.RadioButton("cTradeType", "Estate_New", new { @checked = true }) 新購大樓
+                    @Html.RadioButton("cTradeType", "Estate_Db") 從資料庫選取大樓
+                </td>
+            </tr>
+            <tr>
+                <td style="width:100px">
+                    <label>冊號 : </label>
+                </td>
+                <td style="width:300px">
+                    <label id="lESTATE_BOOK_NO" class="ESTATE_View Estate_P" style="display:none" ></label>
+                    @Html.DropDownList("dESTATE_BOOK_NO", (SelectList)ViewBag.ESTATE_Book_No, new { @class = "Estate_G", @style= "width:207px;display:none" })
+                </td>
+                <td style="width:100px">
+                    <label>大樓名稱 : </label>
+                </td>
+                <td style="width:300px">
+                    @*<label id="lESTATE_BUILDING_NAME" class="ESTATE_View" style="display:none"></label>*@
+                    <input type="text" id="tESTATE_BUILDING_NAME" class="Estate_P Estate_New ESTATE_View" style="display:none" disabled/>
+                    @Html.DropDownList("dESTATE_BUILDING_NAME", (SelectList)ViewBag.ESTATE_Building_Name, new { @class = "Estate_Db Estate_G", @style = "width:207px;display:none" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>坐落 : </label>
+                </td>
+                <td>
+                    @*<label id="lESTATE_LOCATED" class="ESTATE_View Estate_G" ></label>*@
+                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_LOCATED" name="tESTATE_LOCATED" disabled/>
+                </td>
+                <td>
+                    <label>備註 : </label>
+                </td>
+                <td>
+                    @*<label id="lESTATE_MEMO" class="ESTATE_View Estate_G"></label>*@
+                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_MEMO" name="tESTATE_MEMO" disabled/>
+                </td>
+            </tr>
+        </table>
+        <div style="padding-bottom:5px;">
+            <input type="button" id="ESTATEInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+        </div>
+        <div id="ESTATEjqgridDiv" class="jqd" style="padding-bottom:5px;">
 
-    </div>
-    <div id="ESTATEjqgridDiv2"  class="col-sm-24">
-
-    </div>
-    <div style="text-align:center;padding-top:5px;display:none;"  class="ESTATEAct">
-        <input type="button" id="ESTATEApply" value="申請覆核"  class="btn btn-primary" />
-        <input type="button" id="ESTATECancel" value="取消申請"  class="btn btn-primary" />
-        <input type="button" id="ESTATEBack" value="回到功能選擇"  class="btn btn-primary" />
-    </div>
-    <div id="BillInsertDialog" style="display:none;">
-        <form id="ESTATEForm">
+        </div>
+        <div style="text-align:center;display:none;" class="ESTATE_Act">
+            <input type="button" id="ESTATEApply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="ESTATECancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="ESTATEBack" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </form>
+    <div id="ESTATEDialog" style="display:none">
+        <form id="ESTATEDialogForm">
             <table>
                 <tr>
-                    <td >
-                        <label>存入資料 : </label>
-                    </td>
-                    <td colspan="3">
-
-                    </td>
-                </tr>
-                <tr>
-                    <td >
-                        <label>冊號 : </label>
+                    <td>
+                        <label>狀別 : </label>
                     </td>
                     <td>
-
-                    </td>
-                    <td>
-                        <label>大樓名稱 : </label>
-                    </td>
-                    <td>
-                      
+                        @Html.DropDownList("dESTATE_FORM_NO", (SelectList)ViewBag.ESTATE_From_No, new { @class = "ESTATEInsertType", @style = "width:207px" })
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label>坐落 : </label>
+                        <label>發狀日 : </label>
                     </td>
                     <td>
-                        <input type="text" class="ESTATEInsertType" id="tESTATE_Check_No_B" name="tESTATE_Check_No_B"/>
+                        <input type="text" id="tESTATE_DATE" class="ESTATEInsertType"/>
                     </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>字號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tESTATE_OWNERSHIP_CERT_NO" class="ESTATEInsertType" maxlength="16"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>地/建號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tESTATE_LAND_BUILDING_NO" class="ESTATEInsertType" maxlength="10"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>門牌號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tESTATE_HOUSE_NO" class="ESTATEInsertType" maxlength="30"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>流水號/編號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tESTATE_SEQ" class="ESTATEInsertType" maxlength="16"/>
+                    </td>
+                </tr>
+                <tr>
                     <td>
                         <label>備註 : </label>
                     </td>
                     <td>
-                        <input type="text" class="ESTATEInsertType" id="tESTATE_Check_No_E" name="tESTATE_Check_No_E" />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4">
-                        <input type="hidden" id="tAplyNo" />
-                        <input type="hidden" id="tDataSeq" />
-                        <input type="hidden" id="tItemId" />
+                        <textarea id="tESTATE_MEMO_D" class="ESTATEInsertType" style="width:207px" maxlength="200"></textarea>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <input type="button" id="ESTATEInsertTemp" value="新增" class="btn btn-primary" style="display:none"/>
-                        <input type="button" id="ESTATEUpdateTemp" value="修改" class="btn btn-primary" style="display:none"/>
-                        <input type="button" id="ESTATEDeleteTemp" value="刪除" class="btn btn-primary" style="display:none"/>
+                       <input type="hidden" id="hESTATE_ITEM_ID"/>
+                       @*<input type="hidden" id="hESTATE_GROUP_NO" />*@
                     </td>
-                    <td colspan="2" style="text-align:right;">
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="ESTATEInsertTemp" value="新增" class="btn btn-primary"  />
+                        <input type="button" id="ESTATEUpdateTemp" value="修改" class="btn btn-primary"  />
+                        <input type="button" id="ESTATEDeleteTemp" value="刪除" class="btn btn-primary"  />
+                    </td>
+                    <td  style="text-align:right;">
                         <input type="button" id="ESTATECancelTemp" value="取消" class="btn btn-primary" />
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </div>
-    <div id="BillTakeOutDialog" style="display:none">
-        <form id="ESTATETakeOutForm">
-            <table>
-                <tr>
-                    <td>
-                        <label>發票行庫 : </label>
-                    </td>
-                    <td>
-                        <label id="lESTATE_Issuing_Bank"></label>
-                    </td>
-                    <td>
-                        <label>類型 : </label>
-                    </td>
-                    <td>
-                        <label id="lESTATE_Check_Type"></label>
-                    </td>
-                    <td style="width:70px">
-                        <label>字軌 : </label>
-                    </td>
-                    <td>
-                        <label id="lESTATE_Check_No_Track"></label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label>票號(起) : </label>
-                    </td>
-                    <td>
-                        <label id="lESTATE_Check_No_B"></label>
-                    </td>
-                    <td>
-                        <label>票號(迄) : </label>
-                    </td>
-                    <td>
-                        <label id="lESTATE_Check_No_E"></label>
-                    </td>
-                    <td colspan="2">
-                        <input type="hidden" id="hItemId" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label>取出票號(迄) : </label>
-                    </td>
-                    <td>
-                        <input type="text" id="tTakeOutE" name="tTakeOutE"/>
-                    </td>
-                    <td>
-                        <label>取出總張數 : </label>
-                    </td>
-                    <td>
-                        <input type="text" id="tTakeOutTotalNum" name="tTakeOutTotalNum" />
-                    </td>
-                    <td colspan="2">
-                        <input type="hidden" id="hESTATE_total" />
-                        <input type="hidden" id="hReMainTotalNum">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <input type="button" id="ESTATETakeOutTemp" value="取出" class="btn btn-primary" />
-                    </td>
-                    <td colspan="3" style="text-align:right;">
-                        <input type="button" id="ESTATETakeOutCancelTemp" value="取消" class="btn btn-primary" />
                     </td>
                 </tr>
             </table>
@@ -147,93 +140,239 @@
 
 <script>
     $(function () {
-        //#region 參數設定
-        var ESTATEFormId = 'ESTATEForm'; //formId
-        var ESTATE_AplyNoId = 'tAplyNo'; //申請單號Id
-        var ESTATE_DataSeqId = 'tDataSeq'; //明細流水號Id
-        var ESTATE_ItemId = 'tItemId'; //物品編號Id
-        var ESTATE_Check_TypeId = 'dESTATE_Check_Type'; //支票類型Id
-        var ESTATE_Issuing_BankId = 'tESTATE_Issuing_Bank'; //行庫Id
-        var ESTATE_Check_No_TrackId = 'tESTATE_Check_No_Track'; //字軌Id
-        var ESTATE_Check_No_BId = 'tESTATE_Check_No_B'; //票號(起)Id
-        var ESTATE_Check_No_EId = 'tESTATE_Check_No_E'; //票號(迄)Id
-        var ESTATETakeOutFormId = 'ESTATETakeOutForm'; //TakeOutformId
-        var ESTATE_totalId = 'ESTATE_total'; //總張數Id
-        var ESTATE_Take_OutId = 'tTakeOutE'; //取出票號(迄)Id
-        var ESTATE_Take_Out_TotalId = 'tTakeOutTotalNum'; //取出總張數
-        var ESTATE_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態      
-        var type = $('input[name=cProjectType]:checked').val();
-        if (!ESTATE_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
-            $('.ESTATEAct').hide();
-            type = '@ViewBag.dAccess';
-            $('.aplyNoDetail').show();
-            var TARdata = @Html.Raw(Json.Encode(ViewBag.TAR));
-            //$('#TAVMvAplyNo').text(TARdata.vAplyNo);
-            //$('#TAVMvItem').text(TARdata.vItem)
-            //$('#TAVMvAplyUnit').text(TARdata.vAplyUnit);
-            //$('#TAVMvAplyUid').text(TARdata.vAplyUid);
-            //$('#TAVMvChargeUnit').text(TARdata.vAplyUnit);
-            //$('#TAVMvAccessType').text(TARdata.vAccessType);
-            //$('#TAVMvExpectedAccessDate').text(TARdata.vExpectedAccessDate);
-            //$('#TAVMvCreateDt').text(TARdata.vCreateDt);
-            //$('#TAVMvCreateUnit').text(TARdata.vCreateUnit);
-            //$('#TAVMvCreateUid').text(TARdata.vCreateUid);
-            //$('#TAVMvAccessReason').val(TARdata.vAccessReason);
-        }
-        else { //是覆核狀態 (為存入 or 取出 動作)
-            $('.ESTATEAct').show();
-        }
-        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
-        if (typeFlag && ESTATE_Act_Type) {
-            $('#ESTATEInsert').show();
-        }
-        else
-        {
-            $('#ESTATEInsert').hide();
-        }
-        //#endregion
-
         //#region url設定
         var ESTATEurl = {};
-        ESTATEurl.Insert = '@Url.Action("InsertView", "Bill")';
-        ESTATEurl.getData = '@Url.Action("GetCacheData", "Bill")';
-        ESTATEurl.InsertTempData = '@Url.Action("InsertTempData", "Bill")';
-        ESTATEurl.UpdateTempData = '@Url.Action("UpdateTempData", "Bill")';
-        ESTATEurl.DeleteTempData = '@Url.Action("DeleteTempData", "Bill")';
-        ESTATEurl.ResetTempData = '@Url.Action("ResetTempData", "Bill")';
-        ESTATEurl.TakeOutData = '@Url.Action("TakeOutData", "Bill")';
-        ESTATEurl.ApplyTempData = '@Url.Action("ApplyTempData", "Bill")';
-        ESTATEurl.RepeatData = '@Url.Action("RepeatData", "Bill")';
+        ESTATEurl.Insert = '@Url.Action("InsertView", "Estate")';
+        ESTATEurl.getData = '@Url.Action("GetCacheData", "Estate")';
+        ESTATEurl.InsertTempData = '@Url.Action("InsertTempData", "Estate")';
+        ESTATEurl.UpdateTempData = '@Url.Action("UpdateTempData", "Estate")';
+        ESTATEurl.DeleteTempData = '@Url.Action("DeleteTempData", "Estate")';
+        ESTATEurl.ResetTempData = '@Url.Action("ResetTempData", "Estate")';
+        ESTATEurl.TakeOutData = '@Url.Action("TakeOutData", "Estate")';
+        ESTATEurl.ApplyTempData = '@Url.Action("ApplyTempData", "Estate")';
+        ESTATEurl.GetItemBook = '@Url.Action("GetItemBook", "Estate")';
         //#endregion
+
+        //#region 參數設定
+
+        //項目冊號
+        var ESTATEFormId = 'ESTATEForm'; //formId
+        var ESTATE_BookNoLId = 'lESTATE_BOOK_NO'; //冊號Id(label)
+        var ESTATE_BookNoDId = 'dESTATE_BOOK_NO'; //冊號Id(DropDown List)
+        var ESTATE_Building_NameTId = 'tESTATE_BUILDING_NAME'; //大樓名稱Id(text)
+        var ESTATE_Building_NameDId = 'dESTATE_BUILDING_NAME'; //大樓名稱Id(DropDown List)
+        var ESTATE_LocatedTId = 'tESTATE_LOCATED'; //坐落Id(text)
+        var ESTATE_MemoTId = 'tESTATE_MEMO'; //備註Id(text)
+
+        //庫存資料
+        var ESTATEDialogId = 'ESTATEDialog'; //dialogId
+        var ESTATEDialogFormId = 'ESTATEDialogForm'; //dialogFormId
+        var ESTATE_Form_NoDId = 'dESTATE_FORM_NO'; //狀別Id(DropDown List)
+        var ESTATE_DateTId = 'tESTATE_DATE'; //發狀日Id(text)
+        var ESTATE_Ownership_Cert_NoTId = 'tESTATE_OWNERSHIP_CERT_NO'; //字號Id(text)
+        var ESTATE_Land_Building_NoTId = 'tESTATE_LAND_BUILDING_NO'; //地/建號Id(text)
+        var ESTATE_House_NoTId = 'tESTATE_HOUSE_NO'; //門牌號Id(text)
+        var ESTATE_SeqTId = 'tESTATE_SEQ'; //流水號/編號Id(text)
+        var ESTATE_Memo_DTId = 'tESTATE_MEMO_D'; //備註Id(text)
+        var ESTATE_Item_IdHlId = 'hESTATE_ITEM_ID'; //物品標號Id(hidden)
+
+        var ESTATE_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+        if (!ESTATE_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.ESTATE_Act').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.ESTATE_Act').show();
+        }
+        var ESTATE_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (ESTATE_Aply_No_Flag && ESTATE_Act_Type) {
+            type = '@ViewBag.dAccess';
+            $('#ESTATECancel').hide(); //已經申請故無法取消申請
+            //跳到資料庫選取
+
+            setTimeout(
+            function () {
+                $("input[name='cTradeType'][value='Estate_Db']").click();
+                $.when(
+                      $('#' + ESTATE_Building_NameDId).val('@ViewBag.group').change()
+                    )
+                .done(function(){
+                    $("input[name='cTradeType']").prop('disabled', true);
+                    $('#' + ESTATE_LocatedTId).prop('disabled', true);
+                    $('#' + ESTATE_MemoTId).prop('disabled', true);
+                })
+            }, 100);
+            $('#' + ESTATE_Building_NameDId).prop('disabled', true);
+            $('#' + ESTATE_BookNoDId).prop('disabled', true);
+        }
+        var tradeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (tradeFlag && ESTATE_Act_Type) {
+            $('.Estate_P').show();
+            $('#ESTATEInsert').show();
+            $('#' + ESTATE_Building_NameTId).prop('disabled', false);
+            $('#' + ESTATE_LocatedTId).prop('disabled', false);
+            if ('@ViewBag.CustodianFlag' == "True") {
+                $("#" + ESTATE_MemoTId).attr("Disabled", false);
+            }
+            else {
+                $("#" + ESTATE_MemoTId).attr("Disabled", true);
+            }
+        }
+        else if (!tradeFlag && ESTATE_Act_Type) {
+            $('.Estate_G').show();
+        }
+        else {
+            $('.ESTATE_View').show();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    groupNo: 0,
+                    accessType: tradeFlag
+                }),
+                dataType: "json",
+                url: ESTATEurl.GetItemBook,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    var data = result.Datas;
+                    $('#' + ESTATE_BookNoLId).text(data.BOOK_NO);
+                    $('#' + ESTATE_Building_NameTId).val(data.BUILDING_NAME)
+                    $('#' + ESTATE_LocatedTId).val(data.LOCATED);
+                    $('#' + ESTATE_MemoTId).val(data.MEMO);
+                }
+            })
+        }
+
+        //#endregion
+
+
+
+        $('input[name=cTradeType]').on('change', function () {
+            var type = $('input[name=cTradeType]:checked').val();
+            $('.Estate_New,.Estate_Db').hide();
+            ESTATEReset();
+            $('.' + type).show();
+            if (type == 'Estate_New')
+            {
+                $('#' + ESTATE_LocatedTId).prop('disabled', false);
+                if ('@ViewBag.CustodianFlag' == "True") {
+                    $("#" + ESTATE_MemoTId).attr("Disabled", false);
+                }
+                else {
+                    $("#" + ESTATE_MemoTId).attr("Disabled", true);
+                }
+            }
+            else if (type == 'Estate_Db')
+            {
+                $('#' + ESTATE_LocatedTId).prop('disabled', true);
+                $('#' + ESTATE_MemoTId).prop('disabled', true);
+            }
+        });
+
+        //大樓名稱變更抓取對應資料
+        $('#' + ESTATE_Building_NameDId).on('change', function () {
+            if (tradeFlag) {
+                $('#' + ESTATE_BookNoLId).text('');
+            }
+            else {
+                if ($('#' + ESTATE_BookNoDId + ' option').length > 0) {
+                    $('#' + ESTATE_BookNoDId).val($($('#' + ESTATE_BookNoDId + ' option')[0]).val())
+                }
+            }
+            $('#' + ESTATE_LocatedTId).val('');
+            $('#' + ESTATE_MemoTId).val('');
+            var _val = -1;
+            if ($(this).val().trim() != '')
+                _val = $(this).val();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    groupNo: _val,
+                    accessType: tradeFlag,
+                    aplyNo: $('#TAR_AplyNo').val()
+                }),
+                dataType: "json",
+                url: ESTATEurl.GetItemBook,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    var data = result.Datas;
+                    if (tradeFlag) { //存入
+                        $('#' + ESTATE_BookNoLId).text(data.BOOK_NO);
+                    }
+                    else { //取出
+                        $('#' + ESTATE_BookNoDId).val(data.BOOK_NO);
+                    }
+                    $('#' + ESTATE_LocatedTId).val(data.LOCATED);
+                    $('#' + ESTATE_MemoTId).val(data.MEMO);
+                    ESTATETempGrid();
+                }
+                else {
+                    ESTATETempGrid();
+                }
+            })
+
+        });
+
+        //冊號變更
+        $('#' + ESTATE_BookNoDId).on('change', function () {
+            if ($('#' + ESTATE_Building_NameDId + ' option').length > 0) {
+                $('#' + ESTATE_Building_NameDId).val($($('#' + ESTATE_Building_NameDId + ' option')[0]).val())
+            }
+            $('#' + ESTATE_LocatedTId).val('');
+            $('#' + ESTATE_MemoTId).val('');
+            var _val = -1;
+            if ($(this).val().trim() != '')
+                _val = $(this).val();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    groupNo: _val,
+                    accessType: tradeFlag,
+                    aplyNo: $('#TAR_AplyNo').val()
+                }),
+                dataType: "json",
+                url: ESTATEurl.GetItemBook,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    var data = result.Datas;
+                    $('#' + ESTATE_Building_NameDId).val(data.BOOK_NO);
+                    $('#' + ESTATE_LocatedTId).val(data.LOCATED);
+                    $('#' + ESTATE_MemoTId).val(data.MEMO);
+                    ESTATETempGrid();
+                }
+                else {
+                    ESTATETempGrid();
+                }
+            })
+
+        });
+
+        function clearJqgrid(gridDivId) {
+            $('#' + gridDivId).children().remove();
+        }
 
         //#region 初始動作
         ESTATETempGrid();
-        ESTATEDayGrid();
         setESTATEVerified();
         //#endregion
 
         //#region 註冊verified
         function setESTATEVerified() {
-            verified.english(ESTATEFormId, ESTATE_Check_No_TrackId); //字軌僅能輸入英文
-            verified.required(ESTATEFormId, ESTATE_Check_No_TrackId, message.required('字軌')); //字軌為必填
-            verified.maxlength(ESTATEFormId, ESTATE_Check_No_TrackId, 4); //字軌最大長度(4)
-            verified.positiveInt(ESTATEFormId, ESTATE_Check_No_BId); //票號(起) 僅能輸入數字(正)
-            verified.required(ESTATEFormId, ESTATE_Check_No_BId, message.required('票號(起)')); //票號(起)為必填
-            verified.maxlength(ESTATEFormId, ESTATE_Check_No_BId, 8); //票號(起)最大長度(8)
-            verified.positiveInt(ESTATEFormId, ESTATE_Check_No_EId); //票號(迄) 僅能輸入數字(正)
-            verified.required(ESTATEFormId, ESTATE_Check_No_EId, message.required('票號(迄)')); //票號(迄)為必填
-            verified.maxlength(ESTATEFormId, ESTATE_Check_No_EId, 8); //票號(迄)最大長度(8)
-            verified.positiveInt(ESTATETakeOutFormId, ESTATE_Take_OutId); //取出票號(迄) 僅能輸入數字(正)
-            verified.maxlength(ESTATETakeOutFormId, ESTATE_Take_OutId, 8); //取出票號(迄)最大長度(8)
-            verified.required(ESTATETakeOutFormId, ESTATE_Take_OutId, message.required('取出票號(迄)'));
-            verified.positiveInt(ESTATETakeOutFormId, ESTATE_Take_Out_TotalId); //取出總張數 僅能輸入數字(正)
-            verified.required(ESTATETakeOutFormId, ESTATE_Take_Out_TotalId, message.required('總張數'));
+            verified.required(ESTATEFormId, ESTATE_Building_NameTId, message.required('大樓名稱')); //大樓名稱為必填
+            verified.maxlength(ESTATEFormId, ESTATE_Building_NameTId, 200); //字軌最大長度(200)
+            verified.required(ESTATEFormId, ESTATE_LocatedTId, message.required('坐落')); //坐落為必填
+            verified.maxlength(ESTATEFormId, ESTATE_LocatedTId, 200); //字軌最大長度(200)
+            //verified.required(ESTATEFormId, ESTATE_MemoTId, message.required('備註')); //備註為必填
+            //verified.maxlength(ESTATEFormId, ESTATE_MemoTId, 200); //字軌最大長度(200)
         }
         //#endregion
 
         //#region 註冊事件
         $('input:button').each(function () {
-            var id = $(this).attr('id');          
+            var id = $(this).attr('id');
             switch (id) {
                 case 'ESTATEInsert':
                     $('#' + id).off('click');
@@ -265,77 +404,62 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { ESTATEDeleteTempFun(); });
                     break;
-                case 'ESTATETakeOutTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { ESTATETakeOutTempFun(); });
-                    break;
-            }
-        });
-        $('#' + ESTATE_Take_OutId).off('blur', function () { });
-        $('#' + ESTATE_Take_OutId).on('blur', function () {
-            if ($('#' + ESTATE_Take_OutId).val().length <= 8)
-            {
-                var _ESTATE_Take_Out = parseInt($('#tTakeOutE').val());
-                var _lESTATE_Check_No_E = parseInt($('#lESTATE_Check_No_E').text());
-                var _lESTATE_Check_No_B = parseInt($('#lESTATE_Check_No_B').text());
-                if (!isNaN(_ESTATE_Take_Out) && _lESTATE_Check_No_E >= _ESTATE_Take_Out && _ESTATE_Take_Out >= _lESTATE_Check_No_B)
-                {
-                    $('#' + ESTATE_Take_Out_TotalId).val((_ESTATE_Take_Out - _lESTATE_Check_No_B + 1));
-                }
-                if (!isNaN(_ESTATE_Take_Out))
-                    $('#' + ESTATE_Take_OutId).val(created.padLeft(_ESTATE_Take_Out, 8, '0'));
-            }
-        });
-        $('#' + ESTATE_Take_Out_TotalId).off('blur', function () { });
-        $('#' + ESTATE_Take_Out_TotalId).on('blur', function () {
-            var _ESTATE_Take_O_Total = parseInt($('#' + ESTATE_Take_Out_TotalId).val());
-            var _total = parseInt($('#hESTATE_total').val());
-            if (!isNaN(_ESTATE_Take_O_Total) && _total >= _ESTATE_Take_O_Total) {                
-                $('#' + ESTATE_Take_OutId).val(created.padLeft((parseInt($('#lESTATE_Check_No_B').text()) + _ESTATE_Take_O_Total - 1), 8, '0'));
             }
         });
 
-
-        //計算總張數
-        $('#' + ESTATE_Check_No_BId + ',#' + ESTATE_Check_No_EId).off('blur', function () { });
-        $('#' + ESTATE_Check_No_BId + ',#' + ESTATE_Check_No_EId).on('blur', function () {
-            setESTATE_total();
-        });
-
-        function setESTATE_total()
-        {
-            if ($('#' + ESTATE_Check_No_BId).val().length <= 8 && $('#' + ESTATE_Check_No_EId).val().length <= 8) {
-                var _Check_No_B = parseInt($('#' + ESTATE_Check_No_BId).val());
-                var _Check_No_E = parseInt($('#' + ESTATE_Check_No_EId).val());
-                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E >= _Check_No_B) {
-                    $('#' + ESTATE_totalId).html(_Check_No_E - _Check_No_B + 1);
-                }
-                else {
-                    $('#' + ESTATE_totalId).html('');
-                }
-                if (!isNaN(_Check_No_B))
-                    $('#' + ESTATE_Check_No_BId).val(created.padLeft(_Check_No_B, 8, '0'));
-                if (!isNaN(_Check_No_E))
-                    $('#' + ESTATE_Check_No_EId).val(created.padLeft(_Check_No_E, 8, '0'));
+        function ESTATEReset() {
+            $('#' + ESTATE_BookNoLId).text('');
+            $('#' + ESTATE_LocatedTId).val('');
+            $('#' + ESTATE_MemoTId).val('');
+            if ($('#' + ESTATE_BookNoDId + ' option').length > 0) {
+                $('#' + ESTATE_BookNoDId).val($($('#' + ESTATE_BookNoDId + ' option')[0]).val())
             }
-            else {
-                $('#' + ESTATE_totalId).html('');
+            if ($('#' + ESTATE_Building_NameDId + ' option').length > 0) {
+                $('#' + ESTATE_Building_NameDId).val($($('#' + ESTATE_Building_NameDId + ' option')[0]).val())
             }
         }
-        //#endregion
 
         function ESTATEApplyFun() {
-            $.ajax({
-                type: "POST",
-                dataType: "json",
-                url: ESTATEurl.ApplyTempData,
-                contentType: 'application/json',
-            }).done(function (result) {
-                customerUtility.alertAuto(result);
-                if (result.RETURN_FLAG) {
-                    customerUtility.closeDialog($('#ESTATEApply'));
+            if ($('#' + ESTATEFormId).valid()) {
+                var _BOOK_NO = '';
+                var _BUILDING_NAME = '';
+                if (tradeFlag) {
+                    var tradetype = $('input[name=cTradeType]:checked').val();
+                    if (tradetype == 'Estate_New') {
+                        _BUILDING_NAME = $('#' + ESTATE_Building_NameTId).val();
+                    }
+                    else if (tradetype == 'Estate_Db') {
+                        _BOOK_NO = $('#' + ESTATE_BookNoLId).text();
+                        _BUILDING_NAME = $('#' + ESTATE_Building_NameDId + ' option:selected').text().split('(')[0];
+                    }
                 }
-            })
+                else {
+                    _BOOK_NO = $('#' + ESTATE_BookNoDId).val();
+                    _BUILDING_NAME = $('#' + ESTATE_Building_NameDId + ' option:selected').text().split('(')[0];
+                }
+                if (_BUILDING_NAME.trim() == '') {
+                    customerUtility.alert('大樓名稱不能為空', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: EstateModel(
+                            _BOOK_NO,
+                            _BUILDING_NAME,
+                            $('#' + ESTATE_LocatedTId).val(),
+                            $('#' + ESTATE_MemoTId).val())
+                    }),
+                    dataType: "json",
+                    url: ESTATEurl.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ESTATEApply'));
+                    }
+                })
+            }
         }
 
         function ESTATECancelFun() {
@@ -348,335 +472,154 @@
                 url: ESTATEurl.ResetTempData,
                 contentType: 'application/json',
             }).done(function (result) {
+
+                if (tradeFlag) {
+                    $('input[name="cTradeType"]').each(function () {
+                        if ($(this).val() == 'Estate_New')
+                            $(this).click();
+                    });
+                }
+                else {
+                    if ($('#' + ESTATE_BookNoDId + ' option').length > 0) {
+                        $('#' + ESTATE_BookNoDId).val($($('#' + ESTATE_BookNoDId + ' option')[0]).val())
+                    }
+                    if ($('#' + ESTATE_Building_NameDId + ' option').length > 0) {
+                        $('#' + ESTATE_Building_NameDId).val($($('#' + ESTATE_Building_NameDId + ' option')[0]).val())
+                    }
+                    $('#' + ESTATE_LocatedTId).val('');
+                    $('#' + ESTATE_MemoTId).val('');
+                }
                 ResetInsertDialog();
                 ESTATETempGrid();
-                ESTATEDayGrid();
             })
         }
 
         function formatterTakeOut(cellvalue, options, rdata) {
-            let str = '';
-            str += '<div class="btn-group">';
-            str += '<a title="取出" class="btn actionTakeout" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="ESTATE' + options.gid + 'TakeOut' + options.rowId + '" return:false;="">';
-            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
-            str += '<a title="重設" class="btn actionRepeat" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="ESTATE' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
-            str += '<i class="fa fa-repeat fa-lg"></i></a>';
-            str += '</div>';
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox Estatetakeouts customerCheck'></div>";
             return str;
         }
 
-        function ESTATEformatterCheckType(cellvalue, options, rdata)
-        {
-            var value = '';
-            switch (cellvalue)
-            {
-                case '01':
-                    value = '01 有膠';
-                    break;
-                case '02':
-                    value = '02 無膠';
-                    break;
-                case null:
-                    value = '';
-                    break;
-                default:
-                    value = cellvalue;
-                    break;
-            }
-            return value;
-        }
-
-        function ESTATEunformatterCheckType(cellvalue, options, rdata) {
-            return cellvalue;
-        }
 
         function ESTATETempGrid() {
-            if (typeFlag) {
-                var colNameArray = ['項次', '動作', '發票行庫', '類型', '字軌',
-                    '支票號碼(起)', '支票號碼(迄)', '總張數',
-                    '物品單號', '申請單號', '明細流水號'];
-                var colModelArray = [
-                     { name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' }
-                ];
-                if (ESTATE_Act_Type) {
-                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
-                    colModelArray.push({ name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false });
-                }
-                else {
-                    colModelArray.push( { name: "act", index: "act", width: 0, sortable: false, hidden: true });
-                    colModelArray.push({ name: "vIssuingBank", index: "vIssuingBank", width: 210, sortable: false });
-                }
-                colModelArray.push({ name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: ESTATEformatterCheckType, unformat: ESTATEunformatterCheckType });
-                colModelArray.push({ name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false });
-                colModelArray.push({ name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", width: 200, sortable: false, align: 'right' });
+
+            if (tradeFlag) { //存入
+                var colNameArray = ['動作', '狀別', '發狀日', '字號', '地/建號',
+                    '門牌號', '流水號/編號', '備註', '物品編號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vEstate_From_No", index: "vEstate_From_No", width: 90, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vEstate_Date", index: "vEstate_Date", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vOwnership_Cert_No", index: "vOwnership_Cert_No", width: 90, sortable: false });
+                colModelArray.push({ name: "vLand_Building_No", index: "vLand_Building_No", width: 90, sortable: false });
+                colModelArray.push({ name: "vHouse_No", index: "vHouse_No", width: 120, sortable: false });
+                colModelArray.push({ name: "vEstate_Seq", index: "vEstate_Seq", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
-                colModelArray.push({ name: "vAplyNo", index: "vAplyNo", hidden: true });
-                colModelArray.push({ name: "vDataSeq", index: "vDataSeq", hidden: true });
                 jqgridCustom.createJqgridByCache(
-                    'ESTATEjqgridDiv1',
+                    'ESTATEjqgridDiv',
                     'ESTATETempList',
                     'ESTATETempPeger',
                     ESTATEurl.getData,
                     {
-                        type: 'Temp'
+
                     },
                     colNameArray,
                     colModelArray,
                     '存入明細資料',
-                    jqgridCustom.getPage('ESTATEjqgridDiv1'),
-                    ESTATETempCompleteFun
+                    jqgridCustom.getPage('ESTATEjqgridDiv'),
+                    ESTATETempCompleteFun,
+                    true
                     );
             }
-            else {
-                var colNameArray = ['項次', '取出', '發票行庫', '類型',
-                    '字軌', '票號(起)', '票號(迄)', '取出票號(迄)', '取出總張數',
-                    '總張數', '剩餘總張數', '物品單號'];
-                var colModelArray = [{ name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' }];
-                if (ESTATE_Act_Type) {
-                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterTakeOut, align: 'center' });
-                    colModelArray.push({ name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false });
+            else { //取出
+                var colNameArray = ['取出', '動作', '狀別', '發狀日', '字號', '地/建號',
+                    '門牌號', '流水號/編號', '備註', '物品編號'];
+                var colModelArray = [];
+                if (!ESTATE_Act_Type) {
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 }
                 else {
-                    colModelArray.push({ name: "act", index: "act", width: 0, sortable: false, formatter: formatterTakeOut, align: 'center', hidden: true });
-                    colModelArray.push({ name: "vIssuingBank", index: "vIssuingBank", width: 210, sortable: false });
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
                 }
-                colModelArray.push({ name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: ESTATEformatterCheckType, unformat: ESTATEunformatterCheckType });
-                colModelArray.push({ name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false });
-                colModelArray.push({ name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTakeOutE", index: "vTakeOutE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTakeOutTotalNum", index: "vTakeOutTotalNum", width: 80, sortable: false, align: 'right' });
-                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", hidden: true });
-                colModelArray.push({ name: "vReMainTotalNum", index: "vReMainTotalNum", hidden: true });
+                colModelArray.push({ name: "vEstate_From_No", index: "vEstate_From_No", width: 90, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vEstate_Date", index: "vEstate_Date", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vOwnership_Cert_No", index: "vOwnership_Cert_No", width: 90, sortable: false });
+                colModelArray.push({ name: "vLand_Building_No", index: "vLand_Building_No", width: 90, sortable: false });
+                colModelArray.push({ name: "vHouse_No", index: "vHouse_No", width: 120, sortable: false });
+                colModelArray.push({ name: "vEstate_Seq", index: "vEstate_Seq", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 jqgridCustom.createJqgridByCache(
-                    'ESTATEjqgridDiv1',
+                    'ESTATEjqgridDiv',
                     'ESTATETempList',
                     'ESTATETempPeger',
                     ESTATEurl.getData,
                     {
-                        type: 'Temp'
                     },
                     colNameArray,
                     colModelArray,
                     '取出明細資料',
-                    jqgridCustom.getPage('ESTATEjqgridDiv1'),
-                    ESTATETempTakeOutFun
+                    jqgridCustom.getPage('ESTATEjqgridDiv'),
+                    ESTATETempTakeOutFun,
+                    true
                     );
             }
-        }
-
-        function ESTATEDayGrid() {
-            if(typeFlag){
-                var colNameArray = ['項次', '庫存狀態', '發票行庫', '類型',
-                    '總張數', '剩餘總張數', '字軌', '支票號碼(起)', '支票號碼(迄)',
-                    '物品單號', '申請單號', '明細流水號'];
-                var colModelArray = [
-                    { name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' },
-                    { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
-                    { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
-                    { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: ESTATEformatterCheckType, unformat: ESTATEunformatterCheckType },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
-                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
-                    { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
-                    { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
-                    { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },
-                    { name: "vItemId", index: "vItemId", hidden: true },
-                    { name: "vAplyNo", index: "vAplyNo", hidden: true },
-                    { name: "vDataSeq", index: "vDataSeq", hidden: true },
-                ];
-                jqgridCustom.createJqgridByCache(
-                    'ESTATEjqgridDiv2',
-                    'ESTATEDayList',
-                    'ESTATEDayPeger',
-                    ESTATEurl.getData,
-                    {
-                        type: 'Day'
-                    },
-                    colNameArray,
-                    colModelArray,
-                    '當日庫存明細資料',
-                    jqgridCustom.getPage('ESTATEjqgridDiv2')
-                    );
-            }
-            else{
-                var colNameArray = ['項次', '庫存狀態', '發票行庫', '類型',
-                    '總張數', '剩餘總張數', '字軌', '支票號碼(起)', '支票號碼(迄)',
-                    '物品單號'];
-                var colModelArray = [
-                    { name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'right' },
-                    { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
-                    { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
-                    { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: ESTATEformatterCheckType, unformat: ESTATEunformatterCheckType },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
-                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
-                    { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
-                    { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
-                    { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },
-                    { name: "vItemId", index: "vItemId", hidden: true },
-                ];
-                jqgridCustom.createJqgridByCache(
-                    'ESTATEjqgridDiv2',
-                    'ESTATEDayList',
-                    'ESTATEDayPeger',
-                    ESTATEurl.getData,
-                    {
-                        type: 'Day'
-                    },
-                    colNameArray,
-                    colModelArray,
-                    '當日庫存明細資料',
-                    jqgridCustom.getPage('ESTATEjqgridDiv2')
-                    );
-            }
-
         }
 
         function ESTATETempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'ESTATETemp', tempActFun);
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
-                $(this).find('td').find('a.actionTakeout').each(function () {
-                    $(this).off('click');
-                    $(this).on('click',function(){
-                        dialogTakeOutOpen(i+1);
-                    });
-                });
-                $(this).find('td').find('a.actionRepeat').each(function () {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.Estatetakeouts').each(function () {
                     $(this).off('click');
                     $(this).on('click', function () {
-                        repeat(i + 1);
+                        takeout(i + 1, $(this).prop('checked'));
                     });
                 });
             });
         }
 
-        function repeat(rowid) {
+        function takeout(rowid, flag) {
             var listId = 'ESTATETempList';
             var data = $("#" + listId).getRowData(rowid);
             $.ajax({
                 type: "POST",
                 data: JSON.stringify({
-                    model: BillViewModel(
-                        data.vItemId)
+                    model: EstateDetailViewModel(data.vItemId),
+                    takeoutFlag: flag
                 }),
                 dataType: "json",
-                url: ESTATEurl.RepeatData,
+                url: ESTATEurl.TakeOutData,
                 contentType: 'application/json',
             }).done(function (result) {
-                customerUtility.alertAuto(result);
                 if (result.RETURN_FLAG) {
                     ESTATETempGrid();
-                    ESTATEDayGrid();
                 }
             });
         }
 
-        function dialogTakeOutOpen(rowid) {
-            $('#' + ESTATETakeOutFormId).validate().resetForm();
-            var dialogId = 'BillTakeOutDialog';
-            var listId = 'ESTATETempList';
-            var data = $("#" + listId).getRowData(rowid);
-            $('#lESTATE_Issuing_Bank').text('');
-            $('#lESTATE_Issuing_Bank').text(data.vIssuingBank);
-            $('#lESTATE_Check_Type').text('');
-            $('#lESTATE_Check_Type').text(data.vCheckType);
-            $('#lESTATE_Check_No_Track').text('');
-            $('#lESTATE_Check_No_Track').text(data.vCheckNoTrack);
-            $('#lESTATE_Check_No_B').text('');
-            $('#lESTATE_Check_No_B').text(data.vCheckNoB);
-            $('#lESTATE_Check_No_E').text('');
-            $('#lESTATE_Check_No_E').text(data.vCheckNoE);
-            $('#hItemId').val('');
-            $('#hItemId').val(data.vItemId);
-            $('#hESTATE_total').val('');
-            $('#hESTATE_total').val(data.vCheckTotalNum);
-            $('#hReMainTotalNum').val('');
-            $('#hReMainTotalNum').val(data.vReMainTotalNum);
-            $('#tTakeOutE').val('');
-            $('#tTakeOutE').val(data.vTakeOutE);
-            $('#tTakeOutTotalNum').val('');
-            $('#tTakeOutTotalNum').val(data.vTakeOutTotalNum);
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: '取出空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
-            $('#' + dialogId).dialog('open');
-        }
-
-        function ESTATETakeOutTempFun()
-        {
-            if ($('#' + ESTATETakeOutFormId).valid()) {
-                var _ESTATE_Take_OutE = parseInt($('#tTakeOutE').val());
-                var _lESTATE_Check_No_E = parseInt($('#lESTATE_Check_No_E').text());
-                var _lESTATE_Check_No_B = parseInt($('#lESTATE_Check_No_B').text());
-                var _ESTATE_total = parseInt($('#hESTATE_total').val());
-                var _ESTATE_Take_Out_Total = parseInt($('#' + ESTATE_Take_Out_TotalId).val());
-                var _Check_No_B = parseInt($('#' + ESTATE_Check_No_BId).val());
-                var _Check_No_E = parseInt($('#' + ESTATE_Check_No_EId).val());
- 
-                if (_ESTATE_Take_OutE > _lESTATE_Check_No_E) {
-                    customerUtility.alert('取出票號(迄)不可大於票號(迄)!', 'w');
-                    return false;
-                }
-                if (_lESTATE_Check_No_B > _ESTATE_Take_OutE) {
-                    customerUtility.alert('取出票號(迄)不可小於票號(起)!', 'w');
-                    return false;
-                }
-                if (_ESTATE_Take_Out_Total >  _ESTATE_total){
-                    customerUtility.alert('取出總張數不可大於總張數(' + _ESTATE_total + ')!', 'w');
-                    return false;
-                }
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        model: BillViewModel(
-                            $('#hItemId').val(),
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            $('#tTakeOutE').val(),
-                            $('#tTakeOutTotalNum').val(),
-                            $('#hReMainTotalNum').val())
-                    }),
-                    dataType: "json",
-                    url: ESTATEurl.TakeOutData,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    customerUtility.alertAuto(result);
-                    if (result.RETURN_FLAG) {
-                        customerUtility.closeDialog($('#ESTATETakeOutTemp'));
-                        ESTATETempGrid();
-                        ESTATEDayGrid();
-                    }
+        function ESTATETempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'ESTATETemp', tempActFun);
+            if (!ESTATE_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
                 });
             }
         }
 
-        function ESTATETempCompleteFun(listId){
-            jqgridCustom.randerAction(listId, 'ESTATETemp', tempActFun);
-        }
-
         var tempActFun = {};
-        tempActFun.Edit = function(i)
-        {
+        tempActFun.Edit = function (i) {
             dialogOpen('@Ref.ActionType.Edit.ToString()', i);
         }
-        tempActFun.Dele = function(i)
-        {
+        tempActFun.Dele = function (i) {
             dialogOpen('@Ref.ActionType.Dele.ToString()', i);
         }
-        tempActFun.View = function(i)
-        {
+        tempActFun.View = function (i) {
             dialogOpen('@Ref.ActionType.View.ToString()', i);
         }
 
@@ -686,68 +629,60 @@
             dialogOpen('@Ref.ActionType.Add.ToString()', null);
         }
 
-        function dialogOpen(type, rowid)
-        {
-            $('#' + ESTATEFormId).validate().resetForm();
-            var dialogId = 'BillInsertDialog';
+        function dialogOpen(type, rowid) {
+            var dialogId = 'ESTATEDialog';
             var listId = 'ESTATETempList';
             var ESTATEInsertClass = 'ESTATEInsertType';
-            var title = '';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '不動產權狀',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
             $('#ESTATEInsertTemp,#ESTATEUpdateTemp,#ESTATEDeleteTemp').hide();
-            if (type == '@Ref.ActionType.Add.ToString()')
-            {
+            if (type == '@Ref.ActionType.Add.ToString()') {
                 ResetInsertDialog();
                 $('#ESTATEInsertTemp').show();
                 title = '@Ref.ActionType.Add.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', false);
             }
-            else if (type == '@Ref.ActionType.Dele.ToString()')
-            {
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
                 dialogSetData(listId, rowid);
                 $('#ESTATEDeleteTemp').show();
                 title = '@Ref.ActionType.Dele.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', true);
             }
-            else if (type == '@Ref.ActionType.Edit.ToString()')
-            {
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
                 dialogSetData(listId, rowid);
                 $('#ESTATEUpdateTemp').show();
                 title = '@Ref.ActionType.Edit.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', false);
             }
-            else if (type == '@Ref.ActionType.View.ToString()')
-            {
+            else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData(listId, rowid);
                 title = '@Ref.ActionType.View.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', true);
             }
-            $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
-                title: title + '空白票券',
-                width: 'auto',
-                autoOpen: false,
-                resizable: false,
-                closeText: '取消',
-            });
             $('#' + dialogId).dialog('open');
         }
 
         function ResetInsertDialog() {
-            if ($('#' + ESTATE_Check_TypeId + ' option').length > 0)
-            {
-                $('#' + ESTATE_Check_TypeId).val($($('#' + ESTATE_Check_TypeId + ' option')[0]).val())               
+            if ($('#' + ESTATE_Form_NoDId + ' option').length > 0) {
+                $('#' + ESTATE_Form_NoDId).val($($('#' + ESTATE_Form_NoDId + ' option')[0]).val())
             }
-            if ($('#sESTATE_Issuing_Bank option').length > 0) {
-                $('#sESTATE_Issuing_Bank').val($($('#sESTATE_Issuing_Bank option')[0]).val())
-            }          
-            $('#' + ESTATE_AplyNoId).val('');
-            $('#' + ESTATE_DataSeqId).val('');
-            $('#' + ESTATE_ItemId).val('');
-            $('#' + ESTATE_Issuing_BankId).val('');
-            $('#' + ESTATE_Check_No_TrackId).val('');
-            $('#' + ESTATE_Check_No_BId).val('');
-            $('#' + ESTATE_Check_No_EId).val('');
-            $('#' + ESTATE_totalId).html('');
+            $('#' + ESTATE_DateTId).val('');
+            $('#' + ESTATE_Ownership_Cert_NoTId).val('');
+            $('#' + ESTATE_Land_Building_NoTId).val('');
+            $('#' + ESTATE_House_NoTId).val('');
+            $('#' + ESTATE_SeqTId).val('');
+            $('#' + ESTATE_Memo_DTId).val('');
+            $('#' + ESTATE_Item_IdHlId).val('');
         }
 
         function dialogSetData(listId, rowid) {
@@ -757,153 +692,144 @@
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
-                $('#' + ESTATE_AplyNoId).val(data.vAplyNo);
-                $('#' + ESTATE_DataSeqId).val(data.vDataSeq);
-                $('#' + ESTATE_ItemId).val(data.vItemId);
-                $('#' + ESTATE_Check_TypeId).val(data.vCheckType.split(' ')[0]);
-                $('#' + ESTATE_Issuing_BankId).val(data.vIssuingBank);
-                $('#' + ESTATE_Check_No_TrackId).val(data.vCheckNoTrack);
-                $('#' + ESTATE_Check_No_BId).val(data.vCheckNoB);
-                $('#' + ESTATE_Check_No_EId).val(data.vCheckNoE);
-                $('#' + ESTATE_totalId).html(data.vCheckTotalNum);
+                $('#' + ESTATE_Form_NoDId).val(data.vEstate_From_No);
+                $('#' + ESTATE_DateTId).val(data.vEstate_Date);
+                $('#' + ESTATE_Ownership_Cert_NoTId).val(data.vOwnership_Cert_No);
+                $('#' + ESTATE_Land_Building_NoTId).val(data.vLand_Building_No);
+                $('#' + ESTATE_House_NoTId).val(data.vHouse_No);
+                $('#' + ESTATE_SeqTId).val(data.vEstate_Seq);
+                $('#' + ESTATE_Memo_DTId).val(data.vMemo);
+                $('#' + ESTATE_Item_IdHlId).val(data.vItemId);
             }
         }
 
-        //新增暫存空白票據明細
+        //新增暫存不動產明細
         function ESTATEInsertTempFun() {
-            if ($('#' + ESTATEFormId).valid())
-            {
-                var _Check_No_B = parseInt($('#' + ESTATE_Check_No_BId).val());
-                var _Check_No_E = parseInt($('#' + ESTATE_Check_No_EId).val());
-                if(_Check_No_B > _Check_No_E)
-                {
-                    customerUtility.alert('迄號不可小於起號!', 'w');
-                    return false;
-                }
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        model: BillViewModel(
-                            created.uuid(),
-                            $('#' + ESTATE_AplyNoId).val(),
-                            $('#' + ESTATE_DataSeqId).val(),
-                            $('#' + ESTATE_Issuing_BankId).val(),
-                            $('#' + ESTATE_Check_TypeId).val(),
-                            $('#' + ESTATE_Check_No_TrackId).val(),
-                            $('#' + ESTATE_Check_No_BId).val(),
-                            $('#' + ESTATE_Check_No_EId).val(),
-                            $('#' + ESTATE_totalId).html())
-                    }),
-                    dataType: "json",
-                    url: ESTATEurl.InsertTempData,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    customerUtility.alertAuto(result);
-                    if (result.RETURN_FLAG)
-                    {
-                        customerUtility.closeDialog($('#ESTATEInsertTemp'));
-                        ESTATETempGrid();
-                        ESTATEDayGrid();
-                    }
-                })
+            if (!ESTATETempCheck()) {
+                return false;
             }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: EstateDetailViewModel(
+                        created.uuid(),
+                        $('#' + ESTATE_Form_NoDId).val(),
+                        $('#' + ESTATE_DateTId).val().trim(),
+                        $('#' + ESTATE_Ownership_Cert_NoTId).val().trim(),
+                        $('#' + ESTATE_Land_Building_NoTId).val().trim(),
+                        $('#' + ESTATE_House_NoTId).val().trim(),
+                        $('#' + ESTATE_SeqTId).val().trim(),
+                        $('#' + ESTATE_Memo_DTId).val().trim())
+                }),
+                dataType: "json",
+                url: ESTATEurl.InsertTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#ESTATEInsertTemp'));
+                    ESTATETempGrid();
+                }
+            })
         }
 
-        function ESTATEUpdateTempFun()
-        {
-            if ($('#' + ESTATEFormId).valid()) {
-                var _Check_No_B = parseInt($('#' + ESTATE_Check_No_BId).val());
-                var _Check_No_E = parseInt($('#' + ESTATE_Check_No_EId).val());
-                if (_Check_No_B > _Check_No_E) {
-                    customerUtility.alert('迄號不可小於起號!', 'w');
-                    return false;
-                }
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        model: BillViewModel(
-                            $('#' + ESTATE_ItemId).val(),
-                            $('#' + ESTATE_AplyNoId).val(),
-                            $('#' + ESTATE_DataSeqId).val(),
-                            $('#' + ESTATE_Issuing_BankId).val(),
-                            $('#' + ESTATE_Check_TypeId).val(),
-                            $('#' + ESTATE_Check_No_TrackId).val(),
-                            $('#' + ESTATE_Check_No_BId).val(),
-                            $('#' + ESTATE_Check_No_EId).val(),
-                            $('#' + ESTATE_totalId).html())
-                    }),
-                    dataType: "json",
-                    url: ESTATEurl.UpdateTempData,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    customerUtility.alertAuto(result);
-                    if (result.RETURN_FLAG) {
-                        customerUtility.closeDialog($('#ESTATEUpdateTemp'));
-                        ESTATETempGrid();
-                        ESTATEDayGrid();
-                    }
-                })
+        function ESTATEUpdateTempFun() {
+            if (!ESTATETempCheck()) {
+                return false;
             }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: EstateDetailViewModel(
+                        $('#' + ESTATE_Item_IdHlId).val(),
+                        $('#' + ESTATE_Form_NoDId).val(),
+                        $('#' + ESTATE_DateTId).val().trim(),
+                        $('#' + ESTATE_Ownership_Cert_NoTId).val().trim(),
+                        $('#' + ESTATE_Land_Building_NoTId).val().trim(),
+                        $('#' + ESTATE_House_NoTId).val().trim(),
+                        $('#' + ESTATE_SeqTId).val().trim(),
+                        $('#' + ESTATE_Memo_DTId).val().trim())
+                }),
+                dataType: "json",
+                url: ESTATEurl.UpdateTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#ESTATEUpdateTemp'));
+                    ESTATETempGrid();
+                }
+            })
         }
 
         function ESTATEDeleteTempFun() {
-            if ($('#' + ESTATEFormId).valid()) {
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        model: BillViewModel(
-                            $('#' + ESTATE_ItemId).val())
-                    }),
-                    dataType: "json",
-                    url: ESTATEurl.DeleteTempData,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    customerUtility.alertAuto(result);
-                    if (result.RETURN_FLAG) {
-                        customerUtility.closeDialog($('#ESTATEDeleteTemp'));
-                        ESTATETempGrid();
-                        ESTATEDayGrid();
-                    }
-                })
-            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: EstateDetailViewModel(
+                        $('#' + ESTATE_Item_IdHlId).val())
+                }),
+                dataType: "json",
+                url: ESTATEurl.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#ESTATEDeleteTemp'));
+                    ESTATETempGrid();
+                }
+            })
         }
 
-        function BillViewModel(
+        function ESTATETempCheck() {
+            var _checkFlag = true;
+            if ($('#' + ESTATE_DateTId).val().trim() == '') {
+                customerUtility.alert('發狀日不能為空', 'w');
+                _checkFlag = false;
+            }
+            else if (!verified.isTWDate($('#' + ESTATE_DateTId).val().trim())) {
+                customerUtility.alert('發狀日不符合民國日期格式(yyymmdd or yymmdd)', 'w');
+                _checkFlag = false;
+            }
+            return _checkFlag
+        }
+
+        function EstateDetailViewModel(
             vItemId,
-            vAplyNo,
-            vDataSeq,
-            vIssuingBank,
-            vCheckType,
-            vCheckNoTrack,
-            vCheckNoB,
-            vCheckNoE,
-            vCheckTotalNum,
-            vTakeOutE,
-            vTakeOutTotalNum,
-            vReMainTotalNum
+            vEstate_From_No,
+            vEstate_Date,
+            vOwnership_Cert_No,
+            vLand_Building_No,
+            vHouse_No,
+            vEstate_Seq,
+            vMemo
             ) {
             var obj = {};
             obj['vItemId'] = vItemId;
-            obj['vAplyNo'] = vAplyNo;
-            obj['vDataSeq'] = vDataSeq;
-            obj['vIssuingBank'] = vIssuingBank;
-            obj['vCheckType'] = vCheckType;
-            obj['vCheckNoTrack'] = vCheckNoTrack;
-            obj['vCheckNoB'] = vCheckNoB;
-            obj['vCheckNoE'] = vCheckNoE;
-            obj['vCheckTotalNum'] = vCheckTotalNum;
-            obj['vTakeOutE'] = vTakeOutE;
-            obj['vTakeOutTotalNum'] = vTakeOutTotalNum;
-            obj['vReMainTotalNum'] = vReMainTotalNum;
+            obj['vEstate_From_No'] = vEstate_From_No;
+            obj['vEstate_Date'] = vEstate_Date;
+            obj['vOwnership_Cert_No'] = vOwnership_Cert_No;
+            obj['vLand_Building_No'] = vLand_Building_No;
+            obj['vHouse_No'] = vHouse_No;
+            obj['vEstate_Seq'] = vEstate_Seq;
+            obj['vMemo'] = vMemo;
             return obj;
         }
 
+        function EstateModel(
+            BOOK_NO,
+            BUILDING_NAME,
+            LOCATED,
+            MEMO) {
+            var obj = {};
+            obj['BOOK_NO'] = BOOK_NO;
+            obj['BUILDING_NAME'] = BUILDING_NAME;
+            obj['LOCATED'] = LOCATED;
+            obj['MEMO'] = MEMO;
+            return obj;
+        }
 
         //#endregion
 
-        function getPage(id)
-        {
-            return $('#' + id).find('.ui-pg-input').val();
-        }
     });
 </script>

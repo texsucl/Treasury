@@ -1,0 +1,461 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="">
+    <div style="padding-bottom:5px;">
+        <input type="button" id="SEALInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="SEALjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="SEAL_Act">
+        <input type="button" id="SEALApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="SEALCancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="SEALBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="SEALDialog" style="display:none;">
+        <form id="SEALDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>印章內容 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tSEAL_DESC" name="tSEAL_DESC" class="SEALInsertType" maxlength="20"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註說明 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tSEAL_MEMO" name="tSEAL_MEMO" class="SEALInsertType" style="width:207px;height:80px;"  maxlength="200"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                       <input type="hidden" id="hSEAL_ITEM_ID"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="SEALInsertTemp" value="新增" class="btn btn-primary"  />
+                        <input type="button" id="SEALUpdateTemp" value="修改" class="btn btn-primary"  />
+                        <input type="button" id="SEALDeleteTemp" value="刪除" class="btn btn-primary"  />
+                    </td>
+                    <td  style="text-align:right;">
+                        <input type="button" id="SEALCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var SEALurl = {};
+        SEALurl.getData = '@Url.Action("GetCacheData", "Seal")';
+        SEALurl.InsertTempData = '@Url.Action("InsertTempData", "Seal")';
+        SEALurl.UpdateTempData = '@Url.Action("UpdateTempData", "SEAL")';
+        SEALurl.DeleteTempData = '@Url.Action("DeleteTempData", "SEAL")';
+        SEALurl.ResetTempData = '@Url.Action("ResetTempData", "SEAL")';
+        SEALurl.TakeOutData = '@Url.Action("TakeOutData", "SEAL")';
+        SEALurl.ApplyTempData = '@Url.Action("ApplyTempData", "SEAL")';
+        //#endregion
+
+        //#region 參數設定
+
+        //庫存資料
+        var SEALDialogId = 'SEALDialog'; //dialogId
+        var SEALDialogFormId = 'SEALDialogForm'; //dialogFormId
+        var SEAL_DescDId = 'tSEAL_DESC'; //印章內容Id(text)
+        var SEAL_MemoId = 'tSEAL_MEMO'; //備註Id(texarea)
+        var SEAL_Item_IdHlId = 'hSEAL_ITEM_ID'; //物品標號Id(hidden)
+
+        var SEAL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+        var SEAL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (SEAL_Aply_No_Flag) {
+            $('#SEALCancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+
+        if (!SEAL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.SEAL_Act').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.SEAL_Act').show();
+        }
+        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (typeFlag && SEAL_Act_Type) {
+            $('#SEALInsert').show();
+        }
+        //#endregion
+
+        function clearJqgrid(gridDivId) {
+            $('#' + gridDivId).children().remove();
+        }
+
+        //#region 初始動作
+        SEALTempGrid();
+        setSEALVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setSEALVerified() {
+            verified.required(SEALDialogFormId, SEAL_DescDId, message.required('印章內容')); //印章內容為必填
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'SEALInsert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALInsertFun(); });
+                    break;
+                case 'SEALApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALApplyFun(); });
+                    break;
+                case 'SEALCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALCancelFun(); });
+                    break;
+                case 'SEALBack':
+                case 'SEALCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    break;
+                case 'SEALInsertTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALInsertTempFun(); });
+                    break;
+                case 'SEALUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALUpdateTempFun(); });
+                    break;
+                case 'SEALDeleteTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { SEALDeleteTempFun(); });
+                    break;
+            }
+        });
+
+        function SEALReset() {
+            $('#' + SEAL_LocatedTId).val('');
+            $('#' + SEAL_MemoTId).val('');
+        }
+
+        function SEALApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: SEALurl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#SEALApply'));
+                }
+            })
+        }
+
+        function SEALCancelFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
+                dataType: "json",
+                url: SEALurl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog();
+                SEALTempGrid();
+            })
+        }
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var  str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox SEALtakeouts customerCheck'></div>";
+            return str;
+        }
+
+
+        function SEALTempGrid() {
+
+            if (typeFlag) { //存入
+                var colNameArray = ['動作', '印章內容', '備註', '物品編號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", width: 170, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 500, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'SEALjqgridDiv',
+                    'SEALTempList',
+                    'SEALTempPeger',
+                    SEALurl.getData,
+                    {
+
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '存入明細資料',
+                    jqgridCustom.getPage('SEALjqgridDiv'),
+                    SEALTempCompleteFun,
+                    true
+                    );
+            }
+            else { //取出
+                var colNameArray = ['取出','動作', '印章內容', '備註', '物品編號'];
+                var colModelArray = [];
+                if (!SEAL_Act_Type) {
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                }
+                else {
+                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                }               
+                colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", width: 170, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 500, sortable: false });
+                //colModelArray.push({ name: "vSEAL_Date", index: "vSEAL_Date", width: 80, sortable: false, align: 'center' });
+                //colModelArray.push({ name: "vOwnership_Cert_No", index: "vOwnership_Cert_No", width: 90, sortable: false });
+                //colModelArray.push({ name: "vLand_Building_No", index: "vLand_Building_No", width: 90, sortable: false });
+                //colModelArray.push({ name: "vHouse_No", index: "vHouse_No", width: 120, sortable: false });
+                //colModelArray.push({ name: "vSEAL_Seq", index: "vSEAL_Seq", width: 100, sortable: false});
+                //colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'SEALjqgridDiv',
+                    'SEALTempList',
+                    'SEALTempPeger',
+                    SEALurl.getData,
+                    {
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '取出明細資料',
+                    jqgridCustom.getPage('SEALjqgridDiv'),
+                    SEALTempTakeOutFun,
+                    true
+                    );
+            }
+        }
+
+        function SEALTempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'SEALTemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.SEALtakeouts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function takeout(rowid, flag) {
+            var listId = 'SEALTempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: SealViewModel(data.vItemId),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: SEALurl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    SEALTempGrid();
+                }
+            });
+        }
+
+        function SEALTempCompleteFun(listId){
+            jqgridCustom.randerAction(listId, 'SEALTemp', tempActFun);
+            if (!SEAL_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function(i)
+        {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function(i)
+        {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function(i)
+        {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function SEALInsertFun() {
+
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid)
+        {
+            $('#' + SEALDialogFormId).validate().resetForm();
+            var dialogId = 'SEALDialog';
+            var listId = 'SEALTempList';
+            var SEALInsertClass = 'SEALInsertType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '印章',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#SEALInsertTemp,#SEALUpdateTemp,#SEALDeleteTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+                ResetInsertDialog();
+                $('#SEALInsertTemp').show();
+                $('.' + SEALInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#SEALDeleteTemp').show();
+                $('.' + SEALInsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#SEALUpdateTemp').show();
+                $('.' + SEALInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('.' + SEALInsertClass).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            $('#' + SEAL_DescDId).val('');
+            $('#' + SEAL_MemoId).val('');
+            $('#' + SEAL_Item_IdHlId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + SEAL_DescDId).val(data.vSeal_Desc);
+                $('#' + SEAL_MemoId).val(data.vMemo);
+                $('#' + SEAL_Item_IdHlId).val(data.vItemId);
+            }
+        }
+
+        //新增暫存不動產明細
+        function SEALInsertTempFun() {
+            if ($('#' + SEALDialogFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: SealViewModel(
+                            created.uuid(),
+                            $('#' + SEAL_DescDId).val().trim(),
+                            $('#' + SEAL_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: SEALurl.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#SEALInsertTemp'));
+                        SEALTempGrid();
+                    }
+                })
+            }
+        }
+
+        function SEALUpdateTempFun()
+        {
+            if ($('#' + SEALDialogFormId).valid())
+            {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: SealViewModel(
+                            $('#' + SEAL_Item_IdHlId).val(),
+                            $('#' + SEAL_DescDId).val().trim(),
+                            $('#' + SEAL_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: SEALurl.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#SEALUpdateTemp'));
+                        SEALTempGrid();
+                    }
+                })
+            }
+        }
+
+        function SEALDeleteTempFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: SealViewModel(
+                        $('#' + SEAL_Item_IdHlId).val())
+                }),
+                dataType: "json",
+                url: SEALurl.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#SEALDeleteTemp'));
+                    SEALTempGrid();
+                }
+            })
+        }
+
+        function SealViewModel(
+            vItemId,
+            vSeal_Desc,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vSeal_Desc'] = vSeal_Desc;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>

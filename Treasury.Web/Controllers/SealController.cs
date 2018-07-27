@@ -289,7 +289,14 @@ namespace Treasury.WebControllers
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit , AplyNo));//抓庫存+單號
+                    if (Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
+                    {
+                        Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit, AplyNo));//抓庫存+單號
+                    }
+                    else
+                    {
+                        Cache.Set(CacheList.SEALData, Seal.GetDataByAplyNo(AplyNo));//抓單號
+                    }                      
                 }
             }
         }

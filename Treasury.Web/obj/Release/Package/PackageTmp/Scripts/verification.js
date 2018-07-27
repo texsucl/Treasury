@@ -129,6 +129,26 @@
         })
     }
 
+    verified.TWDate = function (formid, elementid, message) {
+        message = message || '不符合民國日期格式(yyymmdd or yymmdd)';
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+
+        //#region 客製化驗證
+
+        $.validator.addMethod("TWdateFormate",
+        function (value, element, arg) {
+            return verified.isTWDate(value);
+        }, message);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            TWdateFormate: true,
+        })
+    }
+
     verified.datepicker = function (formid, datepickerid) {
 
         $("#" + formid).validate({
@@ -298,6 +318,24 @@
         return dateFormat.test(value);
     }
 
+    verified.isTWDate = function (value) {
+        value = value || '';
+        if (value == '')
+            return true;
+        if (verified.checkSpace(value))
+            return false;
+        var len = value.length;
+        if (len == 7)
+        {
+            return dateFormat.test((Number(value.substr(0, 3)) + 1911) + '/' + value.substr(3, 2) + '/' + value.substr(5, 2));
+        }
+        else if (len == 6)
+        {
+            return dateFormat.test((Number(value.substr(0, 2)) + 1911) + '/' + value.substr(2, 2) + '/' + value.substr(4, 2));
+        }
+        return false;
+    }
+
     verified.isEnglish = function (value) {
         value = value || '';
         return englishFormat.test(value);
@@ -350,6 +388,14 @@
             maxValue = parseInt(obj.attr('maxlength'));
         }
         if ((obj.val().Blength() + 1 > maxValue) && $.inArray(evt.keyCode, arrayExceptions) === -1) {
+            return false;
+        }
+    }
+
+    verified.checkSpace = function checkSpace(s) {
+        if (s.match(/\x20/i)) {
+            return true;
+        } else {
             return false;
         }
     }

@@ -78,6 +78,14 @@ namespace Treasury.Web.Service.Actual
         public List<SealViewModel> GetDbDataByUnit(string itemId, string vAplyUnit = null, string aplyNo = null)
         {
             var result = new List<SealViewModel>();
+            List<string> _itemIds = new List<string>();
+            _itemIds.Add(itemId);
+            if (itemId == TreaItemType.D1008.ToString())
+                _itemIds.Add(TreaItemType.D1005.ToString());
+            if (itemId == TreaItemType.D1009.ToString())
+                _itemIds.Add(TreaItemType.D1006.ToString());
+            if (itemId == TreaItemType.D1010.ToString())
+                _itemIds.Add(TreaItemType.D1007.ToString());
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
@@ -86,7 +94,7 @@ namespace Treasury.Web.Service.Actual
                     result = db.ITEM_SEAL.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
-                    .Where(x => x.INVENTORY_STATUS == "1" && x.TREA_ITEM_NAME == itemId) //庫存
+                    .Where(x => x.INVENTORY_STATUS == "1" && _itemIds.Contains(x.TREA_ITEM_NAME)) //庫存
                     .AsEnumerable()
                     .Select(x => 
                     new SealViewModel() {

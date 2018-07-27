@@ -29,6 +29,24 @@ namespace Treasury.Web.Enum
             D1015,
 
             /// <summary>
+            /// 公司大章A
+            /// </summary>
+            [Description("公司大章A")]
+            D1005,
+
+            /// <summary>
+            /// 公司小章A
+            /// </summary>
+            [Description("公司小章A")]
+            D1006,
+
+            /// <summary>
+            /// 退管會大章A
+            /// </summary>
+            [Description("退管會大章A")]
+            D1007,
+
+            /// <summary>
             /// 公司大章B
             /// </summary>
             [Description("公司大章B")]

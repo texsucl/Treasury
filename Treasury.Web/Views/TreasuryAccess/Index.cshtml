@@ -151,7 +151,7 @@
         </div>
     </div>
     @*查詢區塊*@
-    <div id="TASearchDialog" style="display:none" role="dialog" class="myDialog">
+    <div id="TASearchDialog" style="display:none;" role="dialog" class="myDialog">
         <div id="TAjqgridDiv1" class="col-sm-24 jqd" style="padding-bottom:5px;">
         </div>
         <div id="TAjqgridDiv2" class="col-sm-24 jqd">
@@ -164,7 +164,7 @@
     <div id="TAOpenInsertDialog" style="display:none" role="dialog" class="myDialog">
         <div id="TAOpenInsertDetail"></div>
     </div>
-    <div id="TAOpenSearchDialog" style="display:none" role="dialog" class="myDialog">
+    <div id="TAOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
         <div id="TAOpenSearchDetail"></div>
     </div>
 </div>
@@ -333,12 +333,13 @@
             $('#' + dialogId).dialog({
                 position: { my: "top", at: "center top", of: window },
                 title: '查詢畫面',
-                width: 1300,
+                width: 1310,
                 autoOpen: false,
+                maxHeight: 700,
                 resizable: false,
                 closeText: '取消'
             });
-
+            
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -358,6 +359,7 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     $('#' + dialogId).dialog('open');
+                    $('#' + dialogId).css('max-height','300px;')
                     TAAccessGrid();
                     TAReportGrid();
                 }
@@ -545,6 +547,7 @@
                 width: width,
                 autoOpen : false,
                 resizable: false,
+                maxHeight: 600,
                 closeText : '取消',
                 close: function () {
                     if (dialogId == 'TAOpenSearchDialog' && $('#TAR_AplyNo').val() != '' && closeFalg)
@@ -730,7 +733,7 @@
             var obj = {};
             obj.url = null; //開啟金庫物品的頁面 url
             obj.title = null; //開啟金庫物品的頁面 Title
-            obj.openDialogWidth = '850px'; //開啟金庫物品的頁面 寬度
+            obj.openDialogWidth = '860px'; //開啟金庫物品的頁面 寬度
             obj.reportTitle = _reportTitle; //報表Title
             obj.reportType = null; //報表類型
 
@@ -738,7 +741,6 @@
                 case '@Ref.TreaItemType.D1012.ToString()':
                     obj.url = TAurl.openBILL;
                     obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
-                    obj.openDialogWidth = '850px';
                     obj.reportType = 'BILL';
                     break;
                 case '@Ref.TreaItemType.D1014.ToString()':
