@@ -29,12 +29,10 @@ namespace Treasury.WebControllers
     public class SealController : CommonController
     {
         private ISeal Seal;
-        private ITreasuryAccess TreasuryAccess;
 
         public SealController()
         {
             Seal = new Seal();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -42,19 +40,17 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
         {
-            var _dActType = false;
+            var _dActType = GetActType(type, AplyNo);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
                 resetSealViewModel(data.vAccessType);
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
@@ -83,7 +79,6 @@ namespace Treasury.WebControllers
             else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (List<SealViewModel>)Cache.Get(CacheList.SEALData);
                 if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
                 {
@@ -266,7 +261,8 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <param name="AccessType"></param>
         /// <param name="AplyNo"></param>
-        private void resetSealViewModel(string AccessType, string AplyNo = null, bool EditFlag = false)
+        /// <param name="EditFlag"></param>
+        private void resetSealViewModel(string AccessType, string AplyNo = null, bool EditFlag = true)
         {
             Cache.Invalidate(CacheList.SEALData);     
             var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -289,7 +285,7 @@ namespace Treasury.WebControllers
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    if (Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
+                    if (EditFlag && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
                     {
                         Cache.Set(CacheList.SEALData, Seal.GetDbDataByUnit(data.vItem, data.vAplyUnit, AplyNo));//抓庫存+單號
                     }

@@ -23,6 +23,16 @@
         public static string TreasuryAccessSearchDetailViewData { get; private set; }
 
         /// <summary>
+        /// 金庫物品覆核畫面(查詢條件)
+        /// </summary>
+        public static string TreasuryAccessApprSearchData { get; private set; }
+
+        /// <summary>
+        /// 金庫物品覆核畫面(資料)
+        /// </summary>
+        public static string TreasuryAccessApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
         public static string BILLTempData { get; private set; }
@@ -75,6 +85,8 @@
             TreasuryAccessViewData = "TreasuryAccessViewData";
             TreasuryAccessSearchData = "TreasuryAccessSearchData";
             TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
+            TreasuryAccessApprSearchData = "TreasuryAccessApprSearchData";
+            TreasuryAccessApprSearchDetailViewData = "TreasuryAccessApprSearchDetailViewData";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";

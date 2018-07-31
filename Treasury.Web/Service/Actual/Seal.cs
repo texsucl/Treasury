@@ -26,13 +26,13 @@ using System.Data.Entity.Infrastructure;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class Seal : ISeal
+    public class Seal : Common, ISeal
     {
-        protected INTRA intra { private set; get; }
+
 
         public Seal()
         {
-            intra = new INTRA();
+
         }
 
         #region Get Date
@@ -304,45 +304,12 @@ namespace Treasury.Web.Service.Actual
                             }
                             else
                             {
-                                #region 申請單紀錄檔
-                                var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+                                #region 申請單紀錄檔 & 申請單歷程檔
 
-                                _TAR = new TREA_APLY_REC()
-                                {
-                                    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
-                                    ITEM_ID = taData.vItem, //申請項目
-                                    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
-                                    ACCESS_REASON = taData.vAccessReason, //申請原因
-                                    APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
-                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
-                                    APLY_UNIT = taData.vAplyUnit, //申請單位
-                                    APLY_UID = taData.vAplyUid, //申請人
-                                    APLY_DT = dt,
-                                    CREATE_UID = taData.vCreateUid, //新增人
-                                    CREATE_DT = dt,
-                                    LAST_UPDATE_UID = taData.vCreateUid,
-                                    LAST_UPDATE_DT = dt
-                                };
-                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
-                                {
-                                    _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
-                                    _TAR.CONFIRM_DT = dt;
-                                }
-                                logStr += _TAR.modelToString(logStr);
-                                db.TREA_APLY_REC.Add(_TAR);
-                                #endregion
+                                var data = SaveTREA_APLY_REC(db, taData, logStr, dt);
+                                _TAR.APLY_NO = data.Item1;
+                                logStr = data.Item2;
 
-                                #region 申請單歷程檔
-                                var _ARH = new APLY_REC_HIS()
-                                {
-                                    APLY_NO = _TAR.APLY_NO,
-                                    APLY_STATUS = _TAR.APLY_STATUS,
-                                    PROC_DT = dt,
-                                    PROC_UID = _TAR.CREATE_UID
-                                };
-                                logStr += _ARH.modelToString(logStr);
-                                db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
                                 #region 印章庫存資料檔
@@ -430,7 +397,7 @@ namespace Treasury.Web.Service.Actual
                                         log.CFUNCTION = "申請覆核-新增印章";
                                         log.CACTION = "A";
                                         log.CCONTENT = logStr;
-                                        LogDao.Insert(log, _TAR.CREATE_UID);
+                                        LogDao.Insert(log, taData.vCreateUid);
                                         #endregion
 
                                         result.RETURN_FLAG = true;

@@ -26,13 +26,11 @@ using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Service.Actual
 {
-    public class Bill : IBill
+    public class Bill : Common, IBill
     {
-        protected INTRA intra { private set; get; }
-
         public Bill()
         {
-            intra = new INTRA();
+
         }
 
         #region GetData
@@ -377,47 +375,54 @@ namespace Treasury.Web.Service.Actual
                                     }
                                 }
                                 #endregion
-                              
-                                var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
 
-                                #region 申請單紀錄檔
-                                var _TAR = new TREA_APLY_REC()
-                                {
-                                    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
-                                    ITEM_ID = taData.vItem, //申請項目
-                                    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
-                                    ACCESS_REASON = taData.vAccessReason, //申請原因
-                                    APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
-                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
-                                    APLY_UNIT = taData.vAplyUnit, //申請單位
-                                    APLY_UID = taData.vAplyUid, //申請人
-                                    APLY_DT = dt,
-                                    CREATE_UID = taData.vCreateUid, //新增人
-                                    CREATE_DT = dt,
-                                    LAST_UPDATE_UID = taData.vCreateUid,
-                                    LAST_UPDATE_DT = dt
-                                };
-                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
-                                {
-                                    _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
-                                    _TAR.CONFIRM_DT = dt;
-                                }
-                                logStr += _TAR.modelToString(logStr);
-                                db.TREA_APLY_REC.Add(_TAR);
+                                #region 申請單紀錄檔 & 申請單歷程檔
+
+                                var data = SaveTREA_APLY_REC(db, taData, logStr, dt);
+
+                                logStr = data.Item2;
+
                                 #endregion
 
-                                #region 申請單歷程檔
-                                var _ARH = new APLY_REC_HIS()
-                                {
-                                    APLY_NO = _TAR.APLY_NO,
-                                    APLY_STATUS = _TAR.APLY_STATUS,
-                                    PROC_DT = dt,
-                                    PROC_UID = _TAR.CREATE_UID
-                                };
-                                logStr += _ARH.modelToString(logStr);
-                                db.APLY_REC_HIS.Add(_ARH);
-                                #endregion
+                                //#region 申請單紀錄檔
+                                //var _TAR = new TREA_APLY_REC()
+                                //{
+                                //    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
+                                //    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
+                                //    ITEM_ID = taData.vItem, //申請項目
+                                //    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
+                                //    ACCESS_REASON = taData.vAccessReason, //申請原因
+                                //    APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
+                                //    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
+                                //    APLY_UNIT = taData.vAplyUnit, //申請單位
+                                //    APLY_UID = taData.vAplyUid, //申請人
+                                //    APLY_DT = dt,
+                                //    CREATE_UNIT = taData.vCreateUnit, //新增
+                                //    CREATE_UID = taData.vCreateUid, //新增人
+                                //    CREATE_DT = dt,
+                                //    LAST_UPDATE_UID = taData.vCreateUid,
+                                //    LAST_UPDATE_DT = dt
+                                //};
+                                //if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
+                                //{
+                                //    _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
+                                //    _TAR.CONFIRM_DT = dt;
+                                //}
+                                //logStr += _TAR.modelToString(logStr);
+                                //db.TREA_APLY_REC.Add(_TAR);
+                                //#endregion
+
+                                //#region 申請單歷程檔
+                                //var _ARH = new APLY_REC_HIS()
+                                //{
+                                //    APLY_NO = _TAR.APLY_NO,
+                                //    APLY_STATUS = _TAR.APLY_STATUS,
+                                //    PROC_DT = dt,
+                                //    PROC_UID = _TAR.CREATE_UID
+                                //};
+                                //logStr += _ARH.modelToString(logStr);
+                                //db.APLY_REC_HIS.Add(_ARH);
+                                //#endregion
 
                                 #region 空白票據申請資料檔
                                 datas.ForEach(x =>
@@ -425,7 +430,7 @@ namespace Treasury.Web.Service.Actual
                                     var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
                                     var _BNA = new BLANK_NOTE_APLY()
                                     {
-                                        APLY_NO = _TAR.APLY_NO,
+                                        APLY_NO = data.Item1,
                                         ITEM_ID = $@"{item_Seq}{item_id}",
                                         CHECK_TYPE = x.vCheckType,
                                         ISSUING_BANK = x.vIssuingBank,
@@ -458,11 +463,11 @@ namespace Treasury.Web.Service.Actual
                                         log.CFUNCTION = "申請覆核-新增空白票據";
                                         log.CACTION = "A";
                                         log.CCONTENT = logStr;
-                                        LogDao.Insert(log, _TAR.CREATE_UID);
+                                        LogDao.Insert(log, taData.vCreateUid);
                                         #endregion
 
                                         result.RETURN_FLAG = true;
-                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{data.Item1}");
                                     }
                                     catch (DbUpdateException ex)
                                     {

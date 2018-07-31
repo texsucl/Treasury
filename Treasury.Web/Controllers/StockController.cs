@@ -30,12 +30,10 @@ namespace Treasury.WebControllers
     {
         // GET: Stock
         private IStock Stock;
-        private ITreasuryAccess TreasuryAccess;
 
         public StockController()
         {
             Stock = new Stock();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -45,16 +43,15 @@ namespace Treasury.WebControllers
         /// <param name="data">金庫物品存取主畫面ViewModel</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
         {
             ViewBag.dStock_Area_Type = new SelectList(Stock.GetAreaType(), "Value", "Text");
             ViewBag.dStock_Type = new SelectList(Stock.GetStockType(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
 
-            var _dActType = false;
+            var _dActType = GetActType(type, AplyNo);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
                 if (data.vAccessType == AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(), "Value", "Text");
@@ -70,7 +67,6 @@ namespace Treasury.WebControllers
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
 
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
@@ -113,7 +109,6 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.TreasuryAccessViewData) && Cache.IsSet(CacheList.StockData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (StockViewModel)Cache.Get(CacheList.StockData);
                 _data.vStockDate = vStockDate;
                 _data.vStockModel = vStockModel;

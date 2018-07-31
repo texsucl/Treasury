@@ -12,6 +12,7 @@ using System.Linq;
 using Microsoft.Reporting.WebForms;
 using System.Data;
 using Treasury.Web.ViewModels;
+using Treasury.Web.Controllers;
 
 /// <summary>
 /// 功能說明：共用 controller
@@ -34,6 +35,8 @@ namespace Treasury.WebControllers
         internal ICacheProvider Cache { get; set; }
         internal List<string> Aply_Appr_Type { get; set; }
 
+        protected ITreasuryAccess TreasuryAccess;
+
         public CommonController()
         {
             Cache = new DefaultCacheProvider();
@@ -44,6 +47,30 @@ namespace Treasury.WebControllers
                 AccessProjectFormStatus.A04.ToString(),
                 AccessProjectFormStatus.A05.ToString()
             };
+            TreasuryAccess = new TreasuryAccess();
+        }
+
+        /// <summary>
+        /// 判斷 PartialView 是否可以CRUD
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="AplyNo"></param>
+        /// <returns></returns>
+        protected bool GetActType(OpenPartialViewType type, string AplyNo)
+        {
+            if (AplyNo.IsNullOrWhiteSpace()) //沒有申請單號表示可以CRUD
+                return true;
+            switch (type) //哪個畫面呼叫PartialView
+            {
+                case OpenPartialViewType.Appr: //金庫物品存取覆核作業
+                    //只有檢視功能
+                    return false; 
+
+                case OpenPartialViewType.Index: //金庫物品存取申請作業
+                default:
+                    //查詢作業 有單號的申請,如果為填表人本人可以修改
+                    return TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);
+            }
         }
 
         protected string GetopScope(string funcId)
