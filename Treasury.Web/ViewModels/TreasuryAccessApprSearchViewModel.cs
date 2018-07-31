@@ -35,5 +35,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("填表人員")]
         public string vCreateUid { get; set; }
+
+        /// <summary>
+        /// 填表單位
+        /// </summary>
+        [Description("填表單位")]
+        public string vCreateUnit { get; set; }
     }
 }

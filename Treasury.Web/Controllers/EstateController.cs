@@ -29,12 +29,10 @@ namespace Treasury.WebControllers
     public class EstateController : CommonController
     {
         private IEstate Estate;
-        private ITreasuryAccess TreasuryAccess;
 
         public EstateController()
         {
             Estate = new Estate();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -42,14 +40,13 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
         {
             ViewBag.ESTATE_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
-            var _dActType = false;
+            var _dActType = GetActType(type, AplyNo); 
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
                 if (data.vAccessType == AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(), "Value", "Text");
@@ -66,7 +63,6 @@ namespace Treasury.WebControllers
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 ViewBag.dAccess = viewModel.vAccessType;
                 if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
@@ -111,7 +107,6 @@ namespace Treasury.WebControllers
             else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
                 _data.vItem_Book = model;
                 _data.vDetail = _detail;

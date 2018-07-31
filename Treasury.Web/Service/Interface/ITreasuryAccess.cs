@@ -11,12 +11,19 @@ namespace Treasury.Web.Service.Interface
     public interface ITreasuryAccess 
     {
         /// <summary>
+        /// 取得 人員基本資料
+        /// </summary>
+        /// <param name="cUserID">userId</param>
+        /// <returns></returns>
+        BaseUserInfoModel GetUserInfo(string cUserID);
+
+        /// <summary>
         /// 金庫進出管理作業-金庫物品存取申請作業 初始畫面顯示
         /// </summary>
         /// <param name="cUserID">userId</param>
         /// <param name="custodyFlag">管理科Flag</param>
         /// <returns></returns>
-        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>,string,string> TreasuryAccessDetail(string cUserID, bool custodyFlag);
+        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, BaseUserInfoModel> TreasuryAccessDetail(string cUserID, bool custodyFlag);
 
         /// <summary>
         /// 申請單位 變更時 變更申請人
@@ -85,5 +92,12 @@ namespace Treasury.Web.Service.Interface
         /// <param name="aplyNo">單號</param>
         /// <returns></returns>
         TreasuryAccessViewModel GetTreasuryAccessViewModel(string aplyNo);
+
+        /// <summary>
+        /// 金庫物品存取申請覆核作業 覆核查詢 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        List<TreasuryAccessApprSearchDetailViewModel> GetApprSearchDetail(TreasuryAccessApprSearchViewModel data);
     }
 }

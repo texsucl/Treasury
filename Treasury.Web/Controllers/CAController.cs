@@ -29,12 +29,10 @@ namespace Treasury.WebControllers
     public class CAController : CommonController
     {
         private ICA CA;
-        private ITreasuryAccess TreasuryAccess;
 
         public CAController()
         {
             CA = new CA();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -42,26 +40,24 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
         {
-            var _dActType = false;
+            var _dActType = GetActType(type, AplyNo);
             ViewBag.CAUse = new SelectList(CA.GetCA_Use(), "Value", "Text"); 
             ViewBag.CADesc = new SelectList(CA.GetCA_Desc(), "Value", "Text"); 
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
                 resetCAViewModel(data.vAccessType);
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
-                resetCAViewModel(viewModel.vAccessType, AplyNo);
+                resetCAViewModel(viewModel.vAccessType, AplyNo, _dActType);
             }
             ViewBag.dActType = _dActType;
             return PartialView();
@@ -85,7 +81,6 @@ namespace Treasury.WebControllers
             else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (List<CAViewModel>)Cache.Get(CacheList.CAData);
                 if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
                 {
@@ -247,7 +242,7 @@ namespace Treasury.WebControllers
         public JsonResult ResetTempData(string AccessType)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
-            resetCAViewModel(AccessType);
+            resetCAViewModel( AccessType);
             return Json(result);
         }
 
@@ -269,9 +264,10 @@ namespace Treasury.WebControllers
         /// <summary>
         /// 電子憑證預設資料
         /// </summary>
-        /// <param name="AccessType"></param>
-        /// <param name="AplyNo"></param>
-        private void resetCAViewModel(string AccessType, string AplyNo = null)
+        /// <param name="ActType">修改狀態</param>
+        /// <param name="AccessType">存入 or 取出</param>
+        /// <param name="AplyNo">單號</param>
+        private void resetCAViewModel(string AccessType , string AplyNo = null, bool ActType = true)
         {
             Cache.Invalidate(CacheList.CAData);     
             var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -294,7 +290,7 @@ namespace Treasury.WebControllers
                 }
                 if (AccessType == AccessProjectTradeType.G.ToString())
                 {
-                    if (Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
+                    if (ActType && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
                     {
                         Cache.Set(CacheList.CAData, CA.GetDbDataByUnit(data.vAplyUnit, AplyNo));//抓庫存+單號
                     }

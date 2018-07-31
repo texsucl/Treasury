@@ -196,10 +196,13 @@ namespace Treasury.WebUtility
         /// </summary>
         /// <param name="datetime"></param>
         /// <returns></returns>
-        public static string DateToTaiwanDate(this DateTime datetime)
+        public static string DateToTaiwanDate(this DateTime datetime, int length = 7)
         {
             TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
-            return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
+            if(length == 9)
+               return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
+            else 
+               return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
         }
 
         /// <summary>

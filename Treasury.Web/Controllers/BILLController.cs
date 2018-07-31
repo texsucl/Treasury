@@ -29,12 +29,10 @@ namespace Treasury.WebControllers
     public class BillController : CommonController
     {
         private IBill Bill;
-        private ITreasuryAccess TreasuryAccess;
 
         public BillController()
         {
             Bill = new Bill();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -42,15 +40,14 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data , OpenPartialViewType type)
         {
             ViewBag.dBILL_Check_Type = new SelectList(Bill.GetCheckType(), "Value", "Text");
             var ibs = Bill.GetIssuing_Bank();
             ViewBag.dBILL_Issuing_Bank = new SelectList(ibs, "Value", "Text");
-            var _dActType = false;           
+            var _dActType = GetActType(type , AplyNo);  //畫面是否可以CRUD    
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
                 ViewBag.dAccess = null;
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, data);
@@ -58,12 +55,11 @@ namespace Treasury.WebControllers
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 ViewBag.dAccess = viewModel.vAccessType;
                 if (viewModel.vAccessType == AccessProjectTradeType.G.ToString())
                 {
-                    _dActType = false; ///空白票據 取出預設只能檢視
+                    _dActType = false; //空白票據 取出預設只能檢視
                 }
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
                 Cache.Set(CacheList.TreasuryAccessViewData, viewModel);
@@ -84,7 +80,6 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.TreasuryAccessViewData) && Cache.IsSet(CacheList.BILLTempData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 result = Bill.ApplyAudit((List<BillViewModel>)Cache.Get(CacheList.BILLTempData), data);
                 if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
                 {
