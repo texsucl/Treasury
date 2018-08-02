@@ -84,7 +84,7 @@ namespace Treasury.Web.Controllers
              
                 try
                 {
-                    //string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
+                    string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
 
                     //AD驗證成功，檢查該user是否有系統權限
                     CodeUserDao codeUserDao = new CodeUserDao();

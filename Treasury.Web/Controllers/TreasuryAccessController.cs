@@ -8,7 +8,7 @@ using Treasury.WebUtility;
 using Treasury.Web.Controllers;
 using Treasury.Web.ViewModels;
 using System.Linq;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 初始畫面
@@ -29,15 +29,14 @@ namespace Treasury.WebControllers
     [CheckSessionFilterAttribute]
     public class TreasuryAccessController : CommonController
     {
-        private ITreasuryAccess TreasuryAccess;
 
         public TreasuryAccessController()
         {
-            TreasuryAccess = new TreasuryAccess();
+
         }
 
         /// <summary>
-        /// 畫面初始
+        /// 申請作業 畫面初始
         /// </summary>
         /// <returns></returns>
         public ActionResult Index()
@@ -61,8 +60,24 @@ namespace Treasury.WebControllers
             ViewBag.applicant = new SelectList(data.Item3, "Value", "Text");
             ViewBag.aProjectAll = new SelectList(_aProjectAll, "Value", "Text");
             ViewBag.aUnitAll = new SelectList(_aUnitAll, "Value", "Text");
-            ViewBag.lCREATE_User = data.Item4;
-            ViewBag.lCREATE_Dep = data.Item5;
+            var userInfo = data.Item4;
+            ViewBag.hCREATE_User = userInfo.EMP_ID;
+            ViewBag.lCREATE_User = userInfo.EMP_Name;
+            ViewBag.hCREATE_Dep = userInfo.DPT_ID;
+            ViewBag.lCREATE_Dep = userInfo.DPT_Name;
+            return View();
+        }
+
+        /// <summary>
+        /// 覆核作業 畫面初始
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Appr()
+        {
+            ViewBag.opScope = GetopScope("~/TreasuryAccess/");
+            var userInfo = TreasuryAccess.GetUserInfo(AccountController.CurrentUserId);
+            ViewBag.hCREATE_User = userInfo.EMP_ID;
+            ViewBag.hCREATE_Dep = userInfo.DPT_ID;
             return View();
         }
 
@@ -77,13 +92,17 @@ namespace Treasury.WebControllers
             return Json(TreasuryAccess.ChangeUnit(DPT_CD));
         }
 
+        /// <summary>
+        /// 查詢畫面查詢
+        /// </summary>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult Search(TreasuryAccessSearchViewModel searchModel)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
-            searchModel.vCreateUid = AccountController.CurrentUserId;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             Cache.Invalidate(CacheList.TreasuryAccessSearchData);
             Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
             var datas = TreasuryAccess.GetSearchDetail(searchModel);
@@ -98,6 +117,29 @@ namespace Treasury.WebControllers
         }
 
         /// <summary>
+        /// 覆核作業查詢畫面
+        /// </summary>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public JsonResult SearchAppr(TreasuryAccessApprSearchViewModel searchModel)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+            Cache.Invalidate(CacheList.TreasuryAccessApprSearchData);
+            Cache.Set(CacheList.TreasuryAccessApprSearchData, searchModel);
+            var datas = TreasuryAccess.GetApprSearchDetail(searchModel);
+            if (datas.Any())
+            {               
+                Cache.Invalidate(CacheList.TreasuryAccessApprSearchDetailViewData);
+                Cache.Set(CacheList.TreasuryAccessApprSearchDetailViewData, datas);
+                result.RETURN_FLAG = true;
+            }
+            return Json(result);
+        }
+
+
+        /// <summary>
         /// 取消申請
         /// </summary>
         /// <param name="AplyNo"></param>
@@ -107,7 +149,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
             var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
             var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
@@ -133,7 +175,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
             var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
             var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
@@ -146,6 +188,32 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
                 }
             }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 覆核
+        /// </summary>
+        /// <param name="AplyNos"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Appraisal(List<string> AplyNos)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 駁回
+        /// </summary>
+        /// <param name="AplyNos"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Reject(List<string> AplyNos)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+
             return Json(result);
         }
 
@@ -174,19 +242,20 @@ namespace Treasury.WebControllers
         /// <returns></returns>
         [HttpPost]
         public JsonResult GetCacheData(jqGridParam jdata, string type)
-        {
-            if (Cache.IsSet(CacheList.TreasuryAccessSearchDetailViewData))
-            {
-                var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                switch (type)
-                {
-                    case "Access":
-                            return Json(jdata.modelToJqgridResult(datas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
-                    case "Report":
-                            return Json(jdata.modelToJqgridResult(datas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
-                }
-            }
-            return null;
+        {           
+           switch (type)
+           {
+               case "Access":
+                   var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+               case "Report":
+                   var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+               case "Appr":
+                   var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(ApprDatas));
+           }           
+           return null;
         }
 
         public void ResetSearchData()

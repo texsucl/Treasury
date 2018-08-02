@@ -8,7 +8,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
 /// <summary>
@@ -26,13 +26,11 @@ using System.Data.Entity.Infrastructure;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class Estate : IEstate
+    public class Estate : Common , IEstate
     {
-        protected INTRA intra { private set; get; }
 
         public Estate()
         {
-            intra = new INTRA();
         }
 
         #region Get Date
@@ -93,7 +91,7 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var itemId = TreaItemType.D1014.ToString();
+                var itemId = Ref.TreaItemType.D1014.ToString();
                 result = GetEstateModel(db.ITEM_BOOK.AsNoTracking()
                     .Where(x => x.ITEM_ID == itemId && x.GROUP_NO == groupNo).ToList());
             }
@@ -134,13 +132,13 @@ namespace Treasury.Web.Service.Actual
                         {
                             result.vItem_Book = GetEstateModel(_ItemBooks);
                         }
-                        var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                        var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        if (_TAR.ACCESS_TYPE == AccessProjectTradeType.P.ToString())//存入
+                        if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString())//存入
                         {
                             result.vDetail = GetDetailModel(details, _Inventory_types).ToList();
                         }
-                        else if (_TAR.ACCESS_TYPE == AccessProjectTradeType.G.ToString()) //取出
+                        else if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString()) //取出
                         {                          
                             var _vDetail = GetDetailModel(details, _Inventory_types, true).ToList();
                             if (EditFlag) //可以修改時需加入庫存資料
@@ -179,7 +177,7 @@ namespace Treasury.Web.Service.Actual
                 var dept = intra.getDept(vAplyUnit); //抓取單位
                 //var itemId = TreaItemType.D1014.ToString(); //不動產權狀
                 //var _ItemBooks = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO == groupNo && x.ITEM_ID == itemId).ToList();
-                var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                 List<string> itemIds = new List<string>();
                 if (!aplyNo.IsNullOrWhiteSpace()) //有單號須加單號資料
@@ -224,19 +222,19 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _first = datas.First();
 
-                        if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                        if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                         {
                             if (!_first.vDetail.Any())
                             {
-                                result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                                result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                                 return result;
                             }
                         }
-                        else if(taData.vAccessType == AccessProjectTradeType.G.ToString())
+                        else if(taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                         {
                             if (!_first.vDetail.Any(x => x.vtakeoutFlag))
                             {
-                                result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                                result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                                 return result;
                             }
                         }
@@ -253,14 +251,14 @@ namespace Treasury.Web.Service.Actual
                             int groupUp = 1; //群組編號
                             var item_Seq = "E3"; //不動產權狀流水號開頭編碼    
 
-                            var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+                            var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
 
                             if (!taData.vAplyNo.IsNullOrWhiteSpace()) //修改已存在申請單
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -274,7 +272,7 @@ namespace Treasury.Web.Service.Actual
 
                                 #region 存取項目冊號資料檔
 
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                 {
                                     var _ItemBook = _first.vItem_Book;
                                     var _BUILDING_NAME = _ItemBook.BUILDING_NAME?.Trim();
@@ -339,10 +337,10 @@ namespace Treasury.Web.Service.Actual
                                 foreach (var item in details)
                                 {
                                     var _IRE_Item_Id = string.Empty;
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var _IRE = new ITEM_REAL_ESTATE();
                                             if (item.vItemId.StartsWith(item_Seq))
@@ -350,7 +348,7 @@ namespace Treasury.Web.Service.Actual
                                                 _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                                 if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 {
-                                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
                                                 _IRE.GROUP_NO = groupUp; //群組編號
@@ -396,13 +394,13 @@ namespace Treasury.Web.Service.Actual
                                             logStr += _IRE.modelToString(logStr);
                                         }
                                     }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
                                         var _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                         _IRE_Item_Id = _IRE.ITEM_ID;
                                         if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
                                         {
-                                            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                             return result;
                                         }
                                         //預約取出 
@@ -432,7 +430,7 @@ namespace Treasury.Web.Service.Actual
                                     }
                                 }
 
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                 {
                                     var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
@@ -443,7 +441,7 @@ namespace Treasury.Web.Service.Actual
                                     }));
                                     db.ITEM_REAL_ESTATE.AddRange(inserts);
                                 }
-                                else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                 {
                                     foreach (var backItemId in db.OTHER_ITEM_APLY.Where(x =>
                                      x.APLY_NO == taData.vAplyNo &&
@@ -467,50 +465,17 @@ namespace Treasury.Web.Service.Actual
                             }
                             else //新增申請單
                             {
-                                #region 申請單紀錄檔
-                                var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+                                #region 申請單紀錄檔 & 申請單歷程檔
 
-                                _TAR = new TREA_APLY_REC()
-                                {
-                                    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
-                                    ITEM_ID = taData.vItem, //申請項目
-                                    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
-                                    ACCESS_REASON = taData.vAccessReason, //申請原因
-                                    APLY_STATUS = _APLY_STATUS, //表單申請
-                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
-                                    APLY_UNIT = taData.vAplyUnit, //申請單位
-                                    APLY_UID = taData.vAplyUid, //申請人
-                                    APLY_DT = dt,
-                                    CREATE_UID = taData.vCreateUid, //新增人
-                                    CREATE_DT = dt,
-                                    LAST_UPDATE_UID = taData.vCreateUid,
-                                    LAST_UPDATE_DT = dt
-                                };
-                                if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
-                                {
-                                    _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
-                                    _TAR.CONFIRM_DT = dt;
-                                }
-                                logStr += _TAR.modelToString();
-                                db.TREA_APLY_REC.Add(_TAR);
-                                #endregion
+                                var data = SaveTREA_APLY_REC(db, taData, logStr, dt);
+                                _TAR.APLY_NO = data.Item1;
+                                logStr = data.Item2;
 
-                                #region 申請單歷程檔
-                                var _ARH = new APLY_REC_HIS()
-                                {
-                                    APLY_NO = _TAR.APLY_NO,
-                                    APLY_STATUS = _TAR.APLY_STATUS,
-                                    PROC_DT = dt,
-                                    PROC_UID = _TAR.CREATE_UID
-                                };
-                                logStr += _ARH.modelToString(logStr);
-                                db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
                                 #region 存取項目冊號資料檔
 
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                 {
                                     var _ItemBook = _first.vItem_Book;
                                     var _BUILDING_NAME = _ItemBook.BUILDING_NAME?.Trim();
@@ -570,10 +535,10 @@ namespace Treasury.Web.Service.Actual
                                 foreach (var item in details)
                                 {
                                     var _IRE_Item_Id = string.Empty;
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
                                             var _IRE = new ITEM_REAL_ESTATE()
@@ -601,16 +566,16 @@ namespace Treasury.Web.Service.Actual
                                             logStr += _IRE.modelToString(logStr);
                                         }
                                     }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
                                         //只抓取預約取出
-                                        if (item.vStatus == AccessInventoryType._4.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                         {
                                             var _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                             _IRE_Item_Id = _IRE.ITEM_ID;
                                             if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
                                             {
-                                                result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
                                             _IRE.INVENTORY_STATUS = "4"; //預約取出
@@ -654,12 +619,12 @@ namespace Treasury.Web.Service.Actual
                                     log.CFUNCTION = "申請覆核-新增不動產";
                                     log.CACTION = "A";
                                     log.CCONTENT = logStr;
-                                    LogDao.Insert(log, _TAR.CREATE_UID);
+                                    LogDao.Insert(log, taData.vCreateUid);
                                     #endregion
 
                                     result.RETURN_FLAG = true;
                                     var addstr = insertGroupFlag ? (",新增冊號:" + groupUp.ToString()) : string.Empty;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
+                                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
                                 }
                                 catch (DbUpdateException ex)
                                 {
@@ -671,12 +636,12 @@ namespace Treasury.Web.Service.Actual
                     }
                     else
                     {
-                        result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                        result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                     }
                 }
                 else
                 {
-                    result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
             catch (Exception ex)
@@ -699,7 +664,7 @@ namespace Treasury.Web.Service.Actual
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
             var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原
             {
                 foreach (var item in db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
@@ -734,7 +699,7 @@ namespace Treasury.Web.Service.Actual
         {
             var otherItemAplys = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == aply_No).ToList();
             var itemIds = otherItemAplys.Select(y => y.ITEM_ID).ToList();
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態不動產權狀庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
             {
                 foreach (var item in db.ITEM_REAL_ESTATE.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
@@ -789,7 +754,7 @@ namespace Treasury.Web.Service.Actual
                         groupNos.Add(db.ITEM_REAL_ESTATE.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == _itemId).GROUP_NO);
                     }
                 }
-                var itemId = TreaItemType.D1014.ToString(); //不動產權狀
+                var itemId = Ref.TreaItemType.D1014.ToString(); //不動產權狀
                 if (!parm.IsNullOrWhiteSpace())
                 {
                     result.AddRange(db.ITEM_BOOK.AsNoTracking()

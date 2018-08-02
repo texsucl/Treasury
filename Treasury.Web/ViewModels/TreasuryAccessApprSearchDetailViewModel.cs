@@ -18,10 +18,22 @@ namespace Treasury.Web.ViewModels
         public string vAPPR_DESC { get; set; }
 
         /// <summary>
-        /// 申請項目
+        /// 點選狀態
         /// </summary>
-        [Description("存取項目")]
+        [Description("點選狀態")]
+        public string vCheckFlag { get; set; }
+
+        /// <summary>
+        /// 存取申請項目
+        /// </summary>
+        [Description("存取申請項目")]
         public string vItem { get; set; }
+
+        /// <summary>
+        /// 存取申請項目中文
+        /// </summary>
+        [Description("存取申請項目中文")]
+        public string vItemDec { get; set; }
 
         /// <summary>
         /// 申請日期
@@ -58,6 +70,12 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("入庫原因")]
         public string vACCESS_REASON { get; set; }
+
+        /// <summary>
+        /// 覆核權限
+        /// </summary>
+        [Description("覆核權限")]
+        public bool vAPPRFlag { get; set; }
   
         /// <summary>
         /// 最後修改時間

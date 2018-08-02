@@ -13,14 +13,16 @@ namespace Treasury.Web.Report.Data
     public class BILL : ReportData
     {
         public override DataSet GetData(List<reportParm> parms)
-        {
+        {  
             var resultsTable = new DataSet();
+
 
             var _Parameters = new List<SqlParameter>(); 
             string aply_No = parms.Where(x => x.key == "aply_No").FirstOrDefault()?.value ?? string.Empty;
             SetDetail(aply_No);
             using (var conn = new SqlConnection(defaultConnection))
             {
+                
                 string sql = string.Empty;
                 sql += $@"
 select 

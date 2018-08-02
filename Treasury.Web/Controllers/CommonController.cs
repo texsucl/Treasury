@@ -6,12 +6,13 @@ using Treasury.Web.Service.Actual;
 using System.Web.Mvc;
 using System.Collections.Generic;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.Reflection;
 using System.Linq;
 using Microsoft.Reporting.WebForms;
 using System.Data;
 using Treasury.Web.ViewModels;
+using Treasury.Web.Controllers;
 
 /// <summary>
 /// 功能說明：共用 controller
@@ -34,16 +35,42 @@ namespace Treasury.WebControllers
         internal ICacheProvider Cache { get; set; }
         internal List<string> Aply_Appr_Type { get; set; }
 
+        protected ITreasuryAccess TreasuryAccess;
+
         public CommonController()
         {
             Cache = new DefaultCacheProvider();
             Aply_Appr_Type = new List<string>()
             {
-                AccessProjectFormStatus.A01.ToString(),
-                AccessProjectFormStatus.A03.ToString(),
-                AccessProjectFormStatus.A04.ToString(),
-                AccessProjectFormStatus.A05.ToString()
+                Ref.AccessProjectFormStatus.A01.ToString(),
+                Ref.AccessProjectFormStatus.A03.ToString(),
+                Ref.AccessProjectFormStatus.A04.ToString(),
+                Ref.AccessProjectFormStatus.A05.ToString()
             };
+            TreasuryAccess = new TreasuryAccess();
+        }
+
+        /// <summary>
+        /// 判斷 PartialView 是否可以CRUD
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="AplyNo"></param>
+        /// <returns></returns>
+        protected bool GetActType(Ref.OpenPartialViewType type, string AplyNo)
+        {
+            if (AplyNo.IsNullOrWhiteSpace()) //沒有申請單號表示可以CRUD
+                return true;
+            switch (type) //哪個畫面呼叫PartialView
+            {
+                case Ref.OpenPartialViewType.Appr: //金庫物品存取覆核作業
+                    //只有檢視功能
+                    return false; 
+
+                case Ref.OpenPartialViewType.Index: //金庫物品存取申請作業
+                default:
+                    //查詢作業 有單號的申請,如果為填表人本人可以修改
+                    return TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);
+            }
         }
 
         protected string GetopScope(string funcId)

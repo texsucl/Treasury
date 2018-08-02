@@ -7,7 +7,7 @@ using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
 using Treasury.WebActionFilter;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 不動產權狀
@@ -29,12 +29,10 @@ namespace Treasury.WebControllers
     public class EstateController : CommonController
     {
         private IEstate Estate;
-        private ITreasuryAccess TreasuryAccess;
 
         public EstateController()
         {
             Estate = new Estate();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -42,20 +40,19 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
             ViewBag.ESTATE_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
-            var _dActType = false;
+            var _dActType = GetActType(type, AplyNo); 
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                _dActType = AplyNo.IsNullOrWhiteSpace();
-                if (data.vAccessType == AccessProjectTradeType.P.ToString())
+                if (data.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(), "Value", "Text");
                     ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(), "Value", "Text");
                 }
-                else if (data.vAccessType == AccessProjectTradeType.G.ToString())
+                else if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(data.vAplyUnit), "Value", "Text");
                     ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(data.vAplyUnit), "Value", "Text");
@@ -66,20 +63,19 @@ namespace Treasury.WebControllers
             }
             else
             {
-                _dActType = TreasuryAccess.GetActType(AplyNo,AccountController.CurrentUserId, Aply_Appr_Type);
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 ViewBag.dAccess = viewModel.vAccessType;
-                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
+                if (viewModel.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(), "Value", "Text");
                     ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(), "Value", "Text");
                 }
-                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && _dActType)
+                else if (viewModel.vAccessType == Ref.AccessProjectTradeType.G.ToString() && _dActType)
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(viewModel.vAplyUnit, AplyNo), "Value", "Text");
                     ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(viewModel.vAplyUnit, AplyNo), "Value", "Text");
                 }
-                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && !_dActType)
+                else if (viewModel.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_dActType)
                 {
                     ViewBag.ESTATE_Book_No = new SelectList(Estate.GetBookNo(viewModel.vAplyUnit), "Value", "Text");
                     ViewBag.ESTATE_Building_Name = new SelectList(Estate.GetBuildName(viewModel.vAplyUnit), "Value", "Text");
@@ -111,13 +107,12 @@ namespace Treasury.WebControllers
             else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-                data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
                 _data.vItem_Book = model;
                 _data.vDetail = _detail;
                 List<EstateViewModel> _datas = new List<EstateViewModel>();
                 _datas.Add(_data);
-                if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_detail.Any(x => x.vtakeoutFlag))
+                if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_detail.Any(x => x.vtakeoutFlag))
                 {
                     result.DESCRIPTION = "無申請任何資料";
                 }
@@ -133,7 +128,7 @@ namespace Treasury.WebControllers
             else
             {
                 result.RETURN_FLAG = false;
-                result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
             return Json(result);
         }
@@ -150,7 +145,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<EstateModel> result = new MSGReturnModel<EstateModel>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (groupNo == 0 && Cache.IsSet(CacheList.ESTATEAllData)) //單純檢視畫面
             {
                 var data = (EstateViewModel)Cache.Get(CacheList.ESTATEAllData);
@@ -196,16 +191,16 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
-                model.vStatus = AccessInventoryType._3.GetDescription();
+                model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.ESTATEData);
                 Cache.Set(CacheList.ESTATEData, tempData);
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = MessageType.insert_Success.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
             }
             return Json(result);
         }
@@ -221,7 +216,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);                
@@ -238,12 +233,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.ESTATEData);
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -259,7 +254,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -271,12 +266,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.ESTATEData);
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.delete_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.delete_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -292,7 +287,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
@@ -301,22 +296,22 @@ namespace Treasury.WebControllers
                 {
                     if (takeoutFlag)
                     {
-                        updateTempData.vStatus = AccessInventoryType._4.GetDescription();                    
+                        updateTempData.vStatus = Ref.AccessInventoryType._4.GetDescription();                    
                     }
                     else
                     {
-                        updateTempData.vStatus = AccessInventoryType._1.GetDescription();
+                        updateTempData.vStatus = Ref.AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vtakeoutFlag = takeoutFlag;
                     Cache.Invalidate(CacheList.ESTATEData);
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }                                 
             }
             return Json(result);

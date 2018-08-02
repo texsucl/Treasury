@@ -21,7 +21,7 @@ namespace Treasury.Web.Report.Data
             SetDetail(aply_No);
             using (var conn = new SqlConnection(defaultConnection))
             {
-                string sql = string.Empty;
+                string sql = string.Empty;               
                 sql += $@"
 with temp as
 (
