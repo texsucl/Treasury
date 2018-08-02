@@ -9,7 +9,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.ComponentModel;
 
 namespace Treasury.Web.Service.Actual
@@ -31,7 +31,7 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result = db.ITEM_BOOK.AsNoTracking()
-                    .Where(x => x.ITEM_ID == TreaItemType.D1015.ToString())
+                    .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString())
                     .Max(x => x.GROUP_NO);
             }
             return result;
@@ -46,9 +46,9 @@ namespace Treasury.Web.Service.Actual
             var result = new List<ItemBookStock>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var vObj = from A in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "AREA")
-                           join M in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "MEMO") on A.GROUP_NO equals M.GROUP_NO
-                           join NBN in db.ITEM_BOOK.Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() & x.COL == "NEXT_BATCH_NO") on A.GROUP_NO equals NBN.GROUP_NO
+                var vObj = from A in db.ITEM_BOOK.Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString() & x.COL == "AREA")
+                           join M in db.ITEM_BOOK.Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString() & x.COL == "MEMO") on A.GROUP_NO equals M.GROUP_NO
+                           join NBN in db.ITEM_BOOK.Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString() & x.COL == "NEXT_BATCH_NO") on A.GROUP_NO equals NBN.GROUP_NO
                            where A.GROUP_NO == GroupNo
                            select new ItemBookStock
                            {
@@ -106,7 +106,7 @@ namespace Treasury.Web.Service.Actual
                 }
 
                 result.AddRange(db.ITEM_BOOK.AsNoTracking()
-                    .Where(x => x.ITEM_ID == TreaItemType.D1015.ToString() && x.COL == "NAME")
+                    .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString() && x.COL == "NAME")
                     .Where(x => groupNos.Contains(x.GROUP_NO), !vAplyUnit.IsNullOrWhiteSpace())
                     .OrderBy(x => x.GROUP_NO)
                     .AsEnumerable().Select(x => new SelectOption()
@@ -176,7 +176,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
                 var _emply = intra.getEmply();   //抓取員工資料
-                var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                 List<string> itemIds = new List<string>();
 
@@ -214,7 +214,7 @@ namespace Treasury.Web.Service.Actual
             var result = new List<StockDetailViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                 result =
                     getdetailModel(db.ITEM_STOCK.AsNoTracking()
@@ -260,13 +260,13 @@ namespace Treasury.Web.Service.Actual
                         {
                             result.vStockDate = GetItemBookStock(_ItemBooks);
                         }
-                        var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                        var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        if (_TAR.ACCESS_TYPE == AccessProjectTradeType.P.ToString())//存入
+                        if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString())//存入
                         {
                             result.vDetail = getdetailModel(details, _Inventory_types).ToList();
                         }
-                        else if (_TAR.ACCESS_TYPE == AccessProjectTradeType.G.ToString()) //取出
+                        else if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString()) //取出
                         {
                             var _emply = intra.getEmply();   //抓取員工資料
                             var _vDetail = getMainModel(details, _emply, _Inventory_types).ToList();
@@ -320,7 +320,7 @@ namespace Treasury.Web.Service.Actual
                             var _TAR = new TREA_APLY_REC(); //申請單號
                             bool insertGroupFlag = false;
                             string stockName = "";  //股票名稱
-                            var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+                            var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
 
                             if (taData.vAplyNo.IsNullOrWhiteSpace()) //新增申請單
                             {
@@ -377,7 +377,7 @@ namespace Treasury.Web.Service.Actual
                                 var _first = datas.First();
                                 var _StockModel = _first.vStockModel;
                                 //判斷申請作業
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                 {
                                     //判斷存入資料
                                     switch (_first.vStockDate.StockFeaturesType)
@@ -421,10 +421,10 @@ namespace Treasury.Web.Service.Actual
                                 foreach (var item in details)
                                 {
                                     //判斷申請作業-存入
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo("E7", string.Empty).ToString().PadLeft(8, '0');
 
@@ -468,10 +468,10 @@ namespace Treasury.Web.Service.Actual
                                             #endregion
                                         }
                                     }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
                                     {
                                         //只抓取預約取出
-                                        if (item.vStatus == AccessInventoryType._4.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                         {
                                             //取得股票明細資料
                                             var StockDetail = db.ITEM_STOCK.AsNoTracking()
@@ -485,7 +485,7 @@ namespace Treasury.Web.Service.Actual
                                                 var _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == detail.ITEM_ID);
                                                 if (_IS.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 {
-                                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
                                                 _IS.INVENTORY_STATUS = "4"; //預約取出
@@ -513,7 +513,7 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -542,17 +542,17 @@ namespace Treasury.Web.Service.Actual
                                 foreach (var item in details)
                                 {
                                     //判斷申請作業-存入
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             if (item.vItemId.StartsWith("E7"))  //明細修改
                                             {
                                                 _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                                 if (_IS.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 {
-                                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
                                                 _IS.GROUP_NO = _first.vStockDate.GroupNo;
@@ -602,7 +602,7 @@ namespace Treasury.Web.Service.Actual
                                             }
                                         }
                                     }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
                                     {
                                         //取得股票明細資料
                                         var StockDetail = db.ITEM_STOCK.AsNoTracking()
@@ -616,7 +616,7 @@ namespace Treasury.Web.Service.Actual
                                             _IS = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == detail.ITEM_ID);
                                             if (_IS.LAST_UPDATE_DT > item.vLast_Update_Time)
                                             {
-                                                result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
 
@@ -647,7 +647,7 @@ namespace Treasury.Web.Service.Actual
                                     }
                                 }
 
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                 {
                                     var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
@@ -659,7 +659,7 @@ namespace Treasury.Web.Service.Actual
                                     }));
                                     db.ITEM_STOCK.AddRange(inserts);
                                 }
-                                else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                 {
                                     foreach (var backItemId in db.OTHER_ITEM_APLY.Where(x =>
                                      x.APLY_NO == taData.vAplyNo &&
@@ -704,7 +704,7 @@ namespace Treasury.Web.Service.Actual
 
                                     result.RETURN_FLAG = true;
                                     var addstr = insertGroupFlag ? (",新增股票:" + stockName) : string.Empty;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
+                                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}{addstr}");
                                 }
                                 catch (DbUpdateException ex)
                                 {
@@ -716,12 +716,12 @@ namespace Treasury.Web.Service.Actual
                     }
                     else
                     {
-                        result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                        result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                     }
                 }
                 else
                 {
-                    result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
             catch (Exception ex)
@@ -743,11 +743,11 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
             {
                 return Recover(db, aply_No, logStr, dt, true);
             }
-            else if (access_Type == AccessProjectTradeType.P.ToString())    //存入處理作業
+            else if (access_Type == Ref.AccessProjectTradeType.P.ToString())    //存入處理作業
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
                 .FirstOrDefault(x => x.APLY_NO == aply_No);
@@ -790,11 +790,11 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
             {
                 return Recover(db, aply_No, logStr, dt, false);
             }
-            else if (access_Type == AccessProjectTradeType.P.ToString())    //存入處理作業
+            else if (access_Type == Ref.AccessProjectTradeType.P.ToString())    //存入處理作業
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
                 .FirstOrDefault(x => x.APLY_NO == aply_No);

@@ -8,7 +8,7 @@ using Treasury.WebUtility;
 using Treasury.Web.Controllers;
 using Treasury.Web.ViewModels;
 using System.Linq;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 初始畫面
@@ -102,7 +102,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             Cache.Invalidate(CacheList.TreasuryAccessSearchData);
             Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
             var datas = TreasuryAccess.GetSearchDetail(searchModel);
@@ -125,7 +125,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.not_Find_Any.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             Cache.Invalidate(CacheList.TreasuryAccessApprSearchData);
             Cache.Set(CacheList.TreasuryAccessApprSearchData, searchModel);
             var datas = TreasuryAccess.GetApprSearchDetail(searchModel);
@@ -149,7 +149,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
             var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
             var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
@@ -175,7 +175,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
             var datas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
             var data = datas.FirstOrDefault(x => x.vAPLY_NO == AplyNo);
@@ -242,24 +242,20 @@ namespace Treasury.WebControllers
         /// <returns></returns>
         [HttpPost]
         public JsonResult GetCacheData(jqGridParam jdata, string type)
-        {
-            if (Cache.IsSet(CacheList.TreasuryAccessSearchDetailViewData))
-            {
-                
-                switch (type)
-                {
-                    case "Access":
-                        var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                        return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
-                    case "Report":
-                        var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                        return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
-                    case "Appr":
-                        var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
-                        return Json(jdata.modelToJqgridResult(ApprDatas));
-                }
-            }
-            return null;
+        {           
+           switch (type)
+           {
+               case "Access":
+                   var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+               case "Report":
+                   var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+               case "Appr":
+                   var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                   return Json(jdata.modelToJqgridResult(ApprDatas));
+           }           
+           return null;
         }
 
         public void ResetSearchData()

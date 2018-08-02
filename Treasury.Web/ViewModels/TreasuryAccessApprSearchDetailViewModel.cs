@@ -18,6 +18,12 @@ namespace Treasury.Web.ViewModels
         public string vAPPR_DESC { get; set; }
 
         /// <summary>
+        /// 點選狀態
+        /// </summary>
+        [Description("點選狀態")]
+        public string vCheckFlag { get; set; }
+
+        /// <summary>
         /// 存取申請項目
         /// </summary>
         [Description("存取申請項目")]

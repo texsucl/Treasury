@@ -7,7 +7,7 @@ using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
 using Treasury.WebActionFilter;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 股票
@@ -43,7 +43,7 @@ namespace Treasury.WebControllers
         /// <param name="data">金庫物品存取主畫面ViewModel</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
             ViewBag.dStock_Area_Type = new SelectList(Stock.GetAreaType(), "Value", "Text");
             ViewBag.dStock_Type = new SelectList(Stock.GetStockType(), "Value", "Text");
@@ -52,11 +52,11 @@ namespace Treasury.WebControllers
             var _dActType = GetActType(type, AplyNo);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                if (data.vAccessType == AccessProjectTradeType.P.ToString())
+                if (data.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(), "Value", "Text");
                 }
-                else if (data.vAccessType == AccessProjectTradeType.G.ToString())
+                else if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(data.vAplyUnit), "Value", "Text");
                 }
@@ -70,15 +70,15 @@ namespace Treasury.WebControllers
                 ViewBag.dAccess = TreasuryAccess.GetAccessType(AplyNo);
 
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
-                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
+                if (viewModel.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(), "Value", "Text");
                 }
-                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && _dActType)
+                else if (viewModel.vAccessType == Ref.AccessProjectTradeType.G.ToString() && _dActType)
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(viewModel.vAplyUnit, AplyNo), "Value", "Text");
                 }
-                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString() && !_dActType)
+                else if (viewModel.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_dActType)
                 {
                     ViewBag.dStock_Name = new SelectList(Stock.GetStockName(viewModel.vAplyUnit), "Value", "Text");
                 }
@@ -112,11 +112,11 @@ namespace Treasury.WebControllers
                 var _data = (StockViewModel)Cache.Get(CacheList.StockData);
                 _data.vStockDate = vStockDate;
                 _data.vStockModel = vStockModel;
-                if (AccessType == AccessProjectTradeType.P.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     _data.vDetail = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
                 }
-                if (AccessType == AccessProjectTradeType.G.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     //判斷至少勾選一筆資料
                     var vDetail = ((List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData)).Where(x => x.vTakeoutFlag == true).ToList();
@@ -137,7 +137,7 @@ namespace Treasury.WebControllers
             else
             {
                 result.RETURN_FLAG = false;
-                result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
             return Json(result);
         }
@@ -153,7 +153,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (groupNo == 0 && Cache.IsSet(CacheList.StockMainData))
             {
                 var data = (StockDetailViewModel)Cache.Get(CacheList.StockMainData);
@@ -192,7 +192,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
 
             var _data = Stock.GetDetailData(groupNo, treaBatchNo);
             Cache.Invalidate(CacheList.StockTempData);
@@ -212,17 +212,17 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockTempData);
-                model.vStatus = AccessInventoryType._3.GetDescription();
+                model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.StockTempData);
                 Cache.Set(CacheList.StockTempData, tempData);
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = MessageType.insert_Success.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
             }
             return Json(result);
         }
@@ -237,7 +237,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -257,12 +257,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.StockTempData);
                     Cache.Set(CacheList.StockTempData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -278,7 +278,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.StockTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -290,12 +290,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.StockTempData);
                     Cache.Set(CacheList.StockTempData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.delete_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.delete_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -312,7 +312,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.StockMainData))
             {
                 var tempData = (List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData);
@@ -321,22 +321,22 @@ namespace Treasury.WebControllers
                 {
                     if (takeoutFlag)
                     {
-                        updateTempData.vStatus = AccessInventoryType._4.GetDescription();
+                        updateTempData.vStatus = Ref.AccessInventoryType._4.GetDescription();
                     }
                     else
                     {
-                        updateTempData.vStatus = AccessInventoryType._1.GetDescription();
+                        updateTempData.vStatus = Ref.AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vTakeoutFlag = takeoutFlag;
                     Cache.Invalidate(CacheList.StockMainData);
                     Cache.Set(CacheList.StockMainData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -414,11 +414,11 @@ namespace Treasury.WebControllers
                 Cache.Set(CacheList.StockData, data);
 
                 var viewModel = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
-                if (viewModel.vAccessType == AccessProjectTradeType.P.ToString())
+                if (viewModel.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     Cache.Set(CacheList.StockTempData, data.vDetail);
                 }
-                else if (viewModel.vAccessType == AccessProjectTradeType.G.ToString())
+                else if (viewModel.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     Cache.Set(CacheList.StockMainData, data.vDetail);
                     Cache.Set(CacheList.StockTempData, new List<StockDetailViewModel>());

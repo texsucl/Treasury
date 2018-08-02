@@ -6,7 +6,7 @@ using Treasury.Web.Service.Actual;
 using System.Web.Mvc;
 using System.Collections.Generic;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.Reflection;
 using System.Linq;
 using Microsoft.Reporting.WebForms;
@@ -42,10 +42,10 @@ namespace Treasury.WebControllers
             Cache = new DefaultCacheProvider();
             Aply_Appr_Type = new List<string>()
             {
-                AccessProjectFormStatus.A01.ToString(),
-                AccessProjectFormStatus.A03.ToString(),
-                AccessProjectFormStatus.A04.ToString(),
-                AccessProjectFormStatus.A05.ToString()
+                Ref.AccessProjectFormStatus.A01.ToString(),
+                Ref.AccessProjectFormStatus.A03.ToString(),
+                Ref.AccessProjectFormStatus.A04.ToString(),
+                Ref.AccessProjectFormStatus.A05.ToString()
             };
             TreasuryAccess = new TreasuryAccess();
         }
@@ -56,17 +56,17 @@ namespace Treasury.WebControllers
         /// <param name="type"></param>
         /// <param name="AplyNo"></param>
         /// <returns></returns>
-        protected bool GetActType(OpenPartialViewType type, string AplyNo)
+        protected bool GetActType(Ref.OpenPartialViewType type, string AplyNo)
         {
             if (AplyNo.IsNullOrWhiteSpace()) //沒有申請單號表示可以CRUD
                 return true;
             switch (type) //哪個畫面呼叫PartialView
             {
-                case OpenPartialViewType.Appr: //金庫物品存取覆核作業
+                case Ref.OpenPartialViewType.Appr: //金庫物品存取覆核作業
                     //只有檢視功能
                     return false; 
 
-                case OpenPartialViewType.Index: //金庫物品存取申請作業
+                case Ref.OpenPartialViewType.Index: //金庫物品存取申請作業
                 default:
                     //查詢作業 有單號的申請,如果為填表人本人可以修改
                     return TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);

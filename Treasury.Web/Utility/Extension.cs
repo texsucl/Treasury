@@ -177,6 +177,14 @@ namespace Treasury.WebUtility
             return string.IsNullOrWhiteSpace(str);
         }
 
+        public static DateTime? DateToLatestTime(this DateTime? datetime)
+        {
+            if (datetime == null)
+                return null;
+            datetime = (datetime.Value.Date).AddHours(23).AddMinutes(59).AddSeconds(59);
+            return datetime;
+        }
+
         /// <summary>
         /// To the simple taiwan date.
         /// </summary>
@@ -199,10 +207,12 @@ namespace Treasury.WebUtility
         public static string DateToTaiwanDate(this DateTime datetime, int length = 7)
         {
             TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
-            if(length == 9)
-               return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
-            else 
-               return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
+            if (length == 9)
+                return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
+            else if (length == 17)
+                return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')} {datetime.ToString("HH:mm:ss")}";
+            else
+                return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
         }
 
         /// <summary>
