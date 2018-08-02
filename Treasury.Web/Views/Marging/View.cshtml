@@ -1,0 +1,591 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div style="padding-bottom:5px;">
+        <input type="button" id="MargingInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="MARGINGjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="MargingAct">
+        <input type="button" id="MargingApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="MargingCancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="MargingBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="MargingDialog" style="display:none;">
+        <form id="MargingDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>類別 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dMargin_Dep_Type", (SelectList)ViewBag.dMargin_Dep_Type, new { @class = "MargingInsertType" })
+                    </td>
+                    <td>
+                        <label>交易對象 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tTrad_Partners" name="tTrad_Partners" maxlength="8" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>歸檔編號 : </label>
+                    </td>
+                    <td>
+                        <label id="lItem_Id"></label>
+                        <input type="hidden" id="hItem_PK" />
+                    </td>
+                    <td>
+                        <label>金額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tAmount" name="tAmount" maxlength="13" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>職場代號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tWorkplace_Code" name="tWorkplace_Code" maxlength="7" />
+                    </td>
+                    <td>
+                        <label>說明 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tDescription" name="tDescription" maxlength="20" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tMemo" name="tMemo" maxlength="30" />
+                    </td>
+                    <td>
+                        <label>冊號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="MargingInsertType" id="tBook_No" name="tBook_No" maxlength="2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" id="MargingInsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="MargingUpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="MargingDeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+
+                    <td colspan="2" style="text-align:right;">
+                        <input type="button" id="MargingCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var MargingUrl = {};
+        MargingUrl.getData = '@Url.Action("GetCacheData", "Marging")';
+        MargingUrl.InsertTempData = '@Url.Action("InsertTempData", "Marging")';
+        MargingUrl.UpdateTempData = '@Url.Action("UpdateTempData", "Marging")';
+        MargingUrl.DeleteTempData = '@Url.Action("DeleteTempData", "Marging")';
+        MargingUrl.ResetTempData = '@Url.Action("ResetTempData", "Marging")';
+        MargingUrl.TakeOutData = '@Url.Action("TakeOutData", "Marging")';
+        MargingUrl.ApplyTempData = '@Url.Action("ApplyTempData", "Marging")';
+        //#endregion
+
+        //#region 參數設定
+        var MargingFormId = 'MargingDialogForm'; //formId
+        var MargingDepType = 'dMargin_Dep_Type'; //類別Id
+        var MargingTradPartners = 'tTrad_Partners'; //交易對象Id
+        var MargingItemPK = 'hItem_PK'; //網頁PK
+        var MargingItemId = 'lItem_Id'; //歸檔編號Id
+        var MargingAmount = 'tAmount'; //金額Id
+        var MargingWorkplaceCode = 'tWorkplace_Code'; //職場代號Id
+        var MargingDescription = 'tDescription'; //說明Id
+        var MargingMemo = 'tMemo'; //備註Id
+        var MargingBookNo = 'tBook_No'; //冊號Id
+
+        var Marging_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val();
+        if (!Marging_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.MargingAct').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.MargingAct').show();
+        }
+        var Marging_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (Marging_Aply_No_Flag) {
+            $('#MargingCancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (typeFlag && Marging_Act_Type) {
+            $('#MargingInsert').show();
+        }
+        //#endregion
+
+        //#region 初始動作
+        MargingTempGrid();
+        setMargingVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setMargingVerified() {
+            verified.required(MargingFormId, MargingTradPartners, message.required('交易對象')); //交易對象為必填
+            verified.required(MargingFormId, MargingAmount, message.required('金額')); //金額為必填
+
+            verified.positiveInt(MargingFormId, MargingAmount); //金額 僅能輸入數字(正)
+            verified.positiveInt(MargingFormId, MargingBookNo); //冊號 僅能輸入數字(正)
+        }
+        //#endregion
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'MargingInsert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingInsertFun(); });
+                    break;
+                case 'MargingApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingApplyFun(); });
+                    break;
+                case 'MargingCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingCancelFun(); });
+                    break;
+                case 'MargingBack':
+                case 'MargingCancelTemp':
+                case 'MargingTakeOutCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    break;
+                case 'MargingInsertTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingInsertTempFun(); });
+                    break;
+                case 'MargingUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingUpdateTempFun(); });
+                    break;
+                case 'MargingDeleteTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingDeleteTempFun(); });
+                    break;
+                case 'MargingTakeOutTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { MargingTakeOutTempFun(); });
+                    break;
+            }
+        });
+
+        //#endregion
+
+        //#region 初始設定
+        function SetCustodianFlag()
+        {
+            if ('@ViewBag.CustodianFlag' == "True") {
+                $('#' + MargingMemo).attr("Disabled", false);
+                $('#' + MargingBookNo).attr("Disabled", false);
+            }
+            else {
+                $('#' + MargingMemo).attr("Disabled", true);
+                $('#' + MargingMemo).val(" ");
+                $('#' + MargingBookNo).attr("Disabled", true);
+                $('#' + MargingBookNo).val(" ");
+            }
+        }
+        //#endregion
+
+        //#region function
+
+        //#region dialog
+        function dialogOpen(type, rowid) {
+            $('#' + MargingFormId).validate().resetForm();
+            var dialogId = 'MargingDialog';
+            var listId = 'MargingTempList';
+            var MargingInsertClass = 'MargingInsertType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '存出保證金',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#MargingInsertTemp,#MargingUpdateTemp,#MargingDeleteTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog();
+                $('#MargingInsertTemp').show();
+                $('.' + MargingInsertClass).prop('disabled', false);
+                SetCustodianFlag();
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#MargingDeleteTemp').show();
+                $('.' + MargingInsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#MargingUpdateTemp').show();
+                $('.' + MargingInsertClass).prop('disabled', false);
+                SetCustodianFlag();
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + MargingInsertClass).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            if ($('#' + MargingDepType + ' option').length > 0) {
+                $('#' + MargingDepType).val($($('#' + MargingDepType + ' option')[0]).val())
+            }
+            $('#' + MargingItemPK).val('');
+            $('#' + MargingTradPartners).val('');
+            $('#' + MargingItemId).html('');
+            $('#' + MargingAmount).val('');
+            $('#' + MargingWorkplaceCode).val('');
+            $('#' + MargingDescription).val('');
+            $('#' + MargingMemo).val('');
+            $('#' + MargingBookNo).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + MargingItemPK).val(data.vItem_PK);
+                $('#' + MargingDepType).val(data.vMargin_Dep_Type.split('-')[0]);
+                $('#' + MargingTradPartners).val(data.vTrad_Partners);
+                $('#' + MargingItemId).html(data.vItem_Id);
+                $('#' + MargingAmount).val(data.vAmount);
+                $('#' + MargingWorkplaceCode).val(data.vWorkplace_Code);
+                $('#' + MargingDescription).val(data.vDescription);
+                $('#' + MargingMemo).val(data.vMemo);
+                $('#' + MargingBookNo).val(data.vBook_No);
+            }
+        }
+
+        //#endregion dialog
+
+        //#region jqgrid
+        function MARGINGformatterCheckType(cellvalue, options, rdata) {
+            var value = '';
+            switch (cellvalue) {
+                case '1':
+                    value = '1-房租押金';
+                    break;
+                case '2':
+                    value = '2-其他';
+                    break;
+                case '3':
+                    value = '3-或有資產';
+                    break;
+                case null:
+                    value = '';
+                    break;
+                default:
+                    value = cellvalue;
+                    break;
+            }
+            return value;
+        }
+
+        function MARGINGunformatterCheckType(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox MargingTakeOuts customerCheck'></div>";
+            return str;
+        }
+
+        function MargingTempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'MargingTemp', tempActFun);
+            if (!Marging_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        function MargingTempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'MargingTemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.MargingTakeOuts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function takeout(rowid, flag) {
+            var listId = 'MargingTempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: MargingViewModel(data.vItem_PK),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: MargingUrl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    MargingTempGrid();
+                }
+            });
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        function MargingTempGrid()
+        {
+            if (typeFlag) { //存入
+                var colNameArray = ['動作', '類別', '交易對象', '歸檔編號', '金額', '職場代號', '說明', '備註', '冊號', '網頁PK'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 100, sortable: false, formatter: MARGINGformatterCheckType, unformat: MARGINGunformatterCheckType });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'MARGINGjqgridDiv',
+                    'MargingTempList',
+                    'MargingTempPeger',
+                    MargingUrl.getData,
+                    {
+
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '存入明細資料',
+                    jqgridCustom.getPage('MARGINGjqgridDiv'),
+                    MargingTempCompleteFun,
+                    true
+                    );
+            }
+            else { //取出
+                var colNameArray = ['取出', '動作', '類別', '交易對象', '歸檔編號', '金額', '職場代號', '說明', '備註', '冊號', '網頁PK'];
+                var colModelArray = [];
+                if (!Marging_Act_Type) {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                }
+                else {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                }
+                colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 100, sortable: false, formatter: MARGINGformatterCheckType, unformat: MARGINGunformatterCheckType });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'MARGINGjqgridDiv',
+                    'MargingTempList',
+                    'MargingTempPeger',
+                    MargingUrl.getData,
+                    {
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '取出明細資料',
+                    jqgridCustom.getPage('MARGINGjqgridDiv'),
+                    MargingTempTakeOutFun,
+                    true
+                    );
+            }
+        }
+        //#endregion jqgrid
+
+        //開啟存出保證金新增頁面
+        function MargingInsertFun() {
+
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        //申請覆核
+        function MargingApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: MargingUrl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#MargingApply'));
+                }
+            })
+        }
+
+        //取消申請
+        function MargingCancelFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
+                dataType: "json",
+                url: MargingUrl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog();
+                MargingTempGrid();
+            })
+        }
+
+        //新增存出保證金暫存資料
+        function MargingInsertTempFun() {
+            if ($('#' + MargingFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: MargingViewModel(
+                            created.uuid(),
+                            $('#' + MargingItemId).html().trim(),
+                            $('#' + MargingTradPartners).val().trim(),
+                            $('#' + MargingDepType).val().trim(),
+                            $('#' + MargingAmount).val().trim(),
+                            $('#' + MargingWorkplaceCode).val().trim(),
+                            $('#' + MargingDescription).val().trim(),
+                            $('#' + MargingMemo).val().trim(),
+                            $('#' + MargingBookNo).val().trim())
+                    }),
+                    dataType: "json",
+                    url: MargingUrl.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#MargingInsertTemp'));
+                        MargingTempGrid();
+                    }
+                })
+            }
+        }
+
+        //修改存出保證金暫存資料
+        function MargingUpdateTempFun() {
+            if ($('#' + MargingFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: MargingViewModel(
+                            $('#' + MargingItemPK).val().trim(),
+                            $('#' + MargingItemId).html().trim(),
+                            $('#' + MargingTradPartners).val().trim(),
+                            $('#' + MargingDepType).val().trim(),
+                            $('#' + MargingAmount).val().trim(),
+                            $('#' + MargingWorkplaceCode).val().trim(),
+                            $('#' + MargingDescription).val().trim(),
+                            $('#' + MargingMemo).val().trim(),
+                            $('#' + MargingBookNo).val().trim())
+                    }),
+                    dataType: "json",
+                    url: MargingUrl.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#MargingUpdateTemp'));
+                        MargingTempGrid();
+                    }
+                })
+            }
+        }
+
+        //刪除存出保證金暫存資料
+        function MargingDeleteTempFun() {
+            if ($('#' + MargingFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: MargingViewModel(
+                            $('#' + MargingItemPK).val().trim())
+                    }),
+                    dataType: "json",
+                    url: MargingUrl.DeleteTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#MargingDeleteTemp'));
+                        MargingTempGrid();
+                    }
+                })
+            }
+        }
+
+        function MargingViewModel(
+            vItem_PK,
+            vItem_Id,
+            vTrad_Partners,
+            vMargin_Dep_Type,
+            vAmount,
+            vWorkplace_Code,
+            vDescription,
+            vMemo,
+            vBook_No
+            ) {
+            var obj = {};
+            obj['vItem_PK'] = vItem_PK;
+            obj['vItem_Id'] = vItem_Id;
+            obj['vTrad_Partners'] = vTrad_Partners;
+            obj['vMargin_Dep_Type'] = vMargin_Dep_Type;
+            obj['vAmount'] = vAmount;
+            obj['vWorkplace_Code'] = vWorkplace_Code;
+            obj['vDescription'] = vDescription;
+            obj['vMemo'] = vMemo;
+            obj['vBook_No'] = vBook_No;
+            return obj;
+        }
+        //#endregion
+    });
+</script>

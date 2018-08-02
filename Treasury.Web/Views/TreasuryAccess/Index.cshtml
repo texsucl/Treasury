@@ -184,6 +184,7 @@
         TAurl.openSEAL = '@Url.Action("View", "Seal")';
         TAurl.openSTOCK = '@Url.Action("View", "Stock")';
         TAurl.openCA = '@Url.Action("View","CA")';
+        TAurl.openMARGING = '@Url.Action("View", "Marging")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -294,6 +295,7 @@
                     case '@Ref.TreaItemType.D1011.ToString()':
                     case '@Ref.TreaItemType.D1015.ToString()':
                     case '@Ref.TreaItemType.D1024.ToString()':
+                    case '@Ref.TreaItemType.D1016.ToString()':
                         open(_aProject);
                         break;
                     case '':
@@ -341,7 +343,7 @@
                 resizable: false,
                 closeText: '取消'
             });
-            
+
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -377,7 +379,7 @@
         //#region 呼叫報表
         function TAReport() {
             if ($('.TAReportCs:checked').length > 0) {
-                $('.TAReportCs:checked').each(                
+                $('.TAReportCs:checked').each(
                     function () {
                         var listId = 'TAReportList';
                         var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
@@ -397,7 +399,7 @@
                                         );
                                 }, 100);
                         }
-                    }                   
+                    }
                 );
             }
             else {
@@ -544,7 +546,7 @@
             title = title || '';
             width = width || 'auto';
             title += '明細';
-            var dialogId = dialogId; 
+            var dialogId = dialogId;
             $('#' + dialogId).dialog({
                 position: {my:"top",at:"center top",of:window},
                 title: title,
@@ -788,6 +790,12 @@
                     obj.url = TAurl.openCA;
                     obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
                     obj.reportType = 'CA';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.url = TAurl.openMARGING;
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = '900px';
+                    obj.reportType = 'MARGING';
                     break;
             }
             return obj;
