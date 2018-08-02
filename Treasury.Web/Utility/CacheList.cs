@@ -75,6 +75,11 @@
         /// 庫存資料(電子憑證)
         /// </summary>
         public static string CAData { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(存出保證金)
+        /// </summary>
+        public static string MargingData { get; private set; }
         #endregion Cache資料
 
 
@@ -95,7 +100,8 @@
             CAData = "CAData";
             StockData = "StockData";
             StockMainData = "StockMainData";
-            StockTempData = "StockTempData";            
+            StockTempData = "StockTempData";
+            MargingData = "MargingData";
             #endregion Cache資料
 
         }
