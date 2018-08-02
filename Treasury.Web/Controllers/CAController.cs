@@ -7,7 +7,7 @@ using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
 using Treasury.WebActionFilter;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 電子憑證
@@ -40,7 +40,7 @@ namespace Treasury.WebControllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, OpenPartialViewType type)
+        public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
             var _dActType = GetActType(type, AplyNo);
             ViewBag.CAUse = new SelectList(CA.GetCA_Use(), "Value", "Text"); 
@@ -82,7 +82,7 @@ namespace Treasury.WebControllers
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var _data = (List<CAViewModel>)Cache.Get(CacheList.CAData);
-                if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
+                if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
                 {
                     result.DESCRIPTION = "無申請任何資料";
                 }
@@ -97,7 +97,7 @@ namespace Treasury.WebControllers
             }
             else
             {
-                result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
             return Json(result);
         }
@@ -112,16 +112,16 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.CAData))
             {
                 var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
-                model.vStatus = AccessInventoryType._3.GetDescription();
+                model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.CAData);
                 Cache.Set(CacheList.CAData, tempData);
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = MessageType.insert_Success.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
             }
             return Json(result);
         }
@@ -136,7 +136,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.CAData))
             {
                 var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);                
@@ -151,12 +151,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.CAData);
                     Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -172,7 +172,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.CAData))
             {
                 var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
@@ -183,12 +183,12 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.CAData);
                     Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.delete_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.delete_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
                 }
             }
             return Json(result);
@@ -204,7 +204,7 @@ namespace Treasury.WebControllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.CAData))
             {
                 var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
@@ -213,22 +213,22 @@ namespace Treasury.WebControllers
                 {
                     if (takeoutFlag)
                     {
-                        updateTempData.vStatus = AccessInventoryType._4.GetDescription();                    
+                        updateTempData.vStatus = Ref.AccessInventoryType._4.GetDescription();                    
                     }
                     else
                     {
-                        updateTempData.vStatus = AccessInventoryType._1.GetDescription();
+                        updateTempData.vStatus = Ref.AccessInventoryType._1.GetDescription();
                     }
                     updateTempData.vtakeoutFlag = takeoutFlag;
                     Cache.Invalidate(CacheList.CAData);
                     Cache.Set(CacheList.CAData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = MessageType.update_Fail.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                 }                                 
             }
             return Json(result);
@@ -273,22 +273,22 @@ namespace Treasury.WebControllers
             var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
             if (AplyNo.IsNullOrWhiteSpace())
             {
-                if (AccessType == AccessProjectTradeType.P.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     Cache.Set(CacheList.CAData, new List<CAViewModel>());
                 }
-                if (AccessType == AccessProjectTradeType.G.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     Cache.Set(CacheList.CAData, CA.GetDbDataByUnit(data.vAplyUnit, AplyNo));//只抓庫存
                 }              
             }
             else
             {
-                if (AccessType == AccessProjectTradeType.P.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.P.ToString())
                 {
                     Cache.Set(CacheList.CAData, CA.GetDataByAplyNo(AplyNo));//抓單號
                 }
-                if (AccessType == AccessProjectTradeType.G.ToString())
+                if (AccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
                     if (ActType && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
                     {

@@ -8,7 +8,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 空白票券
@@ -49,12 +49,12 @@ namespace Treasury.Web.Service.Actual
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
                 var _code = "3"; //預約存入 , 4=> 預約取出
                 var _Inventory_types = sys_codes
-                    .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList(); //抓庫存狀態設定
+                    .Where(x => x.CODE_TYPE == Ref.SysCodeType.INVENTORY_TYPE.ToString()).ToList(); //抓庫存狀態設定
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
                     .FirstOrDefault(x => x.APLY_NO == aplyNo);
                 if (_TAR != null)
-                    _code = _TAR.ACCESS_TYPE == AccessProjectTradeType.P.ToString() ? "3" :
-                           _TAR.ACCESS_TYPE == AccessProjectTradeType.G.ToString() ? "4" : "3";
+                    _code = _TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString() ? "3" :
+                           _TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString() ? "4" : "3";
                 result = db.BLANK_NOTE_APLY.AsNoTracking()
                     .Where(x => x.APLY_NO == aplyNo)
                     .OrderBy(x => x.ISSUING_BANK)
@@ -87,7 +87,7 @@ namespace Treasury.Web.Service.Actual
                         vAplyUnit = _TAR.APLY_UNIT;
                 }
                 var dept = intra.getDept(vAplyUnit); //抓取單位
-                var _code_type = SysCodeType.INVENTORY_TYPE.ToString();
+                var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString();
                 var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                      result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存資料表只抓庫存 其他由申請紀錄檔 抓取
@@ -117,11 +117,11 @@ namespace Treasury.Web.Service.Actual
             {
                 var nonShowStatus = new List<string>()
                 {
-                    AccessProjectFormStatus.E02.ToString() //申請人刪除狀態 (等同庫存有需排除)
+                    Ref.AccessProjectFormStatus.E02.ToString() //申請人刪除狀態 (等同庫存有需排除)
                 };
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
                 var _Inventory_types = sys_codes
-                    .Where(x => x.CODE_TYPE == SysCodeType.INVENTORY_TYPE.ToString()).ToList();
+                    .Where(x => x.CODE_TYPE == Ref.SysCodeType.INVENTORY_TYPE.ToString()).ToList();
                 db.TREA_APLY_REC.AsNoTracking()
                     .Where(x => !nonShowStatus.Contains(x.APLY_STATUS)) //要確認是否須排除不能顯示的
                     .Where(x => x.APLY_UNIT == vAplyUnit).ToList()
@@ -214,13 +214,13 @@ namespace Treasury.Web.Service.Actual
                         {
                             using (TreasuryDBEntities db = new TreasuryDBEntities())
                             {
-                                var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+                                var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
                                 
 
                                 #region 申請單紀錄檔
                                 var _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
                                 logStr += _TAR.modelToString(logStr);
@@ -306,7 +306,7 @@ namespace Treasury.Web.Service.Actual
                                         #endregion
 
                                         result.RETURN_FLAG = true;
-                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                        result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
                                     }
                                     catch (DbUpdateException ex)
                                     {
@@ -318,15 +318,15 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                            result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                         }
                     }
                     else //新增申請單
                     {
                         //取出只抓狀態為預約取出的資料
-                        if (taData.vAccessType == AccessProjectTradeType.G.ToString())
+                        if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                         {
-                            datas = datas.Where(x => x.vStatus == AccessInventoryType._4.GetDescription()).ToList();
+                            datas = datas.Where(x => x.vStatus == Ref.AccessInventoryType._4.GetDescription()).ToList();
                         }
                         if (datas.Any())
                         {
@@ -335,7 +335,7 @@ namespace Treasury.Web.Service.Actual
                                 string _ITEM_BLANK_NOTE_ITEM_ID = null; //紀錄空白票據申請資料檔 對應空白票據庫存資料檔 物品編號                              
 
                                 #region 取出時要把空白票據資料 做切段動作
-                                if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //取出時要把空白票據資料 做切段動作
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //取出時要把空白票據資料 做切段動作
                                 {
                                     bool _changFlag = false;
                                     datas.ForEach(x =>
@@ -370,7 +370,7 @@ namespace Treasury.Web.Service.Actual
                                     });
                                     if (_changFlag)
                                     {
-                                        result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                        result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                         return result;
                                     }
                                 }
@@ -436,7 +436,7 @@ namespace Treasury.Web.Service.Actual
                                         ISSUING_BANK = x.vIssuingBank,
                                         CHECK_NO_TRACK = x.vCheckNoTrack,
                                         CHECK_NO_B = x.vCheckNoB,
-                                        CHECK_NO_E = taData.vAccessType == AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
+                                        CHECK_NO_E = taData.vAccessType == Ref.AccessProjectTradeType.P.ToString() ? x.vCheckNoE : x.vTakeOutE,
                                         ITEM_BLANK_NOTE_ITEM_ID = _ITEM_BLANK_NOTE_ITEM_ID
                                     };
                                     db.BLANK_NOTE_APLY.Add(_BNA);
@@ -467,7 +467,7 @@ namespace Treasury.Web.Service.Actual
                                         #endregion
 
                                         result.RETURN_FLAG = true;
-                                        result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{data.Item1}");
+                                        result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{data.Item1}");
                                     }
                                     catch (DbUpdateException ex)
                                     {
@@ -479,14 +479,14 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                            result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                         }
                     }
 
                 }
                 else
                 {
-                    result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
             catch (Exception ex)
@@ -581,7 +581,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
             {
                 return Recover(db, aply_No, logStr, dt, false);
             }
@@ -602,7 +602,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-            if (access_Type == AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態資料要復原
             {
                 return Recover(db, aply_No, logStr, dt, true);
             }

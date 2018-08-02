@@ -8,7 +8,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 
 namespace Treasury.Web.Service.Actual
 {
@@ -33,25 +33,25 @@ namespace Treasury.Web.Service.Actual
         public TreasuryAccess()
         {
             printsStatus = new List<string>();
-            printsStatus.Add(AccessProjectFormStatus.A02.ToString());
-            printsStatus.Add(AccessProjectFormStatus.B01.ToString());
-            printsStatus.Add(AccessProjectFormStatus.B02.ToString());
-            printsStatus.Add(AccessProjectFormStatus.B03.ToString());
-            printsStatus.Add(AccessProjectFormStatus.B04.ToString());
-            printsStatus.Add(AccessProjectFormStatus.C01.ToString());
-            printsStatus.Add(AccessProjectFormStatus.C02.ToString());
-            printsStatus.Add(AccessProjectFormStatus.D01.ToString());
-            printsStatus.Add(AccessProjectFormStatus.D02.ToString());
-            printsStatus.Add(AccessProjectFormStatus.D03.ToString());
-            printsStatus.Add(AccessProjectFormStatus.D04.ToString());
-            printsStatus.Add(AccessProjectFormStatus.E01.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.A02.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.B01.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.B02.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.B03.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.B04.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.C01.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.C02.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.D01.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.D02.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.D03.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.D04.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.E01.ToString());
             invalidStatus = new List<string>();
-            invalidStatus.Add(AccessProjectFormStatus.A03.ToString());
-            invalidStatus.Add(AccessProjectFormStatus.A04.ToString());
-            invalidStatus.Add(AccessProjectFormStatus.A05.ToString());
+            invalidStatus.Add(Ref.AccessProjectFormStatus.A03.ToString());
+            invalidStatus.Add(Ref.AccessProjectFormStatus.A04.ToString());
+            invalidStatus.Add(Ref.AccessProjectFormStatus.A05.ToString());
             apprStatus = new List<string>();
-            apprStatus.Add(AccessProjectFormStatus.A01.ToString());
-            apprStatus.Add(AccessProjectFormStatus.A05.ToString());
+            apprStatus.Add(Ref.AccessProjectFormStatus.A01.ToString());
+            apprStatus.Add(Ref.AccessProjectFormStatus.A05.ToString());
         }
 
         #region Get Date
@@ -318,9 +318,9 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
-                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E);
+                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E).DateToLatestTime();
                 DateTime? _vActualAccessDate_S = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_S);
-                DateTime? _vActualAccessDate_E = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_E);
+                DateTime? _vActualAccessDate_E = TypeTransfer.stringToDateTimeN(data.vActualAccessDate_E).DateToLatestTime();
                 var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
                 var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
 
@@ -334,8 +334,8 @@ namespace Treasury.Web.Service.Actual
                 if (_vActualAccessDate_S != null || _vActualAccessDate_E != null) //實際存取
                 {
                     var status = new List<string>() {
-                        AccessProjectFormStatus.D03.ToString(),
-                        AccessProjectFormStatus .E01.ToString()}; //狀態須符合這兩個
+                        Ref.AccessProjectFormStatus.D03.ToString(),
+                        Ref.AccessProjectFormStatus.E01.ToString()}; //狀態須符合這兩個
                     _data = _data.Where(x => status.Contains(x.APLY_STATUS))
                         .Join(db.TREA_OPEN_REC.AsNoTracking()
                         .Where(x => x.REGI_APPR_DT >= _vActualAccessDate_S, _vActualAccessDate_S != null)
@@ -456,7 +456,7 @@ namespace Treasury.Web.Service.Actual
         {
             var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
             //取得流水號
@@ -476,7 +476,7 @@ namespace Treasury.Web.Service.Actual
                     var sampleFactory = new SampleFactory();
 
                     #region 
-                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
                     if (getAgenct != null)
                     {
                         var _recover = getAgenct.CancelApply(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
@@ -551,11 +551,11 @@ namespace Treasury.Web.Service.Actual
         {
             var result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = MessageType.already_Change.GetDescription();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
             //取得流水號
-            var _status = AccessProjectFormStatus.E02.ToString();
+            var _status = Ref.AccessProjectFormStatus.E02.ToString();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
@@ -569,7 +569,7 @@ namespace Treasury.Web.Service.Actual
                     _TREA_APLY_REC.APLY_STATUS = _status;
                     var sampleFactory = new SampleFactory();
                     #region 
-                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
                     if (getAgenct != null)
                     {
                         var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
@@ -666,7 +666,7 @@ namespace Treasury.Web.Service.Actual
                 vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME,
                 vAPLY_UID = data.APLY_UID,
                 vAPLY_UID_NAME = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME,
-                vCancleFlag = data.APLY_STATUS == AccessProjectFormStatus.A01.ToString() && data.CREATE_UID == userId ? "Y" : "N",
+                vCancleFlag = data.APLY_STATUS == Ref.AccessProjectFormStatus.A01.ToString() && data.CREATE_UID == userId ? "Y" : "N",
                 vInvalidFlag = invalidStatus.Contains(data.APLY_STATUS) &&
                               data.CREATE_UID == userId ? "Y" : "N",
                 vPrintFlag = printsStatus.Contains(data.APLY_STATUS) ? "Y" : "N",

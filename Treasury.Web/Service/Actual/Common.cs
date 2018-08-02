@@ -8,7 +8,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
 /// <summary>
@@ -64,11 +64,11 @@ namespace Treasury.Web.Service.Actual
             var _TAR = new TREA_APLY_REC()
             {
                 APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
+                APLY_FROM = Ref.AccessProjectStartupType.M.ToString(), //人工
                 ITEM_ID = taData.vItem, //申請項目
                 ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
                 ACCESS_REASON = taData.vAccessReason, //申請原因
-                APLY_STATUS = AccessProjectFormStatus.A01.ToString(), //表單申請
+                APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(), //表單申請
                 EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
                 APLY_UNIT = taData.vAplyUnit, //申請單位
                 APLY_UID = taData.vAplyUid, //申請人

@@ -38,22 +38,43 @@
                                  <input type="button" class="btn btn-primary" id="TAApprI_Search" value="查詢" />
                                  @Html.Hidden("h_Appr_CREATE_Dep", (string)ViewBag.hCREATE_Dep)
                                  @Html.Hidden("h_Appr_CREATE_User", (string)ViewBag.hCREATE_User)
+                                 @Html.Hidden("h_Appr_Aply_No")
                              </td>
                          </tr>
                      </table>
-                    <div id="TAApprSearchDetail">
-                    </div>
                 </form>
             }
         </div>
     </div>
     <div id="TAApprSearchDetail" style="display:none" role="dialog" class="myDialog">
-        <div id="TAApprjqgridDiv" class="col-sm-24 jqd" style="padding-bottom:5px;">
+        <div id="TAApprjqgridDiv" class="jqd" style="padding-bottom:5px;">
         </div>
-        <div class="TAApprClass">
-            <input type="button" class="TAPrint btn btn-primary" id="TAApprI_Appr" value="核准" />
-            <input type="button" class="TAPrint btn btn-primary" id="TAApprI_Reject" value="駁回" />
+        <div class="TAApprClass" style="text-align:center">
+            <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_I_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" id="TAAppr_I_Reject" value="駁回" />
         </div>
+    </div>
+    <div id="TAApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TAApprOpenSearchDetail"></div>
+        <div style="text-align:center">
+            <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_V_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" id="TAAppr_V_Reject" value="駁回" />
+        </div>
+    </div>
+    <div id="" style="display:none" role="dialog">
+        <table>
+            <tr>
+                <td>
+                    <textarea id="TAApprDesc"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="TAAppr_Y_Reject" class="btn btn-primary" style="" value="確認駁回"/>
+                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="" value="取消駁回" />
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 
@@ -75,6 +96,7 @@
         TAApprurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
         TAApprurl.Appr = '@Url.Action("Appraisal", "TreasuryAccess")';
         TAApprurl.Reject = '@Url.Action("Reject", "TreasuryAccess")';
+        TAApprurl.getByAplyNo = '@Url.Action("GetByAplyNo", "TreasuryAccess")';
 
         var openSearchDetailId = 'TAApprOpenSearchDetail';
         var TAFormId = 'TAForm';
@@ -106,6 +128,20 @@
                     case 'TAApprI_Search':
                         $('#' + id).on('click', function () { TAApprSearch(); });
                         break;
+                    case 'TAAppr_I_Appr':
+                    case 'TAAppr_V_Appr':
+                        $('#' + id).on('click', function () { TAApprApproved(); });
+                        break;
+                    case 'TAAppr_I_Reject':
+                    case 'TAAppr_V_Reject':
+                        $('#' + id).on('click', function () { TAApprReject(); });
+                        break;
+                    case 'TAAppr_Y_Reject':
+                        $('#' + id).on('click', function () { });
+                        break;
+                    case 'TAAppr_N_Reject':
+                        $('#' + id).on('click', function () { });
+                        break;
                 }
             });
             //#endregion
@@ -120,11 +156,11 @@
 
         //#region 查詢畫面查詢
         function TAApprSearch() {
-            var dialogId = 'TAApprOpenSearchDialog';
+            var dialogId = 'TAApprSearchDetail';
             $('#' + dialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
+                position: { my: "top", at: "center top", of: window },
                 title: '查詢畫面',
-                width: 1310,
+                width: 1070,
                 autoOpen: false,
                 maxHeight: 700,
                 resizable: false,
@@ -167,7 +203,7 @@
 
         function formatterCheck(cellvalue, options, rdata) {
             var str = '';
-            if (cellvalue == 'Y') {
+            if (rdata.vAPPRFlag) {
                 str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
                     options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox TAReortCs customerCheck'></div>";
             }
@@ -186,37 +222,33 @@
 
         //#region 查詢表單
         function TAApprGrid() {
-            var colNameArray = ['項次', ' ',
+            var colNameArray = [ ' ',
                 '存取項目', '申請日期', '申請單號',
                 '申請單位', '申請人', '入庫原因',
-                '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入'];
+                '存取項目ID', '覆核權限'];
             var colModelArray = [
-                { name: "vCancleFlag", index: "vCancleFlag", width: 70, sortable: false, align: 'center', formatter: formatterCancleFlag },
-                { name: "vInvalidFlag", index: "vInvalidFlag", width: 40, sortable: false, align: 'center', formatter: formatterInvalidFlag },
-                { name: "vItem", index: "vItem", width: 150, sortable: false, align: 'center' },
+                { name: "vCheckFlag", index: "vCheckFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck },
+                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
                 { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center' },
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 160, sortable: false, align: 'left' },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 160, sortable: false, align: 'left' },
-                { name: "vDESC", index: "vDESC", width: 160, sortable: false, align: 'left' },
-                { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
-                { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
-                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 270, sortable: false, align: 'left' },
+                { name: "vItem", index: "vItem", hidden: true },
+                { name: "vAPPRFlag", index: "vAPPRFlag", hidden: true },
             ];
             jqgridCustom.createJqgridByCache(
-                'TAjqgridDiv1',
-                'TAAccessList',
-                'TAAccessPeger',
+                'TAApprjqgridDiv',
+                'TAApprList',
+                'TAApprPeger',
                 TAApprurl.getData,
                 {
                     type: 'Appr'
                 },
                 colNameArray,
                 colModelArray,
-                '申請代辦區',
-                jqgridCustom.getPage('TAjqgridDiv1'),
+                '代處理文件',
+                jqgridCustom.getPage('TAApprjqgridDiv'),
                 TAApprGridCompeleteFun,
                 true
                 );
@@ -241,7 +273,27 @@
         //#endregion
 
 
-
+        //#region 新增事件(打開Dialog)
+        function openTADialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '明細';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    $('#h_Appr_Aply_No').val('');
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
 
         //#region 開啟申請單號
         function TAOpenAPLYNOFun(listId, rowid) {
@@ -251,12 +303,11 @@
             var itemData = GetItemData(itemId);
             if (itemData.url != null)
             {
-                $('#TAR_AplyNo').val(data.vAPLY_NO);
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
                         AplyNo: data.vAPLY_NO,
-                        data: null
+                        data: null,
                     }),
                     url: TAApprurl.getByAplyNo,
                     contentType: 'application/json',
@@ -264,6 +315,7 @@
                 .done(function (result) {
                     if (result.RETURN_FLAG) {
                         var aplyNoData = result.Datas;
+                        $('#h_Appr_Aply_No').val(data.vAPLY_NO);
                         $.ajax({
                             type: 'POST',
                             data: JSON.stringify({
@@ -287,7 +339,7 @@
                                 $('#TAVMApprvCreateUnit').text(aplyNoData.vCreateUnit);
                                 $('#TAVMApprvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMApprvAccessReason').val(aplyNoData.vAccessReason);
-                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAOpenSearchDialog');
+                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAApprOpenSearchDialog');
                             }
                         })
                     }
