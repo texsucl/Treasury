@@ -10,6 +10,8 @@ namespace Treasury.Web.Service.Interface
 {
     public interface ITreasuryAccess 
     {
+        #region Get
+
         /// <summary>
         /// 取得 人員基本資料
         /// </summary>
@@ -39,22 +41,6 @@ namespace Treasury.Web.Service.Interface
         /// <returns></returns>
 
         List<TreasuryAccessSearchDetailViewModel> GetSearchDetail(TreasuryAccessSearchViewModel data);
-
-        /// <summary>
-        /// 取消申請
-        /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
-
-        /// <summary>
-        /// 作廢
-        /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
 
         /// <summary>
         /// 查詢申請單紀錄資料by單號
@@ -99,5 +85,37 @@ namespace Treasury.Web.Service.Interface
         /// <param name="data"></param>
         /// <returns></returns>
         List<TreasuryAccessApprSearchDetailViewModel> GetApprSearchDetail(TreasuryAccessApprSearchViewModel data);
+
+        #endregion
+
+        #region Save
+
+        /// <summary>
+        /// 取消申請
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Cancel(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
+
+        /// <summary>
+        /// 作廢
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> Invalidate(TreasuryAccessSearchViewModel searchData, TreasuryAccessSearchDetailViewModel data);
+
+
+        /// <summary>
+        /// 覆核畫面覆核
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="viewModels"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Approved(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels);
+
+        #endregion
+
     }
 }

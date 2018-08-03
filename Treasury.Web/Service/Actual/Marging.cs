@@ -29,11 +29,10 @@ namespace Treasury.Web.Service.Actual
 {
     public class Marging: Common,IMarging
     {
-        protected INTRA intra { private set; get; }
 
         public Marging()
         {
-            intra = new INTRA();
+  
         }
 
         #region GetData

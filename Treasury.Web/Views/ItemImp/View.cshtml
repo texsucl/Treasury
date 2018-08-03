@@ -1,0 +1,542 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="row">
+    <div style="padding-bottom:5px;">
+        <input type="button" id="ItemImpInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="ItemImpjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+
+    </div>
+    <div style="text-align:center;display:none;" class="ItemImp_Act">
+        <input type="button" id="ItemImpApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="ItemImpCancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="ItemImpBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+
+    <div id="ItemImpDialog" style="display:none">
+        <form id="ItemImpDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>編號 : </label>
+                    </td>
+                    <td>
+                        
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>物品名稱 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Name" name="tItemImp_Name" class="ItemImpInsertType" maxlength="30" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Quantity" name="tItemImp_Quantity" class="ItemImpInsertType" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>金額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Amount" name="tItemImp_Amount" class="ItemImpInsertType" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>預計提取日期 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Expected_Date" name="tItemImp_Expected_Date" class="ItemImpInsertType" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>說明 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Description" name="tItemImp_Description" class="ItemImpInsertType" maxlength="100" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tItemImp_MEMO" name="tItemImp_MEMO" class="ItemImpInsertType" style="width:207px;height:80px;" maxlength="200" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" id="hItemImp_ITEM_ID" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="ItemImpInsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="ItemImpUpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="ItemImpDeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ItemImpCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var ItemImpurl = {};
+        ItemImpurl.getData = '@Url.Action("GetCacheData", "ItemImp")';
+        ItemImpurl.InsertTempData = '@Url.Action("InsertTempData", "ItemImp")';
+        ItemImpurl.UpdateTempData = '@Url.Action("UpdateTempData", "ItemImp")';
+        ItemImpurl.DeleteTempData = '@Url.Action("DeleteTempData", "ItemImp")';
+        ItemImpurl.ResetTempData = '@Url.Action("ResetTempData", "ItemImp")';
+        ItemImpurl.TakeOutData = '@Url.Action("TakeOutData", "ItemImp")';
+        ItemImpurl.ApplyTempData = '@Url.Action("ApplyTempData", "ItemImp")';
+        //#endregion
+
+        //#region 參數設定
+
+        //庫存資料
+        var ItemImpDialogId = 'ItemImpDialog'; //dialogId
+        var ItemImpDialogFormId = 'ItemImpDialogForm'; //dialogFormId
+        var ItemImp_Name = 'tItemImp_Name';//物品名稱Id(text)
+        var ItemImp_Quantity = 'tItemImp_Quantity';//數量Id(text)
+        var ItemImp_Amount = 'tItemImp_Amount';//金額Id(text)
+        var ItemImp_Expected_Date = 'tItemImp_Expected_Date';//預計提取日期(text)
+        var ItemImp_Description = 'tItemImp_Description';//說明(text)
+        var ItemImp_MemoId = 'tItemImp_MEMO'; //備註Id(texarea)
+        var ItemImp_Item_IdHlId = 'hItemImp_ITEM_ID'; //物品標號Id(hidden)
+
+
+        var ItemImp_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+        var ItemImp_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (ItemImp_Aply_No_Flag) {
+            $('#ItemImpCancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+
+        if (!ItemImp_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.ItemImp_Act').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.ItemImp_Act').show();
+        }
+        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (typeFlag && ItemImp_Act_Type) {
+            $('#ItemImpInsert').show();
+        }
+        //#endregion
+
+        function clearJqgrid(gridDivId) {
+            $('#' + gridDivId).children().remove();
+        }
+
+        //#region 初始動作
+        ItemImpTempGrid();
+        setItemImpVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setItemImpVerified() {
+            verified.required(ItemImpDialogFormId, ItemImp_Name, message.required('重要物品名稱')); //重要物品名稱為必填
+            verified.required(ItemImpDialogFormId, ItemImp_Amount, message.required('重要物品金額'));//重要物品金額為必填
+            
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'ItemImpInsert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpInsertFun(); });
+                    break;
+                case 'ItemImpApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpApplyFun(); });
+                    break;
+                case 'ItemImpCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpCancelFun(); });
+                    break;
+                case 'ItemImpBack':
+                case 'ItemImpCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    break;
+                case 'ItemImpInsertTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpInsertTempFun(); });
+                    break;
+                case 'ItemImpUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpUpdateTempFun(); });
+                    break;
+                case 'ItemImpDeleteTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpDeleteTempFun(); });
+                    break;
+            }
+        });
+
+        function ItemImpReset() {
+            $('#' + ItemImp_LocatedTId).val('');
+            $('#' + ItemImp_MemoTId).val('');
+        }
+
+        function ItemImpApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ItemImpurl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#ItemImpApply'));
+                }
+            })
+        }
+
+        function ItemImpCancelFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
+                dataType: "json",
+                url: ItemImpurl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog();
+                ItemImpTempGrid();
+            })
+        }
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox ItemImptakeouts customerCheck'></div>";
+            return str;
+        }
+
+
+
+
+
+
+
+        function ItemImpTempGrid() {
+
+            if (typeFlag) { //存入
+                var colNameArray = ['動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品編號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                
+                colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", width: 100, sortable: false });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'ItemImpjqgridDiv',
+                    'ItemImpTempList',
+                    'ItemImpTempPeger',
+                    ItemImpurl.getData,
+                    {
+
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '存入明細資料',
+                    jqgridCustom.getPage('ItemImpjqgridDiv'),
+                    ItemImpTempCompleteFun,
+                    true
+                    );
+            }
+            else { //取出
+                //var colNameArray = ['取出', '動作', '電子憑證用途', '電子憑證品項', '銀行/廠商', '電子憑證號碼', '備註', '物品編號'];
+                //var colModelArray = [];
+                //if (!ItemImp_Act_Type) {
+                //    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                //    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                //}
+                //else {
+                //    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                //    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                //}
+                //colModelArray.push({ name: "vItemImp_Use", index: "vItemImp_Use", width: 100, sortable: false, formatter: formatterItemImp_Use, unformat: UnformatterItemImp_Use });
+                //colModelArray.push({ name: "vItemImp_Desc", index: "vItemImp_Desc", width: 100, sortable: false, formatter: formatterItemImp_Desc, unformat: UnformatterItemImp_Desc });
+                //colModelArray.push({ name: "vBank", index: "vBank", width: 100, sortable: false });
+                //colModelArray.push({ name: "vItemImp_Number", index: "vItemImp_Number", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                //colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                //jqgridCustom.createJqgridByItemImpche(
+                //    'ItemImpjqgridDiv',
+                //    'ItemImpTempList',
+                //    'ItemImpTempPeger',
+                //    ItemImpurl.getData,
+                //    {
+                //    },
+                //    colNameArray,
+                //    colModelArray,
+                //    '取出明細資料',
+                //    jqgridCustom.getPage('ItemImpjqgridDiv'),
+                //    ItemImpTempTakeOutFun,
+                //    true
+                //    );
+            }
+        }
+
+        function ItemImpTempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'ItemImpTemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.ItemImptakeouts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function takeout(rowid, flag) {
+            var listId = 'ItemImpTempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: ItemImpViewModel(data.vItemId),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: ItemImpurl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    ItemImpTempGrid();
+                }
+            });
+        }
+
+        function ItemImpTempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'ItemImpTemp', tempActFun);
+            if (!ItemImp_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function ItemImpInsertFun() {
+
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid) {
+            $('#' + ItemImpDialogFormId).validate().resetForm();
+            var dialogId = 'ItemImpDialog';
+            var listId = 'ItemImpTempList';
+            var ItemImpInsertClass = 'ItemImpInsertType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '印章',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#ItemImpInsertTemp,#ItemImpUpdateTemp,#ItemImpDeleteTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog();
+                $('#ItemImpInsertTemp').show();
+                $('.' + ItemImpInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#ItemImpDeleteTemp').show();
+                $('.' + ItemImpInsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#ItemImpUpdateTemp').show();
+                $('.' + ItemImpInsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + ItemImpInsertClass).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            
+            $('#' + ItemImp_Name).val('');
+            $('#' + ItemImp_Quantity).val('');
+            $('#' + ItemImp_Amount).val('');
+            $('#' + ItemImp_Expected_Date).val('');
+            $('#' + ItemImp_Description).val('');
+            $('#' + ItemImp_MemoId).val('');
+            $('#' + ItemImp_Item_IdHlId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                
+                $('#' + ItemImp_Name).val(data.vItemImp_Name);
+                $('#' + ItemImp_Quantity).val(data.vItemImp_Quantity);
+                $('#' + ItemImp_Amount).val(data.vItemImp_Amount);
+                $('#' + ItemImp_Expected_Date).val(data.vItemImp_Expected_Date);
+                $('#' + ItemImp_Description).val(data.Description);
+                $('#' + ItemImp_MemoId).val(data.vMemo);
+                $('#' + ItemImp_Item_IdHlId).val(data.vItemId);
+            }
+        }
+
+        //新增暫存重要物品明細
+        function ItemImpInsertTempFun() {
+            
+            if ($('#' + ItemImpDialogFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ItemImpViewModel(
+                            created.uuid(),
+                            
+                            $('#' + ItemImp_Name).val().trim(),
+                            $('#' + ItemImp_Quantity).val().trim(),
+                            $('#' + ItemImp_Amount).val().trim(),
+                            $('#' + ItemImp_Expected_Date).val().trim(),
+                            $('#' + ItemImp_Description).val().trim(),
+                            $('#' + ItemImp_MemoId).val().trim())
+             
+                    }),
+                    dataType: "json",
+                    url: ItemImpurl.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ItemImpInsertTemp'));
+                        ItemImpTempGrid();
+                    }
+                })
+            }
+        }
+
+        function ItemImpUpdateTempFun() {
+            
+            if ($('#' + ItemImpDialogFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ItemImpViewModel(
+                            $('#' + ItemImp_Item_IdHlId).val(),
+                            
+                            $('#' + ItemImp_Name).val().trim(),
+                            $('#' + ItemImp_Quantity).val().trim(),
+                            $('#' + ItemImp_Amount).val().trim(),
+                            $('#' + ItemImp_Expected_Date).val().trim(),
+                            $('#' + ItemImp_Description).val().trim(),
+                            $('#' + ItemImp_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: ItemImpurl.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ItemImpUpdateTemp'));
+                        ItemImpTempGrid();
+                    }
+                })
+            }
+        }
+
+        function ItemImpDeleteTempFun() {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: ItemImpViewModel(
+                        $('#' + ItemImp_Item_IdHlId).val())
+                }),
+                dataType: "json",
+                url: ItemImpurl.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#ItemImpDeleteTemp'));
+                    ItemImpTempGrid();
+                }
+            })
+        }
+
+        
+
+        function ItemImpViewModel(
+            vItemId,
+            
+            vItemImp_Name,
+            vItemImp_Quantity,
+            vItemImp_Amount,
+            vItemImp_Expected_Date,
+            vDescription,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            
+            obj['vItemImp_Name'] = vItemImp_Name;
+            obj['vItemImp_Quantity'] = vItemImp_Quantity;
+            obj['vItemImp_Amount'] = vItemImp_Amount;
+            obj['vItemImp_Expected_Date'] = vItemImp_Expected_Date;
+            obj['vDescription'] = vDescription;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>
