@@ -402,7 +402,7 @@ namespace Treasury.Web.Service.Actual
                 var emps = GetEmps();
                 var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
                 DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
-                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E);
+                DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E).DateToLatestTime();
                 result = db.TREA_APLY_REC.AsNoTracking()
                     .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
                     .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
@@ -662,9 +662,10 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                var aplynos = new List<string>();
                 foreach (var item in viewModels.Where(x=>x.vCheckFlag))
                 {
-                    var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
+                    var _TREA_APLY_REC = db.TREA_APLY_REC
                         .FirstOrDefault(x => x.APLY_NO == item.vAPLY_NO);
                     if (_TREA_APLY_REC == null) //找不到該筆單號
                     {
@@ -676,6 +677,7 @@ namespace Treasury.Web.Service.Actual
                         result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vAPLY_NO}");
                         return result;
                     }
+                    aplynos.Add(item.vAPLY_NO);
                     var aplyStatus = Ref.AccessProjectFormStatus.B01.ToString(); // 狀態 => 申請單位覆核完成，保管科確認中
                     if (_TREA_APLY_REC.CUSTODY_UID != null &&
                         _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID)
@@ -735,7 +737,7 @@ namespace Treasury.Web.Service.Actual
                         #endregion
 
                         result.RETURN_FLAG = true;
-                        result.DESCRIPTION = "覆核成功!";
+                        result.DESCRIPTION = $"申請單號 : {string.Join(",", aplynos)} 覆核成功!";
                         result.Datas = GetApprSearchDetail(searchData);
                     }
                     catch (DbUpdateException ex)
@@ -749,10 +751,11 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
-        /// 覆核畫面拒絕
+        /// 覆核畫面駁回
         /// </summary>
-        /// <param name="searchData"></param>
-        /// <param name="viewModels"></param>
+        /// <param name="searchData">金庫物品覆核畫面查詢ViewModel</param>
+        /// <param name="viewModels">覆核表單查詢顯示區塊ViewModel</param>
+        /// <param name="apprDesc">駁回意見</param>
         /// <returns></returns>
         public MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Reject(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels ,string apprDesc)
         {
@@ -765,9 +768,10 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                var aplynos = new List<string>();
                 foreach (var item in viewModels.Where(x=>x.vCheckFlag))
                 {
-                    var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
+                    var _TREA_APLY_REC = db.TREA_APLY_REC
                         .FirstOrDefault(x => x.APLY_NO == item.vAPLY_NO);
                     if (_TREA_APLY_REC == null) //找不到該筆單號
                     {
@@ -779,6 +783,8 @@ namespace Treasury.Web.Service.Actual
                         result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vAPLY_NO}");
                         return result;
                     }
+                    aplynos.Add(item.vAPLY_NO);
+
                     var aplyStatus = Ref.AccessProjectFormStatus.E03.ToString(); // 狀態 => 申請單位退回作廢
 
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
@@ -854,7 +860,8 @@ namespace Treasury.Web.Service.Actual
                         #endregion
 
                         result.RETURN_FLAG = true;
-                        result.DESCRIPTION = "覆核成功!";
+                        result.DESCRIPTION = $"申請單號 : {string.Join(",", aplynos)} 已駁回!";
+                        result.Datas = GetApprSearchDetail(searchData);
                     }
                     catch (DbUpdateException ex)
                     {
@@ -865,8 +872,6 @@ namespace Treasury.Web.Service.Actual
 
             return result;
         }
-
-
 
         #endregion
 
@@ -893,7 +898,7 @@ namespace Treasury.Web.Service.Actual
             return new TreasuryAccessSearchDetailViewModel()
             {
                 vACCESS_REASON = data.ACCESS_REASON,
-                vAPLY_DT = data.APLY_DT?.ToString("yyyy/MM/dd"),
+                vAPLY_DT = data.APLY_DT?.DateToTaiwanDate(9),
                 vAPLY_NO = data.APLY_NO,
                 vAPLY_STATUS = data.APLY_STATUS,
                 vAPLY_STATUS_D = formStatus.FirstOrDefault(x => x.CODE == data.APLY_STATUS)?.CODE_VALUE,
@@ -924,7 +929,7 @@ namespace Treasury.Web.Service.Actual
             {
                 vItem = data.ITEM_ID,
                 vItemDec = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC,
-                vAPLY_DT = data.APLY_DT?.DateToTaiwanDate(),
+                vAPLY_DT = data.APLY_DT?.DateToTaiwanDate(9),
                 vAPLY_NO = data.APLY_NO,
                 vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME,
                 vAPLY_UID = data.APLY_UID,
