@@ -473,9 +473,9 @@ namespace Treasury.Web.Service.Actual
                     }
                     logStr += _TREA_APLY_REC.modelToString();
 
-                    var sampleFactory = new SampleFactory();
 
-                    #region 
+                    #region 刪除申請
+                    var sampleFactory = new SampleFactory();
                     var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
                     if (getAgenct != null)
                     {
@@ -567,8 +567,10 @@ namespace Treasury.Web.Service.Actual
                     }
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = _status;
+                    logStr += _TREA_APLY_REC.modelToString(logStr);
+
+                    #region 作廢
                     var sampleFactory = new SampleFactory();
-                    #region 
                     var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
                     if (getAgenct != null)
                     {
@@ -577,7 +579,7 @@ namespace Treasury.Web.Service.Actual
                         {
                             return result;
                         }
-                        logStr = _recover.Item2;
+                        logStr += _recover.Item2;
                     }
                     else
                     {
@@ -587,16 +589,19 @@ namespace Treasury.Web.Service.Actual
 
                     #region 申請單歷程檔
                     //「取消申請」：新增「E02」申請人刪除的狀態資料。
-                    db.APLY_REC_HIS.Add(
-                    new APLY_REC_HIS()
+                    var ARH = new APLY_REC_HIS()
                     {
                         APLY_NO = _TREA_APLY_REC.APLY_NO,
                         APLY_STATUS = _status,
                         PROC_UID = searchData.vCreateUid,
                         PROC_DT = dt
-                    });
+                    };
+                    logStr += ARH.modelToString(logStr);
+
+                    db.APLY_REC_HIS.Add(ARH);
 
                     #endregion
+
                     var validateMessage = db.GetValidationErrors().getValidateString();
                     if (validateMessage.Any())
                     {
@@ -657,7 +662,7 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                foreach (var item in viewModels)
+                foreach (var item in viewModels.Where(x=>x.vCheckFlag))
                 {
                     var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
                         .FirstOrDefault(x => x.APLY_NO == item.vAPLY_NO);
@@ -671,12 +676,71 @@ namespace Treasury.Web.Service.Actual
                         result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vAPLY_NO}");
                         return result;
                     }
-
-                    if(_TREA_APLY_REC.CUSTODY_UID != null &&
-                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID) 
-                        //新增人員等於保管科人員直接
+                    var aplyStatus = Ref.AccessProjectFormStatus.B01.ToString(); // 狀態 => 申請單位覆核完成，保管科確認中
+                    if (_TREA_APLY_REC.CUSTODY_UID != null &&
+                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID)
+                       //新增人員等於保管科人員 狀態 => 入庫確認中
                     {
+                        aplyStatus = Ref.AccessProjectFormStatus.C01.ToString();
+                    }
+                    _TREA_APLY_REC.LAST_UPDATE_DT = dt;
+                    _TREA_APLY_REC.APLY_STATUS = aplyStatus;
+                    _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
+                    // 申請單位
+                    if (aplyStatus == Ref.AccessProjectFormStatus.B01.ToString())
+                    {
+                        _TREA_APLY_REC.APLY_APPR_UID = searchData.vCreateUid;
+                        _TREA_APLY_REC.APLY_APPR_DT = dt;
+                    }
+                    // 保管科單位
+                    else
+                    {
+                        _TREA_APLY_REC.CUSTODY_APPR_UID = searchData.vCreateUid;
+                        _TREA_APLY_REC.CUSTODY_APPR_DT = dt;
+                    }
+                    logStr += _TREA_APLY_REC.modelToString(logStr);
 
+                    #region 申請單歷程檔
+                    var ARH = new APLY_REC_HIS()
+                    {
+                        APLY_NO = _TREA_APLY_REC.APLY_NO,
+                        APLY_STATUS = aplyStatus,
+                        PROC_UID = searchData.vCreateUid,
+                        PROC_DT = dt
+                    };
+                    logStr += ARH.modelToString(logStr);
+
+                    db.APLY_REC_HIS.Add(ARH);
+
+                    #endregion
+                }
+                var validateMessage = db.GetValidationErrors().getValidateString();
+                if (validateMessage.Any())
+                {
+                    result.DESCRIPTION = validateMessage;
+                }
+                else
+                {
+                    try
+                    {
+                        db.SaveChanges();
+
+                        #region LOG
+                        //新增LOG
+                        Log log = new Log();
+                        log.CFUNCTION = "覆核-金庫物品存取覆核作業";
+                        log.CACTION = "U";
+                        log.CCONTENT = logStr;
+                        LogDao.Insert(log, searchData.vCreateUid);
+                        #endregion
+
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = "覆核成功!";
+                        result.Datas = GetApprSearchDetail(searchData);
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        result.DESCRIPTION = ex.exceptionMessage();
                     }
                 }
             }
@@ -690,15 +754,113 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchData"></param>
         /// <param name="viewModels"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Reject(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels)
+        public MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Reject(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels ,string apprDesc)
         {
             var result = new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
 
+            DateTime dt = DateTime.Now;
+            string logStr = string.Empty;
+
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                foreach (var item in viewModels.Where(x=>x.vCheckFlag))
+                {
+                    var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
+                        .FirstOrDefault(x => x.APLY_NO == item.vAPLY_NO);
+                    if (_TREA_APLY_REC == null) //找不到該筆單號
+                    {
+                        result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription(null, $"單號:{item.vAPLY_NO}");
+                        return result;
+                    }
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > item.vLast_Update_Time) //資料已經被更新
+                    {
+                        result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vAPLY_NO}");
+                        return result;
+                    }
+                    var aplyStatus = Ref.AccessProjectFormStatus.E03.ToString(); // 狀態 => 申請單位退回作廢
 
+                    _TREA_APLY_REC.LAST_UPDATE_DT = dt;
+                    _TREA_APLY_REC.APLY_STATUS = aplyStatus;
+                    _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
+                    // 保管科單位
+                    if (_TREA_APLY_REC.CUSTODY_UID != null &&
+                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID)
+                    {
+                        _TREA_APLY_REC.CUSTODY_APPR_DESC = apprDesc;
+                        _TREA_APLY_REC.CUSTODY_APPR_DT = dt;
+                        _TREA_APLY_REC.CUSTODY_APPR_UID = searchData.vCreateUid;
+                    }
+                    // 申請單位
+                    else
+                    {
+                        _TREA_APLY_REC.APLY_APPR_DESC = apprDesc;
+                        _TREA_APLY_REC.APLY_APPR_DT = dt;
+                        _TREA_APLY_REC.APLY_APPR_UID = searchData.vCreateUid;
+                    }
+                    logStr += _TREA_APLY_REC.modelToString(logStr);
+
+                    #region 申請單歷程檔
+                    var ARH = new APLY_REC_HIS()
+                    {
+                        APLY_NO = _TREA_APLY_REC.APLY_NO,
+                        APLY_STATUS = aplyStatus,
+                        PROC_UID = searchData.vCreateUid,
+                        PROC_DT = dt
+                    };
+                    logStr += ARH.modelToString(logStr);
+
+                    db.APLY_REC_HIS.Add(ARH);
+
+                    #endregion
+
+                    #region 作廢
+                    var sampleFactory = new SampleFactory();
+                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
+                    if (getAgenct != null)
+                    {
+                        var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
+                        if (!_recover.Item1) //失敗
+                        {
+                            return result;
+                        }
+                        logStr += _recover.Item2;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+                    #endregion                
+                }
+                var validateMessage = db.GetValidationErrors().getValidateString();
+                if (validateMessage.Any())
+                {
+                    result.DESCRIPTION = validateMessage;
+                }
+                else
+                {
+                    try
+                    {
+                        db.SaveChanges();
+
+                        #region LOG
+                        //新增LOG
+                        Log log = new Log();
+                        log.CFUNCTION = "駁回-金庫物品存取覆核作業";
+                        log.CACTION = "U";
+                        log.CCONTENT = logStr;
+                        LogDao.Insert(log, searchData.vCreateUid);
+                        #endregion
+
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = "覆核成功!";
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        result.DESCRIPTION = ex.exceptionMessage();
+                    }
+                }
             }
 
             return result;

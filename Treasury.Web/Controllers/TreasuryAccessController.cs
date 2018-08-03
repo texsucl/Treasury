@@ -199,8 +199,25 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult Appraisal(List<string> AplyNos)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
-
+            MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> result =
+                new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (AplyNos.Any() && Cache.IsSet(CacheList.TreasuryAccessApprSearchDetailViewData))
+            {
+                var datas =  (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                foreach (var item in datas.Where(x => AplyNos.Contains(x.vAPLY_NO)))
+                {
+                    item.vCheckFlag = true;
+                }
+                var searchData = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessApprSearchData);
+                result = TreasuryAccess.Approved(searchData, datas);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessApprSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessApprSearchDetailViewData, result.Datas);
+                }
+            }
             return Json(result);
         }
 
