@@ -9,7 +9,7 @@ using Treasury.Web.ViewModels;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.ComponentModel;
 
 /// <summary>
@@ -83,7 +83,7 @@ namespace Treasury.Web.Service.Actual
                     {
                         vItem_PK = x.ITEM_ID,
                         vItem_Id=x.ITEM_ID,
-                        vStatus = AccessInventoryType._1.GetDescription(),
+                        vStatus = Ref.AccessInventoryType._1.GetDescription(),
                         vTrad_Partners=x.TRAD_PARTNERS,
                         vMargin_Dep_Type=x.MARGIN_DEP_TYPE,
                         vAmount=x.AMOUNT,
@@ -106,7 +106,7 @@ namespace Treasury.Web.Service.Actual
                      {
                          vItem_PK = x.ITEM_ID,
                          vItem_Id = x.ITEM_ID,
-                         vStatus = AccessInventoryType._4.GetDescription(),
+                         vStatus = Ref.AccessInventoryType._4.GetDescription(),
                          vTrad_Partners = x.TRAD_PARTNERS,
                          vMargin_Dep_Type = x.MARGIN_DEP_TYPE,
                          vAmount = x.AMOUNT,
@@ -144,7 +144,7 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
                     if (details.Any())
                     {
-                        var _code_type = SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
+                        var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                         result = GetDetailModel(details, _Inventory_types).ToList();
                     }
@@ -181,7 +181,7 @@ namespace Treasury.Web.Service.Actual
 
                             string logStr = string.Empty; //log
                             var _TAR = new TREA_APLY_REC(); //申請單號
-                            var _APLY_STATUS = AccessProjectFormStatus.A01.ToString(); //表單申請
+                            var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
                             if (taData.vAplyNo.IsNullOrWhiteSpace()) //新增申請單
                             {
                                 String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
@@ -199,10 +199,10 @@ namespace Treasury.Web.Service.Actual
                                 {
                                     var _IRD_Item_Id = string.Empty;
                                     //判斷申請作業-存入
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             string item_id = string.Empty;
 
@@ -222,7 +222,7 @@ namespace Treasury.Web.Service.Actual
                                                     item_id = $@"C{item_id}";
                                                     break;
                                                 default:
-                                                    result.DESCRIPTION = MessageType.parameter_Error.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
                                                     return result;
                                             }
 
@@ -253,17 +253,17 @@ namespace Treasury.Web.Service.Actual
                                             #endregion
                                         }
                                     }
-                                    else if (taData.vAccessType == AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
                                     {
                                         //只抓取預約取出
-                                        if (item.vStatus == AccessInventoryType._4.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                         {
                                             #region 存出保證金庫存資料檔
                                             var _IRD = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == item.vItem_Id);
                                             _IRD_Item_Id = _IRD.ITEM_ID;
                                             if (_IRD.LAST_UPDATE_DT > item.vLast_Update_Time)
                                             {
-                                                result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
                                             _IRD.INVENTORY_STATUS = "4"; //預約取出
@@ -292,7 +292,7 @@ namespace Treasury.Web.Service.Actual
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -319,10 +319,10 @@ namespace Treasury.Web.Service.Actual
                                 foreach(var item in datas)
                                 {
                                     //判斷申請作業-存入
-                                    if (taData.vAccessType == AccessProjectTradeType.P.ToString())
+                                    if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString())
                                     {
                                         //只抓取預約存入
-                                        if (item.vStatus == AccessInventoryType._3.GetDescription())
+                                        if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             string TypeCode = string.Empty;
 
@@ -339,7 +339,7 @@ namespace Treasury.Web.Service.Actual
                                                     TypeCode = "C";
                                                     break;
                                                 default:
-                                                    result.DESCRIPTION = MessageType.parameter_Error.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
                                                     return result;
                                             }
 
@@ -348,7 +348,7 @@ namespace Treasury.Web.Service.Actual
                                                 _IRD = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == item.vItem_PK);
                                                 if (_IRD.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 {
-                                                    result.DESCRIPTION = MessageType.already_Change.GetDescription();
+                                                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
                                                 _IRD.TRAD_PARTNERS = item.vTrad_Partners;   //交易對象
@@ -385,7 +385,7 @@ namespace Treasury.Web.Service.Actual
                                                         item_id = $@"C{item_id}";
                                                         break;
                                                     default:
-                                                        result.DESCRIPTION = MessageType.parameter_Error.GetDescription();
+                                                        result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
                                                         return result;
                                                 }
 
@@ -413,9 +413,42 @@ namespace Treasury.Web.Service.Actual
                                             }
                                         }
                                     }
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
+                                    {
+                                        _IRD = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == item.vItem_Id);
+                                        if (_IRD.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                        {
+                                            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                                            return result;
+                                        }
+                                        //預約取出
+                                        if (item.vTakeoutFlag)
+                                        {
+                                            if (_IRD.INVENTORY_STATUS == "1") //原先為在庫
+                                            {
+                                                _IRD.INVENTORY_STATUS = "4"; //預約取出
+                                                _IRD.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                updateItemIds.Add(_IRD.ITEM_ID);
+                                                logStr += _IRD.modelToString(logStr);
+                                            }
+                                            else if (_IRD.INVENTORY_STATUS == "4") //原先為預約取出
+                                            {
+                                                updateItemIds.Add(_IRD.ITEM_ID);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (_IRD.INVENTORY_STATUS == "4") //原先為在庫
+                                            {
+                                                _IRD.INVENTORY_STATUS = "1"; //預約取出
+                                                _IRD.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                logStr += _IRD.modelToString(logStr);
+                                            }
+                                        }
+                                    }
                                 }
 
-                                if (taData.vAccessType == AccessProjectTradeType.P.ToString()) //存入
+                                if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                 {
                                     var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
@@ -428,9 +461,14 @@ namespace Treasury.Web.Service.Actual
                                     db.ITEM_REFUNDABLE_DEP.AddRange(inserts);
 
                                 }
-                                else if (taData.vAccessType == AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                 {
-
+                                    db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).ToList());
+                                    db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
+                                    {
+                                        APLY_NO = taData.vAplyNo,
+                                        ITEM_ID = x
+                                    }));
                                 }
                                 #endregion
                             }
@@ -457,7 +495,7 @@ namespace Treasury.Web.Service.Actual
                                     #endregion
 
                                     result.RETURN_FLAG = true;
-                                    result.DESCRIPTION = MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
+                                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_TAR.APLY_NO}");
                                 }
                                 catch (DbUpdateException ex)
                                 {
@@ -470,12 +508,12 @@ namespace Treasury.Web.Service.Actual
                     }
                     else
                     {
-                        result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                        result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                     }
                 }
                 else
                 {
-                    result.DESCRIPTION = MessageType.not_Find_Audit_Data.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
             catch (Exception ex)
@@ -497,8 +535,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> CancelApply(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-
-            return new Tuple<bool, string>(true, logStr);
+            return Process(db, aply_No, logStr, dt, access_Type, true);
         }
 
         /// <summary>
@@ -512,8 +549,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-
-            return new Tuple<bool, string>(true, logStr);
+            return Process(db, aply_No, logStr, dt, access_Type, false);
         }
         #endregion
 
@@ -541,6 +577,88 @@ namespace Treasury.Web.Service.Actual
                 vTakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
+        }
+
+        /// <summary>
+        /// 申請刪除 & 作廢 存出保證金資料庫要處理的事件
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aply_No"></param>
+        /// <param name="logStr"></param>
+        /// <param name="dt"></param>
+        /// <param name="accessType"></param>
+        /// <param name="deleFlag"></param>
+        /// <returns></returns>
+        public Tuple<bool, string> Process(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt,string accessType, bool deleFlag)
+        {
+            var _changeFlag = false;
+
+            var _TAR = db.TREA_APLY_REC.AsNoTracking()
+            .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+            if (_TAR != null)
+            {
+                //使用單號去其他存取項目檔抓取物品編號
+                var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                    .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                //使用物品編號去存出保證金庫存資料檔抓取資料
+                var details = db.ITEM_REFUNDABLE_DEP.AsNoTracking()
+                    .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                if (details.Any())
+                {
+                    if (accessType == Ref.AccessProjectTradeType.G.ToString()) //取出狀態處理作業
+                    {
+                        foreach (var item in details)
+                        {
+                            var _IRD = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                            _IRD.INVENTORY_STATUS = "1"; //返回在庫
+                            _IRD.LAST_UPDATE_DT = dt;
+                            logStr += _IRD.modelToString(logStr);
+                        }
+
+                        //刪除其他存取項目檔
+                        if (deleFlag)
+                            db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+                    }
+                    else if (accessType == Ref.AccessProjectTradeType.P.ToString())    //存入狀態處理作業
+                    {
+                        //判斷申請刪除 & 作廢
+                        if (deleFlag)
+                        {
+                            db.ITEM_REFUNDABLE_DEP.RemoveRange(db.ITEM_REFUNDABLE_DEP.Where(x => OIAs.Contains(x.ITEM_ID)));
+                            db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+                        }
+                        else
+                        {
+                            foreach (var item in details)
+                            {
+                                var _IRD = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                                _IRD.INVENTORY_STATUS = "7"; //已取消
+                                _IRD.LAST_UPDATE_DT = dt;
+                                logStr += _IRD.modelToString(logStr);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _changeFlag = true;
+                }
+            }
+            else
+            {
+                _changeFlag = true;
+            }
+
+            if (_changeFlag)
+            {
+                return new Tuple<bool, string>(false, logStr);
+            }
+            else
+            {
+                return new Tuple<bool, string>(true, logStr);
+            }
         }
         #endregion
     }

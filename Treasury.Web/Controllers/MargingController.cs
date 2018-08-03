@@ -304,7 +304,14 @@ namespace Treasury.WebControllers
                 }
                 if (AccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
-
+                    if (EditFlag && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
+                    {
+                        Cache.Set(CacheList.MargingData, Marging.GetDbDataByUnit(data.vAplyUnit, AplyNo));//抓庫存+單號
+                    }
+                    else
+                    {
+                        Cache.Set(CacheList.MargingData, Marging.GetDataByAplyNo(AplyNo));//抓單號
+                    }
                 }
             }
         }

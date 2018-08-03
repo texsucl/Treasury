@@ -634,6 +634,78 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 覆核畫面覆核
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="viewModels"></param>
+        /// <returns></returns>
+        public MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Approved(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels)
+        {
+            var result = new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+
+            if (!viewModels.Any())
+            {
+                return result;
+            }
+
+            DateTime dt = DateTime.Now;
+            string logStr = string.Empty;
+            
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                foreach (var item in viewModels)
+                {
+                    var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
+                        .FirstOrDefault(x => x.APLY_NO == item.vAPLY_NO);
+                    if (_TREA_APLY_REC == null) //找不到該筆單號
+                    {
+                        result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription(null,$"單號:{item.vAPLY_NO}");
+                        return result;
+                    }
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > item.vLast_Update_Time) //資料已經被更新
+                    {
+                        result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vAPLY_NO}");
+                        return result;
+                    }
+
+                    if(_TREA_APLY_REC.CUSTODY_UID != null &&
+                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID) 
+                        //新增人員等於保管科人員直接
+                    {
+
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 覆核畫面拒絕
+        /// </summary>
+        /// <param name="searchData"></param>
+        /// <param name="viewModels"></param>
+        /// <returns></returns>
+        public MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Reject(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels)
+        {
+            var result = new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+
+            }
+
+            return result;
+        }
+
+
+
         #endregion
 
         #region private function
