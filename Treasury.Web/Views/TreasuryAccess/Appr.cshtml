@@ -48,14 +48,14 @@
     </div>
     <div id="TAApprSearchDetail" style="display:none" role="dialog" class="myDialog">
         <div id="TAApprjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
-        <div class="TAApprClass" style="text-align:center">
+        <div class="TAApprClass" style="text-align:center" >
             <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_I_Appr" value="核准" />
             <input type="button" class="btn btn-primary" id="TAAppr_I_Reject" value="駁回" />
         </div>
     </div>
     <div id="TAApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
         <div id="TAApprOpenSearchDetail"></div>
-        <div style="text-align:center">
+        <div style="text-align:center" class="TAApprAct">
             <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_V_Appr" value="核准" />
             <input type="button" class="btn btn-primary" id="TAAppr_V_Reject" value="駁回" />
         </div>
@@ -64,13 +64,13 @@
         <table>
             <tr>
                 <td>
-                    <textarea id="TAApprDesc" maxlength="50"></textarea>
+                    <textarea id="TAApprDesc" maxlength="50" style="width:98%"></textarea>
                 </td>
             </tr>
             <tr>
                 <td>
                     <input type="button" id="TAAppr_Y_Reject" class="btn btn-primary" style="" value="確認駁回"/>
-                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="" value="取消駁回" />
+                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
                 </td>
             </tr>
         </table>
@@ -142,7 +142,7 @@
                         $('#' + id).on('click', function () { TAApprRejectY(); });
                         break;
                     case 'TAAppr_N_Reject':
-                        $('#' + id).on('click', function () { TAApprRejectN(); });
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
                         break;
                 }
             });
@@ -160,6 +160,7 @@
         function TAApprApproved()
         {
             var aplyNos = [];
+            var openflag = false;
             if ($('#' + hAply_No).val() == '') {
                 if ($('.TAApprCs:checked').length > 0) {
                     $('.TAApprCs:checked').each(
@@ -173,9 +174,29 @@
             }
             else {
                 aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
             }
             if (aplyNos.length > 0) {
-
+                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?"))
+                {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNos: aplyNos
+                        }),
+                        url: TAApprurl.Appr,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            if (openflag)
+                            {
+                                customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                            }
+                            TAApprGrid();
+                        }
+                        customerUtility.alertAuto(result);
+                    });
+                }
             }
             else {
                 customerUtility.alert('無選擇核准項目', 'w');
@@ -186,24 +207,81 @@
         //#region 駁回
         function TAApprReject()
         {
-
+            var flag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    flag = true;
+                }
+            }
+            else {
+                flag = true;
+            }
+            if (!flag)
+            {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'TAApprDescDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#TAApprDesc').val('');
+            $('#' + dialogId).dialog('open');
         }
         //#endregion
 
         //#region 駁回確認
         function TAApprRejectY()
         {
-
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    $('.TAApprCs:checked').each(
+                        function () {
+                            var listId = 'TAApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNos : aplyNos,
+                        apprDesc: $('#TAApprDesc').val().trim()
+                    }),
+                    url: TAApprurl.Reject,
+                    contentType: 'application/json',
+                }).done(function (result) {                  
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#TAAppr_Y_Reject'));
+                        if (openflag)
+                        {
+                            customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                        }                                           
+                        TAApprGrid();
+                    }
+                    customerUtility.alertAuto(result);
+                });
+            }
+            else {
+                customerUtility.alert('無選擇駁回項目', 'w');
+            }
         }
         //#endregion
-
-        //#region 駁回取消
-        function TAApprRejectN()
-        {
-
-        }
-        //#endregion
-
 
         //#region 查詢畫面查詢
         function TAApprSearch() {
@@ -325,7 +403,6 @@
         function TAOpenAPLYNOFun(listId, rowid) {
             var data = $("#" + listId).getRowData(rowid);
             var itemId = data.vItem;
-            //var _accessType = data.vACCESS_TYPE;
             var itemData = GetItemData(itemId);
             if (itemData.url != null) {
                 $.ajax({
@@ -339,7 +416,8 @@
                 })
                 .done(function (result) {
                     if (result.RETURN_FLAG) {
-                        var aplyNoData = result.Datas;
+                        var aplyNoData = result.Datas.Item1;
+                        var actFlag = result.Datas.Item2;
                         $('#h_Appr_Aply_No').val(data.vAPLY_NO);
                         $.ajax({
                             type: 'POST',
@@ -365,6 +443,10 @@
                                 $('#TAVMApprvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMApprvAccessReason').val(aplyNoData.vAccessReason);
                                 openTADialog(itemData.title, itemData.openDialogWidth, 'TAApprOpenSearchDialog');
+                                if (!actFlag)
+                                {
+                                    $('.TAApprAct').show();
+                                }
                             }
                         })
                     }
@@ -379,6 +461,7 @@
             width = width || 'auto';
             title += '明細';
             var dialogId = dialogId;
+            $('.TAApprAct').hide();
             $('#' + dialogId).dialog({
                 position: { my: "top", at: "center top", of: window },
                 title: title,
