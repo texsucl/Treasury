@@ -80,6 +80,31 @@
         /// 庫存資料(存出保證金)
         /// </summary>
         public static string MargingData { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(定期存單-總項)
+        /// </summary>
+        public static string DepositData_M { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(定期存單-總項-設質否=N)
+        /// </summary>
+        public static string DepositData_N { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(定期存單-總項-設質否=Y)
+        /// </summary>
+        public static string DepositData_Y { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(定期存單-明細)
+        /// </summary>
+        public static string DepositData_D { get; private set; }
+
+        /// <summary>
+        /// 庫存資料(定期存單-明細-全)
+        /// </summary>
+        public static string DepositData_D_All { get; private set; }
         #endregion Cache資料
 
 
@@ -102,6 +127,11 @@
             StockMainData = "StockMainData";
             StockTempData = "StockTempData";
             MargingData = "MargingData";
+            DepositData_M = "DepositData_M";
+            DepositData_N = "DepositData_N";
+            DepositData_Y = "DepositData_Y";
+            DepositData_D = "DepositData_D";
+            DepositData_D_All = "DepositData_D_All";
             #endregion Cache資料
 
         }

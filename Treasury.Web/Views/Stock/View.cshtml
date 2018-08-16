@@ -24,7 +24,7 @@
                         <label>股票名稱:</label>
                     </td>
                     <td>
-                        <input type="text" id="tStock_Name" name="tStock_Name" style="200px"/>
+                        <input type="text" id="tStock_Name" name="tStock_Name" style="width:200px"/>
                         @Html.DropDownList("dStock_Name", (SelectList)ViewBag.dStock_Name, new { @style = "display:none;width:200px;" })
                     </td>
                     <td>
@@ -71,7 +71,7 @@
     <div style="text-align:center;padding-top:5px;display:none;" class="StockAct">
         <input type="button" id="StockApply" value="申請覆核" class="btn btn-primary" />
         <input type="button" id="StockCancel" value="取消申請" class="btn btn-primary" />
-        <input type="button" id="StockBack" value="回到功能選擇" class="btn btn-primary" />
+        <input type="button" id="StockBack" value="回上一頁" class="btn btn-primary" />
     </div>
     <div id="StockInsertDialog" style="display:none;">
         <form id="StockForm">
@@ -234,7 +234,6 @@
         StockUrl.GetItemBook = '@Url.Action("GetItemBook", "Stock")';
         StockUrl.TakeOutData = '@Url.Action("TakeOutData", "Stock")';
         StockUrl.GetStockDetailDate = '@Url.Action("GetStockDetailDate", "Stock")';
-
         //#endregion
 
         //#region 初始動作
@@ -470,6 +469,7 @@
             $("#tStock_No_Preamble").attr("Disabled", false);
             $("#tStock_No_B").attr("Disabled", false);
             $("#tStock_No_E").attr("Disabled", false);
+            $("#tNumber_Of_Shares").attr("Disabled", false);
 
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
@@ -491,11 +491,12 @@
             $("#tStock_No_B").attr("Disabled", true);
             $("#tStock_No_E").val('');
             $("#tStock_No_E").attr("Disabled", true);
-            $("#tStock_Total").val('');
-            $("#tStock_Total").attr("Disabled", true);
+            $("#tStock_Total").attr("Disabled", false);
             $("#tDenomination").val('');
             $("#tDenomination").attr("Disabled", true);
             $('#lDenomination_Total').html('');
+            $("#tNumber_Of_Shares").val('');
+            $("#tNumber_Of_Shares").attr("Disabled", true);
         }
 
         //計算張數
@@ -509,10 +510,6 @@
                 else {
                     $('#' + Stock_Total).val('');
                 }
-                if (!isNaN(_Check_No_B))
-                    $('#' + Stock_No_B).val(created.padLeft(_Check_No_B, 8, '0'));
-                if (!isNaN(_Check_No_E))
-                    $('#' + Stock_No_E).val(created.padLeft(_Check_No_E, 8, '0'));
             }
             else {
                 $('#' + Stock_Total).val('');
@@ -593,8 +590,7 @@
                 if (typeFlag) {
                     GetNumber_Of_Shares_Total();
                 }
-                else
-                {
+                else {
                     if ($('#' + Stock_Name_D + ' option').length > 0) {
                         $('#' + Stock_Name_D).val($($('#' + Stock_Name_D + ' option')[0]).val())
                     }
@@ -843,6 +839,9 @@
                 autoOpen: false,
                 resizable: false,
                 closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
             });
             $('#StockInsertTemp,#StockUpdateTemp,#StockDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
@@ -936,6 +935,13 @@
                             break;
                     }
                 }
+                else if ($("#dStock_Type").val() == "C")//其他
+                {
+                    if(Check_C()==false)
+                    {
+                        return
+                    }
+                }
 
                 $.ajax({
                     type: "POST",
@@ -987,6 +993,12 @@
                                 return
                             }
                             break;
+                    }
+                }
+                else if ($("#dStock_Type").val() == "C")//其他
+                {
+                    if (Check_C() == false) {
+                        return
                     }
                 }
 
@@ -1065,6 +1077,13 @@
                 return false;
             }
 
+            var _Check_No_B = parseInt($("#tStock_No_B").val());
+            var _Check_No_E = parseInt($("#tStock_No_E").val());
+            if (_Check_No_B > _Check_No_E) {
+                customerUtility.alert('迄號不可小於起號!', 'w');
+                return false;
+            }
+
             if ($("#tStock_Total").val().trim() == "") {
                 customerUtility.alert('張數不可為空白', 'w');
                 return false;
@@ -1083,6 +1102,21 @@
         {
             if ($("#tStock_Total").val().trim() == "") {
                 customerUtility.alert('張數必填', 'w');
+                return false;
+            }
+
+            return true;
+        }
+
+        //其他必填檢查
+        function Check_C() {
+            if ($("#tStock_Total").val().trim() == "") {
+                customerUtility.alert('張數必填', 'w');
+                return false;
+            }
+
+            if ($("#tMemo").val().trim() == "") {
+                customerUtility.alert('備註必填', 'w');
                 return false;
             }
 

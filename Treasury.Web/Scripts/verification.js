@@ -4,10 +4,12 @@
     var dateFormat;
     var positiveInt;
     var englishFormat;
+    var englishNumberFormat;
 
     dateFormat = /^((?!0000)[0-9]{4}[/]((0[1-9]|1[0-2])[/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/](29|30)|(0[13578]|1[02])[/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/]02[/]29)$/;
     englishFormat = /^[a-zA-Z]+$/;
     positiveInt = /^[0-9]+$/;
+    englishNumberFormat = /^[a-zA-Z0-9]+$/;
 
     window.verified = verified;
     window.created = created;
@@ -80,6 +82,26 @@
         //#endregion
         $('#' + elementid).rules('add', {
             englishFormate: true,
+        })
+    }
+
+    verified.englishNumber = function (formid, elementid, msg) {
+        msg = msg || message.english;
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+
+        //#region 客製化驗證
+
+        $.validator.addMethod("englishNumberFormate",
+        function (value, element, arg) {
+            return verified.isEnglishNumber(value);
+        }, message.englishNumber);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            englishNumberFormate: true,
         })
     }
 
@@ -346,6 +368,11 @@
         if (value == '')
             return true;
         return positiveInt.test(value);
+    }
+
+    verified.isEnglishNumber = function (value) {
+        value = value || '';
+        return englishNumberFormat.test(value);
     }
 
     verified.reportDate = function () {

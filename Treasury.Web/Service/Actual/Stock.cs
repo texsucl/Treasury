@@ -869,8 +869,8 @@ namespace Treasury.Web.Service.Actual
                 vTreaBatchNo = x.TREA_BATCH_NO,   //入庫批號
                 vStockType = x.STOCK_TYPE,    //類型
                 vStockNoPreamble = x.STOCK_NO_PREAMBLE,   //序號前置碼
-                vStockNoB = int.Parse(x.STOCK_NO_B),  //序號(起)
-                vStockNoE = int.Parse(x.STOCK_NO_E),  //序號(迄)
+                vStockNoB = x.STOCK_NO_B,  //序號(起)
+                vStockNoE = x.STOCK_NO_E,  //序號(迄)
                 vStockTotal = x.STOCK_CNT,    //張數
                 vDenomination = x.DENOMINATION,   //單張面額
                 vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,  //面額小計

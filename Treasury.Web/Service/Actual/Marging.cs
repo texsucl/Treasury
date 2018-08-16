@@ -29,11 +29,9 @@ namespace Treasury.Web.Service.Actual
 {
     public class Marging: Common,IMarging
     {
-        protected INTRA intra { private set; get; }
-
         public Marging()
         {
-            intra = new INTRA();
+
         }
 
         #region GetData
@@ -194,6 +192,7 @@ namespace Treasury.Web.Service.Actual
                                 logStr = data.Item2;
 
                                 #endregion
+
                                 #region 儲存資料
                                 foreach (var item in datas)
                                 {
@@ -459,7 +458,6 @@ namespace Treasury.Web.Service.Actual
                                         ITEM_ID = x.ITEM_ID
                                     }));
                                     db.ITEM_REFUNDABLE_DEP.AddRange(inserts);
-
                                 }
                                 else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                 {

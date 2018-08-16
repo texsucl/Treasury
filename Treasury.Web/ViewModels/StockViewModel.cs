@@ -133,13 +133,13 @@ namespace Treasury.Web.ViewModels
         /// 序號(起)
         /// </summary>
         [Description("序號(起)")]
-        public int vStockNoB { get; set; }
+        public string vStockNoB { get; set; }
 
         /// <summary>
         /// 序號(迄)
         /// </summary>
         [Description("序號(迄)")]
-        public int vStockNoE { get; set; }
+        public string vStockNoE { get; set; }
 
         /// <summary>
         /// 張數

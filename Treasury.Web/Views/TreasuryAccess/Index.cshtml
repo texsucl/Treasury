@@ -185,6 +185,7 @@
         TAurl.openSTOCK = '@Url.Action("View", "Stock")';
         TAurl.openCA = '@Url.Action("View","CA")';
         TAurl.openMARGING = '@Url.Action("View", "Marging")';
+        TAurl.openDEPOSIT = '@Url.Action("View", "Deposit")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -296,6 +297,7 @@
                     case '@Ref.TreaItemType.D1015.ToString()':
                     case '@Ref.TreaItemType.D1024.ToString()':
                     case '@Ref.TreaItemType.D1016.ToString()':
+                    case '@Ref.TreaItemType.D1013.ToString()':
                         open(_aProject);
                         break;
                     case '':
@@ -796,6 +798,12 @@
                     obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
                     obj.openDialogWidth = '900px';
                     obj.reportType = 'MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.url = TAurl.openDEPOSIT;
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = '1325px';
+                    obj.reportType = 'DEPOSIT';
                     break;
             }
             return obj;
