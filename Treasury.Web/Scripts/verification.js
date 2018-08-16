@@ -5,7 +5,7 @@
     var positiveInt;
     var englishFormat;
 
-    dateFormat = /^((?!0000)[0-9]{4}[/]((0[1-9]|1[0-2])[/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/](29|30)|(0[13578]|1[02])[/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/]02[/]29)$/;
+    dateFormat = /^((?!0000)[0-9]{4}[/|-]((0[1-9]|1[0-2])[/|-](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/|-](29|30)|(0[13578]|1[02])[/|-]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/|-]02[/|-]29)$/;
     englishFormat = /^[a-zA-Z]+$/;
     positiveInt = /^[0-9]+$/;
 
@@ -180,7 +180,7 @@
                     d = verified.datepickerStrToDate(date);
                 }
                 else {
-                    d = getOnlyDate();
+                    d = created.getOnlyDate();
                 }
             
         }
@@ -349,7 +349,7 @@
     }
 
     verified.reportDate = function () {
-        var d = getOnlyDate();
+        var d = created.getOnlyDate();
         var day = d.getDate();
         if (day <= 5) {
             d.setDate(1); //設定為當月份的第一天
@@ -365,11 +365,17 @@
         }
     }
 
-    //formate string(yyyy/MM/dd) to date 失敗回傳 false
+    //formate string(yyyy/MM/dd or yyyy-MM-dd) to date 失敗回傳 false
     verified.datepickerStrToDate = function (value) {
         if (dateFormat.test(value)) {
-            var d = value.split('-');
-            return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            if (value.split('/').length > 2) {
+                var d = value.split('/');
+                return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            }
+            if (value.split('-').length > 2) {
+                var d = value.split('-');
+                return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            }
         }
         return false;
     }
@@ -408,7 +414,7 @@
             }
             if (datepicker.getDate() === 25)
                 return true;
-            var d = getOnlyDate();
+            var d = created.getOnlyDate();
             d.setFullYear(datepicker.getFullYear());
             d.setDate(1);
             d.setMonth(datepicker.getMonth());
@@ -422,9 +428,16 @@
         return false;
     }
 
-    function getOnlyDate() {
+    created.getOnlyDate = function getOnlyDate() {
         var d = new Date();
-        d = new Date(d.getFullYear() + '-' + padLeft((d.getMonth() + 1), 2) + '-' + padLeft((d.getDate()),2));
+        d = new Date(d.getFullYear() + '-' + created.padLeft((d.getMonth() + 1), 2) + '-' + created.padLeft((d.getDate()), 2));
+        return d;
+    }
+
+    created.getOnlyDateStr = function getOnlyDateStr()
+    {
+        var d = new Date();
+        d = d.getFullYear() + '-' + created.padLeft((d.getMonth() + 1), 2) + '-' + created.padLeft((d.getDate()), 2);
         return d;
     }
 

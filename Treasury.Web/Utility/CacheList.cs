@@ -81,6 +81,11 @@
         public static string MargingData { get; private set; }
 
         /// <summary>
+        /// 庫存資料(存入保證金)
+        /// </summary>
+        public static string MarginpData { get; private set; }
+
+        /// <summary>
         /// 庫存資料(重要物品)
         /// </summary>
         public static string ItemImpData { get; private set; }
@@ -107,6 +112,7 @@
             StockMainData = "StockMainData";
             StockTempData = "StockTempData";
             MargingData = "MargingData";
+            MarginpData = "MarginpData";
             #endregion Cache資料
 
         }

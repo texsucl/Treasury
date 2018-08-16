@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Treasury.Web.ViewModels
 {
-    public class MargingViewModel : ITreaItem
+    public class MargingpViewModel : ITreaItem
     {
         /// <summary>
         /// 網頁PK

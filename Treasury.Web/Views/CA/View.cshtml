@@ -102,6 +102,7 @@
         var CA_MemoId = 'tCA_MEMO'; //備註Id(texarea)
         var CA_Item_IdHlId = 'hCA_ITEM_ID'; //物品標號Id(hidden)
 
+        var CAConfirmFlag = false; //離開時提醒訊息
 
         var CA_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
@@ -153,12 +154,25 @@
                     break;
                 case 'CACancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CACancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (CAConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        CACancelFun();
+                    });
                     break;
                 case 'CABack':
                 case 'CACancelTemp':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'CABack' &&
+                                CAConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
                     break;
                 case 'CAInsertTemp':
                     $('#' + id).off('click');
@@ -372,6 +386,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     CATempGrid();
+                    if (CA_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        CAConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        CAConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -497,6 +519,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#CAInsertTemp'));
                         CATempGrid();
+                        CAConfirmFlag = true;
                     }
                 })
             }
@@ -526,6 +549,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#CAUpdateTemp'));
                         CATempGrid();
+                        CAConfirmFlag = true;
                     }
                 })
             }
@@ -546,6 +570,14 @@
                 if (result.RETURN_FLAG) {
                     customerUtility.closeDialog($('#CADeleteTemp'));
                     CATempGrid();
+                    if (CA_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        CAConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        CAConfirmFlag = $('#CATempList').jqGrid('getRowData').length != 0;
+                    }
                 }
             })
         }
