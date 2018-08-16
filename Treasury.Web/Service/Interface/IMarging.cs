@@ -24,13 +24,13 @@ namespace Treasury.Web.Service.Interface
         /// <param name="vAplyUnit">申請單位</param>
         /// <param name="vAplyNo">取出單號</param>
         /// <returns></returns>
-        List<MargingViewModel> GetDbDataByUnit(string vAplyUnit = null, string vAplyNo = null);
+        List<MargingpViewModel> GetDbDataByUnit(string vAplyUnit = null, string vAplyNo = null);
 
         /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
         /// <param name="vAplyNo">申請單號</param
         /// <returns></returns>
-        List<MargingViewModel> GetDataByAplyNo(string vAplyNo);
+        List<MargingpViewModel> GetDataByAplyNo(string vAplyNo);
     }
 }

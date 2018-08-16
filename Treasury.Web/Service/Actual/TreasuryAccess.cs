@@ -33,7 +33,6 @@ namespace Treasury.Web.Service.Actual
         public TreasuryAccess()
         {
             printsStatus = new List<string>();
-            printsStatus.Add(Ref.AccessProjectFormStatus.A02.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.B01.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.B02.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.B03.ToString());
@@ -168,12 +167,14 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="cUserID">userId</param>
         /// <param name="custodyFlag">管理科Flag</param>
+        /// <param name="unit">科別指定</param>
         /// <returns></returns>
-        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, BaseUserInfoModel> TreasuryAccessDetail(string cUserID, bool custodyFlag)
+        public Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, BaseUserInfoModel> TreasuryAccessDetail(string cUserID, bool custodyFlag, string unit= null)
         {
             List<SelectOption> applicationProject = new List<SelectOption>(); //申請項目
             List<SelectOption> applicationUnit = new List<SelectOption>(); //申請單位
             List<SelectOption> applicant = new List<SelectOption>(); //申請人
+            var empty = new SelectOption() { Text = string.Empty, Value = string.Empty };
             BaseUserInfoModel user = GetUserInfo(cUserID); //填表人 資料
             try
             {
@@ -207,8 +208,6 @@ namespace Treasury.Web.Service.Actual
                                         Units.Add(x.CHARGE_DEPT.Trim());
                                 });
 
-
-
                             applicationUnit = Units.Distinct().OrderBy(x => x)
                                 .AsEnumerable()
                                 .Select(x => new SelectOption()
@@ -218,17 +217,24 @@ namespace Treasury.Web.Service.Actual
                                 }).ToList();
                             if (applicationUnit.Any())
                             {
-                                var _first = applicationUnit.First();
-                                applicant = dbINTRA.V_EMPLY2.AsNoTracking()
-                                    .Where(x => x.DPT_CD == _first.Value)
-                                    .AsEnumerable()
-                                    .Select(x => new SelectOption()
+                                if (unit != null)
+                                {
+                                    var _first = applicationUnit.FirstOrDefault(x=>x.Value == unit);
+                                    if (_first != null)
                                     {
-                                        Value = x.USR_ID,
-                                        Text = $@"{x.USR_ID}({x.EMP_NAME})"
-                                    }).ToList();
+                                        applicant = dbINTRA.V_EMPLY2.AsNoTracking()
+                                       .Where(x => x.DPT_CD == _first.Value)
+                                       .AsEnumerable()
+                                       .Select(x => new SelectOption()
+                                       {
+                                           Value = x.USR_ID,
+                                           Text = $@"{x.USR_ID}({x.EMP_NAME})"
+                                       }).ToList();
+                                    }
+                                }                                                          
                             }
-
+                            if (!applicant.Any())
+                                applicant.Add(empty);
                         }
                         #endregion
                         #region 非保管科人員
@@ -374,10 +380,12 @@ namespace Treasury.Web.Service.Actual
                 {
                     result.vAplyNo = data.APLY_NO;
                     result.vItem = treaItemTypes.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC;
-                    result.vAplyUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME;
-                    result.vAplyUid = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME;
+                    result.vAplyUnit = data.APLY_UNIT;
+                    result.vAplyUid = data.APLY_UID;
+                    result.vChargeUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME;
+                    //result.vAplyUid = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME;
                     result.vAccessType = data.ACCESS_TYPE == "P" ? "存入" : data.ACCESS_TYPE == "G" ? "取出" : ""; //存入(P) or 取出(G)
-                    result.vExpectedAccessDate = data.EXPECTED_ACCESS_DATE?.ToSimpleTaiwanDate();
+                    result.vExpectedAccessDate = TypeTransfer.dateTimeNToString(data.EXPECTED_ACCESS_DATE);
                     result.vCreateDt = data.CREATE_DT?.ToSimpleTaiwanDate();
                     var _createEmp = emps.FirstOrDefault(x => x.USR_ID == data.CREATE_UID);
                     result.vCreateUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == _createEmp?.DPT_CD?.Trim())?.DPT_NAME;

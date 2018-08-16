@@ -28,23 +28,22 @@ namespace Treasury.WebControllers
     [CheckSessionFilterAttribute]
     public class ItemImpController : CommonController
     {
-        //private ICA CA;
+        private IItemImp ItemImp;
 
         public ItemImpController()
         {
-            //ItemImp = new CA();
+            ItemImp = new ItemImp();
         }
 
         /// <summary>
-        /// 電子憑證 新增畫面
+        /// 重要物品 新增畫面
         /// </summary>
         /// <returns></returns>resetItemImpViewModel
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
             var _dActType = GetActType(type, AplyNo);
-            //ViewBag.CAUse = new SelectList(CA.GetCA_Use(), "Value", "Text"); 
-            //ViewBag.CADesc = new SelectList(CA.GetCA_Desc(), "Value", "Text"); 
+           
             if (AplyNo.IsNullOrWhiteSpace())
             {
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
@@ -72,33 +71,34 @@ namespace Treasury.WebControllers
         public JsonResult ApplyTempData()
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
-            //result.RETURN_FLAG = false;
-            //var _detail = (List<CAViewModel>)Cache.Get(CacheList.CAData);
-            //if (!_detail.Any())
-            //{
-            //    result.DESCRIPTION = "無申請任何資料";
-            //}
-            //else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
-            //{
-            //    TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
-            //    var _data = (List<CAViewModel>)Cache.Get(CacheList.CAData);
-            //    if (data.vAccessType == AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
-            //    {
-            //        result.DESCRIPTION = "無申請任何資料";
-            //    }
-            //    else
-            //    {
-            //        result = CA.ApplyAudit(_data, data);
-            //        if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
-            //        {
-            //            new TreasuryAccessController().ResetSearchData();
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            //}
+            result.RETURN_FLAG = false;
+            
+            var _detail = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
+            if (!_detail.Any())
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.TreasuryAccessViewData))
+            {
+                TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
+                var _data = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
+                if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
+                {
+                    result.DESCRIPTION = "無申請任何資料";
+                }
+                else
+                {
+                    result = ItemImp.ApplyAudit(_data, data);
+                    if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
+                    {
+                        new TreasuryAccessController().ResetSearchData();
+                    }
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
             return Json(result);
         }
 
@@ -113,6 +113,7 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -137,7 +138,8 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            if (Cache.IsSet(CacheList.CAData))
+            transType(model);
+            if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
@@ -146,11 +148,12 @@ namespace Treasury.WebControllers
                     updateTempData.vItemImp_Name = model.vItemImp_Name;
                     updateTempData.vItemImp_Quantity = model.vItemImp_Quantity;
                     updateTempData.vItemImp_Amount = model.vItemImp_Amount;
-                    updateTempData.vItemImp_Expected_Date = model.vItemImp_Expected_Date;
+                    updateTempData.vItemImp_Expected_Date_1 = model.vItemImp_Expected_Date_1;
+                    updateTempData.vItemImp_Expected_Date_2 = model.vItemImp_Expected_Date_2;
                     updateTempData.vDescription = model.vDescription;
                     updateTempData.vMemo = model.vMemo;
-                    Cache.Invalidate(CacheList.CAData);
-                    Cache.Set(CacheList.CAData, tempData);
+                    Cache.Invalidate(CacheList.ItemImpData);
+                    Cache.Set(CacheList.ItemImpData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
@@ -174,6 +177,7 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -201,37 +205,38 @@ namespace Treasury.WebControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult TakeOutData(CAViewModel model,bool takeoutFlag)
+        public JsonResult TakeOutData(ItemImpViewModel model,bool takeoutFlag)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
-            //result.RETURN_FLAG = false;
-            //result.DESCRIPTION = MessageType.login_Time_Out.GetDescription();
-            //if (Cache.IsSet(CacheList.CAData))
-            //{
-            //    var tempData = (List<CAViewModel>)Cache.Get(CacheList.CAData);
-            //    var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
-            //    if (updateTempData != null)
-            //    {
-            //        if (takeoutFlag)
-            //        {
-            //            updateTempData.vStatus = AccessInventoryType._4.GetDescription();                    
-            //        }
-            //        else
-            //        {
-            //            updateTempData.vStatus = AccessInventoryType._1.GetDescription();
-            //        }
-            //        updateTempData.vtakeoutFlag = takeoutFlag;
-            //        Cache.Invalidate(CacheList.CAData);
-            //        Cache.Set(CacheList.CAData, tempData);
-            //        result.RETURN_FLAG = true;
-            //        result.DESCRIPTION = MessageType.update_Success.GetDescription();
-            //    }
-            //    else
-            //    {
-            //        result.RETURN_FLAG = false;
-            //        result.DESCRIPTION = MessageType.update_Fail.GetDescription();
-            //    }                                 
-            //}
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
+            if (Cache.IsSet(CacheList.ItemImpData))
+            {
+                var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
+                var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                if (updateTempData != null)
+                {
+                    if (takeoutFlag)
+                    {
+                        updateTempData.vStatus = Ref.AccessInventoryType._4.GetDescription();
+                    }
+                    else
+                    {
+                        updateTempData.vStatus = Ref.AccessInventoryType._1.GetDescription();
+                    }
+                    updateTempData.vtakeoutFlag = takeoutFlag;
+                    Cache.Invalidate(CacheList.ItemImpData);
+                    Cache.Set(CacheList.ItemImpData, tempData);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
             return Json(result);
         }
 
@@ -263,7 +268,7 @@ namespace Treasury.WebControllers
         }
 
         /// <summary>
-        /// 電子憑證預設資料
+        /// 重要物品預設資料
         /// </summary>
         /// <param name="ActType">修改狀態</param>
         /// <param name="AccessType">存入 or 取出</param>
@@ -280,28 +285,40 @@ namespace Treasury.WebControllers
                 }
                 if (AccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
-                    //Cache.Set(CacheList.ItemImpData, ItemImp.GetDbDataByUnit(data.vAplyUnit, AplyNo));//只抓庫存
+                    Cache.Set(CacheList.ItemImpData, ItemImp.GetDbDataByUnit(data.vAplyUnit, AplyNo));//只抓庫存
                 }
             }
             else
             {
-                //if (AccessType == Ref.AccessProjectTradeType.P.ToString())
-                //{
-                //    //Cache.Set(CacheList.ItemImpData, CA.GetDataByAplyNo(AplyNo));//抓單號
-                //}
-                //if (AccessType == Ref.AccessProjectTradeType.G.ToString())
-                //{
-                //    if (ActType && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
-                //    {
-                //        Cache.Set(CacheList.ItemImpData, CA.GetDbDataByUnit(data.vAplyUnit, AplyNo));//抓庫存+單號
-                //    }
-                //    else
-                //    {
-                //        Cache.Set(CacheList.ItemImpData, CA.GetDataByAplyNo(AplyNo));//抓單號
-                //    }
-                //}
+                if (AccessType == Ref.AccessProjectTradeType.P.ToString())
+                {
+                    Cache.Set(CacheList.ItemImpData, ItemImp.GetDataByAplyNo(AplyNo));//抓單號
+                }
+                if (AccessType == Ref.AccessProjectTradeType.G.ToString())
+                {
+                    if (ActType && Aply_Appr_Type.Contains(TreasuryAccess.GetStatus(AplyNo))) //可以修改
+                    {
+                        Cache.Set(CacheList.ItemImpData, ItemImp.GetDbDataByUnit(data.vAplyUnit, AplyNo));//抓庫存+單號
+                    }
+                    else
+                    {
+                        Cache.Set(CacheList.ItemImpData, ItemImp.GetDataByAplyNo(AplyNo));//抓單號
+                    }
+                }
             }
         }
 
+        /// <summary>
+        /// 西元年轉民國年
+        /// </summary>
+        private void transType(ItemImpViewModel model)
+        {
+            if (model != null)
+            {
+                var date = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_2);
+                model.vItemImp_Expected_Date_1 =
+                    (date == null ? null : date.Value.DateToTaiwanDate(9,true));
+            } 
+        }
     }
 }

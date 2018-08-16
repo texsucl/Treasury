@@ -40,7 +40,7 @@ namespace Treasury.Web.Controllers
                 var httpContext = System.Web.HttpContext.Current;
                 var _Unit = httpContext.Session["UserUnit"];
                 if(_Unit != null)
-                   return _Unit.ToString() == "VE303"; //VE303 後續改為動態?
+                   return _Unit.ToString() == Properties.Settings.Default["CustodianFlag"]?.ToString() ; //改為動態
                 return false;
             }
         }

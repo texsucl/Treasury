@@ -426,7 +426,7 @@
                 var checkbox = $(this);
                 var parent = checkbox.parent();
                 var divId = checkbox.attr('id') + "div";
-                var div = '<div id="' + divId + '" class="checkbox checkbox-info" style="padding-top:0px;margin-top:0px;margin-bottom:0px;"></div>';
+                var div = '<div id="' + divId + '" class="checkbox checkbox-info" style="text-align:left;padding-top:0px;margin-top:0px;margin-bottom:0px;"></div>';
                 checkbox.before(div);               
                 $('#'+divId).append(checkbox);
                 $(checkbox).after('<label>&nbsp;</label>');

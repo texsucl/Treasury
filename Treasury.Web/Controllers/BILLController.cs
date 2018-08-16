@@ -436,7 +436,7 @@ namespace Treasury.WebControllers
 
                 data.ForEach(x =>
                     {
-                        x.vRowNum = rownum.ToString();
+                        //x.vRowNum = rownum.ToString();
                         if (x.vStatus == Ref.AccessInventoryType._3.GetDescription())
                         {
                             x.vReMainTotalNum = x.vCheckTotalNum;
@@ -452,7 +452,7 @@ namespace Treasury.WebControllers
                             x.vReMainTotalNum = _vReMainTotalNum == 0 ? "" : _vReMainTotalNum.ToString();
                         }
 
-                        rownum += 1;
+                        //rownum += 1;
                     });
 
                 data.GroupBy(x => new { x.vIssuingBank, x.vCheckType })
@@ -461,6 +461,12 @@ namespace Treasury.WebControllers
                     .ToList()
                     .ForEach(x =>
                 {
+                    rownum = 1;
+                    foreach (var item in x)
+                    {
+                        item.vRowNum = rownum.ToString();
+                        rownum += 1;
+                    }
                     result.AddRange(x);
                     //資料欄位狀態文字為未包含'取出'的資料 - 料欄位狀態文字為包含'取出'的資料
                     var _groupvCheckTotalNum = x.Sum(y => TypeTransfer.stringToInt(y.vCheckTotalNum));

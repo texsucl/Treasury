@@ -19,12 +19,6 @@ namespace Treasury.Web.ViewModels
         public string vStatus { get; set; }
 
         /// <summary>
-        /// 重要物品編號
-        /// </summary>
-        [Description("重要物品編號")]
-        public string vItemImp_Id { get; set; }
-
-        /// <summary>
         /// 重要物品名稱
         /// </summary>
         [Description("重要物品名稱")]
@@ -34,19 +28,25 @@ namespace Treasury.Web.ViewModels
         /// 重要物品數量
         /// </summary>
         [Description("重要物品數量")]
-        public string vItemImp_Quantity { get; set; }
+        public int? vItemImp_Quantity { get; set; }
 
         /// <summary>
         /// 重要物品金額
         /// </summary>
         [Description("重要物品金額")]
-        public string vItemImp_Amount { get; set; }
+        public decimal? vItemImp_Amount { get; set; }
 
         /// <summary>
-        /// 重要物品預計提取日期
+        /// 重要物品預計提取日期民國年
         /// </summary>
         [Description("重要物品預計提取日期")]
-        public string vItemImp_Expected_Date { get; set; }
+        public String vItemImp_Expected_Date_1 { get; set; }
+
+        /// <summary>
+        /// 重要物品預計提取日期西元年
+        /// </summary>
+        [Description("重要物品預計提取日期")]
+        public String vItemImp_Expected_Date_2 { get; set; }
 
         /// <summary>
         /// 說明

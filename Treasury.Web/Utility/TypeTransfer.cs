@@ -59,6 +59,22 @@ namespace Treasury.WebUtility
 
         #endregion String To Double
 
+        #region  Decimal? To String
+
+        /// <summary>
+        /// Decimal 轉 String
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string decimalNToString(decimal? value)
+        {
+            if (value.HasValue)
+                return value.Value.ToString();
+            return string.Empty;
+        }
+
+        #endregion String To Decimal
+
         #region String To Decimal
 
         /// <summary>
@@ -117,10 +133,13 @@ namespace Treasury.WebUtility
         /// string 轉 DateTime?
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="i"></param>
+        /// <param name="_bool"></param>
         /// <returns></returns>
-        public static DateTime? stringToDateTimeN(string value, int i = 10)
-        {
-            DateTime t = new DateTime();
+        public static DateTime? stringToDateTimeN(string value, int i = 10, bool _bool = false)
+        {DateTime t = new DateTime();
+            if(!_bool){
+
             if (i == 8 && !value.IsNullOrWhiteSpace() && value.Length == i)
             {
                 if (DateTime.TryParse(string.Format(
@@ -129,7 +148,20 @@ namespace Treasury.WebUtility
                     value.Substring(4, 2),
                     value.Substring(6, 2)), out t))
                     return t;
+                _bool=true;
             }
+                
+            }
+            
+            if(i == 10 && !value.IsNullOrWhiteSpace() && value.Substring(4,1).Equals("/"))
+            {
+            if (DateTime.TryParse(string.Format(
+                "{0}-{1}-{2}",
+                value.Substring(0,4),
+                value.Substring(5,2),
+                value.Substring(8,2)), out t))
+                return t;
+        }
             if (DateTime.TryParse(value, out t))
                 return t;
             return null;

@@ -224,7 +224,13 @@ namespace Treasury.Web.Enum
             /// 檢核錯誤!
             /// </summary>
             [Description("檢核錯誤!")]
-            Check_Fail
+            Check_Fail,
+
+            /// <summary>
+            /// 暫存資料尚未申請覆核,是否繼續動作?
+            /// </summary>
+            [Description("暫存資料尚未申請覆核,是否繼續動作?")]
+            application_Audit_Confirm,
         }
     }
 
