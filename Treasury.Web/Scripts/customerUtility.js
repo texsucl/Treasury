@@ -180,6 +180,22 @@
             alert(message);
     }
 
+    customerUtility.confirm = function (message)
+    {
+        var df = $.Deferred(); //建立Deferred物件
+            customerConfirm.confirm({ message: message }).on(function (e) {
+                if (e) {
+                    debugger
+                    df.resolve(); //使用者按下Yes
+                }
+                else {
+                debugger
+                    df.reject(); //使用者按下No
+                }
+            })
+        return df.promise();
+    }
+
     customerUtility.getDialogType = function (action)
     {
         action = action || '';

@@ -64,9 +64,9 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit">申請單位</param>
         /// <param name="vAplyNo">取出單號</param>
         /// <returns></returns>
-        public List<MargingViewModel> GetDbDataByUnit(string vAplyUnit = null, string vAplyNo = null)
+        public List<MargingpViewModel> GetDbDataByUnit(string vAplyUnit = null, string vAplyNo = null)
         {
-            var result = new List<MargingViewModel>();
+            var result = new List<MargingpViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
@@ -78,7 +78,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .AsEnumerable()
                     .Select(x =>
-                    new MargingViewModel()
+                    new MargingpViewModel()
                     {
                         vItem_PK = x.ITEM_ID,
                         vItem_Id=x.ITEM_ID,
@@ -101,7 +101,7 @@ namespace Treasury.Web.Service.Actual
                     result.AddRange(db.ITEM_REFUNDABLE_DEP.AsNoTracking().Where(
                     x => itemIds.Contains(x.ITEM_ID)).AsEnumerable()
                     .Select(x =>
-                     new MargingViewModel()
+                     new MargingpViewModel()
                      {
                          vItem_PK = x.ITEM_ID,
                          vItem_Id = x.ITEM_ID,
@@ -126,9 +126,9 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="vAplyNo">申請單號</param>
         /// <returns></returns>
-        public List<MargingViewModel> GetDataByAplyNo(string vAplyNo)
+        public List<MargingpViewModel> GetDataByAplyNo(string vAplyNo)
         {
-            var result = new List<MargingViewModel>();
+            var result = new List<MargingpViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
@@ -170,7 +170,7 @@ namespace Treasury.Web.Service.Actual
             {
                 if (insertDatas != null)
                 {
-                    var datas = (List<MargingViewModel>)insertDatas;
+                    var datas = (List<MargingpViewModel>)insertDatas;
                     if (datas.Any())
                     {
                         using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -559,9 +559,9 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<MargingViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types)
+        private IEnumerable<MargingpViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types)
         {
-            return data.Select(x => new MargingViewModel()
+            return data.Select(x => new MargingpViewModel()
             {
                 vItem_PK = x.ITEM_ID,   //網頁PK
                 vItem_Id = x.ITEM_ID, //歸檔編號

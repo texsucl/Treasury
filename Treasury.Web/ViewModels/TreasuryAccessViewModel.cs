@@ -30,6 +30,12 @@ namespace Treasury.Web.ViewModels
         public string vAplyUnit { get; set; }
 
         /// <summary>
+        /// 權責部門
+        /// </summary>
+        [Description("權責部門")]
+        public string vChargeUnit { get; set; }
+
+        /// <summary>
         /// 申請人員
         /// </summary>
         [Description("申請人員")]

@@ -81,6 +81,11 @@
         public static string MargingData { get; private set; }
 
         /// <summary>
+        /// 庫存資料(存入保證金)
+        /// </summary>
+        public static string MarginpData { get; private set; }
+
+        /// <summary>
         /// 庫存資料(重要物品)
         /// </summary>
         public static string ItemImpData { get; private set; }
@@ -131,6 +136,7 @@
             StockMainData = "StockMainData";
             StockTempData = "StockTempData";
             MargingData = "MargingData";
+            MarginpData = "MarginpData";
             DepositData_M = "DepositData_M";
             DepositData_N = "DepositData_N";
             DepositData_Y = "DepositData_Y";

@@ -2,223 +2,294 @@
 @using Treasury.WebUtility;
 <div class="row">
     <div style="padding-bottom:5px;">
-        <input type="button" id="CAInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+        <input type="button" id="MarginpInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
     </div>
-    <div id="CAjqgridDiv" class="jqd" style="padding-bottom:5px;">
+    <div id="MarginpjqgridDiv" class="jqd" style="padding-bottom:5px;">
 
 
     </div>
-    <div style="text-align:center;display:none;" class="CA_Act">
-        <input type="button" id="CAApply" value="申請覆核" class="btn btn-primary" />
-        <input type="button" id="CACancel" value="取消申請" class="btn btn-primary" />
-        <input type="button" id="CABack" value="回上一頁" class="btn btn-primary" />
+    <div style="text-align:center;display:none;" class="Marginp_Act">
+        <input type="button" id="MarginpApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="MarginpCancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="MarginpBack" value="回上一頁" class="btn btn-primary" />
     </div>
 
-    <div id="CADialog" style="display:none">
-        <form id="CADialogForm">
+    <div id="MarginpDialog" style="display:none">
+        <form id="MarginpDialogForm">
             <table>
                 <tr>
                     <td>
-                        <label>用途 : </label>
+                        <label>類別 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dCA_Use", (SelectList)ViewBag.CAUse, new { @class = "CAInsertType", @style = "width:207px" })
+                        @Html.DropDownList("dMarginp_Take_Of_Type", (SelectList)ViewBag.MarginpType, new { @class = "MarginpInsertType", @style = "width:207px" })
+                        @*<input type="text" id="tMarginp_Take_Of_Type" name="tMarginp_Take_Of_Type" class="MarginpInsertType" maxlength="10" />*@
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label>類型 : </label>
+                        <label>交易對象 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dCA_Desc", (SelectList)ViewBag.CADesc, new { @class = "CAInsertType", @style = "width:207px" })
+                        <input type="text" id="tMarginp_Trad_Partners" name="tMarginp_Trad_Partners" class="MarginpInsertType" maxlength="30" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label>銀行 : </label>
+                        <label>歸檔編號 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tCA_Bank" name="tCA_Bank" class="CAInsertType" maxlength="8" />
+                        @*<input type="text" id="tMarginp_Item_ID" name="tMarginp_Item_ID" class="MarginpInsertType" maxlength="30" />*@
+                        <input type="hidden" id="hMarginp_ITEM_ID" name="hMarginp_ITEM_ID" class="MarginpInsertType"/>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label>號碼 : </label>
+                        <label>金額 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tCA_Number" name="tCA_Number" class="CAInsertType" maxlength="13" />
+                        <input type="text" id="tMarginp_Amount" name="tMarginp_Amount" class="MarginpInsertType" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label>備註 : </label>
+                        <label>物品名稱 : </label>
                     </td>
                     <td>
-                        <textarea id="tCA_MEMO" name="tCA_MEMO" class="CAInsertType" style="width:207px;height:80px;" maxlength="200" />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="hidden" id="hCA_ITEM_ID" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="button" id="CAInsertTemp" value="新增" class="btn btn-primary" />
-                        <input type="button" id="CAUpdateTemp" value="修改" class="btn btn-primary" />
-                        <input type="button" id="CADeleteTemp" value="刪除" class="btn btn-primary" />
-                    </td>
-                    <td style="text-align:right;">
-                        <input type="button" id="CACancelTemp" value="取消" class="btn btn-primary" />
-                    </td>
-                </tr>
-            </table>
-        </form>
+                       @Html.DropDownList("dMarginp_Item", (SelectList)ViewBag.MarginpItem, new { @class = "MarginpInsertType", @style = "width:207px" })
+                       @*<input type="text" id="tMarginp_Item_Name" name="tMarginp_Item_Name" class="MarginpInsertType" maxlength="10" />*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>物品發行人 : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Item_Issuer" name="tMarginp_Item_Issuer" class="MarginpInsertType" maxlength="10" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>質押標的號碼 : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Pledge_Item_No" name="tMarginp_Pledge_Item_No" class="MarginpInsertType" maxlength="16" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>有效期間(起) : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Effective_Date_B" name="tMarginp_Effective_Date_B" class="MarginpInsertType" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>有效期間(迄) : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Effective_Date_E" name="tMarginp_Effective_Date_E" class="MarginpInsertType" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>說明 : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Description" name="tMarginp_Description" class="MarginpInsertType" maxlength="20" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>備註 : </label>
+                        </td>
+                        <td>
+                            <textarea id="tMarginp_Memo" name="tMarginp_Memo" class="MarginpInsertType" maxlength="30" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>冊號 : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="tMarginp_Book_No" name="tMarginp_Book_No" class="MarginpInsertType" maxlength="2" />
+                        </td>
+                    </tr>
+                    @*<tr>
+                        <td colspan="2">
+                            <input type="hidden" id="hMarginp_ITEM_ID" />
+                        </td>
+                    </tr>*@
+                    <tr>
+                        <td>
+                            <input type="button" id="MarginpInsertTemp" value="新增" class="btn btn-primary" />
+                            <input type="button" id="MarginpUpdateTemp" value="修改" class="btn btn-primary" />
+                            <input type="button" id="MarginpDeleteTemp" value="刪除" class="btn btn-primary" />
+                        </td>
+                        <td style="text-align:right;">
+                            <input type="button" id="MarginpCancelTemp" value="取消" class="btn btn-primary" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    $(function () {
-        //#region url設定
-        var CAurl = {};
-        CAurl.getData = '@Url.Action("GetCacheData", "CA")';
-        CAurl.InsertTempData = '@Url.Action("InsertTempData", "CA")';
-        CAurl.UpdateTempData = '@Url.Action("UpdateTempData", "CA")';
-        CAurl.DeleteTempData = '@Url.Action("DeleteTempData", "CA")';
-        CAurl.ResetTempData = '@Url.Action("ResetTempData", "CA")';
-        CAurl.TakeOutData = '@Url.Action("TakeOutData", "CA")';
-        CAurl.ApplyTempData = '@Url.Action("ApplyTempData", "CA")';
-        //#endregion
+    <script>
+        $(function () {
+            //#region url設定
+            var Marginpurl = {};
+            Marginpurl.getData = '@Url.Action("GetCacheData", "Marginp")';
+            Marginpurl.InsertTempData = '@Url.Action("InsertTempData", "Marginp")';
+            Marginpurl.UpdateTempData = '@Url.Action("UpdateTempData", "Marginp")';
+            Marginpurl.DeleteTempData = '@Url.Action("DeleteTempData", "Marginp")';
+            Marginpurl.ResetTempData = '@Url.Action("ResetTempData", "Marginp")';
+            Marginpurl.TakeOutData = '@Url.Action("TakeOutData", "Marginp")';
+            Marginpurl.ApplyTempData = '@Url.Action("ApplyTempData", "Marginp")';
+            //#endregion
 
-        //#region 參數設定
+            //#region 參數設定
 
-        //庫存資料
-        var CADialogId = 'CADialog'; //dialogId
-        var CADialogFormId = 'CADialogForm'; //dialogFormId
-        var CA_UseId = 'dCA_Use'; //用途Id(droupdownlist)
-        var CA_DescId = 'dCA_Desc'; //類型Id(droupdownlist)
-        var CA_BankId = 'tCA_Bank'; //銀行Id(text)
-        var CA_NumberId = 'tCA_Number'; // 號碼Id(text)
-        var CA_MemoId = 'tCA_MEMO'; //備註Id(texarea)
-        var CA_Item_IdHlId = 'hCA_ITEM_ID'; //物品標號Id(hidden)
+            //庫存資料
+            var MarginpDialogId = 'MarginpDialog'; //dialogId
+            var MarginpDialogFormId = 'MarginpDialogForm'; //dialogFormId
+            var Marginp_Take_Of_Type = 'dMarginp_Take_Of_Type'; //類別Id(dropdownlist)
+            var Marginp_Trad_Partners = 'tMarginp_Trad_Partners'; //交易對象Id(text)
+            var Marginp_Item_ID = 'tMarginp_Item_ID'; //歸檔編號Id(hidden)
+            var Marginp_Amount = 'tMarginp_Amount'; //金額Id(text)
+            var Marginp_Item = 'dMarginp_Item'; //物品名稱(dropdownlist)
+            var Marginp_Item_Issuer = 'tMarginp_Item_Issuer'; //物品發行人Id(text)
+            var Marginp_Pledge_Item_No = 'tMarginp_Pledge_Item_No'; //質押標的號碼Id(text)
+            var Marginp_Effective_Date_B = 'tMarginp_Effective_Date_B'; //有效期間(起)Id(text)
+            var Marginp_Effective_Date_E = 'tMarginp_Effective_Date_E'; //有效期間(迄)Id(text)
+            var Marginp_Description = 'tMarginp_Description'; //說明Id(text)
+            var Marginp_Memo = 'tMarginp_Memo'; //備註Id(textarea)
+            var Marginp_Book_No = 'tMarginp_Book_No'; //冊號Id(text)
+            //var Marginp_Item_IdHlId = 'hMarginp_ITEM_ID'; //物品編號Id(hidden)
 
 
-        var CA_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
-        var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
-        var CA_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
-        if (CA_Aply_No_Flag) {
-            $('#CACancel').hide(); //已經申請故無法取消申請
-            type = '@ViewBag.dAccess';
-        }
-
-        if (!CA_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
-            $('.CA_Act').hide();
-            type = '@ViewBag.dAccess';
-        }
-        else { //是覆核狀態 (為存入 or 取出 動作)
-            $('.CA_Act').show();
-        }
-        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
-        if (typeFlag && CA_Act_Type) {
-            $('#CAInsert').show();
-        }
-        //#endregion
-
-        function clearJqgrid(gridDivId) {
-            $('#' + gridDivId).children().remove();
-        }
-
-        //#region 初始動作
-        CATempGrid();
-        setCAVerified();
-        //#endregion
-
-        //#region 註冊verified
-        function setCAVerified() {
-            verified.required(CADialogFormId, CA_NumberId, message.required('號碼')); //號碼為必填
-        }
-        //#endregion
-
-        //#region 註冊事件
-        $('input:button').each(function () {
-            var id = $(this).attr('id');
-            switch (id) {
-                case 'CAInsert':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CAInsertFun(); });
-                    break;
-                case 'CAApply':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CAApplyFun(); });
-                    break;
-                case 'CACancel':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CACancelFun(); });
-                    break;
-                case 'CABack':
-                case 'CACancelTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
-                    break;
-                case 'CAInsertTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CAInsertTempFun(); });
-                    break;
-                case 'CAUpdateTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CAUpdateTempFun(); });
-                    break;
-                case 'CADeleteTemp':
-                    $('#' + id).off('click');
-                    $('#' + id).on('click', function () { CADeleteTempFun(); });
-                    break;
+            var Marginp_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+            var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
+            var Marginp_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+            if (Marginp_Aply_No_Flag) {
+                $('#MarginpCancel').hide(); //已經申請故無法取消申請
+                type = '@ViewBag.dAccess';
             }
-        });
 
-        function CAReset() {
-            $('#' + CA_LocatedTId).val('');
-            $('#' + CA_MemoTId).val('');
-        }
+            if (!Marginp_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+                $('.Marginp_Act').hide();
+                type = '@ViewBag.dAccess';
+            }
+            else { //是覆核狀態 (為存入 or 取出 動作)
+                $('.Marginp_Act').show();
+            }
+            var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+            if (typeFlag && Marginp_Act_Type) {
+                $('#MarginpInsert').show();
+            }
+            //#endregion
 
-        function CAApplyFun() {
-            $.ajax({
-                type: "POST",
-                dataType: "json",
-                url: CAurl.ApplyTempData,
-                contentType: 'application/json',
-            }).done(function (result) {
-                customerUtility.alertAuto(result);
-                if (result.RETURN_FLAG) {
-                    customerUtility.closeDialog($('#CAApply'));
+            function clearJqgrid(gridDivId) {
+                $('#' + gridDivId).children().remove();
+            }
+
+            //#region 初始動作
+            MarginpTempGrid();
+            setMarginpVerified();
+            //#endregion
+
+            //#region 註冊verified
+            function setMarginpVerified() {
+                verified.required(MarginpDialogFormId, Marginp_Take_Of_Type, message.required('類別')); //類別為必填
+                verified.required(MarginpDialogFormId, Marginp_Trad_Partners, message.required('交易對象')); //交易對象為必填
+                verified.required(MarginpDialogFormId, Marginp_Amount, message.required('金額')); //金額為必填
+                verified.required(MarginpDialogFormId, Marginp_Item, message.required('物品名稱')); //物品名稱為必填
+                verified.required(MarginpDialogFormId, Marginp_Item_Issuer, message.required('物品發行人')); //物品發行人為必填
+                verified.required(MarginpDialogFormId, Marginp_Pledge_Item_No, message.required('質押標的號碼')); //質押標的號碼為必填
+            }
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'MarginpInsert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpInsertFun(); });
+                        break;
+                    case 'MarginpApply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpApplyFun(); });
+                        break;
+                    case 'MarginpCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpCancelFun(); });
+                        break;
+                    case 'MarginpBack':
+                    case 'MarginpCancelTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                        break;
+                    case 'MarginpInsertTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpInsertTempFun(); });
+                        break;
+                    case 'MarginpUpdateTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpUpdateTempFun(); });
+                        break;
+                    case 'MarginpDeleteTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { MarginpDeleteTempFun(); });
+                        break;
                 }
-            })
-        }
+            });
 
-        function CACancelFun() {
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify({
-                    AccessType: type
-                }),
-                dataType: "json",
-                url: CAurl.ResetTempData,
-                contentType: 'application/json',
-            }).done(function (result) {
-                ResetInsertDialog();
-                CATempGrid();
-            })
-        }
+            function MarginpReset() {
+                $('#' + Marginp_LocatedTId).val('');
+                $('#' + Marginp_MemoTId).val('');
+            }
 
-        function formatterTakeOut(cellvalue, options, rdata) {
+            function MarginpApplyFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: Marginpurl.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#MarginpApply'));
+                    }
+                })
+            }
+
+            function MarginpCancelFun() {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        AccessType: type
+                    }),
+                    dataType: "json",
+                    url: Marginpurl.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetInsertDialog();
+                    MarginpTempGrid();
+                })
+            }
+
+            function formatterTakeOut(cellvalue, options, rdata) {
             var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
-                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox CAtakeouts customerCheck'></div>";
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox Marginptakeouts customerCheck'></div>";
             return str;
         }
 
-        function formatterCA_Use(cellvalue, options, rdata) {
+            function formatterMarginp_Take_Of_Type(cellvalue, options, rdata) {
             switch (cellvalue) {
                 @{
-                    foreach (var item in ((SelectList)ViewBag.CAUse))
+                    foreach (var item in ((SelectList)ViewBag.MarginpType))
                     {
                     <text>
                     case '@item.Value':
@@ -231,10 +302,10 @@
             }
         }
 
-        function UnformatterCA_Use(cellvalue, options, rdata) {
+            function UnformatterMarginp_Take_Of_Type(cellvalue, options, rdata) {
             switch (cellvalue) {
                 @{
-                    foreach (var item in ((SelectList)ViewBag.CAUse))
+                    foreach (var item in ((SelectList)ViewBag.MarginpType))
                     {
                         <text>
                         case '@item.Text':
@@ -247,10 +318,10 @@
         }
         }
 
-        function formatterCA_Desc(cellvalue, options, rdata) {
+            function formatterMarginp_Item(cellvalue, options, rdata) {
             switch (cellvalue) {
                 @{
-                    foreach (var item in ((SelectList)ViewBag.CADesc))
+                    foreach (var item in ((SelectList)ViewBag.MarginpItem))
                     {
                         <text>
                         case '@item.Value':
@@ -264,10 +335,10 @@
             return '';
         }
 
-        function UnformatterCA_Desc(cellvalue, options, rdata) {
+            function UnformatterMarginp_Item(cellvalue, options, rdata) {
             switch (cellvalue) {
                @{
-                    foreach (var item in ((SelectList)ViewBag.CADesc))
+                    foreach (var item in ((SelectList)ViewBag.MarginpItem))
                     {
                         <text>
                         case '@item.Text':
@@ -281,74 +352,93 @@
         return '';
         }
 
-        function CATempGrid() {
+        function MarginpTempGrid() {
 
             if (typeFlag) { //存入
-                var colNameArray = ['動作', '電子憑證用途', '電子憑證品項', '銀行/廠商', '電子憑證號碼', '備註', '物品編號'];
+                var colNameArray = ['動作', '類別', '交易對象', '歸檔編號', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
-                colModelArray.push({ name: "vCA_Use", index: "vCA_Use", width: 100, sortable: false, formatter: formatterCA_Use, unformat: UnformatterCA_Use });
-                colModelArray.push({ name: "vCA_Desc", index: "vCA_Desc", width: 100, sortable: false, formatter: formatterCA_Desc, unformat: UnformatterCA_Desc });
-                colModelArray.push({ name: "vBank", index: "vBank", width: 100, sortable: false });
-                colModelArray.push({ name: "vCA_Number", index: "vCA_Number", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+
+                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                //colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 100, sortable: false });
+                //colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, formatter: formatterMarginp_Item_Name, unformat: UnformatterMarginp_Item_Name });
+                //colModelArray.push({ name: "vMarginp_Item_Name", index: "vMarginp_Item_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 110, sortable: false });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 150, sortable: false });
+                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 100, sortable: false });
+                //colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 jqgridCustom.createJqgridByCache(
-                    'CAjqgridDiv',
-                    'CATempList',
-                    'CATempPeger',
-                    CAurl.getData,
+                    'MarginpjqgridDiv',
+                    'MarginpTempList',
+                    'MarginpTempPeger',
+                    Marginpurl.getData,
                     {
 
                     },
                     colNameArray,
                     colModelArray,
                     '存入明細資料',
-                    jqgridCustom.getPage('CAjqgridDiv'),
-                    CATempCompleteFun,
+                    jqgridCustom.getPage('MarginpjqgridDiv'),
+                    MarginpTempCompleteFun,
                     true
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '電子憑證用途', '電子憑證品項', '銀行/廠商', '電子憑證號碼', '備註', '物品編號'];
-                var colModelArray = [];
-                if (!CA_Act_Type) {
-                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
-                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
-                }
-                else {
-                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
-                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
-                }
-                colModelArray.push({ name: "vCA_Use", index: "vCA_Use", width: 100, sortable: false, formatter: formatterCA_Use, unformat: UnformatterCA_Use });
-                colModelArray.push({ name: "vCA_Desc", index: "vCA_Desc", width: 100, sortable: false, formatter: formatterCA_Desc, unformat: UnformatterCA_Desc });
-                colModelArray.push({ name: "vBank", index: "vBank", width: 100, sortable: false });
-                colModelArray.push({ name: "vCA_Number", index: "vCA_Number", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
-                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
-                jqgridCustom.createJqgridByCache(
-                    'CAjqgridDiv',
-                    'CATempList',
-                    'CATempPeger',
-                    CAurl.getData,
-                    {
-                    },
-                    colNameArray,
-                    colModelArray,
-                    '取出明細資料',
-                    jqgridCustom.getPage('CAjqgridDiv'),
-                    CATempTakeOutFun,
-                    true
-                    );
+                //var colNameArray = ['取出', '動作', '類別', '交易對象', '歸檔編號', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '備註', '冊號', '物品編號'];
+                //var colModelArray = [];
+                //if (!Marginp_Act_Type) {
+                //    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                //    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                //}
+                //else {
+                //    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                //    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                //}
+                //colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                //colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Item_ID", index: "vMarginp_Item_ID", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Item_Name", index: "vMarginp_Item_Name", width: 100, sortable: false, formatter: formatterMarginp_Item_Name, unformat: UnformatterMarginp_Item_Name });
+                //colModelArray.push({ name: "vMarginp_Item_Name", index: "vMarginp_Item_Name", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 100, sortable: false });
+                //colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 150, sortable: false });
+                //colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                //jqgridCustom.createJqgridByCache(
+                //    'MarginpjqgridDiv',
+                //    'MarinpTempList',
+                //    'MarginpTempPeger',
+                //    Marginpurl.getData,
+                //    {
+                //    },
+                //    colNameArray,
+                //    colModelArray,
+                //    '取出明細資料',
+                //    jqgridCustom.getPage('MarginpjqgridDiv'),
+                //    MarginpTempTakeOutFun,
+                //    true
+                //    );
             }
         }
 
-        function CATempTakeOutFun(listId) {
-            jqgridCustom.randerAction(listId, 'CATemp', tempActFun);
+        function MarginpTempTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'MarginpTemp', tempActFun);
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                 $(this).find('.actionEditIcon').hide();
                 $(this).find('.actionDeleIcon').hide();
-                $(this).find('td').find('.CAtakeouts').each(function () {
+                $(this).find('td').find('.Marginptakeouts').each(function () {
                     $(this).off('click');
                     $(this).on('click', function () {
                         takeout(i + 1, $(this).prop('checked'));
@@ -358,27 +448,27 @@
         }
 
         function takeout(rowid, flag) {
-            var listId = 'CATempList';
-            var data = $("#" + listId).getRowData(rowid);
+            var listId = 'MarginpTempList';
+            var data = $("#" + listId).getRowData(rowid);s
             $.ajax({
                 type: "POST",
                 data: JSON.stringify({
-                    model: CAViewModel(data.vItemId),
+                    model: MarginpViewModel(data.vItemId),
                     takeoutFlag: flag
                 }),
                 dataType: "json",
-                url: CAurl.TakeOutData,
+                url: Marginpurl.TakeOutData,
                 contentType: 'application/json',
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
-                    CATempGrid();
+                    MarginpTempGrid();
                 }
             });
         }
 
-        function CATempCompleteFun(listId) {
-            jqgridCustom.randerAction(listId, 'CATemp', tempActFun);
-            if (!CA_Act_Type) { //申請狀態
+        function MarginpTempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'MarginpTemp', tempActFun);
+            if (!Marginp_Act_Type) { //申請狀態
                 $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionEditIcon').hide();
                     $(this).find('.actionDeleIcon').hide();
@@ -398,20 +488,20 @@
         }
 
         //#region function
-        function CAInsertFun() {
+        function MarginpInsertFun() {
 
             dialogOpen('@Ref.ActionType.Add.ToString()', null);
         }
 
         function dialogOpen(type, rowid) {
-            $('#' + CADialogFormId).validate().resetForm();
-            var dialogId = 'CADialog';
-            var listId = 'CATempList';
-            var CAInsertClass = 'CAInsertType';
+            $('#' + MarginpDialogFormId).validate().resetForm();
+            var dialogId = 'MarginpDialog';
+            var listId = 'MarginpTempList';
+            var MarginpInsertClass = 'MarginpInsertType';
             var title = customerUtility.getDialogType(type);;
             $('#' + dialogId).dialog({
                 position: { my: "top+30%", at: "center top", of: window },
-                title: title + '印章',
+                title: title + '存入保證金',
                 width: 'auto',
                 autoOpen: false,
                 resizable: false,
@@ -420,40 +510,49 @@
                     customerUtility.closeDialog(this);
                 }
             });
-            $('#CAInsertTemp,#CAUpdateTemp,#CADeleteTemp').hide();
+            $('#MarginpInsertTemp,#MarginpUpdateTemp,#MarginpDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
                 ResetInsertDialog();
-                $('#CAInsertTemp').show();
-                $('.' + CAInsertClass).prop('disabled', false);
+                $('#MarginpInsertTemp').show();
+                $('.' + MarginpInsertClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
                 dialogSetData(listId, rowid);
-                $('#CADeleteTemp').show();
-                $('.' + CAInsertClass).prop('disabled', true);
+                $('#MarginpDeleteTemp').show();
+                $('.' + MarginpInsertClass).prop('disabled', true);
             }
             else if (type == '@Ref.ActionType.Edit.ToString()') {
                 dialogSetData(listId, rowid);
-                $('#CAUpdateTemp').show();
-                $('.' + CAInsertClass).prop('disabled', false);
+                $('#MarginpUpdateTemp').show();
+                $('.' + MarginpInsertClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData(listId, rowid);
-                $('.' + CAInsertClass).prop('disabled', true);
+                $('.' + MarginpInsertClass).prop('disabled', true);
             }
             $('#' + dialogId).dialog('open');
         }
 
         function ResetInsertDialog() {
-            if ($('#' + CA_UseId + ' option').length > 0) {
-                $('#' + CA_UseId).val($($('#' + CA_UseId + ' option')[0]).val())
+            if ($('#' + Marginp_Take_Of_Type + ' option').length > 0) {
+                $('#' + Marginp_Take_Of_Type).val($($('#' + Marginp_Take_Of_Type + ' option')[0]).val())
             }
-            if ($('#' + CA_DescId + ' option').length > 0) {
-                $('#' + CA_DescId).val($($('#' + CA_DescId + ' option')[0]).val())
+            //$('#' + Marginp_Take_Of_Type).val('');
+            $('#' + Marginp_Trad_Partners).val('');
+            $('#' + Marginp_Item_ID).val('');
+            $('#' + Marginp_Amount).val('');
+            if ($('#' + Marginp_Item + ' option').length > 0) {
+                $('#' + Marginp_Item).val($($('#' + Marginp_Item + ' option')[0]).val())
             }
-            $('#' + CA_BankId).val('');
-            $('#' + CA_NumberId).val('');
-            $('#' + CA_MemoId).val('');
-            $('#' + CA_Item_IdHlId).val('');
+            //$('#' + Marginp_Item_Name).val('');
+            $('#' + Marginp_Item_Issuer).val('');
+            $('#' + Marginp_Pledge_Item_No).val('');
+            $('#' + Marginp_Effective_Date_B).val('');
+            $('#' + Marginp_Effective_Date_E).val('');
+            $('#' + Marginp_Description).val('');
+            $('#' + Marginp_Memo).val('');
+            $('#' + Marginp_Book_No).val('');
+            //$('#' + Marginp_Item_IdHlId).val('');
         }
 
         function dialogSetData(listId, rowid) {
@@ -463,121 +562,159 @@
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
-                $('#' + CA_UseId).val(data.vCA_Use);
-                $('#' + CA_DescId).val(data.vCA_Desc);
-                $('#' + CA_BankId).val(data.vBank);
-                $('#' + CA_NumberId).val(data.vCA_Number);
-                $('#' + CA_MemoId).val(data.vMemo);
-                $('#' + CA_Item_IdHlId).val(data.vItemId);
+                $('#' + Marginp_Take_Of_Type).val(data.vMarginp_Take_Of_Type);
+                $('#' + Marginp_Trad_Partners).val(data.vMarginp_Trad_Partners);
+                $('#' + Marginp_Item_ID).val(data.vItemId);
+                $('#' + Marginp_Amount).val(data.vMarginp_Amount);
+                $('#' + Marginp_Item).val(data.vMarginp_Item);
+                $('#' + Marginp_Item_Issuer).val(data.vMarginp_Item_Issuer);
+                $('#' + Marginp_Pledge_Item_No).val(data.vMarginp_Pledge_Item_No);
+                $('#' + Marginp_Effective_Date_B).val(data.vMarginp_Effective_Date_B);
+                $('#' + Marginp_Effective_Date_E).val(data.vMarginp_Effective_Date_E);
+                $('#' + Marginp_Description).val(data.vDescription);
+                $('#' + Marginp_Memo).val(data.vMemo);
+                $('#' + Marginp_Book_No).val(data.vMarginp_Book_No);
+                //$('#' + Marginp_Item_IdHlId).val(data.vItemId);
             }
         }
 
-        //新增暫存不動產明細
-        function CAInsertTempFun() {
-            if (!CATempCheck()) {
-                return false;
-            }
-            if ($('#' + CADialogFormId).valid()) {
+
+
+        //新增暫存存入保證金明細
+        function MarginpInsertTempFun() {
+
+            if ($('#' + MarginpDialogFormId).valid()) {
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
-                        model: CAViewModel(
+                        model: MarginpViewModel(
                             created.uuid(),
-                            $('#' + CA_UseId).val().trim(),
-                            $('#' + CA_DescId).val().trim(),
-                            $('#' + CA_BankId).val().trim(),
-                            $('#' + CA_NumberId).val().trim(),
-                            $('#' + CA_MemoId).val().trim())
+
+                            $('#' + Marginp_Take_Of_Type).val().trim(),
+                            $('#' + Marginp_Trad_Partners).val().trim(),
+                            $('#' + Marginp_Item_ID).val().trim(),
+                            $('#' + Marginp_Amount).val().trim(),
+                            $('#' + Marginp_Item).val().trim(),
+                            $('#' + Marginp_Item_Issuer).val().trim(),
+                            $('#' + Marginp_Pledge_Item_No).val().trim(),
+                            $('#' + Marginp_Effective_Date_B).val().trim(),
+                            $('#' + Marginp_Effective_Date_E).val().trim(),
+                            $('#' + Marginp_Description).val().trim(),
+                            $('#' + Marginp_Memo).val().trim(),
+                            $('#' + Marginp_Book_No).val().trim())
                     }),
                     dataType: "json",
-                    url: CAurl.InsertTempData,
+                    url: Marginpurl.InsertTempData,
                     contentType: 'application/json',
                 }).done(function (result) {
                     customerUtility.alertAuto(result);
                     if (result.RETURN_FLAG) {
-                        customerUtility.closeDialog($('#CAInsertTemp'));
-                        CATempGrid();
+                        customerUtility.closeDialog($('#MarginpInsertTemp'));
+                        MarginpTempGrid();
                     }
                 })
             }
         }
 
-        function CAUpdateTempFun() {
-            if (!CATempCheck()) {
-                return false;
-            }
-            if ($('#' + CADialogFormId).valid()) {
+        function MarginpUpdateTempFun() {
+
+            if ($('#' + MarginpDialogFormId).valid()) {
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
-                        model: CAViewModel(
-                            $('#' + CA_Item_IdHlId).val(),
-                            $('#' + CA_UseId).val().trim(),
-                            $('#' + CA_DescId).val().trim(),
-                            $('#' + CA_BankId).val().trim(),
-                            $('#' + CA_NumberId).val().trim(),
-                            $('#' + CA_MemoId).val().trim())
+                        model: MarginpViewModel(
+                            //$('#' + Marginp_Item_IdHlId).val(),
+
+                            $('#' + Marginp_Take_Of_Type).val().trim(),
+                            $('#' + Marginp_Trad_Partners).val().trim(),
+                            $('#' + Marginp_Item_ID).val().trim(),
+                            $('#' + Marginp_Amount).val().trim(),
+                            $('#' + Marginp_Item).val().trim(),
+                            $('#' + Marginp_Item_Issuer).val().trim(),
+                            $('#' + Marginp_Pledge_Item_No).val().trim(),
+                            $('#' + Marginp_Effective_Date_B).val().trim(),
+                            $('#' + Marginp_Effective_Date_E).val().trim(),
+                            $('#' + Marginp_Description).val().trim(),
+                            $('#' + Marginp_Memo).val().trim(),
+                            $('#' + Marginp_Book_No).val().trim())
                     }),
                     dataType: "json",
-                    url: CAurl.UpdateTempData,
+                    url: Marginpurl.UpdateTempData,
                     contentType: 'application/json',
                 }).done(function (result) {
                     customerUtility.alertAuto(result);
                     if (result.RETURN_FLAG) {
-                        customerUtility.closeDialog($('#CAUpdateTemp'));
-                        CATempGrid();
+                        customerUtility.closeDialog($('#MarginpUpdateTemp'));
+                        MarginpTempGrid();
                     }
                 })
             }
         }
 
-        function CADeleteTempFun() {
+        function MarginpDeleteTempFun() {
             $.ajax({
                 type: "POST",
                 data: JSON.stringify({
-                    model: CAViewModel(
-                        $('#' + CA_Item_IdHlId).val())
+                    model: MarginpViewModel(
+                        $('#' + Marginp_Item_IdHlId).val())
                 }),
                 dataType: "json",
-                url: CAurl.DeleteTempData,
+                url: Marginpurl.DeleteTempData,
                 contentType: 'application/json',
             }).done(function (result) {
                 customerUtility.alertAuto(result);
                 if (result.RETURN_FLAG) {
-                    customerUtility.closeDialog($('#CADeleteTemp'));
-                    CATempGrid();
+                    customerUtility.closeDialog($('#MarginpDeleteTemp'));
+                    MarginpTempGrid();
                 }
             })
         }
 
-        function CATempCheck() {
-            var _checkFlag = true;
-            if ($('#' + CA_UseId).val() == '1' && $('#' + CA_BankId).val().trim() == '') {
-                customerUtility.alert('用途為網銀時銀行必輸', 'w');
-                _checkFlag = false;
-            }
-            return _checkFlag
-        }
+        //function setApplicant(DPT_CD) {
+        //    $.ajax({
+        //        type: "POST",
+        //        data: JSON.stringify({
+        //            DPT_CD: DPT_CD
+        //        }),
+        //        dataType: "json",
+        //        url: TAurl.changeUnit,
+        //        contentType: 'application/json'
+        //    }).done(function (result) {
+        //        customerUtility.addoption('applicant', result);
+        //    })
 
-        function CAViewModel(
+        //}
+
+        function MarginpViewModel(
+            vMarginp_Take_Of_Type,
+            vMarginp_Trad_Partners,
+            vMarginp_Item_ID,
+            vMarginp_Amount,
             vItemId,
-            vCA_Use,
-            vCA_Desc,
-            vBank,
-            vCA_Number,
-            vMemo
+            vMarginp_Item_Issuer,
+            vMarginp_Pledge_Item_No,
+            vMarginp_Effective_Date_B,
+            vMarginp_Effective_Date_E,
+            vDescription,
+            vMemo,
+            vMarginp_Book_No
             ) {
             var obj = {};
-            obj['vItemId'] = vItemId;
-            obj['vCA_Use'] = vCA_Use;
-            obj['vCA_Desc'] = vCA_Desc;
-            obj['vBank'] = vBank;
-            obj['vCA_Number'] = vCA_Number;
+            obj['vMarginp_Take_Of_Type'] = vMarginp_Take_Of_Type;
+            obj['vMarginp_Trad_Partners'] = vMarginp_Trad_Partners;
+            obj['vMarginp_Item_ID'] = vItemId;
+            obj['vMarginp_Amount'] = vMarginp_Amount;
+            obj['vMarginp_Item'] = vMarginp_Item;
+            obj['vMarginp_Item_Issuer'] = vMarginp_Item_Issuer;
+            obj['vMarginp_Pledge_Item_No'] = vMarginp_Pledge_Item_No;
+            obj['vMarginp_Effective_Date_B'] = vMarginp_Effective_Date_B;
+            obj['vMarginp_Effective_Date_E'] = vMarginp_Effective_Date_E;
+            obj['vDescription'] = vDescription;
             obj['vMemo'] = vMemo;
+            obj['vMarginp_Book_No'] = vMarginp_Book_No;
             return obj;
         }
 
         //#endregion
-
     });
 </script>

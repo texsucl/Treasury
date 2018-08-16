@@ -12,7 +12,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Linq.Expressions;
-using static Treasury.Web.Enum.Ref;
+using Treasury.Web.Enum;
 using System.Reflection.Emit;
 using System.Data.Entity;
 using NLog;
@@ -204,15 +204,25 @@ namespace Treasury.WebUtility
         /// </summary>
         /// <param name="datetime"></param>
         /// <returns></returns>
-        public static string DateToTaiwanDate(this DateTime datetime, int length = 7)
+        public static string DateToTaiwanDate(this DateTime datetime, int length = 7,bool _bool=false)
         {
             TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
-            if (length == 9)
-                return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
-            else if (length == 17)
-                return $@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')} {datetime.ToString("HH:mm:ss")}";
-            else
-                return $@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";
+            
+           if (length == 9)
+           {
+              if(!_bool)
+                  return string.Format("{0}/{1}/{2}", taiwanCalendar.GetYear(datetime), datetime.Month.ToString().PadLeft(2, '0'), datetime.Day.ToString().PadLeft(2, '0'));
+              //$@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
+              else
+                  return string.Format("{0}-{1}-{2}", taiwanCalendar.GetYear(datetime), datetime.Month.ToString().PadLeft(2, '0'), datetime.Day.ToString().PadLeft(2, '0'));
+              //$@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')}";
+           }
+           else if (length == 17)
+                return string.Format("{0}/{1}/{2} {3}", taiwanCalendar.GetYear(datetime), datetime.Month.ToString().PadLeft(2, '0'), datetime.Day.ToString().PadLeft(2, '0'), datetime.ToString("HH:mm:ss"));
+                //$@"{taiwanCalendar.GetYear(datetime)}/{datetime.Month.ToString().PadLeft(2, '0')}/{datetime.Day.ToString().PadLeft(2, '0')} {datetime.ToString("HH:mm:ss")}";
+           else
+                return string.Format("{0}{1}{2}", taiwanCalendar.GetYear(datetime), datetime.Month.ToString().PadLeft(2, '0'), datetime.Day.ToString().PadLeft(2, '0'));
+                //$@"{taiwanCalendar.GetYear(datetime)}{datetime.Month.ToString().PadLeft(2, '0')}{datetime.Day.ToString().PadLeft(2, '0')}";         
         }
 
         /// <summary>
@@ -921,32 +931,32 @@ namespace Treasury.WebUtility
         /// </summary>
         /// <param name="message">訊息</param>
         /// <param name="nlog">類型 預設為訊息</param>
-        public static void NlogSet(string message, Nlog nlog = Nlog.Info)
+        public static void NlogSet(string message, Ref.Nlog nlog = Ref.Nlog.Info)
         {
             switch (nlog)
             {
                 // 用於追蹤，可以在程式裡需要追蹤的地方將訊息以Trace傳出。
-                case Nlog.Trace:
+                case Ref.Nlog.Trace:
                     logger.Trace(message);
                     break;
                 // 用於開發，於開發時將一些需要特別關注的訊息以Debug傳出。
-                case Nlog.Debug:
+                case Ref.Nlog.Debug:
                     logger.Debug(message);
                     break;
                 // 訊息，記錄不影響系統執行的訊息，通常會記錄登入登出或是資料的建立刪除、傳輸等。
-                case Nlog.Info:
+                case Ref.Nlog.Info:
                     logger.Info(message);
                     break;
                 // 警告，用於需要提示的訊息，例如庫存不足、貨物超賣、餘額即將不足等。
-                case Nlog.Warn:
+                case Ref.Nlog.Warn:
                     logger.Warn(message);
                     break;
                 // 錯誤，記錄系統實行所發生的錯誤，例如資料庫錯誤、遠端連線錯誤、發生例外等。
-                case Nlog.Error:
+                case Ref.Nlog.Error:
                     logger.Error(message);
                     break;
                 // 致命，用來記錄會讓系統無法執行的錯誤，例如資料庫無法連線、重要資料損毀等。
-                case Nlog.Fatal:
+                case Ref.Nlog.Fatal:
                     logger.Fatal(message);
                     break;
             }            

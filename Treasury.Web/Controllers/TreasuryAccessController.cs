@@ -47,11 +47,12 @@ namespace Treasury.WebControllers
             var data = TreasuryAccess.TreasuryAccessDetail(
                  AccountController.CurrentUserId, AccountController.CustodianFlag
                 );
-            //        var data = TreasuryAccess.TreasuryAccessDetail(
-            // AccountController.CurrentUserId, true
-            //);
             var _aProjectAll = data.Item1.ModelConvert<SelectOption, SelectOption>();
             var _aUnitAll = data.Item2.ModelConvert<SelectOption, SelectOption>();
+            var empty = new SelectOption() { Text = string.Empty, Value = string.Empty };
+            data.Item1.Insert(0, empty);
+            if (AccountController.CustodianFlag)
+                data.Item2.Insert(0, empty);
             var All = new SelectOption() { Text = "All", Value = "All" };
             _aProjectAll.Insert(0, All);
             _aUnitAll.Insert(0, All);
@@ -258,14 +259,16 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult GetByAplyNo(string AplyNo)
         {
-            MSGReturnModel<Tuple<TreasuryAccessViewModel, bool>> result = new MSGReturnModel<Tuple<TreasuryAccessViewModel, bool>>();
+            MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption>>> result =
+                new MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption>>>();
             result.RETURN_FLAG = false;
             if (!AplyNo.IsNullOrWhiteSpace())
             {
                 result.RETURN_FLAG = true;
                 var data = TreasuryAccess.GetByAplyNo(AplyNo);
                 var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
-                result.Datas  = new Tuple<TreasuryAccessViewModel,bool>(data, (temp.vCreateUid == AccountController.CurrentUserId));
+                var selectOptions = TreasuryAccess.TreasuryAccessDetail(AccountController.CurrentUserId, AccountController.CustodianFlag, data.vAplyUnit);
+                result.Datas  = new Tuple<TreasuryAccessViewModel,bool, List<SelectOption>, List<SelectOption>>(data, AccountController.CustodianFlag, selectOptions.Item2, selectOptions.Item3);
             }
             return Json(result);
         }

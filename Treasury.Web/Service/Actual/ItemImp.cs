@@ -11,10 +11,12 @@ using Treasury.WebUtility;
 using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
+using Treasury.WebControllers;
+
 /// <summary>
-/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 電子憑證
-/// 初版作者：20180723 張家華
-/// 修改歷程：20180723 張家華 
+/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 重要物品
+/// 初版作者：20180810 陳宥穎
+/// 修改歷程：20180810 陳宥穎 
 ///           需求單號：
 ///           初版
 /// ==============================================
@@ -26,9 +28,9 @@ using System.Data.Entity.Infrastructure;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class CA : Common, ICA
+    public class ItemImp : Common, IItemImp
     {
-        public CA()
+        public ItemImp()
         {
 
         }
@@ -36,50 +38,13 @@ namespace Treasury.Web.Service.Actual
         #region Get Date
 
         /// <summary>
-        /// 抓取 電子憑證用途 項目
-        /// </summary>
-        /// <returns></returns>
-        public List<SelectOption> GetCA_Use()
-        {
-            var result = new List<SelectOption>();
-            using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {
-                result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "CA_USE")
-                    .Select( x => new SelectOption() {
-                        Value = x.CODE,
-                        Text = x.CODE_VALUE
-                    }));
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 抓取 電子憑證品項 項目
-        /// </summary>
-        /// <returns></returns>
-        public List<SelectOption> GetCA_Desc()
-        {
-            var result = new List<SelectOption>();
-            using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {
-                result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "CA_DESC")
-                .Select(x => new SelectOption()
-                {
-                    Value = x.CODE,
-                    Text = x.CODE_VALUE
-                }));
-            }
-            return result;
-        }
-
-        /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
         /// <param name="aplyNo">單號</param>
         /// <returns></returns>
-        public List<CAViewModel> GetDataByAplyNo(string aplyNo)
+        public List<ItemImpViewModel> GetDataByAplyNo(string aplyNo)
         {
-            var result = new List<CAViewModel>();
+            var result = new List<ItemImpViewModel>();
             //result.
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -90,8 +55,8 @@ namespace Treasury.Web.Service.Actual
                     //使用單號去其他存取項目檔抓取物品編號
                     var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
-                    //使用物品編號去電子憑證庫存資料檔抓取資料
-                    var details = db.ITEM_CA.AsNoTracking()
+                    //使用物品編號去重要物品庫存資料檔抓取資料
+                    var details = db.ITEM_IMPO.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
                     if (details.Any())
                     {
@@ -110,48 +75,54 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit">申請單位</param>
         /// <param name="aplyNo">取出單號</param>
         /// <returns></returns>
-        public List<CAViewModel> GetDbDataByUnit(string vAplyUnit = null, string aplyNo = null)
+        
+        public List<ItemImpViewModel> GetDbDataByUnit(string vAplyUnit = null, string aplyNo = null)
         {
-            var result = new List<CAViewModel>();
+            var result = new List<ItemImpViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
                 if (!vAplyUnit.IsNullOrWhiteSpace())
                 {
-                    result = db.ITEM_CA.AsNoTracking()
+                    result = db.ITEM_IMPO.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .AsEnumerable()
                     .Select(x => 
-                    new CAViewModel() {
+                    new ItemImpViewModel() {
                         vItemId = x.ITEM_ID,
                         vStatus = Ref.AccessInventoryType._1.GetDescription(),
-                        vCA_Desc = x.CA_DESC,
-                        vCA_Use = x.CA_USE,
-                        vBank = x.BANK,
-                        vCA_Number = x.CA_NUMBER,
+                        vItemImp_Name = x.ITEM_NAME,
+                        vItemImp_Quantity = x.QUANTITY,
+                        vItemImp_Amount = x.AMOUNT,
+                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                        vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                        vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
                         vtakeoutFlag = false,
                         vLast_Update_Time = x.LAST_UPDATE_DT
                     }).ToList();
+                    
                 }
                 if (!aplyNo.IsNullOrWhiteSpace())
                 {
                     var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
-                        result.AddRange(db.ITEM_CA.AsNoTracking().Where(
+                        result.AddRange(db.ITEM_IMPO.AsNoTracking().Where(
                         x => itemIds.Contains(x.ITEM_ID)).AsEnumerable()
                         .Select(x =>
-                         new CAViewModel()
+                         new ItemImpViewModel()
                          {
                              vItemId = x.ITEM_ID,
                              vStatus = Ref.AccessInventoryType._4.GetDescription(),
-                             vCA_Desc = x.CA_DESC,
-                             vCA_Use = x.CA_USE,
-                             vBank = x.BANK,
-                             vCA_Number = x.CA_NUMBER,
-                             vMemo = x.MEMO,
+                             vItemImp_Name = x.ITEM_NAME,
+                        vItemImp_Quantity = x.QUANTITY,
+                        vItemImp_Amount = x.AMOUNT,
+                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                        vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                        vDescription = x.DESCRIPTION,
+                        vMemo = x.MEMO,
                              vtakeoutFlag = true,
                              vLast_Update_Time = x.LAST_UPDATE_DT
                          }));
@@ -165,7 +136,7 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 申請覆核 印章
+        /// 申請覆核 重要物品
         /// </summary>
         /// <param name="insertDatas">資料</param>
         /// <param name="taData">申請單資料</param>
@@ -179,16 +150,15 @@ namespace Treasury.Web.Service.Actual
             {
                 if (insertDatas != null)
                 {
-                    var datas = (List<CAViewModel>)insertDatas;
+                    var datas = (List<ItemImpViewModel>)insertDatas;
                     if (datas.Any())
                     {
                         using (TreasuryDBEntities db = new TreasuryDBEntities())
                         {
-
                             //取得流水號
                             SysSeqDao sysSeqDao = new SysSeqDao();
                             string logStr = string.Empty; //log
-                            var item_Seq = "E5"; //電子憑證流水號開頭編碼
+                            var item_Seq = "E8"; //重要物品流水號開頭編碼
 
                             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
 
@@ -220,13 +190,13 @@ namespace Treasury.Web.Service.Actual
                                 #endregion
 
 
-                                #region 印章庫存資料檔
+                                #region 重要物品庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
                                 List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId 
                                 List<string> updateItemIds = new List<string>(); //更新 itemId
                                 List<string> cancelItemIds = new List<string>(); //取消 itemId
-                                List<ITEM_CA> inserts = new List<ITEM_CA>(); //新增資料
+                                List<ITEM_IMPO> inserts = new List<ITEM_IMPO>(); //新增資料
 
                                 //抓取有修改註記的
                                 foreach (var item in datas)
@@ -237,36 +207,38 @@ namespace Treasury.Web.Service.Actual
                                         //只抓取預約存入
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
-                                            var _IC = new ITEM_CA();
+                                            var _IC = new ITEM_IMPO();
 
                                             if (item.vItemId.StartsWith(item_Seq)) //舊有資料
                                             {
-                                                _IC = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                                _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                                 if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
-                                                {
+                                                { 
                                                     result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
-                                                _IC.CA_DESC = item.vCA_Desc; //電子憑證品項
-                                                _IC.CA_USE = item.vCA_Use; //電子憑證用途
-                                                _IC.BANK = item.vBank; //銀行/廠商
-                                                _IC.CA_NUMBER = item.vCA_Number; //電子憑證號碼
-                                                _IC.MEMO = item.vMemo; //備註說明
+                                                _IC.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
+                                                _IC.QUANTITY = item.vItemImp_Quantity; //重要物品數量
+                                                _IC.AMOUNT = item.vItemImp_Amount; //重要物品金額
+                                                _IC.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2); //重要物品預計提取日期
+                                                _IC.DESCRIPTION = item.vDescription;//說明
+                                                _IC.MEMO = item.vMemo; //備註
                                                 updateItemIds.Add(item.vItemId);
                                                 logStr += _IC.modelToString(logStr);
                                             }
                                             else
                                             {
                                                 var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');                                               
-                                                _IC = new ITEM_CA()
+                                                _IC = new ITEM_IMPO()
                                                 {
                                                     ITEM_ID = $@"{item_Seq}{item_id}", //物品編號
                                                     INVENTORY_STATUS = "3", //預約存入
-                                                    CA_DESC = item.vCA_Desc, //電子憑證品項
-                                                    CA_USE = item.vCA_Use, //電子憑證用途
-                                                    BANK = item.vBank, //銀行/廠商
-                                                    CA_NUMBER = item.vCA_Number, //電子憑證號碼
-                                                    MEMO = item.vMemo, //備註說明
+                                                    ITEM_NAME = item.vItemImp_Name, //重要物品名稱
+                                                    QUANTITY = item.vItemImp_Quantity, //重要物品數量
+                                                    AMOUNT = item.vItemImp_Amount, //重要物品金額
+                                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2), //重要物品預計提取日期
+                                                    DESCRIPTION = item.vDescription,//說明
+                                                    MEMO = item.vMemo, //備註
                                                     APLY_DEPT = _dept.Item1, //申請人部門
                                                     APLY_SECT = _dept.Item2, //申請人科別
                                                     APLY_UID = taData.vAplyUid, //申請人
@@ -283,7 +255,7 @@ namespace Treasury.Web.Service.Actual
                                     }
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
-                                        var _IC = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                        var _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                         if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
                                         {
                                             result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
@@ -318,13 +290,13 @@ namespace Treasury.Web.Service.Actual
                                 {
                                     var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
-                                    db.ITEM_CA.RemoveRange(db.ITEM_CA.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
+                                    db.ITEM_IMPO.RemoveRange(db.ITEM_IMPO.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
                                     db.OTHER_ITEM_APLY.AddRange(inserts.Select(x => new OTHER_ITEM_APLY()
                                     {
                                         APLY_NO = taData.vAplyNo,
                                         ITEM_ID = x.ITEM_ID
                                     }));
-                                    db.ITEM_CA.AddRange(inserts);
+                                    db.ITEM_IMPO.AddRange(inserts);
                                 }
                                 else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                 {
@@ -347,7 +319,7 @@ namespace Treasury.Web.Service.Actual
 
                                 #endregion
 
-                                #region 電子憑證庫存資料檔
+                                #region 重要物品庫存資料檔
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
                                 //抓取有修改註記的
                                 foreach (var item in datas)
@@ -359,15 +331,16 @@ namespace Treasury.Web.Service.Actual
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
-                                            var _IC = new ITEM_CA()
+                                            var _IC = new ITEM_IMPO()
                                             {
                                                 ITEM_ID = $@"{item_Seq}{item_id}", //物品編號
                                                 INVENTORY_STATUS = "3", //預約存入
-                                                CA_DESC = item.vCA_Desc, //電子憑證品項
-                                                CA_USE = item.vCA_Use, //電子憑證用途
-                                                BANK = item.vBank, //銀行/廠商
-                                                CA_NUMBER = item.vCA_Number, //電子憑證號碼
-                                                MEMO = item.vMemo, //備註說明
+                                                ITEM_NAME = item.vItemImp_Name, //重要物品名稱
+                                                QUANTITY = item.vItemImp_Quantity, //重要物品數量
+                                                AMOUNT = item.vItemImp_Amount, //重要物品金額
+                                                EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2), //重要物品預計提取日期
+                                                DESCRIPTION = item.vDescription,//說明
+                                                MEMO = item.vMemo, //備註
                                                 APLY_DEPT = _dept.Item1, //申請人部門
                                                 APLY_SECT = _dept.Item2, //申請人科別
                                                 APLY_UID = taData.vAplyUid, //申請人
@@ -377,7 +350,7 @@ namespace Treasury.Web.Service.Actual
                                                 LAST_UPDATE_DT = dt, //最後修改時間
                                             };
                                             _IC_Item_Id = _IC.ITEM_ID;
-                                            db.ITEM_CA.Add(_IC);
+                                            db.ITEM_IMPO.Add(_IC);
                                             logStr += _IC.modelToString(logStr);
                                         }
                                     }
@@ -386,7 +359,7 @@ namespace Treasury.Web.Service.Actual
                                         //只抓取預約取出
                                         if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                         {
-                                            var _IC = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                            var _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                             _IC_Item_Id = _IC.ITEM_ID;
                                             if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
                                             {
@@ -430,7 +403,7 @@ namespace Treasury.Web.Service.Actual
                                         #region LOG
                                         //新增LOG
                                         Log log = new Log();
-                                        log.CFUNCTION = "申請覆核-新增電子憑證";
+                                        log.CFUNCTION = "申請覆核-新增重要物品";
                                         log.CACTION = "A";
                                         log.CCONTENT = logStr;
                                         LogDao.Insert(log, taData.vCreateUid);
@@ -477,9 +450,9 @@ namespace Treasury.Web.Service.Actual
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
             var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
-            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態重要物品庫存資料檔要復原
             {
-                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                foreach (var item in db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
                     item.INVENTORY_STATUS = "1"; //復原為在庫
                     item.LAST_UPDATE_DT = dt;
@@ -489,7 +462,7 @@ namespace Treasury.Web.Service.Actual
             }
             else //存入狀態改為已取消
             {
-                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                foreach (var item in db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
                     item.INVENTORY_STATUS = "7"; //改為已取消
                     item.LAST_UPDATE_DT = dt;
@@ -512,9 +485,9 @@ namespace Treasury.Web.Service.Actual
         {
             var otherItemAplys = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == aply_No).ToList();
             var itemIds = otherItemAplys.Select(y => y.ITEM_ID).ToList();
-            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態重要物品庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
             {
-                foreach (var item in db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)))
+                foreach (var item in db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
                     item.INVENTORY_STATUS = "1"; //復原為在庫
                     item.LAST_UPDATE_DT = dt;
@@ -523,9 +496,9 @@ namespace Treasury.Web.Service.Actual
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
                 return new Tuple<bool, string>(true, logStr);
             }
-            else //存入狀態 刪除電子憑證庫存資料檔,其它存取項目申請資料檔
+            else //存入狀態 刪除重要物品庫存資料檔,其它存取項目申請資料檔
             {
-                db.ITEM_CA.RemoveRange(db.ITEM_CA.Where(x => itemIds.Contains(x.ITEM_ID)));
+                db.ITEM_IMPO.RemoveRange(db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)));
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
                 return new Tuple<bool, string>(true, logStr);
             }
@@ -536,21 +509,23 @@ namespace Treasury.Web.Service.Actual
         #region privateFunction
 
         /// <summary>
-        /// 電子憑證資料轉畫面資料
+        /// 重要物品資料轉畫面資料
         /// </summary>
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<CAViewModel> GetDetailModel(IEnumerable<ITEM_CA> data,List<SYS_CODE> _Inventory_types)
+        private IEnumerable<ItemImpViewModel> GetDetailModel(IEnumerable<ITEM_IMPO> data,List<SYS_CODE> _Inventory_types)
         {
-            return data.Select(x => new CAViewModel()
+            return data.Select(x => new ItemImpViewModel()
             {
                 vItemId = x.ITEM_ID, //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vCA_Desc = x.CA_DESC, //電子憑證品項
-                vCA_Use = x.CA_USE, //電子憑證用途
-                vBank = x.BANK, //銀行/廠商
-                vCA_Number = x.CA_NUMBER, //電子憑證號碼
+                vItemImp_Name = x.ITEM_NAME, //重要物品名稱
+                vItemImp_Quantity = x.QUANTITY, //重要物品數量
+                vItemImp_Amount = x.AMOUNT, //重要物品金額
+                vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
+                vDescription = x.DESCRIPTION,//說明
                 vMemo = x.MEMO, //備註
                 vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
