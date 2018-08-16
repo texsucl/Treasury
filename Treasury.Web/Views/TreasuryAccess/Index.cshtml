@@ -185,6 +185,7 @@
         TAurl.openSTOCK = '@Url.Action("View", "Stock")';
         TAurl.openCA = '@Url.Action("View","CA")';
         TAurl.openMARGING = '@Url.Action("View", "Marging")';
+        TAurl.openDEPOSIT = '@Url.Action("View", "Deposit")';
         TAurl.openItemImp = '@Url.Action("View", "ItemImp")';
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
@@ -297,6 +298,7 @@
                     case '@Ref.TreaItemType.D1015.ToString()':
                     case '@Ref.TreaItemType.D1024.ToString()':
                     case '@Ref.TreaItemType.D1016.ToString()':
+                    case '@Ref.TreaItemType.D1013.ToString()':
                     case '@Ref.TreaItemType.D1018.ToString()':
                         open(_aProject);
                         break;
@@ -804,11 +806,19 @@
                     obj.openDialogWidth = '900px';
                     obj.reportType = 'MARGING';
                     break;
+
                 case '@Ref.TreaItemType.D1018.ToString()':
                     obj.url = TAurl.openItemImp;
                     obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
                     obj.reportType = 'ITEMIMP';
-                    break;            }
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.url = TAurl.openDEPOSIT;
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = '1325px';
+                    obj.reportType = 'DEPOSIT';
+                    break;
+            }
             return obj;
         }
         //#endregion

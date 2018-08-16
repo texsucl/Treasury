@@ -30,12 +30,10 @@ namespace Treasury.WebControllers
     {
         // GET: Marging
         private IMarging Marging;
-        private ITreasuryAccess TreasuryAccess;
 
         public MargingController()
         {
             Marging = new Marging();
-            TreasuryAccess = new TreasuryAccess();
         }
 
         /// <summary>
@@ -186,7 +184,7 @@ namespace Treasury.WebControllers
         }
 
         /// <summary>
-        /// 刪除明細資料
+        /// 刪除存出保證金明細資料
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
