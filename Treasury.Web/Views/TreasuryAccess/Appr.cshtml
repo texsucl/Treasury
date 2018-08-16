@@ -47,31 +47,30 @@
         </div>
     </div>
     <div id="TAApprSearchDetail" style="display:none" role="dialog" class="myDialog">
-        <div id="TAApprjqgridDiv" class="jqd" style="padding-bottom:5px;">
-        </div>
-        <div class="TAApprClass" style="text-align:center">
+        <div id="TAApprjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div class="TAApprClass" style="text-align:center" >
             <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_I_Appr" value="核准" />
             <input type="button" class="btn btn-primary" id="TAAppr_I_Reject" value="駁回" />
         </div>
     </div>
     <div id="TAApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
         <div id="TAApprOpenSearchDetail"></div>
-        <div style="text-align:center">
+        <div style="text-align:center" class="TAApprAct">
             <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_V_Appr" value="核准" />
             <input type="button" class="btn btn-primary" id="TAAppr_V_Reject" value="駁回" />
         </div>
     </div>
-    <div id="" style="display:none" role="dialog">
+    <div id="TAApprDescDialog" style="display:none" role="dialog">
         <table>
             <tr>
                 <td>
-                    <textarea id="TAApprDesc"></textarea>
+                    <textarea id="TAApprDesc" maxlength="50" style="width:98%"></textarea>
                 </td>
             </tr>
             <tr>
                 <td>
                     <input type="button" id="TAAppr_Y_Reject" class="btn btn-primary" style="" value="確認駁回"/>
-                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="" value="取消駁回" />
+                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
                 </td>
             </tr>
         </table>
@@ -92,6 +91,8 @@
         TAApprurl.openSEAL = '@Url.Action("View", "Seal")';
         TAApprurl.openSTOCK = '@Url.Action("View", "Stock")';
         TAApprurl.openCA = '@Url.Action("View","CA")';
+        TAApprurl.openMARGING = '@Url.Action("View", "Marging")';
+        TAApprurl.openItemImp = '@Url.Action("View", "ItemImp")';
         TAApprurl.search = '@Url.Action("SearchAppr", "TreasuryAccess")';
         TAApprurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
         TAApprurl.Appr = '@Url.Action("Appraisal", "TreasuryAccess")';
@@ -100,6 +101,7 @@
 
         var openSearchDetailId = 'TAApprOpenSearchDetail';
         var TAFormId = 'TAForm';
+        var hAply_No = 'h_Appr_Aply_No';
 
         //#endregion
 
@@ -137,10 +139,10 @@
                         $('#' + id).on('click', function () { TAApprReject(); });
                         break;
                     case 'TAAppr_Y_Reject':
-                        $('#' + id).on('click', function () { });
+                        $('#' + id).on('click', function () { TAApprRejectY(); });
                         break;
                     case 'TAAppr_N_Reject':
-                        $('#' + id).on('click', function () { });
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
                         break;
                 }
             });
@@ -151,6 +153,133 @@
         //#region 初始設定
         function reset() {
             resetTAInsertDeatil();
+        }
+        //#endregion
+
+        //#region 核准
+        function TAApprApproved()
+        {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    $('.TAApprCs:checked').each(
+                        function () {
+                            var listId = 'TAApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?"))
+                {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNos: aplyNos
+                        }),
+                        url: TAApprurl.Appr,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            if (openflag)
+                            {
+                                customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                            }
+                            TAApprGrid();
+                        }
+                        customerUtility.alertAuto(result);
+                    });
+                }
+            }
+            else {
+                customerUtility.alert('無選擇核准項目', 'w');
+            }
+        }
+        //#endregion
+
+        //#region 駁回
+        function TAApprReject()
+        {
+            var flag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    flag = true;
+                }
+            }
+            else {
+                flag = true;
+            }
+            if (!flag)
+            {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'TAApprDescDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#TAApprDesc').val('');
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+
+        //#region 駁回確認
+        function TAApprRejectY()
+        {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    $('.TAApprCs:checked').each(
+                        function () {
+                            var listId = 'TAApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNos : aplyNos,
+                        apprDesc: $('#TAApprDesc').val().trim()
+                    }),
+                    url: TAApprurl.Reject,
+                    contentType: 'application/json',
+                }).done(function (result) {                  
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#TAAppr_Y_Reject'));
+                        if (openflag)
+                        {
+                            customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                        }                                           
+                        TAApprGrid();
+                    }
+                    customerUtility.alertAuto(result);
+                });
+            }
+            else {
+                customerUtility.alert('無選擇駁回項目', 'w');
+            }
         }
         //#endregion
 
@@ -205,7 +334,7 @@
             var str = '';
             if (rdata.vAPPRFlag) {
                 str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
-                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox TAReortCs customerCheck'></div>";
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox TAApprCs customerCheck'></div>";
             }
             return str;
         }
@@ -222,7 +351,7 @@
 
         //#region 查詢表單
         function TAApprGrid() {
-            var colNameArray = [ ' ',
+            var colNameArray = [' ',
                 '存取項目', '申請日期', '申請單號',
                 '申請單位', '申請人', '入庫原因',
                 '存取項目ID', '覆核權限'];
@@ -256,8 +385,6 @@
 
         //#endregion
 
-
-
         //#region 註冊 開啟申請單號 事件
         function TAApprGridCompeleteFun(listId) {
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
@@ -272,37 +399,12 @@
         }
         //#endregion
 
-
-        //#region 新增事件(打開Dialog)
-        function openTADialog(title, width, dialogId) {
-            title = title || '';
-            width = width || 'auto';
-            title += '明細';
-            var dialogId = dialogId;
-            $('#' + dialogId).dialog({
-                position: { my: "top", at: "center top", of: window },
-                title: title,
-                width: width,
-                autoOpen: false,
-                resizable: false,
-                maxHeight: 600,
-                closeText: '取消',
-                close: function () {
-                    $('#h_Appr_Aply_No').val('');
-                }
-            });
-            $('#' + dialogId).dialog('open');
-        }
-        //#endregion
-
         //#region 開啟申請單號
         function TAOpenAPLYNOFun(listId, rowid) {
             var data = $("#" + listId).getRowData(rowid);
             var itemId = data.vItem;
-            //var _accessType = data.vACCESS_TYPE;
             var itemData = GetItemData(itemId);
-            if (itemData.url != null)
-            {
+            if (itemData.url != null) {
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
@@ -314,7 +416,8 @@
                 })
                 .done(function (result) {
                     if (result.RETURN_FLAG) {
-                        var aplyNoData = result.Datas;
+                        var aplyNoData = result.Datas.Item1;
+                        var actFlag = result.Datas.Item2;
                         $('#h_Appr_Aply_No').val(data.vAPLY_NO);
                         $.ajax({
                             type: 'POST',
@@ -340,11 +443,38 @@
                                 $('#TAVMApprvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMApprvAccessReason').val(aplyNoData.vAccessReason);
                                 openTADialog(itemData.title, itemData.openDialogWidth, 'TAApprOpenSearchDialog');
+                                if (!actFlag)
+                                {
+                                    $('.TAApprAct').show();
+                                }
                             }
                         })
                     }
                 });
             }
+        }
+        //#endregion
+
+        //#region 新增事件(打開Dialog)
+        function openTADialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '明細';
+            var dialogId = dialogId;
+            $('.TAApprAct').hide();
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    $('#h_Appr_Aply_No').val('');
+                }
+            });
+            $('#' + dialogId).dialog('open');
         }
         //#endregion
 
@@ -400,6 +530,22 @@
                     obj.url = TAApprurl.openCA;
                     obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
                     obj.reportType = 'CA';
+                    break;
+                case '@Ref.TreaItemType.D1017.ToString()':
+                    obj.url = TAApprurl.openMARGINP;
+                    obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                    obj.reportType = 'MARGINP';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.url = TAApprurl.openMARGING;
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = '900px';
+                    obj.reportType = 'MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1018.ToString()':
+                    obj.url = TAApprurl.openItemImp;
+                    obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                    obj.reportType = 'ITEMIMP';
                     break;
             }
             return obj;

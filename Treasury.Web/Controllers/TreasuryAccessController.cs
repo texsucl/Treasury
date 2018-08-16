@@ -199,8 +199,25 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult Appraisal(List<string> AplyNos)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
-
+            MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> result =
+                new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (AplyNos.Any() && Cache.IsSet(CacheList.TreasuryAccessApprSearchDetailViewData))
+            {
+                var datas =  (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                foreach (var item in datas.Where(x => AplyNos.Contains(x.vAPLY_NO)))
+                {
+                    item.vCheckFlag = true;
+                }
+                var searchData = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessApprSearchData);
+                result = TreasuryAccess.Approved(searchData, datas);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessApprSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessApprSearchDetailViewData, result.Datas);
+                }
+            }
             return Json(result);
         }
 
@@ -210,10 +227,27 @@ namespace Treasury.WebControllers
         /// <param name="AplyNos"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult Reject(List<string> AplyNos)
+        public JsonResult Reject(List<string> AplyNos,string apprDesc)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
-
+            MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> result =
+                new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (AplyNos.Any() && Cache.IsSet(CacheList.TreasuryAccessApprSearchDetailViewData))
+            {
+                var datas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                foreach (var item in datas.Where(x => AplyNos.Contains(x.vAPLY_NO)))
+                {
+                    item.vCheckFlag = true;
+                }
+                var searchData = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessApprSearchData);
+                result = TreasuryAccess.Reject(searchData, datas, apprDesc);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessApprSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessApprSearchDetailViewData, result.Datas);
+                }
+            }
             return Json(result);
         }
 
@@ -224,12 +258,14 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult GetByAplyNo(string AplyNo)
         {
-            MSGReturnModel<TreasuryAccessViewModel> result = new MSGReturnModel<TreasuryAccessViewModel>();
+            MSGReturnModel<Tuple<TreasuryAccessViewModel, bool>> result = new MSGReturnModel<Tuple<TreasuryAccessViewModel, bool>>();
             result.RETURN_FLAG = false;
             if (!AplyNo.IsNullOrWhiteSpace())
             {
                 result.RETURN_FLAG = true;
-                result.Datas  = TreasuryAccess.GetByAplyNo(AplyNo);
+                var data = TreasuryAccess.GetByAplyNo(AplyNo);
+                var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                result.Datas  = new Tuple<TreasuryAccessViewModel,bool>(data, (temp.vCreateUid == AccountController.CurrentUserId));
             }
             return Json(result);
         }
