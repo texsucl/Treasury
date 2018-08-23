@@ -113,6 +113,8 @@
         var MargingMemo = 'tMemo'; //備註Id
         var MargingBookNo = 'tBook_No'; //冊號Id
 
+        var MargingConfirmFlag = false; //離開時提醒訊息
+
         var Marging_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val();
         if (!Marging_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -163,10 +165,26 @@
                     break;
                 case 'MargingCancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { MargingCancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (MargingConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        MargingCancelFun();
+                    });
                     break;
                 case 'MargingBack':
                 case 'MargingCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'MargingBack' &&
+                                MargingConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
                 case 'MargingTakeOutCancelTemp':
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
@@ -357,6 +375,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     MargingTempGrid();
+                    if (Marging_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        MargingConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        MargingConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -503,6 +529,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#MargingInsertTemp'));
                         MargingTempGrid();
+                        MargingConfirmFlag = true;
                     }
                 })
             }
@@ -533,6 +560,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#MargingUpdateTemp'));
                         MargingTempGrid();
+                        MargingConfirmFlag = true;
                     }
                 })
             }
@@ -555,6 +583,14 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#MargingDeleteTemp'));
                         MargingTempGrid();
+                        if (Marging_Aply_No_Flag) //從查詢畫面進來的
+                        {
+                            MargingConfirmFlag = true;
+                        }
+                        else //新增存入畫面
+                        {
+                            MargingConfirmFlag = result.Datas;
+                        }
                     }
                 })
             }

@@ -194,6 +194,7 @@
         TAurl.cancel = '@Url.Action("Cancel", "TreasuryAccess")';
         TAurl.invalidate = '@Url.Action("Invalidate", "TreasuryAccess")';
         TAurl.getByAplyNo = '@Url.Action("GetByAplyNo", "TreasuryAccess")';
+        TAurl.GetReportGroupData = '@Url.Action("GetReportGroupData", "Deposit")';
 
         var openInsertDetailId = 'TAOpenInsertDetail';
         var openSearchDetailId = 'TAOpenSearchDetail';
@@ -296,7 +297,7 @@
             {
                 $('#TAR_AplyNo').val('');
                 $('#' + openInsertDetailId).children().remove();
-                $('#' + openSearchDetailId).children().remove();               
+                $('#' + openSearchDetailId).children().remove();
                 var _aProject = $('#aProject').val();
                 _aProject = _aProject || '';
                 switch (_aProject) {
@@ -400,20 +401,59 @@
                         var listId = 'TAReportList';
                         var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
                         var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
+                        var accessType = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vACCESS_TYPE]', listId)).text();
                         var reportType = '';
                         var title = '';
                         var parms = [];
                         var itemData = GetItemData(item);
-                        if (itemData.reportType != null) {
-                            setTimeout(
-                                function () {
-                                    parms.push(customerUtility.reportParm('aply_No', aply_No));
-                                    customerUtility.report(
-                                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
-                                        parms,
-                                        null
-                                        );
-                                }, 500);
+                        //判斷是否定期存單
+                        if (item == "D1013")
+                        {
+                            itemData.reportType = itemData.reportType + "_" + accessType;
+
+                            $.ajax({
+                                type: "POST",
+                                data: JSON.stringify({
+                                    vAplyNo: aply_No
+                                }),
+                                dataType: "json",
+                                url: TAurl.GetReportGroupData,
+                                contentType: 'application/json'
+                            }).done(function (result) {
+                                if (result.RETURN_FLAG) {
+                                    setTimeout(
+                                        function () {
+                                            for (var i = 0; i < result.Datas.length; i++) {
+                                                parms.push(customerUtility.reportParm('aply_No', aply_No));
+                                                parms.push(customerUtility.reportParm('isTWD', result.Datas[i].isTWD));
+                                                parms.push(customerUtility.reportParm('vDep_Type', result.Datas[i].vDep_Type));
+                                                customerUtility.report(
+                                                    customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                                                    parms,
+                                                    null
+                                                    );
+                                                parms.length = 0;
+
+                                                setTimeout(50000);
+                                            }
+                                        }, 500);
+                                }
+                            })
+
+                        }
+                        else
+                        {
+                            if (itemData.reportType != null) {
+                                setTimeout(
+                                    function () {
+                                        parms.push(customerUtility.reportParm('aply_No', aply_No));
+                                        customerUtility.report(
+                                            customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                                            parms,
+                                            null
+                                            );
+                                    }, 500);
+                            }
                         }
                     }
                 );
@@ -428,13 +468,13 @@
         function resetTADialogDeatil()
         {
             $('#' + EXP_ACCESS_DATEId).datepicker('setDate', created.getOnlyDate()); //預計存取日期重設
-            $('#TAReason,#APLY_DT_From,#APLY_DT_To,#APLY_NO,#CONFIRM_DT_From,#CONFIRM_DT_To,#TREA_REGISTER_ID').val('');            
+            $('#TAReason,#APLY_DT_From,#APLY_DT_To,#APLY_NO,#CONFIRM_DT_From,#CONFIRM_DT_To,#TREA_REGISTER_ID').val('');
             if ($('#' + aProjectId + ' option').length > 0) {
                 $('#' + aProjectId).val($($('#' + aProjectId + ' option')[0]).val())
             }
             if ($('#' + aIUnitId + ' option').length > 0) {
                 $('#' + aIUnitId).val($($('#' + aIUnitId + ' option')[0]).val())
-            }          
+            }
             if ($('#' + applicantId + ' option').length > 0) {
                 if ($('#' + applicantId + ' option').length > 1)
                     customerUtility.addoption(applicantId, { value: ' ', text: ' ' });
@@ -1030,7 +1070,7 @@
             str += '</td>';
             str += '</tr>';
             str += '<tr>';
-            str += '<td colspan="3">';                              
+            str += '<td colspan="3">';
             str += '<input type="button" class="btn btn-primary" id="TAVMUpdate" value="修改" style="display:none;margin-right:10px;" />';
             str += '<input type="button" class="btn btn-primary" id="TAVMSave" value="儲存" style="display:none" />'
             str += '</td>';

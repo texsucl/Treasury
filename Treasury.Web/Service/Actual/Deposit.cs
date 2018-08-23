@@ -262,6 +262,54 @@ namespace Treasury.Web.Service.Actual
             }
             return result;
         }
+
+        /// <summary>
+        /// 依申請單號取得列印群組筆數
+        /// </summary>
+        /// <param name="vAplyNo">申請單號</param
+        /// <returns></returns>
+        public List<DepositReportGroupData> GetReportGroupData(string vAplyNo)
+        {
+            List<DepositReportGroupData> result = new List<DepositReportGroupData>();
+            DepositReportGroupData GroupData = new DepositReportGroupData();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                            .FirstOrDefault(x => x.APLY_NO == vAplyNo);
+
+                if (_TAR != null)
+                {
+                    //使用單號去其他存取項目檔抓取物品編號
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    //使用物品編號去定期存單庫存資料檔抓取資料
+                    var _IDOM_DataList = db.ITEM_DEP_ORDER_M.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                    //台幣
+                    var GroupDataList_TWD = _IDOM_DataList.Where(x => x.CURRENCY == "TWD").GroupBy(x => new { x.DEP_TYPE });
+
+                    foreach(var item in GroupDataList_TWD)
+                    {
+                        GroupData = new DepositReportGroupData { isTWD = "Y", vDep_Type = item.Key.DEP_TYPE };
+
+                        result.Add(GroupData);
+                    }
+
+                    //外幣
+                    var GroupDataList_NTWD = _IDOM_DataList.Where(x => x.CURRENCY != "TWD").GroupBy(x => new { x.DEP_TYPE });
+
+                    foreach (var item in GroupDataList_NTWD)
+                    {
+                        GroupData = new DepositReportGroupData { isTWD = "N", vDep_Type = item.Key.DEP_TYPE };
+
+                        result.Add(GroupData);
+                    }
+                }
+            }
+
+            return result;
+        }
         #endregion
 
         #region SaveData
@@ -561,7 +609,44 @@ namespace Treasury.Web.Service.Actual
                                     }
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
                                     {
-
+                                        _IDOM = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == item.vItem_Id);
+                                        if (_IDOM.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                        {
+                                            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                                            return result;
+                                        }
+                                        //預約取出
+                                        if (item.vTakeoutFlag)
+                                        {
+                                            if (_IDOM.INVENTORY_STATUS == "1") //原先為在庫
+                                            {
+                                                //判斷狀態
+                                                if(item.vStatus == Ref.AccessInventoryType._4.GetDescription())
+                                                {
+                                                    _IDOM.INVENTORY_STATUS = "4"; //預約取出
+                                                }
+                                                else if (item.vStatus == Ref.AccessInventoryType._5.GetDescription())
+                                                {
+                                                    _IDOM.INVENTORY_STATUS = "5"; //預約取出，計庫存
+                                                }
+                                                _IDOM.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                updateItemIds.Add(_IDOM.ITEM_ID);
+                                                logStr += _IDOM.modelToString(logStr);
+                                            }
+                                            else if (_IDOM.INVENTORY_STATUS == "4"|| _IDOM.INVENTORY_STATUS == "5") //原先為預約取出或預約取出，計庫存
+                                            {
+                                                updateItemIds.Add(_IDOM.ITEM_ID);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (_IDOM.INVENTORY_STATUS == "4" || _IDOM.INVENTORY_STATUS == "5") //原先為在庫
+                                            {
+                                                _IDOM.INVENTORY_STATUS = "1"; //預約取出
+                                                _IDOM.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                logStr += _IDOM.modelToString(logStr);
+                                            }
+                                        }
                                     }
                                 }
 
@@ -679,8 +764,76 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> Process(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt, string accessType, bool deleFlag)
         {
+            var _changeFlag = false;
 
-            return new Tuple<bool, string>(true, logStr);
+            var _TAR = db.TREA_APLY_REC.AsNoTracking()
+            .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+            if (_TAR != null)
+            {
+                //使用單號去其他存取項目檔抓取物品編號
+                var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                    .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                //使用物品編號去定期存單庫存資料檔抓取資料
+                var details = db.ITEM_DEP_ORDER_M.AsNoTracking()
+                    .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+
+                if (details.Any())
+                {
+                    if (accessType == Ref.AccessProjectTradeType.G.ToString()) //取出狀態處理作業
+                    {
+                        foreach (var item in details)
+                        {
+                            var _IDOM = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                            _IDOM.INVENTORY_STATUS = "1"; //返回在庫
+                            _IDOM.LAST_UPDATE_DT = dt;
+                            logStr += _IDOM.modelToString(logStr);
+                        }
+
+                        //刪除其他存取項目檔
+                        if (deleFlag)
+                            db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+
+                    }
+                    else if (accessType == Ref.AccessProjectTradeType.P.ToString())    //存入狀態處理作業
+                    {
+                        //判斷申請刪除 & 作廢
+                        if (deleFlag)
+                        {
+                            db.ITEM_DEP_ORDER_M.RemoveRange(db.ITEM_DEP_ORDER_M.Where(x => OIAs.Contains(x.ITEM_ID)));
+                            db.ITEM_DEP_ORDER_D.RemoveRange(db.ITEM_DEP_ORDER_D.Where(x => OIAs.Contains(x.ITEM_ID)));
+                            db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => OIAs.Contains(x.ITEM_ID)));
+                        }
+                        else
+                        {
+                            foreach (var item in details)
+                            {
+                                var _IDOM = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == item.ITEM_ID);
+                                _IDOM.INVENTORY_STATUS = "7"; //已取消
+                                _IDOM.LAST_UPDATE_DT = dt;
+                                logStr += _IDOM.modelToString(logStr);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _changeFlag = true;
+                }
+            }
+            else
+            {
+                _changeFlag = true;
+            }
+
+            if (_changeFlag)
+            {
+                return new Tuple<bool, string>(false, logStr);
+            }
+            else
+            {
+                return new Tuple<bool, string>(true, logStr);
+            }
         }
 
         /// <summary>

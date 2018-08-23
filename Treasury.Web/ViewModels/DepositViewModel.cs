@@ -219,4 +219,19 @@ namespace Treasury.Web.ViewModels
         [Description("面額小計")]
         public decimal vSubtotal_Denomination { get; set; }
     }
+
+    public class DepositReportGroupData
+    {
+        /// <summary>
+        /// 台幣/外幣
+        /// </summary>
+        [Description("台幣/外幣")]
+        public string isTWD { get; set; }
+
+        /// <summary>
+        /// 存單類型
+        /// </summary>
+        [Description("存單類型")]
+        public string vDep_Type { get; set; }
+    }
 }

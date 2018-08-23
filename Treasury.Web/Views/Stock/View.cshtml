@@ -179,6 +179,8 @@
         var Number_Of_Shares = 'tNumber_Of_Shares'; //股數Id
         var Memo = 'tMemo'; //備註說明Id
 
+        var StockConfirmFlag = false; //離開時提醒訊息
+
         var Stock_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val();
         if (!Stock_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -327,10 +329,26 @@
                     break;
                 case 'StockCancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { StockCancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (StockConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        StockCancelFun();
+                    });
                     break;
                 case 'StockBack':
                 case 'StockCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'StockBack' &&
+                                StockConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
                 case 'StockTakeOutCancelTemp':
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
@@ -776,6 +794,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     StockTempGrid();
+                    if (Stock_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        StockConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        StockConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -968,6 +994,7 @@
                         customerUtility.closeDialog($('#StockInsertTemp'));
                         StockTempGrid();
                         GetNumber_Of_Shares_Total();
+                        StockConfirmFlag = true;
                     }
                 })
             }
@@ -1027,6 +1054,7 @@
                         customerUtility.closeDialog($('#StockUpdateTemp'));
                         StockTempGrid();
                         GetNumber_Of_Shares_Total();
+                        StockConfirmFlag = true;
                     }
                 })
             }
@@ -1052,6 +1080,14 @@
                         customerUtility.closeDialog($('#StockDeleteTemp'));
                         StockTempGrid();
                         GetNumber_Of_Shares_Total();
+                        if (Stock_Aply_No_Flag) //從查詢畫面進來的
+                        {
+                            StockConfirmFlag = true;
+                        }
+                        else //新增存入畫面
+                        {
+                            StockConfirmFlag = result.Datas;
+                        }
                     }
                 })
             }
