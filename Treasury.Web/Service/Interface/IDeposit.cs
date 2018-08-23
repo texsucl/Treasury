@@ -51,5 +51,12 @@ namespace Treasury.Web.Service.Interface
         /// <param name="vAplyNo">申請單號</param
         /// <returns></returns>
         DepositViewModel GetDataByAplyNo(string vAplyNo);
+
+        /// <summary>
+        /// 依申請單號取得列印群組資料
+        /// </summary>
+        /// <param name="vAplyNo">申請單號</param
+        /// <returns></returns>
+        List<DepositReportGroupData> GetReportGroupData(string vAplyNo);
     }
 }

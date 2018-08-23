@@ -352,7 +352,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData_M(Deposit_M model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.DepositData_M))
@@ -376,6 +376,7 @@ namespace Treasury.WebControllers
 
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData.Any();
                 }
                 else
                 {
@@ -394,11 +395,12 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData_D(Deposit_D model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.DepositData_D_All))
             {
+                var tempData_M = (List<Deposit_M>)Cache.Get(CacheList.DepositData_M);
                 var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
                 var deleteTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
                 if (deleteTempData != null)
@@ -416,6 +418,7 @@ namespace Treasury.WebControllers
 
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData_M.Any();
                 }
                 else
                 {
@@ -434,7 +437,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult TakeOutData(Deposit_M model, bool takeoutFlag)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.DepositData_N) && Cache.IsSet(CacheList.DepositData_Y))
@@ -483,6 +486,7 @@ namespace Treasury.WebControllers
 
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vTakeoutFlag);
                 }
                 else
                 {
@@ -545,6 +549,28 @@ namespace Treasury.WebControllers
             return Json(result);
         }
 
+        /// <summary>
+        /// 依申請單號取得列印群組筆數
+        /// </summary>
+        /// <param name="vAplyNo">申請單號</param
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetReportGroupData(string vAplyNo)
+        {
+            MSGReturnModel<List<DepositReportGroupData>> result = new MSGReturnModel<List<DepositReportGroupData>>();
+
+            result.Datas = Deposit.GetReportGroupData(vAplyNo);
+            if (result.Datas.Count > 0)
+            {
+                result.RETURN_FLAG = true;
+            }
+            else
+            {
+                result.RETURN_FLAG = false;
+            }
+
+            return Json(result);
+        }
         /// <summary>
         /// jqgrid cache data
         /// </summary>
