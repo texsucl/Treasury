@@ -107,6 +107,14 @@ namespace Treasury.Web.Controllers
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
+                var checkdata = (List<BillViewModel>)Cache.Get(CacheList.BILLDayData);
+                var sameFlag = checkSameData(checkdata, model);
+                if(sameFlag)
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = "您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!";
+                    return Json(result);
+                }
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
@@ -118,12 +126,11 @@ namespace Treasury.Web.Controllers
                 {
                     dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
                 }
-                dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
-                var sameFlag = checkSameData(dayData, model);
+                dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());               
                 Cache.Invalidate(CacheList.BILLDayData);
                 Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription() + (sameFlag ? "</br>您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!" : string.Empty); 
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription(); 
             }
             return Json(result);
         }
@@ -141,6 +148,14 @@ namespace Treasury.Web.Controllers
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
+                var checkdata = (List<BillViewModel>)Cache.Get(CacheList.BILLDayData);
+                var sameFlag = checkSameData(checkdata, model);
+                if (sameFlag)
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = "您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!";
+                    return Json(result);
+                }
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var tempData = (List<BillViewModel>)Cache.Get(CacheList.BILLTempData);
                 var dayData =  (List<BillViewModel>)Bill.GetDayData(data.vAplyUnit);                
@@ -160,11 +175,10 @@ namespace Treasury.Web.Controllers
                         dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
                     }
                     dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
-                    var sameFlag = checkSameData(dayData, updateTempData);
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription() + (sameFlag ? "</br>您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!" : string.Empty);
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                 }
                 else
                 {
@@ -512,9 +526,7 @@ namespace Treasury.Web.Controllers
             try
             {
                 data = data.Where(x => x.vItemId != model.vItemId &&
-                        x.vIssuingBank == model.vIssuingBank &&
-                        x.vCheckType == model.vCheckType &&
-                        x.vCheckNoTrack == model.vCheckNoTrack).ToList();
+                        x.vIssuingBank == model.vIssuingBank).ToList();
                 result = data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoB) <= int.Parse(x.vCheckNoE)) ||
                          data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoE) && int.Parse(model.vCheckNoE) <= int.Parse(x.vCheckNoE)) ||
                          data.Any(x => int.Parse(x.vCheckNoB) >= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoE) >= int.Parse(x.vCheckNoE));

@@ -278,10 +278,10 @@ namespace Treasury.Web.Controllers
                 //var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 var selectOptions = TreasuryAccess.TreasuryAccessDetail(AccountController.CurrentUserId, AccountController.CustodianFlag, data.vAplyUnit);
                 List<SelectOption> selectOptionsAppr = new List<SelectOption>();
-                if (!AccountController.CustodianFlag)
-                    selectOptionsAppr = TreasuryAccess.ChangeUnit(data.vAplyUnit);
-                else
-                    selectOptionsAppr = selectOptions.Item3;
+                //if (!AccountController.CustodianFlag)
+                selectOptionsAppr = TreasuryAccess.ChangeUnit(data.vAplyUnit);
+                //else
+                //    selectOptionsAppr = selectOptions.Item3;
                 result.Datas  = new Tuple<TreasuryAccessViewModel,bool, List<SelectOption>, List<SelectOption> , bool>(data, AccountController.CustodianFlag, selectOptions.Item2, selectOptionsAppr , _dActType);
             }
             return Json(result);

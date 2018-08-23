@@ -362,7 +362,7 @@
                 title: '查詢畫面',
                 width: 1310,
                 autoOpen: false,
-                maxHeight: 700,
+                maxHeight: 600,
                 resizable: false,
                 closeText: '取消'
             });
@@ -415,8 +415,9 @@
                         //判斷是否定期存單
                         if (item == "D1013")
                         {
+                            customerUtility.alert('待完成', 'w');
+                            return false;
                             itemData.reportType = itemData.reportType + "_" + accessType;
-
                             $.ajax({
                                 type: "POST",
                                 data: JSON.stringify({
@@ -439,13 +440,11 @@
                                                     null
                                                     );
                                                 parms.length = 0;
-
-                                                setTimeout(50000);
+                                                //setTimeout(50000);
                                             }
-                                        }, 500);
+                                        }, 100);
                                 }
                             })
-
                         }
                         else
                         {
@@ -458,7 +457,7 @@
                                             parms,
                                             null
                                             );
-                                    }, 500);
+                                    }, 100);
                             }
                         }
                     }
