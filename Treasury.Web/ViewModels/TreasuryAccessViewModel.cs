@@ -75,7 +75,12 @@ namespace Treasury.Web.ViewModels
         /// 填表日期
         /// </summary>
         [Description("填表日期")]
-        public string vCreateDt { get; set; } 
+        public string vCreateDt { get; set; }
 
+        /// <summary>
+        /// 最後修改時間
+        /// </summary>
+        [Description("最後修改時間")]
+        public Nullable<DateTime> vLastUpdateTime { get; set; }
     }
 }

@@ -30,7 +30,7 @@ using System.Transactions;
 /// ==============================================
 /// </summary>
 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
 
     [Authorize]

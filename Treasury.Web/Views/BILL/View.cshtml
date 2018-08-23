@@ -168,6 +168,9 @@
         var BILL_totalId = 'BILL_total'; //總張數Id
         var BILL_Take_OutId = 'tTakeOutE'; //取出票號(迄)Id
         var BILL_Take_Out_TotalId = 'tTakeOutTotalNum'; //取出總張數
+
+        var BILLConfirmFlag = false; //離開時提醒訊息
+
         var BILL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態      
         var type = $('input[name=cProjectType]:checked').val();
         if (!BILL_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -214,6 +217,8 @@
 
         //#region 註冊verified
         function setBILLVerified() {
+            verified.required(BILLFormId, BILL_Issuing_BankId, message.required('發票行庫')); //發票行庫為必填
+            verified.maxlength(BILLFormId, BILL_Issuing_BankId, 10); //發票行庫最大長度(10)
             verified.english(BILLFormId, BILL_Check_No_TrackId); //字軌僅能輸入英文
             verified.required(BILLFormId, BILL_Check_No_TrackId, message.required('字軌')); //字軌為必填
             verified.maxlength(BILLFormId, BILL_Check_No_TrackId, 4); //字軌最大長度(4)
@@ -245,13 +250,25 @@
                     break;
                 case 'BILLCancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { BILLCancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (BILLConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        BILLCancelFun();
+                    });
                     break;
                 case 'BILLBack':
                 case 'BILLCancelTemp':
                 case 'BILLTakeOutCancelTemp':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    $('#' + id).on('click', function () {
+                        if (id == 'BILLBack' &&
+                            BILLConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
                     break;
                 case 'BILLInsertTemp':
                     $('#' + id).off('click');
@@ -586,6 +603,7 @@
                 if (result.RETURN_FLAG) {
                     BILLTempGrid();
                     BILLDayGrid();
+                    BILLConfirmFlag = result.Datas;
                 }
             });
         }
@@ -829,6 +847,7 @@
                         customerUtility.closeDialog($('#BILLInsertTemp'));
                         BILLTempGrid();
                         BILLDayGrid();
+                        BILLConfirmFlag = true;
                     }
                 })
             }
@@ -866,6 +885,7 @@
                         customerUtility.closeDialog($('#BILLUpdateTemp'));
                         BILLTempGrid();
                         BILLDayGrid();
+                        BILLConfirmFlag = true;
                     }
                 })
             }
@@ -888,6 +908,14 @@
                         customerUtility.closeDialog($('#BILLDeleteTemp'));
                         BILLTempGrid();
                         BILLDayGrid();
+                        if (BILL_Aply_No_Flag) //從查詢畫面進來的
+                        {
+                            BILLConfirmFlag = true;
+                        }
+                        else //新增存入畫面
+                        {
+                            BILLConfirmFlag = result.Datas;
+                        }
                     }
                 })
             }

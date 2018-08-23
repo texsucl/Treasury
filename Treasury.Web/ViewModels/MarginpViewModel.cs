@@ -6,11 +6,6 @@ namespace Treasury.Web.ViewModels
 {
     public class MarginpViewModel : ITreaItem
     {
-        ///// <summary>
-        ///// 歸檔編號
-        ///// </summary>
-        //[Description("物品編號")]
-        //public string vItemId { get; set; }
 
         /// <summary>
         /// 庫存狀態
@@ -40,7 +35,7 @@ namespace Treasury.Web.ViewModels
         /// 金額
         /// </summary>
         [Description("金額")]
-        public string vMarginp_Amount { get; set; }
+        public string  vMarginp_Amount { get; set; }
 
         /// <summary>
         /// 物品名稱
@@ -67,10 +62,22 @@ namespace Treasury.Web.ViewModels
         public string vMarginp_Effective_Date_B { get; set; }
 
         /// <summary>
+        /// 有效期間(起)日期西元年
+        /// </summary>
+        [Description("有效期間(起)")]
+        public String vMarginp_Effective_Date_B_2 { get; set; }
+
+        /// <summary>
         /// 有效期間(迄)
         /// </summary>
         [Description("有效期間(迄)")]
         public string vMarginp_Effective_Date_E { get; set; }
+
+        /// <summary>
+        /// 有效期間(迄)日期西元年
+        /// </summary>
+        [Description("有效期間(迄)")]
+        public String vMarginp_Effective_Date_E_2 { get; set; }
 
         /// <summary>
         /// 說明

@@ -22,7 +22,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -223,7 +223,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult TakeOutData(MargingpViewModel model, bool takeoutFlag)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.MargingData))
@@ -245,6 +245,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.MargingData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vTakeoutFlag);
                 }
                 else
                 {

@@ -36,6 +36,10 @@ namespace Treasury.Web.Service.Actual
                     return new Stock();
                 case TreaItemType.D1016:
                     return new Marging();
+                case TreaItemType.D1017:
+                    return new Marginp();
+                case TreaItemType.D1018:
+                    return new ItemImp();
             }
             return null;
         }

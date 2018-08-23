@@ -207,7 +207,8 @@ namespace Treasury.WebUtility
         public static string DateToTaiwanDate(this DateTime datetime, int length = 7,bool _bool=false)
         {
             TaiwanCalendar taiwanCalendar = new TaiwanCalendar();
-            
+            if(datetime.Year <= 1911)
+                return string.Empty;
            if (length == 9)
            {
               if(!_bool)

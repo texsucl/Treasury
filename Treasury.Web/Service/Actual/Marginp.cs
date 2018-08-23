@@ -45,7 +45,8 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "MARGIN_TAKE_OF_TYPE")
-                    .Select( x => new SelectOption() {
+                    .Select(x => new SelectOption()
+                    {
                         Value = x.CODE,
                         Text = x.CODE_VALUE
                     }));
@@ -57,17 +58,16 @@ namespace Treasury.Web.Service.Actual
         /// 抓取 存入保證金物品名稱 項目
         /// </summary>
         /// <returns></returns>
-        public List<SelectOption> GetMarginp_Item()
+        public List<SelectOption> GetMarginpItem()
         {
             var result = new List<SelectOption>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "MARGPIN_ITEM")
-                .Select(x => new SelectOption()
-                {
+                result.AddRange(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "MARGIN_ITEM")
+                .Select(x => new SelectOption() {
                     Value = x.CODE,
                     Text = x.CODE_VALUE
-                }));
+                }));     
             }
             return result;
         }
@@ -90,7 +90,7 @@ namespace Treasury.Web.Service.Actual
                     //使用單號去其他存取項目檔抓取物品編號
                     var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
-                    //使用物品編號去電子憑證庫存資料檔抓取資料
+                    //使用歸檔編號去存入保證金庫存資料檔抓取資料
                     var details = db.ITEM_DEP_RECEIVED.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
                     if (details.Any())
@@ -134,7 +134,9 @@ namespace Treasury.Web.Service.Actual
                         vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,
                         vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,
                         vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
+                        vMarginp_Effective_Date_B_2 = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9,true),
                         vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                        vMarginp_Effective_Date_E_2 = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9,true),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
                         vMarginp_Book_No = x.BOOK_NO,
@@ -159,8 +161,11 @@ namespace Treasury.Web.Service.Actual
                              vMarginp_Item = x.MARGIN_ITEM,
                              vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,
                              vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,
-                             vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
-                             vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                             vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9,true),
+                             vMarginp_Effective_Date_B_2=TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
+                            vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9,true),
+                            vMarginp_Effective_Date_E_2=TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                             vDescription= x.DESCRIPTION,//說明
                              vMemo = x.MEMO,
                              vMarginp_Book_No = x.BOOK_NO,
                              vtakeoutFlag = true,
@@ -198,19 +203,18 @@ namespace Treasury.Web.Service.Actual
                             //取得流水號
                             SysSeqDao sysSeqDao = new SysSeqDao();
                             string logStr = string.Empty; //log
-                            var item_Seq = "E5"; //電子憑證流水號開頭編碼
-
-                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-
+                            //var item_Seq = "X"; //存入保證金流水號開頭編碼
+                            //String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+                           
                             var _TAR = new TREA_APLY_REC(); //申請單號
                             var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
-                            
+
                             if (!taData.vAplyNo.IsNullOrWhiteSpace()) //修改已存在申請單
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
                                 if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例72
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -229,8 +233,7 @@ namespace Treasury.Web.Service.Actual
                                 db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
-
-                                #region 印章庫存資料檔
+                                #region 存入保證金庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
                                 List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId 
@@ -241,71 +244,90 @@ namespace Treasury.Web.Service.Actual
                                 //抓取有修改註記的
                                 foreach (var item in datas)
                                 {
-                                    var _IC_Item_Id = string.Empty;
+
                                     if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                     {
                                         //只抓取預約存入
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
-                                            var _IC = new ITEM_DEP_RECEIVED();
-
-                                            if (item.vItemId.StartsWith(item_Seq)) //舊有資料
+                                            var _IDR = new ITEM_DEP_RECEIVED();
+                                            //依類別取得對應歸檔編號                                     
+                                            if (item.vItemId.StartsWith("X") || item.vItemId.StartsWith("Y") || item.vItemId.StartsWith("Z")) //舊有資料
                                             {
-                                                _IC = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                                if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                                _IDR = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                                if (_IDR.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 {
                                                     result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
-                                                _IC.MARGIN_TAKE_OF_TYPE = item.vMarginp_Take_Of_Type; //類別
-                                                _IC.TRAD_PARTNERS = item.vMarginp_Trad_Partners; //交易對象
-                                                _IC.ITEM_ID = item.vItemId; //歸檔編號
-                                               // _IC.AMOUNT = item.vMarginp_Amount; //金額
-                                                _IC.MARGIN_ITEM = item.vMarginp_Item;//物品名稱
-                                                _IC.MARGIN_ITEM_ISSUER = item.vMarginp_Item_Issuer;//物品發行人
-                                                _IC.PLEDGE_ITEM_NO = item.vMarginp_Pledge_Item_No;//質押標的號碼
-                                               // _IC.EFFECTIVE_DATE_B = item.vMarginp_Effective_Date_B;//有效期間(起)
-                                               // _IC.EFFECTIVE_DATE_E = item.vMarginp_Effective_Date_E;//有效期間(迄)
-                                                _IC.MEMO = item.vMemo; //備註說明
-                                                _IC.BOOK_NO = item.vMarginp_Book_No;//冊號
+                                                _IDR.MARGIN_TAKE_OF_TYPE = item.vMarginp_Take_Of_Type; //類別
+                                                _IDR.TRAD_PARTNERS = item.vMarginp_Trad_Partners; //交易對象
+                                                _IDR.AMOUNT = TypeTransfer.stringToDecimal(item.vMarginp_Amount); //金額
+                                                _IDR.MARGIN_ITEM = item.vMarginp_Item; //物品名稱 
+                                                _IDR.MARGIN_ITEM_ISSUER = item.vMarginp_Item_Issuer;//物品發行人
+                                                _IDR.PLEDGE_ITEM_NO = item.vMarginp_Pledge_Item_No;//質押標的號碼
+                                                _IDR.EFFECTIVE_DATE_B = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_B);//有效期間(起)
+                                                _IDR.EFFECTIVE_DATE_E = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_E);//有效期間(迄)
+                                                _IDR.DESCRIPTION = item.vDescription;//說明
+                                                _IDR.MEMO = item.vMemo; //備註
+                                                _IDR.BOOK_NO = item.vMarginp_Book_No;//冊號
                                                 updateItemIds.Add(item.vItemId);
-                                                logStr += _IC.modelToString(logStr);
+                                                logStr += _IDR.modelToString(logStr);
                                             }
                                             else
                                             {
-                                                var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
-                                                _IC = new ITEM_DEP_RECEIVED()
+                                                string item_id = string.Empty;
+                                                switch (item.vMarginp_Take_Of_Type)
                                                 {
-                                                    ITEM_ID = $@"{item_Seq}{item_id}", //歸檔編號
+                                                    case "1":
+                                                        item_id = sysSeqDao.qrySeqNo("X", string.Empty).ToString().PadLeft(8, '0');
+                                                        item_id = $@"X{item_id}";
+                                                        break;
+                                                    case "2":
+                                                        item_id = sysSeqDao.qrySeqNo("Y", string.Empty).ToString().PadLeft(8, '0');
+                                                        item_id = $@"Y{item_id}";
+                                                        break;
+                                                    case "3":
+                                                        item_id = sysSeqDao.qrySeqNo("Z", string.Empty).ToString().PadLeft(8, '0');
+                                                        item_id = $@"Z{item_id}";
+                                                        break;
+                                                    default:
+                                                        result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
+                                                        return result;
+                                                }
+
+                                                _IDR = new ITEM_DEP_RECEIVED()
+                                                {
+                                                    ITEM_ID = $@"{item_id}", //物品編號
                                                     INVENTORY_STATUS = "3", //預約存入
                                                     MARGIN_TAKE_OF_TYPE = item.vMarginp_Take_Of_Type, //類別
                                                     TRAD_PARTNERS = item.vMarginp_Trad_Partners, //交易對象
-                                                   // AMOUNT = item.vMarginp_Amount, //金額
+                                                    AMOUNT = TypeTransfer.stringToDecimal(item.vMarginp_Amount), //金額
                                                     MARGIN_ITEM = item.vMarginp_Item, //物品名稱 
                                                     MARGIN_ITEM_ISSUER = item.vMarginp_Item_Issuer,//物品發行人
                                                     PLEDGE_ITEM_NO = item.vMarginp_Pledge_Item_No,//質押標的號碼
-                                                   // EFFECTIVE_DATE_B = item.vMarginp_Effective_Date_B,//有效期間(起)
-                                                   // EFFECTIVE_DATE_E = item.vMarginp_Effective_Date_E,//有效期間(迄)
-                                                    MEMO = item.vMemo, //備註說明
+                                                    EFFECTIVE_DATE_B = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_B),//有效期間(起)
+                                                    EFFECTIVE_DATE_E = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_E),//有效期間(迄)
+                                                    DESCRIPTION = item.vDescription,//說明
+                                                    MEMO = item.vMemo, //備註
                                                     BOOK_NO = item.vMarginp_Book_No,//冊號
                                                     APLY_DEPT = _dept.Item1, //申請人部門
                                                     APLY_SECT = _dept.Item2, //申請人科別
                                                     APLY_UID = taData.vAplyUid, //申請人
                                                     CHARGE_DEPT = _dept.Item1, //權責部門
                                                     CHARGE_SECT = _dept.Item2, //權責科別
-                                                                               //PUT_DATE = dt, //存入日期時間
+                                                    //PUT_DATE = dt, //存入日期時間
                                                     LAST_UPDATE_DT = dt, //最後修改時間
                                                 };
-                                                _IC_Item_Id = _IC.ITEM_ID;
-                                                inserts.Add(_IC);
-                                                logStr += _IC.modelToString(logStr);
+                                                inserts.Add(_IDR);
+                                                logStr += _IDR.modelToString(logStr);
                                             }
                                         }
                                     }
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
-                                        var _IC = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                        if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                        var _IDR = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                        if (_IDR.LAST_UPDATE_DT > item.vLast_Update_Time)
                                         {
                                             result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                             return result;
@@ -313,23 +335,23 @@ namespace Treasury.Web.Service.Actual
                                         //預約取出
                                         if (item.vtakeoutFlag)
                                         {
-                                            if (_IC.INVENTORY_STATUS == "1") //原先為在庫
+                                            if (_IDR.INVENTORY_STATUS == "1") //原先為在庫
                                             {
-                                                _IC.INVENTORY_STATUS = "4"; //預約取出
-                                                _IC.LAST_UPDATE_DT = dt;  //最後修改時間
-                                                updateItemIds.Add(_IC.ITEM_ID);
+                                                _IDR.INVENTORY_STATUS = "4"; //預約取出
+                                                _IDR.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                updateItemIds.Add(_IDR.ITEM_ID);
                                             }
-                                            else if (_IC.INVENTORY_STATUS == "4") //原先為預約取出
+                                            else if (_IDR.INVENTORY_STATUS == "4") //原先為預約取出
                                             {
-                                                updateItemIds.Add(_IC.ITEM_ID);
+                                                updateItemIds.Add(_IDR.ITEM_ID);
                                             }
                                         }
                                         else
                                         {
-                                            if (_IC.INVENTORY_STATUS == "4") //原先為在庫
+                                            if (_IDR.INVENTORY_STATUS == "4") //原先為在庫
                                             {
-                                                _IC.INVENTORY_STATUS = "1"; //預約取出
-                                                _IC.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                _IDR.INVENTORY_STATUS = "1"; //預約取出
+                                                _IDR.LAST_UPDATE_DT = dt;  //最後修改時間
                                             }
                                         }
                                     }
@@ -368,7 +390,7 @@ namespace Treasury.Web.Service.Actual
 
                                 #endregion
 
-                                #region 電子憑證庫存資料檔
+                                #region 存入保證金庫存資料檔
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
                                 //抓取有修改註記的
                                 foreach (var item in datas)
@@ -379,20 +401,43 @@ namespace Treasury.Web.Service.Actual
                                         //只抓取預約存入
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
-                                            var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
+                                            var item_id =  string.Empty;
+                                            //var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
+                                                                                        //依類別取得對應歸檔編號
+                                            switch(item.vMarginp_Take_Of_Type)
+                                            {
+                                                   case "1" :
+                                                    item_id = sysSeqDao.qrySeqNo("X", string.Empty).ToString().PadLeft(8, '0');
+                                                    item_id = $@"X{item_id}";
+                                                    break;
+                                                     case "2" :
+                                                    item_id = sysSeqDao.qrySeqNo("Y", string.Empty).ToString().PadLeft(8, '0');
+                                                    item_id = $@"Y{item_id}";
+                                                    break;
+                                                     case "3" :
+                                                    item_id = sysSeqDao.qrySeqNo("Z", string.Empty).ToString().PadLeft(8, '0');
+                                                    item_id = $@"Z{item_id}";
+                                                    break;
+                                                    default:
+                                                    result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
+                                                    return result;
+                                            }          
+
+
                                             var _IC = new ITEM_DEP_RECEIVED()
                                             {
-                                                ITEM_ID = $@"{item_Seq}{item_id}", //歸檔編號
+                                                ITEM_ID = $@"{item_id}", //歸檔編號
                                                 INVENTORY_STATUS = "3", //預約存入
                                                 MARGIN_TAKE_OF_TYPE = item.vMarginp_Take_Of_Type, //類別
                                                 TRAD_PARTNERS = item.vMarginp_Trad_Partners, //交易對象
-                                               // AMOUNT = item.vMarginp_Amount, //金額
+                                                AMOUNT = TypeTransfer.stringToDecimal(item.vMarginp_Amount), //金額
                                                 MARGIN_ITEM = item.vMarginp_Item, // 物品名稱
                                                 MARGIN_ITEM_ISSUER = item.vMarginp_Item_Issuer,//物品發行人
                                                 PLEDGE_ITEM_NO = item.vMarginp_Pledge_Item_No,//質押標的號碼
-                                               // EFFECTIVE_DATE_B = item.vMarginp_Effective_Date_B,//有效期間(起)
-                                               // EFFECTIVE_DATE_E = item.vMarginp_Effective_Date_E,//有效期間(迄)
-                                                MEMO = item.vMemo, //備註說明
+                                                EFFECTIVE_DATE_B = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_B),//有效期間(起)
+                                                EFFECTIVE_DATE_E = TypeTransfer.stringToDateTimeN(item.vMarginp_Effective_Date_E),//有效期間(迄)
+                                                DESCRIPTION=item.vDescription,//說明
+                                                MEMO = item.vMemo, //備註
                                                 BOOK_NO = item.vMarginp_Book_No,//冊號
                                                 APLY_DEPT = _dept.Item1, //申請人部門
                                                 APLY_SECT = _dept.Item2, //申請人科別
@@ -456,7 +501,7 @@ namespace Treasury.Web.Service.Actual
                                         #region LOG
                                         //新增LOG
                                         Log log = new Log();
-                                        log.CFUNCTION = "申請覆核-新增電子憑證";
+                                        log.CFUNCTION = "申請覆核-新增存入保證金";
                                         log.CACTION = "A";
                                         log.CCONTENT = logStr;
                                         LogDao.Insert(log, taData.vCreateUid);
@@ -483,6 +528,7 @@ namespace Treasury.Web.Service.Actual
                     result.DESCRIPTION = Ref.MessageType.not_Find_Audit_Data.GetDescription();
                 }
             }
+
             catch (Exception ex)
             {
                 result.DESCRIPTION = ex.exceptionMessage();
@@ -503,7 +549,7 @@ namespace Treasury.Web.Service.Actual
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
             var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
-            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態存入保證金庫存資料檔要復原
             {
                 foreach (var item in db.ITEM_DEP_RECEIVED.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
@@ -538,7 +584,7 @@ namespace Treasury.Web.Service.Actual
         {
             var otherItemAplys = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == aply_No).ToList();
             var itemIds = otherItemAplys.Select(y => y.ITEM_ID).ToList();
-            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態電子憑證庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
+            if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態存入保證金庫存資料檔要復原 , 並刪除其它存取項目申請資料檔
             {
                 foreach (var item in db.ITEM_DEP_RECEIVED.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
@@ -549,7 +595,7 @@ namespace Treasury.Web.Service.Actual
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
                 return new Tuple<bool, string>(true, logStr);
             }
-            else //存入狀態 刪除電子憑證庫存資料檔,其它存取項目申請資料檔
+            else //存入狀態 刪除存入保證金庫存資料檔,其它存取項目申請資料檔
             {
                 db.ITEM_DEP_RECEIVED.RemoveRange(db.ITEM_DEP_RECEIVED.Where(x => itemIds.Contains(x.ITEM_ID)));
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
@@ -562,7 +608,7 @@ namespace Treasury.Web.Service.Actual
         #region privateFunction
 
         /// <summary>
-        /// 電子憑證資料轉畫面資料
+        /// 存入保證金資料轉畫面資料
         /// </summary>
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
@@ -575,13 +621,16 @@ namespace Treasury.Web.Service.Actual
                 vMarginp_Take_Of_Type = x.MARGIN_TAKE_OF_TYPE,//類別
                 vMarginp_Trad_Partners = x.TRAD_PARTNERS,//交易對象
                 vItemId = x.ITEM_ID,//歸檔編號
-               // vMarginp_Amount = x.AMOUNT,//金額
+                vMarginp_Amount = TypeTransfer.decimalNToString(x.AMOUNT),//金額
                 vMarginp_Item = x.MARGIN_ITEM, // 物品名稱
                 vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,// 物品發行人
                 vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,//質押標的號碼
-              //  vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B,//有效期間(起)
-               // vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E,//有效期間(迄) 
-                vMemo = x.MEMO,//備註說明
+                vMarginp_Effective_Date_B_2 = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9),
+                vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),//有效期間(起)
+                 vMarginp_Effective_Date_E_2 = x.EFFECTIVE_DATE_E== null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9),
+                vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),//有效期間(迄) 
+                vDescription =x.DESCRIPTION,//說明
+                vMemo = x.MEMO,//備註
                 vMarginp_Book_No = x.BOOK_NO,//冊號 
                 vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
@@ -591,3 +640,4 @@ namespace Treasury.Web.Service.Actual
         #endregion
     }
 }
+

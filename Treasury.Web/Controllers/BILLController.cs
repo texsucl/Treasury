@@ -22,7 +22,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -119,10 +119,11 @@ namespace Treasury.WebControllers
                     dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
                 }
                 dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
+                var sameFlag = checkSameData(dayData, model);
                 Cache.Invalidate(CacheList.BILLDayData);
                 Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription() + (sameFlag ? "</br>您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!" : string.Empty); 
             }
             return Json(result);
         }
@@ -158,11 +159,12 @@ namespace Treasury.WebControllers
                     {
                         dayData = dayData.Where(x => x.vAplyNo != data.vAplyNo).ToList();
                     }
-                    dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());             
+                    dayData.AddRange(tempData.ModelConvert<BillViewModel, BillViewModel>());
+                    var sameFlag = checkSameData(dayData, updateTempData);
                     Cache.Invalidate(CacheList.BILLDayData);
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription() + (sameFlag ? "</br>您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!" : string.Empty);
                 }
                 else
                 {
@@ -181,7 +183,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData(BillViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.BILLTempData) && Cache.IsSet(CacheList.TreasuryAccessViewData))
@@ -204,6 +206,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(dayData));
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData.Any();
                 }
                 else
                 {
@@ -262,7 +265,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult RepeatData(BillViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.BILLTempData))
@@ -285,6 +288,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(_data2));
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vStatus == Ref.AccessInventoryType._4.GetDescription());
                 }
                 else
                 {
@@ -410,7 +414,7 @@ namespace Treasury.WebControllers
             data.OrderBy(x => x.vIssuingBank)
                 .ThenBy(x => x.vCheckType).ToList()
                 .ForEach(x =>
-            {
+            { 
                 x.vRowNum = rownum.ToString();
                 rownum += 1;
             });
@@ -492,6 +496,32 @@ namespace Treasury.WebControllers
                     vCheckTotalNum = _vCheckTotalNum.ToString(),
                     vReMainTotalNum = _intReMainTotalNum.ToString()
                 });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 比對資料系統檢視存入空白票據的票據的票號(起),票號(迄)是否與下面當日庫存明細資料中的票號(起),票號(迄)重疊, 若重疊,僅訊息提醒,但不影響存入資料的建置
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private bool checkSameData(List<BillViewModel> data, BillViewModel model)
+        {
+            bool result = false;
+            try
+            {
+                data = data.Where(x => x.vItemId != model.vItemId &&
+                        x.vIssuingBank == model.vIssuingBank &&
+                        x.vCheckType == model.vCheckType &&
+                        x.vCheckNoTrack == model.vCheckNoTrack).ToList();
+                result = data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoB) <= int.Parse(x.vCheckNoE)) ||
+                         data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoE) && int.Parse(model.vCheckNoE) <= int.Parse(x.vCheckNoE)) ||
+                         data.Any(x => int.Parse(x.vCheckNoB) >= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoE) >= int.Parse(x.vCheckNoE));
+            }
+            catch
+            {
+
             }
             return result;
         }
