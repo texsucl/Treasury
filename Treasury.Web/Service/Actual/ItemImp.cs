@@ -96,7 +96,7 @@ namespace Treasury.Web.Service.Actual
                         vItemImp_Name = x.ITEM_NAME,
                         vItemImp_Quantity = x.QUANTITY,
                         vItemImp_Amount = x.AMOUNT,
-                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
                         vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
@@ -119,7 +119,7 @@ namespace Treasury.Web.Service.Actual
                              vItemImp_Name = x.ITEM_NAME,
                         vItemImp_Quantity = x.QUANTITY,
                         vItemImp_Amount = x.AMOUNT,
-                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
                         vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
@@ -189,7 +189,6 @@ namespace Treasury.Web.Service.Actual
                                 db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
-
                                 #region 重要物品庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
@@ -207,29 +206,29 @@ namespace Treasury.Web.Service.Actual
                                         //只抓取預約存入
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
-                                            var _IC = new ITEM_IMPO();
+                                            var _II = new ITEM_IMPO();
 
                                             if (item.vItemId.StartsWith(item_Seq)) //舊有資料
                                             {
-                                                _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                                if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                                _II = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                                if (_II.LAST_UPDATE_DT > item.vLast_Update_Time)
                                                 { 
                                                     result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                     return result;
                                                 }
-                                                _IC.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
-                                                _IC.QUANTITY = item.vItemImp_Quantity; //重要物品數量
-                                                _IC.AMOUNT = item.vItemImp_Amount; //重要物品金額
-                                                _IC.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2); //重要物品預計提取日期
-                                                _IC.DESCRIPTION = item.vDescription;//說明
-                                                _IC.MEMO = item.vMemo; //備註
+                                                _II.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
+                                                _II.QUANTITY = item.vItemImp_Quantity; //重要物品數量
+                                                _II.AMOUNT = item.vItemImp_Amount; //重要物品金額
+                                                _II.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2); //重要物品預計提取日期
+                                                _II.DESCRIPTION = item.vDescription;//說明
+                                                _II.MEMO = item.vMemo; //備註
                                                 updateItemIds.Add(item.vItemId);
-                                                logStr += _IC.modelToString(logStr);
+                                                logStr += _II.modelToString(logStr);
                                             }
                                             else
                                             {
                                                 var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');                                               
-                                                _IC = new ITEM_IMPO()
+                                                _II = new ITEM_IMPO()
                                                 {
                                                     ITEM_ID = $@"{item_Seq}{item_id}", //物品編號
                                                     INVENTORY_STATUS = "3", //預約存入
@@ -247,16 +246,16 @@ namespace Treasury.Web.Service.Actual
                                                                                //PUT_DATE = dt, //存入日期時間
                                                     LAST_UPDATE_DT = dt, //最後修改時間
                                                 };
-                                                _IC_Item_Id = _IC.ITEM_ID;
-                                                inserts.Add(_IC);
-                                                logStr += _IC.modelToString(logStr);
+                                                _IC_Item_Id = _II.ITEM_ID;
+                                                inserts.Add(_II);
+                                                logStr += _II.modelToString(logStr);
                                             }
                                         }
                                     }
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
-                                        var _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                        if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                        var _II = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                        if (_II.LAST_UPDATE_DT > item.vLast_Update_Time)
                                         {
                                             result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                             return result;
@@ -264,23 +263,23 @@ namespace Treasury.Web.Service.Actual
                                         //預約取出
                                         if (item.vtakeoutFlag)
                                         {
-                                            if (_IC.INVENTORY_STATUS == "1") //原先為在庫
+                                            if (_II.INVENTORY_STATUS == "1") //原先為在庫
                                             {
-                                                _IC.INVENTORY_STATUS = "4"; //預約取出
-                                                _IC.LAST_UPDATE_DT = dt;  //最後修改時間
-                                                updateItemIds.Add(_IC.ITEM_ID);
+                                                _II.INVENTORY_STATUS = "4"; //預約取出
+                                                _II.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                updateItemIds.Add(_II.ITEM_ID);
                                             }
-                                            else if (_IC.INVENTORY_STATUS == "4") //原先為預約取出
+                                            else if (_II.INVENTORY_STATUS == "4") //原先為預約取出
                                             {
-                                                updateItemIds.Add(_IC.ITEM_ID);
+                                                updateItemIds.Add(_II.ITEM_ID);
                                             }
                                         }
                                         else
                                         {
-                                            if (_IC.INVENTORY_STATUS == "4") //原先為在庫
+                                            if (_II.INVENTORY_STATUS == "4") //原先為在庫
                                             {
-                                                _IC.INVENTORY_STATUS = "1"; //預約取出
-                                                _IC.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                _II.INVENTORY_STATUS = "1"; //預約取出
+                                                _II.LAST_UPDATE_DT = dt;  //最後修改時間
                                             }
                                         }
                                     }
@@ -324,14 +323,14 @@ namespace Treasury.Web.Service.Actual
                                 //抓取有修改註記的
                                 foreach (var item in datas)
                                 {
-                                    var _IC_Item_Id = string.Empty;
+                                    var _II_Item_Id = string.Empty;
                                     if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                     {
                                         //只抓取預約存入
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
-                                            var _IC = new ITEM_IMPO()
+                                            var _II = new ITEM_IMPO()
                                             {
                                                 ITEM_ID = $@"{item_Seq}{item_id}", //物品編號
                                                 INVENTORY_STATUS = "3", //預約存入
@@ -349,9 +348,9 @@ namespace Treasury.Web.Service.Actual
                                                                            //PUT_DATE = dt, //存入日期時間
                                                 LAST_UPDATE_DT = dt, //最後修改時間
                                             };
-                                            _IC_Item_Id = _IC.ITEM_ID;
-                                            db.ITEM_IMPO.Add(_IC);
-                                            logStr += _IC.modelToString(logStr);
+                                            _II_Item_Id = _II.ITEM_ID;
+                                            db.ITEM_IMPO.Add(_II);
+                                            logStr += _II.modelToString(logStr);
                                         }
                                     }
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
@@ -359,28 +358,28 @@ namespace Treasury.Web.Service.Actual
                                         //只抓取預約取出
                                         if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                         {
-                                            var _IC = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
-                                            _IC_Item_Id = _IC.ITEM_ID;
-                                            if (_IC.LAST_UPDATE_DT > item.vLast_Update_Time)
+                                            var _II = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
+                                            _II_Item_Id = _II.ITEM_ID;
+                                            if (_II.LAST_UPDATE_DT > item.vLast_Update_Time)
                                             {
                                                 result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
-                                            _IC.INVENTORY_STATUS = "4"; //預約取出
+                                            _II.INVENTORY_STATUS = "4"; //預約取出
                                                                         //_IRE.GET_DATE = dt; //取出日期時間
-                                            _IC.LAST_UPDATE_DT = dt;  //最後修改時間
+                                            _II.LAST_UPDATE_DT = dt;  //最後修改時間
                                         }
                                     }
 
 
                                     #region 其它存取項目申請資料檔
-                                    if (!_IC_Item_Id.IsNullOrWhiteSpace())
+                                    if (!_II_Item_Id.IsNullOrWhiteSpace())
                                     {
                                         db.OTHER_ITEM_APLY.Add(
                                         new OTHER_ITEM_APLY()
                                         {
                                             APLY_NO = _TAR.APLY_NO,
-                                            ITEM_ID = _IC_Item_Id
+                                            ITEM_ID = _II_Item_Id
                                         });
                                     }
                                     #endregion
@@ -523,7 +522,7 @@ namespace Treasury.Web.Service.Actual
                 vItemImp_Name = x.ITEM_NAME, //重要物品名稱
                 vItemImp_Quantity = x.QUANTITY, //重要物品數量
                 vItemImp_Amount = x.AMOUNT, //重要物品金額
-                vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9,true),
+                vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
                 vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
                 vDescription = x.DESCRIPTION,//說明
                 vMemo = x.MEMO, //備註

@@ -165,7 +165,7 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 申請覆核 印章
+        /// 申請覆核 電子憑證
         /// </summary>
         /// <param name="insertDatas">資料</param>
         /// <param name="taData">申請單資料</param>
@@ -219,8 +219,7 @@ namespace Treasury.Web.Service.Actual
                                 db.APLY_REC_HIS.Add(_ARH);
                                 #endregion
 
-
-                                #region 印章庫存資料檔
+                                #region 電子憑證庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
                                 List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId 

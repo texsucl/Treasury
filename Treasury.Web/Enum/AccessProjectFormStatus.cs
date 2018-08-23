@@ -108,9 +108,9 @@ namespace Treasury.Web.Enum
             E01,
 
             /// <summary>
-            /// 申請人刪除
+            /// 申請人作廢
             /// </summary>
-            [Description("申請人刪除")]
+            [Description("申請人作廢")]
             E02,
 
             /// <summary>

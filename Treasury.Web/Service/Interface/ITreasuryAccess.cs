@@ -126,6 +126,14 @@ namespace Treasury.Web.Service.Interface
         /// <returns></returns>
         MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> Reject(TreasuryAccessApprSearchViewModel searchData, List<TreasuryAccessApprSearchDetailViewModel> viewModels, string apprDesc);
 
+        /// <summary>
+        /// 修改申請單記錄檔
+        /// </summary>
+        /// <param name="data">修改資料</param>
+        /// <param name="custodianFlag">是否為保管科</param>
+        /// <param name="searchData">申請表單查詢顯示區塊ViewModel</param>
+        /// <returns></returns>
+        MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> updateAplyNo(TreasuryAccessViewModel data, bool custodianFlag, TreasuryAccessSearchViewModel searchData);
         #endregion
 
     }

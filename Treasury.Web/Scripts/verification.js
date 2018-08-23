@@ -10,6 +10,7 @@
     englishFormat = /^[a-zA-Z]+$/;
     positiveInt = /^[0-9]+$/;
     englishNumberFormat = /^[a-zA-Z0-9]+$/;
+    priceFormate = /^([0-9]{1,})+(.[0-9]{1,})?$/;
 
     window.verified = verified;
     window.created = created;
@@ -50,6 +51,27 @@
             positiveInt: true,
         })
     }
+
+    verified.price = function (formid, elementid, msg) {
+        msg = msg || message.price;
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+
+        //#region 客製化驗證
+
+        $.validator.addMethod("priceFormate",
+        function (value, element, arg) {
+            return verified.isPrice(value);
+        }, message.price);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            priceFormate: true,
+        })
+    }
+
 
     verified.number = function (formid, elementid) {
         $("#" + formid).validate({
@@ -253,6 +275,7 @@
         }
     }
 
+    //datepicker清除範圍限定
     created.clearDatepickerRangeValue = function (
         datepickerStartid, datepickerEndid) {
         $("#" + datepickerStartid).val('');
@@ -261,6 +284,7 @@
         $('#' + datepickerEndid).datepicker("option", "minDate", null);
     }
 
+    //範圍datepicker
     created.createDatepickerRange = function (datepickerStartid,
         datepickerEndid) {
         var format = 'yy/mm/dd';
@@ -358,6 +382,25 @@
         return false;
     }
 
+    created.dateToTWDate = function (value) {
+        value = value || '';
+        if (value == '')
+            return '';
+        if (verified.checkSpace(value))
+            return '';
+        var arr = value.split('/');
+        if (arr.length == 3) {
+            return (Number(arr[0]) + 1911) + '/' + created.padLeft(arr[1], 2, '0') + '/' + created.padLeft(arr[2], 2, '0');
+        }
+        return  '';
+    }
+
+    verified.isPrice = function (value)
+    {
+        value = value || '';
+        return priceFormate.test(value);
+    }
+
     verified.isEnglish = function (value) {
         value = value || '';
         return englishFormat.test(value);
@@ -409,7 +452,7 @@
 
     verified.dateToStr = function (value)
     {
-        return value.getFullYear() + '/' + padLeft((value.getMonth() + 1), 2) + '/' + (value.getDate())
+        return value.getFullYear() + '/' + created.padLeft((value.getMonth() + 1), 2) + '/' + (value.getDate())
     }
 
     verified.textAreaLength = function (evt) {
@@ -425,6 +468,7 @@
         }
     }
 
+    //檢查有無空白
     verified.checkSpace = function checkSpace(s) {
         if (s.match(/\x20/i)) {
             return true;
@@ -461,11 +505,16 @@
         return d;
     }
 
-    created.getOnlyDateStr = function getOnlyDateStr()
+    created.getOnlyDateStr = function getOnlyDateStr(backSlashFlag, tawFlag, notLinkFlag)
     {
+        backSlashFlag = backSlashFlag || false;
+        tawFlag = tawFlag || false;
+        notLinkFlag = notLinkFlag || false;
         var d = new Date();
-        d = d.getFullYear() + '-' + created.padLeft((d.getMonth() + 1), 2) + '-' + created.padLeft((d.getDate()), 2);
-        return d;
+        var r = '';   
+        r = tawFlag ? d.getFullYear() - 1911 : d.getFullYear();
+        r += ((notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getMonth() + 1), 2) + (notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getDate()), 2));
+        return r;
     }
 
     created.uuid = function _uuid() {

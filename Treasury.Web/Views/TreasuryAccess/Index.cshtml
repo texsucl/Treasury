@@ -158,12 +158,13 @@
         </div>
         <div id="TAjqgridDiv2" class="col-sm-24 jqd">
         </div>
-        <div class="TAPrintClass" style="text-align:center">
-            <input type="button" class="TAPrint btn btn-primary" id="TAI_Print"  value="列印" />
+        <div class="TAPrintClass" style="text-align:center;margin-top:5px;">
+            <input type="button" class="TAPrint btn btn-primary" id="TAI_Print" style="margin-right:10px;"  value="列印" />
+            <input type="button" class="btn btn-primary" id="TAI_Back" value="回上一頁" />
         </div>
     </div>
 
-    <div id="TAOpenInsertDialog" style="display:none" role="dialog" class="myDialog">
+    <div id="TAOpenInsertDialog" style="display:none;" role="dialog" class="myDialog">
         <div id="TAOpenInsertDetail"></div>
     </div>
     <div id="TAOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
@@ -195,6 +196,7 @@
         TAurl.invalidate = '@Url.Action("Invalidate", "TreasuryAccess")';
         TAurl.getByAplyNo = '@Url.Action("GetByAplyNo", "TreasuryAccess")';
         TAurl.GetReportGroupData = '@Url.Action("GetReportGroupData", "Deposit")';
+        TAurl.updateAplyNo = '@Url.Action("UpdateAplyNo", "TreasuryAccess")';
 
         var openInsertDetailId = 'TAOpenInsertDetail';
         var openSearchDetailId = 'TAOpenSearchDetail';
@@ -226,6 +228,7 @@
             //#region 初始設定
 
             created.createDatepicker(EXP_ACCESS_DATEId, '');
+            $('#' + EXP_ACCESS_DATEId).datepicker("option", "minDate", created.getOnlyDateStr(true));
             created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
             created.createDatepickerRange('CONFIRM_DT_From', 'CONFIRM_DT_To');
             verified.datepicker(TAFormId, EXP_ACCESS_DATEId, $('#' + EXP_ACCESS_DATEId).val());
@@ -251,6 +254,9 @@
                         break;
                     case 'TAI_Print':
                         $('#' + id).on('click', function () { TAReport(); });
+                        break;
+                    case 'TAI_Back':
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
                         break;
                 }
             });
@@ -538,20 +544,21 @@
         //#region 查詢表單
         function TAAccessGrid() {
             var colNameArray = ['刪除申請', '作廢',
-                '存取申請項目', '申請日期', '申請單號',
+                '存取申請項目', '申請日期', '實際存取日期', '申請單號',
                 '申請單位', '申請人', '入庫原因',
                 '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
             var colModelArray = [
                 { name: "vCancleFlag", index: "vCancleFlag", width: 70, sortable: false, align: 'center', formatter: formatterCancleFlag },
                 { name: "vInvalidFlag", index: "vInvalidFlag", width: 40, sortable: false, align: 'center', formatter: formatterInvalidFlag },
-                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
-                { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center'},
-                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vItemDec", index: "vItemDec", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 90, sortable: false, align: 'center' },
+                { name: "vREGI_APPR_DT", index: "vREGI_APPR_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width:160, sortable: false, align: 'left' },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 160, sortable: false, align: 'left'},
-                { name: "vDESC", index: "vDESC", width: 160, sortable: false, align: 'left' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width:150, sortable: false, align: 'left' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'left'},
+                { name: "vDESC", index: "vDESC", width: 150, sortable: false, align: 'left' },
                 { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
                 { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
@@ -576,19 +583,20 @@
 
         function TAReportGrid() {
             var colNameArray = ['列印',
-                '存取申請項目', '申請日期', '申請單號' ,
+                '存取申請項目', '申請日期', '實際存取日期', '申請單號' ,
                 '申請單位', '申請人', '入庫原因',
                 '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
             var colModelArray = [
                 { name: "vPrintFlag", index: "vPrintFlag", width: 110, sortable: false, align: 'center', formatter: formatterCheck },
-                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
-                { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center'},
-                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vItemDec", index: "vItemDec", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 90, sortable: false, align: 'center' },
+                { name: "vREGI_APPR_DT", index: "vREGI_APPR_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 160, sortable: false, align: 'left' },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 160, sortable: false, align: 'left'},
-                { name: "vDESC", index: "vDESC", width: 160, sortable: false, align: 'left' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 150, sortable: false, align: 'left' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'left'},
+                { name: "vDESC", index: "vDESC", width: 150, sortable: false, align: 'left' },
                 { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
                 { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
@@ -643,36 +651,6 @@
                 }
             });
             $('#' + dialogId).dialog('open');
-            if (closeFalg) {
-                //可供修改上方申請單號區塊
-                $('#TAVMUpdate,#TAVMSave').show();
-                $('#TAVMUpdate,#TAVMSave').off('click');
-                $('#TAVMvAplyUnit').off('change');
-                $('#TAVMvAplyUnit').on('change', function () {
-                    $.ajax({
-                        type: "POST",
-                        data: JSON.stringify({
-                            DPT_CD: $(this).val()
-                        }),
-                        dataType: "json",
-                        url: TAurl.changeUnit,
-                        contentType: 'application/json'
-                    }).done(function (result) {
-                        customerUtility.addoption('TAVMvAplyUid', result);
-                    })
-                });
-                $('#TAVMUpdate').on('click', function () {
-                    if (custodianFlag) {
-
-                    }
-                    else {
-
-                    }
-                });
-                $('#TAVMSave').on('click', function () {
-
-                });
-            }
         }
 
         //#endregion
@@ -681,6 +659,11 @@
 
         function open(itemId) {
             var _data = GetItemData(itemId);
+            if ($('#aIUnit').val().trim() == '' || $('#applicant').val().trim() == '')
+            {
+                customerUtility.alert('請選擇申請單位和申請人', 'w');
+                return false;
+            }
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -825,8 +808,8 @@
                             dataType: 'html',
                             url: itemData.url,
                             contentType: 'application/json',
-                            success: function (data, textStatus, jqXHR) {
-                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + data);
+                            success: function (vdata, textStatus, jqXHR) {
+                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + vdata);
                                 $('#TAVMvAplyNo').text(aplyNoData.vAplyNo);
                                 $('#TAVMvItem').text(aplyNoData.vItem);
                                 customerUtility.addoption('TAVMvAplyUnit', result.Datas.Item3);
@@ -836,11 +819,113 @@
                                 $('#TAVMvChargeUnit').text(aplyNoData.vChargeUnit);
                                 $('#TAVMvAccessType').text(aplyNoData.vAccessType);
                                 created.createDatepicker('TAVMvExpectedAccessDate', aplyNoData.vExpectedAccessDate);
+                                $('#TAVMvExpectedAccessDate').datepicker("option", "minDate", created.dateToTWDate(aplyNoData.vCreateDt));
                                 $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
                                 $('#TAVMvCreateDt').text(aplyNoData.vCreateDt);
                                 $('#TAVMvCreateUnit').text(aplyNoData.vCreateUnit);
                                 $('#TAVMvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMvAccessReason').val(aplyNoData.vAccessReason);
+                                $('#TAVMvAplyUnit').off('change');
+                                $('#TAVMvAplyUnit').on('change', function () {
+                                    $.ajax({
+                                        type: "POST",
+                                        data: JSON.stringify({
+                                            DPT_CD: $(this).val()
+                                        }),
+                                        dataType: "json",
+                                        url: TAurl.changeUnit,
+                                        contentType: 'application/json'
+                                    }).done(function (result) {
+                                        customerUtility.addoption('TAVMvAplyUid', result);
+                                    })
+                                });
+                                if (result.Datas.Item5) {
+                                    $('#TAVMUpdate,#TAVMSave,#TAVMCancel').show();
+                                    $('#TAVMUpdate').prop('disabled', false);
+                                    $('#TAVMUpdate,#TAVMSave,#TAVMCancel').off('click');
+                                    $('#TAVMUpdate').on('click', function () {
+                                        if (result.Datas.Item2) {
+                                            $('#TAVMvAplyUnit').prop('disabled', false);
+                                            $('#TAVMvAplyUid').prop('disabled', false);
+                                        }
+                                        $('#TAVMvExpectedAccessDate').prop('disabled', false);
+                                        $('#TAVMvExpectedAccessDate').next().prop('disabled', false);
+                                        $('#TAVMvAccessReason').prop('disabled', false);
+                                        $('#TAVMUpdate').prop('disabled', true);
+                                        $('#TAVMSave').prop('disabled', false);
+                                        $('#TAVMCancel').prop('disabled', false);
+                                    });
+                                    $('#TAVMSave').on('click', function () {
+                                        $('#TAForm').validate().resetForm();
+                                        if ($('#TAForm').valid()) {
+                                            $.ajax({
+                                                type: 'POST',
+                                                data: JSON.stringify({
+                                                    data: TreasuryAccessViewModel(
+                                                     null,
+                                                     $('#TAVMvAplyUnit').val(),
+                                                     $('#TAVMvAplyUid').val(),
+                                                     $('#TAVMvAccessReason').val(),
+                                                     $('#TAVMvExpectedAccessDate').val(),
+                                                     null,
+                                                     null,
+                                                     null)
+                                                }),
+                                                url: TAurl.updateAplyNo,
+                                                dataType: 'json',
+                                                contentType: 'application/json'
+                                            })
+                                            .done(function (result3) {
+                                                customerUtility.alertAuto(result3);
+                                                if (result3.RETURN_FLAG) {
+                                                    $('#TAVMvAplyUnit').prop('disabled', true);
+                                                    $('#TAVMvAplyUid').prop('disabled', true);
+                                                    $('#TAVMvExpectedAccessDate').prop('disabled', true);
+                                                    $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
+                                                    $('#TAVMvAccessReason').prop('disabled', true);
+                                                    $('#TAVMUpdate').prop('disabled', false);
+                                                    $('#TAVMSave').prop('disabled', true);
+                                                    $('#TAVMCancel').prop('disabled', true);
+                                                    TAAccessGrid();
+                                                }
+                                            })
+                                        }
+                                    });
+                                    $('#TAVMCancel').on('click', function () {
+                                        $('#TAForm').validate().resetForm();
+                                        $.ajax({
+                                            type: 'POST',
+                                            data: JSON.stringify({
+                                                AplyNo: data.vAPLY_NO,
+                                                data: null
+                                            }),
+                                            url: TAurl.getByAplyNo,
+                                            contentType: 'application/json',
+                                        })
+                                         .done(function (result2) {
+                                             var aplyNoData2 = result2.Datas.Item1;
+                                             customerUtility.addoption('TAVMvAplyUnit', result2.Datas.Item3);
+                                             $('#TAVMvAplyUnit').val(aplyNoData2.vAplyUnit);
+                                             customerUtility.addoption('TAVMvAplyUid', result2.Datas.Item4);
+                                             $('#TAVMvAplyUid').val(aplyNoData2.vAplyUid);
+                                             $('#TAVMvExpectedAccessDate').val(aplyNoData2.vExpectedAccessDate);
+                                             $('#TAVMvAccessReason').val(aplyNoData2.vAccessReason);
+                                             $('#TAVMvAplyUnit').prop('disabled', true);
+                                             $('#TAVMvAplyUid').prop('disabled', true);
+                                             $('#TAVMvExpectedAccessDate').prop('disabled', true);
+                                             $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
+                                             $('#TAVMvAccessReason').prop('disabled', true);
+                                             $('#TAVMUpdate').prop('disabled', false);
+                                             $('#TAVMSave').prop('disabled', true);
+                                             $('#TAVMCancel').prop('disabled', true);
+                                         });
+                                    });
+                                }
+                                else {
+                                    $('#TAVMUpdate,#TAVMSave,#TAVMCancel').hide();
+                                }
+                                verified.required('TAVMvForm', 'TAVMvAccessReason', message.required('申請原因')); //申請原因為必填
+                                verified.required('TAVMvForm', 'TAVMvExpectedAccessDate', message.required('預計存取日期')); //預計存取日期為必填
                                 openTADialog(itemData.title, itemData.openDialogWidth, 'TAOpenSearchDialog', closeFalg, result.Datas.Item2);
                             }
                         })
@@ -906,7 +991,7 @@
                 case '@Ref.TreaItemType.D1017.ToString()':
                     obj.url = TAurl.openMARGINP;
                     obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
-                    obj.openDialogWidth = 1000;
+                    obj.openDialogWidth = 1250;
                     obj.reportType = 'MARGINP';
                     break;
                 case '@Ref.TreaItemType.D1016.ToString()':
@@ -915,7 +1000,6 @@
                     obj.openDialogWidth = 900;
                     obj.reportType = 'MARGING';
                     break;
-
                 case '@Ref.TreaItemType.D1018.ToString()':
                     obj.url = TAurl.openItemImp;
                     obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
@@ -925,7 +1009,7 @@
                 case '@Ref.TreaItemType.D1013.ToString()':
                     obj.url = TAurl.openDEPOSIT;
                     obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
-                    obj.openDialogWidth = '1325px';
+                    obj.openDialogWidth = 1325;
                     obj.reportType = 'DEPOSIT';
                     break;
             }
@@ -990,7 +1074,8 @@
         function GetAplyNoDetail() {
             var str = '';
             str += '<div  class="aplyNoDetail" style="border-bottom:1px solid #000;margin-bottom:10px;">';
-            str += '<table style="width:95%" >';
+            str += '<form id="TAVMvForm">';
+            str += '<table id="TAVMvTablr" style="width:95%" >';
             str += '<tr>';
             str += '<td style="width:150px">';
             str += '<label>申請單號 : </label>';
@@ -1071,11 +1156,13 @@
             str += '</tr>';
             str += '<tr>';
             str += '<td colspan="3">';
-            str += '<input type="button" class="btn btn-primary" id="TAVMUpdate" value="修改" style="display:none;margin-right:10px;" />';
-            str += '<input type="button" class="btn btn-primary" id="TAVMSave" value="儲存" style="display:none" />'
+            str += '<input type="button" class="btn btn-primary" id="TAVMUpdate" value="修改" disabled style="display:none;margin-right:10px;" />';
+            str += '<input type="button" class="btn btn-primary" id="TAVMSave" value="儲存" disabled style="display:none;margin-right:10px;" />';
+            str += '<input type="button" class="btn btn-primary" id="TAVMCancel" value="取消" disabled style="display:none;" />';
             str += '</td>';
             str += '</tr>';
             str += '</table>';
+            str += '</form>';
             str += '</div>';
             return str;
         }

@@ -48,6 +48,12 @@ namespace Treasury.Web.ViewModels
         public string vAPLY_DT { get; set; }
 
         /// <summary>
+        /// 實際存取日期
+        /// </summary>
+        [Description("實際存取日期")]
+        public string vREGI_APPR_DT { get; set; }
+
+        /// <summary>
         /// 申請單號
         /// </summary>
         [Description("申請單號")]

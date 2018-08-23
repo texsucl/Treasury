@@ -73,6 +73,8 @@
         var SEAL_MemoId = 'tSEAL_MEMO'; //備註Id(texarea)
         var SEAL_Item_IdHlId = 'hSEAL_ITEM_ID'; //物品標號Id(hidden)
 
+        var SEALConfirmFlag = false; //離開時提醒訊息
+
         var SEAL_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
         var SEAL_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
@@ -123,12 +125,24 @@
                     break;
                 case 'SEALCancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { SEALCancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (SEALConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        SEALCancelFun();
+                    });
                     break;
                 case 'SEALBack':
                 case 'SEALCancelTemp':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    $('#' + id).on('click', function () {
+                        if (id == 'CABack' &&
+                            SEALConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
                     break;
                 case 'SEALInsertTemp':
                     $('#' + id).off('click');
@@ -277,6 +291,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     SEALTempGrid();
+                    if (SEAL_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        SEALConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        SEALConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -394,6 +416,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#SEALInsertTemp'));
                         SEALTempGrid();
+                        SEALConfirmFlag = true;
                     }
                 })
             }
@@ -419,6 +442,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#SEALUpdateTemp'));
                         SEALTempGrid();
+                        SEALConfirmFlag = true;
                     }
                 })
             }
@@ -439,6 +463,14 @@
                 if (result.RETURN_FLAG) {
                     customerUtility.closeDialog($('#SEALDeleteTemp'));
                     SEALTempGrid();
+                    if (SEAL_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        SEALConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        SEALConfirmFlag = result.Datas;
+                    }
                 }
             })
         }

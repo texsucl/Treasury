@@ -22,7 +22,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -44,7 +44,8 @@ namespace Treasury.WebControllers
         {
             var _dActType = GetActType(type, AplyNo);
             ViewBag.MarginpType = new SelectList(Marginp.GetMarginp_Take_Of_Type(), "Value", "Text"); 
-            ViewBag.MarginpItem = new SelectList(Marginp.GetMarginp_Item(), "Value", "Text"); 
+            ViewBag.MarginpItem = new SelectList(Marginp.GetMarginpItem(), "Value", "Text");
+            ViewBag.CustodianFlag = AccountController.CustodianFlag;
             if (AplyNo.IsNullOrWhiteSpace())
             {
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
@@ -61,6 +62,32 @@ namespace Treasury.WebControllers
             }
             ViewBag.dActType = _dActType;
             return PartialView();
+        }
+
+       /// <summary>
+       /// 抓取存入保證金物品名稱
+       /// </summary>
+       /// <returns></returns>
+        public JsonResult GetMarginpItem(string MARGIN_ITEM)
+        {
+            var MarginpItems = new List<string>();
+            var data = Marginp.GetMarginpItem();
+            switch (MARGIN_ITEM.ToString()) {
+                case "1":
+                    MarginpItems = new List<string>(){ "1", "2" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
+                case "2":
+                    MarginpItems = new List<string>() { "3" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
+                case "3":
+                    MarginpItems = new List<string>() { "4" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
+
+            }
+            return Json(data);
         }
 
         /// <summary>
@@ -113,10 +140,12 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
+                transType(model);
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.MarginpData);
                 Cache.Set(CacheList.MarginpData, tempData);
@@ -137,6 +166,7 @@ namespace Treasury.WebControllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);                
@@ -145,7 +175,6 @@ namespace Treasury.WebControllers
                 {
                     updateTempData.vMarginp_Take_Of_Type = model.vMarginp_Take_Of_Type;
                     updateTempData.vMarginp_Trad_Partners = model.vMarginp_Trad_Partners;
-                    //updateTempData.vItemId = model.vItemId;
                     updateTempData.vMarginp_Item = model.vItemId;
                     updateTempData.vMarginp_Amount = model.vMarginp_Amount;
                     updateTempData.vMarginp_Item = model.vMarginp_Item;
@@ -155,7 +184,8 @@ namespace Treasury.WebControllers
                     updateTempData.vMarginp_Effective_Date_E = model.vMarginp_Effective_Date_E;
                     updateTempData.vDescription = model.vDescription;
                     updateTempData.vMemo = model.vMemo;
-                    updateTempData.vMarginp_Book_No = model.vMarginp_Book_No;
+                    updateTempData.vMarginp_Book_No = model.vMarginp_Book_No;                 
+                    transType(updateTempData);
                     Cache.Invalidate(CacheList.MarginpData);
                     Cache.Set(CacheList.MarginpData, tempData);
                     result.RETURN_FLAG = true;
@@ -178,9 +208,10 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData(MarginpViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
@@ -190,8 +221,10 @@ namespace Treasury.WebControllers
                     tempData.Remove(deleteTempData);
                     Cache.Invalidate(CacheList.MarginpData);
                     Cache.Set(CacheList.MarginpData, tempData);
+                    transType(model);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData.Any();
                 }
                 else
                 {
@@ -210,9 +243,10 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult TakeOutData(MarginpViewModel model,bool takeoutFlag)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
@@ -232,6 +266,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.MarginpData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vtakeoutFlag == true);
                 }
                 else
                 {
@@ -270,7 +305,7 @@ namespace Treasury.WebControllers
         }
 
         /// <summary>
-        /// 電子憑證預設資料
+        /// 存入保證金預設資料
         /// </summary>
         /// <param name="ActType">修改狀態</param>
         /// <param name="AccessType">存入 or 取出</param>
@@ -309,6 +344,20 @@ namespace Treasury.WebControllers
                 }
             }
         }
-
+         /// <summary>
+        /// 西元年轉民國年
+        /// </summary>
+        private void transType(MarginpViewModel model)
+        {
+            if (model != null)
+            {
+                var date_B = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_B);
+                model.vMarginp_Effective_Date_B_2 =
+                    (date_B == null ? null : date_B.Value.DateToTaiwanDate(9));
+                var date_E = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_E);
+                model.vMarginp_Effective_Date_E_2 =
+                    (date_E == null ? null : date_E.Value.DateToTaiwanDate(9));
+            } 
+        }
     }
-}
+ }

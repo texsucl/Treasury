@@ -96,6 +96,7 @@ namespace Treasury.Web.Service.Actual
                     result.vExpectedAccessDate = TAR.EXPECTED_ACCESS_DATE?.ToString("yyyy/MM/dd");
                     result.vCreateUid = TAR.CREATE_UID;
                     result.vCreateUnit = TAR.CREATE_UNIT;
+                    result.vLastUpdateTime = TAR.LAST_UPDATE_DT;
                 }
             }
             return result;
@@ -350,8 +351,35 @@ namespace Treasury.Web.Service.Actual
                         y => y.TREA_REGISTER_ID,
                         (x, y) => x);
                 }
-                result.AddRange(_data.AsEnumerable()
-                    .Select(x => TreaAplyRecToTASDViewModel(data.vCreateUid, x, treaItems, formStatus, depts, emps)));
+                var dataTAR = _data.ToList();
+                var TRIDs = dataTAR.Where(x => x.TREA_REGISTER_ID != null).Select(x => x.TREA_REGISTER_ID).ToList();
+                var dataTOR = db.TREA_OPEN_REC.AsNoTracking().Where(x => TRIDs.Contains(x.TREA_REGISTER_ID)).ToList();
+                result.AddRange(
+                    from TAR in dataTAR
+                    join TOR in dataTOR
+                    on TAR.TREA_REGISTER_ID equals TOR.TREA_REGISTER_ID into temp
+                    from TOR in temp.DefaultIfEmpty()
+                    select new TreasuryAccessSearchDetailViewModel
+                    {
+                        vACCESS_REASON = TAR.ACCESS_REASON,
+                        vAPLY_DT = TAR.APLY_DT?.DateToTaiwanDate(9),
+                        vREGI_APPR_DT = TOR?.REGI_APPR_DT?.DateToTaiwanDate(9),
+                        vAPLY_NO = TAR.APLY_NO,
+                        vAPLY_STATUS = TAR.APLY_STATUS,
+                        vAPLY_STATUS_D = formStatus.FirstOrDefault(x => x.CODE == TAR.APLY_STATUS)?.CODE_VALUE,
+                        vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == TAR.APLY_UNIT)?.DPT_NAME,
+                        vAPLY_UID = TAR.APLY_UID,
+                        vAPLY_UID_NAME = emps.FirstOrDefault(x => x.USR_ID == TAR.APLY_UID)?.EMP_NAME,
+                        vCancleFlag = TAR.APLY_STATUS == Ref.AccessProjectFormStatus.A01.ToString() && TAR.CREATE_UID == data.vCreateUid ? "Y" : "N",
+                        vInvalidFlag = invalidStatus.Contains(TAR.APLY_STATUS) &&
+                              TAR.CREATE_UID == data.vCreateUid ? "Y" : "N",
+                        vPrintFlag = printsStatus.Contains(TAR.APLY_STATUS) ? "Y" : "N",
+                        vItem = TAR.ITEM_ID,
+                        vItemDec = treaItems.FirstOrDefault(x => x.ITEM_ID == TAR.ITEM_ID)?.ITEM_DESC,
+                        vDESC = !TAR.APLY_APPR_DESC.IsNullOrWhiteSpace() ? TAR.APLY_APPR_DESC : TAR.CUSTODY_APPR_DESC,
+                        vACCESS_TYPE = TAR.ACCESS_TYPE,
+                        vLast_Update_Time = TAR.LAST_UPDATE_DT
+                    });
             }
             return result;
         }
@@ -391,6 +419,7 @@ namespace Treasury.Web.Service.Actual
                     result.vCreateUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == _createEmp?.DPT_CD?.Trim())?.DPT_NAME;
                     result.vCreateUid = _createEmp?.EMP_NAME;
                     result.vAccessReason = data.ACCESS_REASON;
+                    result.vLastUpdateTime = data.LAST_UPDATE_DT;
                 }
             }
             return result;
@@ -878,6 +907,50 @@ namespace Treasury.Web.Service.Actual
                 }
             }
 
+            return result;
+        }
+
+        /// <summary>
+        /// 修改申請單記錄檔
+        /// </summary>
+        /// <param name="data">修改資料</param>
+        /// <param name="custodianFlag">是否為保管科</param>
+        /// <param name="searchData">申請表單查詢顯示區塊ViewModel</param>
+        /// <returns></returns>
+        public MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> updateAplyNo(TreasuryAccessViewModel data,bool custodianFlag, TreasuryAccessSearchViewModel searchData)
+        {
+            MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>> result = new MSGReturnModel<List<TreasuryAccessSearchDetailViewModel>>();
+            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var updateData = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAplyNo);
+                if (updateData != null)
+                {
+                    if (updateData.LAST_UPDATE_DT > data.vLastUpdateTime)
+                    {
+                        return result;
+                    }
+                    if (custodianFlag)
+                    {
+                        updateData.APLY_UNIT = data.vAplyUnit;
+                        updateData.APLY_UID = data.vAplyUid;
+                    }
+                    updateData.ACCESS_REASON = data.vAccessReason;
+                    updateData.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(data.vExpectedAccessDate);
+                    updateData.LAST_UPDATE_DT = DateTime.Now;
+                    try
+                    {
+                        db.SaveChanges();
+                        result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                        result.RETURN_FLAG = true;
+                        result.Datas = GetSearchDetail(searchData);                       
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        result.DESCRIPTION = ex.exceptionMessage();
+                    }
+                }
+            }
             return result;
         }
 

@@ -30,7 +30,6 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<string, string> getDept_Sect(string DPT_CD)
         {
-            //var result = 
             var _dept = getDept(DPT_CD);
             if (_dept.Dpt_type != null)
             {
@@ -39,7 +38,7 @@ namespace Treasury.Web.Service.Actual
                     case "04":
                         return new Tuple<string, string>(_dept.UP_DPT_CD?.Trim(),_dept.DPT_CD?.Trim());
                     case "03":
-                        return new Tuple<string, string>(_dept.DPT_CD?.Trim(),null);
+                        return new Tuple<string, string>(_dept.DPT_CD?.Trim(),string.Empty);
                 }
             }
             return new Tuple<string, string>(null,null);
