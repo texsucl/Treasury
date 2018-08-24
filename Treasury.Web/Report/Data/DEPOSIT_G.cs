@@ -8,7 +8,7 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Report.Data
 {
-    public class DEPOSIT_P : ReportDepositData
+    public class DEPOSIT_G : ReportDepositData
     {
         public override DataSet GetData(List<reportParm> parms)
         {
@@ -45,21 +45,22 @@ namespace Treasury.Web.Report.Data
 
                     if (_IDOM_DataList.Any())
                     {
-                        foreach (var MasterData in _IDOM_DataList)
-                        {
-                            Decimal TOTAL_DENOMINATION = 0;
+                        //設值否=N
+                        var _IDOM_DataNList = _IDOM_DataList.Where(x => x.DEP_SET_QUALITY == "N").ToList();
 
+                        foreach (var MasterDataN in _IDOM_DataNList)
+                        {
                             //使用物品編號去定期存單庫存資料明細檔抓取資料
                             var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
-                                .Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList();
+                                .Where(x => x.ITEM_ID == MasterDataN.ITEM_ID).ToList();
 
-                            foreach(var DetailData in _IDOD_DataList)
+                            foreach (var DetailData in _IDOD_DataList)
                             {
                                 ReportData = new ReportData()
                                 {
-                                    TYPE = "Data",
-                                    EXPIRY_DATE = MasterData.EXPIRY_DATE.DateToTaiwanDate(9),
-                                    TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                                    TYPE = "Data-N",
+                                    EXPIRY_DATE = MasterDataN.EXPIRY_DATE.DateToTaiwanDate(9),
+                                    TRAD_PARTNERS = MasterDataN.TRAD_PARTNERS,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
                                     DEP_CNT = DetailData.DEP_CNT.ToString(),
@@ -68,15 +69,48 @@ namespace Treasury.Web.Report.Data
 
                                 ReportDataList.Add(ReportData);
 
-                                TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
                                 TOTAL_DEP_CNT += DetailData.DEP_CNT;
+                            }
+                        }
+
+                        //設值否=Y
+                        var _IDOM_DataYList = _IDOM_DataList.Where(x => x.DEP_SET_QUALITY == "Y").ToList();
+
+                        foreach (var MasterDataY in _IDOM_DataYList)
+                        {
+                            Decimal TOTAL_DENOMINATION = 0;
+
+                            //使用物品編號去定期存單庫存資料明細檔抓取資料
+                            var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
+                                .Where(x => x.ITEM_ID == MasterDataY.ITEM_ID).ToList();
+
+                            foreach (var DetailData in _IDOD_DataList)
+                            {
+                                ReportData = new ReportData()
+                                {
+                                    TYPE = "Data-Y",
+                                    CURRENCY=_REC.CURRENCY,
+                                    EXPIRY_DATE=MasterDataY.EXPIRY_DATE.DateToTaiwanDate(9),
+                                    TRAD_PARTNERS=MasterDataY.TRAD_PARTNERS,
+                                    DEP_TYPE=_REC.DEP_TYPE,
+                                    DEP_NO_B=DetailData.DEP_NO_B,
+                                    DEP_NO_E=DetailData.DEP_NO_E,
+                                    DEP_CNT=DetailData.DEP_CNT.ToString(),
+                                    DENOMINATION=DetailData.DENOMINATION.ToString(),
+                                };
+
+                                ReportDataList.Add(ReportData);
+
+                                TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
                             }
 
                             ReportData = new ReportData()
                             {
-                                TYPE = "Data",
-                                EXPIRY_DATE = MasterData.EXPIRY_DATE.DateToTaiwanDate(9),
-                                TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                                TYPE = "Data-Y",
+                                CURRENCY = _REC.CURRENCY,
+                                EXPIRY_DATE = MasterDataY.EXPIRY_DATE.DateToTaiwanDate(9),
+                                TRAD_PARTNERS = MasterDataY.TRAD_PARTNERS,
+                                DEP_TYPE = _REC.DEP_TYPE,
                                 TOTAL_DENOMINATION = TOTAL_DENOMINATION.ToString()
                             };
 
@@ -87,18 +121,18 @@ namespace Treasury.Web.Report.Data
 
                 //取得定存交割檢核項目
                 var _Dep_Chk_Item = db.DEP_CHK_ITEM.AsNoTracking()
-                    .Where(x => x.ACCESS_TYPE == "P")
-                    .Where(x => x.IS_DISABLED == "N")
-                    .OrderBy(x => x.ISORTBY).ToList();
+                .Where(x => x.ACCESS_TYPE == "G")
+                .Where(x => x.IS_DISABLED == "N")
+                .OrderBy(x => x.ISORTBY).ToList();
 
-                foreach(var item in _Dep_Chk_Item)
+                foreach (var item in _Dep_Chk_Item)
                 {
                     string DEP_CHK_ITEM_DESC = string.Empty;
 
                     //是否項次1
-                    if (item.ISORTBY==1)
+                    if (item.ISORTBY == 5)
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@1", TOTAL_DEP_CNT.ToString());
+                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@2", TOTAL_DEP_CNT.ToString());
                     }
                     else
                     {
