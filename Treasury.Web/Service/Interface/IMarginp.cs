@@ -23,7 +23,7 @@ namespace Treasury.Web.Service.Interface
         /// 抓取存入保證金物品名稱設定
         /// </summary>
         /// <returns></returns>
-        List<SelectOption> GetMarginp_Item();
+        List<SelectOption> GetMarginpItem();
 
         /// <summary>
         /// 使用 申請單號 抓取資料

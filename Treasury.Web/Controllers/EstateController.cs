@@ -22,7 +22,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -195,12 +195,17 @@ namespace Treasury.WebControllers
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
+                bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
+                    tempData.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim() , !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim() , !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.ESTATEData);
                 Cache.Set(CacheList.ESTATEData, tempData);
                 result.RETURN_FLAG = true;
-                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription() + (sameFlag? "</br>您建置的明細資料重複敬請確認,謝謝!" : string.Empty);
             }
             return Json(result);
         }
@@ -223,6 +228,12 @@ namespace Treasury.WebControllers
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null )
                 {
+                    var tempData2 = tempData.Where(x => x.vItemId == updateTempData.vItemId).ToList();
+                    bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
+                        tempData2.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
+                        tempData2.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
+                        tempData2.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim(), !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
+                        tempData2.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim(), !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
                     updateTempData.vEstate_From_No = model.vEstate_From_No;
                     updateTempData.vEstate_Date = model.vEstate_Date;
                     updateTempData.vOwnership_Cert_No = model.vOwnership_Cert_No;
@@ -233,7 +244,7 @@ namespace Treasury.WebControllers
                     Cache.Invalidate(CacheList.ESTATEData);
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription() + (sameFlag ? "</br>您建置的明細資料重複敬請確認,謝謝!" : string.Empty);
                 }
                 else
                 {
@@ -252,7 +263,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData(EstateDetailViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
@@ -267,6 +278,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData.Any();
                 }
                 else
                 {
@@ -285,7 +297,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult TakeOutData(EstateDetailViewModel model,bool takeoutFlag)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.ESTATEData))
@@ -307,6 +319,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.ESTATEData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vtakeoutFlag);
                 }
                 else
                 {

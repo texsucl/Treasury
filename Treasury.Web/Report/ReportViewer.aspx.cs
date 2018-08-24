@@ -21,7 +21,7 @@ namespace Treasury.Web.Report
         {
             try
             {
-                var ReportWrapperSessionKey = "ReportWrapper";
+                var ReportWrapperSessionKey = Request.QueryString["ReportId"];
                 var rw = (ReportWrapper)base.Session[ReportWrapperSessionKey];
                 if (rw != null)
                 {

@@ -23,7 +23,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]

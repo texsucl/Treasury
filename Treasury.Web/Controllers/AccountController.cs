@@ -26,6 +26,9 @@ namespace Treasury.Web.Controllers
     {
         static private NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// 登入的 userID
+        /// </summary>
         static public string CurrentUserId {
             get {
                 var httpContext = System.Web.HttpContext.Current;                
@@ -36,6 +39,9 @@ namespace Treasury.Web.Controllers
             }
         }
 
+        /// <summary>
+        /// 判斷是不是保管科
+        /// </summary>
         static public bool CustodianFlag { get {
                 var httpContext = System.Web.HttpContext.Current;
                 var _Unit = httpContext.Session["UserUnit"];

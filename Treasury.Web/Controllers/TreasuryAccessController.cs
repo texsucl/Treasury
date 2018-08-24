@@ -1,5 +1,6 @@
 ﻿using Treasury.WebActionFilter;
 using System;
+using Treasury.Web.Properties;
 using System.Web.Mvc;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.Service.Actual;
@@ -23,7 +24,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -90,7 +91,12 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult ChangeUnit(string DPT_CD)
         {
-            return Json(TreasuryAccess.ChangeUnit(DPT_CD));
+            var data = TreasuryAccess.ChangeUnit(DPT_CD);
+            if (DPT_CD == Properties.Settings.Default["CustodianFlag"]?.ToString())
+                data = data.Where(x => x.Value == AccountController.CurrentUserId).ToList();
+            else
+                data.Insert(0, new SelectOption() { Text = string.Empty, Value = string.Empty }); 
+            return Json(data);
         }
 
         /// <summary>
@@ -259,18 +265,63 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult GetByAplyNo(string AplyNo)
         {
-            MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption>>> result =
-                new MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption>>>();
+            MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption> , bool>> result =
+                new MSGReturnModel<Tuple<TreasuryAccessViewModel, bool, List<SelectOption>, List<SelectOption> , bool>>();
             result.RETURN_FLAG = false;
             if (!AplyNo.IsNullOrWhiteSpace())
             {
                 result.RETURN_FLAG = true;
+                var _dActType = GetActType(Ref.OpenPartialViewType.Index, AplyNo);
                 var data = TreasuryAccess.GetByAplyNo(AplyNo);
-                var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
+                Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
+                Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data);
+                //var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 var selectOptions = TreasuryAccess.TreasuryAccessDetail(AccountController.CurrentUserId, AccountController.CustodianFlag, data.vAplyUnit);
-                result.Datas  = new Tuple<TreasuryAccessViewModel,bool, List<SelectOption>, List<SelectOption>>(data, AccountController.CustodianFlag, selectOptions.Item2, selectOptions.Item3);
+                List<SelectOption> selectOptionsAppr = new List<SelectOption>();
+                //if (!AccountController.CustodianFlag)
+                selectOptionsAppr = TreasuryAccess.ChangeUnit(data.vAplyUnit);
+                //else
+                //    selectOptionsAppr = selectOptions.Item3;
+                result.Datas  = new Tuple<TreasuryAccessViewModel,bool, List<SelectOption>, List<SelectOption> , bool>(data, AccountController.CustodianFlag, selectOptions.Item2, selectOptionsAppr , _dActType);
             }
             return Json(result);
+        }
+
+        /// <summary>
+        /// 更新申請單記錄檔
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UpdateAplyNo(TreasuryAccessViewModel data)
+        {
+            var cdata = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessSearchUpdateViewData);
+            if (AccountController.CustodianFlag)
+            {
+                cdata.vAccessReason = data.vAccessReason;
+                cdata.vExpectedAccessDate = data.vExpectedAccessDate;
+                cdata.vAplyUnit = data.vAplyUnit;
+                cdata.vAplyUid = data.vAplyUid;
+            }
+            else
+            {
+                cdata.vAccessReason = data.vAccessReason;
+                cdata.vExpectedAccessDate = data.vExpectedAccessDate;
+            }
+            var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
+            var result = TreasuryAccess.updateAplyNo(cdata,AccountController.CustodianFlag, searchData);
+            if (result.RETURN_FLAG)
+            {
+                var data1 = TreasuryAccess.GetByAplyNo(cdata.vAplyNo);
+                Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
+                Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data1);
+                var data2 = TreasuryAccess.GetTreasuryAccessViewModel(cdata.vAplyNo);
+                Cache.Invalidate(CacheList.TreasuryAccessViewData);
+                Cache.Set(CacheList.TreasuryAccessViewData, data2);
+                Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);                
+            }
+            return Json(result);  
         }
 
         /// <summary>
@@ -286,10 +337,10 @@ namespace Treasury.WebControllers
            {
                case "Access":
                    var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+                   return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
                case "Report":
                    var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).ToList()));
+                   return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
                case "Appr":
                    var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
                    return Json(jdata.modelToJqgridResult(ApprDatas));

@@ -17,7 +17,7 @@ using Treasury.Web;
 /// </summary>
 /// 
 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
 
 

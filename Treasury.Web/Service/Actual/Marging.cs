@@ -177,7 +177,6 @@ namespace Treasury.Web.Service.Actual
                         {
                             //取得流水號
                             SysSeqDao sysSeqDao = new SysSeqDao();
-
                             string logStr = string.Empty; //log
                             var _TAR = new TREA_APLY_REC(); //申請單號
                             var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請

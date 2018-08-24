@@ -1,4 +1,4 @@
-﻿namespace Treasury.WebControllers
+﻿namespace Treasury.Web.Controllers
 {
 
     public class ReportController : CommonController

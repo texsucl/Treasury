@@ -3,6 +3,23 @@
 
     window.customerUtility = customerUtility;
 
+    customerUtility.addCommas = function addCommas(nStr) {
+        nStr += '';
+        x = nStr.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return x1 + x2;
+    }
+
+    customerUtility.removeCommas = function removeCommas(nStr) {
+        nStr += '';
+        return nStr.replace(/\,/g, '');;
+    }
+
     customerUtility.addoption = function (selectId, obj) {
         $('#' + selectId + ' option').remove();
         $.each(obj, function (key, data) {
@@ -69,7 +86,7 @@
         })
         .done(function (result) {
             if (result.RETURN_FLAG) {
-                window.open(customerUtility.reportUrl);
+                window.open((customerUtility.reportUrl) + "?ReportId=" + result.Datas);
             }
             else
                 customerUtility.alert(result.DESCRIPTION,'e');
@@ -184,12 +201,10 @@
     {
         var df = $.Deferred(); //建立Deferred物件
             customerConfirm.confirm({ message: message }).on(function (e) {
-                if (e) {
-                    debugger
+                if (e) {                    
                     df.resolve(); //使用者按下Yes
                 }
-                else {
-                debugger
+                else {              
                     df.reject(); //使用者按下No
                 }
             })

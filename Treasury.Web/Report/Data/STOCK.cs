@@ -55,6 +55,7 @@ select
 (select SUM(ISNULL(NUMBER_OF_SHARES,0)) from temp2) AS NUMBER_OF_SHARES_TOTAL, --總股數
 null AS ROW_NUMBER,
 null AS STOCK_TYPE,
+null AS STOCK_NO_PREAMBLE,
 null AS STOCK_NO_B,
 null AS STOCK_NO_E,
 null AS STOCK_CNT,
@@ -70,6 +71,7 @@ null AS NAME,
 null AS NUMBER_OF_SHARES_TOTAL,
 ROW_NUMBER() OVER(order by ITEM_ID) AS ROW_NUMBER,
 (select top 1 CODE_VALUE from code where CODE = STOCK_TYPE)  AS STOCK_TYPE , --類型
+STOCK_NO_PREAMBLE, -- 序號前置碼
 STOCK_NO_B, --序號(起)
 STOCK_NO_E, --序號(迄) 
 STOCK_CNT, --張數

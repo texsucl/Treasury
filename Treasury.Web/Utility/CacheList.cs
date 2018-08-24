@@ -23,6 +23,11 @@
         public static string TreasuryAccessSearchDetailViewData { get; private set; }
 
         /// <summary>
+        /// 金庫物品查詢畫面(可供修改的資料)
+        /// </summary>
+        public static string TreasuryAccessSearchUpdateViewData { get; private set; }
+
+        /// <summary>
         /// 金庫物品覆核畫面(查詢條件)
         /// </summary>
         public static string TreasuryAccessApprSearchData { get; private set; }
@@ -123,6 +128,7 @@
             TreasuryAccessViewData = "TreasuryAccessViewData";
             TreasuryAccessSearchData = "TreasuryAccessSearchData";
             TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
+            TreasuryAccessSearchUpdateViewData = "TreasuryAccessSearchUpdateViewData";
             TreasuryAccessApprSearchData = "TreasuryAccessApprSearchData";
             TreasuryAccessApprSearchDetailViewData = "TreasuryAccessApprSearchDetailViewData";
             BILLTempData = "BILLTempData";

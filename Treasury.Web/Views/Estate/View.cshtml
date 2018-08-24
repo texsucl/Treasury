@@ -74,7 +74,7 @@
                         <label>發狀日 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tESTATE_DATE" class="ESTATEInsertType"/>
+                        <input type="text" id="tESTATE_DATE" class="ESTATEInsertType land build otherRight"/>
                     </td>
                 </tr>
                 <tr>
@@ -82,7 +82,7 @@
                         <label>字號 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tESTATE_OWNERSHIP_CERT_NO" class="ESTATEInsertType" maxlength="16"/>
+                        <input type="text" id="tESTATE_OWNERSHIP_CERT_NO" class="ESTATEInsertType land build otherRight" maxlength="16"/>
                     </td>
                 </tr>
                 <tr>
@@ -90,7 +90,7 @@
                         <label>地/建號 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tESTATE_LAND_BUILDING_NO" class="ESTATEInsertType" maxlength="10"/>
+                        <input type="text" id="tESTATE_LAND_BUILDING_NO" class="ESTATEInsertType land build other" maxlength="10"/>
                     </td>
                 </tr>
                 <tr>
@@ -98,7 +98,7 @@
                         <label>門牌號 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tESTATE_HOUSE_NO" class="ESTATEInsertType" maxlength="30"/>
+                        <input type="text" id="tESTATE_HOUSE_NO" class="ESTATEInsertType build" maxlength="30"/>
                     </td>
                 </tr>
                 <tr>
@@ -106,7 +106,7 @@
                         <label>流水號/編號 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tESTATE_SEQ" class="ESTATEInsertType" maxlength="16"/>
+                        <input type="text" id="tESTATE_SEQ" class="ESTATEInsertType land build otherRight other" maxlength="16"/>
                     </td>
                 </tr>
                 <tr>
@@ -114,7 +114,7 @@
                         <label>備註 : </label>
                     </td>
                     <td>
-                        <textarea id="tESTATE_MEMO_D" class="ESTATEInsertType" style="width:207px" maxlength="200"></textarea>
+                        <textarea id="tESTATE_MEMO_D" class="ESTATEInsertType otherRight other" style="width:207px" maxlength="200"></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -140,6 +140,7 @@
 
 <script>
     $(function () {
+        debugger
         //#region url設定
         var ESTATEurl = {};
         ESTATEurl.Insert = '@Url.Action("InsertView", "Estate")';
@@ -163,6 +164,8 @@
         var ESTATE_Building_NameDId = 'dESTATE_BUILDING_NAME'; //大樓名稱Id(DropDown List)
         var ESTATE_LocatedTId = 'tESTATE_LOCATED'; //坐落Id(text)
         var ESTATE_MemoTId = 'tESTATE_MEMO'; //備註Id(text)
+
+        var ESTATEConfirmFlag = false; //離開時提醒訊息
 
         //庫存資料
         var ESTATEDialogId = 'ESTATEDialog'; //dialogId
@@ -384,13 +387,25 @@
                     break;
                 case 'ESTATECancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { ESTATECancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (ESTATEConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        ESTATECancelFun();
+                    });
                     break;
                 case 'ESTATEBack':
                 case 'ESTATECancelTemp':
                 case 'ESTATETakeOutCancelTemp':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    $('#' + id).on('click', function () {
+                        if (id == 'ESTATEBack' &&
+                            ESTATEConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
                     break;
                 case 'ESTATEInsertTemp':
                     $('#' + id).off('click');
@@ -439,6 +454,10 @@
                 }
                 if (_BUILDING_NAME.trim() == '') {
                     customerUtility.alert('大樓名稱不能為空', 'w');
+                    return false;
+                }
+                if (ESTATE_LocatedTId.trim() == '') {
+                    customerUtility.alert('坐落不能為空', 'w');
                     return false;
                 }
                 $.ajax({
@@ -598,6 +617,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     ESTATETempGrid();
+                    if (ESTATE_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        ESTATEConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        ESTATEConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -729,6 +756,7 @@
                 if (result.RETURN_FLAG) {
                     customerUtility.closeDialog($('#ESTATEInsertTemp'));
                     ESTATETempGrid();
+                    ESTATEConfirmFlag = true;
                 }
             })
         }
@@ -758,6 +786,7 @@
                 if (result.RETURN_FLAG) {
                     customerUtility.closeDialog($('#ESTATEUpdateTemp'));
                     ESTATETempGrid();
+                    ESTATEConfirmFlag = true;
                 }
             })
         }
@@ -777,21 +806,103 @@
                 if (result.RETURN_FLAG) {
                     customerUtility.closeDialog($('#ESTATEDeleteTemp'));
                     ESTATETempGrid();
+                    if (ESTATE_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        ESTATEConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        ESTATEConfirmFlag = result.Datas;
+                    }
                 }
             })
         }
 
         function ESTATETempCheck() {
             var _checkFlag = true;
-            if ($('#' + ESTATE_DateTId).val().trim() == '') {
-                customerUtility.alert('發狀日不能為空', 'w');
-                _checkFlag = false;
+            var strs = [];
+            switch($('#dESTATE_FORM_NO').val())
+            {
+                case '土地':
+                    $.each($('.land'), function () {
+                        if ($(this).val().trim() == '')
+                        {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim()+'不得為空');
+                            _checkFlag = false;
+                        }
+                        else 
+                        {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '建物':
+                    $.each($('.build'), function () {
+                        if ($(this).val().trim() == '') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                        else {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '他項權利':
+                    $.each($('.otherRight'), function () {
+                        if ($(this).val().trim() == '') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                        else {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '其他':
+                    if ($('#' + ESTATE_DateTId).val().trim() != '') {
+                        $.each(checkEstate_Date(ESTATE_DateTId), function () {
+                            strs.push(this);
+                            _checkFlag = false;
+                        })
+                    }
+                    $.each($('.other'), function () {
+                        if ($(this).val().trim() == '') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                    })
+                    break;
             }
-            else if (!verified.isTWDate($('#' + ESTATE_DateTId).val().trim())) {
-                customerUtility.alert('發狀日不符合民國日期格式(yyymmdd or yymmdd)', 'w');
-                _checkFlag = false;
-            }
+            if (!_checkFlag)
+            {
+                customerUtility.alert(strs.join(',</br>'), 'w');
+            }         
             return _checkFlag
+        }
+
+        function checkEstate_Date(id)
+        {
+            var arr = [];
+            if (id == ESTATE_DateTId)
+            {
+                var date = $('#' + ESTATE_DateTId).val().trim();
+                if (!verified.isTWDate(date)) {
+                    arr.push('發狀日不符合民國日期格式(yyymmdd or yymmdd)');                   
+                }
+                else if (Number(date) > Number(created.getOnlyDateStr(false, true, true))) {
+                    arr.push('發狀日需 ≦ 系統日');
+                }                
+            }
+            return arr;
         }
 
         function EstateDetailViewModel(

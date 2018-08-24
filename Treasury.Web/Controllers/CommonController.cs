@@ -27,7 +27,7 @@ using Treasury.Web.Controllers;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
 
     public class CommonController : BaseController
@@ -135,8 +135,10 @@ namespace Treasury.WebControllers
                 if (eparm.Any())
                     rw.ReportParameters.AddRange(eparm.Select(x => new ReportParameter(x.key, x.value)));
                 rw.IsDownloadDirectly = false;
-                Session["ReportWrapper"] = rw;
+                var g = Guid.NewGuid().ToString();
+                Session[g] = rw;
                 result.RETURN_FLAG = true;
+                result.Datas = g;
             }
             catch (Exception ex){
                 result.DESCRIPTION = ex.exceptionMessage();

@@ -82,7 +82,7 @@ namespace Treasury.Web.Service.Actual
             if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為保管單位代申請)
             {
                 _TAR.CUSTODY_UID = taData.vCreateUid; //保管單位直接帶 新增人
-                _TAR.CONFIRM_DT = dt;
+                _TAR.CUSTODY_DT = dt;
             }
             logStr += _TAR.modelToString(logStr);
             db.TREA_APLY_REC.Add(_TAR);

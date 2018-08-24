@@ -4,10 +4,12 @@
     var dateFormat;
     var positiveInt;
     var englishFormat;
+    var englishNumberFormat;
 
-    dateFormat = /^((?!0000)[0-9]{4}[/]((0[1-9]|1[0-2])[/](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/](29|30)|(0[13578]|1[02])[/]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/]02[/]29)$/;
+    dateFormat = /^((?!0000)[0-9]{4}[/|-]((0[1-9]|1[0-2])[/|-](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/|-](29|30)|(0[13578]|1[02])[/|-]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/|-]02[/|-]29)$/;
     englishFormat = /^[a-zA-Z]+$/;
     positiveInt = /^[0-9]+$/;
+    englishNumberFormat = /^[a-zA-Z0-9]+$/;
 
     window.verified = verified;
     window.created = created;
@@ -80,6 +82,26 @@
         //#endregion
         $('#' + elementid).rules('add', {
             englishFormate: true,
+        })
+    }
+
+    verified.englishNumber = function (formid, elementid, msg) {
+        msg = msg || message.english;
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+
+        //#region 客製化驗證
+
+        $.validator.addMethod("englishNumberFormate",
+        function (value, element, arg) {
+            return verified.isEnglishNumber(value);
+        }, message.englishNumber);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            englishNumberFormate: true,
         })
     }
 
@@ -180,7 +202,7 @@
                     d = verified.datepickerStrToDate(date);
                 }
                 else {
-                    d = getOnlyDate();
+                    d = created.getOnlyDate();
                 }
             
         }
@@ -348,8 +370,13 @@
         return positiveInt.test(value);
     }
 
+    verified.isEnglishNumber = function (value) {
+        value = value || '';
+        return englishNumberFormat.test(value);
+    }
+
     verified.reportDate = function () {
-        var d = getOnlyDate();
+        var d = created.getOnlyDate();
         var day = d.getDate();
         if (day <= 5) {
             d.setDate(1); //設定為當月份的第一天
@@ -365,18 +392,24 @@
         }
     }
 
-    //formate string(yyyy/MM/dd) to date 失敗回傳 false
+    //formate string(yyyy/MM/dd or yyyy-MM-dd) to date 失敗回傳 false
     verified.datepickerStrToDate = function (value) {
         if (dateFormat.test(value)) {
-            var d = value.split('-');
-            return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            if (value.split('/').length > 2) {
+                var d = value.split('/');
+                return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            }
+            if (value.split('-').length > 2) {
+                var d = value.split('-');
+                return new Date(d[0] + '-' + d[1] + '-' + d[2]);
+            }
         }
         return false;
     }
 
     verified.dateToStr = function (value)
     {
-        return value.getFullYear() + '/' + padLeft((value.getMonth() + 1), 2) + '/' + (value.getDate())
+        return value.getFullYear() + '/' + created.padLeft((value.getMonth() + 1), 2) + '/' + (value.getDate())
     }
 
     verified.textAreaLength = function (evt) {
@@ -408,7 +441,7 @@
             }
             if (datepicker.getDate() === 25)
                 return true;
-            var d = getOnlyDate();
+            var d = created.getOnlyDate();
             d.setFullYear(datepicker.getFullYear());
             d.setDate(1);
             d.setMonth(datepicker.getMonth());
@@ -422,10 +455,22 @@
         return false;
     }
 
-    function getOnlyDate() {
+    created.getOnlyDate = function getOnlyDate() {
         var d = new Date();
-        d = new Date(d.getFullYear() + '-' + padLeft((d.getMonth() + 1), 2) + '-' + padLeft((d.getDate()),2));
+        d = new Date(d.getFullYear() + '-' + created.padLeft((d.getMonth() + 1), 2) + '-' + created.padLeft((d.getDate()), 2));
         return d;
+    }
+
+    created.getOnlyDateStr = function getOnlyDateStr(backSlashFlag, tawFlag, notLinkFlag)
+    {
+        backSlashFlag = backSlashFlag || false;
+        tawFlag = tawFlag || false;
+        notLinkFlag = notLinkFlag || false;
+        var d = new Date();
+        var r = '';   
+        r = tawFlag ? d.getFullYear() - 1911 : d.getFullYear();
+        r += ((notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getMonth() + 1), 2) + (notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getDate()), 2));
+        return r;
     }
 
     created.uuid = function _uuid() {

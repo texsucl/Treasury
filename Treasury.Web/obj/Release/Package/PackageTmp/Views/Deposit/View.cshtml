@@ -1,0 +1,1468 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div style="padding-bottom:5px;">
+        <input type="button" id="DepositInsert_M" value="新增存入定存單總項" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="DEPOSITjqgridDiv_M" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none" class="DepositTakeOut">
+        <label>定存單到期日 : </label>
+        <input type="text" id="tTrans_Expiry_Date_From" name="tTrans_Expiry_Date_From" />
+        <label> ~&ensp;</label>
+        <input type="text" id="tTrans_Expiry_Date_To" name="tTrans_Expiry_Date_To" />
+        <input type="button" id="DepositSearch" value="查詢" class="btn btn-primary" />
+    </div>
+    <div id="DEPOSITjqgridDiv_N" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div id="DEPOSITjqgridDiv_Y" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+
+    <div style="padding-bottom:5px;">
+        <input type="button" id="DepositInsert_D" value="新增存入定存單明細" class="btn btn-primary" style="display:none" />
+    </div>
+    <div id="DEPOSITjqgridDiv_D" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="DepositAct">
+        <input type="button" id="DepositApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="DepositCancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="DepositBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="DepositDialog_M" style="display:none;">
+        <form id="DepositDialogForm_M">
+            <table>
+                <tr>
+                    <td>
+                        <label>幣別 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tCurrency" name="tCurrency" maxlength="3" />
+                    </td>
+                    <td>
+                        <label>交易對象 : </label>
+                    </td>
+                    <td colspan="3">
+                        <input type="text" class="DepositInsertType_M" id="tTrad_Partners" name="tTrad_Partners" maxlength="30" style="width:530px" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>承作日期 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tCommit_Date" name="tCommit_Date" />
+                    </td>
+                    <td>
+                        <label>到期日 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tExpiry_Date" name="tExpiry_Date" />
+                    </td>
+                    <td>
+                        <label>計息方式 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dInterest_Rate_Type", (SelectList)ViewBag.dInterest_Rate_Type, new { @class = "DepositInsertType_M" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>利率% : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tInterest_Rate" name="tInterest_Rate" maxlength="5" />
+                    </td>
+                    <td>
+                        <label>存單類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dDep_Type", (SelectList)ViewBag.dDep_Type, new { @class = "DepositInsertType_M" })
+                    </td>
+                    <td>
+                        <label>總面額 : </label>
+                    </td>
+                    <td>
+                        <label id="lTotal_Denomination"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>設質否 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dDep_Set_Quality", (SelectList)ViewBag.dYN_Flag, new { @class = "DepositInsertType_M" })
+                    </td>
+                    <td>
+                        <label>自動轉期 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dAuto_Trans", (SelectList)ViewBag.dYN_Flag, new { @class = "DepositInsertType_M" })
+                    </td>
+                    <td>
+                        <label>轉期後到期日 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tTrans_Expiry_Date" name="tTrans_Expiry_Date" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td colspan="3">
+                        <input type="text" class="DepositInsertType_M" id="tMemo" name="tMemo" maxlength="30" style="width:500px" />
+                        <input type="hidden" id="hItem_Id" />
+                    </td>
+                    <td>
+                        <label>轉期次數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_M" id="tTrans_Tms" name="tTrans_Tms"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="DepositInsertTemp_M" value="新增" class="btn btn-primary" />
+                        <input type="button" id="DepositUpdateTemp_M" value="修改" class="btn btn-primary" />
+                        <input type="button" id="DepositDeleteTemp_M" value="刪除" class="btn btn-primary" />
+                    </td>
+
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="DepositCancelTemp_M" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="DepositDialog_D" style="display:none;">
+        <form id="DepositDialogForm_D">
+            <table>
+                <tr>
+                    <td>
+                        <label>存單號碼前置碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_Preamble" name="tDep_No_Preamble" maxlength="3" />
+                    </td>
+                    <td>
+                        <label>存單號碼(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_B" name="tDep_No_B" maxlength="7" />
+                    </td>
+                    <td>
+                        <label>存單號碼(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_E" name="tDep_No_E" maxlength="7" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存單號碼尾碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_Tail" name="tDep_No_Tail" maxlength="1" />
+                    </td>
+                    <td>
+                        <label>張數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDep_Cnt" name="tDep_Cnt" />
+                    </td>
+                    <td>
+                        <label>單張面額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="DepositInsertType_D" id="tDenomination" name="tDenomination" maxlength="13" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>面額小計 : </label>
+                    </td>
+                    <td>
+                        <label id="lSubtotal_Denomination"></label>
+                        <input type="hidden" id="hRowNum" />
+                        <input type="hidden" id="hData_Seq" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="DepositInsertTemp_D" value="新增" class="btn btn-primary" />
+                        <input type="button" id="DepositUpdateTemp_D" value="修改" class="btn btn-primary" />
+                        <input type="button" id="DepositDeleteTemp_D" value="刪除" class="btn btn-primary" />
+                    </td>
+
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="DepositCancelTemp_D" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var DepositUrl = {};
+        DepositUrl.getData = '@Url.Action("GetCacheData", "Deposit")';
+        DepositUrl.setData = '@Url.Action("SetDetailData", "Deposit")';
+        DepositUrl.InsertTempData_M = '@Url.Action("InsertTempData_M", "Deposit")';
+        DepositUrl.InsertTempData_D = '@Url.Action("InsertTempData_D", "Deposit")';
+        DepositUrl.UpdateTempData_M = '@Url.Action("UpdateTempData_M", "Deposit")';
+        DepositUrl.UpdateTempData_D = '@Url.Action("UpdateTempData_D", "Deposit")';
+        DepositUrl.DeleteTempData_M = '@Url.Action("DeleteTempData_M", "Deposit")';
+        DepositUrl.DeleteTempData_D = '@Url.Action("DeleteTempData_D", "Deposit")';
+        DepositUrl.ResetTempData = '@Url.Action("ResetTempData", "Deposit")';
+        DepositUrl.TakeOutData = '@Url.Action("TakeOutData", "Deposit")';
+        DepositUrl.ApplyTempData = '@Url.Action("ApplyTempData", "Deposit")';
+        DepositUrl.SearchData = '@Url.Action("SearchData", "Deposit")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var DepositFormId_M = 'DepositDialogForm_M'; //formId
+        var DepositItem_Id = 'hItem_Id'; //物品編號Id
+        var DepositCurrency = 'tCurrency'; //幣別Id
+        var DepositTrad_Partners = 'tTrad_Partners'; //交易對象Id
+        var DepositCommit_Date = 'tCommit_Date'; //承作日期Id
+        var DepositExpiry_Date = 'tExpiry_Date'; //到期日Id
+        var DepositInterest_Rate_Type = 'dInterest_Rate_Type'; //計息方式Id
+        var DepositInterest_Rate = 'tInterest_Rate'; //利率%Id
+        var DepositDep_Type = 'dDep_Type'; //存單類型Id
+        var DepositTotal_Denomination = 'lTotal_Denomination'; //總面額Id
+        var DepositDep_Set_Quality = 'dDep_Set_Quality'; //設質否Id
+        var DepositAuto_Trans = 'dAuto_Trans'; //自動轉期Id
+        var DepositTrans_Expiry_Date = 'tTrans_Expiry_Date'; //轉期後到期日Id
+        var DepositMemo = 'tMemo'; //備註Id
+        var DepositTrans_Tms = 'tTrans_Tms'; //轉期次數Id
+
+        var DepositFormId_D = 'DepositDialogForm_D'; //formId
+        var DepositRowNum = 'hRowNum'; //編號Id
+        var DepositData_Seq = 'hData_Seq'; //明細流水號Id
+        var DepositDep_No_Preamble = 'tDep_No_Preamble'; //存單號碼前置碼Id
+        var DepositDep_No_B = 'tDep_No_B'; //存單號碼(起)Id
+        var DepositDep_No_E = 'tDep_No_E'; //存單號碼(迄)Id
+        var DepositDep_No_Tail = 'tDep_No_Tail'; //存單號碼尾碼Id
+        var DepositDep_Cnt = 'tDep_Cnt'; //張數Id
+        var DepositDenomination = 'tDenomination'; //單張面額Id
+        var DepositSubtotal_Denomination = 'lSubtotal_Denomination'; //面額小計Id
+
+        var DepositTrans_Expiry_Date_From = 'tTrans_Expiry_Date_From';//定存單到期日(起)
+        var DepositTrans_Expiry_Date_To = 'tTrans_Expiry_Date_To';//定存單到期日(迄)
+
+        var Deposit_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
+        var type = $('input[name=cProjectType]:checked').val();
+        if (!Deposit_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
+            $('.DepositAct').hide();
+            type = '@ViewBag.dAccess';
+        }
+        else { //是覆核狀態 (為存入 or 取出 動作)
+            $('.DepositAct').show();
+        }
+        var Deposit_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
+        if (Deposit_Aply_No_Flag) {
+            $('#DepositCancel').hide(); //已經申請故無法取消申請
+            type = '@ViewBag.dAccess';
+        }
+        var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
+        if (typeFlag && Deposit_Act_Type) {
+            $('#DepositInsert_M').show();
+            $('#DepositInsert_D').show();
+        }
+        else if (!typeFlag && Deposit_Act_Type)//取出且可編輯
+        {
+            $('.DepositTakeOut').show();
+        }
+        //#endregion 參數設定
+
+        //#region 初始動作
+        DepositTempGrid_M();
+        DepositTempGrid_D();
+        setDepositVerified();
+        //#endregion 初始動作
+
+        //#region 註冊verified
+        function setDepositVerified() {
+            created.createDatepicker(DepositCommit_Date, null);
+            created.createDatepicker(DepositExpiry_Date, null);
+            created.createDatepickerRange(DepositTrans_Expiry_Date_From, DepositTrans_Expiry_Date_To);
+
+            if ('@ViewBag.CustodianFlag' == "True") {
+                created.createDatepicker(DepositTrans_Expiry_Date, null);
+            }
+
+            verified.required(DepositFormId_M, DepositCurrency, message.required('幣別')); //幣別為必填
+            verified.required(DepositFormId_M, DepositTrad_Partners, message.required('交易對象')); //交易對象為必填
+            verified.required(DepositFormId_M, DepositCommit_Date, message.required('承作日期')); //承作日期為必填
+            verified.required(DepositFormId_M, DepositExpiry_Date, message.required('到期日')); //到期日為必填
+            verified.required(DepositFormId_M, DepositInterest_Rate, message.required('利率%')); //利率%為必填
+
+            verified.english(DepositFormId_M, DepositCurrency); //幣別 僅能輸入英文
+            verified.datepicker(DepositFormId_M, DepositCommit_Date, $('#' + DepositCommit_Date).val()); //承作日期 僅能輸入日期
+            verified.datepicker(DepositFormId_M, DepositExpiry_Date, $('#' + DepositExpiry_Date).val()); //到期日 僅能輸入日期
+            verified.number(DepositFormId_M, DepositInterest_Rate); //利率% 僅能輸入數字
+
+            verified.required(DepositFormId_D, DepositDep_No_B, message.required('存單號碼(起)')); //存單號碼(起)為必填
+            verified.required(DepositFormId_D, DepositDep_No_E, message.required('存單號碼(迄)')); //存單號碼(迄)為必填
+            verified.required(DepositFormId_D, DepositDep_Cnt, message.required('張數')); //張數為必填
+            verified.required(DepositFormId_D, DepositDenomination, message.required('單張面額')); //單張面額為必填
+
+            verified.number(DepositFormId_D, DepositDep_No_B); //存單號碼(起) 僅能輸入數字
+            verified.number(DepositFormId_D, DepositDep_No_E); //存單號碼(迄) 僅能輸入數字
+
+        }
+        //#endregion 註冊verified
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'DepositInsert_M':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositInsertFun_M(); });
+                    break;
+                case 'DepositInsert_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositInsertFun_D(); });
+                    break;
+                case 'DepositApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositApplyFun(); });
+                    break;
+                case 'DepositCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositCancelFun(); });
+                    break;
+                case 'DepositBack':
+                case 'DepositCancelTemp_M':
+                case 'DepositCancelTemp_D':
+                case 'DepositTakeOutCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                    break;
+                case 'DepositInsertTemp_M':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositInsertTempFun_M(); });
+                    break;
+                case 'DepositInsertTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositInsertTempFun_D(); });
+                    break;
+                case 'DepositUpdateTemp_M':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositUpdateTempFun_M(); });
+                    break;
+                case 'DepositUpdateTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositUpdateTempFun_D(); });
+                    break;
+                case 'DepositDeleteTemp_M':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositDeleteTempFun_M(); });
+                    break;
+                case 'DepositDeleteTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositDeleteTempFun_D(); });
+                    break;
+                case 'DepositTakeOutTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositTakeOutTempFun(); });
+                    break;
+                case 'DepositSearch':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { DepositSearchFun(); });
+                    break;
+            }
+        });
+
+        //存單號碼(迄)帶出張數
+        $('#' + DepositDep_No_E).off('blur', function () { });
+        $('#' + DepositDep_No_E).on('blur', function () {
+            if ($('#' + DepositDep_No_E).val().length <= 7) {
+                var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+                var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
+                if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+                    $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+                }
+                else
+                {
+                    $('#' + DepositDep_Cnt).val('');
+                }
+            }
+            else
+            {
+                $('#' + DepositDep_Cnt).val('');
+            }
+        });
+
+        //張數算出存單號碼(迄)
+        $('#' + DepositDep_Cnt).off('blur', function () { });
+        $('#' + DepositDep_Cnt).on('blur', function () {
+            var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+            var _Deposit_Dep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+            if (!isNaN(_Deposit_Dep_Cnt) && !isNaN(_Deposit_Dep_Cnt)) {
+                $('#' + DepositDep_No_E).val(_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1);
+            }
+            else
+            {
+                $('#' + DepositDep_No_E).val('');
+            }
+        });
+
+        //單張面額輸入完畢
+        $('#' + DepositDenomination).off('blur', function () { });
+        $('#' + DepositDenomination).on('blur', function () {
+            if ($('#' + DepositDenomination).val().length <= 13) {
+                var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+                var _Denomination = parseInt($('#' + DepositDenomination).val());
+                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                    $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                }
+                else {
+                    $('#' + DepositSubtotal_Denomination).html('');
+                }
+            }
+            else {
+                $('#' + DepositSubtotal_Denomination).html('');
+            }
+        });
+        //#endregion 註冊事件
+
+        //#region 初始設定
+        function SetCustodianFlag() {
+            if ('@ViewBag.CustodianFlag' == "True") {
+                $('#' + DepositTrans_Expiry_Date).attr("Disabled", false);
+                $('#' + DepositTrans_Tms).attr("Disabled", false);
+            }
+            else {
+                $('#' + DepositTrans_Expiry_Date).attr("Disabled", true);
+                $('#' + DepositTrans_Tms).attr("Disabled", true);
+            }
+        }
+        //#endregion 初始設定
+
+        //#region function
+
+        //#region dialog
+        function dialogOpen_M(type, rowid) {
+            $('#' + DepositFormId_M).validate().resetForm();
+            var dialogId = 'DepositDialog_M';
+            var listId = 'DepositTempList_M';
+            var DepositInsertClass_M = 'DepositInsertType_M';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定存單總項維護',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#DepositInsertTemp_M,#DepositUpdateTemp_M,#DepositDeleteTemp_M').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog_M();
+                $('#DepositInsertTemp_M').show();
+                $('.' + DepositInsertClass_M).prop('disabled', false);
+                SetCustodianFlag();
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('#DepositDeleteTemp_M').show();
+                $('.' + DepositInsertClass_M).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('#DepositUpdateTemp_M').show();
+                $('.' + DepositInsertClass_M).prop('disabled', false);
+                SetCustodianFlag();
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('.' + DepositInsertClass_M).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function dialogOpen_N(type, rowid) {
+            $('#' + DepositFormId_M).validate().resetForm();
+            var dialogId = 'DepositDialog_M';
+            var listId = 'DepositTempList_N';
+            var DepositInsertClass_M = 'DepositInsertType_M';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定存單總項維護',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#DepositInsertTemp_M,#DepositUpdateTemp_M,#DepositDeleteTemp_M').hide();
+            if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('.' + DepositInsertClass_M).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function dialogOpen_Y(type, rowid) {
+            $('#' + DepositFormId_M).validate().resetForm();
+            var dialogId = 'DepositDialog_M';
+            var listId = 'DepositTempList_Y';
+            var DepositInsertClass_M = 'DepositInsertType_M';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定存單總項維護',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#DepositInsertTemp_M,#DepositUpdateTemp_M,#DepositDeleteTemp_M').hide();
+            if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('.' + DepositInsertClass_M).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function dialogOpen_D(type, rowid) {
+            $('#' + DepositFormId_D).validate().resetForm();
+            var dialogId = 'DepositDialog_D';
+            var listId = 'DepositTempList_D';
+            var DepositInsertClass_D = 'DepositInsertType_D';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定存單明細維護',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#DepositInsertTemp_D,#DepositUpdateTemp_D,#DepositDeleteTemp_D').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog_D();
+                $('#DepositInsertTemp_D').show();
+                $('.' + DepositInsertClass_D).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData_D(listId, rowid);
+                $('#DepositDeleteTemp_D').show();
+                $('.' + DepositInsertClass_D).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData_D(listId, rowid);
+                $('#DepositUpdateTemp_D').show();
+                $('.' + DepositInsertClass_D).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_D(listId, rowid);
+                $('.' + DepositInsertClass_D).prop('disabled', true);
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetInsertDialog_M() {
+            $('#' + DepositCurrency).val('');
+            $('#' + DepositTrad_Partners).val('');
+            $('#' + DepositCommit_Date).val('');
+            $('#' + DepositExpiry_Date).val('');
+            if ($('#' + DepositInterest_Rate_Type + ' option').length > 0) {
+                $('#' + DepositInterest_Rate_Type).val($($('#' + DepositInterest_Rate_Type + ' option')[0]).val())
+            }
+            $('#' + DepositInterest_Rate).val('');
+            if ($('#' + DepositDep_Type + ' option').length > 0) {
+                $('#' + DepositDep_Type).val($($('#' + DepositDep_Type + ' option')[0]).val())
+            }
+            $('#' + DepositTotal_Denomination).html('');
+            if ($('#' + DepositDep_Set_Quality + ' option').length > 0) {
+                $('#' + DepositDep_Set_Quality).val($($('#' + DepositDep_Set_Quality + ' option')[0]).val())
+            }
+            if ($('#' + DepositAuto_Trans + ' option').length > 0) {
+                $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[0]).val())
+            }
+            $('#' + DepositTrans_Expiry_Date).val('');
+            $('#' + DepositMemo).val('');
+            $('#' + DepositTrans_Tms).val('');
+        }
+
+        function ResetInsertDialog_D() {
+            $('#' + DepositDep_No_Preamble).val('');
+            $('#' + DepositDep_No_B).val('');
+            $('#' + DepositDep_No_E).val('');
+            $('#' + DepositDep_No_Tail).val('');
+            $('#' + DepositDep_Cnt).val('');
+            $('#' + DepositDenomination).val('');
+            $('#' + DepositSubtotal_Denomination).html('');
+        }
+
+        function dialogSetData_M(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog_M();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + DepositItem_Id).val(data.vItem_Id);
+                $('#' + DepositCurrency).val(data.vCurrency);
+                $('#' + DepositTrad_Partners).val(data.vTrad_Partners);
+                $('#' + DepositCommit_Date).val(data.vCommit_Date);
+                $('#' + DepositExpiry_Date).val(data.vExpiry_Date);
+                $('#' + DepositInterest_Rate_Type).val(data.vInterest_Rate_Type.split('-')[0]);
+                $('#' + DepositInterest_Rate).val(data.vInterest_Rate);
+                $('#' + DepositDep_Type).val(data.vDep_Type.split('-')[0]);
+                $('#' + DepositTotal_Denomination).html(data.vTotal_Denomination);
+                $('#' + DepositDep_Set_Quality).val(data.vDep_Set_Quality);
+                $('#' + DepositAuto_Trans).val(data.vAuto_Trans);
+                $('#' + DepositTrans_Expiry_Date).val(data.vTrans_Expiry_Date);
+                $('#' + DepositTrans_Tms).val(data.vTrans_Tms);
+                $('#' + DepositMemo).val(data.vMemo);
+            }
+        }
+
+        function dialogSetData_D(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog_D();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + DepositRowNum).val(data.vRowNum);
+                $('#' + DepositItem_Id).val(data.vItem_Id);
+                $('#' + DepositData_Seq).val(data.vData_Seq);
+                $('#' + DepositDep_No_Preamble).val(data.vDep_No_Preamble);
+                $('#' + DepositDep_No_B).val(data.vDep_No_B);
+                $('#' + DepositDep_No_E).val(data.vDep_No_E);
+                $('#' + DepositDep_No_Tail).val(data.vDep_No_Tail);
+                $('#' + DepositDep_Cnt).val(data.vDep_Cnt);
+                $('#' + DepositDenomination).val(data.vDenomination);
+                $('#' + DepositSubtotal_Denomination).html(data.vSubtotal_Denomination);
+            }
+        }
+        //#endregion dialog
+
+        //#region jqgrid
+        function formatterRowNum(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogRowNum' style='text-decoration:underline;' return:false; id='" + options.gid + "RowNum" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
+        function formatterItem_Id(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogItem_Id' style='text-decoration:underline;' return:false; id='" + options.gid + "Item_Id" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
+        function INTEREST_RATE_TYPEformatterCheckType(cellvalue, options, rdata) {
+            var value = '';
+            switch (cellvalue) {
+                case '1':
+                    value = '1-機動';
+                    break;
+                case '2':
+                    value = '2-固定';
+                    break;
+                case null:
+                    value = '';
+                    break;
+                default:
+                    value = cellvalue;
+                    break;
+            }
+            return value;
+        }
+
+        function DEP_TYPEformatterCheckType(cellvalue, options, rdata) {
+            var value = '';
+            switch (cellvalue) {
+                case '1':
+                    value = '1-一般';
+                    break;
+                case '2':
+                    value = '2-NCD';
+                    break;
+                case null:
+                    value = '';
+                    break;
+                default:
+                    value = cellvalue;
+                    break;
+            }
+            return value;
+        }
+
+        function DEPOSITunformatter(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox DepositTakeOuts customerCheck'></div>";
+            return str;
+        }
+
+        function DepositCompleteFun_M(listId) {
+            jqgridCustom.randerAction(listId, 'DepositTemp', tempActFun_M);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //編號
+                $(this).find('td').find('a.DialogRowNum').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        SetDepositFun(listId, i + 1);
+                    });
+                });
+            });
+
+            if (!Deposit_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        function DepositTempTakeOutFun_N(listId) {
+            jqgridCustom.randerAction(listId, 'DepositTemp', tempActFun_N);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.DepositTakeOuts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout_N(i + 1, $(this).prop('checked'));
+                    });
+                });
+
+                //庫存編號
+                $(this).find('td').find('a.DialogItem_Id').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        SetDepositFun(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function DepositTempTakeOutFun_Y(listId) {
+            jqgridCustom.randerAction(listId, 'DepositTemp', tempActFun_Y);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.DepositTakeOuts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout_Y(i + 1, $(this).prop('checked'));
+                    });
+                });
+
+                //庫存編號
+                $(this).find('td').find('a.DialogItem_Id').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        SetDepositFun(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function takeout_N(rowid, flag) {
+            var listId = 'DepositTempList_N';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: DepositViewModel_M(
+                        data.vItem_Id,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        data.vDep_Set_Quality
+                        ),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: DepositUrl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    DepositTempGrid_M();
+                }
+            });
+        }
+
+        function takeout_Y(rowid, flag) {
+            var listId = 'DepositTempList_Y';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: DepositViewModel_M(
+                        data.vItem_Id,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        data.vDep_Set_Quality
+                        ),
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: DepositUrl.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    DepositTempGrid_M();
+                }
+            });
+        }
+
+        function DepositCompleteFun_D(listId) {
+            jqgridCustom.randerAction(listId, 'DepositTemp', tempActFun_D);
+            if (!Deposit_Act_Type) { //申請狀態
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+        }
+
+        function DepositTempTakeOutFun_D(listId) {
+            jqgridCustom.randerAction(listId, 'DepositTemp', tempActFun_D);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+            });
+        }
+
+        var tempActFun_M = {};
+        tempActFun_M.Edit = function (i) {
+            dialogOpen_M('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun_M.Dele = function (i) {
+            dialogOpen_M('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun_M.View = function (i) {
+            dialogOpen_M('@Ref.ActionType.View.ToString()', i);
+        }
+
+        var tempActFun_N = {};
+        tempActFun_N.Edit = function (i) {
+            dialogOpen_N('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun_N.Dele = function (i) {
+            dialogOpen_N('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun_N.View = function (i) {
+            dialogOpen_N('@Ref.ActionType.View.ToString()', i);
+        }
+
+        var tempActFun_Y = {};
+        tempActFun_Y.Edit = function (i) {
+            dialogOpen_Y('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun_Y.Dele = function (i) {
+            dialogOpen_Y('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun_Y.View = function (i) {
+            dialogOpen_Y('@Ref.ActionType.View.ToString()', i);
+        }
+
+        var tempActFun_D = {};
+        tempActFun_D.Edit = function (i) {
+            dialogOpen_D('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun_D.Dele = function (i) {
+            dialogOpen_D('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun_D.View = function (i) {
+            dialogOpen_D('@Ref.ActionType.View.ToString()', i);
+        }
+
+        function DepositTempGrid_M() {
+            if (typeFlag) { //存入
+                var colNameArray = ['編號', '動作', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置否', '自動轉期', '轉期後到期日', '備註', '轉期次數', '物品編號', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
+                var colModelArray = [];
+                colModelArray.push({ name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'center', formatter: formatterRowNum, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCommit_Date_Tw", index: "vCommit_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vExpiry_Date_Tw", index: "vExpiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 80, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 80, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
+                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
+                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", hidden: true });
+                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'DEPOSITjqgridDiv_M',
+                    'DepositTempList_M',
+                    'DepositTempPeger_M',
+                    DepositUrl.getData,
+                    {
+                        type: 'M'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '存入定存單',
+                    jqgridCustom.getPage('DEPOSITjqgridDiv_M'),
+                    DepositCompleteFun_M
+                    );
+            }
+            else { //取出
+                var colNameArray = ['取出', '動作', '庫存編號','幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置否', '自動轉期', '轉期後到期日', '備註', '轉期次數', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
+                var colModelArray = [];
+                if (!Deposit_Act_Type) {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                }
+                else {
+                    colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                }
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center', formatter: formatterItem_Id, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCommit_Date_Tw", index: "vCommit_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vExpiry_Date_Tw", index: "vExpiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
+                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", hidden: true });
+                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'DEPOSITjqgridDiv_N',
+                    'DepositTempList_N',
+                    'DepositTempPeger_N',
+                    DepositUrl.getData,
+                    {
+                        type: 'N'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '設置否=N  到期明細',
+                    jqgridCustom.getPage('DEPOSITjqgridDiv_N'),
+                    DepositTempTakeOutFun_N,
+                    true
+                    );
+                jqgridCustom.createJqgridByCache(
+                    'DEPOSITjqgridDiv_Y',
+                    'DepositTempList_Y',
+                    'DepositTempPeger_Y',
+                    DepositUrl.getData,
+                    {
+                        type: 'Y'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '設置否=Y  到期明細',
+                    jqgridCustom.getPage('DEPOSITjqgridDiv_Y'),
+                    DepositTempTakeOutFun_Y,
+                    true
+                    );
+            }
+        }
+
+        function DepositTempGrid_D() {
+            if (typeFlag) { //存入
+                var colNameArray = ['編號', '動作', '存單號碼前置碼', '存單號碼(起)', '存單號碼(迄)', '存單號碼尾碼', '張數', '單張面額', '面額小計', '物品編號', '明細流水號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'center' });
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vDep_No_Preamble", index: "vDep_No_Preamble", width: 140, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
+                colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'DEPOSITjqgridDiv_D',
+                    'DepositTempList_D',
+                    'DepositTempPeger_D',
+                    DepositUrl.getData,
+                    {
+                        type: 'D'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '定存單明細',
+                    jqgridCustom.getPage('DEPOSITjqgridDiv_D'),
+                    DepositCompleteFun_D
+                    );
+            }
+            else { //取出
+                var colNameArray = ['動作', '庫存編號', '存單號碼前置碼', '存單號碼(起)', '存單號碼(迄)', '存單號碼尾碼', '張數', '單張面額', '面額小計','編號', '明細流水號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_Preamble", index: "vDep_No_Preamble", width: 140, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vRowNum", index: "vRowNum", hidden: true });
+                colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'DEPOSITjqgridDiv_D',
+                    'DepositTempList_D',
+                    'DepositTempPeger_D',
+                    DepositUrl.getData,
+                    {
+                        type: 'D'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '定存單明細',
+                    jqgridCustom.getPage('DEPOSITjqgridDiv_D'),
+                    DepositTempTakeOutFun_D,
+                    true
+                    );
+            }
+        }
+        //#endregion jqgrid
+
+        //開啟定期存單總項新增頁面
+        function DepositInsertFun_M() {
+
+            dialogOpen_M('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        //開啟定期存單明細新增頁面
+        function DepositInsertFun_D() {
+            if ($('#' + DepositRowNum).val().trim() == "")
+            {
+                customerUtility.alert('請選取定期存單編號', 'w');
+            }
+            else
+            {
+                dialogOpen_D('@Ref.ActionType.Add.ToString()', null);
+            }
+        }
+
+        //申請覆核
+        function DepositApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: DepositUrl.ApplyTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#DepositApply'));
+                }
+            })
+        }
+
+        //取消申請
+        function DepositCancelFun() {
+            if (confirm("是否要取消申請?"))
+            {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        AccessType: type
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetInsertDialog_M();
+                    ResetInsertDialog_D();
+                    $('#' + DepositRowNum).val('');
+                    DepositTempGrid_M();
+                    DepositTempGrid_D();
+                })
+            }
+        }
+
+        //新增定期存單總項暫存資料
+        function DepositInsertTempFun_M() {
+            if ($('#' + DepositFormId_M).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_M(
+                            created.uuid(),
+                            $('#' + DepositCurrency).val().trim(),
+                            $('#' + DepositTrad_Partners).val().trim(),
+                            $('#' + DepositCommit_Date).val().trim(),
+                            $('#' + DepositExpiry_Date).val().trim(),
+                            $('#' + DepositInterest_Rate_Type).val().trim(),
+                            $('#' + DepositInterest_Rate).val().trim(),
+                            $('#' + DepositDep_Type).val().trim(),
+                            $('#' + DepositTotal_Denomination).html().trim(),
+                            $('#' + DepositDep_Set_Quality).val().trim(),
+                            $('#' + DepositAuto_Trans).val().trim(),
+                            $('#' + DepositTrans_Expiry_Date).val().trim(),
+                            $('#' + DepositTrans_Tms).val().trim(),
+                            $('#' + DepositMemo).val().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.InsertTempData_M,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositInsertTemp_M'));
+                        DepositTempGrid_M();
+                    }
+                })
+            }
+        }
+
+        //新增定期存單明細暫存資料
+        function DepositInsertTempFun_D() {
+            if ($('#' + DepositFormId_D).valid()) {
+                //存單號碼前置碼格式檢查
+                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishNumber($('#' + DepositDep_No_Preamble).val().trim()) == false) {
+                    customerUtility.alert('存單號碼前置碼僅可輸入英文字母和數字', 'w');
+                    return
+                }
+                //存單號碼(起)/(迄)檢查
+                var _Check_No_B = parseInt($('#' + DepositDep_No_B).val());
+                var _Check_No_E = parseInt($('#' + DepositDep_No_E).val());
+                if (_Check_No_B > _Check_No_E) {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_D(
+                            $('#' + DepositRowNum).val().trim(),
+                            $('#' + DepositItem_Id).val().trim(),
+                            created.uuid(),
+                            $('#' + DepositDep_No_Preamble).val().trim(),
+                            $('#' + DepositDep_No_B).val().trim(),
+                            $('#' + DepositDep_No_E).val().trim(),
+                            $('#' + DepositDep_No_Tail).val().trim(),
+                            $('#' + DepositDep_Cnt).val().trim(),
+                            $('#' + DepositDenomination).val().trim(),
+                            $('#' + DepositSubtotal_Denomination).html().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.InsertTempData_D,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositInsertTemp_D'));
+                        DepositTempGrid_M();
+                        DepositTempGrid_D();
+                    }
+                })
+            }
+        }
+
+        //修改定期存單總項暫存資料
+        function DepositUpdateTempFun_M() {
+            if ($('#' + DepositFormId_M).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_M(
+                            $('#' + DepositItem_Id).val().trim(),
+                            $('#' + DepositCurrency).val().trim(),
+                            $('#' + DepositTrad_Partners).val().trim(),
+                            $('#' + DepositCommit_Date).val().trim(),
+                            $('#' + DepositExpiry_Date).val().trim(),
+                            $('#' + DepositInterest_Rate_Type).val().trim(),
+                            $('#' + DepositInterest_Rate).val().trim(),
+                            $('#' + DepositDep_Type).val().trim(),
+                            $('#' + DepositTotal_Denomination).html().trim(),
+                            $('#' + DepositDep_Set_Quality).val().trim(),
+                            $('#' + DepositAuto_Trans).val().trim(),
+                            $('#' + DepositTrans_Expiry_Date).val().trim(),
+                            $('#' + DepositTrans_Tms).val().trim(),
+                            $('#' + DepositMemo).val().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.UpdateTempData_M,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositUpdateTemp_M'));
+                        DepositTempGrid_M();
+                    }
+                })
+            }
+        }
+
+        //修改定期存單明細暫存資料
+        function DepositUpdateTempFun_D() {
+            if ($('#' + DepositFormId_D).valid()) {
+                //存單號碼前置碼格式檢查
+                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishNumber($('#' + DepositDep_No_Preamble).val().trim()) == false) {
+                    customerUtility.alert('存單號碼前置碼僅可輸入英文字母和數字', 'w');
+                    return
+                }
+                //存單號碼(起)/(迄)檢查
+                var _Check_No_B = parseInt($('#' + DepositDep_No_B).val());
+                var _Check_No_E = parseInt($('#' + DepositDep_No_E).val());
+                if (_Check_No_B > _Check_No_E) {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_D(
+                            $('#' + DepositRowNum).val().trim(),
+                            $('#' + DepositItem_Id).val().trim(),
+                            $('#' + DepositData_Seq).val().trim(),
+                            $('#' + DepositDep_No_Preamble).val().trim(),
+                            $('#' + DepositDep_No_B).val().trim(),
+                            $('#' + DepositDep_No_E).val().trim(),
+                            $('#' + DepositDep_No_Tail).val().trim(),
+                            $('#' + DepositDep_Cnt).val().trim(),
+                            $('#' + DepositDenomination).val().trim(),
+                            $('#' + DepositSubtotal_Denomination).html().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.UpdateTempData_D,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositUpdateTemp_D'));
+                        DepositTempGrid_M();
+                        DepositTempGrid_D();
+                    }
+                })
+            }
+        }
+
+        //刪除定期存單總項暫存資料
+        function DepositDeleteTempFun_M() {
+            if ($('#' + DepositFormId_M).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_M(
+                            $('#' + DepositItem_Id).val().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.DeleteTempData_M,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositDeleteTemp_M'));
+                        $('#' + DepositRowNum).val('');
+                        DepositTempGrid_M();
+                        DepositTempGrid_D();
+                    }
+                })
+            }
+        }
+
+        //刪除定期存單明細暫存資料
+        function DepositDeleteTempFun_D() {
+            if ($('#' + DepositFormId_D).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: DepositViewModel_D(
+                            $('#' + DepositRowNum).val().trim(),
+                            $('#' + DepositItem_Id).val().trim(),
+                            $('#' + DepositData_Seq).val().trim())
+                    }),
+                    dataType: "json",
+                    url: DepositUrl.DeleteTempData_D,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DepositDeleteTemp_D'));
+                        DepositTempGrid_M();
+                        DepositTempGrid_D();
+                    }
+                })
+            }
+        }
+
+        //查詢
+        function DepositSearchFun()
+        {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    vTransExpiryDateFrom: $('#' + DepositTrans_Expiry_Date_From).val().trim(),
+                    vTransExpiryDateTo: $('#' + DepositTrans_Expiry_Date_To).val().trim()
+                }),
+                dataType: "json",
+                url: DepositUrl.SearchData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                DepositTempGrid_M();
+            })
+        }
+
+        //依總項編號設定定期存單明細
+        function SetDepositFun(listId, rowid) {
+            var data = $("#" + listId).getRowData(rowid);
+            $('#' + DepositItem_Id).val(data.vItem_Id);
+            $('#' + DepositRowNum).val(data.vRowNum);
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    vItem_Id: data.vItem_Id
+                }),
+                dataType: "json",
+                url: DepositUrl.setData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                DepositTempGrid_D();
+            })
+
+        }
+
+        //檢查日期
+        function checkDate(str) {
+            var re = new RegExp("^([0-9]{4})[./]{1}([0-9]{1,2})[./]{1}([0-9]{1,2})$");
+            var strDataValue;
+            var infoValidation = true;
+
+            if ((strDataValue = re.exec(str)) != null) {
+                var i;
+                i = parseFloat(strDataValue[1]);
+                if (i <= 0 || i > 9999) { // 年
+                    infoValidation = false;
+                }
+                i = parseFloat(strDataValue[2]);
+                if (i <= 0 || i > 12) { // 月
+                    infoValidation = false;
+                }
+                i = parseFloat(strDataValue[3]);
+                if (i <= 0 || i > 31) { // 日
+                    infoValidation = false;
+                }
+            } else {
+                infoValidation = false;
+            }
+            return infoValidation;
+        }
+
+        //檢查英數字
+        function checkEnglishNumber(str)
+        {
+            var regExp = /^[\d|a-zA-Z]+$/;
+            if (regExp.test(str))
+                return true;
+            else
+                return false;
+        }
+
+        function DepositViewModel_M(
+            vItem_Id,
+            vCurrency,
+            vTrad_Partners,
+            vCommit_Date,
+            vExpiry_Date,
+            vInterest_Rate_Type,
+            vInterest_Rate,
+            vDep_Type,
+            vTotal_Denomination,
+            vDep_Set_Quality,
+            vAuto_Trans,
+            vTrans_Expiry_Date,
+            vTrans_Tms,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItem_Id'] = vItem_Id;
+            obj['vCurrency'] = vCurrency;
+            obj['vTrad_Partners'] = vTrad_Partners;
+            obj['vCommit_Date'] = vCommit_Date;
+            obj['vExpiry_Date'] = vExpiry_Date;
+            obj['vInterest_Rate_Type'] = vInterest_Rate_Type;
+            obj['vInterest_Rate'] = vInterest_Rate;
+            obj['vDep_Type'] = vDep_Type;
+            obj['vTotal_Denomination'] = vTotal_Denomination;
+            obj['vDep_Set_Quality'] = vDep_Set_Quality;
+            obj['vAuto_Trans'] = vAuto_Trans;
+            obj['vTrans_Expiry_Date'] = vTrans_Expiry_Date;
+            obj['vTrans_Tms'] = vTrans_Tms;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+        function DepositViewModel_D(
+            vRowNum,
+            vItem_Id,
+            vData_Seq,
+            vDep_No_Preamble,
+            vDep_No_B,
+            vDep_No_E,
+            vDep_No_Tail,
+            vDep_Cnt,
+            vDenomination,
+            vSubtotal_Denomination
+            ) {
+            var obj = {};
+            obj['vRowNum'] = vRowNum;
+            obj['vItem_Id'] = vItem_Id;
+            obj['vData_Seq'] = vData_Seq;
+            obj['vDep_No_Preamble'] = vDep_No_Preamble;
+            obj['vDep_No_B'] = vDep_No_B;
+            obj['vDep_No_E'] = vDep_No_E;
+            obj['vDep_No_Tail'] = vDep_No_Tail;
+            obj['vDep_Cnt'] = vDep_Cnt;
+            obj['vDenomination'] = vDenomination;
+            obj['vSubtotal_Denomination'] = vSubtotal_Denomination;
+            return obj;
+        }
+        //#endregion function
+    });
+</script>

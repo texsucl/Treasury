@@ -22,7 +22,7 @@ using Treasury.Web.Enum;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.WebControllers
+namespace Treasury.Web.Controllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -43,7 +43,7 @@ namespace Treasury.WebControllers
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
             var _dActType = GetActType(type, AplyNo);
-           
+            ViewBag.CustodianFlag = AccountController.CustodianFlag;
             if (AplyNo.IsNullOrWhiteSpace())
             {
                 Cache.Invalidate(CacheList.TreasuryAccessViewData);
@@ -61,6 +61,7 @@ namespace Treasury.WebControllers
             ViewBag.dActType = _dActType;
             return PartialView();
         }
+
 
         /// <summary>
         /// 申請覆核
@@ -174,7 +175,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult DeleteTempData(ItemImpViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             transType(model);
@@ -189,6 +190,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.ItemImpData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
+                    result.Datas = tempData.Any();
                 }
                 else
                 {
@@ -207,7 +209,7 @@ namespace Treasury.WebControllers
         [HttpPost]
         public JsonResult TakeOutData(ItemImpViewModel model,bool takeoutFlag)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             transType(model);
@@ -230,6 +232,7 @@ namespace Treasury.WebControllers
                     Cache.Set(CacheList.ItemImpData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vtakeoutFlag);
                 }
                 else
                 {
@@ -317,7 +320,7 @@ namespace Treasury.WebControllers
             {
                 var date = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_2);
                 model.vItemImp_Expected_Date_1 =
-                    (date == null ? null : date.Value.DateToTaiwanDate(9,true));
+                    (date == null ? null : date.Value.DateToTaiwanDate(9));
             } 
         }
     }
