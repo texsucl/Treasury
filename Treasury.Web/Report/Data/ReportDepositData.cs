@@ -92,11 +92,20 @@ namespace Treasury.Web.Report.Data
 
         protected class ReportData
         {
+            [Description("類型")]
+            public string TYPE { get; set; }
+
+            [Description("幣別")]
+            public string CURRENCY { get; set; }
+
             [Description("到期日")]
             public string EXPIRY_DATE { get; set; }
 
             [Description("交易對象")]
             public string TRAD_PARTNERS { get; set; }
+
+            [Description("存單類型")]
+            public string DEP_TYPE { get; set; }
 
             [Description("存單號碼(起)")]
             public string DEP_NO_B { get; set; }
@@ -105,13 +114,19 @@ namespace Treasury.Web.Report.Data
             public string DEP_NO_E { get; set; }
 
             [Description("張數")]
-            public int DEP_CNT { get; set; }
+            public string DEP_CNT { get; set; }
 
             [Description("單張面額")]
-            public Decimal DENOMINATION { get; set; }
+            public string DENOMINATION { get; set; }
 
             [Description("總面額")]
-            public Decimal TOTAL_DENOMINATION { get; set; }
+            public string TOTAL_DENOMINATION { get; set; }
+
+            [Description("項次")]
+            public string ISORTBY { get; set; }
+
+            [Description("檢核項目")]
+            public string DEP_CHK_ITEM_DESC { get; set; }
 
         }
     }

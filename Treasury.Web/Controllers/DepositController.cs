@@ -219,31 +219,40 @@ namespace Treasury.Web.Controllers
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
-            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            if(CheckDetail(model))
+
+            if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
-                if (Cache.IsSet(CacheList.DepositData_D_All))
+                if (CheckDetail(model))
                 {
-                    //新增明細全部
-                    var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
-                    tempData.Add(model);
-                    Cache.Invalidate(CacheList.DepositData_D_All);
-                    Cache.Set(CacheList.DepositData_D_All, tempData);
+                    if (Cache.IsSet(CacheList.DepositData_D_All))
+                    {
+                        //新增明細全部
+                        var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
+                        tempData.Add(model);
+                        Cache.Invalidate(CacheList.DepositData_D_All);
+                        Cache.Set(CacheList.DepositData_D_All, tempData);
 
-                    //依編號取出顥示明細
-                    var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
-                    Cache.Invalidate(CacheList.DepositData_D);
-                    Cache.Set(CacheList.DepositData_D, detailData);
-                    SetTotalDenomination(model.vItem_Id);
+                        //依編號取出顥示明細
+                        var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                        Cache.Invalidate(CacheList.DepositData_D);
+                        Cache.Set(CacheList.DepositData_D, detailData);
+                        SetTotalDenomination(model.vItem_Id);
 
-                    result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                    }
+                }
+                else
+                {
+                    result.DESCRIPTION = "重覆資料";
                 }
             }
             else
             {
-                result.DESCRIPTION = "重覆資料";
+                result.RETURN_FLAG = false;
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
+
             return Json(result);
         }
 
@@ -302,45 +311,55 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            if (CheckDetail(model))
+
+            if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
-                if (Cache.IsSet(CacheList.DepositData_D_All))
+                if (CheckDetail(model))
                 {
-                    var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
-                    var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
-                    if (updateTempData != null)
+                    if (Cache.IsSet(CacheList.DepositData_D_All))
                     {
-                        //修改明細全部
-                        updateTempData.vDep_No_Preamble = model.vDep_No_Preamble;
-                        updateTempData.vDep_No_B = model.vDep_No_B;
-                        updateTempData.vDep_No_E = model.vDep_No_E;
-                        updateTempData.vDep_No_Tail = model.vDep_No_Tail;
-                        updateTempData.vDep_Cnt = model.vDep_Cnt;
-                        updateTempData.vDenomination = model.vDenomination;
-                        updateTempData.vSubtotal_Denomination = model.vSubtotal_Denomination;
-                        Cache.Invalidate(CacheList.DepositData_D_All);
-                        Cache.Set(CacheList.DepositData_D_All, tempData);
+                        var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
+                        var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
+                        if (updateTempData != null)
+                        {
+                            //修改明細全部
+                            updateTempData.vDep_No_Preamble = model.vDep_No_Preamble;
+                            updateTempData.vDep_No_B = model.vDep_No_B;
+                            updateTempData.vDep_No_E = model.vDep_No_E;
+                            updateTempData.vDep_No_Tail = model.vDep_No_Tail;
+                            updateTempData.vDep_Cnt = model.vDep_Cnt;
+                            updateTempData.vDenomination = model.vDenomination;
+                            updateTempData.vSubtotal_Denomination = model.vSubtotal_Denomination;
+                            Cache.Invalidate(CacheList.DepositData_D_All);
+                            Cache.Set(CacheList.DepositData_D_All, tempData);
 
-                        //依編號取出顥示明細
-                        var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
-                        Cache.Invalidate(CacheList.DepositData_D);
-                        Cache.Set(CacheList.DepositData_D, detailData);
-                        SetTotalDenomination(model.vItem_Id);
+                            //依編號取出顥示明細
+                            var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                            Cache.Invalidate(CacheList.DepositData_D);
+                            Cache.Set(CacheList.DepositData_D, detailData);
+                            SetTotalDenomination(model.vItem_Id);
 
-                        result.RETURN_FLAG = true;
-                        result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                        }
+                        else
+                        {
+                            result.RETURN_FLAG = false;
+                            result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                        }
                     }
-                    else
-                    {
-                        result.RETURN_FLAG = false;
-                        result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
-                    }
+                }
+                else
+                {
+                    result.DESCRIPTION = "重覆資料";
                 }
             }
             else
             {
-                result.DESCRIPTION = "重覆資料";
+                result.RETURN_FLAG = false;
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
+
             return Json(result);
         }
 
