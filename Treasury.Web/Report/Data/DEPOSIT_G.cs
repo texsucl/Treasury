@@ -59,7 +59,7 @@ namespace Treasury.Web.Report.Data
                                 ReportData = new ReportData()
                                 {
                                     TYPE = "Data-N",
-                                    EXPIRY_DATE = MasterDataN.EXPIRY_DATE.DateToTaiwanDate(9),
+                                    EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterDataN.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterDataN.TRAD_PARTNERS,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
@@ -90,7 +90,7 @@ namespace Treasury.Web.Report.Data
                                 {
                                     TYPE = "Data-Y",
                                     CURRENCY=_REC.CURRENCY,
-                                    EXPIRY_DATE=MasterDataY.EXPIRY_DATE.DateToTaiwanDate(9),
+                                    EXPIRY_DATE=TypeTransfer.dateTimeToString(MasterDataY.EXPIRY_DATE,false),
                                     TRAD_PARTNERS=MasterDataY.TRAD_PARTNERS,
                                     DEP_TYPE=_REC.DEP_TYPE,
                                     DEP_NO_B=DetailData.DEP_NO_B,
@@ -108,7 +108,7 @@ namespace Treasury.Web.Report.Data
                             {
                                 TYPE = "Data-Y",
                                 CURRENCY = _REC.CURRENCY,
-                                EXPIRY_DATE = MasterDataY.EXPIRY_DATE.DateToTaiwanDate(9),
+                                EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterDataY.EXPIRY_DATE,false),
                                 TRAD_PARTNERS = MasterDataY.TRAD_PARTNERS,
                                 DEP_TYPE = _REC.DEP_TYPE,
                                 TOTAL_DENOMINATION = TOTAL_DENOMINATION.ToString()
