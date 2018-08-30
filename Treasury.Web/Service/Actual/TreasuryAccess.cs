@@ -45,6 +45,7 @@ namespace Treasury.Web.Service.Actual
             printsStatus.Add(Ref.AccessProjectFormStatus.D04.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.E01.ToString());
             invalidStatus = new List<string>();
+            invalidStatus.Add(Ref.AccessProjectFormStatus.A02.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A03.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A04.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A05.ToString());
@@ -362,8 +363,8 @@ namespace Treasury.Web.Service.Actual
                     select new TreasuryAccessSearchDetailViewModel
                     {
                         vACCESS_REASON = TAR.ACCESS_REASON,
-                        vAPLY_DT = TAR.APLY_DT?.DateToTaiwanDate(9),
-                        vREGI_APPR_DT = TOR?.REGI_APPR_DT?.DateToTaiwanDate(9),
+                        vAPLY_DT = TypeTransfer.dateTimeNToString(TAR.APLY_DT),
+                        vREGI_APPR_DT = TypeTransfer.dateTimeNToString(TOR?.REGI_APPR_DT),
                         vAPLY_NO = TAR.APLY_NO,
                         vAPLY_STATUS = TAR.APLY_STATUS,
                         vAPLY_STATUS_D = formStatus.FirstOrDefault(x => x.CODE == TAR.APLY_STATUS)?.CODE_VALUE,
@@ -414,7 +415,7 @@ namespace Treasury.Web.Service.Actual
                     //result.vAplyUid = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME;
                     result.vAccessType = data.ACCESS_TYPE == "P" ? "存入" : data.ACCESS_TYPE == "G" ? "取出" : ""; //存入(P) or 取出(G)
                     result.vExpectedAccessDate = TypeTransfer.dateTimeNToString(data.EXPECTED_ACCESS_DATE);
-                    result.vCreateDt = data.CREATE_DT?.ToSimpleTaiwanDate();
+                    result.vCreateDt = TypeTransfer.dateTimeNToString(data.CREATE_DT);
                     var _createEmp = emps.FirstOrDefault(x => x.USR_ID == data.CREATE_UID);
                     result.vCreateUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == _createEmp?.DPT_CD?.Trim())?.DPT_NAME;
                     result.vCreateUid = _createEmp?.EMP_NAME;
@@ -822,7 +823,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
 
-                    var aplyStatus = Ref.AccessProjectFormStatus.E03.ToString(); // 狀態 => 申請單位退回作廢
+                    var aplyStatus = Ref.AccessProjectFormStatus.A02.ToString(); // 狀態 => 申請單位覆核駁回
 
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = aplyStatus;
@@ -856,25 +857,7 @@ namespace Treasury.Web.Service.Actual
 
                     db.APLY_REC_HIS.Add(ARH);
 
-                    #endregion
-
-                    #region 作廢
-                    var sampleFactory = new SampleFactory();
-                    var getAgenct = sampleFactory.GetAgenct(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _TREA_APLY_REC.ITEM_ID));
-                    if (getAgenct != null)
-                    {
-                        var _recover = getAgenct.ObSolete(db, _TREA_APLY_REC.APLY_NO, _TREA_APLY_REC.ACCESS_TYPE, logStr, dt);
-                        if (!_recover.Item1) //失敗
-                        {
-                            return result;
-                        }
-                        logStr += _recover.Item2;
-                    }
-                    else
-                    {
-                        return result;
-                    }
-                    #endregion                
+                    #endregion           
                 }
                 var validateMessage = db.GetValidationErrors().getValidateString();
                 if (validateMessage.Any())

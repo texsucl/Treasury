@@ -60,11 +60,11 @@ namespace Treasury.Web.Report.Data
                 }
                 _REC.APLY_NO = data.APLY_NO; //申請單號
                 _REC.ACCESS_TYPE = data.ACCESS_TYPE == "P" ? "存入" : data.ACCESS_TYPE == "G" ? "取出" : ""; //動作 存入/取出
-                _REC.APLY_DT = data.CREATE_DT?.ToSimpleTaiwanDate(); //申請日期
+                _REC.APLY_DT = TypeTransfer.dateTimeNToString(data.CREATE_DT); //申請日期
                 _REC.ITEM_ID = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC; //作業項目
                 _REC.APLY_UNIT = getEmpName(depts, data.APLY_UNIT); //權責部門
                 _REC.ACCESS_REASON = data.ACCESS_REASON; //申請原因
-                _REC.EXPECTED_ACCESS_DATE = data.EXPECTED_ACCESS_DATE?.ToSimpleTaiwanDate(); //預計存取日期
+                _REC.EXPECTED_ACCESS_DATE = TypeTransfer.dateTimeNToString(data.EXPECTED_ACCESS_DATE); //預計存取日期
                 //申請單位
                 var APLY_APPR = getDeptName(emps, data.APLY_APPR_UID); //覆核人員資料
                 _REC.APLY_APPR_UID_UNIT = APLY_APPR.Item1; //覆核人員單位

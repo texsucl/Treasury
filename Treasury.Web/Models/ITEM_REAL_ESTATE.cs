@@ -32,5 +32,14 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> PUT_DATE { get; set; }
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
+        public string ESTATE_FORM_NO_AFT { get; set; }
+        public Nullable<System.DateTime> ESTATE_DATE_AFT { get; set; }
+        public string OWNERSHIP_CERT_NO_AFT { get; set; }
+        public string LAND_BUILDING_NO_AFT { get; set; }
+        public string HOUSE_NO_AFT { get; set; }
+        public string ESTATE_SEQ_AFT { get; set; }
+        public string MEMO_AFT { get; set; }
+        public string CHARGE_DEPT_AFT { get; set; }
+        public string CHARGE_SECT_AFT { get; set; }
     }
 }

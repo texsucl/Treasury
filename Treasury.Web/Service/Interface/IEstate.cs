@@ -57,5 +57,12 @@ namespace Treasury.Web.Service.Interface
         /// <param name="groupNo"></param>
         /// <returns></returns>
         EstateModel GetItemBook(int groupNo);
+
+        /// <summary>
+        /// 對資料庫進行大樓名稱的模糊比對
+        /// </summary>
+        /// <param name="building_Name">大樓名稱</param>
+        /// <returns></returns>
+        MSGReturnModel<string> GetCheckItemBook(string building_Name);
     }
 }

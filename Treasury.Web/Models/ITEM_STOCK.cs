@@ -18,9 +18,13 @@ namespace Treasury.Web.Models
         public string INVENTORY_STATUS { get; set; }
         public int GROUP_NO { get; set; }
         public int TREA_BATCH_NO { get; set; }
+        public string STOCK_TYPE { get; set; }
         public string STOCK_NO_PREAMBLE { get; set; }
         public string STOCK_NO_B { get; set; }
         public string STOCK_NO_E { get; set; }
+        public Nullable<int> STOCK_CNT { get; set; }
+        public Nullable<decimal> AMOUNT_PER_SHARE { get; set; }
+        public Nullable<decimal> SINGLE_NUMBER_OF_SHARES { get; set; }
         public Nullable<decimal> DENOMINATION { get; set; }
         public Nullable<decimal> NUMBER_OF_SHARES { get; set; }
         public string MEMO { get; set; }
@@ -32,7 +36,15 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> PUT_DATE { get; set; }
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
-        public string STOCK_TYPE { get; set; }
-        public Nullable<int> STOCK_CNT { get; set; }
+        public string STOCK_TYPE_AFT { get; set; }
+        public string STOCK_NO_PREAMBLE_AFT { get; set; }
+        public string STOCK_NO_B_AFT { get; set; }
+        public string STOCK_NO_E_AFT { get; set; }
+        public Nullable<int> STOCK_CNT_AFT { get; set; }
+        public Nullable<decimal> AMOUNT_PER_SHARE_AFT { get; set; }
+        public Nullable<decimal> SINGLE_NUMBER_OF_SHARES_AFT { get; set; }
+        public Nullable<decimal> DENOMINATION_AFT { get; set; }
+        public Nullable<decimal> NUMBER_OF_SHARES_AFT { get; set; }
+        public string MEMO_AFT { get; set; }
     }
 }

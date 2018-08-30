@@ -182,6 +182,24 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 對資料庫進行大樓名稱的模糊比對
+        /// </summary>
+        /// <param name="building_Name">大樓名稱</param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult CheckItemBook(string building_Name)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
+            if (!building_Name.IsNullOrWhiteSpace())
+            {
+                result = Estate.GetCheckItemBook(building_Name);              
+            }
+            return Json(result);
+        }
+
+        /// <summary>
         /// 新增明細資料
         /// </summary>
         /// <param name="model"></param>
@@ -195,11 +213,12 @@ namespace Treasury.Web.Controllers
             if (Cache.IsSet(CacheList.ESTATEData))
             {
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
+                var tempData2 = tempData.Where(x => x.vItemId != model.vItemId).ToList();
                 bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
-                    tempData.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim() , !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim() , !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
+                    tempData2.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim() , !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim() , !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.ESTATEData);
@@ -228,7 +247,7 @@ namespace Treasury.Web.Controllers
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null )
                 {
-                    var tempData2 = tempData.Where(x => x.vItemId == updateTempData.vItemId).ToList();
+                    var tempData2 = tempData.Where(x => x.vItemId != updateTempData.vItemId).ToList();
                     bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
                         tempData2.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
                         tempData2.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
