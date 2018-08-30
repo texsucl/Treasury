@@ -256,6 +256,8 @@
         var DepositTrans_Expiry_Date_From = 'tTrans_Expiry_Date_From';//定存單到期日(起)
         var DepositTrans_Expiry_Date_To = 'tTrans_Expiry_Date_To';//定存單到期日(迄)
 
+        var DepositConfirmFlag = false; //離開時提醒訊息
+
         var Deposit_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val();
         if (!Deposit_Act_Type) { //不是覆核狀態 (為使用單號查詢資料)
@@ -338,11 +340,27 @@
                     break;
                 case 'DepositCancel':
                     $('#' + id).off('click');
-                    $('#' + id).on('click', function () { DepositCancelFun(); });
+                    $('#' + id).on('click', function () {
+                        if (DepositConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        DepositCancelFun();
+                    });
                     break;
                 case 'DepositBack':
                 case 'DepositCancelTemp_M':
                 case 'DepositCancelTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'DepositBack' &&
+                                DepositConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
                 case 'DepositTakeOutCancelTemp':
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
@@ -809,6 +827,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     DepositTempGrid_M();
+                    if (Deposit_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        DepositConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        DepositConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -839,6 +865,14 @@
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
                     DepositTempGrid_M();
+                    if (Deposit_Aply_No_Flag) //從查詢畫面進來的
+                    {
+                        DepositConfirmFlag = true;
+                    }
+                    else //新增存入畫面
+                    {
+                        DepositConfirmFlag = result.Datas;
+                    }
                 }
             });
         }
@@ -918,7 +952,7 @@
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 80, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 80, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
@@ -962,7 +996,7 @@
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
@@ -1014,9 +1048,9 @@
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
                 colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -1043,9 +1077,9 @@
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vRowNum", index: "vRowNum", hidden: true });
                 colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -1102,24 +1136,21 @@
 
         //取消申請
         function DepositCancelFun() {
-            if (confirm("是否要取消申請?"))
-            {
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify({
-                        AccessType: type
-                    }),
-                    dataType: "json",
-                    url: DepositUrl.ResetTempData,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    ResetInsertDialog_M();
-                    ResetInsertDialog_D();
-                    $('#' + DepositRowNum).val('');
-                    DepositTempGrid_M();
-                    DepositTempGrid_D();
-                })
-            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    AccessType: type
+                }),
+                dataType: "json",
+                url: DepositUrl.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                ResetInsertDialog_M();
+                ResetInsertDialog_D();
+                $('#' + DepositRowNum).val('');
+                DepositTempGrid_M();
+                DepositTempGrid_D();
+            })
         }
 
         //新增定期存單總項暫存資料
@@ -1152,6 +1183,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#DepositInsertTemp_M'));
                         DepositTempGrid_M();
+                        DepositConfirmFlag = true;
                     }
                 })
             }
@@ -1197,6 +1229,7 @@
                         customerUtility.closeDialog($('#DepositInsertTemp_D'));
                         DepositTempGrid_M();
                         DepositTempGrid_D();
+                        DepositConfirmFlag = true;
                     }
                 })
             }
@@ -1232,6 +1265,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#DepositUpdateTemp_M'));
                         DepositTempGrid_M();
+                        DepositConfirmFlag = true;
                     }
                 })
             }
@@ -1277,6 +1311,7 @@
                         customerUtility.closeDialog($('#DepositUpdateTemp_D'));
                         DepositTempGrid_M();
                         DepositTempGrid_D();
+                        DepositConfirmFlag = true;
                     }
                 })
             }
@@ -1301,6 +1336,14 @@
                         $('#' + DepositRowNum).val('');
                         DepositTempGrid_M();
                         DepositTempGrid_D();
+                        if (Deposit_Aply_No_Flag) //從查詢畫面進來的
+                        {
+                            DepositConfirmFlag = true;
+                        }
+                        else //新增存入畫面
+                        {
+                            DepositConfirmFlag = result.Datas;
+                        }
                     }
                 })
             }
@@ -1326,6 +1369,14 @@
                         customerUtility.closeDialog($('#DepositDeleteTemp_D'));
                         DepositTempGrid_M();
                         DepositTempGrid_D();
+                        if (Deposit_Aply_No_Flag) //從查詢畫面進來的
+                        {
+                            DepositConfirmFlag = true;
+                        }
+                        else //新增存入畫面
+                        {
+                            DepositConfirmFlag = result.Datas;
+                        }
                     }
                 })
             }

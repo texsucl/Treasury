@@ -217,6 +217,8 @@
 
         //#region 註冊verified
         function setBILLVerified() {
+            verified.required(BILLFormId, BILL_Issuing_BankId, message.required('發票行庫')); //發票行庫為必填
+            verified.maxlength(BILLFormId, BILL_Issuing_BankId, 10); //發票行庫最大長度(10)
             verified.english(BILLFormId, BILL_Check_No_TrackId); //字軌僅能輸入英文
             verified.required(BILLFormId, BILL_Check_No_TrackId, message.required('字軌')); //字軌為必填
             verified.maxlength(BILLFormId, BILL_Check_No_TrackId, 4); //字軌最大長度(4)
@@ -428,7 +430,7 @@
                 colModelArray.push({ name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false });
                 colModelArray.push({ name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", width: 200, sortable: false, align: 'right' });
+                colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", width: 200, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 colModelArray.push({ name: "vAplyNo", index: "vAplyNo", hidden: true });
                 colModelArray.push({ name: "vDataSeq", index: "vDataSeq", hidden: true });
@@ -464,8 +466,8 @@
                 colModelArray.push({ name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false });
                 colModelArray.push({ name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTakeOutE", index: "vTakeOutE", width: 120, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTakeOutTotalNum", index: "vTakeOutTotalNum", width: 80, sortable: false, align: 'right' });
+                colModelArray.push({ name: "vTakeOutE", index: "vTakeOutE", width: 120, sortable: false, align: 'center'});
+                colModelArray.push({ name: "vTakeOutTotalNum", index: "vTakeOutTotalNum", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vCheckTotalNum", index: "vCheckTotalNum", hidden: true });
                 colModelArray.push({ name: "vReMainTotalNum", index: "vReMainTotalNum", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
@@ -496,8 +498,8 @@
                     { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
                     { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
                     { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: BILLformatterCheckType, unformat: BILLunformatterCheckType },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
-                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
+                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas },
+                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas },
                     { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
                     { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
                     { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },
@@ -529,8 +531,8 @@
                     { name: "vStatus", index: "vStatus", width: 90, sortable: false, align: 'center' },
                     { name: "vIssuingBank", index: "vIssuingBank", width: 120, sortable: false },
                     { name: "vCheckType", index: "vCheckType", width: 80, sortable: false, formatter: BILLformatterCheckType, unformat: BILLunformatterCheckType },
-                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right' },
-                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right' },
+                    { name: "vCheckTotalNum", index: "vCheckTotalNum", width: 120, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas },
+                    { name: "vReMainTotalNum", index: "vReMainTotalNum", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas },
                     { name: "vCheckNoTrack", index: "vCheckNoTrack", width: 60, sortable: false },
                     { name: "vCheckNoB", index: "vCheckNoB", width: 120, sortable: false, align: 'center' },
                     { name: "vCheckNoE", index: "vCheckNoE", width: 120, sortable: false, align: 'center' },

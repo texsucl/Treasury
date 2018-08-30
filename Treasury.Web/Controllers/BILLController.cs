@@ -526,6 +526,7 @@ namespace Treasury.Web.Controllers
             try
             {
                 data = data.Where(x => x.vItemId != model.vItemId &&
+                        x.vItemId != null &&
                         x.vIssuingBank == model.vIssuingBank).ToList();
                 result = data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoB) <= int.Parse(x.vCheckNoE)) ||
                          data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoE) && int.Parse(model.vCheckNoE) <= int.Parse(x.vCheckNoE)) ||

@@ -195,6 +195,7 @@
         TAurl.cancel = '@Url.Action("Cancel", "TreasuryAccess")';
         TAurl.invalidate = '@Url.Action("Invalidate", "TreasuryAccess")';
         TAurl.getByAplyNo = '@Url.Action("GetByAplyNo", "TreasuryAccess")';
+        TAurl.GetReportGroupData = '@Url.Action("GetReportGroupData", "Deposit")';
         TAurl.updateAplyNo = '@Url.Action("UpdateAplyNo", "TreasuryAccess")';
 
         var openInsertDetailId = 'TAOpenInsertDetail';
@@ -302,7 +303,7 @@
             {
                 $('#TAR_AplyNo').val('');
                 $('#' + openInsertDetailId).children().remove();
-                $('#' + openSearchDetailId).children().remove();               
+                $('#' + openSearchDetailId).children().remove();
                 var _aProject = $('#aProject').val();
                 _aProject = _aProject || '';
                 switch (_aProject) {
@@ -361,7 +362,7 @@
                 title: '查詢畫面',
                 width: 1310,
                 autoOpen: false,
-                maxHeight: 700,
+                maxHeight: 600,
                 resizable: false,
                 closeText: '取消'
             });
@@ -406,20 +407,58 @@
                         var listId = 'TAReportList';
                         var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
                         var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
+                        var accessType = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vACCESS_TYPE]', listId)).text();
                         var reportType = '';
                         var title = '';
                         var parms = [];
                         var itemData = GetItemData(item);
-                        if (itemData.reportType != null) {
-                            setTimeout(
-                                function () {
-                                    parms.push(customerUtility.reportParm('aply_No', aply_No));
-                                    customerUtility.report(
-                                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
-                                        parms,
-                                        null
-                                        );
-                                }, 500);
+                        //判斷是否定期存單
+                        if (item == "D1013")
+                        {
+                            customerUtility.alert('待完成', 'w');
+                            return false;
+                            itemData.reportType = itemData.reportType + "_" + accessType;
+                            $.ajax({
+                                type: "POST",
+                                data: JSON.stringify({
+                                    vAplyNo: aply_No
+                                }),
+                                dataType: "json",
+                                url: TAurl.GetReportGroupData,
+                                contentType: 'application/json'
+                            }).done(function (result) {
+                                if (result.RETURN_FLAG) {
+                                    setTimeout(
+                                        function () {
+                                            for (var i = 0; i < result.Datas.length; i++) {
+                                                parms.push(customerUtility.reportParm('aply_No', aply_No));
+                                                parms.push(customerUtility.reportParm('isTWD', result.Datas[i].isTWD));
+                                                parms.push(customerUtility.reportParm('vDep_Type', result.Datas[i].vDep_Type));
+                                                customerUtility.report(
+                                                    customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                                                    parms,
+                                                    null
+                                                    );
+                                                parms.length = 0;
+                                                //setTimeout(50000);
+                                            }
+                                        }, 100);
+                                }
+                            })
+                        }
+                        else
+                        {
+                            if (itemData.reportType != null) {
+                                setTimeout(
+                                    function () {
+                                        parms.push(customerUtility.reportParm('aply_No', aply_No));
+                                        customerUtility.report(
+                                            customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                                            parms,
+                                            null
+                                            );
+                                    }, 100);
+                            }
                         }
                     }
                 );
@@ -434,13 +473,13 @@
         function resetTADialogDeatil()
         {
             $('#' + EXP_ACCESS_DATEId).datepicker('setDate', created.getOnlyDate()); //預計存取日期重設
-            $('#TAReason,#APLY_DT_From,#APLY_DT_To,#APLY_NO,#CONFIRM_DT_From,#CONFIRM_DT_To,#TREA_REGISTER_ID').val('');            
+            $('#TAReason,#APLY_DT_From,#APLY_DT_To,#APLY_NO,#CONFIRM_DT_From,#CONFIRM_DT_To,#TREA_REGISTER_ID').val('');
             if ($('#' + aProjectId + ' option').length > 0) {
                 $('#' + aProjectId).val($($('#' + aProjectId + ' option')[0]).val())
             }
             if ($('#' + aIUnitId + ' option').length > 0) {
                 $('#' + aIUnitId).val($($('#' + aIUnitId + ' option')[0]).val())
-            }          
+            }
             if ($('#' + applicantId + ' option').length > 0) {
                 if ($('#' + applicantId + ' option').length > 1)
                     customerUtility.addoption(applicantId, { value: ' ', text: ' ' });
@@ -504,20 +543,21 @@
         //#region 查詢表單
         function TAAccessGrid() {
             var colNameArray = ['刪除申請', '作廢',
-                '存取申請項目', '申請日期', '申請單號',
+                '存取申請項目', '申請日期', '實際存取日期', '申請單號',
                 '申請單位', '申請人', '入庫原因',
                 '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
             var colModelArray = [
                 { name: "vCancleFlag", index: "vCancleFlag", width: 70, sortable: false, align: 'center', formatter: formatterCancleFlag },
                 { name: "vInvalidFlag", index: "vInvalidFlag", width: 40, sortable: false, align: 'center', formatter: formatterInvalidFlag },
-                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
-                { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center'},
-                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vItemDec", index: "vItemDec", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 90, sortable: false, align: 'center' },
+                { name: "vREGI_APPR_DT", index: "vREGI_APPR_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width:160, sortable: false, align: 'left' },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 160, sortable: false, align: 'left'},
-                { name: "vDESC", index: "vDESC", width: 160, sortable: false, align: 'left' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width:150, sortable: false, align: 'left' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'left'},
+                { name: "vDESC", index: "vDESC", width: 150, sortable: false, align: 'left' },
                 { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
                 { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
@@ -542,19 +582,20 @@
 
         function TAReportGrid() {
             var colNameArray = ['列印',
-                '存取申請項目', '申請日期', '申請單號' ,
+                '存取申請項目', '申請日期', '實際存取日期', '申請單號' ,
                 '申請單位', '申請人', '入庫原因',
                 '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
             var colModelArray = [
                 { name: "vPrintFlag", index: "vPrintFlag", width: 110, sortable: false, align: 'center', formatter: formatterCheck },
-                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
-                { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center'},
-                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vItemDec", index: "vItemDec", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 90, sortable: false, align: 'center' },
+                { name: "vREGI_APPR_DT", index: "vREGI_APPR_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 160, sortable: false, align: 'left' },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 160, sortable: false, align: 'left'},
-                { name: "vDESC", index: "vDESC", width: 160, sortable: false, align: 'left' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 150, sortable: false, align: 'left' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'left'},
+                { name: "vDESC", index: "vDESC", width: 150, sortable: false, align: 'left' },
                 { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
                 { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
@@ -617,6 +658,11 @@
 
         function open(itemId) {
             var _data = GetItemData(itemId);
+            if ($('#aIUnit').val().trim() == '' || $('#applicant').val().trim() == '')
+            {
+                customerUtility.alert('請選擇申請單位和申請人', 'w');
+                return false;
+            }
             $.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -761,8 +807,8 @@
                             dataType: 'html',
                             url: itemData.url,
                             contentType: 'application/json',
-                            success: function (data, textStatus, jqXHR) {
-                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + data);
+                            success: function (vdata, textStatus, jqXHR) {
+                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + vdata);
                                 $('#TAVMvAplyNo').text(aplyNoData.vAplyNo);
                                 $('#TAVMvItem').text(aplyNoData.vItem);
                                 customerUtility.addoption('TAVMvAplyUnit', result.Datas.Item3);
@@ -772,6 +818,7 @@
                                 $('#TAVMvChargeUnit').text(aplyNoData.vChargeUnit);
                                 $('#TAVMvAccessType').text(aplyNoData.vAccessType);
                                 created.createDatepicker('TAVMvExpectedAccessDate', aplyNoData.vExpectedAccessDate);
+                                $('#TAVMvExpectedAccessDate').datepicker("option", "minDate", created.dateToTWDate(aplyNoData.vCreateDt));
                                 $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
                                 $('#TAVMvCreateDt').text(aplyNoData.vCreateDt);
                                 $('#TAVMvCreateUnit').text(aplyNoData.vCreateUnit);
@@ -791,8 +838,9 @@
                                         customerUtility.addoption('TAVMvAplyUid', result);
                                     })
                                 });
-                                if (false && result.Datas.Item5) {
+                                if (result.Datas.Item5) {
                                     $('#TAVMUpdate,#TAVMSave,#TAVMCancel').show();
+                                    $('#TAVMUpdate').prop('disabled', false);
                                     $('#TAVMUpdate,#TAVMSave,#TAVMCancel').off('click');
                                     $('#TAVMUpdate').on('click', function () {
                                         if (result.Datas.Item2) {
@@ -802,6 +850,7 @@
                                         $('#TAVMvExpectedAccessDate').prop('disabled', false);
                                         $('#TAVMvExpectedAccessDate').next().prop('disabled', false);
                                         $('#TAVMvAccessReason').prop('disabled', false);
+                                        $('#TAVMUpdate').prop('disabled', true);
                                         $('#TAVMSave').prop('disabled', false);
                                         $('#TAVMCancel').prop('disabled', false);
                                     });
@@ -815,8 +864,8 @@
                                                      null,
                                                      $('#TAVMvAplyUnit').val(),
                                                      $('#TAVMvAplyUid').val(),
-                                                     $('#TAReason').val(),
-                                                     $('#EXP_ACCESS_DATE').val(),
+                                                     $('#TAVMvAccessReason').val(),
+                                                     $('#TAVMvExpectedAccessDate').val(),
                                                      null,
                                                      null,
                                                      null)
@@ -833,6 +882,10 @@
                                                     $('#TAVMvExpectedAccessDate').prop('disabled', true);
                                                     $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
                                                     $('#TAVMvAccessReason').prop('disabled', true);
+                                                    $('#TAVMUpdate').prop('disabled', false);
+                                                    $('#TAVMSave').prop('disabled', true);
+                                                    $('#TAVMCancel').prop('disabled', true);
+                                                    TAAccessGrid();
                                                 }
                                             })
                                         }
@@ -861,7 +914,9 @@
                                              $('#TAVMvExpectedAccessDate').prop('disabled', true);
                                              $('#TAVMvExpectedAccessDate').next().prop('disabled', true);
                                              $('#TAVMvAccessReason').prop('disabled', true);
-                                             $('#')
+                                             $('#TAVMUpdate').prop('disabled', false);
+                                             $('#TAVMSave').prop('disabled', true);
+                                             $('#TAVMCancel').prop('disabled', true);
                                          });
                                     });
                                 }
@@ -935,7 +990,7 @@
                 case '@Ref.TreaItemType.D1017.ToString()':
                     obj.url = TAurl.openMARGINP;
                     obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
-                    obj.openDialogWidth = 1000;
+                    obj.openDialogWidth = 1250;
                     obj.reportType = 'MARGINP';
                     break;
                 case '@Ref.TreaItemType.D1016.ToString()':
@@ -944,7 +999,6 @@
                     obj.openDialogWidth = 900;
                     obj.reportType = 'MARGING';
                     break;
-
                 case '@Ref.TreaItemType.D1018.ToString()':
                     obj.url = TAurl.openItemImp;
                     obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
@@ -954,7 +1008,7 @@
                 case '@Ref.TreaItemType.D1013.ToString()':
                     obj.url = TAurl.openDEPOSIT;
                     obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
-                    obj.openDialogWidth = '1325px';
+                    obj.openDialogWidth = 1325;
                     obj.reportType = 'DEPOSIT';
                     break;
             }
@@ -1100,7 +1154,7 @@
             str += '</td>';
             str += '</tr>';
             str += '<tr>';
-            str += '<td colspan="3">';                              
+            str += '<td colspan="3">';
             str += '<input type="button" class="btn btn-primary" id="TAVMUpdate" value="修改" disabled style="display:none;margin-right:10px;" />';
             str += '<input type="button" class="btn btn-primary" id="TAVMSave" value="儲存" disabled style="display:none;margin-right:10px;" />';
             str += '<input type="button" class="btn btn-primary" id="TAVMCancel" value="取消" disabled style="display:none;" />';
