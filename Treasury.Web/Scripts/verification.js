@@ -219,14 +219,12 @@
     created.createDatepicker = function (datepickerid, date, completeEvent) {
         var d = null;
         if (!(date === d)) {
-
                 if (verified.isDate(date)) {
                     d = verified.datepickerStrToDate(date);
                 }
                 else {
                     d = created.getOnlyDate();
-                }
-            
+                }  
         }
 
         $("#" + datepickerid).datepicker({
