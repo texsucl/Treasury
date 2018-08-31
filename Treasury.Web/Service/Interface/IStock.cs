@@ -68,5 +68,11 @@ namespace Treasury.Web.Service.Interface
         /// <returns></returns>
         StockViewModel GetDataByAplyNo(string aplyNo, bool EditFlag = false);
 
+        /// <summary>
+        /// 股票名稱模糊比對
+        /// </summary>
+        /// <param name="StockName">股票名稱</param>
+        /// <returns></returns>
+        List<ItemBookStock> GetStockCheck(string StockName);
     }
 }

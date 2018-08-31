@@ -37,5 +37,20 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> PUT_DATE { get; set; }
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
+        public string CURRENCY_AFT { get; set; }
+        public string TRAD_PARTNERS_AFT { get; set; }
+        public Nullable<System.DateTime> COMMIT_DATE_AFT { get; set; }
+        public Nullable<System.DateTime> EXPIRY_DATE_AFT { get; set; }
+        public string INTEREST_RATE_TYPE_AFT { get; set; }
+        public Nullable<decimal> INTEREST_RATE_AFT { get; set; }
+        public string DEP_TYPE_AFT { get; set; }
+        public Nullable<decimal> TOTAL_DENOMINATION_AFT { get; set; }
+        public string DEP_SET_QUALITY_AFT { get; set; }
+        public string AUTO_TRANS_AFT { get; set; }
+        public Nullable<System.DateTime> TRANS_EXPIRY_DATE_AFT { get; set; }
+        public Nullable<int> TRANS_TMS_AFT { get; set; }
+        public string MEMO_AFT { get; set; }
+        public string CHARGE_DEPT_AFT { get; set; }
+        public string CHARGE_SECT_AFT { get; set; }
     }
 }

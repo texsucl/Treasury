@@ -289,6 +289,32 @@ namespace Treasury.Web.Service.Actual
 
             return result;
         }
+
+        /// <summary>
+        /// 股票名稱模糊比對
+        /// </summary>
+        /// <param name="StockName">股票名稱</param>
+        /// <returns></returns>
+        public List<ItemBookStock> GetStockCheck(string StockName)
+        {
+            var result = new List<ItemBookStock>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                result = db.ITEM_BOOK.AsNoTracking()
+                    .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString())
+                    .Where(x => x.COL == "NAME")
+                    .Where(x => x.COL_VALUE.Contains(StockName))
+                    .Select(x => new ItemBookStock()
+                    {
+                        GroupNo = x.GROUP_NO,
+                        Name = x.COL_VALUE
+                    })
+                    .ToList();
+            }
+
+            return result;
+        }
         #endregion
 
         #region SaveData
@@ -449,11 +475,13 @@ namespace Treasury.Web.Service.Actual
                                                 TREA_BATCH_NO = int.Parse(_first.vStockDate.Next_Batch_No),  //入庫批號
                                                 STOCK_TYPE = item.vStockType,    //股票類型
                                                 STOCK_NO_PREAMBLE = item.vStockNoPreamble,   //序號前置碼
-                                                STOCK_NO_B = item.vStockNoB.ToString(),  //股票序號(起)
-                                                STOCK_NO_E = item.vStockNoE.ToString(),  //股票序號(迄)
+                                                STOCK_NO_B = item.vStockNoB,  //股票序號(起)
+                                                STOCK_NO_E = item.vStockNoE,  //股票序號(迄)
                                                 STOCK_CNT = item.vStockTotal,    //股票張數
-                                                DENOMINATION = item.vDenomination,   //面額
-                                                NUMBER_OF_SHARES = item.vNumberOfShares,   //股數
+                                                AMOUNT_PER_SHARE = item.vAmount_Per_Share,    //每股金額
+                                                SINGLE_NUMBER_OF_SHARES = item.vSingle_Number_Of_Shares,  //單張股數
+                                                DENOMINATION = item.vDenomination,   //單張面額
+                                                NUMBER_OF_SHARES = item.vNumberOfShares,   //股數小計
                                                 MEMO = item.vMemo,//備註
                                                 APLY_DEPT = _dept.Item1, //申請人部門
                                                 APLY_SECT = _dept.Item2, //申請人科別
@@ -558,11 +586,13 @@ namespace Treasury.Web.Service.Actual
                                                 _IS.GROUP_NO = _first.vStockDate.GroupNo;
                                                 _IS.STOCK_TYPE = item.vStockType;    //股票類型
                                                 _IS.STOCK_NO_PREAMBLE = item.vStockNoPreamble;   //序號前置碼
-                                                _IS.STOCK_NO_B = item.vStockNoB.ToString();  //股票序號(起)
-                                                _IS.STOCK_NO_E = item.vStockNoE.ToString();  //股票序號(迄)
+                                                _IS.STOCK_NO_B = item.vStockNoB;  //股票序號(起)
+                                                _IS.STOCK_NO_E = item.vStockNoE;  //股票序號(迄)
                                                 _IS.STOCK_CNT = item.vStockTotal;    //股票張數
-                                                _IS.DENOMINATION = item.vDenomination;   //面額
-                                                _IS.NUMBER_OF_SHARES = item.vNumberOfShares;   //股數
+                                                _IS.AMOUNT_PER_SHARE = item.vAmount_Per_Share;  //每股金額
+                                                _IS.SINGLE_NUMBER_OF_SHARES = item.vSingle_Number_Of_Shares;    //單張股數
+                                                _IS.DENOMINATION = item.vDenomination;   //單張面額
+                                                _IS.NUMBER_OF_SHARES = item.vNumberOfShares;   //股數小計
                                                 _IS.MEMO = item.vMemo;  //備註
                                                 _IS.LAST_UPDATE_DT = dt; //最後修改時間
 
@@ -584,11 +614,12 @@ namespace Treasury.Web.Service.Actual
                                                     TREA_BATCH_NO = int.Parse(_first.vStockDate.Next_Batch_No),  //入庫批號
                                                     STOCK_TYPE = item.vStockType,    //股票類型
                                                     STOCK_NO_PREAMBLE = item.vStockNoPreamble,   //序號前置碼
-                                                    STOCK_NO_B = item.vStockNoB.ToString(),  //股票序號(起)
-                                                    STOCK_NO_E = item.vStockNoE.ToString(),  //股票序號(迄)
+                                                    STOCK_NO_B = item.vStockNoB,  //股票序號(起)
+                                                    STOCK_NO_E = item.vStockNoE,  //股票序號(迄)
                                                     STOCK_CNT = item.vStockTotal,    //股票張數
-                                                    DENOMINATION = item.vDenomination,   //面額
-                                                    NUMBER_OF_SHARES = item.vNumberOfShares,   //股數
+
+                                                    DENOMINATION = item.vDenomination,   //單張面額
+                                                    NUMBER_OF_SHARES = item.vNumberOfShares,   //股數小計
                                                     MEMO = item.vMemo,//備註
                                                     APLY_DEPT = _dept.Item1, //申請人部門
                                                     APLY_SECT = _dept.Item2, //申請人科別
@@ -872,9 +903,11 @@ namespace Treasury.Web.Service.Actual
                 vStockNoB = x.STOCK_NO_B,  //序號(起)
                 vStockNoE = x.STOCK_NO_E,  //序號(迄)
                 vStockTotal = x.STOCK_CNT,    //張數
+                vAmount_Per_Share=x.AMOUNT_PER_SHARE,   //每股金額
+                vSingle_Number_Of_Shares=x.SINGLE_NUMBER_OF_SHARES, //單張股數
                 vDenomination = x.DENOMINATION,   //單張面額
                 vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,  //面額小計
-                vNumberOfShares = x.NUMBER_OF_SHARES,   //股數
+                vNumberOfShares = x.NUMBER_OF_SHARES,   //股數小計
                 vMemo = x.MEMO,  //備註說明
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });

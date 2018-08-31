@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Treasury.Web.Controllers;
@@ -250,6 +251,8 @@ namespace Treasury.Web.Controllers
                     updateTempData.vStockNoB = model.vStockNoB;
                     updateTempData.vStockNoE = model.vStockNoE;
                     updateTempData.vStockTotal = model.vStockTotal;
+                    updateTempData.vAmount_Per_Share = model.vAmount_Per_Share;
+                    updateTempData.vSingle_Number_Of_Shares = model.vSingle_Number_Of_Shares;
                     updateTempData.vDenomination = model.vDenomination;
                     updateTempData.vDenominationTotal = model.vDenominationTotal;
                     updateTempData.vNumberOfShares = model.vNumberOfShares;
@@ -367,6 +370,31 @@ namespace Treasury.Web.Controllers
         {
             var result = Stock.GetStockDate(int.Parse(GroupNo), vAplyNo);
             
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 取得在庫股票明細
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetStockCheck(string StockName)
+        {
+            MSGReturnModel<List<ItemBookStock>> result = new MSGReturnModel<List<ItemBookStock>>();
+            
+            try
+            {
+                result.Datas = Stock.GetStockCheck(StockName);
+                result.RETURN_FLAG = true;
+            }
+            catch (Exception ex)
+            {
+                result.RETURN_FLAG = false;
+                result.DESCRIPTION = ex.Message;
+            }
+
             return Json(result);
         }
 

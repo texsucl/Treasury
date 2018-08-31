@@ -29,7 +29,7 @@ namespace Treasury.Web.Report.Data
                 var ReportData = new ReportData();
                 int TOTAL_DEP_CNT = 0;
 
-                //取得定存交明細資料
+                //取得定存明細資料
                 if (_TAR != null)
                 {
                     //使用單號去其他存取項目檔抓取物品編號

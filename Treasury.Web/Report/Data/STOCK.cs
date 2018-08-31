@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using Treasury.Web.Enum;
 using Treasury.Web.Models;
-using Treasury.Web.Service.Actual;
 using Treasury.WebUtility;
 
 namespace Treasury.Web.Report.Data
@@ -16,86 +16,164 @@ namespace Treasury.Web.Report.Data
         {
             var resultsTable = new DataSet();
 
-            var _Parameters = new List<SqlParameter>(); 
             string aply_No = parms.Where(x => x.key == "aply_No").FirstOrDefault()?.value ?? string.Empty;
             SetDetail(aply_No);
-            using (var conn = new SqlConnection(defaultConnection))
-            {
-                string sql = string.Empty;
-                sql += $@"
-with temp as
-(
-select * from OTHER_ITEM_APLY
-where APLY_NO =  @APLY_NO
-),
-temp2 as
-(
-select * from ITEM_STOCK
-where ITEM_ID in (select ITEM_ID from temp)
-)
-,
-temp3 as
-(
-select * from ITEM_BOOK  
-where GROUP_NO = (select top 1 GROUP_NO from temp2)
-and ITEM_ID = 'D1015'
-)
-,
-code as
-(
-select * from sys_code
-where CODE_TYPE = 'STOCK_TYPE'
-),
-temp4 as
-(
-select
-'1' AS TYPE,
-(select Top 1 GROUP_NO from temp3 ) AS GROUP_NO, --編號
-(select top 1 COL_VALUE from temp3 where COL = 'NAME') AS NAME, --股票名稱
-(select SUM(ISNULL(NUMBER_OF_SHARES,0)) from temp2) AS NUMBER_OF_SHARES_TOTAL, --總股數
-null AS ROW_NUMBER,
-null AS STOCK_TYPE,
-null AS STOCK_NO_PREAMBLE,
-null AS STOCK_NO_B,
-null AS STOCK_NO_E,
-null AS STOCK_CNT,
-null AS DENOMINATION,
-null AS DENOMINATION_TOTAL,
-null AS NUMBER_OF_SHARES,
-null AS MEMO
-UNION ALL
-select
-'2' AS TYPE,
-null AS GROUP_NO,
-null AS NAME,
-null AS NUMBER_OF_SHARES_TOTAL,
-ROW_NUMBER() OVER(order by ITEM_ID) AS ROW_NUMBER,
-(select top 1 CODE_VALUE from code where CODE = STOCK_TYPE)  AS STOCK_TYPE , --類型
-STOCK_NO_PREAMBLE, -- 序號前置碼
-STOCK_NO_B, --序號(起)
-STOCK_NO_E, --序號(迄) 
-STOCK_CNT, --張數
-DENOMINATION, --單張面額
-STOCK_CNT * DENOMINATION AS DENOMINATION_TOTAL, --面額小計
-NUMBER_OF_SHARES, --股數
-MEMO  --備註
-from temp2
-)
-select * from temp4;
-";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    _Parameters.Add(new SqlParameter("@APLY_NO", aply_No));
-                    cmd.Parameters.AddRange(_Parameters.ToArray());
-                    conn.Open();
-                    var adapter = new SqlDataAdapter(cmd);
-                    adapter.Fill(resultsTable);
 
-                    SetExtensionParm();
+            //報表資料
+            List<StockReportData> ReportDataList = new List<StockReportData>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                    .FirstOrDefault(x => x.APLY_NO == aply_No);
+
+                var ReportData = new StockReportData();
+                decimal? NUMBER_OF_SHARES_TOTAL = 0;
+                
+                //取得股票明細資料
+                if (_TAR != null)
+                {
+                    //使用單號去其他存取項目檔抓取物品編號
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    //使用物品編號去股票庫存資料檔抓取資料
+                    var _IS_DataList = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
+                    var IS_Group_No_DaatList = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => OIAs.Contains(x.ITEM_ID))
+                        .Select(x => x.GROUP_NO).ToList();
+                    //使用群組編號去存取項目冊號資料檔抓取資料
+                    var _IB_DataList = _IS_DataList.GroupBy(x => x.TREA_BATCH_NO);
+                    var _IB_Data = db.ITEM_BOOK.AsNoTracking()
+                        .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString())
+                        .Where(x => IS_Group_No_DaatList.Contains(x.GROUP_NO))
+                        .Where(x => x.COL == "NAME").FirstOrDefault();
+                    //類型清單
+                    var _IS_StockTypeList = db.SYS_CODE.AsNoTracking()
+                        .Where(x => x.CODE_TYPE == "STOCK_TYPE")
+                        .OrderBy(x => x.ISORTBY).ToList();
+
+                    if (_IB_DataList.Any())
+                    {
+                        foreach (var ItemBook in _IB_DataList)
+                        {
+                            #region 存取項目冊號資料
+                            //計算總股數
+                            NUMBER_OF_SHARES_TOTAL = _IS_DataList.Where(x => x.TREA_BATCH_NO == ItemBook.Key).Sum(x => x.NUMBER_OF_SHARES);
+
+                            ReportData = new StockReportData()
+                            {
+                                TYPE = "B",
+                                GROUP_NO = _IB_Data.GROUP_NO.ToString(),
+                                NAME = _IB_Data.COL_VALUE,
+                                TREA_BATCH_NO = ItemBook.Key.ToString(),
+                                NUMBER_OF_SHARES_TOTAL = NUMBER_OF_SHARES_TOTAL == null ? null : NUMBER_OF_SHARES_TOTAL.ToString()
+                            };
+
+                            ReportDataList.Add(ReportData);
+                            #endregion
+
+                            #region 股票庫存資料
+                            var _IS_TREA_BATCH_NO_DataList = _IS_DataList.Where(x => x.TREA_BATCH_NO == ItemBook.Key).ToList();
+                            int ROW_NUMBER = 1;
+
+                            foreach (var ItemStock in _IS_TREA_BATCH_NO_DataList)
+                            {
+                                //計算面額小計
+                                string DENOMINATION_TOTAL = string.Empty;
+                                if(ItemStock.STOCK_CNT != null && ItemStock.DENOMINATION != null)
+                                {
+                                    DENOMINATION_TOTAL = (decimal.Parse(ItemStock.STOCK_CNT.ToString()) * decimal.Parse(ItemStock.DENOMINATION.ToString())).ToString();
+                                }
+
+                                ReportData = new StockReportData()
+                                {
+                                    TYPE = "S",
+                                    ROW_NUMBER = ROW_NUMBER.ToString(),
+                                    TREA_BATCH_NO = ItemStock.TREA_BATCH_NO.ToString(),
+                                    STOCK_TYPE = _IS_StockTypeList.Where(x => x.CODE == ItemStock.STOCK_TYPE).Select(x => x.CODE_VALUE).FirstOrDefault(),
+                                    STOCK_NO_PREAMBLE = ItemStock.STOCK_NO_PREAMBLE,
+                                    STOCK_NO_B = ItemStock.STOCK_NO_B,
+                                    STOCK_NO_E = ItemStock.STOCK_NO_E,
+                                    STOCK_CNT = ItemStock.STOCK_CNT == null ? null : ItemStock.STOCK_CNT.ToString(),
+                                    AMOUNT_PER_SHARE = ItemStock.AMOUNT_PER_SHARE == null ? null : ItemStock.AMOUNT_PER_SHARE.ToString(),
+                                    SINGLE_NUMBER_OF_SHARES = ItemStock.SINGLE_NUMBER_OF_SHARES == null ? null : ItemStock.SINGLE_NUMBER_OF_SHARES.ToString(),
+                                    DENOMINATION = ItemStock.DENOMINATION == null ? null : ItemStock.DENOMINATION.ToString(),
+                                    DENOMINATION_TOTAL = DENOMINATION_TOTAL,
+                                    NUMBER_OF_SHARES = ItemStock.NUMBER_OF_SHARES == null ? null : ItemStock.NUMBER_OF_SHARES.ToString(),
+                                    MEMO = ItemStock.MEMO
+                                };
+
+                                ReportDataList.Add(ReportData);
+
+                                ROW_NUMBER++;
+                            }
+                            #endregion
+                        }
+                    }
                 }
             }
+
+            resultsTable.Tables.Add(ReportDataList.ToDataTable());
+
+            SetExtensionParm();
+
             return resultsTable;
         }
 
+    }
+
+    public class StockReportData
+    {
+        [Description("類型")]
+        public string TYPE { get; set; }
+
+        [Description("編號")]
+        public string GROUP_NO { get; set; }
+
+        [Description("股票名稱")]
+        public string NAME { get; set; }
+
+        [Description("入庫批號")]
+        public string TREA_BATCH_NO { get; set; }
+
+        [Description("總股數")]
+        public string NUMBER_OF_SHARES_TOTAL { get; set; }
+
+        [Description("項次")]
+        public string ROW_NUMBER { get; set; }
+
+        [Description("類型")]
+        public string STOCK_TYPE { get; set; }
+
+        [Description("序號前置碼")]
+        public string STOCK_NO_PREAMBLE { get; set; }
+
+        [Description("序號(起)")]
+        public string STOCK_NO_B { get; set; }
+
+        [Description("序號(迄)")]
+        public string STOCK_NO_E { get; set; }
+
+        [Description("張數")]
+        public string STOCK_CNT { get; set; }
+
+        [Description("每股金額")]
+        public string AMOUNT_PER_SHARE { get; set; }
+
+        [Description("單張股數")]
+        public string SINGLE_NUMBER_OF_SHARES { get; set; }
+
+        [Description("單張面額")]
+        public string DENOMINATION { get; set; }
+
+        [Description("面額小計")]
+        public string DENOMINATION_TOTAL { get; set; }
+
+        [Description("股數小計")]
+        public string NUMBER_OF_SHARES { get; set; }
+
+        [Description("備註")]
+        public string MEMO { get; set; }
     }
 }

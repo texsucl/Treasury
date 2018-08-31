@@ -31,5 +31,14 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> PUT_DATE { get; set; }
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
+        public string TRAD_PARTNERS_AFT { get; set; }
+        public string MARGIN_DEP_TYPE_AFT { get; set; }
+        public Nullable<decimal> AMOUNT_AFT { get; set; }
+        public string WORKPLACE_CODE_AFT { get; set; }
+        public string DESCRIPTION_AFT { get; set; }
+        public string MEMO_AFT { get; set; }
+        public string BOOK_NO_AFT { get; set; }
+        public string CHARGE_DEPT_AFT { get; set; }
+        public string CHARGE_SECT_AFT { get; set; }
     }
 }

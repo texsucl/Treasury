@@ -148,6 +148,18 @@ namespace Treasury.Web.ViewModels
         public int? vStockTotal { get; set; }
 
         /// <summary>
+        /// 每股金額
+        /// </summary>
+        [Description("每股金額")]
+        public decimal? vAmount_Per_Share { get; set; }
+
+        /// <summary>
+        /// 單張股數
+        /// </summary>
+        [Description("單張股數")]
+        public decimal? vSingle_Number_Of_Shares { get; set; }
+
+        /// <summary>
         /// 單張面額
         /// </summary>
         [Description("單張面額")]
@@ -160,9 +172,9 @@ namespace Treasury.Web.ViewModels
         public decimal? vDenominationTotal { get; set; }
 
         /// <summary>
-        /// 股數
+        /// 股數小計
         /// </summary>
-        [Description("股數")]
+        [Description("股數小計")]
         public decimal? vNumberOfShares { get; set; }
 
         /// <summary>
