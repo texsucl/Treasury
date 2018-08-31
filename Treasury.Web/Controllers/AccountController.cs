@@ -90,37 +90,38 @@ namespace Treasury.Web.Controllers
              
                 try
                 {
-                    string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
+                    //string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
 
                     //AD驗證成功，檢查該user是否有系統權限
                     CodeUserDao codeUserDao = new CodeUserDao();
 
-                    
-                    
-                    CODE_USER codeUser = codeUserDao.qryUserByKey(loginModel.UserId);
+
+					CODE_USER codeUser = codeUserDao.qryUserByKey(loginModel.UserId);
                     if (codeUser != null)
                     {
                         if ("N".Equals(codeUser.IS_DISABLED)) {
                             
                             Session["UserID"] = loginModel.UserId;
-                            //Session["AgentID"] = codeUser.CAGENTID;
+							//Session["AgentID"] = codeUser.CAGENTID;
 
-                            Session["UserName"] = "";
-                            Session["UserUnit"] = "";
-                            //Session["UserName"] = "侯蔚鑫";
-                            //Session["UserUnit"] = "VLX01";
-                            OaEmpDao oaEmpDao = new OaEmpDao();
+							//Session["UserName"] = "";
+							//Session["UserUnit"] = "";
+							Session["UserName"] = "李彥賢";
+							Session["UserUnit"] = "VL307";
+							//Session["UserName"] = "李彥賢";
+							//Session["UserUnit"] = "VLX01";
+							OaEmpDao oaEmpDao = new OaEmpDao();
                             try
                             {
-                                using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
-                                {
-                                    V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
-                                    if (emp != null)
-                                    {
-                                        Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
-                                        Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
-                                    }
-                                }
+                                //using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
+                                //{
+                                //    V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
+                                //    if (emp != null)
+                                //    {
+                                //        Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
+                                //        Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
+                                //    }
+                                //}
                             }
                             catch (Exception e)
                             {

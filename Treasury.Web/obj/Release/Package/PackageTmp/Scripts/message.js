@@ -3,6 +3,7 @@
 
     window.message = message;
     message.number = '請輸入數字';
+    message.price = '僅可輸入金額';
     message.positiveInt = '僅可輸入正整數';
     message.english = '僅可輸入英文字母';
     message.englishNumber = '僅可輸入英文字母和數字';

@@ -43,6 +43,7 @@ namespace Treasury.Web.Controllers
             Aply_Appr_Type = new List<string>()
             {
                 Ref.AccessProjectFormStatus.A01.ToString(),
+                Ref.AccessProjectFormStatus.A02.ToString(),
                 Ref.AccessProjectFormStatus.A03.ToString(),
                 Ref.AccessProjectFormStatus.A04.ToString(),
                 Ref.AccessProjectFormStatus.A05.ToString()

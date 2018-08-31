@@ -51,6 +51,12 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("已取消")]
             _7,
+
+            /// <summary>
+            /// 資料庫異動中
+            /// </summary>
+            [Description("資料庫異動中")]
+            _8,
         }
     }
 

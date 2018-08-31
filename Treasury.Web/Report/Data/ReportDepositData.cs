@@ -38,7 +38,8 @@ namespace Treasury.Web.Report.Data
                     .Where(x => x.CODE_TYPE == "DEP_TYPE" && x.CODE == vDep_Type)
                     .Select(x => x.CODE_VALUE).FirstOrDefault();
 
-                _REC.SYS_TYPE = DateTime.Now.DateToTaiwanDate(9);
+                //_REC.SYS_TYPE = DateTime.Now.DateToTaiwanDate(9);
+                _REC.SYS_TYPE = TypeTransfer.dateTimeToString(DateTime.Now,false);
 
                 //取得承作日期
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
@@ -53,11 +54,11 @@ namespace Treasury.Web.Report.Data
                     var _IDOM_DataList = db.ITEM_DEP_ORDER_M.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
 
-                    _REC.COMMIT_DATE = _IDOM_DataList
+                    _REC.COMMIT_DATE = TypeTransfer.dateTimeToString(_IDOM_DataList
                         .Where(x => x.CURRENCY == "TWD", isTWD == "Y")
                         .Where(x => x.CURRENCY != "TWD", isTWD == "N")
                         .Where(x => x.DEP_TYPE == vDep_Type)
-                        .Select(x => x.COMMIT_DATE).FirstOrDefault().DateToTaiwanDate(9);
+                        .Select(x => x.COMMIT_DATE).FirstOrDefault(),false);
                 }
             }
         }

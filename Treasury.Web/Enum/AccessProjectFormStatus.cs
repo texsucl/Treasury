@@ -1,5 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
+using System.ComponentModel;	
 
 namespace Treasury.Web.Enum
 {
@@ -17,15 +17,15 @@ namespace Treasury.Web.Enum
             A01,
 
             /// <summary>
-            /// 表單申請覆核中
+            /// 申請單位覆核駁回
             /// </summary>
-            [Description("表單申請覆核中")]
+            [Description("申請單位覆核駁回")]
             A02,
 
             /// <summary>
-            /// 保管科退回申請單位
+            /// 保管科承辦覆核駁回
             /// </summary>
-            [Description("保管科退回申請單位")]
+            [Description("保管科承辦覆核駁回")]
             A03,
 
             /// <summary>
@@ -41,9 +41,9 @@ namespace Treasury.Web.Enum
             A05,
 
             /// <summary>
-            /// 申請單位覆核完成，保管科確認中
+            /// 申請單位完成覆核，保管科承辦確認中
             /// </summary>
-            [Description("申請單位覆核完成，保管科確認中")]
+            [Description("申請單位完成覆核，保管科承辦確認中")]
             B01,
 
             /// <summary>
@@ -66,9 +66,9 @@ namespace Treasury.Web.Enum
 
 
             /// <summary>
-            /// 入庫確認中
+            /// 保管科覆核完成覆核，待入庫人員確認中
             /// </summary>
-            [Description("入庫確認中")]
+            [Description("保管科覆核完成覆核，待入庫人員確認中")]
             C01,
 
             /// <summary>

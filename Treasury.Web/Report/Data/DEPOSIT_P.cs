@@ -58,7 +58,7 @@ namespace Treasury.Web.Report.Data
                                 ReportData = new ReportData()
                                 {
                                     TYPE = "Data",
-                                    EXPIRY_DATE = MasterData.EXPIRY_DATE.DateToTaiwanDate(9),
+                                    EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
@@ -75,7 +75,7 @@ namespace Treasury.Web.Report.Data
                             ReportData = new ReportData()
                             {
                                 TYPE = "Data",
-                                EXPIRY_DATE = MasterData.EXPIRY_DATE.DateToTaiwanDate(9),
+                                EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
                                 TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                 TOTAL_DENOMINATION = TOTAL_DENOMINATION.ToString()
                             };

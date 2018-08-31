@@ -207,21 +207,6 @@
     <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
   </EntityType>
-  <EntityType Name="ITEM_DEP_ORDER_D">
-    <Key>
-      <PropertyRef Name="ITEM_ID" />
-      <PropertyRef Name="DATA_SEQ" />
-    </Key>
-    <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DATA_SEQ" Type="Int32" Nullable="false" />
-    <Property Name="DEP_NO_PREAMBLE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DEP_NO_B" Type="String" MaxLength="7" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DEP_NO_E" Type="String" MaxLength="7" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DEP_NO_TAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="DEP_CNT" Type="Int32" Nullable="false" />
-    <Property Name="DENOMINATION" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
-    <Property Name="SUBTOTAL_DENOMINATION" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
-  </EntityType>
   <EntityType Name="ITEM_DEP_ORDER_M">
     <Key>
       <PropertyRef Name="ITEM_ID" />
@@ -630,6 +615,7 @@
     <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
   </EntityType>
   <EntityType Name="TREA_APLY_TEMP">
     <Key>
@@ -819,7 +805,6 @@
     <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" />
     <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" />
     <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" />
-    <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="Self.ITEM_DEP_ORDER_D" />
     <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="Self.ITEM_DEP_ORDER_M" />
     <EntitySet Name="ITEM_DEP_RECEIVED" EntityType="Self.ITEM_DEP_RECEIVED" />
     <EntitySet Name="ITEM_IMPO" EntityType="Self.ITEM_IMPO" />
@@ -867,6 +852,7 @@
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
     <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
     <EntitySet Name="ITEM_CA" EntityType="dbTreasuryModel.ITEM_CA" />
+    <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_D" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1019,5 +1005,27 @@
     <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
     <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="ITEM_DEP_ORDER_D">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="DATA_SEQ" />
+    </Key>
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="DATA_SEQ" Type="Int32" Nullable="false" />
+    <Property Name="DEP_NO_PREAMBLE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_B" Type="String" Nullable="false" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_E" Type="String" Nullable="false" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_TAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_CNT" Type="Int32" Nullable="false" />
+    <Property Name="DENOMINATION" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+    <Property Name="SUBTOTAL_DENOMINATION" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+    <Property Name="DEP_NO_PREAMBLE_AFT" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_B_AFT" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_E_AFT" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_TAIL_AFT" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_CNT_AFT" Type="Int32" />
+    <Property Name="DENOMINATION_AFT" Type="Decimal" Precision="18" Scale="2" />
+    <Property Name="SUBTOTAL_DENOMINATION_AFT" Type="Decimal" Precision="18" Scale="2" />
   </EntityType>
 </Schema>

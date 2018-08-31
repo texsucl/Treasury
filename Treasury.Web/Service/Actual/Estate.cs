@@ -99,6 +99,43 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
+        /// 對資料庫進行大樓名稱的模糊比對
+        /// </summary>
+        /// <param name="building_Name"></param>
+        /// <returns></returns>
+        public MSGReturnModel<string> GetCheckItemBook(string building_Name)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.parameter_Error.GetDescription();
+            string str = string.Empty;
+            if (building_Name.IsNullOrWhiteSpace())
+                return result;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                building_Name = building_Name.Replace("大樓", string.Empty);
+                var _item_Id = Ref.TreaItemType.D1014.ToString();
+                var same = db.ITEM_BOOK.AsNoTracking().Where(x =>
+                x.COL == "BUILDING_NAME" &&
+                x.ITEM_ID == _item_Id &&
+                x.COL_VALUE.Contains(building_Name)
+                ).OrderBy(x=>x.GROUP_NO)
+                .AsEnumerable()
+                .Select(x=> $@"大樓名稱:{x.COL_VALUE},冊號:{x.GROUP_NO}")
+                .ToList();
+                if (same.Any())
+                {
+                    str += $@"比對結果:<br/>";
+                    str += string.Join("<br/>", same);
+                }
+                result.RETURN_FLAG = true;
+                result.DESCRIPTION = "沒有類似的大樓名稱!";
+                result.Datas = str;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 使用 申請單號 抓取資料
         /// </summary>
         /// <param name="aplyNo">單號</param>
