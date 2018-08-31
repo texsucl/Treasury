@@ -214,13 +214,20 @@
     </Key>
     <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="DATA_SEQ" Type="Int32" Nullable="false" />
-    <Property Name="DEP_NO_PREAMBLE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="DEP_NO_PREAMBLE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
     <Property Name="DEP_NO_B" Type="String" MaxLength="7" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="DEP_NO_E" Type="String" MaxLength="7" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="DEP_NO_TAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="DEP_CNT" Type="Int32" Nullable="false" />
     <Property Name="DENOMINATION" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
     <Property Name="SUBTOTAL_DENOMINATION" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+    <Property Name="DEP_NO_PREAMBLE_AFT" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_B_AFT" Type="String" Nullable="false" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_E_AFT" Type="String" Nullable="false" MaxLength="7" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_NO_TAIL_AFT" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="DEP_CNT_AFT" Type="Int32" Nullable="false" />
+    <Property Name="DENOMINATION_AFT" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+    <Property Name="SUBTOTAL_DENOMINATION_AFT" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
   </EntityType>
   <EntityType Name="ITEM_DEP_ORDER_M">
     <Key>
@@ -727,32 +734,6 @@
     <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
   </EntityType>
-  <EntityType Name="TREA_OPEN_REC">
-    <Key>
-      <PropertyRef Name="TREA_REGISTER_ID" />
-    </Key>
-    <Property Name="TREA_REGISTER_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="OPEN_TREA_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="OPEN_TREA_REASON" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="OPEN_TREA_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="ACTUAL_PUT_TIME" Type="DateTime" Precision="3" />
-    <Property Name="ACTUAL_GET_TIME" Type="DateTime" Precision="3" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="APPR_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
-    <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-    <Property Name="REGI_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="REGI_APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="REGI_APPR_DT" Type="DateTime" Precision="3" />
-    <Property Name="REGI_APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-  </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT_HIS">
     <Key>
       <PropertyRef Name="APLY_NO" />
@@ -847,7 +828,6 @@
     <EntitySet Name="TREA_EQUIP_HIS" EntityType="Self.TREA_EQUIP_HIS" />
     <EntitySet Name="TREA_ITEM" EntityType="Self.TREA_ITEM" />
     <EntitySet Name="TREA_ITEM_HIS" EntityType="Self.TREA_ITEM_HIS" />
-    <EntitySet Name="TREA_OPEN_REC" EntityType="Self.TREA_OPEN_REC" />
     <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" />
     <EntitySet Name="Log" EntityType="Self.Log" />
     <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
@@ -868,6 +848,7 @@
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
     <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
     <EntitySet Name="ITEM_CA" EntityType="dbTreasuryModel.ITEM_CA" />
+    <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1020,5 +1001,32 @@
     <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
     <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="TREA_OPEN_REC">
+    <Key>
+      <PropertyRef Name="TREA_REGISTER_ID" />
+    </Key>
+    <Property Name="TREA_REGISTER_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="OPEN_TREA_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="OPEN_TREA_REASON" Type="String" Nullable="false" MaxLength="1000" FixedLength="false" Unicode="true" />
+    <Property Name="OPEN_TREA_TIME" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="EXEC_TIME_B" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="EXEC_TIME_E" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="ACTUAL_PUT_TIME" Type="DateTime" Precision="3" />
+    <Property Name="ACTUAL_GET_TIME" Type="DateTime" Precision="3" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="REGI_STATUS" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+    <Property Name="REGI_APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="REGI_APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="REGI_APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="OPEN_TREA_DATE" Type="DateTime" Nullable="false" Precision="0" />
   </EntityType>
 </Schema>

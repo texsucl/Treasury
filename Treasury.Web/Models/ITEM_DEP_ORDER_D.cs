@@ -23,5 +23,12 @@ namespace Treasury.Web.Models
         public int DEP_CNT { get; set; }
         public decimal DENOMINATION { get; set; }
         public decimal SUBTOTAL_DENOMINATION { get; set; }
+        public string DEP_NO_PREAMBLE_AFT { get; set; }
+        public string DEP_NO_B_AFT { get; set; }
+        public string DEP_NO_E_AFT { get; set; }
+        public string DEP_NO_TAIL_AFT { get; set; }
+        public int DEP_CNT_AFT { get; set; }
+        public decimal DENOMINATION_AFT { get; set; }
+        public decimal SUBTOTAL_DENOMINATION_AFT { get; set; }
     }
 }

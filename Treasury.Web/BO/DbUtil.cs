@@ -11,9 +11,9 @@ namespace Treasury.WebUtils
     {
         public static string GetDBTreasuryConnStr()
         {
-            var connString = ConfigurationManager.ConnectionStrings["dbTreasury"].ConnectionString;
+			var connString = ConfigurationManager.ConnectionStrings["dbTreasury"].ConnectionString;
 
-            return connString;
+			return connString;
         }
     }
 }
