@@ -37,10 +37,25 @@
         /// </summary>
         public static string TreasuryAccessApprSearchDetailViewData { get; private set; }
 
-        /// <summary>
-        /// 明細資料(空白票據)
-        /// </summary>
-        public static string BILLTempData { get; private set; }
+		/// <summary>
+		/// 指定開庫作業(查詢條件)
+		/// </summary>
+		public static string SpecifiedTimeTreasurySearchData { get; private set; }
+
+		/// <summary>
+		/// 指定開庫作業(資料)
+		/// </summary>
+		public static string SpecifiedTimeTreasurySearchDetailViewData { get; private set; }
+
+		/// <summary>5
+		/// 指定開庫作業新增申請覆核
+		/// </summary>
+		public static string SpecifiedTimeTreasuryApplyData { get; private set; }
+
+		/// <summary>
+		/// 明細資料(空白票據)
+		/// </summary>
+		public static string BILLTempData { get; private set; }
 
         /// <summary>
         /// 當日庫存明細表(空白票據)
@@ -131,7 +146,10 @@
             TreasuryAccessSearchUpdateViewData = "TreasuryAccessSearchUpdateViewData";
             TreasuryAccessApprSearchData = "TreasuryAccessApprSearchData";
             TreasuryAccessApprSearchDetailViewData = "TreasuryAccessApprSearchDetailViewData";
-            BILLTempData = "BILLTempData";
+			SpecifiedTimeTreasurySearchData = "SpecifiedTimeTreasurySearchData";
+			SpecifiedTimeTreasurySearchDetailViewData = "SpecifiedTimeTreasurySearchDetailViewData";
+			SpecifiedTimeTreasuryApplyData = "SpecifiedTimeTreasuryApplyData";
+			BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";

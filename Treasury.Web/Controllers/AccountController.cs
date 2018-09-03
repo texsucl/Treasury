@@ -95,9 +95,8 @@ namespace Treasury.Web.Controllers
                     //AD驗證成功，檢查該user是否有系統權限
                     CodeUserDao codeUserDao = new CodeUserDao();
 
-                    
-                    
-                    CODE_USER codeUser = codeUserDao.qryUserByKey(loginModel.UserId);
+
+					CODE_USER codeUser = codeUserDao.qryUserByKey(loginModel.UserId);
                     if (codeUser != null)
                     {
                         if ("N".Equals(codeUser.IS_DISABLED)) {
@@ -107,8 +106,7 @@ namespace Treasury.Web.Controllers
 
                             Session["UserName"] = "";
                             Session["UserUnit"] = "";
-                            //Session["UserName"] = "侯蔚鑫";
-                            //Session["UserUnit"] = "VLX01";
+
                             OaEmpDao oaEmpDao = new OaEmpDao();
                             try
                             {

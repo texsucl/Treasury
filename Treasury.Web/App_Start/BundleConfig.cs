@@ -26,8 +26,9 @@ namespace Treasury.Web
                         "~/Scripts/jquery.unobtrusive-ajax.js",
                         "~/Scripts/datepicker.js",
                         "~/Scripts/locales/datepicker.en.js",
-                        "~/Scripts/locales/datepicker.zh-TW.js"
-                        ));
+                        "~/Scripts/locales/datepicker.zh-TW.js",
+						"~/Scripts/jquery.timepicker.js"
+						));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
                         "~/Scripts/jquery-ui-{version}.js"));
@@ -83,7 +84,9 @@ namespace Treasury.Web
                       "~/Content/site.css",
                       "~/Content/font-awesome.css",
                       "~/Content/toastr.css",
-                      "~/Content/customerUtility.css"));
+                      "~/Content/customerUtility.css",
+					  "~/Content/jquery.timepicker.css"
+					  ));
         }
     }
 }
