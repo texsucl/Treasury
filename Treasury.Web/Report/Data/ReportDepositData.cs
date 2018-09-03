@@ -91,7 +91,8 @@ namespace Treasury.Web.Report.Data
 
         }
 
-        protected class ReportData
+        //修正 欄位型態 by mark 20180903
+        protected class DepositReportData
         {
             [Description("類型")]
             public string TYPE { get; set; }
@@ -115,13 +116,13 @@ namespace Treasury.Web.Report.Data
             public string DEP_NO_E { get; set; }
 
             [Description("張數")]
-            public string DEP_CNT { get; set; }
+            public int DEP_CNT { get; set; }
 
             [Description("單張面額")]
-            public string DENOMINATION { get; set; }
+            public decimal? DENOMINATION { get; set; }
 
             [Description("總面額")]
-            public string TOTAL_DENOMINATION { get; set; }
+            public decimal? TOTAL_DENOMINATION { get; set; }
 
             [Description("項次")]
             public string ISORTBY { get; set; }

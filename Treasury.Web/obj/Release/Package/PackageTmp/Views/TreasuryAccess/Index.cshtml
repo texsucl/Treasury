@@ -235,6 +235,7 @@
             verified.required(TAFormId, 'TAReason', message.required('申請原因')); //申請原因為必填
             verified.required(TAFormId, EXP_ACCESS_DATEId, message.required('預計存取日期')); //預計存取日期為必填
 
+
             $('.TASearch').hide();
             $('input[name=cIFeaturesType]').on('change', function () {
                 var type = $('input[name=cIFeaturesType]:checked').val();
@@ -415,8 +416,6 @@
                         //判斷是否定期存單
                         if (item == "D1013")
                         {
-                            customerUtility.alert('待完成', 'w');
-                            return false;
                             itemData.reportType = itemData.reportType + "_" + accessType;
                             $.ajax({
                                 type: "POST",
@@ -440,7 +439,6 @@
                                                     null
                                                     );
                                                 parms.length = 0;
-                                                //setTimeout(50000);
                                             }
                                         }, 100);
                                 }
@@ -979,7 +977,7 @@
                 case '@Ref.TreaItemType.D1015.ToString()':
                     obj.url = TAurl.openSTOCK;
                     obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
-                    obj.openDialogWidth = 1000;
+                    obj.openDialogWidth = 1200;
                     obj.reportType = 'STOCK';
                     break;
                 case '@Ref.TreaItemType.D1024.ToString()':

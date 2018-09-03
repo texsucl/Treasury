@@ -48,6 +48,7 @@
         </table>
         <div style="padding-bottom:5px;">
             <input type="button" id="ESTATEInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+            <input type="button" id="ESTATECheckItemBook" value="檢核大樓名稱" class="btn btn-primary" style="display:none;">
         </div>
         <div id="ESTATEjqgridDiv" class="jqd" style="padding-bottom:5px;">
 
@@ -140,7 +141,7 @@
 
 <script>
     $(function () {
-        debugger
+        
         //#region url設定
         var ESTATEurl = {};
         ESTATEurl.Insert = '@Url.Action("InsertView", "Estate")';
@@ -152,6 +153,7 @@
         ESTATEurl.TakeOutData = '@Url.Action("TakeOutData", "Estate")';
         ESTATEurl.ApplyTempData = '@Url.Action("ApplyTempData", "Estate")';
         ESTATEurl.GetItemBook = '@Url.Action("GetItemBook", "Estate")';
+        ESTATEurl.CheckItemBook = '@Url.Action("CheckItemBook", "Estate")';
         //#endregion
 
         //#region 參數設定
@@ -213,6 +215,7 @@
         if (tradeFlag && ESTATE_Act_Type) {
             $('.Estate_P').show();
             $('#ESTATEInsert').show();
+            $('#ESTATECheckItemBook').show();
             $('#' + ESTATE_Building_NameTId).prop('disabled', false);
             $('#' + ESTATE_LocatedTId).prop('disabled', false);
             if ('@ViewBag.CustodianFlag' == "True") {
@@ -265,11 +268,13 @@
                 else {
                     $("#" + ESTATE_MemoTId).attr("Disabled", true);
                 }
+                $('#ESTATECheckItemBook').show();
             }
             else if (type == 'Estate_Db')
             {
                 $('#' + ESTATE_LocatedTId).prop('disabled', true);
                 $('#' + ESTATE_MemoTId).prop('disabled', true);
+                $('#ESTATECheckItemBook').hide();
             }
         });
 
@@ -419,8 +424,44 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { ESTATEDeleteTempFun(); });
                     break;
+                case 'ESTATECheckItemBook':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ESTATECheckItemBookFun(); });
+                    break;
             }
         });
+
+        function ESTATECheckItemBookFun() {
+            var _Building_Name = $('#' + ESTATE_Building_NameTId).val().trim();
+            if (_Building_Name == '') {
+                customerUtility.alert('檢核名稱不能為空', 'w');
+                return false;
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        building_Name: _Building_Name,
+                    }),
+                    dataType: "json",
+                    url: ESTATEurl.CheckItemBook,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        var data = result.Datas;
+                        if (data.length > 0) {
+                            customerUtility.alert(result.Datas, 'w');
+                        }
+                        else {
+                            customerUtility.alert(result.DESCRIPTION, 's');
+                        }
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'e');
+                    }
+                })
+            }
+        }
 
         function ESTATEReset() {
             $('#' + ESTATE_BookNoLId).text('');

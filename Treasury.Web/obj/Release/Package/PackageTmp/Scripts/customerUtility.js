@@ -4,6 +4,7 @@
     window.customerUtility = customerUtility;
 
     customerUtility.addCommas = function addCommas(nStr) {
+        nStr = nStr || '';
         nStr += '';
         x = nStr.split('.');
         x1 = x[0];
