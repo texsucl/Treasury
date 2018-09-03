@@ -112,7 +112,7 @@ namespace Treasury.Web.Service.Actual
                     .AsEnumerable().Select(x => new SelectOption()
                     {
                         Value = x.GROUP_NO.ToString(),
-                        Text = x.COL_VALUE
+                        Text = $@"{x.COL_VALUE}(編號:{x.GROUP_NO})"
                     }));
             }
             return result;
