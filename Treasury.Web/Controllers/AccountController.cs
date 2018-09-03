@@ -104,13 +104,10 @@ namespace Treasury.Web.Controllers
                             Session["UserID"] = loginModel.UserId;
 							//Session["AgentID"] = codeUser.CAGENTID;
 
-							//Session["UserName"] = "";
-							//Session["UserUnit"] = "";
-							Session["UserName"] = "李彥賢";
-							Session["UserUnit"] = "VL307";
-							//Session["UserName"] = "李彥賢";
-							//Session["UserUnit"] = "VLX01";
-							OaEmpDao oaEmpDao = new OaEmpDao();
+                            Session["UserName"] = "";
+                            Session["UserUnit"] = "";
+
+                            OaEmpDao oaEmpDao = new OaEmpDao();
                             try
                             {
                                 //using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())

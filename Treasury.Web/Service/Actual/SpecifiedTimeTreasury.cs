@@ -127,8 +127,6 @@ namespace Treasury.Web.Service.Actual
 				var _query =
 					_data.Join(db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "APPR_STATUS"),
 					x => x.APPR_STATUS, z => z.CODE, (x, z) => new { open = x, sysCode = z })
-					//.Join(db.TREA_ITEM.AsEnumerable(),
-					//x => x.open.OPEN_TREA_REASON.Split(';').ToList().ForEach(a => a.FirstOrDefault()), y => y.ITEM_ID, (x, y) => y)
 					.AsEnumerable()
 					.Select((x, index) => new SpecifiedTimeTreasurySearchDetailViewModel()
 					{
