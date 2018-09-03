@@ -162,12 +162,12 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    @*<td>
                         <label>存單號碼尾碼 : </label>
                     </td>
                     <td>
                         <input type="text" class="DepositInsertType_D" id="tDep_No_Tail" name="tDep_No_Tail" maxlength="1" />
-                    </td>
+                    </td>*@
                     <td>
                         <label>張數 : </label>
                     </td>
@@ -180,8 +180,6 @@
                     <td>
                         <input type="text" class="DepositInsertType_D" id="tDenomination" name="tDenomination" maxlength="13" />
                     </td>
-                </tr>
-                <tr>
                     <td>
                         <label>面額小計 : </label>
                     </td>
@@ -191,6 +189,16 @@
                         <input type="hidden" id="hData_Seq" />
                     </td>
                 </tr>
+                @*<tr>
+                    <td>
+                        <label>面額小計 : </label>
+                    </td>
+                    <td>
+                        <label id="lSubtotal_Denomination"></label>
+                        <input type="hidden" id="hRowNum" />
+                        <input type="hidden" id="hData_Seq" />
+                    </td>
+                </tr>*@
                 <tr>
                     <td colspan="3">
                         <input type="button" id="DepositInsertTemp_D" value="新增" class="btn btn-primary" />
@@ -248,7 +256,7 @@
         var DepositDep_No_Preamble = 'tDep_No_Preamble'; //存單號碼前置碼Id
         var DepositDep_No_B = 'tDep_No_B'; //存單號碼(起)Id
         var DepositDep_No_E = 'tDep_No_E'; //存單號碼(迄)Id
-        var DepositDep_No_Tail = 'tDep_No_Tail'; //存單號碼尾碼Id
+        //var DepositDep_No_Tail = 'tDep_No_Tail'; //存單號碼尾碼Id
         var DepositDep_Cnt = 'tDep_Cnt'; //張數Id
         var DepositDenomination = 'tDenomination'; //單張面額Id
         var DepositSubtotal_Denomination = 'lSubtotal_Denomination'; //面額小計Id
@@ -629,7 +637,7 @@
             $('#' + DepositDep_No_Preamble).val('');
             $('#' + DepositDep_No_B).val('');
             $('#' + DepositDep_No_E).val('');
-            $('#' + DepositDep_No_Tail).val('');
+            //$('#' + DepositDep_No_Tail).val('');
             $('#' + DepositDep_Cnt).val('');
             $('#' + DepositDenomination).val('');
             $('#' + DepositSubtotal_Denomination).html('');
@@ -672,7 +680,7 @@
                 $('#' + DepositDep_No_Preamble).val(data.vDep_No_Preamble);
                 $('#' + DepositDep_No_B).val(data.vDep_No_B);
                 $('#' + DepositDep_No_E).val(data.vDep_No_E);
-                $('#' + DepositDep_No_Tail).val(data.vDep_No_Tail);
+                //$('#' + DepositDep_No_Tail).val(data.vDep_No_Tail);
                 $('#' + DepositDep_Cnt).val(data.vDep_Cnt);
                 $('#' + DepositDenomination).val(data.vDenomination);
                 $('#' + DepositSubtotal_Denomination).html(data.vSubtotal_Denomination);
@@ -947,15 +955,15 @@
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCommit_Date_Tw", index: "vCommit_Date_Tw", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vExpiry_Date_Tw", index: "vExpiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 80, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 80, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
@@ -991,15 +999,15 @@
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center', formatter: formatterItem_Id, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCommit_Date_Tw", index: "vCommit_Date_Tw", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vExpiry_Date_Tw", index: "vExpiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrans_Expiry_Date_Tw", index: "vTrans_Expiry_Date_Tw", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
@@ -1047,7 +1055,7 @@
                 colModelArray.push({ name: "vDep_No_Preamble", index: "vDep_No_Preamble", width: 140, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center', hidden: true });
                 colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
@@ -1076,7 +1084,7 @@
                 colModelArray.push({ name: "vDep_No_Preamble", index: "vDep_No_Preamble", width: 140, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center', hidden: true });
                 colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
@@ -1215,7 +1223,8 @@
                             $('#' + DepositDep_No_Preamble).val().trim(),
                             $('#' + DepositDep_No_B).val().trim(),
                             $('#' + DepositDep_No_E).val().trim(),
-                            $('#' + DepositDep_No_Tail).val().trim(),
+                            //$('#' + DepositDep_No_Tail).val().trim(),
+                            null,
                             $('#' + DepositDep_Cnt).val().trim(),
                             $('#' + DepositDenomination).val().trim(),
                             $('#' + DepositSubtotal_Denomination).html().trim())
@@ -1297,7 +1306,8 @@
                             $('#' + DepositDep_No_Preamble).val().trim(),
                             $('#' + DepositDep_No_B).val().trim(),
                             $('#' + DepositDep_No_E).val().trim(),
-                            $('#' + DepositDep_No_Tail).val().trim(),
+                            //$('#' + DepositDep_No_Tail).val().trim(),
+                            null,
                             $('#' + DepositDep_Cnt).val().trim(),
                             $('#' + DepositDenomination).val().trim(),
                             $('#' + DepositSubtotal_Denomination).html().trim())

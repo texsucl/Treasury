@@ -19,14 +19,14 @@ namespace Treasury.Web.Report.Data
             SetDetail(aply_No, isTWD, vDep_Type);
 
             //報表資料
-            List<ReportData> ReportDataList = new List<ReportData>();
+            List<DepositReportData> ReportDataList = new List<DepositReportData>();
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
                     .FirstOrDefault(x => x.APLY_NO == aply_No);
 
-                var ReportData = new ReportData();
+                var ReportData = new DepositReportData();
                 int TOTAL_DEP_CNT = 0;
 
                 //取得定存明細資料
@@ -55,15 +55,15 @@ namespace Treasury.Web.Report.Data
 
                             foreach(var DetailData in _IDOD_DataList)
                             {
-                                ReportData = new ReportData()
+                                ReportData = new DepositReportData()
                                 {
                                     TYPE = "Data",
                                     EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
-                                    DEP_CNT = DetailData.DEP_CNT.ToString(),
-                                    DENOMINATION = DetailData.DENOMINATION.ToString(),
+                                    DEP_CNT = DetailData.DEP_CNT,
+                                    DENOMINATION = DetailData.DENOMINATION,
                                 };
 
                                 ReportDataList.Add(ReportData);
@@ -72,12 +72,12 @@ namespace Treasury.Web.Report.Data
                                 TOTAL_DEP_CNT += DetailData.DEP_CNT;
                             }
 
-                            ReportData = new ReportData()
+                            ReportData = new DepositReportData()
                             {
                                 TYPE = "Data",
                                 EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
                                 TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
-                                TOTAL_DENOMINATION = TOTAL_DENOMINATION.ToString()
+                                TOTAL_DENOMINATION = TOTAL_DENOMINATION
                             };
 
                             ReportDataList.Add(ReportData);
@@ -105,7 +105,7 @@ namespace Treasury.Web.Report.Data
                         DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
                     }
 
-                    ReportData = new ReportData()
+                    ReportData = new DepositReportData()
                     {
                         TYPE = "Item",
                         ISORTBY = item.ISORTBY.ToString(),

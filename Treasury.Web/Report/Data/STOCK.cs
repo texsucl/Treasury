@@ -67,7 +67,7 @@ namespace Treasury.Web.Report.Data
                                 GROUP_NO = _IB_Data.GROUP_NO.ToString(),
                                 NAME = _IB_Data.COL_VALUE,
                                 TREA_BATCH_NO = ItemBook.Key.ToString(),
-                                NUMBER_OF_SHARES_TOTAL = NUMBER_OF_SHARES_TOTAL == null ? null : NUMBER_OF_SHARES_TOTAL.ToString()
+                                NUMBER_OF_SHARES_TOTAL = NUMBER_OF_SHARES_TOTAL
                             };
 
                             ReportDataList.Add(ReportData);
@@ -80,10 +80,10 @@ namespace Treasury.Web.Report.Data
                             foreach (var ItemStock in _IS_TREA_BATCH_NO_DataList)
                             {
                                 //計算面額小計
-                                string DENOMINATION_TOTAL = string.Empty;
+                                decimal DENOMINATION_TOTAL = 0M;
                                 if(ItemStock.STOCK_CNT != null && ItemStock.DENOMINATION != null)
                                 {
-                                    DENOMINATION_TOTAL = (decimal.Parse(ItemStock.STOCK_CNT.ToString()) * decimal.Parse(ItemStock.DENOMINATION.ToString())).ToString();
+                                    DENOMINATION_TOTAL = (decimal.Parse(ItemStock.STOCK_CNT.ToString()) * decimal.Parse(ItemStock.DENOMINATION.ToString()));
                                 }
 
                                 ReportData = new StockReportData()
@@ -95,12 +95,12 @@ namespace Treasury.Web.Report.Data
                                     STOCK_NO_PREAMBLE = ItemStock.STOCK_NO_PREAMBLE,
                                     STOCK_NO_B = ItemStock.STOCK_NO_B,
                                     STOCK_NO_E = ItemStock.STOCK_NO_E,
-                                    STOCK_CNT = ItemStock.STOCK_CNT == null ? null : ItemStock.STOCK_CNT.ToString(),
-                                    AMOUNT_PER_SHARE = ItemStock.AMOUNT_PER_SHARE == null ? null : ItemStock.AMOUNT_PER_SHARE.ToString(),
-                                    SINGLE_NUMBER_OF_SHARES = ItemStock.SINGLE_NUMBER_OF_SHARES == null ? null : ItemStock.SINGLE_NUMBER_OF_SHARES.ToString(),
-                                    DENOMINATION = ItemStock.DENOMINATION == null ? null : ItemStock.DENOMINATION.ToString(),
+                                    STOCK_CNT = ItemStock.STOCK_CNT,
+                                    AMOUNT_PER_SHARE = ItemStock.AMOUNT_PER_SHARE,
+                                    SINGLE_NUMBER_OF_SHARES = ItemStock.SINGLE_NUMBER_OF_SHARES,
+                                    DENOMINATION = ItemStock.DENOMINATION,
                                     DENOMINATION_TOTAL = DENOMINATION_TOTAL,
-                                    NUMBER_OF_SHARES = ItemStock.NUMBER_OF_SHARES == null ? null : ItemStock.NUMBER_OF_SHARES.ToString(),
+                                    NUMBER_OF_SHARES = ItemStock.NUMBER_OF_SHARES,
                                     MEMO = ItemStock.MEMO
                                 };
 
@@ -123,6 +123,7 @@ namespace Treasury.Web.Report.Data
 
     }
 
+    //修正 欄位型態 by mark 20180903
     public class StockReportData
     {
         [Description("類型")]
@@ -138,7 +139,7 @@ namespace Treasury.Web.Report.Data
         public string TREA_BATCH_NO { get; set; }
 
         [Description("總股數")]
-        public string NUMBER_OF_SHARES_TOTAL { get; set; }
+        public decimal? NUMBER_OF_SHARES_TOTAL { get; set; }
 
         [Description("項次")]
         public string ROW_NUMBER { get; set; }
@@ -156,22 +157,22 @@ namespace Treasury.Web.Report.Data
         public string STOCK_NO_E { get; set; }
 
         [Description("張數")]
-        public string STOCK_CNT { get; set; }
+        public int? STOCK_CNT { get; set; }
 
         [Description("每股金額")]
-        public string AMOUNT_PER_SHARE { get; set; }
+        public decimal? AMOUNT_PER_SHARE { get; set; }
 
         [Description("單張股數")]
-        public string SINGLE_NUMBER_OF_SHARES { get; set; }
+        public decimal? SINGLE_NUMBER_OF_SHARES { get; set; }
 
         [Description("單張面額")]
-        public string DENOMINATION { get; set; }
+        public decimal? DENOMINATION { get; set; }
 
         [Description("面額小計")]
-        public string DENOMINATION_TOTAL { get; set; }
+        public decimal? DENOMINATION_TOTAL { get; set; }
 
         [Description("股數小計")]
-        public string NUMBER_OF_SHARES { get; set; }
+        public decimal? NUMBER_OF_SHARES { get; set; }
 
         [Description("備註")]
         public string MEMO { get; set; }

@@ -60,7 +60,14 @@
         </form>
     </div>
     <div style="padding-bottom:5px;">
-        <input type="button" id="StockInsert" value="新增存入明細" class="btn btn-primary" />
+        <table>
+            <tr>
+                <td align="left">
+                    <input type="button" id="StockInsert" value="新增存入明細" style="padding-right:10px;" class="btn btn-primary" />
+                    <input type="button" id="StockCheck" value="股票檢核" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
     </div>
     <div id="STOCKjqgridDiv1"  class="jqd" style="padding-bottom:5px;">
 
@@ -110,21 +117,35 @@
                         <input type="text" class="StockInsertType" id="tStock_Total" name="tStock_Total" />
                     </td>
                     <td>
-                        <label>單張面額 : </label>
+                        <label>每股金額 : </label>
                     </td>
                     <td>
-                        <input type="text" class="StockInsertType" id="tDenomination" name="tDenomination" />
+                        <input type="text" class="StockInsertType" id="tAmount_Per_Share" name="tAmount_Per_Share" />
                     </td>
                 </tr>
                 <tr>
+                    <td>
+                        <label>單張股數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="StockInsertType" id="tSingle_Number_Of_Shares" name="tSingle_Number_Of_Shares" />
+                    </td>
+                    <td>
+                        <label>單張面額 : </label>
+                    </td>
+                    <td>
+                        <label id="lDenomination"></label>
+                    </td>
                     <td>
                         <label>面額小計 : </label>
                     </td>
                     <td>
                         <label id="lDenomination_Total"></label>
                     </td>
+                </tr>
+                <tr>
                     <td>
-                        <label>股數 : </label>
+                        <label>股數小計 : </label>
                     </td>
                     <td>
                         <input type="text" class="StockInsertType" id="tNumber_Of_Shares" name="tNumber_Of_Shares" />
@@ -134,6 +155,9 @@
                     </td>
                     <td>
                         <input type="text" class="StockInsertType" id="tMemo" name="tMemo" />
+                    </td>
+                    <td>
+
                     </td>
                 </tr>
                 <tr>
@@ -174,9 +198,11 @@
         var Stock_No_B = 'tStock_No_B'; //序號(起)Id
         var Stock_No_E = 'tStock_No_E'; //序號(迄)Id
         var Stock_Total = 'tStock_Total'; //張數Id
-        var Denomination = 'tDenomination'; //單張面額Id
+        var Amount_Per_Share = 'tAmount_Per_Share'; //每股金額Id
+        var Single_Number_Of_Shares = 'tSingle_Number_Of_Shares'; //單張股數Id
+        var Denomination = 'lDenomination'; //單張面額Id
         var Denomination_Total = 'lDenomination_Total'; //面額小計Id
-        var Number_Of_Shares = 'tNumber_Of_Shares'; //股數Id
+        var Number_Of_Shares = 'tNumber_Of_Shares'; //股數小計Id
         var Memo = 'tMemo'; //備註說明Id
 
         var StockConfirmFlag = false; //離開時提醒訊息
@@ -198,6 +224,7 @@
             $('#dStock_Name').attr("Disabled", true);
             $("#dStock_Area_Type").attr("Disabled", true);
             $("#tStock_Memo").attr("Disabled", true);
+            $('#StockCheck').hide();
             setTimeout(
             function () {
                 $("input[name='rStockFeaturesType'][value='StockFromDB']").click();
@@ -220,12 +247,14 @@
             $("#tStock_Name").hide();
             $("#dStock_Name").show();
             $("#dStock_Area_Type").attr("Disabled", true);
+            $('#StockCheck').hide();
         }
         //#endregion
 
         //#region url設定
         var StockUrl = {};
         StockUrl.GetStockDate = '@Url.Action("GetStockDate", "Stock")';
+        StockUrl.GetStockCheck = '@Url.Action("GetStockCheck", "Stock")';
         StockUrl.getData = '@Url.Action("GetCacheData", "Stock")';
         StockUrl.InsertTempData = '@Url.Action("InsertTempData", "Stock")';
         StockUrl.UpdateTempData = '@Url.Action("UpdateTempData", "Stock")';
@@ -258,10 +287,10 @@
             verified.positiveInt(StockFormId, Stock_No_E); //序號(迄) 僅能輸入數字(正)
             verified.maxlength(StockFormId, Stock_No_E, 8); //序號(迄)最大長度(8)
             verified.positiveInt(StockFormId, Stock_Total); //張數 僅能輸入數字(正)
-            verified.positiveInt(StockFormId, Denomination); //單張面額 僅能輸入數字(正)
-            verified.maxlength(StockFormId, Denomination, 13); //單張面額最大長度(13)
-            verified.positiveInt(StockFormId, Number_Of_Shares); //股數 僅能輸入數字(正)
-            verified.maxlength(StockFormId, Number_Of_Shares, 13); //股數最大長度(13)
+            verified.positiveInt(StockFormId, Amount_Per_Share); //每股金額 僅能輸入數字(正)
+            verified.positiveInt(StockFormId, Single_Number_Of_Shares); //單張股數 僅能輸入數字(正)
+            verified.positiveInt(StockFormId, Number_Of_Shares); //股數小計 僅能輸入數字(正)
+            verified.maxlength(StockFormId, Number_Of_Shares, 13); //股數小計最大長度(13)
             verified.maxlength(StockFormId, Memo, 30); //備註說明最大長度(30)
 
         }
@@ -323,6 +352,10 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { StockInsertFun(); });
                     break;
+                case 'StockCheck':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { StockCheckFun(); });
+                    break;
                 case 'StockApply':
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { StockApplyFun(); });
@@ -374,10 +407,12 @@
 
         //類型選取
         $("#dStock_Type").on('change', function () {
-            //判斷區域
             switch ($("#dStock_Type").val()) {
                 case "S":
                     Type_S();
+                    break;
+                case "P":
+                    Type_P();
                     break;
                 case "C":
                     Type_C();
@@ -389,11 +424,12 @@
         $('#' + Stock_No_B + ',#' + Stock_No_E).off('blur', function () { });
         $('#' + Stock_No_B + ',#' + Stock_No_E).on('blur', function () {
             setStock_Total();
+            setDenomination_Total();
         });
 
-        //單張面額輸入完畢
-        $('#' + Denomination).off('blur', function () { });
-        $('#' + Denomination).on('blur', function () {
+        //張數,每股金額或單張股數輸入完畢
+        $('#' + Stock_Total + ',#' + Amount_Per_Share + ',#' + Single_Number_Of_Shares).off('blur', function () { });
+        $('#' + Stock_Total + ',#' + Amount_Per_Share + ',#' + Single_Number_Of_Shares).on('blur', function () {
             setDenomination_Total();
         });
 
@@ -420,6 +456,7 @@
             $("#lStock_No").html('');
             $("#tStock_Memo").val("");
             $("#lStock_Trea_Batch_No").html("1");
+            $('#StockCheck').show();
         }
 
         //從資料庫選取股票設定
@@ -427,6 +464,7 @@
             $("#tStock_Name").hide();
             $("#dStock_Name").show();
             $("#dStock_Area_Type").attr("Disabled", true);
+            $('#StockCheck').hide();
 
             GetStockDate();
         }
@@ -463,9 +501,8 @@
         }
 
         //取得股票明細內容
-        function GetStockDetailDate(rowid)
+        function GetStockDetailDate(listId, rowid)
         {
-            var listId = 'StockTempList';
             var data = $("#" + listId).getRowData(rowid);
             $.ajax({
                 type: "POST",
@@ -484,37 +521,89 @@
 
         //股票類型
         function Type_S() {
+            $("#dStock_Type").attr("Disabled", false);
             $("#tStock_No_Preamble").attr("Disabled", false);
             $("#tStock_No_B").attr("Disabled", false);
             $("#tStock_No_E").attr("Disabled", false);
+            $("#tAmount_Per_Share").attr("Disabled", false);
+            $("#tSingle_Number_Of_Shares").attr("Disabled", false);
             $("#tNumber_Of_Shares").attr("Disabled", false);
-
+            $("#tMemo").attr("Disabled", false);
+            $('#tAmount_Per_Share').val('10'); //修正股票類型變換為股票時 每股金額 預設帶回10 -- by mark 20180903
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
                     $("#tStock_Total").attr("Disabled", true);
-                    $("#tDenomination").attr("Disabled", false);
                     break;
                 case "F"://國外
                     $("#tStock_Total").attr("Disabled", false);
-                    $("#tDenomination").attr("Disabled", true);
+                    break;
+            }
+        }
+
+        //股權(持股)憑證
+        function Type_P() {
+            $("#dStock_Type").attr("Disabled", false);
+            $("#tStock_Total").attr("Disabled", false);
+            $("#tNumber_Of_Shares").attr("Disabled", false);
+            $("#tMemo").attr("Disabled", false);
+
+            switch ($("#dStock_Area_Type").val()) {
+                case "D"://國內
+                    $("#tStock_No_Preamble").val('');
+                    $("#tStock_No_Preamble").attr("Disabled", true);
+                    $("#tStock_No_B").val('');
+                    $("#tStock_No_B").attr("Disabled", true);
+                    $("#tStock_No_E").val('');
+                    $("#tStock_No_E").attr("Disabled", true);
+                    $("#tAmount_Per_Share").val('');
+                    $("#tAmount_Per_Share").attr("Disabled", true);
+                    $("#tSingle_Number_Of_Shares").val('');
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", true);
+                    $("#lDenomination").html('');
+                    $('#lDenomination_Total').html('');
+                    break;
+                case "F"://國外
+                    $("#tStock_No_Preamble").attr("Disabled", false);
+                    $("#tStock_No_B").attr("Disabled", false);
+                    $("#tStock_No_E").attr("Disabled", false);
+                    $("#tAmount_Per_Share").attr("Disabled", false);
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
                     break;
             }
         }
 
         //其他類型
         function Type_C() {
-            $("#tStock_No_Preamble").val('');
-            $("#tStock_No_Preamble").attr("Disabled", true);
-            $("#tStock_No_B").val('');
-            $("#tStock_No_B").attr("Disabled", true);
-            $("#tStock_No_E").val('');
-            $("#tStock_No_E").attr("Disabled", true);
+            $("#dStock_Type").attr("Disabled", false);
             $("#tStock_Total").attr("Disabled", false);
-            $("#tDenomination").val('');
-            $("#tDenomination").attr("Disabled", true);
-            $('#lDenomination_Total').html('');
-            $("#tNumber_Of_Shares").val('');
-            $("#tNumber_Of_Shares").attr("Disabled", true);
+            $("#tMemo").attr("Disabled", false);
+
+            switch ($("#dStock_Area_Type").val()) {
+                case "D"://國內
+                    $("#tStock_No_Preamble").val('');
+                    $("#tStock_No_Preamble").attr("Disabled", true);
+                    $("#tStock_No_B").val('');
+                    $("#tStock_No_B").attr("Disabled", true);
+                    $("#tStock_No_E").val('');
+                    $("#tStock_No_E").attr("Disabled", true);
+                    $("#tAmount_Per_Share").val('');
+                    $("#tAmount_Per_Share").attr("Disabled", true);
+                    $("#tSingle_Number_Of_Shares").val('');
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", true);
+                    $("#lDenomination").html('');
+                    $('#lDenomination_Total').html('');
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
+                    break;
+                case "F"://國外
+                    $("#tStock_No_Preamble").attr("Disabled", false);
+                    $("#tStock_No_B").attr("Disabled", false);
+                    $("#tStock_No_E").attr("Disabled", false);
+                    $("#tAmount_Per_Share").attr("Disabled", false);
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
+                    $("#tNumber_Of_Shares").attr("Disabled", false);
+                    break;
+            }
         }
 
         //計算張數
@@ -528,27 +617,53 @@
                 else {
                     $('#' + Stock_Total).val('');
                 }
+
+                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E))
+                {
+                    if ($('#' + Stock_No_B).val().length > $('#' + Stock_No_E).val().length)
+                        $('#' + Stock_No_E).val(created.padLeft(_Check_No_E, $('#' + Stock_No_B).val().length, '0'));
+                    else
+                        $('#' + Stock_No_B).val(created.padLeft(_Check_No_B, $('#' + Stock_No_E).val().length, '0'));
+                }
             }
             else {
                 $('#' + Stock_Total).val('');
             }
         }
 
-        //計算面額小計及股數
+        //計算單張面額,面額小計及股數小計
         function setDenomination_Total() {
-            if ($('#' + Denomination).val().length <= 13) {
-                var _Stock_Total = parseInt($('#' + Stock_Total).val());
-                var _Denomination = parseInt($('#' + Denomination).val());
-                if (!isNaN(_Stock_Total) && !isNaN(_Denomination)) {
-                    $('#' + Denomination_Total).html(_Stock_Total * _Denomination);
-                    $('#' + Number_Of_Shares).val((_Stock_Total * _Denomination) / 10);
-                }
-                else {
-                    $('#' + Denomination_Total).html('');
-                    $('#' + Number_Of_Shares).val('');
-                }
+            var _Stock_Total = parseInt($('#' + Stock_Total).val());
+            var _Amount_Per_Share = parseInt($('#' + Amount_Per_Share).val());
+            var _Single_Number_Of_Shares = parseInt($('#' + Single_Number_Of_Shares).val());
+            if (!isNaN(_Stock_Total) && !isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//張數,每股金額及單張股數皆有值
+            {
+                //計算單張面額
+                $('#' + Denomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+                //計算面額小計
+                $('#' + Denomination_Total).html(_Stock_Total * _Amount_Per_Share * _Single_Number_Of_Shares);
+                //計算股數小計
+                $('#' + Number_Of_Shares).val(_Stock_Total * _Single_Number_Of_Shares);
             }
-            else {
+            else if (!isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//每股金額及單張股數有值
+            {
+                //計算單張面額
+                $('#' + Denomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+
+                $('#' + Denomination_Total).html('');
+                $('#' + Number_Of_Shares).val('');
+            }
+            else if (!isNaN(_Stock_Total) && !isNaN(_Single_Number_Of_Shares))//張數及單張股數
+            {
+                //計算股數小計
+                $('#' + Number_Of_Shares).val(_Stock_Total * _Single_Number_Of_Shares);
+
+                $('#' + Denomination).html('');
+                $('#' + Denomination_Total).html('');
+            }
+            else
+            {
+                $('#' + Denomination).html('');
                 $('#' + Denomination_Total).html('');
                 $('#' + Number_Of_Shares).val('');
             }
@@ -560,7 +675,7 @@
                 url: StockUrl.Number_Of_Shares_Total,
                 type: "POST",
                 success: function (result) {
-                    $("#lNumber_Of_Shares_Total").html(result);
+                    $("#lNumber_Of_Shares_Total").html(customerUtility.addCommas(result));
                 }
             });
         }
@@ -619,6 +734,10 @@
             })
         }
 
+        function formatterTreaBatchNo(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogTreaBatchNo' style='text-decoration:underline;' return:false; id='" + options.gid + "TreaBatchNo" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
         function formatterTakeOut(cellvalue, options, rdata) {
             var  str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
                     options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox StockTakeOuts customerCheck'></div>";
@@ -633,6 +752,9 @@
                 case 'S':
                     value = 'S-股票';
                     break;
+                case 'P':
+                    value = 'P-股權(持股)憑證';
+                    break;
                 case 'C':
                     value = 'C-其他';
                     break;
@@ -646,7 +768,7 @@
             return value;
         }
 
-        function STOCKunformatterCheckType(cellvalue, options, rdata) {
+        function STOCKunformatter(cellvalue, options, rdata) {
             return cellvalue;
         }
 
@@ -654,7 +776,7 @@
         {
             if (typeFlag) {//存入
                 var colNameArray = ['動作', '類型', '序號前置碼', '序號(起)', '序號(迄)',
-                        '張數', '單張面額', '面額小計', '股數', '備註說明',
+                        '張數', '每股金額', '單張股數', '單張面額', '面額小計', '股數小計', '備註說明',
                         '物品單號'];
                 var colModelArray = [];
                 if (Stock_Act_Type) {
@@ -663,11 +785,13 @@
                 else {
                     colModelArray.push({ name: "act", index: "act", width: 0, sortable: false, hidden: true });
                 }
-                colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 60, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatterCheckType });
+                colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 120, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatter });
                 colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
@@ -690,7 +814,7 @@
                     );
             }
             else {//取出
-                var colNameArray = ['取出', '入庫批號', '申請日期', '申請人', '總股數', '明細'];
+                var colNameArray = ['取出', '入庫批號', '申請日期', '申請人', '總股數'];
                 var colModelArray = [];
                 if (Stock_Act_Type) {
                     colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
@@ -698,11 +822,10 @@
                 else {
                     colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
                 }
-                colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center', formatter: formatterTreaBatchNo, unformat: STOCKunformatter });
                 colModelArray.push({ name: "vAplyDate", index: "vAplyDate", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAplyName", index: "vAplyName", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vNumberOfSharesTotal", index: "vNumberOfSharesTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 jqgridCustom.createJqgridByCache(
                     'STOCKjqgridDiv1',
                     'StockTempList',
@@ -724,14 +847,16 @@
         function StockDetailGrid()
         {
             var colNameArray = ['入庫批號', '類型', '序號前置碼', '序號(起)', '序號(迄)',
-                    '張數', '單張面額', '面額小計', '股數', '備註說明'];
+                    '張數', '每股金額', '單張股數', '單張面額', '面額小計', '股數小計', '備註說明'];
             var colModelArray = [];
             colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 60, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatterCheckType });
+            colModelArray.push({ name: "vStockType", index: "vStock_Type", width: 120, sortable: false, formatter: STOCKformatterCheckType, unformat: STOCKunformatter });
             colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
             colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
             colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
             colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
@@ -774,6 +899,15 @@
                         takeout(i + 1, $(this).prop('checked'));
                     });
                 });
+
+                //入庫批號
+                $(this).find('td').find('a.DialogTreaBatchNo').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        GetStockDetailDate(listId, i + 1);
+                    });
+                });
+
             });
         }
 
@@ -815,14 +949,7 @@
             dialogOpen('@Ref.ActionType.Dele.ToString()', i);
         }
         tempActFun.View = function (i) {
-            if(typeFlag)
-            {
-                dialogOpen('@Ref.ActionType.View.ToString()', i);
-            }
-            else
-            {
-                GetStockDetailDate(i);
-            }
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
         }
 
         //#region function
@@ -849,6 +976,35 @@
                         break;
                 }
                 Type_S();
+            }
+        }
+
+        function StockCheckFun()
+        {
+            if ($("#tStock_Name").val().trim() != "") {
+                $.ajax({
+                    url: StockUrl.GetStockCheck,
+                    type: "POST",
+                    data: {
+                        StockName: $("#tStock_Name").val()
+                    },
+                    success: function (result) {
+                        if (result.RETURN_FLAG) {
+                            //有重覆建檔
+                            if (result.Datas.length > 0) {
+                                var itemString = "比對到重覆建檔資料如下：<br>";
+                                for (var i = 0; i < result.Datas.length; i++) {
+                                    itemString += "冊號：" + result.Datas[i].GroupNo + " 股票名稱：" + result.Datas[i].Name + "<br>";
+                                }
+
+                                customerUtility.alert(itemString, 'w');
+                            }
+                        }
+                    }
+                });
+            }
+            else {
+                customerUtility.alert('股票名稱必填', 'w');
             }
         }
 
@@ -886,7 +1042,7 @@
                 dialogSetData(listId, rowid);
                 $('#StockUpdateTemp').show();
                 title = '@Ref.ActionType.Edit.GetDescription()';
-                $('.' + StockInsertClass).prop('disabled', false);
+                //$('.' + StockInsertClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData(listId, rowid);
@@ -907,7 +1063,9 @@
             $('#' + Stock_No_B).val('');
             $('#' + Stock_No_E).val('');
             $('#' + Stock_Total).val('');
-            $('#' + Denomination).val('');
+            $('#' + Amount_Per_Share).val('10');//預設10
+            $('#' + Single_Number_Of_Shares).val('');
+            $('#' + Denomination).html('');
             $('#' + Denomination_Total).html('');
             $('#' + Number_Of_Shares).val('');
             $('#' + Memo).val('');
@@ -922,50 +1080,84 @@
                 //set value
                 $('#' + StockItemId).val(data.vItemId);
                 $('#' + Stock_Type).val(data.vStockType.split('-')[0]);
-                if(data.vStockType.split('-')[0] == "S")//股票
+
+                //區域為國內
+                if ($("#dStock_Area_Type").val() == "D")
+                {
+                    switch (data.vStockType.split('-')[0]) {
+                        case "S":
+                            $('#' + Stock_No_Preamble).val(data.vStockNoPreamble);
+                            $('#' + Stock_No_B).val(data.vStockNoB);
+                            $('#' + Stock_No_E).val(data.vStockNoE);
+                            $('#' + Stock_Total).val(data.vStockTotal);
+                            $('#' + Amount_Per_Share).val(data.vAmount_Per_Share);
+                            $('#' + Single_Number_Of_Shares).val(data.vSingle_Number_Of_Shares);
+                            $('#' + Denomination).html(data.vDenomination);
+                            $('#' + Denomination_Total).html(data.vDenominationTotal);
+                            $('#' + Number_Of_Shares).val(data.vNumberOfShares);
+                            $('#' + Memo).val(data.vMemo);
+                            Type_S();
+                            break;
+                        case "P":
+                            $('#' + Stock_Total).val(data.vStockTotal);
+                            $('#' + Number_Of_Shares).val(data.vNumberOfShares);
+                            $('#' + Memo).val(data.vMemo);
+                            Type_P();
+                            break;
+                        case "C":
+                            $('#' + Stock_Total).val(data.vStockTotal);
+                            $('#' + Memo).val(data.vMemo);
+                            Type_C();
+                            break;
+                    }
+
+                }
+                else if ($("#dStock_Area_Type").val() == "F")//區域為國外
                 {
                     $('#' + Stock_No_Preamble).val(data.vStockNoPreamble);
                     $('#' + Stock_No_B).val(data.vStockNoB);
                     $('#' + Stock_No_E).val(data.vStockNoE);
-                    $('#' + Stock_Total).val(data.vStockTotal);
-
-                    if($("#dStock_Area_Type").val()=="D")//國內
-                    {
-                        $('#' + Denomination).val(data.vDenomination);
+                    if (data.vStockTotal != "null")
+                        $('#' + Stock_Total).val(data.vStockTotal);
+                    if (data.vAmount_Per_Share != "null")
+                        $('#' + Amount_Per_Share).val(data.vAmount_Per_Share);
+                    else
+                        $('#' + Amount_Per_Share).val('');
+                    if (data.vSingle_Number_Of_Shares != "null")
+                        $('#' + Single_Number_Of_Shares).val(data.vSingle_Number_Of_Shares);
+                    if (data.vDenomination != "null")
+                        $('#' + Denomination).html(data.vDenomination);
+                    if (data.vDenominationTotal != "null")
                         $('#' + Denomination_Total).html(data.vDenominationTotal);
-                    }
+                    if (data.vNumberOfShares != "null")
+                        $('#' + Number_Of_Shares).val(data.vNumberOfShares);
+                    $('#' + Memo).val(data.vMemo);
                 }
-                $('#' + Number_Of_Shares).val(data.vNumberOfShares);
-                $('#' + Memo).val(data.vMemo);
             }
         }
 
         //新增暫存股票明細
         function StockInsertTempFun() {
             if ($('#' + StockFormId).valid()) {
-                if($("#dStock_Type").val()=="S")//股票
+                //區域為國內-必要欄位檢核
+                if ($("#dStock_Area_Type").val() == "D")
                 {
-                    switch ($("#dStock_Area_Type").val())
-                    {
-                        case "D"://國內
-                            if (Check_D()==false)
-                            {
+                    switch ($("#dStock_Type").val()) {
+                        case "S"://股票
+                            if (Check_S() == false) {
                                 return
                             }
                             break;
-                        case "F"://國外
-                            if(Check_F()==false)
-                            {
+                        case "P"://股權(持股)憑證
+                            if (Check_P() == false) {
                                 return
                             }
                             break;
-                    }
-                }
-                else if ($("#dStock_Type").val() == "C")//其他
-                {
-                    if(Check_C()==false)
-                    {
-                        return
+                        case "C"://其他
+                            if (Check_C() == false) {
+                                return
+                            }
+                            break;
                     }
                 }
 
@@ -979,7 +1171,9 @@
                             $('#' + Stock_No_B).val(),
                             $('#' + Stock_No_E).val(),
                             $('#' + Stock_Total).val(),
-                            $('#' + Denomination).val(),
+                            $('#' + Amount_Per_Share).val(),
+                            $('#' + Single_Number_Of_Shares).val(),
+                            $('#' + Denomination).html(),
                             $('#' + Denomination_Total).html(),
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val())
@@ -1004,28 +1198,24 @@
         function StockUpdateTempFun()
         {
             if ($('#' + StockFormId).valid()) {
-                if($("#dStock_Type").val()=="S")//股票
-                {
-                    switch ($("#dStock_Area_Type").val())
-                    {
-                        case "D"://國內
-                            if (Check_D()==false)
-                            {
+                //區域為國內-必要欄位檢核
+                if ($("#dStock_Area_Type").val() == "D") {
+                    switch ($("#dStock_Type").val()) {
+                        case "S"://股票
+                            if (Check_S() == false) {
                                 return
                             }
                             break;
-                        case "F"://國外
-                            if(Check_F()==false)
-                            {
+                        case "P"://股權(持股)憑證
+                            if (Check_P() == false) {
                                 return
                             }
                             break;
-                    }
-                }
-                else if ($("#dStock_Type").val() == "C")//其他
-                {
-                    if (Check_C() == false) {
-                        return
+                        case "C"://其他
+                            if (Check_C() == false) {
+                                return
+                            }
+                            break;
                     }
                 }
 
@@ -1039,7 +1229,9 @@
                             $('#' + Stock_No_B).val(),
                             $('#' + Stock_No_E).val(),
                             $('#' + Stock_Total).val(),
-                            $('#' + Denomination).val(),
+                            $('#' + Amount_Per_Share).val(),
+                            $('#' + Single_Number_Of_Shares).val(),
+                            $('#' + Denomination).html(),
                             $('#' + Denomination_Total).html(),
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val())
@@ -1093,8 +1285,8 @@
             }
         }
 
-        //國內股票必填檢查
-        function Check_D() {
+        //股票必填檢查
+        function Check_S() {
             if ($("#tStock_No_Preamble").val().trim() == "")
             {
                 customerUtility.alert('序號前置碼必填', 'w');
@@ -1125,19 +1317,39 @@
                 return false;
             }
 
-            if ($("#tDenomination").val().trim() == "") {
-                customerUtility.alert('單張面額必填', 'w');
+            if ($("#tAmount_Per_Share").val().trim() == "") {
+                customerUtility.alert('每股金額必填', 'w');
+                return false;
+            }
+            else if (parseInt($("#tAmount_Per_Share").val().trim()) <=0)
+            {
+                customerUtility.alert('每股金額必須大於等於1', 'w');
+                return false;
+            }
+
+            if ($("#tSingle_Number_Of_Shares").val().trim() == "") {
+                customerUtility.alert('單張股數必填', 'w');
+                return false;
+            }
+
+            if ($("#tNumber_Of_Shares").val().trim() == "") {
+                customerUtility.alert('股數小計必填', 'w');
                 return false;
             }
 
             return true;
         }
 
-        //國外股票必填檢查
-        function Check_F()
+        //股權(持股)憑證必填檢查
+        function Check_P()
         {
             if ($("#tStock_Total").val().trim() == "") {
                 customerUtility.alert('張數必填', 'w');
+                return false;
+            }
+
+            if ($("#tNumber_Of_Shares").val().trim() == "") {
+                customerUtility.alert('股數小計必填', 'w');
                 return false;
             }
 
@@ -1166,6 +1378,8 @@
             vStockNoB,
             vStockNoE,
             vStockTotal,
+            vAmount_Per_Share,
+            vSingle_Number_Of_Shares,
             vDenomination,
             vDenominationTotal,
             vNumberOfShares,
@@ -1178,6 +1392,8 @@
             obj['vStockNoB'] = vStockNoB;
             obj['vStockNoE'] = vStockNoE;
             obj['vStockTotal'] = vStockTotal;
+            obj['vAmount_Per_Share'] = vAmount_Per_Share;
+            obj['vSingle_Number_Of_Shares'] = vSingle_Number_Of_Shares;
             obj['vDenomination'] = vDenomination;
             obj['vDenominationTotal'] = vDenominationTotal;
             obj['vNumberOfShares'] = vNumberOfShares;
