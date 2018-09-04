@@ -114,7 +114,7 @@
                         <label>備註 : </label>
                     </td>
                     <td colspan="3">
-                        <input type="text" class="DepositInsertType_M" id="tMemo" name="tMemo" maxlength="30" style="width:500px" />
+                        <input type="text" class="DepositInsertType_M" id="tMemo" name="tMemo" maxlength="50" style="width:500px" />
                         <input type="hidden" id="hItem_Id" />
                     </td>
                     <td>
@@ -313,7 +313,7 @@
             verified.required(DepositFormId_M, DepositExpiry_Date, message.required('到期日')); //到期日為必填
             verified.required(DepositFormId_M, DepositInterest_Rate, message.required('利率%')); //利率%為必填
 
-            verified.english(DepositFormId_M, DepositCurrency); //幣別 僅能輸入英文
+            verified.englishUpper(DepositFormId_M, DepositCurrency); //幣別 僅能輸入英文大寫
             verified.datepicker(DepositFormId_M, DepositCommit_Date, $('#' + DepositCommit_Date).val()); //承作日期 僅能輸入日期
             verified.datepicker(DepositFormId_M, DepositExpiry_Date, $('#' + DepositExpiry_Date).val()); //到期日 僅能輸入日期
             verified.number(DepositFormId_M, DepositInterest_Rate); //利率% 僅能輸入數字
@@ -612,10 +612,10 @@
         function ResetInsertDialog_M() {
             $('#' + DepositCurrency).val('');
             $('#' + DepositTrad_Partners).val('');
-            $('#' + DepositCommit_Date).val('');
+            $('#' + DepositCommit_Date).val('@DateTime.Now.ToString("yyyy/MM/dd")');
             $('#' + DepositExpiry_Date).val('');
             if ($('#' + DepositInterest_Rate_Type + ' option').length > 0) {
-                $('#' + DepositInterest_Rate_Type).val($($('#' + DepositInterest_Rate_Type + ' option')[0]).val())
+                $('#' + DepositInterest_Rate_Type).val($($('#' + DepositInterest_Rate_Type + ' option')[1]).val())
             }
             $('#' + DepositInterest_Rate).val('');
             if ($('#' + DepositDep_Type + ' option').length > 0) {
@@ -623,10 +623,11 @@
             }
             $('#' + DepositTotal_Denomination).html('');
             if ($('#' + DepositDep_Set_Quality + ' option').length > 0) {
-                $('#' + DepositDep_Set_Quality).val($($('#' + DepositDep_Set_Quality + ' option')[0]).val())
+                $('#' + DepositDep_Set_Quality).val($($('#' + DepositDep_Set_Quality + ' option')[1]).val())
             }
             if ($('#' + DepositAuto_Trans + ' option').length > 0) {
-                $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[0]).val())
+                $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[1]).val())
+                $('#' + DepositAuto_Trans).attr("Disabled", true);
             }
             $('#' + DepositTrans_Expiry_Date).val('');
             $('#' + DepositMemo).val('');
@@ -960,7 +961,7 @@
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 80, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 80, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
@@ -1004,7 +1005,7 @@
                 colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
@@ -1056,9 +1057,9 @@
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center', hidden: true });
-                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
                 colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -1085,9 +1086,9 @@
                 colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", width: 120, sortable: false, align: 'center', hidden: true });
-                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vRowNum", index: "vRowNum", hidden: true });
                 colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
                 jqgridCustom.createJqgridByCache(
