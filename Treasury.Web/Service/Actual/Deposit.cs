@@ -29,12 +29,111 @@ namespace Treasury.Web.Service.Actual
 {
     public class Deposit : Common, IDeposit
     {
+        private List<SelectOption> Currency_List { get; set; }
+        private List<SelectOption> Trad_Partners_List { get; set; }
+
         public Deposit()
         {
+            //預設幣別
+            Currency_List = new List<SelectOption>()
+            {
+                new SelectOption() { Value = "AUD", Text = "AUD" },
+                new SelectOption() { Value = "CNY", Text = "CNY" },
+                new SelectOption() { Value = "EUR", Text = "EUR" },
+                new SelectOption() { Value = "GBP", Text = "GBP" },
+                new SelectOption() { Value = "JPY", Text = "JPY" },
+                new SelectOption() { Value = "NTD", Text = "NTD" },
+                new SelectOption() { Value = "USD", Text = "USD" }
+            };
+
+
+            //預設交易對象
+            Trad_Partners_List = new List<SelectOption>()
+            {
+                new SelectOption() { Value = "上海三民", Text = "上海三民" },
+                new SelectOption() { Value = "上海二重", Text = "上海二重" },
+                new SelectOption() { Value = "上海三重", Text = "上海三重" },
+                new SelectOption() { Value = "上海南港", Text = "上海南港" },
+                new SelectOption() { Value = "上海營業部", Text = "上海營業部" },
+                new SelectOption() { Value = "中信營業部", Text = "中信營業部" },
+                new SelectOption() { Value = "王道營業部", Text = "王道營業部" },
+                new SelectOption() { Value = "台企仁愛", Text = "台企仁愛" },
+                new SelectOption() { Value = "永豐新湖(營業部發單)", Text = "永豐新湖(營業部發單)" },
+                new SelectOption() { Value = "交銀台北", Text = "交銀台北" },
+                new SelectOption() { Value = "合庫信維", Text = "合庫信維" },
+                new SelectOption() { Value = "星展南京東路", Text = "星展南京東路" },
+                new SelectOption() { Value = "高銀台北", Text = "高銀台北" },
+                new SelectOption() { Value = "凱基營業部", Text = "凱基營業部" },
+                new SelectOption() { Value = "北富銀敦南", Text = "北富銀敦南" },
+                new SelectOption() { Value = "匯豐台北", Text = "匯豐台北" },
+                new SelectOption() { Value = "新光南東", Text = "新光南東" }
+            };
 
         }
 
         #region GetData
+        /// <summary>
+        /// 幣別
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectOption> GetCurrency()
+        {
+            var result = new List<SelectOption>();
+
+            var Currency_string = Currency_List.Select(x => x.Text).ToList();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                //取出DB定期存單中幣別(不含預設幣別)
+                var DB_Currency_List = db.ITEM_DEP_ORDER_M.AsNoTracking()
+                    .Where(x => !Currency_string.Contains(x.CURRENCY))
+                    .OrderBy(x => x.CURRENCY)
+                    .GroupBy(x => x.CURRENCY)
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Value = x.Key,
+                        Text = x.Key
+                    }).ToList();
+
+                //合併預設幣別及DB定期存單幣別
+                result.AddRange(Currency_List);
+                result.AddRange(DB_Currency_List);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 交易對象
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectOption> GetTrad_Partners()
+        {
+            var result = new List<SelectOption>();
+
+            var Trad_Partners_string = Trad_Partners_List.Select(x => x.Text).ToList();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                //取出DB定期存單中交易對象(不含預設交易對象)
+                var DB_Trad_Partners_List = db.ITEM_DEP_ORDER_M.AsNoTracking()
+                    .Where(x=> !Trad_Partners_string.Contains(x.TRAD_PARTNERS))
+                    .OrderBy(x => x.TRAD_PARTNERS)
+                    .GroupBy(x=>x.TRAD_PARTNERS)
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Value = x.Key,
+                        Text = x.Key
+                    }).ToList();
+
+                //合併預設交易對象及DB定期存單交易對象
+                result.AddRange(Trad_Partners_List);
+                result.AddRange(DB_Trad_Partners_List);
+            }
+            return result;
+        }
+
         /// <summary>
         /// 計息方式
         /// </summary>
@@ -287,21 +386,21 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
 
                     //台幣
-                    var GroupDataList_TWD = _IDOM_DataList.Where(x => x.CURRENCY == "TWD").GroupBy(x => new { x.DEP_TYPE });
+                    var GroupDataList_NTD = _IDOM_DataList.Where(x => x.CURRENCY == "NTD").GroupBy(x => new { x.DEP_TYPE });
 
-                    foreach(var item in GroupDataList_TWD)
+                    foreach(var item in GroupDataList_NTD)
                     {
-                        GroupData = new DepositReportGroupData { isTWD = "Y", vDep_Type = item.Key.DEP_TYPE };
+                        GroupData = new DepositReportGroupData { isNTD = "Y", vDep_Type = item.Key.DEP_TYPE };
 
                         result.Add(GroupData);
                     }
 
                     //外幣
-                    var GroupDataList_NTWD = _IDOM_DataList.Where(x => x.CURRENCY != "TWD").GroupBy(x => new { x.DEP_TYPE });
+                    var GroupDataList_NNTD = _IDOM_DataList.Where(x => x.CURRENCY != "NTD").GroupBy(x => new { x.DEP_TYPE });
 
-                    foreach (var item in GroupDataList_NTWD)
+                    foreach (var item in GroupDataList_NNTD)
                     {
-                        GroupData = new DepositReportGroupData { isTWD = "N", vDep_Type = item.Key.DEP_TYPE };
+                        GroupData = new DepositReportGroupData { isNTD = "N", vDep_Type = item.Key.DEP_TYPE };
 
                         result.Add(GroupData);
                     }

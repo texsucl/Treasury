@@ -26,13 +26,13 @@ namespace Treasury.Web.Report.Data
 
         protected REC _REC { get; private set; }
 
-        protected void SetDetail(string aply_No, string isTWD, string vDep_Type)
+        protected void SetDetail(string aply_No, string isNTD, string vDep_Type)
         {
             _REC = new REC();
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                _REC.CURRENCY = isTWD == "Y" ? "台幣" : "外幣";
+                _REC.CURRENCY = isNTD == "Y" ? "台幣" : "外幣";
 
                 _REC.DEP_TYPE = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "DEP_TYPE" && x.CODE == vDep_Type)
@@ -55,8 +55,8 @@ namespace Treasury.Web.Report.Data
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
 
                     _REC.COMMIT_DATE = TypeTransfer.dateTimeToString(_IDOM_DataList
-                        .Where(x => x.CURRENCY == "TWD", isTWD == "Y")
-                        .Where(x => x.CURRENCY != "TWD", isTWD == "N")
+                        .Where(x => x.CURRENCY == "NTD", isNTD == "Y")
+                        .Where(x => x.CURRENCY != "NTD", isNTD == "N")
                         .Where(x => x.DEP_TYPE == vDep_Type)
                         .Select(x => x.COMMIT_DATE).FirstOrDefault(),false);
                 }

@@ -14,9 +14,9 @@ namespace Treasury.Web.Report.Data
         {
             var resultsTable = new DataSet();
             string aply_No = parms.Where(x => x.key == "aply_No").FirstOrDefault()?.value ?? string.Empty;
-            string isTWD = parms.Where(x => x.key == "isTWD").FirstOrDefault()?.value ?? string.Empty;
+            string isNTD = parms.Where(x => x.key == "isNTD").FirstOrDefault()?.value ?? string.Empty;
             string vDep_Type = parms.Where(x => x.key == "vDep_Type").FirstOrDefault()?.value ?? string.Empty;
-            SetDetail(aply_No, isTWD, vDep_Type);
+            SetDetail(aply_No, isNTD, vDep_Type);
 
             //報表資料
             List<DepositReportData> ReportDataList = new List<DepositReportData>();
@@ -38,8 +38,8 @@ namespace Treasury.Web.Report.Data
                     //使用物品編號去定期存單庫存資料檔抓取資料
                     var _IDOM_DataList = db.ITEM_DEP_ORDER_M.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID))
-                        .Where(x => x.CURRENCY == "TWD", isTWD == "Y")
-                        .Where(x => x.CURRENCY != "TWD", isTWD == "N")
+                        .Where(x => x.CURRENCY == "NTD", isNTD == "Y")
+                        .Where(x => x.CURRENCY != "NTD", isNTD == "N")
                         .Where(x => x.DEP_TYPE == vDep_Type)
                         .ToList();
 

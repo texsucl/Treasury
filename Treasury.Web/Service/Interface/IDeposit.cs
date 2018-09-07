@@ -10,6 +10,18 @@ namespace Treasury.Web.Service.Interface
     public interface IDeposit : IApply, IAgency
     {
         /// <summary>
+        /// 幣別
+        /// </summary>
+        /// <returns></returns>
+        List<SelectOption> GetCurrency();
+
+        /// <summary>
+        /// 交易對象
+        /// </summary>
+        /// <returns></returns>
+        List<SelectOption> GetTrad_Partners();
+        
+        /// <summary>
         /// 計息方式
         /// </summary>
         /// <returns></returns>

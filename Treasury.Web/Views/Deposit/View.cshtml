@@ -40,13 +40,25 @@
                         <label>幣別 : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_M" id="tCurrency" name="tCurrency" maxlength="3" />
+                        <div class="select-editable">
+                            @Html.DropDownList("sCurrency", (SelectList)ViewBag.dCurrency, new { @class = "DepositInsertType_M", @onchange = "this.nextElementSibling.value = this.value" })
+                            <input class="DepositInsertType_M" type="text" name="tCurrency" id="tCurrency" value="" maxlength="3" />
+                        </div>
                     </td>
                     <td>
                         <label>交易對象 : </label>
                     </td>
-                    <td colspan="3">
-                        <input type="text" class="DepositInsertType_M" id="tTrad_Partners" name="tTrad_Partners" maxlength="30" style="width:530px" />
+                    <td>
+                        <div class="select-editable">
+                            @Html.DropDownList("sTrad_Partners", (SelectList)ViewBag.dTrad_Partners, new { @class = "DepositInsertType_M", @onchange = "this.nextElementSibling.value = this.value" })
+                            <input class="DepositInsertType_M" type="text" name="tTrad_Partners" id="tTrad_Partners" value="" maxlength="30" />
+                        </div>
+                    </td>
+                    <td>
+
+                    </td>
+                    <td>
+
                     </td>
                 </tr>
                 <tr>
@@ -91,7 +103,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <label>設質否 : </label>
+                        <label>設質 : </label>
                     </td>
                     <td>
                         @Html.DropDownList("dDep_Set_Quality", (SelectList)ViewBag.dYN_Flag, new { @class = "DepositInsertType_M" })
@@ -152,13 +164,13 @@
                         <label>存單號碼(起) : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_D" id="tDep_No_B" name="tDep_No_B" maxlength="7" />
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_B" name="tDep_No_B" maxlength="9" />
                     </td>
                     <td>
                         <label>存單號碼(迄) : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_D" id="tDep_No_E" name="tDep_No_E" maxlength="7" />
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_E" name="tDep_No_E" maxlength="9" />
                     </td>
                 </tr>
                 <tr>
@@ -244,7 +256,7 @@
         var DepositInterest_Rate = 'tInterest_Rate'; //利率%Id
         var DepositDep_Type = 'dDep_Type'; //存單類型Id
         var DepositTotal_Denomination = 'lTotal_Denomination'; //總面額Id
-        var DepositDep_Set_Quality = 'dDep_Set_Quality'; //設質否Id
+        var DepositDep_Set_Quality = 'dDep_Set_Quality'; //設質Id
         var DepositAuto_Trans = 'dAuto_Trans'; //自動轉期Id
         var DepositTrans_Expiry_Date = 'tTrans_Expiry_Date'; //轉期後到期日Id
         var DepositMemo = 'tMemo'; //備註Id
@@ -297,15 +309,21 @@
         setDepositVerified();
         //#endregion 初始動作
 
+
         //#region 註冊verified
         function setDepositVerified() {
-            created.createDatepicker(DepositCommit_Date, null);
-            created.createDatepicker(DepositExpiry_Date, null);
-            created.createDatepickerRange(DepositTrans_Expiry_Date_From, DepositTrans_Expiry_Date_To);
-
-            if ('@ViewBag.CustodianFlag' == "True") {
-                created.createDatepicker(DepositTrans_Expiry_Date, null);
+            //設定承作日期及到期日函數
+            var Commit_Fun = function () {
+                $('#' + DepositExpiry_Date).datepicker("option", "minDate", $('#' + DepositCommit_Date).val());
             }
+            var Expiry_Fun = function () {
+                $('#' + DepositTrans_Expiry_Date).val($('#' + DepositExpiry_Date).val());
+                $('#' + DepositCommit_Date).datepicker("option", "maxDate", $('#' + DepositExpiry_Date).val());
+            };
+
+            created.createDatepicker(DepositCommit_Date, null, Commit_Fun);
+            created.createDatepicker(DepositExpiry_Date, null, Expiry_Fun);
+            created.createDatepickerRange(DepositTrans_Expiry_Date_From, DepositTrans_Expiry_Date_To);
 
             verified.required(DepositFormId_M, DepositCurrency, message.required('幣別')); //幣別為必填
             verified.required(DepositFormId_M, DepositTrad_Partners, message.required('交易對象')); //交易對象為必填
@@ -316,15 +334,16 @@
             verified.englishUpper(DepositFormId_M, DepositCurrency); //幣別 僅能輸入英文大寫
             verified.datepicker(DepositFormId_M, DepositCommit_Date, $('#' + DepositCommit_Date).val()); //承作日期 僅能輸入日期
             verified.datepicker(DepositFormId_M, DepositExpiry_Date, $('#' + DepositExpiry_Date).val()); //到期日 僅能輸入日期
-            verified.number(DepositFormId_M, DepositInterest_Rate); //利率% 僅能輸入數字
+            verified.rate(DepositFormId_M, DepositInterest_Rate); //利率% 格式
 
             verified.required(DepositFormId_D, DepositDep_No_B, message.required('存單號碼(起)')); //存單號碼(起)為必填
             verified.required(DepositFormId_D, DepositDep_No_E, message.required('存單號碼(迄)')); //存單號碼(迄)為必填
             verified.required(DepositFormId_D, DepositDep_Cnt, message.required('張數')); //張數為必填
             verified.required(DepositFormId_D, DepositDenomination, message.required('單張面額')); //單張面額為必填
 
-            verified.number(DepositFormId_D, DepositDep_No_B); //存單號碼(起) 僅能輸入數字
-            verified.number(DepositFormId_D, DepositDep_No_E); //存單號碼(迄) 僅能輸入數字
+            verified.positiveInt(DepositFormId_D, DepositDep_No_B); //存單號碼(起) 僅能輸入數字(正)
+            verified.positiveInt(DepositFormId_D, DepositDep_No_E); //存單號碼(迄) 僅能輸入數字(正)
+            verified.positiveInt(DepositFormId_D, DepositDep_Cnt); //張數 僅能輸入數字(正)
 
         }
         //#endregion 註冊verified
@@ -408,6 +427,36 @@
             }
         });
 
+        //設值選取
+        $('#' + DepositDep_Set_Quality).on('change', function () {
+            switch ($('#' + DepositDep_Set_Quality).val()) {
+                case "N":
+                    $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[1]).val())
+                    $('#' + DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + DepositTrans_Tms).attr("Disabled", true);
+                    break;
+                case "Y":
+                    $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[0]).val())
+                    $('#' + DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + DepositTrans_Tms).attr("Disabled", false);
+                    break;
+            }
+        });
+
+        //存單號碼(起)或存單號碼(迄)輸入完畢
+        $('#' + DepositDep_No_B + ',#' + DepositDep_No_E).off('blur', function () { });
+        $('#' + DepositDep_No_B + ',#' + DepositDep_No_E).on('blur', function () {
+            var _Check_No_B = parseInt($('#' + DepositDep_No_B).val());
+            var _Check_No_E = parseInt($('#' + DepositDep_No_E).val());
+
+            if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E)) {
+                if ($('#' + DepositDep_No_B).val().length > $('#' + DepositDep_No_E).val().length)
+                    $('#' + DepositDep_No_E).val(created.padLeft(_Check_No_E, $('#' + DepositDep_No_B).val().length, '0'));
+                else
+                    $('#' + DepositDep_No_B).val(created.padLeft(_Check_No_B, $('#' + DepositDep_No_E).val().length, '0'));
+            }
+        });
+
         //存單號碼(迄)帶出張數
         $('#' + DepositDep_No_E).off('blur', function () { });
         $('#' + DepositDep_No_E).on('blur', function () {
@@ -462,15 +511,21 @@
         //#endregion 註冊事件
 
         //#region 初始設定
-        function SetCustodianFlag() {
-            if ('@ViewBag.CustodianFlag' == "True") {
-                $('#' + DepositTrans_Expiry_Date).attr("Disabled", false);
-                $('#' + DepositTrans_Tms).attr("Disabled", false);
+        function setInsertDialog_M()
+        {
+            switch ($('#' + DepositDep_Set_Quality).val()) {
+                case "N":
+                    $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[1]).val())
+                    $('#' + DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + DepositTrans_Tms).attr("Disabled", true);
+                    break;
+                case "Y":
+                    $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[0]).val())
+                    $('#' + DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + DepositTrans_Tms).attr("Disabled", false);
+                    break;
             }
-            else {
-                $('#' + DepositTrans_Expiry_Date).attr("Disabled", true);
-                $('#' + DepositTrans_Tms).attr("Disabled", true);
-            }
+            $('#' + DepositTrans_Expiry_Date).attr("Disabled", true);
         }
         //#endregion 初始設定
 
@@ -499,7 +554,7 @@
                 ResetInsertDialog_M();
                 $('#DepositInsertTemp_M').show();
                 $('.' + DepositInsertClass_M).prop('disabled', false);
-                SetCustodianFlag();
+                setInsertDialog_M();
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
                 dialogSetData_M(listId, rowid);
@@ -510,7 +565,7 @@
                 dialogSetData_M(listId, rowid);
                 $('#DepositUpdateTemp_M').show();
                 $('.' + DepositInsertClass_M).prop('disabled', false);
-                SetCustodianFlag();
+                setInsertDialog_M();
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData_M(listId, rowid);
@@ -610,9 +665,10 @@
         }
 
         function ResetInsertDialog_M() {
-            $('#' + DepositCurrency).val('');
+            $('#' + DepositCurrency).val('NTD');
             $('#' + DepositTrad_Partners).val('');
             $('#' + DepositCommit_Date).val('@DateTime.Now.ToString("yyyy/MM/dd")');
+            $('#' + DepositExpiry_Date).datepicker("option", "minDate", $('#' + DepositCommit_Date).val());
             $('#' + DepositExpiry_Date).val('');
             if ($('#' + DepositInterest_Rate_Type + ' option').length > 0) {
                 $('#' + DepositInterest_Rate_Type).val($($('#' + DepositInterest_Rate_Type + ' option')[1]).val())
@@ -624,10 +680,6 @@
             $('#' + DepositTotal_Denomination).html('');
             if ($('#' + DepositDep_Set_Quality + ' option').length > 0) {
                 $('#' + DepositDep_Set_Quality).val($($('#' + DepositDep_Set_Quality + ' option')[1]).val())
-            }
-            if ($('#' + DepositAuto_Trans + ' option').length > 0) {
-                $('#' + DepositAuto_Trans).val($($('#' + DepositAuto_Trans + ' option')[1]).val())
-                $('#' + DepositAuto_Trans).attr("Disabled", true);
             }
             $('#' + DepositTrans_Expiry_Date).val('');
             $('#' + DepositMemo).val('');
@@ -950,7 +1002,7 @@
 
         function DepositTempGrid_M() {
             if (typeFlag) { //存入
-                var colNameArray = ['編號', '動作', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置否', '自動轉期', '轉期後到期日', '備註', '轉期次數', '物品編號', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
+                var colNameArray = ['編號', '動作', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置', '自動轉期', '轉期後到期日', '備註', '轉期次數', '物品編號', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
                 var colModelArray = [];
                 colModelArray.push({ name: "vRowNum", index: "vRowNum", width: 40, sortable: false, align: 'center', formatter: formatterRowNum, unformat: DEPOSITunformatter });
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
@@ -987,7 +1039,7 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '庫存編號','幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置否', '自動轉期', '轉期後到期日', '備註', '轉期次數', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
+                var colNameArray = ['取出', '動作', '庫存編號','幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置', '自動轉期', '轉期後到期日', '備註', '轉期次數', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)'];
                 var colModelArray = [];
                 if (!Deposit_Act_Type) {
                     colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
@@ -1165,6 +1217,14 @@
         //新增定期存單總項暫存資料
         function DepositInsertTempFun_M() {
             if ($('#' + DepositFormId_M).valid()) {
+                //設值=Y檢核
+                if ($('#' + DepositDep_Set_Quality).val() == "Y" && Dep_Set_Quality_Y() == false) {
+                    return
+                }
+                //承作日期及到期日檢核
+                if (CheckDate_Commit_Expiry() == false) {
+                    return
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -1202,8 +1262,8 @@
         function DepositInsertTempFun_D() {
             if ($('#' + DepositFormId_D).valid()) {
                 //存單號碼前置碼格式檢查
-                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishNumber($('#' + DepositDep_No_Preamble).val().trim()) == false) {
-                    customerUtility.alert('存單號碼前置碼僅可輸入英文字母和數字', 'w');
+                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishUpper($('#' + DepositDep_No_Preamble).val().trim()) == false) {
+                    customerUtility.alert('存單號碼前置碼僅可輸入英文大寫字母', 'w');
                     return
                 }
                 //存單號碼(起)/(迄)檢查
@@ -1247,6 +1307,10 @@
 
         //修改定期存單總項暫存資料
         function DepositUpdateTempFun_M() {
+            //設值=Y檢核
+            if ($('#' + DepositDep_Set_Quality).val() == "Y" && Dep_Set_Quality_Y() == false) {
+                return
+            }
             if ($('#' + DepositFormId_M).valid()) {
                 $.ajax({
                     type: "POST",
@@ -1285,8 +1349,8 @@
         function DepositUpdateTempFun_D() {
             if ($('#' + DepositFormId_D).valid()) {
                 //存單號碼前置碼格式檢查
-                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishNumber($('#' + DepositDep_No_Preamble).val().trim()) == false) {
-                    customerUtility.alert('存單號碼前置碼僅可輸入英文字母和數字', 'w');
+                if ($('#' + DepositDep_No_Preamble).val().trim() != "" && checkEnglishUpper($('#' + DepositDep_No_Preamble).val().trim()) == false) {
+                    customerUtility.alert('存單號碼前置碼僅可輸入英文大寫字母', 'w');
                     return
                 }
                 //存單號碼(起)/(迄)檢查
@@ -1456,10 +1520,49 @@
             return infoValidation;
         }
 
-        //檢查英數字
-        function checkEnglishNumber(str)
+        //承作日期及到期日檢核
+        function CheckDate_Commit_Expiry()
         {
-            var regExp = /^[\d|a-zA-Z]+$/;
+            //承作日期
+            var CommitDate = new Date($('#' + DepositCommit_Date).val().trim());
+            //到期日
+            var ExpiryDate = new Date($('#' + DepositExpiry_Date).val().trim());
+
+            //月份比較
+            if (CommitDate.getMonth() != ExpiryDate.getMonth()) {
+                customerUtility.alert('承作日期和到期日月份不相同', 'w');
+                return false;
+            }
+
+            //日期比較
+            if (CommitDate.getDate() != ExpiryDate.getDate()) {
+                customerUtility.alert('承作日期和到期日日期不相同', 'w');
+                return false;
+            }
+
+            return true;
+        }
+
+        //設值=Y檢核
+        function Dep_Set_Quality_Y()
+        {
+            if ($('#' + DepositMemo).val().trim() == "") {
+                customerUtility.alert('備註必填', 'w');
+                return false;
+            }
+
+            if ($('#' + DepositTrans_Tms).val().trim() == "") {
+                customerUtility.alert('轉期次數必填', 'w');
+                return false;
+            }
+
+            return true;
+        }
+
+        //檢查英文大寫
+        function checkEnglishUpper(str)
+        {
+            var regExp = /^[A-Z]+$/;
             if (regExp.test(str))
                 return true;
             else
