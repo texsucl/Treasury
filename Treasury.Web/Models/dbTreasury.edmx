@@ -285,6 +285,21 @@
           <Property Name="DEP_CHK_ITEM_DESC_B" Type="nvarchar" MaxLength="50" />
           <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
         </EntityType>
+        <EntityType Name="INVENTORY_CHG_APLY">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+          </Key>
+          <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="CHG_AUTH_UNIT" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="CREATE_Date" Type="date" />
+          <Property Name="CREATE_Time" Type="time" Precision="7" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_Date" Type="date" />
+          <Property Name="APPR_Time" Type="time" Precision="7" />
+        </EntityType>
         <EntityType Name="ITEM_BLANK_NOTE">
           <Key>
             <PropertyRef Name="ITEM_ID" />
@@ -920,11 +935,11 @@
           <Property Name="CONFIRM_UID" Type="varchar" MaxLength="5" />
           <Property Name="CONFIRM_DT" Type="datetime" />
           <Property Name="RTN_DESC" Type="nvarchar" MaxLength="50" />
-          <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
           <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
           <Property Name="CREATE_DT" Type="datetime" />
           <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
           <Property Name="LAST_UPDATE_DT" Type="datetime" />
+          <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
         </EntityType>
         <EntityType Name="TREA_APLY_TEMP">
           <Key>
@@ -1047,6 +1062,7 @@
           <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
           <Property Name="LAST_UPDATE_DT" Type="datetime" />
           <Property Name="OPEN_TREA_DATE" Type="date" Nullable="false" />
+          <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
         </EntityType>
         <Association Name="R_LOG_MAIN_EXEC_TYPE">
           <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
@@ -1091,6 +1107,7 @@
           <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="INVENTORY_CHG_APLY" EntityType="Self.INVENTORY_CHG_APLY" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ITEM_BLANK_NOTE" EntityType="Self.ITEM_BLANK_NOTE" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" Schema="dbo" store:Type="Tables" />
@@ -1896,6 +1913,7 @@
           <EntitySet Name="ITEM_REFUNDABLE_DEP" EntityType="dbTreasuryModel.ITEM_REFUNDABLE_DEP" />
           <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
           <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
+          <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2283,6 +2301,22 @@
           <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
           <Property Name="OPEN_TREA_DATE" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="INVENTORY_CHG_APLY">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CHG_AUTH_UNIT" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_Date" Type="DateTime" Precision="0" />
+          <Property Name="CREATE_Time" Type="Time" Precision="7" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_Date" Type="DateTime" Precision="0" />
+          <Property Name="APPR_Time" Type="Time" Precision="7" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3318,6 +3352,7 @@
           <EntitySetMapping Name="TREA_OPEN_REC">
             <EntityTypeMapping TypeName="dbTreasuryModel.TREA_OPEN_REC">
               <MappingFragment StoreEntitySet="TREA_OPEN_REC">
+                <ScalarProperty Name="CREATE_UNIT" ColumnName="CREATE_UNIT" />
                 <ScalarProperty Name="OPEN_TREA_DATE" ColumnName="OPEN_TREA_DATE" />
                 <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
                 <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
@@ -3340,6 +3375,22 @@
                 <ScalarProperty Name="OPEN_TREA_REASON" ColumnName="OPEN_TREA_REASON" />
                 <ScalarProperty Name="OPEN_TREA_TYPE" ColumnName="OPEN_TREA_TYPE" />
                 <ScalarProperty Name="TREA_REGISTER_ID" ColumnName="TREA_REGISTER_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="INVENTORY_CHG_APLY">
+            <EntityTypeMapping TypeName="dbTreasuryModel.INVENTORY_CHG_APLY">
+              <MappingFragment StoreEntitySet="INVENTORY_CHG_APLY">
+                <ScalarProperty Name="APPR_Time" ColumnName="APPR_Time" />
+                <ScalarProperty Name="APPR_Date" ColumnName="APPR_Date" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="CREATE_Time" ColumnName="CREATE_Time" />
+                <ScalarProperty Name="CREATE_Date" ColumnName="CREATE_Date" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="CHG_AUTH_UNIT" ColumnName="CHG_AUTH_UNIT" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

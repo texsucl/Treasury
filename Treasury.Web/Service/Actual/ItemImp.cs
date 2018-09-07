@@ -96,8 +96,8 @@ namespace Treasury.Web.Service.Actual
                         vItemImp_Name = x.ITEM_NAME,
                         vItemImp_Quantity = x.QUANTITY,
                         vItemImp_Amount = x.AMOUNT,
-                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
-                        vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                        //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
+                        vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
                         vtakeoutFlag = false,
@@ -119,8 +119,8 @@ namespace Treasury.Web.Service.Actual
                              vItemImp_Name = x.ITEM_NAME,
                         vItemImp_Quantity = x.QUANTITY,
                         vItemImp_Amount = x.AMOUNT,
-                        vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
-                        vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                        //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
+                        vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
                              vtakeoutFlag = true,
@@ -219,7 +219,7 @@ namespace Treasury.Web.Service.Actual
                                                 _II.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
                                                 _II.QUANTITY = item.vItemImp_Quantity; //重要物品數量
                                                 _II.AMOUNT = item.vItemImp_Amount; //重要物品金額
-                                                _II.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2); //重要物品預計提取日期
+                                                _II.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date); //重要物品預計提取日期
                                                 _II.DESCRIPTION = item.vDescription;//說明
                                                 _II.MEMO = item.vMemo; //備註
                                                 updateItemIds.Add(item.vItemId);
@@ -235,7 +235,7 @@ namespace Treasury.Web.Service.Actual
                                                     ITEM_NAME = item.vItemImp_Name, //重要物品名稱
                                                     QUANTITY = item.vItemImp_Quantity, //重要物品數量
                                                     AMOUNT = item.vItemImp_Amount, //重要物品金額
-                                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2), //重要物品預計提取日期
+                                                    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date), //重要物品預計提取日期
                                                     DESCRIPTION = item.vDescription,//說明
                                                     MEMO = item.vMemo, //備註
                                                     APLY_DEPT = _dept.Item1, //申請人部門
@@ -337,7 +337,7 @@ namespace Treasury.Web.Service.Actual
                                                 ITEM_NAME = item.vItemImp_Name, //重要物品名稱
                                                 QUANTITY = item.vItemImp_Quantity, //重要物品數量
                                                 AMOUNT = item.vItemImp_Amount, //重要物品金額
-                                                EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date_2), //重要物品預計提取日期
+                                                EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date), //重要物品預計提取日期
                                                 DESCRIPTION = item.vDescription,//說明
                                                 MEMO = item.vMemo, //備註
                                                 APLY_DEPT = _dept.Item1, //申請人部門
@@ -522,8 +522,8 @@ namespace Treasury.Web.Service.Actual
                 vItemImp_Name = x.ITEM_NAME, //重要物品名稱
                 vItemImp_Quantity = x.QUANTITY, //重要物品數量
                 vItemImp_Amount = x.AMOUNT, //重要物品金額
-                vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
-                vItemImp_Expected_Date_2 = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
+                //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
+                vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
                 vDescription = x.DESCRIPTION,//說明
                 vMemo = x.MEMO, //備註
                 vtakeoutFlag = false, //取出註記

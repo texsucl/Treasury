@@ -13,7 +13,7 @@ using Treasury.Web.Enum;
 namespace Treasury.Web.Service.Actual
 {
 
-    public class TreasuryAccess : ITreasuryAccess
+    public class TreasuryAccess : Common , ITreasuryAccess
     {
         /// <summary>
         /// 報表可以列印狀態
@@ -450,34 +450,6 @@ namespace Treasury.Web.Service.Actual
                     .Select(x => TreaAplyRecToTAASDViewModel(data.vCreateUid, x, treaItems, depts, emps)).ToList();
             }
             return result;
-        }
-
-        /// <summary>
-        /// 獲取 員工資料
-        /// </summary>
-        /// <returns></returns>
-        protected List<V_EMPLY2> GetEmps()
-        {
-            var emps = new List<V_EMPLY2>();
-            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-            {
-                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
-            }
-            return emps;
-        }
-
-        /// <summary>
-        /// 獲取 部門資料
-        /// </summary>
-        /// <returns></returns>
-        protected List<VW_OA_DEPT> GetDepts()
-        {
-            var depts = new List<VW_OA_DEPT>();
-            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-            {
-                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
-            }
-            return depts;
         }
 
         #endregion

@@ -1,0 +1,468 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@using Treasury.Web.ViewModels;
+@model Treasury.Web.ViewModels.CDCViewModel
+@{
+    ViewBag.Title = "資料查詢異動作業-主畫面";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+}
+<style>
+    .customertb input[type=text] {
+        width: 110px;
+    }
+    .customertb td {
+        width: 80px;
+    }
+</style>
+<div class="container margin-top-5" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0") //權限
+            {
+                <form id="CDCForm">
+                    <table class="customertb">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="red">＊</span>
+                                <label class="red">金庫內:</label>
+                            </td>
+                            <td  colspan="4">
+                                @Html.DropDownList("treasuryIO", new SelectList(Model.vTreasuryIO, "Value", "Text"), new { @checked = true })
+                            </td>
+                            <td >
+                                <span class="red ">＊</span>
+                                <label class="red ">作業項目:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("JobProject", new SelectList(Model.vJobProject, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr >
+                            <td>
+                                <label>　入庫日期:</label>
+                            </td>
+                            <td colspan="4">
+                                <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                            </td>
+                            <td >
+                                <label>　出庫日期:</label>
+                            </td>
+                            <td colspan="4">
+                                <input type="text" id="APLY_ODT_From" name="APLY_ODT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_ODT_To" name="APLY_ODT_To" />
+                            </td>
+                        </tr>         
+                        <tr class="D1016 D1017 D1018 clearTd" style="display:none;">
+                            <td class="clearTd_2 D1016_2 D1017_2 D1018_2">
+                                <label>　歸檔編號 : </label>
+                            </td>
+                            <td colspan="2" class="clearTd_2 D1016_2 D1017_2 D1018_2">
+                                <input type="text" id="tItem_No" name="tItem_No" maxlength="9" />
+                            </td>
+                            <td class="clearTd_2 D1016_2 D1017_2">
+                                <label>　冊號 : </label>
+                            </td>
+                            <td colspan="2" class="clearTd_2 D1016_2 D1017_2">
+                                <input type="text" id="tBook_No" name="tBook_No" maxlength="5" />
+                            </td>
+                            <td class="clearTd_2 D1016_2 D1017_2">
+                                <label>　類別 : </label>
+                            </td>
+                            <td colspan="3" class="clearTd_2 D1016_2 D1017_2">
+                                <select id="Margin_Dep_Type"></select>
+                            </td>
+                        </tr>                       
+                        <tr class="D1014 clearTd" style="display:none;">
+                            <td>
+                                <span class="red ">＊</span>
+                                <label class="red">冊號:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("dBook_No", new SelectList(Model.vBook_No, "Value", "Text"))
+                            </td>
+                            <td>
+                                <span class="red ">＊</span>
+                                <label class="red">狀別:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("dEstate_Form_No",new SelectList(Model.vEstate_From_No, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr class="D1015 clearTd" style="display:none;">
+                            <td>
+                                <span class="red ">＊</span>
+                                <label class="red">編號:</label>
+                            </td>
+                            <td colspan="9">
+                                @Html.DropDownList("dName", new SelectList(Model.vName, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr class="D1013 clearTd" style="display:none;">
+                            <td>
+                                <label class="red">＊</label>
+                                <label class="red">承作日期:</label>
+                            </td>
+                            <td colspan="2">
+                                <input type="text" id="vCOMMIT_DATE" name="COMMIT_DATE" />
+                            </td>
+                            <td>
+                                <label class="red">＊</label>
+                                <label class="red">到期日:</label>
+                            </td>
+                            <td colspan="2">
+                                <input type="text" id="vEXPIRY_DATE" name="EXPIRY_DATE" />
+                            </td>    
+                            <td>
+                                <label class="red">＊</label>
+                                <label class="red">交易對象: </label>
+                            </td>
+                            <td colspan="3">
+                                @Html.DropDownList("dTRAD_Partners", new SelectList(Model.vTRAD_Partners, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr  style="text-align: center ">
+                            <td colspan="10">
+                                <input type="button" class=" btn btn-primary" id="CDC_Search" value="查詢" />
+                                <input type="button" class=" btn btn-primary" id="CDC_Clear" value="清除" />
+                            </td>
+                        </tr>                   
+                    </table>                                                     
+                </form>
+                <div id="CDCOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="CDCOpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    @*查詢區塊*@
+
+
+</div>
+<script type="text/javascript">
+
+
+    $(function () {
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            //#region url設定
+            var CDCurl = {};
+            CDCurl.ChangeIO = '@Url.Action("ChangeIO", "CDC")';
+            //#endregion
+
+            var CDCFormId = 'CDCForm';
+            var dBook_NoId = 'dBook_No';
+            var dEstate_Form_NoId = 'dEstate_Form_No';
+            var dNameId = 'dName';
+            var tBook_NoId = 'tBook_No';
+            var tItem_NoId = 'tItem_No';
+            var treasuryIOId = 'treasuryIO';
+            var JobProjectId = 'JobProject';
+            var vCOMMIT_DATEId = 'vCOMMIT_DATE';
+            var vEXPIRY_DATEId = 'vEXPIRY_DATE';
+            var dTRAD_PartnersId = 'dTRAD_Partners';
+            var Margin_Dep_TypeId = 'Margin_Dep_Type';
+            var APLY_ODT_FromId = 'APLY_ODT_From';
+            var APLY_ODT_ToId = 'APLY_ODT_To';
+            var APLY_DT_FromId = 'APLY_DT_From';
+            var APLY_DT_ToId = 'APLY_DT_To';
+            var openSearchDetailId = 'CDCOpenSearchDetail';
+
+            //#region 初始設定
+            created.createDatepicker(vCOMMIT_DATEId, null); //承作日期
+            created.createDatepicker(vEXPIRY_DATEId, null); //到期日
+            created.createDatepickerRange(APLY_DT_FromId, APLY_DT_ToId); //入庫日期
+            created.createDatepickerRange(APLY_ODT_FromId, APLY_ODT_ToId); //出庫日期
+            verified.required(CDCFormId, dBook_NoId, '冊號為必選');
+            verified.required(CDCFormId, dNameId, '編號為必選');
+            verified.datepicker(CDCFormId, vCOMMIT_DATEId, $('#' + vCOMMIT_DATEId).val());
+            verified.datepicker(CDCFormId, vEXPIRY_DATEId, $('#' + vEXPIRY_DATEId).val());
+            //#endregion
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'CDC_Search':
+                        $('#' + id).on('click', function () { CDCSearch(); });
+                        break;
+                    case 'CDC_Clear':
+                        $('#' + id).on('click', function () { CDCClear(); });
+                        break;
+                }
+            });
+
+            $('#'+treasuryIOId).on('change', function () {
+                ChangeIO($(this).val())
+            });
+
+            //作業項目更換畫面動作
+            $('#'+JobProjectId).on('change', function () {
+                $('.clearTd').hide();
+                $('.' + $(this).val()).show();
+                switch($(this).val())
+                {
+                    case '@Ref.TreaItemType.D1016.ToString()':
+                    case '@Ref.TreaItemType.D1017.ToString()':
+                    case '@Ref.TreaItemType.D1018.ToString()':
+                            $('.clearTd_2').hide();
+                            $('.' + $(this).val()+'_2').show();
+                        break;
+                }
+                if($(this).val() == '@Ref.TreaItemType.D1016.ToString()')
+                {
+                    customerUtility.addoption(Margin_Dep_TypeId,@Html.Raw(Json.Encode(@Model.vMarging)));
+                }
+                if($(this).val() == '@Ref.TreaItemType.D1017.ToString()')
+                {
+                    customerUtility.addoption(Margin_Dep_TypeId,@Html.Raw(Json.Encode(@Model.vMarginp)));
+                }
+            });
+            $('#'+JobProjectId).val($($('#'+JobProjectId+' option')[0]).val()).change();
+
+            function ChangeIO(treasuryIO) {
+                created.clearDatepickerRangeValue(APLY_ODT_FromId,APLY_ODT_ToId);
+                if (treasuryIO == "Y") {
+                    $('#' + APLY_ODT_FromId).next().prop('disabled', true);
+                    $('#' + APLY_ODT_ToId).next().prop('disabled', true);
+                    $('#' + APLY_ODT_FromId).prop('disabled', true);
+                    $('#' + APLY_ODT_ToId).prop('disabled', true);
+                } else {
+                    $('#' + APLY_ODT_FromId).next().prop('disabled', false);
+                    $('#' + APLY_ODT_ToId).next().prop('disabled', false);
+                    $('#' + APLY_ODT_FromId).prop('disabled', false);
+                    $('#' + APLY_ODT_ToId).prop('disabled', false);
+                }
+            }
+            $('#'+treasuryIOId).val($($('#'+treasuryIOId+' option')[0]).val()).change();
+
+            function CDCSearch()
+            {
+                switch($('#'+JobProjectId).val())
+                {
+                    case '@Ref.TreaItemType.D1014.ToString()':
+                        if($('#'+dBook_NoId).val().trim() == '')
+                        {
+                            customerUtility.alert('無選擇冊號', 'w');
+                            return false;
+                        }
+                        break;
+                    case '@Ref.TreaItemType.D1015.ToString()':
+                        if($('#'+dNameId).val().trim() == '')
+                        {
+                            customerUtility.alert('無選擇編號', 'w');
+                            return false;
+                        }
+                        break;
+                }
+                if($('#' + CDCFormId).valid())
+                {
+                    var itemData = GetItemData(itemId);
+                    if (itemData.url != '')
+                    {
+                        $.ajax({
+                            type: 'POST',
+                            data: JSON.stringify({
+                                data: CDCSearchViewModel(
+                                    $('#'+treasuryIOId).val(),
+                                    $('#'+JobProjectId).val(),
+                                    $('#'+APLY_DT_FromId).val(),
+                                    $('#'+APLY_DT_ToId).val(),
+                                    $('#'+APLY_ODT_FromId).val(),
+                                    $('#'+APLY_ODT_ToId).va(),
+                                    $('#'+dBook_NoId).val(),
+                                    $('#'+dEstate_Form_NoId).val(),
+                                    $('#'+dNameId).val(),
+                                    $('#'+vCOMMIT_DATEId).val(),
+                                    $('#'+vEXPIRY_DATEId),val(),
+                                    $('#'+dTRAD_PartnersId).val(),
+                                    $('#'+tItem_NoId).val(),
+                                    $('#'+tBook_NoId).val(),
+                                    $('#'+Margin_Dep_TypeId).val()),
+                            }),
+                            dataType: 'html',
+                            url: itemData.url,
+                            contentType: 'application/json',
+                            success: function (vdata, textStatus, jqXHR)
+                            {
+                                $('#' + openSearchDetailId).children().remove();
+                                $('#' + openSearchDetailId).html(vdata);
+                                openCDCDialog(itemData.title,itemData.openDialogWidth,'CDCOpenSearchDialog');
+                            }
+                        })
+                    }
+                }
+            }
+
+            //#region 新增事件(打開Dialog)
+            function openCDCDialog(title, width, dialogId)
+            {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: {my:"top",at:"center top",of:window},
+                    title: title,
+                    width: width,
+                    autoOpen : false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText : '取消',
+                    close: function () {
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            function CDCClear()
+            {
+                $('#' + CDCFormId).validate().resetForm();
+                $('#'+treasuryIOId).val($($('#'+treasuryIOId+' option')[0]).val()).change();
+                $('#'+JobProjectId).val($($('#'+JobProjectId+' option')[0]).val()).change();
+                $('#'+dBook_NoId).val($($('#'+dBook_NoId+' option')[0]).val()).change();
+                $('#'+dEstate_Form_NoId).val($($('#'+dEstate_Form_NoId+' option')[0]).val()).change();
+                $('#'+dNameId).val($($('#'+dNameId+' option')[0]).val()).change();
+                $('#'+dTRAD_PartnersId).val($($('#'+dTRAD_PartnersId+' option')[0]).val()).change();
+                $('#'+Margin_Dep_TypeId).val($($('#'+Margin_Dep_TypeId+' option')[0]).val()).change();
+                created.clearDatepickerRangeValue(APLY_ODT_FromId,APLY_ODT_ToId);
+                created.clearDatepickerRangeValue(APLY_DT_FromId,APLY_DT_ToId);
+                $('#'+tItem_NoId).val('');
+                $('#'+tBook_NoId).val('');
+                $('#'+vCOMMIT_DATEId).val('');
+                $('#'+vEXPIRY_DATEId).val('');
+            }
+
+            //#region 申請項目設定檔案
+            function GetItemData(item) {
+                item = item || '';
+                var obj = {};
+                obj.url = ''; //開啟金庫物品的頁面 url
+                obj.title = null; //開啟金庫物品的頁面 Title
+                obj.openDialogWidth = 860; //開啟頁面 寬度
+
+                switch (item) {
+                    case '@Ref.TreaItemType.D1014.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1008.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1009.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1010.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1011.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1015.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1024.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1017.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1016.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1018.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                        break;
+                    case '@Ref.TreaItemType.D1013.ToString()':
+                        obj.url = '';
+                        obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                        break;
+                }
+                return obj;
+            }
+            //#endregion
+
+            //#region 異動資料庫作業查詢畫面  ViewModel
+            function CDCSearchViewModel(
+            vTreasuryIO,
+            vJobProject,
+            vAPLY_DT_From,
+            vAPLY_DT_To,
+            vAPLY_ODT_From,
+            vAPLY_ODT_To,
+            vBookNo,
+            vEstate_Form_No,
+            vName,
+            vCommit_Date,
+            vExpiry_Date,
+            vTRAD_Partners,
+            vItem_No,
+            vItem_Book_No,
+            vMargin_Dep_Type
+            ) {
+                var obj = {};
+                obj['vTreasuryIO'] = vTreasuryIO;
+                obj['vJobProject'] = vJobProject;
+                obj['vAPLY_DT_From'] = vAPLY_DT_From;
+                obj['vAPLY_DT_To'] = vAPLY_DT_To;
+                obj['vAPLY_ODT_From'] = vAPLY_ODT_From;
+                obj['vAPLY_ODT_To'] = vAPLY_ODT_To;
+                obj['vBookNo'] = vBookNo;
+                obj['vEstate_Form_No'] = vEstate_Form_No;
+                obj['vName'] = vName;
+                obj['vCommit_Date'] = vCommit_Date;
+                obj['vExpiry_Date'] = vExpiry_Date ;
+                obj['vTRAD_Partners'] = vTRAD_Partners;
+                obj['vItem_No'] = vItem_No;
+                obj['vItem_Book_No'] = vItem_Book_No;
+                obj['vMargin_Dep_Type'] = vMargin_Dep_Type;
+                return obj;
+            }
+            //#endregion
+
+        }
+
+    });
+
+
+</script>

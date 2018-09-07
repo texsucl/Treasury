@@ -409,6 +409,47 @@ namespace Treasury.Web.Service.Actual
 
             return result;
         }
+
+        /// <summary>
+        /// 查詢定期存單交易對象
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectOption> GetTRAD_Partners()
+        {
+            //預設交易對象
+            var result = new List<SelectOption>()
+            {
+                new SelectOption() { Text = "上海三民", Value = "上海三民" },
+                new SelectOption() { Text = "上海二重", Value = "上海二重" },
+                new SelectOption() { Text = "上海三重", Value = "上海三重" },
+                new SelectOption() { Text = "上海南港", Value = "上海南港" },
+                new SelectOption() { Text = "上海營業部", Value = "上海營業部" },
+                new SelectOption() { Text = "中信營業部", Value = "中信營業部" },
+                new SelectOption() { Text = "王道營業部", Value = "王道營業部" },
+                new SelectOption() { Text = "台企仁愛", Value = "台企仁愛" },
+                new SelectOption() { Text = "永豐新湖(營業部發單)", Value = "永豐新湖(營業部發單)" },
+                new SelectOption() { Text = "交銀台北", Value = "交銀台北" },
+                new SelectOption() { Text = "合庫信維", Value = "合庫信維" },
+                new SelectOption() { Text = "星展南京東路", Value = "星展南京東路" },
+                new SelectOption() { Text = "高銀台北", Value = "高銀台北" },
+                new SelectOption() { Text = "凱基營業部", Value = "凱基營業部" },
+                new SelectOption() { Text = "北富銀敦南", Value = "北富銀敦南" },
+                new SelectOption() { Text = "匯豐台北", Value = "匯豐台北" },
+                new SelectOption() { Text = "新光南東", Value = "新光南東" },
+            };
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                result.AddRange(db.ITEM_DEP_ORDER_M.AsNoTracking()
+                    .Where(x => x.TRAD_PARTNERS != null && x.TRAD_PARTNERS.Trim() != "")
+                    .Select(x => x.TRAD_PARTNERS)
+                    .AsEnumerable().Select(x => new SelectOption() { Text = x, Value = x }));
+            }
+
+            result = result.Distinct(new SelectOption_Comparer()).OrderBy(x => x.Value).ToList();
+
+            return result;
+        } 
         #endregion
 
         #region SaveData

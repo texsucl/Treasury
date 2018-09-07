@@ -37,16 +37,16 @@ namespace Treasury.Web.ViewModels
         public decimal vItemImp_Amount { get; set; }
 
         /// <summary>
-        /// 重要物品預計提取日期民國年
+        /// 重要物品預計提取日期
         /// </summary>
         [Description("重要物品預計提取日期")]
-        public String vItemImp_Expected_Date_1 { get; set; }
+        public String vItemImp_Expected_Date { get; set; }
 
-        /// <summary>
-        /// 重要物品預計提取日期西元年
-        /// </summary>
-        [Description("重要物品預計提取日期")]
-        public String vItemImp_Expected_Date_2 { get; set; }
+        ///// <summary>
+        ///// 重要物品預計提取日期西元年
+        ///// </summary>
+        //[Description("重要物品預計提取日期")]
+        //public String vItemImp_Expected_Date_2 { get; set; }
 
         /// <summary>
         /// 說明

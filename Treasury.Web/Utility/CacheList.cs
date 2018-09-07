@@ -52,10 +52,25 @@
 		/// </summary>
 		public static string SpecifiedTimeTreasuryApplyData { get; private set; }
 
-		/// <summary>
-		/// 明細資料(空白票據)
-		/// </summary>
-		public static string BILLTempData { get; private set; }
+        /// <summary>
+        /// 指定開庫作業覆核畫面(查詢條件)
+        /// </summary>
+        public static string SpecifiedTimeTreasuryApprSearchData { get; private set; }
+
+        /// <summary>
+        /// 指定開庫作業覆核畫面(資料)
+        /// </summary>
+        public static string SpecifiedTimeTreasuryApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 指定開庫作業覆核畫面(工作項目資料)
+        /// </summary>
+        public static string SpecifiedTimeTreasuryApprReasonDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 明細資料(空白票據)
+        /// </summary>
+        public static string BILLTempData { get; private set; }
 
         /// <summary>
         /// 當日庫存明細表(空白票據)
@@ -134,6 +149,17 @@
         /// 庫存資料(定期存單-明細-全)
         /// </summary>
         public static string DepositData_D_All { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動畫面(查詢條件)
+        /// </summary>
+        public static string CDCSearchViewModel { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動印章畫面
+        /// </summary>
+        public static string CDCSEALData { get; private set; }
+
         #endregion Cache資料
 
 
@@ -149,7 +175,10 @@
 			SpecifiedTimeTreasurySearchData = "SpecifiedTimeTreasurySearchData";
 			SpecifiedTimeTreasurySearchDetailViewData = "SpecifiedTimeTreasurySearchDetailViewData";
 			SpecifiedTimeTreasuryApplyData = "SpecifiedTimeTreasuryApplyData";
-			BILLTempData = "BILLTempData";
+            SpecifiedTimeTreasuryApprSearchData = "SpecifiedTimeTreasuryApprSearchData";
+            SpecifiedTimeTreasuryApprSearchDetailViewData = "SpecifiedTimeTreasuryApprSearchDetailViewData";
+            SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
+            BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";
             ESTATEData = "ESTATEData";
@@ -166,6 +195,8 @@
             DepositData_Y = "DepositData_Y";
             DepositData_D = "DepositData_D";
             DepositData_D_All = "DepositData_D_All";
+            CDCSearchViewModel = "CDCSearchViewModel";
+            CDCSEALData = "CDCSEALData";
             #endregion Cache資料
 
         }

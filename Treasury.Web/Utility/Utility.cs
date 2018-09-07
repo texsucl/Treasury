@@ -1,13 +1,31 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Treasury.WebUtility
 {
 
-    public class SelectOption
+    public class SelectOption 
     {
         public string Text { get; set; }
         public string Value { get; set; }
+    }
+
+    public class SelectOption_Comparer : IEqualityComparer<SelectOption>
+    {
+        public bool Equals(SelectOption x, SelectOption y)
+        {
+            if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                return false;
+            return (x.Text == y.Text && x.Value == y.Value);
+        }
+
+        public int GetHashCode(SelectOption obj)
+        {
+            if (Object.ReferenceEquals(obj, null)) return 0;
+            return obj.Value.GetHashCode() * obj.Text.GetHashCode();
+        }
+
     }
 
     public class RadioButton

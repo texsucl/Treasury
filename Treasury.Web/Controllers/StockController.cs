@@ -134,6 +134,10 @@ namespace Treasury.Web.Controllers
                 List<StockViewModel> _datas = new List<StockViewModel>();
                 _datas.Add(_data);
                 result = Stock.ApplyAudit(_datas, data);
+                if (result.RETURN_FLAG && !data.vAplyNo.IsNullOrWhiteSpace())
+                {
+                    new TreasuryAccessController().ResetSearchData();
+                }
             }
             else
             {

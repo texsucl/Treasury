@@ -133,10 +133,10 @@ namespace Treasury.Web.Service.Actual
                         vMarginp_Item = x.MARGIN_ITEM,
                         vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,
                         vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,
+                        //vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9,true),
                         vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
-                        vMarginp_Effective_Date_B_2 = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9,true),
+                        //vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9, true),
                         vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
-                        vMarginp_Effective_Date_E_2 = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9,true),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
                         vMarginp_Book_No = x.BOOK_NO,
@@ -161,11 +161,11 @@ namespace Treasury.Web.Service.Actual
                              vMarginp_Item = x.MARGIN_ITEM,
                              vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,
                              vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,
-                             vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9,true),
-                             vMarginp_Effective_Date_B_2=TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
-                            vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9,true),
-                            vMarginp_Effective_Date_E_2=TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
-                             vDescription= x.DESCRIPTION,//說明
+                             vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
+                             //vMarginp_Effective_Date_B_2 = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9, true),
+                             vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                             //vMarginp_Effective_Date_E_2 = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9, true),
+                             vDescription = x.DESCRIPTION,//說明
                              vMemo = x.MEMO,
                              vMarginp_Book_No = x.BOOK_NO,
                              vtakeoutFlag = true,
@@ -181,7 +181,7 @@ namespace Treasury.Web.Service.Actual
         #region Save Data
 
         /// <summary>
-        /// 申請覆核 印章
+        /// 申請覆核 存入保證金
         /// </summary>
         /// <param name="insertDatas">資料</param>
         /// <param name="taData">申請單資料</param>
@@ -625,10 +625,10 @@ namespace Treasury.Web.Service.Actual
                 vMarginp_Item = x.MARGIN_ITEM, // 物品名稱
                 vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,// 物品發行人
                 vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,//質押標的號碼
-                vMarginp_Effective_Date_B_2 = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9),
                 vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),//有效期間(起)
-                 vMarginp_Effective_Date_E_2 = x.EFFECTIVE_DATE_E== null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9),
+                //vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9),
                 vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),//有效期間(迄) 
+                //vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9),
                 vDescription =x.DESCRIPTION,//說明
                 vMemo = x.MEMO,//備註
                 vMarginp_Book_No = x.BOOK_NO,//冊號 
