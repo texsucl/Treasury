@@ -280,6 +280,21 @@
     <Property Name="DEP_CHK_ITEM_DESC_B" Type="nvarchar" MaxLength="50" />
     <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
   </EntityType>
+  <EntityType Name="INVENTORY_CHG_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+    </Key>
+    <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
+    <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CHG_AUTH_UNIT" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_Date" Type="date" />
+    <Property Name="CREATE_Time" Type="time" Precision="7" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_Date" Type="date" />
+    <Property Name="APPR_Time" Type="time" Precision="7" />
+  </EntityType>
   <EntityType Name="ITEM_BLANK_NOTE">
     <Key>
       <PropertyRef Name="ITEM_ID" />
@@ -915,11 +930,11 @@
     <Property Name="CONFIRM_UID" Type="varchar" MaxLength="5" />
     <Property Name="CONFIRM_DT" Type="datetime" />
     <Property Name="RTN_DESC" Type="nvarchar" MaxLength="50" />
-    <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
     <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
     <Property Name="CREATE_DT" Type="datetime" />
     <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
     <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
   </EntityType>
   <EntityType Name="TREA_APLY_TEMP">
     <Key>
@@ -1042,6 +1057,7 @@
     <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
     <Property Name="LAST_UPDATE_DT" Type="datetime" />
     <Property Name="OPEN_TREA_DATE" Type="date" Nullable="false" />
+    <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
   </EntityType>
   <Association Name="R_LOG_MAIN_EXEC_TYPE">
     <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
@@ -1086,6 +1102,7 @@
     <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="INVENTORY_CHG_APLY" EntityType="Self.INVENTORY_CHG_APLY" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_BLANK_NOTE" EntityType="Self.ITEM_BLANK_NOTE" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_BOOK" EntityType="Self.ITEM_BOOK" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="ITEM_CA" EntityType="Self.ITEM_CA" Schema="dbo" store:Type="Tables" />

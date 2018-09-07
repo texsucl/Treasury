@@ -502,6 +502,13 @@
         }
     }
 
+    verified.changData = function (value) {
+        value = value || '';
+        if (value.trim() == '')
+            return '(改為空值)';
+        return value;
+    }
+
     function verifiedReportDate(value) {
         if (dateFormat.test(value)) {           
             var datepicker = verified.datepickerStrToDate(value);

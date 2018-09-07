@@ -1,0 +1,596 @@
+﻿
+
+@{
+    ViewBag.Title = "金庫進出管理作業-核准指定開庫作業";
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="SearchForm">
+                    <div class="row">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-10">
+                            <span class="red">＊</span>
+                            <label class="red">申請日期 : </label>
+                            <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                            <label> ~&ensp;</label>
+                            <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-10">
+                            <label>金庫登記簿單號 : </label>
+                            <input type="text" id="TREA_REGISTER_ID" name="TREA_REGISTER_ID" size="17" maxlength="10" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-5"></div>
+                        <div class="col-lg-2" style="text-align:center">
+                            <input type="button" id="STT_Search" value="查詢" class="btn btn-primary marginRight" />
+                            @Html.Hidden("h_Appr_CREATE_Dep", (string)ViewBag.hCREATE_Dep)
+                            @Html.Hidden("h_Appr_CREATE_User", (string)ViewBag.hCREATE_User)
+                            @Html.Hidden("h_Appr_REGISTER_No")
+                        </div>
+                        <div class="col-lg-5"></div>
+                    </div>
+                </form>
+                <form id="ApprForm">
+                    <div class="row">
+                        <div id="SearchJqgridDiv" class="col-lg-12 jqd"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-5"></div>
+                        <div class="col-lg-7">
+                            <input type="button" id="STT_Appr" value="核准" class="btn btn-primary showOrNot" />
+                            <input type="button" id="STT_Reject" value="駁回" class="btn btn-primary showOrNot" />
+                        </div>
+                    </div>
+                </form>
+            }
+            
+            <div id="SSTADDDialog" style="display:none" role="dialog" class="myDialog">
+                <div>
+                    <form>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label>金庫登記簿單號 :</label>
+                            </div>
+                            <div class="col-lg-3">
+                                <input type="text" id="jqREGISTER_ID" size="15" />
+                            </div>
+                            <div class="col-lg-3">
+                                <span class="red">＊</span>
+                                <label class="red">入庫日期 : </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <input type="text" id="jqINTRADATE_ID" size="15" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <span class="red">＊</span>
+                                <label class="red">系統區間(起迄) : </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <input type="text" id="jqSYSTIMESTART_ID" class="timepicker" size="4" />
+                                <label> ~</label>
+                                <input type="text" id="jqSYSTIMEEND_ID" class="timepicker" size="4" />
+                            </div>
+                            <div class="col-lg-3">
+                                <span class="red">＊</span>
+                                <label class="red">開庫時間 : </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <input type="text" id="jqINTRATIME_ID" class="timepicker" size="4" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <span class="red">＊</span>
+                                <label class="red">內文編號 : </label>
+                            </div>
+                            <div class="col-lg-3">
+                                <input type="text" id="jqCASENO_ID" size="15" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label>備註 : </label>
+                            </div>
+                            <div class="col-lg-9">
+                                <input type="text" id="jqMEMO_ID" size="58" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3"></div>
+                            <div class="col-lg-6" style="text-align:center" id="inputList">
+                                <input type="button" id="jqAppr" value="核准" class="btn btn-primary" autofocus />
+                                <input type="button" id="jqReject" value="駁回" class="btn btn-primary" />
+                                <input type="button" id="jqClose" value="回上一頁" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div class="col-lg-1"></div>
+                        <div id="SSTReasontDiv" class="col-lg-10"></div>
+                        <div class="col-lg-1"></div>
+                    </div>
+                </div>             
+            </div>
+            <div id="STTApprDescDialog" style="display:none" role="dialog">
+                <table>
+                    <tr>
+                        <td>
+                            <textarea id="STTApprDesc" maxlength="50" style="width:98%"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" id="STTAppr_Y_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                            <input type="button" id="STTAppr_N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("SearchAppr", "SpecifiedTimeTrea")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "SpecifiedTimeTrea")';
+        UrlFor.Reject = '@Url.Action("Reject", "SpecifiedTimeTrea")';
+        UrlFor.GetReason = '@Url.Action("GetReason", "SpecifiedTimeTrea")';
+        UrlFor.Appr = '@Url.Action("Approve", "SpecifiedTimeTrea")';
+        //#endregion
+        //region 變數設定 name
+        var SearchForm = 'SearchForm';
+        var APLY_DT_From = 'APLY_DT_From';
+        var APLY_DT_To = 'APLY_DT_To';
+        var hREGISTER_No = 'h_Appr_REGISTER_No';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //初始畫面
+            //隱藏 核准 & 駁回 按鈕
+            $('.showOrNot').hide();
+            //region datepicker
+            var today = $.datepicker.formatDate('yy/mm/dd', new Date());
+            created.createDatepicker(APLY_DT_From, today);
+            created.createDatepicker(APLY_DT_To, today);
+            created.createDatepickerRange(APLY_DT_From, APLY_DT_To);
+            verified.datepicker(SearchForm, APLY_DT_From, $('#' + APLY_DT_From).val());
+            verified.datepicker(SearchForm, APLY_DT_To, $('#' + APLY_DT_To).val());
+            verified.required(SearchForm, APLY_DT_From, message.required('申請日期(起)'));
+            verified.required(SearchForm, APLY_DT_To, message.required('申請日期(迄)'));
+            //#endregion
+            //region 驗證金庫需求單號
+            $('#TREA_REGISTER_ID').blur(function () {
+                var reg = /^[W]\d{9}$/;
+                var str = $(this).val();
+                reg.test(str);
+                if ($(this).val() != "") {
+                    if (!reg.test(str)) {
+                        $(this).next('span').empty();
+                        var wLabel = $('<label></label>').text("單號為大寫W + 9碼數字").attr('class', 'red');
+                        var wSpan = $('<span></span>').append(wLabel);
+                        $(this).after(wSpan);
+                    }
+                    else {
+                        $(this).next('span').empty();
+                    }
+                }
+                else {
+                    $(this).next('span').empty();
+                }
+            });
+            //#endregion
+            //region 產生產生button事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'STT_Search':
+                        $('#' + id).click(function () { formSearch(); });
+                        break;
+                    case 'STT_Appr':
+                    case 'jqAppr':
+                        $('#' + id).click(function () { formAppr(); });
+                        break;
+                    case 'STT_Reject':
+                    case 'jqReject':
+                        $('#' + id).click(function () { formReject(); });
+                        break;
+                    case 'STTAppr_Y_Reject':
+                        $('#' + id).click(function () { formRejectY(); });
+                        break;
+                    case 'STTAppr_N_Reject':
+                    case 'jqClose':
+                        $('#' + id).click(function () { customerUtility.closeDialog($(this)); });
+                        break;
+                }
+            });
+            //#endregion
+        }
+       
+        //region 設定Timepicker
+        function setTimepicker() {
+            $('.timepicker').timepicker({
+                timeFormat: 'H:i',
+                step: 10,
+                minTime: '8:00',
+                maxTime: '23:00',
+                defaultTime: '8:00',
+                startTime: '08:00',
+                dynamic: false,
+                dropdown: true,
+                scrollbar: true
+            });
+        }
+        //#endregion 
+        //region 驗證日期
+        function compareDate() {
+            var dateFrom = $('#APLY_DT_From').val();
+            var dateTo = $('#APLY_DT_To').val();
+            if (Date.parse(dateTo) >= Date.parse(dateFrom)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        //#endregion
+        //region 查詢事件
+        function formSearch() {
+            if ($('#SearchForm').valid())
+            {
+                var checkDateOk = compareDate();
+                if (checkDateOk)
+                {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            searchModel: SpecifiedSearchViewModel(
+                                $('#APLY_DT_From').val(),
+                                $('#APLY_DT_To').val(),
+                                $('#TREA_REGISTER_ID').val(),
+                                $('#h_Appr_CREATE_User').val(),
+                                $('#h_Appr_CREATE_Dep').val()
+                            )
+                        }),
+                        url: UrlFor.Search,
+                        contentType: 'application/json'
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            SearchGrid();
+                            $('.showOrNot').show();
+                        }
+                        else
+                        {
+                            customerUtility.alert(result.DESCRIPTION, 'w');
+                        }
+                    });
+                }
+            }
+        }
+        //#endregion
+        //region 核准
+        function formAppr() {
+            var _reigsterIdCheck = [];
+            var openflag = false;
+            if ($('#' + hREGISTER_No).val() == '') {
+                if ($('.STTApprCs:checked').length > 0) {
+                    $('#SearchJqgridDiv').find('input[type="checkbox"]:checked').each(function () {
+                        _reigsterIdCheck.push($(this).val());
+                    });
+                }
+            }
+            else {
+                _reigsterIdCheck.push($('#' + hREGISTER_No).val());
+                openflag = true;
+            }
+            if (_reigsterIdCheck.length === 0) {
+                customerUtility.alert("無選擇駁回項目", 'w');
+            }
+            else {
+                if (confirm("是否覆核單號" + _reigsterIdCheck.join(",") + "?")) {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            ApprModel: _reigsterIdCheck
+                        }),
+                        url: UrlFor.Appr,
+                        contentType: 'application/json'
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            if (openflag) {
+                                customerUtility.closeDialog($('#SSTADDDialog'));
+                            }
+                            SearchGrid();
+                        }
+                        customerUtility.alertAuto(result);
+                    });
+                }
+            }
+
+        }
+        //#endregion
+        //region 是否駁回
+        function formReject() {
+            var flag = false;
+            if ($('#' + hREGISTER_No).val() == '') {
+                if ($('.STTApprCs:checked').length > 0) {
+                    flag = true;
+                }
+            }
+            else {
+                flag = true;
+            }
+            if (!flag) {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'STTApprDescDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#STTApprDesc').val('');
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+        //region 駁回
+        function formRejectY() {
+            var _reigsterIdCheck = [];
+            var openflag = false;
+            if ($('#' + hREGISTER_No).val() == '') {
+                if ($('.STTApprCs:checked').length > 0) {
+                    $('#SearchJqgridDiv').find('input[type="checkbox"]:checked').each(function () {
+                        _reigsterIdCheck.push($(this).val());
+                    });
+                }
+            }
+            else {
+                _reigsterIdCheck.push($('#' + hREGISTER_No).val());
+                openflag = true;
+            }
+            if (_reigsterIdCheck.length === 0) {
+                customerUtility.alert("無選擇駁回項目", 'w');
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        RejectModel: _reigsterIdCheck,
+                        ApprDesc: $('#STTApprDesc').val().trim()
+                    }),
+                    url: UrlFor.Reject,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#STTApprDescDialog'));
+                        if (openflag) {
+                            customerUtility.closeDialog($('#SSTADDDialog'));
+                        }
+                        SearchGrid();
+                    }
+                    customerUtility.alertAuto(result);
+                });
+            }
+        }
+        //#endregion
+        //#region 查詢作業類型
+        function searchWorkId(data) {
+            var reasonId = data.vOPEN_TREA_REASON_ID;
+            var reasonArray = reasonId.split(';');
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    ReasonModel: reasonArray
+                }),
+                url: UrlFor.GetReason,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    WorkItemGrid();
+                }
+            });
+        }
+        //#endregion
+        //#region jqGrid 單號變連結
+        function formatREGISTERID(cellvalue, option, rdata) {      
+            if (rdata.vAPPR_FLAG) {
+                return "<a href='#' id='" + option.gid + "REGISTERID" + option.rowId + "' class='openDialog DialogREGISTERID' style='text-decoration:underline;' return:false; name='" + cellvalue + "' title='" + cellvalue + "'>" + cellvalue + "</a>";
+            }
+            return cellvalue;
+        }
+        //#endregion
+        //#region jqGrid 單號顯示原本樣式
+        function unformatREGISTERID(cellvalue, option, rdata) {
+            return cellvalue;
+        }
+        //#endregion
+        //#region jqGrid checkbox
+        function formatterCheck(cellvalue, options, rdata) {
+            var str = '';
+            if (rdata.vAPPR_FLAG) {
+                str += "<div class='checkbox checkbox-info' title=' ' style='padding-left:40px; padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + cellvalue + "' ' tage='" + options.colModel.index + "' name='" +
+                cellvalue + "' value='" + cellvalue + "' ' title =' ' class='cbox STTApprCs customerCheck'></div>";
+            }
+            return str;
+        }
+        //#endregion
+        //#region 存取項目清單
+        function WorkItemGrid() {
+            var colNameArray = ['作業類型', '存取項目'];
+            var colModelArry =
+                [
+                    { name: "vITEM_OP_TYPE", index: "vITEM_OP_TYPE", width: 200, sortable: false, align: 'center' },
+                    { name: "vITEM_DESC", index: "vITEM_DESC", width: 400, sortable: false, align: 'center' }
+                ];
+            jqgridCustom.createJqgridByCache(
+                'SSTReasontDiv',
+                'SSTReasonList',
+                'SSTReasonPeger',
+                UrlFor.GetData,
+                {
+                    type: 'ApprReason'
+                },
+                colNameArray,
+                colModelArry,
+                '存取項目清單',
+                jqgridCustom.getPage('SSTReasontDiv'),
+                null,
+                true
+                );
+        }
+        //#endregion
+        //#region 代處理文件
+        function SearchGrid() {
+            var colNameArray = [/*'項次',*/ '選擇', '申請日期', '金庫登記簿單號', '申請人', '入庫日期', '備註', '系統區間(起)', '系統區間(迄)', '入庫時間', '開庫原因代碼', '覆核權限'];
+            var colModelArry =
+                [
+                    //{ name: "vINDEX", index: "vINDEX", width: 45, sortable: false, align: 'center' },
+                    { name: "vTREA_REGISTER_ID", index: "vTREA_REGISTER_ID", width: 100, sortable: false, align: 'center', formatter: formatterCheck },
+                    { name: "vCREATE_DT", index: "vCREATE_DT", width: 180, sortable: false, align: 'center' },
+                    { name: "vTREA_REGISTER_ID", index: "vTREA_REGISTER_ID", width: 200, sortable: false, align: 'center', formatter: formatREGISTERID, unformat: unformatREGISTERID },
+                    { name: "vCREATE_UID", index: "vCREATE_UID", width: 130, sortable: false, align: 'center' },
+                    { name: "vOPEN_TREA_DATE", index: "vOPEN_TREA_DATE", hidden: true },
+                    { name: "vMEMO", index: "vMEMO", width: 175, sortable: false, align: 'center' },
+                    { name: "vEXEC_TIME_B", index: "vEXEC_TIME_B", hidden: true },
+                    { name: "vEXEC_TIME_E", index: "vEXEC_TIME_E", hidden: true },
+                    { name: "vOPEN_TREA_TIME", index: "vOPEN_TREA_TIME", hidden: true },
+                    { name: "vOPEN_TREA_REASON_ID", index: "vOPEN_TREA_REASON_ID", hidden: true },
+                    { name: "vAPPR_FLAG", index: "vAPPR_FLAG", hidden: true }
+                ];
+            jqgridCustom.createJqgridByCache(
+                'SearchJqgridDiv',
+                'SearchList',
+                'SearchPeger',
+                UrlFor.GetData,
+                {
+                    type: 'ApprSearch'
+                },
+                colNameArray,
+                colModelArry,
+                '代處理文件',
+                jqgridCustom.getPage('SearchJqgridDiv'),
+                SearchGridCompeleteFun,
+                true
+            );
+        };
+        //#endregion
+        //region 開啟金庫登記簿單號 事件
+        function SearchGridCompeleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0)').each(function (i, j) {
+                //金庫登記簿單號
+                $(this).find('td').find('a.DialogREGISTERID').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        SSTOpenRegisteIdFun(listId, i + 1, false);
+                    });
+                });
+            });
+        }
+        //#endregion
+        //region 開啟金庫登記簿單號
+        function SSTOpenRegisteIdFun(listId, rowId, closeFlag) {
+            var data = $("#" + listId).getRowData(rowId);
+            $('#h_Appr_REGISTER_No').val(data.vTREA_REGISTER_ID);
+            formInsert(data);
+        }
+        //#endregion
+        //region 傳送事件
+        function formInsert(data) {
+            //開啟Dialog
+            openSSTDialog("指定時間開庫-新增作業", 800, 'SSTADDDialog', false, false);
+            getDialogElement(data);
+            setTimepicker();
+            searchWorkId(data);
+        };
+        //#endregion
+        //#region 開啟 Dialog
+        function openSSTDialog(title, width, dialogId, closeFalg, custodianFlag) {
+            title = title || '';
+            width = width || 'auto';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+        //region 產生 Dialog 元素
+        function getDialogElement(data) {
+            $('#jqREGISTER_ID').val(data.vTREA_REGISTER_ID).prop('disabled', true);
+            $('#jqINTRADATE_ID').val(data.vOPEN_TREA_DATE).prop('disabled', true);
+            $('#jqSYSTIMESTART_ID').val(data.vEXEC_TIME_B).prop('disabled', true);
+            $('#jqSYSTIMEEND_ID').val(data.vEXEC_TIME_E).prop('disabled', true);
+            $('#jqINTRATIME_ID').val(data.vOPEN_TREA_TIME).prop('disabled', true);
+            $('#jqCASENO_ID').val('@ViewBag.emailId').prop('disabled', true);
+            $('#jqMEMO_ID').val(data.vMEMO).prop('disabled', true);
+        }
+        //#endregion
+        //#region 查詢畫面  ViewModel
+        function SpecifiedSearchViewModel(vAPLY_DT_From, vAPLY_DT_To, vTREA_REGISTER_ID, vCreateUid, vCreateUnit) {
+            var obj = {};
+            obj['vAPLY_DT_S'] = vAPLY_DT_From;
+            obj['vAPLY_DT_E'] = vAPLY_DT_To;
+            obj['vTREA_REGISTER_ID'] = vTREA_REGISTER_ID;
+            obj['vCreateUid'] = vCreateUid;
+            obj['vCreateUnit'] = vCreateUnit;
+            return obj;
+        };
+        //#endregion
+        //#region 駁回 ViewModel
+        function RejectViewModel(vTREA_REGISTER_ID) {
+            var obj = {};
+            obj['vTREA_REGISTER_ID'] = vTREA_REGISTER_ID;
+            return obj;
+        }
+        //#endregion
+        //#region 查詢工作類型 ViewModel
+        function ReasonViewModel(vOPEN_TREA_REASON_ID) {
+            var obj = {};
+            obj['vOPEN_TREA_REASON_ID'] = vOPEN_TREA_REASON_ID;
+            return obj;
+        }
+        //#endregion
+    });
+</script>

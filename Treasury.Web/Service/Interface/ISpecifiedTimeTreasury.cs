@@ -49,5 +49,38 @@ namespace Treasury.Web.Service.Interface
 		/// <param name="searchData"></param>
 		/// <returns></returns>
 		MSGReturnModel<List<SpecifiedTimeTreasurySearchDetailViewModel>> CancelApplyData(SpecifiedTimeTreasuryCancelViewModel data, string currentUserId, SpecifiedTimeTreasurySearchViewModel searchData);
-	}
+
+        /// <summary>
+        /// 覆核作業查詢
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        List<SpecifiedTimeTreasuryApprSearchDetailViewModel> GetApprSearchData(SpecifiedTimeTreasuryApprSearchViewModel data);
+
+        /// <summary>
+        /// 覆核
+        /// </summary>
+        /// <param name="RegisterNo"></param>
+        /// <param name="ViewModel"></param>
+        /// <param name="SearchData"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>> ApproveData(List<string> RegisterNo, List<SpecifiedTimeTreasuryApprSearchDetailViewModel> ViewModel, SpecifiedTimeTreasuryApprSearchViewModel SearchData);
+        
+        /// <summary>
+        /// 駁回
+        /// </summary>
+        /// <param name="RegisterNo"></param>
+        /// <param name="RejectReason"></param>
+        /// <param name="ViewModel"></param>
+        /// <param name="SearchData"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>> RejectData(List<string> RegisterNo, string RejectReason, List<SpecifiedTimeTreasuryApprSearchDetailViewModel> ViewModel, SpecifiedTimeTreasuryApprSearchViewModel SearchData);
+
+        /// <summary>
+        /// 工作項目
+        /// </summary>
+        /// <param name="RegisterNo"></param>
+        /// <returns></returns>
+        List<SpecifiedTimeTreasuryApprReasonDetailViewModel> GetReasonDetail(List<string> RegisterNo);
+    }
 }

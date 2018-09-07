@@ -558,6 +558,17 @@ namespace Treasury.WebUtility
             return value;
         }
 
+        public static Tuple<string,bool> CheckAFT(this string value, string oldpar)
+        {
+            if (oldpar.IsNullOrWhiteSpace() && value.IsNullOrWhiteSpace())
+                return new Tuple<string, bool>(null, false) ;
+            if (oldpar.IsNullOrWhiteSpace() && !value.IsNullOrWhiteSpace())
+                return new Tuple<string, bool>(value,true);
+            if (!oldpar.IsNullOrWhiteSpace() && !value.IsNullOrWhiteSpace() && (oldpar == value))
+                return new Tuple<string, bool>(null, false); ;
+            return new Tuple<string, bool>(value, true);
+        }
+
         public static string formateThousand(this string value)
         {
             decimal d = 0;

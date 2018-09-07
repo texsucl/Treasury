@@ -23,7 +23,6 @@
                     </td>
                     <td>
                         @Html.DropDownList("dMarginp_Take_Of_Type", (SelectList)ViewBag.MarginpType, new { @class = "MarginpInsertType", @style = "width:207px" })
-                        @*<input type="text" id="tMarginp_Take_Of_Type" name="tMarginp_Take_Of_Type" class="MarginpInsertType" maxlength="10" />*@
                     </td>
                 </tr>
                 <tr>
@@ -84,11 +83,11 @@
                             <input type="text" id="tMarginp_Effective_Date_B" name="tMarginp_Effective_Date_B" class="MarginpInsertType" />
                         </td>
                     </tr>
-                    <tr>
+                    @*<tr>
                         <td colspan="2">
-                            <input type="hidden" id="tMarginp_Effective_Date_B_2" name="tMarginp_Effective_Date_B_2" class="MarginpInsertType" />
+                            <input type="hidden" id="tMarginp_Effective_Date_B" name="tMarginp_Effective_Date_B" class="MarginpInsertType" />
                         </td>
-                    </tr>      
+                    </tr>*@      
                     <tr>
                         <td>
                             <label>有效期間(迄) : </label>
@@ -97,11 +96,11 @@
                             <input type="text" id="tMarginp_Effective_Date_E" name="tMarginp_Effective_Date_E" class="MarginpInsertType" />
                         </td>
                     </tr>
-                    <tr>
+                    @*<tr>
                         <td colspan="2">
-                            <input type="hidden" id="tMarginp_Effective_Date_E_2" name="tMarginp_Effective_Date_E_2" class="MarginpInsertType" />
+                            <input type="hidden" id="tMarginp_Effective_Date_E" name="tMarginp_Effective_Date_E" class="MarginpInsertType" />
                         </td>
-                    </tr>
+                    </tr>*@
                     <tr>
                         <td>
                             <label>說明 : </label>
@@ -157,7 +156,6 @@
             Marginpurl.ResetTempData = '@Url.Action("ResetTempData", "Marginp")';
             Marginpurl.TakeOutData = '@Url.Action("TakeOutData", "Marginp")';
             Marginpurl.ApplyTempData = '@Url.Action("ApplyTempData", "Marginp")';
-
             Marginpurl.GetMarginpItem = '@Url.Action("GetMarginpItem", "Marginp")';
             //#endregion
 
@@ -175,9 +173,9 @@
             var Marginp_Item_Issuer = 'tMarginp_Item_Issuer'; //物品發行人Id(text)
             var Marginp_Pledge_Item_No = 'tMarginp_Pledge_Item_No'; //質押標的號碼Id(text)
             var Marginp_Effective_Date_B = 'tMarginp_Effective_Date_B'; //有效期間(起)Id(text)
-            var Marginp_Effective_Date_B_2 = 'tMarginp_Effective_Date_B_2'; //有效期間(起)西元年Id(hidden)
+            //var Marginp_Effective_Date_B = 'tMarginp_Effective_Date_B'; //有效期間(起)西元年Id(hidden)
             var Marginp_Effective_Date_E = 'tMarginp_Effective_Date_E'; //有效期間(迄)Id(text)
-            var Marginp_Effective_Date_E_2 = 'tMarginp_Effective_Date_E_2'; //有效期間(迄)西元年Id(hidden)
+            //var Marginp_Effective_Date_E = 'tMarginp_Effective_Date_E'; //有效期間(迄)西元年Id(hidden)
             var Marginp_Description = 'tMarginp_Description'; //說明Id(text)
             var Marginp_Memo = 'tMarginp_Memo'; //備註Id(textarea)
             var Marginp_Book_No = 'tMarginp_Book_No'; //冊號Id(text)
@@ -214,8 +212,6 @@
             MarginpTempGrid();
             setMarginpVerified();
             //#endregion
-            //created.createDatepicker(Marginp_Effective_Date_B_2, '');
-            //created.createDatepicker(Marginp_Effective_Date_E_2, '');
             created.createDatepickerRange(Marginp_Effective_Date_B, Marginp_Effective_Date_E);
             $('#' + Marginp_Effective_Date_B).datepicker('option', 'onSelect', function () {
                 var _date = $('#' + Marginp_Effective_Date_B).val();
@@ -248,6 +244,8 @@
                 verified.required(MarginpDialogFormId, Marginp_Item, message.required('物品名稱')); //物品名稱為必填
                 verified.required(MarginpDialogFormId, Marginp_Item_Issuer, message.required('物品發行人')); //物品發行人為必填
                 verified.required(MarginpDialogFormId, Marginp_Pledge_Item_No, message.required('質押標的號碼')); //質押標的號碼為必填
+                verified.required(MarginpDialogFormId, Marginp_Effective_Date_B, message.required('有效期間(起)')); //有效期間(起)為必填
+                verified.required(MarginpDialogFormId, Marginp_Effective_Date_E, message.required('有效期間(迄)')); //有效期間(迄)為必填
                 verified.number(MarginpDialogFormId, Marginp_Book_No); //冊號為數字              
             }
             //#endregion
@@ -304,7 +302,7 @@
             $('#dMarginp_Take_Of_Type').on('change', function () {
                 GetMarginpItem($(this).val())
             });
-
+            
             function GetMarginpItem(MARGIN_ITEM) {
                 $.ajax({
                     type: "POST",
@@ -430,22 +428,22 @@
         function MarginpTempGrid() {
 
             if (typeFlag) { //存入
-                var colNameArray = ['動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號', '有效期間(起)日期西元年', '有效期間(迄)日期西元年','item_id'];
+                var colNameArray = ['動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號','item_id'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
-                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
-                colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 90, sortable: false });
                 colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item});
                 colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
                 colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 110, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B_2", index: "vMarginp_Effective_Date_B_2", width: 110, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E_2", index: "vMarginp_Effective_Date_E_2", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 110, sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 150, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
                 colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", sortable: false, hidden: true });
                 jqgridCustom.createJqgridByCache(
                     'MarginpjqgridDiv',
@@ -464,7 +462,7 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號', '有效期間(起)日期西元年', '有效期間(迄)日期西元年', 'item_id'];
+                var colNameArray = ['取出', '動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號','item_id'];
 
                 var colModelArray = [];
 
@@ -476,19 +474,19 @@
                     colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
                     colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
                 }
-                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 100, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
-                colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 90, sortable: false });
                 colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item });
                 colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
                 colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B_2", index: "vMarginp_Effective_Date_B_2", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E_2", index: "vMarginp_Effective_Date_E_2", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 100, sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
-                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 150, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 120, sortable: false });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
+                //colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", width: 100, sortable: false , hidden:true});
                 jqgridCustom.createJqgridByCache(
                     'MarginpjqgridDiv',
@@ -604,6 +602,7 @@
                 $('.' + MarginpInsertClass).prop('disabled', false);
                 if ('@ViewBag.CustodianFlag' != "True") {
                     $('#' + Marginp_Memo).prop('disabled', true);
+                    $('#' + Marginp_Book_No).prop('disabled', true);
                 }               
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -621,6 +620,7 @@
                 $('.' + MarginpInsertClass).prop('disabled', false);
                 if ('@ViewBag.CustodianFlag' != "True") {
                     $('#' + Marginp_Memo).prop('disabled', true);
+                    $('#' + Marginp_Book_No).prop('disabled', true);
                 }
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
@@ -633,7 +633,7 @@
         }
 
             function ResetInsertDialog() {
-            created.clearDatepickerRangeValue(Marginp_Effective_Date_B, Marginp_Effective_Date_E);
+                created.clearDatepickerRangeValue(Marginp_Effective_Date_B, Marginp_Effective_Date_E);
             if ($('#' + Marginp_Take_Of_Type + ' option').length > 0) {
                 $('#' + Marginp_Take_Of_Type).val($($('#' + Marginp_Take_Of_Type + ' option')[0]).val()).change()
             }
@@ -647,10 +647,10 @@
            // $('#' + Marginp_Item_Name).val('');
             $('#' + Marginp_Item_Issuer).val('');
             $('#' + Marginp_Pledge_Item_No).val('');
+            //$('#' + Marginp_Effective_Date_B).val('');
             $('#' + Marginp_Effective_Date_B).val('');
-            $('#' + Marginp_Effective_Date_B_2).val('');
+            //$('#' + Marginp_Effective_Date_E).val('');
             $('#' + Marginp_Effective_Date_E).val('');
-            $('#' + Marginp_Effective_Date_E_2).val('');
             $('#' + Marginp_Description).val('');
             $('#' + Marginp_Memo).val('');
             $('#' + Marginp_Book_No).val('');
@@ -687,10 +687,10 @@
                 $('#' + Marginp_Pledge_Item_No).val(data.vMarginp_Pledge_Item_No);
                 $('#' + Marginp_Effective_Date_B).val(data.vMarginp_Effective_Date_B);
                 $('#' + Marginp_Effective_Date_B).datepicker("option", 'maxDate', data.vMarginp_Effective_Date_E);
-                $('#' + Marginp_Effective_Date_B_2).val(data.vMarginp_Effective_Date_B_2);
+                //$('#' + Marginp_Effective_Date_B).val(data.vMarginp_Effective_Date_B);
                 $('#' + Marginp_Effective_Date_E).datepicker("option", 'minDate', data.vMarginp_Effective_Date_B);
                 $('#' + Marginp_Effective_Date_E).val(data.vMarginp_Effective_Date_E);
-                $('#' + Marginp_Effective_Date_E_2).val(data.vMarginp_Effective_Date_E_2);
+                //$('#' + Marginp_Effective_Date_E).val(data.vMarginp_Effective_Date_E);
                 $('#' + Marginp_Description).val(data.vDescription);
                 $('#' + Marginp_Memo).val(data.vMemo);
                 $('#' + Marginp_Book_No).val(data.vMarginp_Book_No);
@@ -723,9 +723,9 @@
                             $('#' + Marginp_Item_Issuer).val().trim(),
                             $('#' + Marginp_Pledge_Item_No).val().trim(),
                             $('#' + Marginp_Effective_Date_B).val(),
-                            $('#' + Marginp_Effective_Date_B_2).val().trim(),
+                            //$('#' + Marginp_Effective_Date_B).val().trim(),
                             $('#' + Marginp_Effective_Date_E).val(),
-                            $('#' + Marginp_Effective_Date_E_2).val().trim(),
+                            //$('#' + Marginp_Effective_Date_E).val().trim(),
                             $('#' + Marginp_Description).val().trim(),
                             $('#' + Marginp_Memo).val().trim(),
                             $('#' + Marginp_Book_No).val().trim())
@@ -767,9 +767,9 @@
                             $('#' + Marginp_Item_Issuer).val().trim(),
                             $('#' + Marginp_Pledge_Item_No).val().trim(),
                             $('#' + Marginp_Effective_Date_B).val(),
-                            $('#' + Marginp_Effective_Date_B_2).val().trim(),
+                            //$('#' + Marginp_Effective_Date_B).val().trim(),
                             $('#' + Marginp_Effective_Date_E).val(),
-                            $('#' + Marginp_Effective_Date_E_2).val().trim(),
+                            //$('#' + Marginp_Effective_Date_E).val().trim(),
                             $('#' + Marginp_Description).val().trim(),
                             $('#' + Marginp_Memo).val().trim(),
                             $('#' + Marginp_Book_No).val().trim())
@@ -823,10 +823,10 @@
             vMarginp_Item,
             vMarginp_Item_Issuer,
             vMarginp_Pledge_Item_No,
+            //vMarginp_Effective_Date_B,
             vMarginp_Effective_Date_B,
-            vMarginp_Effective_Date_B_2,
+            //vMarginp_Effective_Date_E,
             vMarginp_Effective_Date_E,
-            vMarginp_Effective_Date_E_2,
             vDescription,
             vMemo,
             vMarginp_Book_No
@@ -839,10 +839,10 @@
             obj['vMarginp_Item'] = vMarginp_Item;
             obj['vMarginp_Item_Issuer'] = vMarginp_Item_Issuer;
             obj['vMarginp_Pledge_Item_No'] = vMarginp_Pledge_Item_No;
+            //obj['vMarginp_Effective_Date_B'] = vMarginp_Effective_Date_B;
             obj['vMarginp_Effective_Date_B'] = vMarginp_Effective_Date_B;
-            obj['vMarginp_Effective_Date_B_2'] = vMarginp_Effective_Date_B_2;
+            //obj['vMarginp_Effective_Date_E'] = vMarginp_Effective_Date_E;
             obj['vMarginp_Effective_Date_E'] = vMarginp_Effective_Date_E;
-            obj['vMarginp_Effective_Date_E_2'] = vMarginp_Effective_Date_E_2;
             obj['vDescription'] = vDescription;
             obj['vMemo'] = vMemo;
             obj['vMarginp_Book_No'] = vMarginp_Book_No;

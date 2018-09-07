@@ -74,6 +74,22 @@ namespace Treasury.Web.Controllers
 			return View();
         }
 
+        /// <summary>
+        /// 覆核起始畫面
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Appr()
+        {
+            ViewBag.opScope = GetopScope("~/SpecifiedTimeTrea/");
+            var userInfo = TreasuryAccess.GetUserInfo(AccountController.CurrentUserId);
+            var data = SpecifiedTimeTreasury.GetTreaItem();
+            ViewBag.hCREATE_User = userInfo.EMP_ID;
+            ViewBag.hCREATE_Dep = userInfo.DPT_ID;
+            //內文編號
+            ViewBag.emailId = data.Item5;
+            return View();
+        }
+
 		/// <summary>
 		/// 畫面查詢
 		/// </summary>
@@ -113,7 +129,13 @@ namespace Treasury.Web.Controllers
 				case "Status":
 					var StatusDatas = (List<SpecifiedTimeTreasurySearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasurySearchDetailViewData);
 					return Json(jdata.modelToJqgridResult(StatusDatas.Where(x => x.vAPLY_STATUS_ID == ((int)Ref.ApplyStatus._2).ToString() || x.vAPLY_STATUS_ID == ((int)Ref.ApplyStatus._4).ToString()).ToList()));
-			}
+                case "ApprSearch":
+                    var ApprSearchDatas = (List<SpecifiedTimeTreasuryApprSearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                    return Json(jdata.modelToJqgridResult(ApprSearchDatas));
+                case "ApprReason":
+                    var ApprReasonDatas = (List<SpecifiedTimeTreasuryApprReasonDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasuryApprReasonDetailViewData);
+                    return Json(jdata.modelToJqgridResult(ApprReasonDatas));
+            }
 			return null;
 		}
 
@@ -129,8 +151,10 @@ namespace Treasury.Web.Controllers
 			result.RETURN_FLAG = false;
 			result.DESCRIPTION = Ref.MessageType.Apply_Audit_Fail.GetDescription();
 			var searchData = (SpecifiedTimeTreasurySearchViewModel)Cache.Get(CacheList.SpecifiedTimeTreasurySearchData);
-			//var datas = (List<SpecifiedTimeTreasurySearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasurySearchDetailViewData);
-		    result = SpecifiedTimeTreasury.InsertApplyData(applyModel, AccountController.CurrentUserId, searchData);
+           
+
+            //var datas = (List<SpecifiedTimeTreasurySearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasurySearchDetailViewData);
+            result = SpecifiedTimeTreasury.InsertApplyData(applyModel, AccountController.CurrentUserId, searchData);
 			if (result.RETURN_FLAG)
 			{
 				Cache.Invalidate(CacheList.SpecifiedTimeTreasurySearchDetailViewData);
@@ -180,5 +204,100 @@ namespace Treasury.Web.Controllers
 			}
 			return Json(result);
 		}
-	}
+
+        /// <summary>
+        /// 覆核畫面查詢
+        /// </summary>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult SearchAppr(SpecifiedTimeTreasuryApprSearchViewModel searchModel)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+            Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprSearchData);
+            Cache.Set(CacheList.SpecifiedTimeTreasuryApprSearchData, searchModel);
+            var datas = SpecifiedTimeTreasury.GetApprSearchData(searchModel);
+            if (datas.Any())
+            {
+                Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                Cache.Set(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData, datas);
+                result.RETURN_FLAG = true;
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 覆核
+        /// </summary>
+        /// <param name="ApprModel"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Approve(List<string> ApprModel)
+        {
+            MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>> result = new MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (ApprModel.Any() && Cache.IsSet(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData))
+            {
+                var datas = (List<SpecifiedTimeTreasuryApprSearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                var searchData = (SpecifiedTimeTreasuryApprSearchViewModel)Cache.Get(CacheList.SpecifiedTimeTreasuryApprSearchData);
+                result = SpecifiedTimeTreasury.ApproveData(ApprModel, datas, searchData);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                    Cache.Set(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData, result.Datas);
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 駁回
+        /// </summary>
+        /// <param name="RejectModel"></param>
+        /// <param name="ApprDesc"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Reject(List<string> RejectModel, string ApprDesc)
+        {
+            MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>> result = new MSGReturnModel<List<SpecifiedTimeTreasuryApprSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if(RejectModel.Any() && Cache.IsSet(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData))
+            {
+                var datas = (List<SpecifiedTimeTreasuryApprSearchDetailViewModel>)Cache.Get(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                var searchData = (SpecifiedTimeTreasuryApprSearchViewModel)Cache.Get(CacheList.SpecifiedTimeTreasuryApprSearchData);
+                result = SpecifiedTimeTreasury.RejectData(RejectModel, ApprDesc, datas, searchData);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
+                    Cache.Set(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData, result.Datas);
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 查詢工作項目
+        /// </summary>
+        /// <param name="ReasonModel"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetReason(List<string> ReasonModel)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+            var datas = SpecifiedTimeTreasury.GetReasonDetail(ReasonModel);
+            if (datas.Any())
+            {
+                Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprReasonDetailViewData);
+                Cache.Set(CacheList.SpecifiedTimeTreasuryApprReasonDetailViewData, datas);
+                result.RETURN_FLAG = true;
+            }
+            return Json(result);
+        }
+    }
 }

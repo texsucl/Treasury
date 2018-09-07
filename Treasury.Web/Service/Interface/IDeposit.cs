@@ -58,5 +58,11 @@ namespace Treasury.Web.Service.Interface
         /// <param name="vAplyNo">申請單號</param
         /// <returns></returns>
         List<DepositReportGroupData> GetReportGroupData(string vAplyNo);
+
+        /// <summary>
+        /// 查詢定期存單交易對象
+        /// </summary>
+        /// <returns></returns>
+        List<SelectOption> GetTRAD_Partners();
     }
 }

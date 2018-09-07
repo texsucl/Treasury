@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Treasury.Web.ViewModels
 {
     /// <summary>
-    /// 金庫物品viewModel 介面
+    /// 庫存異動物品viewModel 介面
     /// </summary>
-    public interface ITreaItem
+    public interface ICDCItem
     {
     }
 }

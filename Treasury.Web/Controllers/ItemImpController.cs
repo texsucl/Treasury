@@ -114,7 +114,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -139,7 +139,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -149,8 +149,8 @@ namespace Treasury.Web.Controllers
                     updateTempData.vItemImp_Name = model.vItemImp_Name;
                     updateTempData.vItemImp_Quantity = model.vItemImp_Quantity;
                     updateTempData.vItemImp_Amount = model.vItemImp_Amount;
-                    updateTempData.vItemImp_Expected_Date_1 = model.vItemImp_Expected_Date_1;
-                    updateTempData.vItemImp_Expected_Date_2 = model.vItemImp_Expected_Date_2;
+                    updateTempData.vItemImp_Expected_Date = model.vItemImp_Expected_Date;
+                    //updateTempData.vItemImp_Expected_Date = model.vItemImp_Expected_Date;
                     updateTempData.vDescription = model.vDescription;
                     updateTempData.vMemo = model.vMemo;
                     Cache.Invalidate(CacheList.ItemImpData);
@@ -178,7 +178,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -212,7 +212,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
@@ -314,14 +314,14 @@ namespace Treasury.Web.Controllers
         /// <summary>
         /// 西元年轉民國年
         /// </summary>
-        private void transType(ItemImpViewModel model)
-        {
-            if (model != null)
-            {
-                var date = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_2);
-                model.vItemImp_Expected_Date_1 =
-                    (date == null ? null : date.Value.DateToTaiwanDate(9));
-            } 
-        }
+        //private void transType(ItemImpViewModel model)
+        //{
+        //    if (model != null)
+        //    {
+        //        var date = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_2);
+        //        model.vItemImp_Expected_Date_1 =
+        //            (date == null ? null : date.Value.DateToTaiwanDate(9));
+        //    } 
+        //}
     }
 }

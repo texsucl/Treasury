@@ -15,14 +15,6 @@
         margin-right: 10px;
     }
 
-    /*.solid {
-        border: 1px solid black;
-    }*/
-
-    /*#panel {
-        width: 1150px;
-    }*/
-
     .center {
         text-align: center;
     }
@@ -360,6 +352,9 @@
                             $('#' + whitchDialog + '_REGISTER_ID').prop('disabled', true);
                             $('#' + whitchDialog + '_INTRADATE_ID').prop('disabled', true);
                             $('#' + whitchDialog + '_CASENO_ID').prop('disabled', true);
+                            if (applyStatus == "1") {
+                                $('#' + whitchDialog + '_Cancel_ID').val('作廢');
+                            }
                             if (currentUserId == data.vCREATE_UID) {
                                 $('#' + whitchDialog + '_Apply_ID').click(function () { UpdateReview(whitchDialog, data); });
                                 $('#' + whitchDialog + '_Cancel_ID').click(function () { CancelReview(whitchDialog, data); });    
@@ -682,7 +677,7 @@
                 var obj = {};
                 obj['vAPLY_DT_S'] = vAPLY_DT_S;
                 obj['vAPLY_DT_E'] = vAPLY_DT_E;
-                obj['vAPLY_NO'] = vAPLY_NO;
+                obj['vTREA_REGISTER_ID'] = vAPLY_NO;
                 return obj;
             }
             //#endregion

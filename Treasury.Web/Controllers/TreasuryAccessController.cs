@@ -271,7 +271,7 @@ namespace Treasury.Web.Controllers
             if (!AplyNo.IsNullOrWhiteSpace())
             {
                 result.RETURN_FLAG = true;
-                var _dActType = GetActType(Ref.OpenPartialViewType.Index, AplyNo);
+                var _dActType = GetActType(Ref.OpenPartialViewType.TAIndex, AplyNo);
                 var data = TreasuryAccess.GetByAplyNo(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
                 Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data);

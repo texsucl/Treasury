@@ -14,14 +14,25 @@ namespace Treasury.Web.Enum
             /// 金庫物品存取申請作業
             /// </summary>
             [Description("金庫物品存取申請作業")]
-            Index = 0,
+            TAIndex = 0,
 
             /// <summary>
             /// 金庫物品存取覆核作業
             /// </summary>
             [Description("金庫物品存取覆核作業")]
-            Appr = 1,
+            TAAppr = 1,
 
+            /// <summary>
+            /// 
+            /// </summary>
+            [Description("資料庫異動申請作業")]
+            CDCIndex = 2,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Description("資料庫異動覆核作業")]
+            CDCAppr = 3,
         }
     }
 
