@@ -46,6 +46,8 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
+            ViewBag.dCurrency = new SelectList(Deposit.GetCurrency(), "Value", "Text", "NTD");
+            ViewBag.dTrad_Partners = new SelectList(Deposit.GetTrad_Partners(), "Value", "Text");
             ViewBag.dInterest_Rate_Type = new SelectList(Deposit.GetInterest_Rate_Type(), "Value", "Text");
             ViewBag.dDep_Type = new SelectList(Deposit.GetDep_Type(), "Value", "Text");
             ViewBag.dYN_Flag = new SelectList(Deposit.GetYN_Flag(), "Value", "Text");
@@ -191,20 +193,36 @@ namespace Treasury.Web.Controllers
             if (Cache.IsSet(CacheList.DepositData_M))
             {
                 var tempData = (List<Deposit_M>)Cache.Get(CacheList.DepositData_M);
+                
                 if (tempData.Count == 0)
                 {
                     model.vRowNum = "1";
+                    model.vStatus = Ref.AccessInventoryType._3.GetDescription();
+                    tempData.Add(model);
+                    Cache.Invalidate(CacheList.DepositData_M);
+                    Cache.Set(CacheList.DepositData_M, tempData);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
                 }
                 else
                 {
-                    model.vRowNum = (tempData.Max(x => int.Parse(x.vRowNum)) + 1).ToString();
+                    //同一申請單號內的承作日期要一樣
+                    if (tempData.Select(x => x.vCommit_Date).FirstOrDefault() == model.vCommit_Date)
+                    {
+                        model.vRowNum = (tempData.Max(x => int.Parse(x.vRowNum)) + 1).ToString();
+                        model.vStatus = Ref.AccessInventoryType._3.GetDescription();
+                        tempData.Add(model);
+                        Cache.Invalidate(CacheList.DepositData_M);
+                        Cache.Set(CacheList.DepositData_M, tempData);
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                    }
+                    else
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = "同一申請單號內的承作日期要一樣!";
+                    }
                 }
-                model.vStatus = Ref.AccessInventoryType._3.GetDescription();
-                tempData.Add(model);
-                Cache.Invalidate(CacheList.DepositData_M);
-                Cache.Set(CacheList.DepositData_M, tempData);
-                result.RETURN_FLAG = true;
-                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
             }
             return Json(result);
         }
@@ -226,20 +244,55 @@ namespace Treasury.Web.Controllers
                 {
                     if (Cache.IsSet(CacheList.DepositData_D_All))
                     {
-                        //新增明細全部
                         var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
-                        tempData.Add(model);
-                        Cache.Invalidate(CacheList.DepositData_D_All);
-                        Cache.Set(CacheList.DepositData_D_All, tempData);
+                        var checkDetailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
 
-                        //依編號取出顥示明細
-                        var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
-                        Cache.Invalidate(CacheList.DepositData_D);
-                        Cache.Set(CacheList.DepositData_D, detailData);
-                        SetTotalDenomination(model.vItem_Id);
+                        if (checkDetailData.Count == 0)
+                        {
+                            //新增明細全部
+                            tempData.Add(model);
+                            Cache.Invalidate(CacheList.DepositData_D_All);
+                            Cache.Set(CacheList.DepositData_D_All, tempData);
 
-                        result.RETURN_FLAG = true;
-                        result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                            //依編號取出顥示明細
+                            var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                            Cache.Invalidate(CacheList.DepositData_D);
+                            Cache.Set(CacheList.DepositData_D, detailData);
+                            SetTotalDenomination(model.vItem_Id);
+
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                        }
+                        else
+                        {
+                            //同編號明細檢核
+                            if (checkDetailData.Select(x => x.vDep_No_Preamble).FirstOrDefault() != model.vDep_No_Preamble)
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = "同一編號內定期存單明細存單號號前置碼要一樣!";
+                            }
+                            else if (checkDetailData.Select(x => x.vDep_No_B).FirstOrDefault().Length != model.vDep_No_B.Length)
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = "同一編號內定期存單明細存單存單號碼(起)/ 存單號碼(迄)碼數要一樣!";
+                            }
+                            else
+                            {
+                                //新增明細全部
+                                tempData.Add(model);
+                                Cache.Invalidate(CacheList.DepositData_D_All);
+                                Cache.Set(CacheList.DepositData_D_All, tempData);
+
+                                //依編號取出顥示明細
+                                var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                                Cache.Invalidate(CacheList.DepositData_D);
+                                Cache.Set(CacheList.DepositData_D, detailData);
+                                SetTotalDenomination(model.vItem_Id);
+
+                                result.RETURN_FLAG = true;
+                                result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
+                            }
+                        }
                     }
                 }
                 else
@@ -270,31 +323,72 @@ namespace Treasury.Web.Controllers
             if (Cache.IsSet(CacheList.DepositData_M))
             {
                 var tempData = (List<Deposit_M>)Cache.Get(CacheList.DepositData_M);
-                var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id== model.vItem_Id);
-                if (updateTempData != null)
+                var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id);
+
+                if (tempData.Count > 1)
                 {
-                    updateTempData.vCurrency = model.vCurrency;
-                    updateTempData.vTrad_Partners = model.vTrad_Partners;
-                    updateTempData.vCommit_Date = model.vCommit_Date;
-                    updateTempData.vExpiry_Date = model.vExpiry_Date;
-                    updateTempData.vInterest_Rate_Type = model.vInterest_Rate_Type;
-                    updateTempData.vInterest_Rate = model.vInterest_Rate;
-                    updateTempData.vDep_Type = model.vDep_Type;
-                    updateTempData.vTotal_Denomination = model.vTotal_Denomination;
-                    updateTempData.vDep_Set_Quality = model.vDep_Set_Quality;
-                    updateTempData.vAuto_Trans = model.vAuto_Trans;
-                    updateTempData.vTrans_Expiry_Date = model.vTrans_Expiry_Date;
-                    updateTempData.vTrans_Tms = model.vTrans_Tms;
-                    updateTempData.vMemo = model.vMemo;
-                    Cache.Invalidate(CacheList.DepositData_M);
-                    Cache.Set(CacheList.DepositData_M, tempData);
-                    result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    //同一申請單號內的承作日期要一樣
+                    if (tempData.Select(x => x.vCommit_Date).FirstOrDefault() == model.vCommit_Date)
+                    {
+                        if (updateTempData != null)
+                        {
+                            updateTempData.vCurrency = model.vCurrency;
+                            updateTempData.vTrad_Partners = model.vTrad_Partners;
+                            updateTempData.vCommit_Date = model.vCommit_Date;
+                            updateTempData.vExpiry_Date = model.vExpiry_Date;
+                            updateTempData.vInterest_Rate_Type = model.vInterest_Rate_Type;
+                            updateTempData.vInterest_Rate = model.vInterest_Rate;
+                            updateTempData.vDep_Type = model.vDep_Type;
+                            updateTempData.vTotal_Denomination = model.vTotal_Denomination;
+                            updateTempData.vDep_Set_Quality = model.vDep_Set_Quality;
+                            updateTempData.vAuto_Trans = model.vAuto_Trans;
+                            updateTempData.vTrans_Expiry_Date = model.vTrans_Expiry_Date;
+                            updateTempData.vTrans_Tms = model.vTrans_Tms;
+                            updateTempData.vMemo = model.vMemo;
+                            Cache.Invalidate(CacheList.DepositData_M);
+                            Cache.Set(CacheList.DepositData_M, tempData);
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                        }
+                        else
+                        {
+                            result.RETURN_FLAG = false;
+                            result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                        }
+                    }
+                    else
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = "同一申請單號內的承作日期要一樣!";
+                    }
                 }
                 else
                 {
-                    result.RETURN_FLAG = false;
-                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                    if (updateTempData != null)
+                    {
+                        updateTempData.vCurrency = model.vCurrency;
+                        updateTempData.vTrad_Partners = model.vTrad_Partners;
+                        updateTempData.vCommit_Date = model.vCommit_Date;
+                        updateTempData.vExpiry_Date = model.vExpiry_Date;
+                        updateTempData.vInterest_Rate_Type = model.vInterest_Rate_Type;
+                        updateTempData.vInterest_Rate = model.vInterest_Rate;
+                        updateTempData.vDep_Type = model.vDep_Type;
+                        updateTempData.vTotal_Denomination = model.vTotal_Denomination;
+                        updateTempData.vDep_Set_Quality = model.vDep_Set_Quality;
+                        updateTempData.vAuto_Trans = model.vAuto_Trans;
+                        updateTempData.vTrans_Expiry_Date = model.vTrans_Expiry_Date;
+                        updateTempData.vTrans_Tms = model.vTrans_Tms;
+                        updateTempData.vMemo = model.vMemo;
+                        Cache.Invalidate(CacheList.DepositData_M);
+                        Cache.Set(CacheList.DepositData_M, tempData);
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    }
+                    else
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                    }
                 }
             }
             return Json(result);
@@ -319,33 +413,83 @@ namespace Treasury.Web.Controllers
                     if (Cache.IsSet(CacheList.DepositData_D_All))
                     {
                         var tempData = (List<Deposit_D>)Cache.Get(CacheList.DepositData_D_All);
-                        var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
-                        if (updateTempData != null)
+                        var checkDetailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+
+                        if (checkDetailData.Count > 1)
                         {
-                            //修改明細全部
-                            updateTempData.vDep_No_Preamble = model.vDep_No_Preamble;
-                            updateTempData.vDep_No_B = model.vDep_No_B;
-                            updateTempData.vDep_No_E = model.vDep_No_E;
-                            updateTempData.vDep_No_Tail = model.vDep_No_Tail;
-                            updateTempData.vDep_Cnt = model.vDep_Cnt;
-                            updateTempData.vDenomination = model.vDenomination;
-                            updateTempData.vSubtotal_Denomination = model.vSubtotal_Denomination;
-                            Cache.Invalidate(CacheList.DepositData_D_All);
-                            Cache.Set(CacheList.DepositData_D_All, tempData);
+                            //同編號明細檢核
+                            if (checkDetailData.Select(x => x.vDep_No_Preamble).FirstOrDefault() != model.vDep_No_Preamble)
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = "同一編號內定期存單明細存單號號前置碼要一樣!";
+                            }
+                            else if (checkDetailData.Select(x => x.vDep_No_B).FirstOrDefault().Length != model.vDep_No_B.Length)
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = "同一編號內定期存單明細存單存單號碼(起)/ 存單號碼(迄)碼數要一樣!";
+                            }
+                            else
+                            {
+                                var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
+                                if (updateTempData != null)
+                                {
+                                    //修改明細全部
+                                    updateTempData.vDep_No_Preamble = model.vDep_No_Preamble;
+                                    updateTempData.vDep_No_B = model.vDep_No_B;
+                                    updateTempData.vDep_No_E = model.vDep_No_E;
+                                    updateTempData.vDep_No_Tail = model.vDep_No_Tail;
+                                    updateTempData.vDep_Cnt = model.vDep_Cnt;
+                                    updateTempData.vDenomination = model.vDenomination;
+                                    updateTempData.vSubtotal_Denomination = model.vSubtotal_Denomination;
+                                    Cache.Invalidate(CacheList.DepositData_D_All);
+                                    Cache.Set(CacheList.DepositData_D_All, tempData);
 
-                            //依編號取出顥示明細
-                            var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
-                            Cache.Invalidate(CacheList.DepositData_D);
-                            Cache.Set(CacheList.DepositData_D, detailData);
-                            SetTotalDenomination(model.vItem_Id);
+                                    //依編號取出顥示明細
+                                    var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                                    Cache.Invalidate(CacheList.DepositData_D);
+                                    Cache.Set(CacheList.DepositData_D, detailData);
+                                    SetTotalDenomination(model.vItem_Id);
 
-                            result.RETURN_FLAG = true;
-                            result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                                    result.RETURN_FLAG = true;
+                                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                                }
+                                else
+                                {
+                                    result.RETURN_FLAG = false;
+                                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                                }
+                            }
                         }
                         else
                         {
-                            result.RETURN_FLAG = false;
-                            result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                            var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id && x.vData_Seq == model.vData_Seq);
+                            if (updateTempData != null)
+                            {
+                                //修改明細全部
+                                updateTempData.vDep_No_Preamble = model.vDep_No_Preamble;
+                                updateTempData.vDep_No_B = model.vDep_No_B;
+                                updateTempData.vDep_No_E = model.vDep_No_E;
+                                updateTempData.vDep_No_Tail = model.vDep_No_Tail;
+                                updateTempData.vDep_Cnt = model.vDep_Cnt;
+                                updateTempData.vDenomination = model.vDenomination;
+                                updateTempData.vSubtotal_Denomination = model.vSubtotal_Denomination;
+                                Cache.Invalidate(CacheList.DepositData_D_All);
+                                Cache.Set(CacheList.DepositData_D_All, tempData);
+
+                                //依編號取出顥示明細
+                                var detailData = tempData.Where(x => x.vRowNum == model.vRowNum).ToList();
+                                Cache.Invalidate(CacheList.DepositData_D);
+                                Cache.Set(CacheList.DepositData_D, detailData);
+                                SetTotalDenomination(model.vItem_Id);
+
+                                result.RETURN_FLAG = true;
+                                result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                            }
+                            else
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                            }
                         }
                     }
                 }

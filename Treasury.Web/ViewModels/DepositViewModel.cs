@@ -226,7 +226,7 @@ namespace Treasury.Web.ViewModels
         /// 台幣/外幣
         /// </summary>
         [Description("台幣/外幣")]
-        public string isTWD { get; set; }
+        public string isNTD { get; set; }
 
         /// <summary>
         /// 存單類型

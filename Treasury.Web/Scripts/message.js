@@ -7,6 +7,7 @@
     message.positiveInt = '僅可輸入正整數';
     message.english = '僅可輸入英文字母';
     message.englishUpper = '僅可輸入英文大寫字母';
+    message.rate = '不符合利率格式(99.99)';
     message.englishNumber = '僅可輸入英文字母和數字';
     message.date = "不符合日期格式 (yyyy/mm/dd)";
     message.maxlength = function (value) {
