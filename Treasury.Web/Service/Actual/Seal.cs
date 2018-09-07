@@ -129,6 +129,82 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 查詢 CDC 股票資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCSealViewModel> result = new List<CDCSealViewModel>();
+            
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_SEAL.AsNoTracking()
+                        .Where(x => x.TREA_ITEM_NAME == searchModel.vJobProject)
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCSealViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vSeal_Desc = x.SEAL_DESC,
+                            vMemo = x.MEMO,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_SEAL.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCSealViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vSeal_Desc = x.SEAL_DESC,
+                            vMemo = x.MEMO,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCHARGE_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                });
+            }
+            return result;
+        }
+
         #endregion
 
         #region Save Data
@@ -495,6 +571,136 @@ namespace Treasury.Web.Service.Actual
             }
         }
 
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCSealViewModel model in saveData)
+                {
+                    var _seal = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_seal != null && !changFlag)
+                    {
+                        if (_seal.LAST_UPDATE_DT > model.vLast_Update_Time || _seal.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+                        if (!changFlag)
+                        {
+                            _seal.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _seal.SEAL_DESC_AFT = model.vSeal_Desc_AFT;
+                            _seal.MEMO_AFT = model.vMemo_AFT;
+                            _seal.LAST_UPDATE_DT = dt;
+
+                            logStr = _seal.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _seal.ITEM_ID
+                            };
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:印章";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _seal = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_seal != null)
+                {
+                    _seal.INVENTORY_STATUS = "1"; //在庫
+                    _seal.MEMO_AFT = null;
+                    _seal.SEAL_DESC_AFT = null;
+                    _seal.LAST_UPDATE_DT = dt;
+                    logStr = _seal.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _seal = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_seal != null)
+                {
+                    _seal.INVENTORY_STATUS = "1"; //在庫
+                    _seal.MEMO = _seal.MEMO_AFT;
+                    _seal.MEMO_AFT = null;
+                    _seal.SEAL_DESC = _seal.SEAL_DESC_AFT;
+                    _seal.SEAL_DESC_AFT = null;
+                    _seal.LAST_UPDATE_DT = dt;
+                    logStr = _seal.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
 
         #endregion
 

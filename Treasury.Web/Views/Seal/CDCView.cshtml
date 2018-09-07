@@ -1,0 +1,407 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="">
+    <div id="CDCSEALjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CDCSEAL_Act">
+        <input type="button" id="CDCSEALApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDCSEALBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDCSEALDialog" style="display:none;">
+        <form id="CDCSEALDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vPUT_Date"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vAPLY_UID_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <label id="vCHARGE_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>印章內容 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCSEAL_DESC" class="CDCSEALUpdateType" maxlength="20"/>
+                        <span class="red" style="padding-left:20px" id="sCDCSEAL_DESC"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註說明 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tCDCSEAL_MEMO" class="CDCSEALUpdateType" maxlength="200"/>
+                        <span class="red" style="padding-left:20px" id="sCDCSEAL_MEMO"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                       <input type="hidden" id="hSEAL_ITEM_ID"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="CDCSEALUpdateTemp" value="修改" class="btn btn-primary"  />
+                    </td>
+                    <td  style="text-align:right;">
+                        <input type="button" id="CDCSEALCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDCSEALurl = {};
+        CDCSEALurl.getData = '@Url.Action("GetCDCCacheData", "Seal")';
+        CDCSEALurl.ApplyDbData = '@Url.Action("ApplyDbData", "Seal")';
+        CDCSEALurl.UpdateDbData = '@Url.Action("UpdateDbData", "Seal")';
+        CDCSEALurl.RepeatDbData = '@Url.Action("RepeatDbData", "Seal")';
+        //#endregion
+
+        //#region 參數設定
+        //庫存資料
+        var CDCSEALDialogId = 'CDCSEALDialog'; //dialogId
+        var CDCSEALDialogFormId = 'CDCSEALDialogForm'; //dialogFormId
+        var vPUT_DateId = 'vPUT_Date'; //入庫日期(label)
+        var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
+        var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
+        var tCDCSEAL_DESCId = 'tCDCSEAL_DESC'; //印章內容Id(text)
+        var sCDCSEAL_DESCId = 'sCDCSEAL_DESC'; //印章內容Id(span)
+        var tCDCSEAL_MemoId = 'tCDCSEAL_MEMO'; //備註Id(texarea)
+        var sCDCSEAL_MemoId = 'sCDCSEAL_MEMO'; //備註Id(span)
+        var SEAL_Item_IdHlId = 'hSEAL_ITEM_ID'; //物品標號Id(hidden)
+
+        var CDCSEAL_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDCSEAL_Act_Type)
+            $('.CDCSEAL_Act').show(); //申請異動主畫面近來
+        
+        var CDCSEAL_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDCSEAL_ApplyFlag)
+            $('#CDCSEALApply').hide();
+
+        var CDCSEALConfirmFlag = false; //離開時提醒訊息
+
+        //#region 初始動作
+        CDCSEALDbGrid();
+        setCDCSEALVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setCDCSEALVerified() {
+            verified.required(CDCSEALDialogFormId, tCDCSEAL_DESCId, message.required('印章內容')); //印章內容為必填
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDCSEALApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCSEALApplyFun(); });
+                    break;
+                case 'CDCSEALBack':
+                case 'CDCSEALCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        if (id == 'CDCSEALBack' &&
+                            CDCSEALConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+                case 'CDCSEALUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCSEALUpdateTempFun(); });
+                    break;
+            }
+        });
+
+
+        function CDCSEALApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDCSEALurl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDCSEALApply'));
+                }
+            })
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                    @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                           <text>
+                           case '@item.Value':
+                           return '@item.Text';
+                           </text>
+                        }
+                    }
+                default:
+            return '';
+            }
+        }
+
+        function formattervSeal_Desc(cellvalue, options, rdata) {
+            if (rdata.vSeal_Desc_AFT != null)
+                return '<span class="red">' + rdata.vSeal_Desc_AFT + '</span>';
+            else
+                return rdata.vSeal_Desc || '';
+        }
+
+        function formattervMemo(cellvalue, options, rdata) {
+            if (rdata.vMemo_AFT != null)
+                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
+            else
+                return rdata.vMemo || '';
+        }
+
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCSeal' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCSeal' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCSeal' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function CDCSEALDbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人',
+                '權責單位',
+                //'權責部門', '權責科別',
+                '印章內容', '備註',
+                '印章內容異動前', '備註異動前',
+                '印章內容異動後', '備註異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus,  align: 'center' });
+            colModelArray.push({ name: "vPUT_Date", index: "vPUT_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false });
+            //colModelArray.push({ name: "vCHARGE_DEPT_Name", index: "vCHARGE_DEPT_Name", width: 90, sortable: false });
+            //colModelArray.push({ name: "vCHARGE_SECT_Name", index: "vCHARGE_SECT_Name", width: 90, sortable: false });
+            colModelArray.push({ name: "vSeal_Desc_Show", index: "vSeal_Desc_Show", width: 100, sortable: false, formatter: formattervSeal_Desc });
+            colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, sortable: false, formatter: formattervMemo });
+            colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", hidden: true });
+            colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vSeal_Desc_AFT", index: "vSeal_Desc_AFT",  hidden: true });
+            colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT",  hidden: true });
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDCSEALjqgridDiv',
+                'CDCSEALTempList',
+                'CDCSEALTempPeger',
+                CDCSEALurl.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '查詢資料',
+                jqgridCustom.getPage('CDCSEALjqgridDiv'),
+                CDCSEALTempCompleteFun,
+                true
+                );
+        }
+
+        function CDCSEALTempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDCSealRepeat(listId,i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1')
+                {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDCSealRepeat(listId,rowid)
+        {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDCSEALurl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDCSEALDbGrid();
+                    CDCSEALConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //#region function
+
+        function dialogOpen(type, rowid)
+        {
+            $('#' + CDCSEALDialogFormId).validate().resetForm();
+            var listId = 'CDCSEALTempList';
+            var SEALUpdateClass = 'CDCSEALUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDCSEALDialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '印章資料',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDCSEALUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#CDCSEALUpdateTemp').show();
+                $('.' + SEALUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('.' + SEALUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDCSEALDialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            $('#' + vPUT_DateId).text('');
+            $('#' + vAPLY_UID_NameId).text('');
+            $('#' + vCHARGE_NameId).text('');
+            $('#' + tCDCSEAL_DESCId).val('');
+            $('#' + sCDCSEAL_DESCId).text('');
+            $('#' + tCDCSEAL_MemoId).val('');
+            $('#' + sCDCSEAL_MemoId).text('');
+            $('#' + SEAL_Item_IdHlId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + vPUT_DateId).text(data.vPUT_Date);
+                $('#' + vAPLY_UID_NameId).text(data.vAPLY_UID_Name);
+                $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
+                $('#' + tCDCSEAL_DESCId).val(data.vSeal_Desc);
+                $('#' + sCDCSEAL_DESCId).text(data.vSeal_Desc_AFT);
+                $('#' + tCDCSEAL_MemoId).val(data.vMemo);
+                $('#' + sCDCSEAL_MemoId).text(data.vMemo_AFT);
+                $('#' + SEAL_Item_IdHlId).val(data.vItemId);
+            }
+        }
+
+
+        function CDCSEALUpdateTempFun()
+        {
+            if ($('#' + CDCSEALDialogFormId).valid())
+            {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDCSealViewModel(
+                            $('#' + SEAL_Item_IdHlId).val(),
+                            $('#' + tCDCSEAL_DESCId).val().trim(),
+                            $('#' + tCDCSEAL_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDCSEALurl.UpdateDbData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDCSEALUpdateTemp'));
+                        CDCSEALDbGrid();
+                        CDCSEALConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+
+        function CDCSealViewModel(
+            vItemId,
+            vSeal_Desc,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vSeal_Desc'] = vSeal_Desc;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>

@@ -328,6 +328,7 @@
     <Compile Include="BO\Utility.cs" />
     <Compile Include="BO\ValidateUtil.cs" />
     <Compile Include="Controllers\CAController.cs" />
+    <Compile Include="Controllers\CDCController.cs" />
     <Compile Include="Controllers\DepositController.cs" />
     <Compile Include="Controllers\ItemImpController.cs" />
     <Compile Include="Controllers\MargingController.cs" />
@@ -479,6 +480,9 @@
       <DependentUpon>dbTreasury.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\DEP_CHK_ITEM_HIS.cs">
+      <DependentUpon>dbTreasury.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\INVENTORY_CHG_APLY.cs">
       <DependentUpon>dbTreasury.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ITEM_BLANK_NOTE.cs">
@@ -638,6 +642,7 @@
     <Compile Include="Scheduler\JobScheduler.cs" />
     <Compile Include="Scheduler\SrcOprUnitJob.cs" />
     <Compile Include="Scheduler\UserMaintainUnitJob.cs" />
+    <Compile Include="Service\Actual\CDC.cs" />
     <Compile Include="Service\Actual\ItemImp.cs" />
     <Compile Include="Service\Actual\Common.cs" />
     <Compile Include="Service\Actual\DefaultCacheProvider.cs" />
@@ -656,6 +661,8 @@
     <Compile Include="Service\Interface\IAgency.cs" />
     <Compile Include="Service\Interface\IBill.cs" />
     <Compile Include="Service\Interface\IApply.cs" />
+    <Compile Include="Service\Interface\ICDC.cs" />
+    <Compile Include="Service\Interface\ICDCAction.cs" />
     <Compile Include="Service\Interface\IItemImp.cs" />
     <Compile Include="Service\Interface\ICacheProvider.cs" />
     <Compile Include="Service\Interface\ICA.cs" />
@@ -667,7 +674,6 @@
     <Compile Include="Service\Interface\ISpecifiedTimeTreasury.cs" />
     <Compile Include="Service\Interface\IStock.cs" />
     <Compile Include="Service\Interface\ITreasuryAccess.cs" />
-    <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="Utility\CacheList.cs" />
     <Compile Include="Utility\Extension.cs" />
     <Compile Include="Utility\Jqgrid.cs" />
@@ -681,10 +687,14 @@
     <Compile Include="ViewModels\AuthReviewRoleModel.cs" />
     <Compile Include="ViewModels\AuthReviewUserModel.cs" />
     <Compile Include="ViewModels\AuthRptModel.cs" />
+    <Compile Include="ViewModels\CDCSealViewModel.cs" />
+    <Compile Include="ViewModels\CDCSearchViewModel.cs" />
+    <Compile Include="ViewModels\CDCViewModel.cs" />
     <Compile Include="ViewModels\DepositViewModel.cs" />
     <Compile Include="ViewModels\EstateDetailViewModel.cs" />
     <Compile Include="ViewModels\EstateModel.cs" />
     <Compile Include="ViewModels\CAViewModel.cs" />
+    <Compile Include="ViewModels\ICDCItem.cs" />
     <Compile Include="ViewModels\ItemImpViewModel.cs" />
     <Compile Include="ViewModels\MargingViewModel.cs" />
     <Compile Include="ViewModels\MarginpViewModel.cs" />
@@ -710,6 +720,9 @@
     <Compile Include="ViewModels\RoleMgrModel.cs" />
     <Compile Include="ViewModels\SignRptSCModel.cs" />
     <Compile Include="ViewModels\SpecifiedTimeTreasuryApplyViewModel.cs" />
+    <Compile Include="ViewModels\SpecifiedTimeTreasuryApprReasonDetailViewModel.cs" />
+    <Compile Include="ViewModels\SpecifiedTimeTreasuryApprSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\SpecifiedTimeTreasuryApprSearchViewModel.cs" />
     <Compile Include="ViewModels\SpecifiedTimeTreasuryCancelViewModel.cs" />
     <Compile Include="ViewModels\SpecifiedTimeTreasurySearchDetailViewModel.cs" />
     <Compile Include="ViewModels\SpecifiedTimeTreasurySearchViewModel.cs" />
@@ -1146,19 +1159,6 @@
     <Content Include="Scripts\respond.js" />
     <None Include="Scripts\_references.js" />
     <Content Include="Scripts\verification.js" />
-    <Content Include="SqlServerTypes\readme.htm" />
-    <Content Include="SqlServerTypes\x64\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x64\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Template\MqOut.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -1224,6 +1224,8 @@
     <Content Include="Views\Marginp\View.cshtml" />
     <Content Include="Views\Deposit\View.cshtml" />
     <Content Include="Views\SpecifiedTimeTrea\Index.cshtml" />
+    <Content Include="Views\CDC\Index.cshtml" />
+    <Content Include="Views\Seal\CDCView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

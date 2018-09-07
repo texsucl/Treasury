@@ -30,12 +30,74 @@ namespace Treasury.Web.Service.Actual
     {
         protected INTRA intra { private set; get; }
 
+        protected List<string> TreasuryIn { private set; get; } //資料庫異動 金庫內查詢狀態
+        protected string TreasuryOut { private set; get; }//資料庫異動 金庫外查詢狀態
+
         public Common()
         {
             intra = new INTRA();
+            TreasuryIn = new List<string>()
+            {
+                "1", //在庫
+                "8" //資料異動中
+            };
+            TreasuryOut = "2"; //已被取出
         }
 
         #region Get Date
+
+        /// <summary>
+        /// get SysCode by CodeType
+        /// </summary>
+        /// <param name="codeType"></param>
+        /// <returns></returns>
+        public List<SelectOption> GetSysCode(string codeType)
+        {
+            var result = new List<SelectOption>();
+            if (codeType.IsNullOrWhiteSpace())
+                return result;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                result = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == codeType)
+                    .OrderBy(x=>x.ISORTBY)
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Text = x.CODE_VALUE,
+                        Value = x.CODE
+                    }).ToList();
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 獲取 員工資料
+        /// </summary>
+        /// <returns></returns>
+        protected List<V_EMPLY2> GetEmps()
+        {
+            var emps = new List<V_EMPLY2>();
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+            }
+            return emps;
+        }
+
+        /// <summary>
+        /// 獲取 部門資料
+        /// </summary>
+        /// <returns></returns>
+        protected List<VW_OA_DEPT> GetDepts()
+        {
+            var depts = new List<VW_OA_DEPT>();
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
+            }
+            return depts;
+        }
 
         #endregion
 
@@ -101,6 +163,39 @@ namespace Treasury.Web.Service.Actual
             #endregion
 
             return new Tuple<string, string>(_TAR.APLY_NO , logStr); 
+        }
+
+        /// <summary>
+        /// 共用存檔 資料庫異動申請單紀錄檔 回傳參數1 (APLY_NO) 回傳參數2 (log訊息)
+        /// </summary>
+        /// <param name="db">Entity</param>
+        /// <param name="data">viewModel</param>
+        /// <param name="logStr">紀錄訊息</param>
+        /// <param name="dt">時間</param>
+        /// <param name="CHG_AUTH_UNIT">權責單位異動</param>
+        /// <returns></returns>
+        protected Tuple<string, string> SaveINVENTORY_CHG_APLY(TreasuryDBEntities db, CDCSearchViewModel data, string logStr, DateTime dt, string CHG_AUTH_UNIT = "N")
+        {
+            //取得流水號
+            SysSeqDao sysSeqDao = new SysSeqDao();
+            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+            var cId = sysSeqDao.qrySeqNo("G8", qPreCode).ToString().PadLeft(3, '0');
+
+            #region 資料庫異動申請單紀錄檔  
+            var ICA = new INVENTORY_CHG_APLY()
+            {
+                APLY_NO = $@"G8{qPreCode}{cId}", //申請單號 G8+系統日期YYYMMDD(民國年)+3碼流水號
+                ITEM_ID = data.vJobProject,
+                APPR_STATUS = "1", //表單申請
+                CHG_AUTH_UNIT = CHG_AUTH_UNIT, //權責單位異動
+                CREATE_UID = data.vCreate_Uid,
+                CREATE_Date = dt.Date,
+                CREATE_Time = dt.TimeOfDay
+            };
+            db.INVENTORY_CHG_APLY.Add(ICA);
+            logStr += ICA.modelToString(logStr);
+            #endregion
+            return new Tuple<string, string>(ICA.APLY_NO, logStr);
         }
 
         #endregion

@@ -63,11 +63,11 @@ namespace Treasury.Web.Controllers
                 return true;
             switch (type) //哪個畫面呼叫PartialView
             {
-                case Ref.OpenPartialViewType.Appr: //金庫物品存取覆核作業
+                case Ref.OpenPartialViewType.TAAppr: //金庫物品存取覆核作業
                     //只有檢視功能
                     return false; 
 
-                case Ref.OpenPartialViewType.Index: //金庫物品存取申請作業
+                case Ref.OpenPartialViewType.TAIndex: //金庫物品存取申請作業
                 default:
                     //查詢作業 有單號的申請,如果為填表人本人可以修改
                     return TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Aply_Appr_Type);

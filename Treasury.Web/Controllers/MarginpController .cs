@@ -140,12 +140,12 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
-                transType(model);
+                //transType(model);
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.MarginpData);
                 Cache.Set(CacheList.MarginpData, tempData);
@@ -166,7 +166,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+           // transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);                
@@ -185,7 +185,7 @@ namespace Treasury.Web.Controllers
                     updateTempData.vDescription = model.vDescription;
                     updateTempData.vMemo = model.vMemo;
                     updateTempData.vMarginp_Book_No = model.vMarginp_Book_No;                 
-                    transType(updateTempData);
+                    //transType(updateTempData);
                     Cache.Invalidate(CacheList.MarginpData);
                     Cache.Set(CacheList.MarginpData, tempData);
                     result.RETURN_FLAG = true;
@@ -211,7 +211,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
@@ -221,7 +221,7 @@ namespace Treasury.Web.Controllers
                     tempData.Remove(deleteTempData);
                     Cache.Invalidate(CacheList.MarginpData);
                     Cache.Set(CacheList.MarginpData, tempData);
-                    transType(model);
+                    //transType(model);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
                     result.Datas = tempData.Any();
@@ -246,7 +246,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            transType(model);
+            //transType(model);
             if (Cache.IsSet(CacheList.MarginpData))
             {
                 var tempData = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
@@ -344,20 +344,20 @@ namespace Treasury.Web.Controllers
                 }
             }
         }
-         /// <summary>
+        /// <summary>
         /// 西元年轉民國年
         /// </summary>
-        private void transType(MarginpViewModel model)
-        {
-            if (model != null)
-            {
-                var date_B = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_B);
-                model.vMarginp_Effective_Date_B_2 =
-                    (date_B == null ? null : date_B.Value.DateToTaiwanDate(9));
-                var date_E = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_E);
-                model.vMarginp_Effective_Date_E_2 =
-                    (date_E == null ? null : date_E.Value.DateToTaiwanDate(9));
-            } 
-        }
+        //private void transType(MarginpViewModel model)
+        //{
+        //    if (model != null)
+        //    {
+        //        var date_B = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_B);
+        //        model.vMarginp_Effective_Date_B_2 =
+        //            (date_B == null ? null : date_B.Value.DateToTaiwanDate(9));
+        //        var date_E = TypeTransfer.stringToDateTimeN(model.vMarginp_Effective_Date_E);
+        //        model.vMarginp_Effective_Date_E_2 =
+        //            (date_E == null ? null : date_E.Value.DateToTaiwanDate(9));
+        //    }
+        //}
     }
  }

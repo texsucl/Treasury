@@ -47,7 +47,7 @@
                         <label>預計提取日期 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tItemImp_Expected_Date_2" name="tItemImp_Expected_Date_2" class="ItemImpInsertType" />
+                        <input type="text" id="tItemImp_Expected_Date" name="tItemImp_Expected_Date" class="ItemImpInsertType" />
                     </td>
                 </tr>
                 <tr>
@@ -71,11 +71,11 @@
                         <input type="hidden" id="hItemImp_ITEM_ID" />
                     </td>
                 </tr>
-                <tr>
+                @*<tr>
                     <td colspan="2">
                         <input type="hidden" id="tItemImp_Expected_Date_2" name="tItemImp_Expected_Date_2"class="ItemImpInsertType"/>
                     </td>
-                </tr>
+                </tr>*@
                 <tr>
                     <td>
                         <input type="button" id="ItemImpInsertTemp" value="新增" class="btn btn-primary" />
@@ -113,11 +113,11 @@
         var ItemImp_Name = 'tItemImp_Name';//物品名稱Id(text)
         var ItemImp_Quantity = 'tItemImp_Quantity';//數量Id(text)
         var ItemImp_Amount = 'tItemImp_Amount';//金額Id(text)
-        var ItemImp_Expected_Date_1 = 'tItemImp_Expected_Date_1';//預計提取日期(text)
+        var ItemImp_Expected_Date = 'tItemImp_Expected_Date';//預計提取日期(text)
         var ItemImp_Description = 'tItemImp_Description';//說明(text)
         var ItemImp_MemoId = 'tItemImp_MEMO'; //備註Id(texarea)
         var ItemImp_Item_IdHlId = 'hItemImp_ITEM_ID'; //物品標號Id(hidden)
-        var ItemImp_Expected_Date_2 = 'tItemImp_Expected_Date_2';//預計提取日期西元年(hidden)
+        //var ItemImp_Expected_Date_2 = 'tItemImp_Expected_Date_2';//預計提取日期西元年(hidden)
         var ItemImp_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
         var ItemImp_Aply_No_Flag = $('#TAR_AplyNo').val() != ''; //有單號(true)為查詢畫面之修改,(false)為新增
@@ -149,12 +149,12 @@
         ItemImpTempGrid();
         setItemImpVerified();
         //#endregion
-        created.createDatepicker(ItemImp_Expected_Date_2, null);
+        created.createDatepicker(ItemImp_Expected_Date, null);
         //#region 註冊verified
         function setItemImpVerified() {
             verified.required(ItemImpDialogFormId, ItemImp_Name, message.required('重要物品名稱')); //重要物品名稱為必填
             verified.required(ItemImpDialogFormId, ItemImp_Amount, message.required('重要物品金額'));//重要物品金額為必填
-            //verified.datepicker(ItemImpDialogFormId, ItemImp_Expected_Date_2, $('#' + ItemImp_Expected_Date_2).val());
+            //verified.datepicker(ItemImpDialogFormId, ItemImp_Expected_Date, $('#' + ItemImp_Expected_Date).val());
             verified.price(ItemImpDialogFormId, ItemImp_Amount); //重要物品金額驗證
             verified.number(ItemImpDialogFormId, ItemImp_Quantity);//重要物品數量輸入為數字
         }
@@ -259,17 +259,17 @@
         function ItemImpTempGrid() {
 
             if (typeFlag) { //存入
-                var colNameArray = ['動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品單號','預計提取日期西元年'];
+                var colNameArray = ['動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品單號'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vItemImp_Expected_Date_1", index: "vItemImp_Expected_Date_1", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", width: 100, sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
-                colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
+                //colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
                 jqgridCustom.createJqgridByCache(
                     'ItemImpjqgridDiv',
                     'ItemImpTempList',
@@ -287,7 +287,7 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品編號', '預計提取日期西元年'];
+                var colNameArray = ['取出', '動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品編號'];
                 var colModelArray = [];
                 if (!ItemImp_Act_Type) {
                     colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
@@ -300,11 +300,11 @@
                 colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vItemImp_Expected_Date_1", index: "vItemImp_Expected_Date_1", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", width: 100, sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
-                colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
+                //colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
                 jqgridCustom.createJqgridByCache(
                     'ItemImpjqgridDiv',
                     'ItemImpTempList',
@@ -442,11 +442,11 @@
             $('#' + ItemImp_Name).val('');
             $('#' + ItemImp_Quantity).val('');
             $('#' + ItemImp_Amount).val('');
-            $('#' + ItemImp_Expected_Date_1).val('');
+            $('#' + ItemImp_Expected_Date).val('');
             $('#' + ItemImp_Description).val('');
             $('#' + ItemImp_MemoId).val('');
             $('#' + ItemImp_Item_IdHlId).val('');
-            $('#' + ItemImp_Expected_Date_2).val('');
+            //$('#' + ItemImp_Expected_Date_2).val('');
         }
 
         function dialogSetData(listId, rowid) {
@@ -459,17 +459,17 @@
                 $('#' + ItemImp_Name).val(data.vItemImp_Name);
                 $('#' + ItemImp_Quantity).val(data.vItemImp_Quantity);
                 $('#' + ItemImp_Amount).val(data.vItemImp_Amount);
-                $('#' + ItemImp_Expected_Date_1).val(data.vItemImp_Expected_Date_1);
+                $('#' + ItemImp_Expected_Date).val(data.vItemImp_Expected_Date);
                 $('#' + ItemImp_Description).val(data.vDescription);
                 $('#' + ItemImp_MemoId).val(data.vMemo);
                 $('#' + ItemImp_Item_IdHlId).val(data.vItemId);
-                $('#' + ItemImp_Expected_Date_2).val(data.vItemImp_Expected_Date_2);
+                //$('#' + ItemImp_Expected_Date_2).val(data.vItemImp_Expected_Date_2);
             }
         }
 
         //新增暫存重要物品明細
         function ItemImpInsertTempFun() {
-            if ($('#' + ItemImp_Expected_Date_2).val().trim() != '' && !verified.isDate($('#' + ItemImp_Expected_Date_2).val().trim()))
+            if ($('#' + ItemImp_Expected_Date).val().trim() != '' && !verified.isDate($('#' + ItemImp_Expected_Date).val().trim()))
             {
                 customerUtility.alert('預計提取日期格式不為yyyy/MM/dd', 'w');
                 return false;
@@ -483,8 +483,8 @@
                             $('#' + ItemImp_Name).val().trim(),
                             $('#' + ItemImp_Quantity).val().trim(),
                             $('#' + ItemImp_Amount).val().trim(),
-                            $('#' + ItemImp_Expected_Date_1).val(),
-                            $('#' + ItemImp_Expected_Date_2).val().trim(),
+                            $('#' + ItemImp_Expected_Date).val().trim(),
+                            //$('#' + ItemImp_Expected_Date_2).val(),
                             $('#' + ItemImp_Description).val().trim(),
                             $('#' + ItemImp_MemoId).val().trim())
                     }),
@@ -503,7 +503,7 @@
         }
 
         function ItemImpUpdateTempFun() {
-            if ($('#' + ItemImp_Expected_Date_2).val().trim() != '' && !verified.isDate($('#' + ItemImp_Expected_Date_2).val().trim())) {
+            if ($('#' + ItemImp_Expected_Date).val().trim() != '' && !verified.isDate($('#' + ItemImp_Expected_Date).val().trim())) {
                 customerUtility.alert('預計提取日期格式不為yyyy/MM/dd', 'w');
                 return false;
             }
@@ -517,8 +517,8 @@
                             $('#' + ItemImp_Name).val().trim(),
                             $('#' + ItemImp_Quantity).val().trim(),
                             $('#' + ItemImp_Amount).val().trim(),
-                            $('#' + ItemImp_Expected_Date_1).val(),
-                            $('#' + ItemImp_Expected_Date_2).val().trim(),
+                            $('#' + ItemImp_Expected_Date).val().trim(),
+                            //$('#' + ItemImp_Expected_Date).val(),
                             $('#' + ItemImp_Description).val().trim(),
                             $('#' + ItemImp_MemoId).val().trim())
 
@@ -571,8 +571,8 @@
             vItemImp_Name,
             vItemImp_Quantity,
             vItemImp_Amount,
-            vItemImp_Expected_Date_1,
-            vItemImp_Expected_Date_2,
+            vItemImp_Expected_Date,
+            //vItemImp_Expected_Date_2,
             vDescription,
             vMemo
             ) {
@@ -581,8 +581,8 @@
             obj['vItemImp_Name'] = vItemImp_Name;
             obj['vItemImp_Quantity'] = vItemImp_Quantity;
             obj['vItemImp_Amount'] = vItemImp_Amount;
-            obj['vItemImp_Expected_Date_1'] = vItemImp_Expected_Date_1;
-            obj['vItemImp_Expected_Date_2'] = vItemImp_Expected_Date_2;
+            obj['vItemImp_Expected_Date'] = vItemImp_Expected_Date;
+            //obj['vItemImp_Expected_Date_2'] = vItemImp_Expected_Date_2;
             obj['vDescription'] = vDescription;
             obj['vMemo'] = vMemo;
             return obj;

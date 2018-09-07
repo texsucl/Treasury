@@ -79,5 +79,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<ITEM_REFUNDABLE_DEP> ITEM_REFUNDABLE_DEP { get; set; }
         public virtual DbSet<ITEM_STOCK> ITEM_STOCK { get; set; }
         public virtual DbSet<TREA_OPEN_REC> TREA_OPEN_REC { get; set; }
+        public virtual DbSet<INVENTORY_CHG_APLY> INVENTORY_CHG_APLY { get; set; }
     }
 }

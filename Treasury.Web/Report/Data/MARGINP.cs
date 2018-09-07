@@ -44,7 +44,7 @@ ROW_NUMBER() OVER(order by ITEM_ID) AS ROW_NUMBER,
 TRAD_PARTNERS, --交易對象
 ITEM_ID, --歸檔編號	 
 AMOUNT, --金額
-(select top 1 CODE_VALUE from code where CODE_TYPE = 'MARGIN_ITEM' and CODE = MARGIN_ITEM) AS wtr, --物品名稱
+(select top 1 CODE_VALUE from code where CODE_TYPE = 'MARGIN_ITEM' and CODE = MARGIN_ITEM) AS MARGIN_ITEM_NAME, --物品名稱
 MARGIN_ITEM_ISSUER,--物品發行人
 PLEDGE_ITEM_NO,--質押標的號碼
 convert(varchar, EFFECTIVE_DATE_B, 111) as 'EFFECTIVE_DATE_B' ,--有效區間(起)

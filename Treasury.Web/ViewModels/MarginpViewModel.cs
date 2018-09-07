@@ -58,26 +58,26 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 有效期間(起)
         /// </summary>
-        [Description("有效期間(起)")]
-        public string vMarginp_Effective_Date_B { get; set; }
+        //[Description("有效期間(起)")]
+        //public string vMarginp_Effective_Date_B { get; set; }
 
         /// <summary>
-        /// 有效期間(起)日期西元年
+        /// 有效期間(起)日期
         /// </summary>
         [Description("有效期間(起)")]
-        public String vMarginp_Effective_Date_B_2 { get; set; }
+        public String vMarginp_Effective_Date_B { get; set; }
 
         /// <summary>
         /// 有效期間(迄)
         /// </summary>
-        [Description("有效期間(迄)")]
-        public string vMarginp_Effective_Date_E { get; set; }
+        //[Description("有效期間(迄)")]
+        //public string vMarginp_Effective_Date_E { get; set; }
 
         /// <summary>
-        /// 有效期間(迄)日期西元年
+        /// 有效期間(迄)日期
         /// </summary>
         [Description("有效期間(迄)")]
-        public String vMarginp_Effective_Date_E_2 { get; set; }
+        public String vMarginp_Effective_Date_E { get; set; }
 
         /// <summary>
         /// 說明

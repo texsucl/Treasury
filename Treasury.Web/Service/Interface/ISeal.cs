@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 印章
     /// </summary>
-    public interface ISeal : IApply , IAgency
+    public interface ISeal : IApply , IAgency , ICDCAction
     {
 
         /// <summary>
