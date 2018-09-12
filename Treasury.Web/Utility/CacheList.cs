@@ -68,6 +68,16 @@
         public static string SpecifiedTimeTreasuryApprReasonDetailViewData { get; private set; }
 
         /// <summary>
+        /// 金庫登記簿執行作業(開庫前)-每日例行進出未確認項目
+        /// </summary>
+        public static string BeforeOpenTreasuryRoutine { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿執行作業(開庫前)-已入庫確認資料
+        /// </summary>
+        public static string BeforeOpenTreasuryStorage { get; private set; }
+        
+        /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
         public static string BILLTempData { get; private set; }
@@ -178,6 +188,8 @@
             SpecifiedTimeTreasuryApprSearchData = "SpecifiedTimeTreasuryApprSearchData";
             SpecifiedTimeTreasuryApprSearchDetailViewData = "SpecifiedTimeTreasuryApprSearchDetailViewData";
             SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
+            BeforeOpenTreasuryRoutine = "BeforeOpenTreasuryRoutine";
+            BeforeOpenTreasuryStorage = "BeforeOpenTreasuryStorage";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";

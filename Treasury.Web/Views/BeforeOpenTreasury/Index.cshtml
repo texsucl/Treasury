@@ -1,0 +1,211 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-金庫登記簿執行作業(開庫前)";
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary solid">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="BOT_Form">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>入庫日期 : </label>
+                            </td>
+                            <td>
+                                <label>@DateTime.Now.ToString("yyyy/MM/dd")</label>
+                            </td>
+                            <td>
+                                <label>開庫類型 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dOpen_Trea_Type", (SelectList)ViewBag.dOpen_Trea_Type)
+                            </td>
+                            <td rowspan="2">
+                                <input type="button" class="TAInsert btn btn-primary" id="BOT_Draft" value="產生底稿" />
+                                <input type="button" class="TAInsert btn btn-primary" id="BOT_Print" value="列印" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>金庫登記簿單號 : </label>
+                            </td>
+                            <td colspan="3">
+                                <label id="lTrea_Register_Id"></label>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+        @*查詢區塊*@
+        <div class="row">
+            <!--每日例行-->
+            <div class="col-lg-4"></div>
+            <div id="BOTjqgridDiv_Routine" class="col-lg-4 jqd">
+            </div>
+            <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+            <!--入庫確認-->
+            <div class="col-lg-1"></div>
+            <div id="BOTjqgridDiv_Storage" class="col-lg-10 jqd">
+                <div class="col-lg-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var BOT_Url = {};
+        BOT_Url.getData = '@Url.Action("GetCacheData", "BeforeOpenTreasury")';
+        BOT_Url.DraftData = '@Url.Action("DraftData", "BeforeOpenTreasury")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var BOT_FormId = 'BOT_Form'; //formId
+        var BOT_Open_Trea_Type = 'dOpen_Trea_Type'; //開庫類型Id
+        var BOT_Trea_Register_Id = 'lTrea_Register_Id'; //金庫登記簿單號Id
+
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 初始設定
+            if('@ViewBag.ShowRoutine' == 'True')
+            {
+                RoutineGrid();
+            }
+            StorageGrid();
+            //#endregion 初始設定
+
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'BOT_Draft':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DraftFun(); });
+                        break;
+                    case 'BOT_Print':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { PrintFun(); });
+                        break;
+                }
+            });
+
+            //開庫類型選取
+            $('#' + BOT_Open_Trea_Type).on('change', function () {
+                switch ($('#' + BOT_Open_Trea_Type).val()) {
+                    case "1"://例行性開庫
+                        $("#BOTjqgridDiv_Routine").show();
+                        if('@ViewBag.ShowRoutine' == 'True')
+                        {
+                            RoutineGrid();
+                        }
+                        break;
+                    case "2"://指定時間開庫
+                        $("#BOTjqgridDiv_Routine").hide();
+                        break;
+                }
+            });
+
+            //#endregion 註冊事件
+
+        }
+
+        //#region jqgrid
+        function RoutineGrid() {
+            var colNameArray = ['存取項目'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vItem_Desc", index: "vItem_Desc", width: 150, sortable: false });
+            jqgridCustom.createJqgridByCache(
+                'BOTjqgridDiv_Routine',
+                'RoutineList',
+                'RoutinePeger',
+                BOT_Url.getData,
+                {
+                    type: 'Routine'
+                },
+                colNameArray,
+                colModelArray,
+                '每日例行進出未確認項目',
+                jqgridCustom.getPage('BOTjqgridDiv_Routine'),
+                null,
+                true
+                );
+        }
+
+        function StorageGrid()
+        {
+            var colNameArray = ['存取項目', '印章內容', '作業別', '申請單號', '入庫原因', '確認人員'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vItem_Desc", index: "vItem_Desc", width: 110, sortable: false });
+            colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", width: 100, sortable: false });
+            colModelArray.push({ name: "vAccess_Type", index: "vAccess_Type", width: 80, sortable: false });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 120, sortable: false });
+            colModelArray.push({ name: "vAccess_Reason", index: "vAccess_Reason", width: 150, sortable: false });
+            colModelArray.push({ name: "vConfirm", index: "vConfirm", width: 105, sortable: false });
+            jqgridCustom.createJqgridByCache(
+                'BOTjqgridDiv_Storage',
+                'StorageList',
+                'StoragePeger',
+                BOT_Url.getData,
+                {
+                    type: 'Storage'
+                },
+                colNameArray,
+                colModelArray,
+                '已入庫確認資料',
+                jqgridCustom.getPage('BOTjqgridDiv_Storage'),
+                null,
+                true
+                );
+        }
+        //#endregion jqgrid
+
+        //產生底稿
+        function DraftFun()
+        {
+            if ($('#' + BOT_Open_Trea_Type).val() == "1") {
+                if ('@ViewBag.ShowRoutine' == 'True') {
+                    if (!confirm('每日例行出入庫項目尚有人未執行〈入庫人員申請確認作業〉，確認要存檔嗎? '))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            //產生工作底稿
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: BOT_Url.DraftData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+            })
+        }
+    });
+</script>
