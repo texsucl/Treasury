@@ -31,7 +31,7 @@ namespace Treasury.Web
 						));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
-                        "~/Scripts/jquery-ui-{version}.js"));
+                        "~/Scripts/jquery-ui-1.12.1.js"));
 
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(

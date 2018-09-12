@@ -239,7 +239,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public JsonResult TakeOutData(BillViewModel model)
         {
-            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (Cache.IsSet(CacheList.BILLTempData))
@@ -261,6 +261,7 @@ namespace Treasury.Web.Controllers
                     Cache.Set(CacheList.BILLDayData, SetBillTakeOutViewModelGroup(_data2));
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = true;
                 }
                 else
                 {

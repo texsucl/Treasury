@@ -790,6 +790,7 @@
           <Property Name="APPR_DT" Type="datetime" />
           <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
           <Property Name="FREEZE_DT" Type="datetime" />
+          <Property Name="OPEN_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
         </EntityType>
         <EntityType Name="MAIL_TIME_HIS">
           <Key>
@@ -895,6 +896,22 @@
           <Property Name="CODE" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="CODE_VALUE" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="ISORTBY" Type="int" Nullable="false" />
+        </EntityType>
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'dbTreasury.dbo.SYS_JOB_REC' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+        <EntityType Name="SYS_JOB_REC">
+          <Key>
+            <PropertyRef Name="JOB_ITEM_ID" />
+            <PropertyRef Name="JOB_ID" />
+            <PropertyRef Name="CREATE_TIME" />
+          </Key>
+          <Property Name="JOB_ITEM_ID" Type="varchar" MaxLength="11" Nullable="false" />
+          <Property Name="JOB_ID" Type="varchar" MaxLength="30" Nullable="false" />
+          <Property Name="START_TIME" Type="datetime" />
+          <Property Name="END_TIME" Type="datetime" />
+          <Property Name="STATUS" Type="varchar" MaxLength="1" />
+          <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+          <Property Name="CREATE_TIME" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="SYS_SEQ">
           <Key>
@@ -1063,6 +1080,7 @@
           <Property Name="LAST_UPDATE_DT" Type="datetime" />
           <Property Name="OPEN_TREA_DATE" Type="date" Nullable="false" />
           <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
+          <Property Name="OPEN_TYPE" Type="varchar" MaxLength="1" />
         </EntityType>
         <Association Name="R_LOG_MAIN_EXEC_TYPE">
           <End Role="PIA_EXEC_TYPE" Type="Self.PIA_EXEC_TYPE" Multiplicity="1" />
@@ -1176,6 +1194,17 @@
     [Log].[CACTION] AS [CACTION], 
     [Log].[CCONTENT] AS [CCONTENT]
     FROM [dbo].[Log] AS [Log]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="SYS_JOB_REC" EntityType="Self.SYS_JOB_REC" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [SYS_JOB_REC].[JOB_ITEM_ID] AS [JOB_ITEM_ID], 
+    [SYS_JOB_REC].[JOB_ID] AS [JOB_ID], 
+    [SYS_JOB_REC].[START_TIME] AS [START_TIME], 
+    [SYS_JOB_REC].[END_TIME] AS [END_TIME], 
+    [SYS_JOB_REC].[STATUS] AS [STATUS], 
+    [SYS_JOB_REC].[MEMO] AS [MEMO], 
+    [SYS_JOB_REC].[CREATE_TIME] AS [CREATE_TIME]
+    FROM [dbo].[SYS_JOB_REC] AS [SYS_JOB_REC]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
             <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
@@ -1558,6 +1587,7 @@
           <Property Name="APPR_DT" Type="DateTime" Precision="3" />
           <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+          <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="MAIL_TIME_HIS">
           <Key>
@@ -1914,6 +1944,7 @@
           <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
           <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
           <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
+          <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2302,6 +2333,7 @@
           <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
           <Property Name="OPEN_TREA_DATE" Type="DateTime" Nullable="false" Precision="0" />
           <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="OPEN_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="INVENTORY_CHG_APLY">
           <Key>
@@ -2317,6 +2349,20 @@
           <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="APPR_Date" Type="DateTime" Precision="0" />
           <Property Name="APPR_Time" Type="Time" Precision="7" />
+        </EntityType>
+        <EntityType Name="SYS_JOB_REC">
+          <Key>
+            <PropertyRef Name="JOB_ITEM_ID" />
+            <PropertyRef Name="JOB_ID" />
+            <PropertyRef Name="CREATE_TIME" />
+          </Key>
+          <Property Name="JOB_ITEM_ID" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="false" />
+          <Property Name="JOB_ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="START_TIME" Type="DateTime" Precision="3" />
+          <Property Name="END_TIME" Type="DateTime" Precision="3" />
+          <Property Name="STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CREATE_TIME" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -2670,6 +2716,7 @@
           <EntitySetMapping Name="MAIL_TIME">
             <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_TIME">
               <MappingFragment StoreEntitySet="MAIL_TIME">
+                <ScalarProperty Name="OPEN_TYPE" ColumnName="OPEN_TYPE" />
                 <ScalarProperty Name="MAIL_TIME_ID" ColumnName="MAIL_TIME_ID" />
                 <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
                 <ScalarProperty Name="SEND_TIME" ColumnName="SEND_TIME" />
@@ -3352,6 +3399,7 @@
           <EntitySetMapping Name="TREA_OPEN_REC">
             <EntityTypeMapping TypeName="dbTreasuryModel.TREA_OPEN_REC">
               <MappingFragment StoreEntitySet="TREA_OPEN_REC">
+                <ScalarProperty Name="OPEN_TYPE" ColumnName="OPEN_TYPE" />
                 <ScalarProperty Name="CREATE_UNIT" ColumnName="CREATE_UNIT" />
                 <ScalarProperty Name="OPEN_TREA_DATE" ColumnName="OPEN_TREA_DATE" />
                 <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
@@ -3391,6 +3439,19 @@
                 <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
                 <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
                 <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SYS_JOB_REC">
+            <EntityTypeMapping TypeName="dbTreasuryModel.SYS_JOB_REC">
+              <MappingFragment StoreEntitySet="SYS_JOB_REC">
+                <ScalarProperty Name="CREATE_TIME" ColumnName="CREATE_TIME" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="STATUS" ColumnName="STATUS" />
+                <ScalarProperty Name="END_TIME" ColumnName="END_TIME" />
+                <ScalarProperty Name="START_TIME" ColumnName="START_TIME" />
+                <ScalarProperty Name="JOB_ID" ColumnName="JOB_ID" />
+                <ScalarProperty Name="JOB_ITEM_ID" ColumnName="JOB_ITEM_ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
