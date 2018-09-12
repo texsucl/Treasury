@@ -366,7 +366,7 @@ namespace Treasury.Web.Service.Actual
                                                 //分段取出
                                                 else
                                                 {
-                                                    _blank_Note.CHECK_NO_B = (TypeTransfer.stringToInt(x.vTakeOutE) + 1).ToString().PadLeft(8, '0');
+                                                    _blank_Note.CHECK_NO_B = (TypeTransfer.stringToInt(x.vTakeOutE) + 1).ToString().PadLeft(7, '0');
                                                 }
                                                 _blank_Note.LAST_UPDATE_DT = dt;
                                             }

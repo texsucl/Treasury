@@ -164,13 +164,15 @@ namespace Treasury.Web.Service.Actual
                             vStatus = x.INVENTORY_STATUS,
                             vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
                             vAPLY_UID = x.APLY_UID,
-                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_DEPT = x.CHARGE_DEPT,
                             vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
                             vCHARGE_SECT = x.CHARGE_SECT,
-                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,                  
                             vSeal_Desc = x.SEAL_DESC,
+                            vSeal_Desc_AFT = x.SEAL_DESC_AFT,
                             vMemo = x.MEMO,
+                            vMemo_AFT = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                 }
@@ -187,13 +189,15 @@ namespace Treasury.Web.Service.Actual
                             vStatus = x.INVENTORY_STATUS,
                             vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
                             vAPLY_UID = x.APLY_UID,
-                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_DEPT = x.CHARGE_DEPT,
                             vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
                             vCHARGE_SECT = x.CHARGE_SECT,
                             vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
                             vSeal_Desc = x.SEAL_DESC,
+                            vSeal_Desc_AFT = x.SEAL_DESC_AFT,
                             vMemo = x.MEMO,
+                            vMemo_AFT = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                 }

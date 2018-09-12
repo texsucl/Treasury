@@ -368,6 +368,7 @@
     <Property Name="APPR_DT" Type="DateTime" Precision="3" />
     <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+    <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
   </EntityType>
   <EntityType Name="MAIL_TIME_HIS">
     <Key>
@@ -724,6 +725,7 @@
     <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
     <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
     <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
+    <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -1112,6 +1114,7 @@
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
     <Property Name="OPEN_TREA_DATE" Type="DateTime" Nullable="false" Precision="0" />
     <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="OPEN_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
   </EntityType>
   <EntityType Name="INVENTORY_CHG_APLY">
     <Key>
@@ -1127,5 +1130,19 @@
     <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="APPR_Date" Type="DateTime" Precision="0" />
     <Property Name="APPR_Time" Type="Time" Precision="7" />
+  </EntityType>
+  <EntityType Name="SYS_JOB_REC">
+    <Key>
+      <PropertyRef Name="JOB_ITEM_ID" />
+      <PropertyRef Name="JOB_ID" />
+      <PropertyRef Name="CREATE_TIME" />
+    </Key>
+    <Property Name="JOB_ITEM_ID" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="false" />
+    <Property Name="JOB_ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+    <Property Name="START_TIME" Type="DateTime" Precision="3" />
+    <Property Name="END_TIME" Type="DateTime" Precision="3" />
+    <Property Name="STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="CREATE_TIME" Type="DateTime" Nullable="false" Precision="3" />
   </EntityType>
 </Schema>

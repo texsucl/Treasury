@@ -369,6 +369,7 @@
 
         //#region 註冊verified
         function setESTATEVerified() {
+            created.createDatepicker(ESTATE_DateTId, null);
             verified.required(ESTATEFormId, ESTATE_Building_NameTId, message.required('大樓名稱')); //大樓名稱為必填
             verified.maxlength(ESTATEFormId, ESTATE_Building_NameTId, 200); //大樓名稱最大長度(200)
             verified.required(ESTATEFormId, ESTATE_LocatedTId, message.required('坐落')); //坐落為必填
@@ -569,7 +570,7 @@
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 colModelArray.push({ name: "vEstate_From_No", index: "vEstate_From_No", width: 90, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vEstate_Date", index: "vEstate_Date", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vEstate_Date", index: "vEstate_Date", width: 90, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vOwnership_Cert_No", index: "vOwnership_Cert_No", width: 90, sortable: false });
                 colModelArray.push({ name: "vLand_Building_No", index: "vLand_Building_No", width: 90, sortable: false });
                 colModelArray.push({ name: "vHouse_No", index: "vHouse_No", width: 120, sortable: false });
@@ -936,10 +937,10 @@
             if (id == ESTATE_DateTId)
             {
                 var date = $('#' + ESTATE_DateTId).val().trim();
-                if (!verified.isTWDate(date)) {
-                    arr.push('發狀日不符合民國日期格式(yyymmdd or yymmdd)');                   
+                if (!verified.isDate(date)) {
+                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');                   
                 }
-                else if (Number(date) > Number(created.getOnlyDateStr(false, true, true))) {
+                else if (Number(date) > Number(created.getOnlyDateStr(true, false, false))) {
                     arr.push('發狀日需 ≦ 系統日');
                 }                
             }

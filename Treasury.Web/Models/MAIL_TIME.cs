@@ -33,5 +33,6 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> APPR_DT { get; set; }
         public string FREEZE_UID { get; set; }
         public Nullable<System.DateTime> FREEZE_DT { get; set; }
+        public string OPEN_TYPE { get; set; }
     }
 }

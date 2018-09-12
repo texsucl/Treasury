@@ -37,5 +37,6 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
         public System.DateTime OPEN_TREA_DATE { get; set; }
         public string CREATE_UNIT { get; set; }
+        public string OPEN_TYPE { get; set; }
     }
 }

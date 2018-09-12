@@ -179,7 +179,8 @@
 
             //#region url設定
             var CDCurl = {};
-            CDCurl.ChangeIO = '@Url.Action("ChangeIO", "CDC")';
+            CDCurl.openSEAL = '@Url.Action("CDCView", "Seal")';
+
             //#endregion
 
             var CDCFormId = 'CDCForm';
@@ -199,7 +200,7 @@
             var APLY_DT_FromId = 'APLY_DT_From';
             var APLY_DT_ToId = 'APLY_DT_To';
             var openSearchDetailId = 'CDCOpenSearchDetail';
-
+            var _date = created.getOnlyDate();
             //#region 初始設定
             created.createDatepicker(vCOMMIT_DATEId, null); //承作日期
             created.createDatepicker(vEXPIRY_DATEId, null); //到期日
@@ -209,6 +210,7 @@
             verified.required(CDCFormId, dNameId, '編號為必選');
             verified.datepicker(CDCFormId, vCOMMIT_DATEId, $('#' + vCOMMIT_DATEId).val());
             verified.datepicker(CDCFormId, vEXPIRY_DATEId, $('#' + vEXPIRY_DATEId).val());
+            CDCClear();
             //#endregion
 
             $('input:button').each(function () {
@@ -263,6 +265,10 @@
                     $('#' + APLY_ODT_ToId).next().prop('disabled', false);
                     $('#' + APLY_ODT_FromId).prop('disabled', false);
                     $('#' + APLY_ODT_ToId).prop('disabled', false);
+                    $('#' + APLY_ODT_FromId).datepicker('setDate', _date);
+                    $('#' + APLY_ODT_ToId).datepicker('setDate', _date);
+                    $('#' + APLY_ODT_FromId).datepicker("option", "maxDate", _date);
+                    $('#' + APLY_ODT_ToId).datepicker("option", "minDate", _date);
                 }
             }
             $('#'+treasuryIOId).val($($('#'+treasuryIOId+' option')[0]).val()).change();
@@ -288,28 +294,30 @@
                 }
                 if($('#' + CDCFormId).valid())
                 {
-                    var itemData = GetItemData(itemId);
+                    var itemData = GetItemData($('#'+JobProjectId).val());
                     if (itemData.url != '')
                     {
                         $.ajax({
                             type: 'POST',
                             data: JSON.stringify({
+                                AplyNo : null,
                                 data: CDCSearchViewModel(
                                     $('#'+treasuryIOId).val(),
                                     $('#'+JobProjectId).val(),
                                     $('#'+APLY_DT_FromId).val(),
                                     $('#'+APLY_DT_ToId).val(),
                                     $('#'+APLY_ODT_FromId).val(),
-                                    $('#'+APLY_ODT_ToId).va(),
+                                    $('#'+APLY_ODT_ToId).val(),
                                     $('#'+dBook_NoId).val(),
                                     $('#'+dEstate_Form_NoId).val(),
                                     $('#'+dNameId).val(),
                                     $('#'+vCOMMIT_DATEId).val(),
-                                    $('#'+vEXPIRY_DATEId),val(),
+                                    $('#'+vEXPIRY_DATEId).val(),
                                     $('#'+dTRAD_PartnersId).val(),
                                     $('#'+tItem_NoId).val(),
                                     $('#'+tBook_NoId).val(),
                                     $('#'+Margin_Dep_TypeId).val()),
+                                type : 2
                             }),
                             dataType: 'html',
                             url: itemData.url,
@@ -341,6 +349,7 @@
                     maxHeight: 600,
                     closeText : '取消',
                     close: function () {
+                        $('#' + openSearchDetailId).children().remove();
                     }
                 });
                 $('#' + dialogId).dialog('open');
@@ -348,6 +357,8 @@
 
             function CDCClear()
             {
+                created.clearDatepickerRangeValue(APLY_ODT_FromId,APLY_ODT_ToId);
+                created.clearDatepickerRangeValue(APLY_DT_FromId,APLY_DT_ToId);
                 $('#' + CDCFormId).validate().resetForm();
                 $('#'+treasuryIOId).val($($('#'+treasuryIOId+' option')[0]).val()).change();
                 $('#'+JobProjectId).val($($('#'+JobProjectId+' option')[0]).val()).change();
@@ -356,8 +367,10 @@
                 $('#'+dNameId).val($($('#'+dNameId+' option')[0]).val()).change();
                 $('#'+dTRAD_PartnersId).val($($('#'+dTRAD_PartnersId+' option')[0]).val()).change();
                 $('#'+Margin_Dep_TypeId).val($($('#'+Margin_Dep_TypeId+' option')[0]).val()).change();
-                created.clearDatepickerRangeValue(APLY_ODT_FromId,APLY_ODT_ToId);
-                created.clearDatepickerRangeValue(APLY_DT_FromId,APLY_DT_ToId);
+                $('#' + APLY_DT_FromId).datepicker('setDate', _date);
+                $('#' + APLY_DT_ToId).datepicker('setDate', _date);
+                $('#' + APLY_DT_FromId).datepicker("option", "maxDate", _date);
+                $('#' + APLY_DT_ToId).datepicker("option", "minDate", _date);
                 $('#'+tItem_NoId).val('');
                 $('#'+tBook_NoId).val('');
                 $('#'+vCOMMIT_DATEId).val('');
@@ -378,19 +391,19 @@
                         obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
                         break;
                     case '@Ref.TreaItemType.D1008.ToString()':
-                        obj.url = '';
+                        obj.url = CDCurl.openSEAL;
                         obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
                         break;
                     case '@Ref.TreaItemType.D1009.ToString()':
-                        obj.url = '';
+                        obj.url = CDCurl.openSEAL;
                         obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
                         break;
                     case '@Ref.TreaItemType.D1010.ToString()':
-                        obj.url = '';
+                        obj.url = CDCurl.openSEAL;
                         obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
                         break;
                     case '@Ref.TreaItemType.D1011.ToString()':
-                        obj.url = '';
+                        obj.url = CDCurl.openSEAL;
                         obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
                         break;
                     case '@Ref.TreaItemType.D1015.ToString()':
