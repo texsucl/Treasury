@@ -40,7 +40,10 @@ namespace Treasury.Web.Controllers
         {
             ViewBag.dOpen_Trea_Type = new SelectList(BeforeOpenTreasury.GetOpenTreaType(), "Value", "Text");
             ViewBag.opScope = GetopScope("~/BeforeOpenTreasury/");
-            resetBeforeOpenTreasuryViewModel();
+            ViewBag.vUser_Id = AccountController.CurrentUserId;
+            string TreaRegisterId = BeforeOpenTreasury.GetTreaRegisterId();
+            ViewBag.lTrea_Register_Id = TreaRegisterId;
+            resetBeforeOpenTreasuryViewModel(TreaRegisterId);
 
             var RoutineData = (List<BeforeOpenTreasuryViewModel>)Cache.Get(CacheList.BeforeOpenTreasuryRoutine);
 
@@ -65,7 +68,7 @@ namespace Treasury.Web.Controllers
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
 
-            result = BeforeOpenTreasury.DraftData();
+            result = BeforeOpenTreasury.DraftData(AccountController.CurrentUserId);
 
             return Json(result);
         }
@@ -96,15 +99,16 @@ namespace Treasury.Web.Controllers
         /// <summary>
         /// 設定開庫前Cache資料
         /// </summary>
+        /// <param name="TreaRegisterId">金庫登記簿單號</param>
         /// <returns></returns>
-        private void resetBeforeOpenTreasuryViewModel()
+        private void resetBeforeOpenTreasuryViewModel(string TreaRegisterId)
         {
             Cache.Invalidate(CacheList.BeforeOpenTreasuryRoutine);
             Cache.Invalidate(CacheList.BeforeOpenTreasuryStorage);
 
             //設定資料
             Cache.Set(CacheList.BeforeOpenTreasuryRoutine, BeforeOpenTreasury.GetRoutineList());
-            Cache.Set(CacheList.BeforeOpenTreasuryStorage, BeforeOpenTreasury.GetStorageList());
+            Cache.Set(CacheList.BeforeOpenTreasuryStorage, BeforeOpenTreasury.GetStorageList(TreaRegisterId));
 
         }
     }

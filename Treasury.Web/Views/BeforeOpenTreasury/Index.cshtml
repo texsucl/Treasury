@@ -28,7 +28,7 @@
                             </td>
                             <td rowspan="2">
                                 <input type="button" class="TAInsert btn btn-primary" id="BOT_Draft" value="產生底稿" />
-                                <input type="button" class="TAInsert btn btn-primary" id="BOT_Print" value="列印" />
+                                <input type="button" class="TAInsert btn btn-primary" id="BOT_Print" value="列印" disabled="disabled"/>
                             </td>
                         </tr>
                         <tr>
@@ -36,7 +36,7 @@
                                 <label>金庫登記簿單號 : </label>
                             </td>
                             <td colspan="3">
-                                <label id="lTrea_Register_Id"></label>
+                                <label id="lTrea_Register_Id">@ViewBag.lTrea_Register_Id</label>
                             </td>
                         </tr>
                     </table>
@@ -205,7 +205,26 @@
                 contentType: 'application/json',
             }).done(function (result) {
                 customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    //成功產生底稿才可列印
+                    $("#BOT_Print").attr("Disabled", false);
+                }
             })
+        }
+
+        //列印
+        function PrintFun() {
+            var parms = [];
+            setTimeout(
+                function () {
+                    parms.push(customerUtility.reportParm('vTreaRegisterId', $('#' + BOT_Trea_Register_Id).html()));
+                    parms.push(customerUtility.reportParm('vUser_Id', '@ViewBag.vUser_Id'));
+                    customerUtility.report(
+                        customerUtility.reportModel('金庫登記簿', 'TREASURY_REGISTER'),
+                        parms,
+                        null
+                        );
+                }, 100);
         }
     });
 </script>

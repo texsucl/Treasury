@@ -7,6 +7,8 @@ using Treasury.Web.Models;
 using Treasury.Web.Service.Interface;
 using Treasury.WebUtility;
 using Treasury.Web.ViewModels;
+using System.Data.Entity.Infrastructure;
+using Treasury.WebDaos;
 
 namespace Treasury.Web.Service.Actual
 {
@@ -37,6 +39,28 @@ namespace Treasury.Web.Service.Actual
                         Text = x.CODE_VALUE
                     }).ToList();
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 金庫登記簿單號
+        /// </summary>
+        /// <returns></returns>
+        public string GetTreaRegisterId()
+        {
+            var result = string.Empty;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var Regi_Status = Ref.AccessProjectFormStatus.C02.ToString();
+                var OTD = DateTime.Now.ToString("yyyy-MM-dd");
+
+                result = db.TREA_OPEN_REC.AsNoTracking()
+                    .Where(x => x.REGI_STATUS == Regi_Status)
+                    .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
+                    .AsEnumerable().Select(x => x.TREA_REGISTER_ID).FirstOrDefault();
+            }
+
             return result;
         }
 
@@ -59,17 +83,21 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 取得已入庫確認資料
         /// </summary>
+        /// <param name="TreaRegisterId">金庫登記簿單號</param>
         /// <returns></returns>
-        public List<BeforeOpenTreasuryViewModel> GetStorageList()
+        public List<BeforeOpenTreasuryViewModel> GetStorageList(string TreaRegisterId)
         {
             var result = new List<BeforeOpenTreasuryViewModel>();
             var Aply_Status = Ref.AccessProjectFormStatus.C02.ToString();
-            var EAD = DateTime.Now.ToString("yyyy-MM-dd");
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _Item_Desc = db.TREA_ITEM.AsNoTracking().ToList();
                 var _Access_Type = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "ACCESS_TYPE").ToList();
-                var _Seal_Desc = db.OTHER_ITEM_APLY.AsNoTracking().Join(db.ITEM_SEAL.AsNoTracking(),
+                //取得入庫類型為2的印章內容
+                var _Trea_Item = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "2").Select(x=>x.ITEM_ID).ToList();
+                var _Trea_Aply_Rec = db.TREA_APLY_REC.AsNoTracking().Where(x => _Trea_Item.Contains(x.ITEM_ID)).Select(x=>x.APLY_NO).ToList();
+                var _Other_Item_Aply = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => _Trea_Aply_Rec.Contains(x.APLY_NO)).ToList();
+                var _Seal_Desc = _Other_Item_Aply.Join(db.ITEM_SEAL.AsNoTracking(),
                     OIA => OIA.ITEM_ID,
                     IS => IS.ITEM_ID,
                     (OIA, IS) => new BeforeOpenTreasurySeal
@@ -80,14 +108,10 @@ namespace Treasury.Web.Service.Actual
                     }).ToList();
                 var _Confirm = GetEmps();
                 result = GetStorageModel(db.TREA_APLY_REC.AsNoTracking()
-                    .Where(x => x.TREA_REGISTER_ID == null)
                     .Where(x => x.CONFIRM_UID != null)
                     .Where(x => x.APLY_STATUS == Aply_Status)
-                    .Where(x => x.EXPECTED_ACCESS_DATE.ToString() == EAD)
+                    .Where(x => x.TREA_REGISTER_ID == TreaRegisterId)
                     .AsEnumerable(), _Item_Desc, _Access_Type, _Seal_Desc, _Confirm).ToList();
-
-                //設定印章內容
-
             }
 
             return result;
@@ -99,8 +123,9 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 產生工作底稿
         /// </summary>
+        /// <param name="currentUserId">目前使用者ID</param>
         /// <returns></returns>
-        public MSGReturnModel<IEnumerable<ITreaItem>> DraftData()
+        public MSGReturnModel<IEnumerable<ITreaItem>> DraftData(string currentUserId)
         {
             var result = new MSGReturnModel<IEnumerable<ITreaItem>>();
             result.RETURN_FLAG = false;
@@ -113,25 +138,111 @@ namespace Treasury.Web.Service.Actual
             {
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
+                    string logStr = string.Empty; //log
+
                     //查詢【開庫紀錄檔】，是否有尚待執行開庫的申請資料
                     var _TOR_List = db.TREA_OPEN_REC.AsNoTracking()
                         .Where(x => x.REGI_STATUS == Regi_Status)
                         .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
                         .AsEnumerable().ToList();
 
-                    if(_TOR_List.Any())
+                    var Update_Regi_Status = Ref.AccessProjectFormStatus.D01.ToString();
+
+                    #region 開庫紀錄檔
+                    if (_TOR_List.Any())
                     {
-                        foreach(var item in _TOR_List)
+                        var _TOR_Data = new TREA_OPEN_REC();
+
+                        foreach (var item in _TOR_List)
                         {
                             //異動【開庫紀錄檔】
-                            var _TOR_Data = new TREA_OPEN_REC();
+                            _TOR_Data = db.TREA_OPEN_REC.FirstOrDefault(x => x.TREA_REGISTER_ID == item.TREA_REGISTER_ID);
+                            _TOR_Data.REGI_STATUS = Update_Regi_Status;
+                            //開庫類型=1
+                            if (item.OPEN_TREA_TYPE == "1")
+                            {
+                                _TOR_Data.CREATE_UID = currentUserId;
+                            }
+                            _TOR_Data.LAST_UPDATE_UID = currentUserId;
+                            _TOR_Data.LAST_UPDATE_DT = dt;
 
+                            logStr += "|";
+                            logStr += _TOR_Data.modelToString();
                         }
+
+                        //畫面上「已入庫確認資料」
+                        var _TAR_List = db.TREA_APLY_REC.AsNoTracking()
+                            .Where(x => x.TREA_REGISTER_ID == null)
+                            .Where(x => x.CONFIRM_UID != null)
+                            .Where(x => x.APLY_STATUS == Regi_Status)
+                            .Where(x => x.EXPECTED_ACCESS_DATE.ToString() == OTD)
+                            .AsEnumerable().ToList();
+
+                        if (_TAR_List.Any())
+                        {
+                            var _TAR_Data = new TREA_APLY_REC();
+
+                            foreach (var item in _TAR_List)
+                            {
+                                #region 申請單紀錄檔
+                                _TAR_Data = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == item.APLY_NO);
+                                _TAR_Data.APLY_STATUS = Update_Regi_Status;
+                                _TAR_Data.LAST_UPDATE_UID = currentUserId;
+                                _TAR_Data.LAST_UPDATE_DT = dt;
+
+                                logStr += "|";
+                                logStr += _TAR_Data.modelToString();
+                                #endregion
+
+                                #region 申請單歷程檔
+                                db.APLY_REC_HIS.Add(
+                                new APLY_REC_HIS()
+                                {
+                                    APLY_NO = item.APLY_NO,
+                                    APLY_STATUS = Update_Regi_Status,
+                                    PROC_UID = currentUserId,
+                                    PROC_DT = dt
+                                });
+                                #endregion
+                            }
+                        }
+
+                        #region Save Db
+                        var validateMessage = db.GetValidationErrors().getValidateString();
+                        if (validateMessage.Any())
+                        {
+                            result.DESCRIPTION = validateMessage;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                db.SaveChanges();
+
+                                #region LOG
+                                //新增LOG
+                                Log log = new Log();
+                                log.CFUNCTION = "金庫登記簿執行作業(開庫前)";
+                                log.CACTION = "A";
+                                log.CCONTENT = logStr;
+                                LogDao.Insert(log, currentUserId);
+                                #endregion
+
+                                result.RETURN_FLAG = true;
+                                result.DESCRIPTION = "金庫登記簿執行作業(開庫前)，執行成功";
+                            }
+                            catch (DbUpdateException ex)
+                            {
+                                result.DESCRIPTION = ex.exceptionMessage();
+                            }
+                        }
+                        #endregion
                     }
                     else
                     {
                         result.DESCRIPTION = "無可供開庫作業的申請資料，若需開庫，請執行指定時間開庫申請!!";
                     }
+                    #endregion
                 }
             }
             catch (Exception ex)
