@@ -41,6 +41,12 @@ namespace Treasury.Web.Enum
             A05,
 
             /// <summary>
+            /// 保管科覆核駁回
+            /// </summary>
+            [Description("保管科覆核駁回")]
+            A06,
+
+            /// <summary>
             /// 申請單位完成覆核，保管科承辦確認中
             /// </summary>
             [Description("申請單位完成覆核，保管科承辦確認中")]

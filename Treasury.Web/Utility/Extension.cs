@@ -543,7 +543,7 @@ namespace Treasury.WebUtility
         {
             string result = string.Empty;
             if (errors.Any())
-                result = string.Join(",", errors.First().ValidationErrors.Select(x=>x.ErrorMessage));
+                result = string.Join(" ", errors.Select(y=>string.Join(",",y.ValidationErrors.Select(z=>z.ErrorMessage))));
             return result;
         }
 

@@ -46,7 +46,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<MAIL_CONTENT_HIS> MAIL_CONTENT_HIS { get; set; }
         public virtual DbSet<MAIL_RECEIVE> MAIL_RECEIVE { get; set; }
         public virtual DbSet<MAIL_RECEIVE_HIS> MAIL_RECEIVE_HIS { get; set; }
-        public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<MAIL_TIME_HIS> MAIL_TIME_HIS { get; set; }
         public virtual DbSet<PIA_EXEC_TYPE> PIA_EXEC_TYPE { get; set; }
         public virtual DbSet<PIA_LOG_MAIN> PIA_LOG_MAIN { get; set; }
@@ -80,6 +79,7 @@ namespace Treasury.Web.Models
         public virtual DbSet<ITEM_STOCK> ITEM_STOCK { get; set; }
         public virtual DbSet<TREA_OPEN_REC> TREA_OPEN_REC { get; set; }
         public virtual DbSet<INVENTORY_CHG_APLY> INVENTORY_CHG_APLY { get; set; }
+        public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<SYS_JOB_REC> SYS_JOB_REC { get; set; }
     }
 }
