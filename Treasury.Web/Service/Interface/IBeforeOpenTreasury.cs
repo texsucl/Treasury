@@ -20,6 +20,12 @@ namespace Treasury.Web.Service.Interface
         List<SelectOption> GetOpenTreaType();
 
         /// <summary>
+        /// 金庫登記簿單號
+        /// </summary>
+        /// <returns></returns>
+        string GetTreaRegisterId(); 
+
+        /// <summary>
         /// 取得每日例行進出未確認項目
         /// </summary>
         /// <returns></returns>
@@ -28,14 +34,16 @@ namespace Treasury.Web.Service.Interface
         /// <summary>
         /// 取得已入庫確認資料
         /// </summary>
+        /// <param name="TreaRegisterId">金庫登記簿單號</param>
         /// <returns></returns>
-        List<BeforeOpenTreasuryViewModel> GetStorageList();
+        List<BeforeOpenTreasuryViewModel> GetStorageList(string TreaRegisterId);
 
         /// <summary>
         /// 產生工作底稿
         /// </summary>
+        /// <param name="currentUserId">目前使用者ID</param>
         /// <returns></returns>
-        MSGReturnModel<IEnumerable<ITreaItem>> DraftData();
+        MSGReturnModel<IEnumerable<ITreaItem>> DraftData(string currentUserId);
 
     }
 }
