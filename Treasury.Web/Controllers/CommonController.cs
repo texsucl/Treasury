@@ -46,7 +46,8 @@ namespace Treasury.Web.Controllers
                 Ref.AccessProjectFormStatus.A02.ToString(),
                 Ref.AccessProjectFormStatus.A03.ToString(),
                 Ref.AccessProjectFormStatus.A04.ToString(),
-                Ref.AccessProjectFormStatus.A05.ToString()
+                Ref.AccessProjectFormStatus.A05.ToString(),
+                Ref.AccessProjectFormStatus.A06.ToString()
             };
             TreasuryAccess = new TreasuryAccess();
         }

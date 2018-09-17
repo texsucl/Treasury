@@ -440,6 +440,8 @@
     verified.isPrice = function (value)
     {
         value = value || '';
+        if (value == '')
+            return true;
         return priceFormate.test(value);
     }
 

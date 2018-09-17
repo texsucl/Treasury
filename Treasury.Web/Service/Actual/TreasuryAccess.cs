@@ -49,6 +49,7 @@ namespace Treasury.Web.Service.Actual
             invalidStatus.Add(Ref.AccessProjectFormStatus.A03.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A04.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A05.ToString());
+            invalidStatus.Add(Ref.AccessProjectFormStatus.A06.ToString());
             apprStatus = new List<string>();
             apprStatus.Add(Ref.AccessProjectFormStatus.A01.ToString());
             apprStatus.Add(Ref.AccessProjectFormStatus.A05.ToString());
@@ -689,8 +690,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
                     var aplyStatus = Ref.AccessProjectFormStatus.B01.ToString(); // 狀態 => 申請單位覆核完成，保管科確認中
-                    if (_TREA_APLY_REC.CUSTODY_UID != null &&
-                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID)
+                    if (Properties.Settings.Default["CustodianFlag"]?.ToString() == _TREA_APLY_REC.CREATE_UID)
                        //新增人員等於保管科人員 狀態 => 入庫確認中
                     {
                         aplyStatus = Ref.AccessProjectFormStatus.C01.ToString();
@@ -795,14 +795,20 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
 
+                    //填寫單位 == 保管科單位 狀態 => 申請單位覆核駁回
                     var aplyStatus = Ref.AccessProjectFormStatus.A02.ToString(); // 狀態 => 申請單位覆核駁回
+
+                    if (Properties.Settings.Default["CustodianFlag"]?.ToString() == _TREA_APLY_REC.APLY_UNIT)
+                    //保管科=申請單位 狀態 => 保管科覆核駁回
+                    {
+                        aplyStatus = Ref.AccessProjectFormStatus.A06.ToString();
+                    }
 
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = aplyStatus;
                     _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
                     // 保管科單位
-                    if (_TREA_APLY_REC.CUSTODY_UID != null &&
-                        _TREA_APLY_REC.CUSTODY_UID == _TREA_APLY_REC.CREATE_UID)
+                    if (aplyStatus == Ref.AccessProjectFormStatus.A06.ToString())
                     {
                         _TREA_APLY_REC.CUSTODY_APPR_DESC = apprDesc;
                         _TREA_APLY_REC.CUSTODY_APPR_DT = dt;

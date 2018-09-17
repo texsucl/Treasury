@@ -31,5 +31,32 @@ namespace Treasury.Web.Properties {
                 return ((string)(this["CustodianFlag"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.204.241.226")]
+        public string smtpServer {
+            get {
+                return ((string)(this["smtpServer"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("glsisys.life@fbt.com")]
+        public string mailAccount {
+            get {
+                return ((string)(this["mailAccount"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Aa87522899")]
+        public string mailPwd {
+            get {
+                return ((string)(this["mailPwd"]));
+            }
+        }
     }
 }

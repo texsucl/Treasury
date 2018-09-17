@@ -772,7 +772,7 @@
             <PropertyRef Name="MAIL_TIME_ID" />
           </Key>
           <Property Name="MAIL_TIME_ID" Type="varchar" MaxLength="2" Nullable="false" />
-          <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="FUNC_ID" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="SEND_TIME" Type="varchar" MaxLength="5" />
           <Property Name="INTERVAL_MIN" Type="int" />
           <Property Name="TREA_OPEN_TIME" Type="varchar" MaxLength="5" />
@@ -897,13 +897,9 @@
           <Property Name="CODE_VALUE" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="ISORTBY" Type="int" Nullable="false" />
         </EntityType>
-        <!--產生期間發現錯誤:
-警告 6002: 資料表/檢視 'dbTreasury.dbo.SYS_JOB_REC' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
         <EntityType Name="SYS_JOB_REC">
           <Key>
             <PropertyRef Name="JOB_ITEM_ID" />
-            <PropertyRef Name="JOB_ID" />
-            <PropertyRef Name="CREATE_TIME" />
           </Key>
           <Property Name="JOB_ITEM_ID" Type="varchar" MaxLength="11" Nullable="false" />
           <Property Name="JOB_ID" Type="varchar" MaxLength="30" Nullable="false" />
@@ -1151,6 +1147,7 @@
           <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PIA_TRN_HIST" EntityType="Self.PIA_TRN_HIST" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SYS_CODE" EntityType="Self.SYS_CODE" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SYS_JOB_REC" EntityType="Self.SYS_JOB_REC" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SYS_SEQ" EntityType="Self.SYS_SEQ" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TREA_APLY_REC" EntityType="Self.TREA_APLY_REC" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="TREA_APLY_TEMP" EntityType="Self.TREA_APLY_TEMP" Schema="dbo" store:Type="Tables" />
@@ -1194,17 +1191,6 @@
     [Log].[CACTION] AS [CACTION], 
     [Log].[CCONTENT] AS [CCONTENT]
     FROM [dbo].[Log] AS [Log]</DefiningQuery>
-          </EntitySet>
-          <EntitySet Name="SYS_JOB_REC" EntityType="Self.SYS_JOB_REC" store:Type="Tables" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [SYS_JOB_REC].[JOB_ITEM_ID] AS [JOB_ITEM_ID], 
-    [SYS_JOB_REC].[JOB_ID] AS [JOB_ID], 
-    [SYS_JOB_REC].[START_TIME] AS [START_TIME], 
-    [SYS_JOB_REC].[END_TIME] AS [END_TIME], 
-    [SYS_JOB_REC].[STATUS] AS [STATUS], 
-    [SYS_JOB_REC].[MEMO] AS [MEMO], 
-    [SYS_JOB_REC].[CREATE_TIME] AS [CREATE_TIME]
-    FROM [dbo].[SYS_JOB_REC] AS [SYS_JOB_REC]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
             <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
@@ -1564,31 +1550,6 @@
           <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
-        <EntityType Name="MAIL_TIME">
-          <Key>
-            <PropertyRef Name="MAIL_TIME_ID" />
-          </Key>
-          <Property Name="MAIL_TIME_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="INTERVAL_MIN" Type="Int32" />
-          <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
-          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-          <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="MAIL_TIME_HIS">
           <Key>
             <PropertyRef Name="APLY_NO" />
@@ -1902,7 +1863,6 @@
           <EntitySet Name="MAIL_CONTENT_HIS" EntityType="Self.MAIL_CONTENT_HIS" />
           <EntitySet Name="MAIL_RECEIVE" EntityType="Self.MAIL_RECEIVE" />
           <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="Self.MAIL_RECEIVE_HIS" />
-          <EntitySet Name="MAIL_TIME" EntityType="Self.MAIL_TIME" />
           <EntitySet Name="MAIL_TIME_HIS" EntityType="Self.MAIL_TIME_HIS" />
           <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" />
           <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" />
@@ -1944,6 +1904,7 @@
           <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
           <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
           <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
+          <EntitySet Name="MAIL_TIME" EntityType="dbTreasuryModel.MAIL_TIME" />
           <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
@@ -2350,11 +2311,34 @@
           <Property Name="APPR_Date" Type="DateTime" Precision="0" />
           <Property Name="APPR_Time" Type="Time" Precision="7" />
         </EntityType>
+        <EntityType Name="MAIL_TIME">
+          <Key>
+            <PropertyRef Name="MAIL_TIME_ID" />
+          </Key>
+          <Property Name="MAIL_TIME_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="FUNC_ID" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="INTERVAL_MIN" Type="Int32" />
+          <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="DATA_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+          <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
         <EntityType Name="SYS_JOB_REC">
           <Key>
             <PropertyRef Name="JOB_ITEM_ID" />
-            <PropertyRef Name="JOB_ID" />
-            <PropertyRef Name="CREATE_TIME" />
           </Key>
           <Property Name="JOB_ITEM_ID" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="false" />
           <Property Name="JOB_ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
@@ -2710,32 +2694,6 @@
                 <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
                 <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
                 <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="MAIL_TIME">
-            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_TIME">
-              <MappingFragment StoreEntitySet="MAIL_TIME">
-                <ScalarProperty Name="OPEN_TYPE" ColumnName="OPEN_TYPE" />
-                <ScalarProperty Name="MAIL_TIME_ID" ColumnName="MAIL_TIME_ID" />
-                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
-                <ScalarProperty Name="SEND_TIME" ColumnName="SEND_TIME" />
-                <ScalarProperty Name="INTERVAL_MIN" ColumnName="INTERVAL_MIN" />
-                <ScalarProperty Name="TREA_OPEN_TIME" ColumnName="TREA_OPEN_TIME" />
-                <ScalarProperty Name="EXEC_TIME_B" ColumnName="EXEC_TIME_B" />
-                <ScalarProperty Name="EXEC_TIME_E" ColumnName="EXEC_TIME_E" />
-                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
-                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
-                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
-                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
-                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
-                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
-                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
-                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
-                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
-                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3439,6 +3397,32 @@
                 <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
                 <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
                 <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MAIL_TIME">
+            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_TIME">
+              <MappingFragment StoreEntitySet="MAIL_TIME">
+                <ScalarProperty Name="OPEN_TYPE" ColumnName="OPEN_TYPE" />
+                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
+                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
+                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
+                <ScalarProperty Name="EXEC_TIME_E" ColumnName="EXEC_TIME_E" />
+                <ScalarProperty Name="EXEC_TIME_B" ColumnName="EXEC_TIME_B" />
+                <ScalarProperty Name="TREA_OPEN_TIME" ColumnName="TREA_OPEN_TIME" />
+                <ScalarProperty Name="INTERVAL_MIN" ColumnName="INTERVAL_MIN" />
+                <ScalarProperty Name="SEND_TIME" ColumnName="SEND_TIME" />
+                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
+                <ScalarProperty Name="MAIL_TIME_ID" ColumnName="MAIL_TIME_ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
