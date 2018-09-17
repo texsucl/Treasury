@@ -92,7 +92,7 @@ namespace Treasury.Web.Service.Actual
                     groupNos = db.ITEM_STOCK.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
-                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    //.Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .Select(x => x.GROUP_NO).ToList();
                 }
                 if (!vAplyNo.IsNullOrWhiteSpace())
