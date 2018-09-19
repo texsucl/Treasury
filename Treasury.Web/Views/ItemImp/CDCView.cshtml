@@ -1,0 +1,535 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="">
+    <div id="CDCItemImpjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CDCItemImp_Act">
+        <input type="button" id="CDCItemImpApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDCItemImpBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDCItemImpDialog" style="display:none;">
+        <form id="CDCItemImpDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vPUT_Date" name="vPUT_Date"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>歸檔編號 : </label>
+                    </td>
+                    <td>
+                        <label id="vlItem_Id" name="vlItem_Id"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vAPLY_UID_Name" name="vAPLY_UID_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <label id="vCHARGE_Name" name="vCHARGE_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>物品名稱 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCItemImp_Name" name="tCDCItemImp_Name" class="CDCItemImpUpdateType" maxlength="30"/>
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Name"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCItemImp_Quantity" name="tCDCItemImp_Quantity" class="CDCItemImpUpdateType" />
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Quantity"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>金額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCItemImp_Amount" name="tCDCItemImp_Amount" class="CDCItemImpUpdateType" />
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Amount"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>預計提取日期 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCItemImp_Expected_Date" name="tCDCItemImp_Expected_Date" class="CDCItemImpUpdateType" />
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Expected_Date"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>說明 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCItemImp_Description" name="tCDCItemImp_Description" class="CDCItemImpUpdateType" maxlength="100" />
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Description"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tCDCItemImp_MEMO" name="tCDCItemImp_MEMO" class="CDCItemImpUpdateType" maxlength="200"/>
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_MEMO"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                       <input type="hidden" id="hItemImp_ITEM_ID"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="CDCItemImpUpdateTemp" value="修改" class="btn btn-primary"  />
+                    </td>
+                    <td  style="text-align:right;">
+                        <input type="button" id="CDCItemImpCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDCItemImpurl = {};
+        CDCItemImpurl.getData = '@Url.Action("GetCDCCacheData", "ItemImp")';
+        CDCItemImpurl.ApplyDbData = '@Url.Action("ApplyDbData", "ItemImp")';
+        CDCItemImpurl.UpdateDbData = '@Url.Action("UpdateDbData", "ItemImp")';
+        CDCItemImpurl.RepeatDbData = '@Url.Action("RepeatDbData", "ItemImp")';
+        //#endregion
+
+        //#region 參數設定
+        //庫存資料
+        var CDCItemImpDialogId = 'CDCItemImpDialog'; //dialogId
+        var CDCItemImpDialogFormId = 'CDCItemImpDialogForm'; //dialogFormId
+        var vPUT_DateId = 'vPUT_Date'; //入庫日期(label)
+        var vlItem_Id = 'vlItem_Id'; //歸檔編號(label)
+        var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
+        var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
+        var tCDCItemImp_NameId = 'tCDCItemImp_Name'; //物品名稱Id(text)
+        var sCDCItemImp_NameId = 'sCDCItemImp_Name'; //物品名稱Id(span)
+        var tCDCItemImp_QuantityId = 'tCDCItemImp_Quantity'; //數量Id(text)
+        var sCDCItemImp_QuantityId = 'sCDCItemImp_Quantity'; //數量Id(span)
+        var tCDCItemImp_AmountId = 'tCDCItemImp_Amount'; //金額Id(text)
+        var sCDCItemImp_AmountId = 'sCDCItemImp_Amount'; //金額Id(span)
+        var tCDCItemImp_Expected_DateId = 'tCDCItemImp_Expected_Date'; //預計提取日期Id(text)
+        var sCDCItemImp_Expected_DateId = 'sCDCItemImp_Expected_Date'; //預計提取日期Id(span)
+        var tCDCItemImp_DescriptionId = 'tCDCItemImp_Description'; //說明Id(text)
+        var sCDCItemImp_DescriptionId = 'sCDCItemImp_Description'; //說明Id(span)
+        var tCDCItemImp_MEMOId = 'tCDCItemImp_MEMO'; //備註Id(text)
+        var sCDCItemImp_MEMOId = 'sCDCItemImp_MEMO'; //備註Id(span)
+        var ItemImp_ITEM_ID = 'hItemImp_ITEM_ID'; //物品標號Id(hidden)
+
+        var CDCItemImp_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDCItemImp_Act_Type)
+            $('.CDCItemImp_Act').show(); //申請異動主畫面近來
+        
+        var CDCItemImp_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDCItemImp_ApplyFlag)
+            $('#CDCItemImpApply').hide();
+
+        var CDCItemImpConfirmFlag = false; //離開時提醒訊息
+   
+        //#region 初始動作
+        CDCItemImpDbGrid();
+        setCDCItemImpVerified();
+        //#endregion
+        created.createDatepicker(tCDCItemImp_Expected_DateId, null);
+        //#region 註冊verified
+        function setCDCItemImpVerified() {
+            verified.required(CDCItemImpDialogFormId, tCDCItemImp_NameId, message.required('物品名稱')); //物品名稱為必填
+            verified.required(CDCItemImpDialogFormId, tCDCItemImp_AmountId, message.required('金額')); //金額為必填
+            verified.price(CDCItemImpDialogFormId, tCDCItemImp_AmountId); //金額驗證
+            verified.number(CDCItemImpDialogFormId, tCDCItemImp_QuantityId); //數量輸入為數字
+        }
+        //#endregion
+    
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDCItemImpApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCItemImpApplyFun(); });
+                    break;
+                case 'CDCItemImpBack':
+                case 'CDCItemImpCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        if (id == 'CDCItemImpBack' &&
+                            CDCItemImpConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+                case 'CDCItemImpUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCItemImpUpdateTempFun(); });
+                    break;
+            }
+        });
+
+        function CDCItemImpApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDCItemImpurl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDCItemImpApply'));
+                }
+            })
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                    @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                           <text>
+                           case '@item.Value':
+                           return '@item.Text';
+                           </text>
+                        }
+                    }
+                default:
+            return '';
+            }
+        }
+
+        function formattervItemImp_Name(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Name_AFT != null)
+                return '<span class="red">' + rdata.vItemImp_Name_AFT + '</span>';
+            else
+                return rdata.vItemImp_Name || '';
+        }
+
+        function formattervItemImp_Quantity(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Quantity_AFT != null)
+                return '<span class="red">' + rdata.vItemImp_Quantity_AFT + '</span>';
+            else
+                return rdata.vItemImp_Quantity || '';
+        }
+
+        function formattervItemImp_Amount(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Amount_AFT != null)
+                return '<span class="red">' + customerUtility.addCommas(rdata.vItemImp_Amount_AFT) + '</span>';
+            else
+                return customerUtility.addCommas(rdata.vItemImp_Amount) || '';
+        }
+
+        function formattervItemImp_Expected_Date(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Expected_Date_AFT == null || rdata.vItemImp_Expected_Date_AFT == '')
+                return rdata.vItemImp_Expected_Date || '';
+            else
+                return '<span class="red">' + rdata.vItemImp_Expected_Date_AFT + '</span>';
+            
+              
+        }
+
+        function formattervItemImp_Description(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Description_AFT != null)
+                return '<span class="red">' + rdata.vItemImp_Description_AFT + '</span>';
+            else
+                return rdata.vItemImp_Description || '';
+        }
+
+        function formattervItemImp_MEMO(cellvalue, options, rdata) {
+            if (rdata.vItemImp_MEMO_AFT != null)
+                return '<span class="red">' + rdata.vItemImp_MEMO_AFT + '</span>';
+            else
+                return rdata.vItemImp_MEMO || '';
+        }
+
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCItemImp' + options.gid + 'Updata' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCItemImp' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCItemImp' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function CDCItemImpDbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '歸檔編號', '存入申請人', '權責單位',
+                '物品名稱', '數量', '金額', '預計提取日期', '說明', '備註',
+                '物品名稱異動前', '數量異動前', '金額異動前', '預計提取日期異動前', '說明異動前', '備註異動前',
+                '物品名稱異動後', '數量異動後', '金額異動後', '預計提取日期異動後', '說明異動後', '備註異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus,  align: 'center' });
+            colModelArray.push({ name: "vPUT_Date", index: "vPUT_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });
+            
+            colModelArray.push({ name: "vItemImp_Name_Show", index: "vItemImp_Name_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Name });
+            colModelArray.push({ name: "vItemImp_Quantity_Show", index: "vItemImp_Quantity_Show", width: 60, align: 'right', sortable: false, formatter: formattervItemImp_Quantity });
+            colModelArray.push({ name: "vItemImp_Amount_Show", index: "vItemImp_Amount_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Amount });
+            colModelArray.push({ name: "vItemImp_Expected_Date_Show", index: "vItemImp_Expected_Date_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Expected_Date });
+            colModelArray.push({ name: "vItemImp_Description_Show", index: "vItemImp_Description_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Description });
+            colModelArray.push({ name: "vItemImp_MEMO_Show", index: "vItemImp_MEMO_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_MEMO });
+
+            colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", hidden: true });
+            colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", hidden: true });
+            colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", hidden: true });
+            colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", hidden: true });
+            colModelArray.push({ name: "vItemImp_Description", index: "vItemImp_Description", hidden: true });
+            colModelArray.push({ name: "vItemImp_MEMO", index: "vItemImp_MEMO", hidden: true });
+
+            colModelArray.push({ name: "vItemImp_Name_AFT", index: "vItemImp_Name_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_Quantity_AFT", index: "vItemImp_Quantity_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_Amount_AFT", index: "vItemImp_Amount_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_Expected_Date_AFT", index: "vItemImp_Expected_Date_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_Description_AFT", index: "vItemImp_Description_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_MEMO_AFT", index: "vItemImp_MEMO_AFT", hidden: true });
+           
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDCItemImpjqgridDiv',
+                'CDCItemImpTempList',
+                'CDCItemImpTempPeger',
+                CDCItemImpurl.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '查詢資料',
+                jqgridCustom.getPage('CDCItemImpjqgridDiv'),
+                CDCItemImpTempCompleteFun,
+                true
+                );
+        }
+
+        function CDCItemImpTempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDCItemImpRepeat(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1')
+                {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDCItemImpRepeat(listId, rowid)
+        {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDCItemImpurl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDCItemImpDbGrid();
+                    CDCItemImpConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //#region function
+
+        function dialogOpen(type, rowid)
+        {
+            $('#' + CDCItemImpDialogFormId).validate().resetForm();
+            var listId = 'CDCItemImpTempList';
+            var ItemImpUpdateClass = 'CDCItemImpUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDCItemImpDialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '重要物品',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDCItemImpUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#CDCItemImpUpdateTemp').show();
+                $('.' + ItemImpUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('.' + ItemImpUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDCItemImpDialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            $('#' + vPUT_DateId).text('');
+            $('#' + vlItem_Id).text('');
+            $('#' + vAPLY_UID_NameId).text('');
+            $('#' + vCHARGE_NameId).text('');
+            $('#' + tCDCItemImp_NameId).val('');
+            $('#' + sCDCItemImp_NameId).text('');
+            $('#' + tCDCItemImp_QuantityId).val('');
+            $('#' + sCDCItemImp_QuantityId).text('');
+            $('#' + tCDCItemImp_AmountId).val('');
+            $('#' + sCDCItemImp_AmountId).text('');
+            $('#' + tCDCItemImp_Expected_DateId).val('');
+            $('#' + sCDCItemImp_Expected_DateId).text('');
+            $('#' + tCDCItemImp_DescriptionId).val('');
+            $('#' + sCDCItemImp_DescriptionId).text('');
+            $('#' + tCDCItemImp_MEMOId).val('');
+            $('#' + sCDCItemImp_MEMOId).text('');
+            $('#' + ItemImp_ITEM_ID).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + vPUT_DateId).text(data.vPUT_Date);
+                $('#' + vlItem_Id).text(data.vlItem_Id);
+                $('#' + vAPLY_UID_NameId).text(data.vAPLY_UID_Name);
+                $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
+                $('#' + tCDCItemImp_NameId).val(data.vItemImp_Name);
+                $('#' + sCDCItemImp_NameId).text(data.vItemImp_Name_AFT);
+                $('#' + tCDCItemImp_QuantityId).val(data.vItemImp_Quantity);
+                $('#' + sCDCItemImp_QuantityId).text(data.vItemImp_Quantity_AFT);
+                $('#' + tCDCItemImp_AmountId).val(data.vItemImp_Amount);
+                $('#' + sCDCItemImp_AmountId).text(data.vItemImp_Amount_AFT);
+                $('#' + tCDCItemImp_Expected_DateId).val(data.vItemImp_Expected_Date);
+                $('#' + sCDCItemImp_Expected_DateId).text(data.vItemImp_Expected_Date_AFT);
+                $('#' + tCDCItemImp_DescriptionId).val(data.vItemImp_Description);
+                $('#' + sCDCItemImp_DescriptionId).text(data.vItemImp_Description_AFT);
+                $('#' + tCDCItemImp_MEMOId).val(data.vItemImp_MEMO);
+                $('#' + sCDCItemImp_MEMOId).text(data.vItemImp_MEMO_AFT);
+                $('#' + ItemImp_ITEM_ID).val(data.vItemId);
+            }
+        }
+
+
+        function CDCItemImpUpdateTempFun()
+        {
+            if ($('#' + CDCItemImpDialogFormId).valid())
+            {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDCItemImpViewModel(
+                            $('#' + ItemImp_ITEM_ID).val(),
+                            $('#' + tCDCItemImp_NameId).val().trim(),
+                            $('#' + tCDCItemImp_QuantityId).val().trim(),
+                            $('#' + tCDCItemImp_AmountId).val().trim(),
+                            $('#' + tCDCItemImp_Expected_DateId).val().trim(),
+                            $('#' + tCDCItemImp_DescriptionId).val().trim(),
+                            $('#' + tCDCItemImp_MEMOId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDCItemImpurl.UpdateDbData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDCItemImpUpdateTemp'));
+                        CDCItemImpDbGrid();
+                        CDCItemImpConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+        
+        function CDCItemImpViewModel(
+            vItemId,
+            vItemImp_Name,
+            vItemImp_Quantity,
+            vItemImp_Amount,
+            vItemImp_Expected_Date,
+            vItemImp_Description,
+            vItemImp_MEMO
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vItemImp_Name'] = vItemImp_Name;
+            obj['vItemImp_Quantity'] = vItemImp_Quantity;
+            obj['vItemImp_Amount'] = vItemImp_Amount;
+            obj['vItemImp_Expected_Date'] = vItemImp_Expected_Date;
+            obj['vItemImp_Description'] = vItemImp_Description;
+            obj['vItemImp_MEMO'] = vItemImp_MEMO;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>

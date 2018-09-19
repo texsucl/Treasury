@@ -160,6 +160,97 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCCAViewModel> result = new List<CDCCAViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_CA.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCCAViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vCA_Use = x.CA_USE,
+                            vCA_Use_AFT = x.CA_USE_AFT,
+                            vCA_Desc = x.CA_DESC,
+                            vCA_Desc_AFT = x.CA_DESC_AFT,
+                            vCA_Bank = x.BANK,
+                            vCA_Bank_AFT = x.BANK_AFT,
+                            vCA_Number = x.CA_NUMBER,
+                            vCA_Number_AFT = x.CA_NUMBER_AFT,
+                            vCA_Memo = x.MEMO,
+                            vCA_Memo_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_CA.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCCAViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vCA_Use = x.CA_USE,
+                            vCA_Use_AFT = x.CA_USE_AFT,
+                            vCA_Desc = x.CA_DESC,
+                            vCA_Desc_AFT = x.CA_DESC_AFT,
+                            vCA_Bank = x.BANK,
+                            vCA_Bank_AFT = x.BANK_AFT,
+                            vCA_Number = x.CA_NUMBER,
+                            vCA_Number_AFT = x.CA_NUMBER_AFT,
+                            vCA_Memo = x.MEMO,
+                            vCA_Memo_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCHARGE_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                });
+            }
+            return result;
+        }
+
         #endregion
 
         #region Save Data
@@ -528,6 +619,149 @@ namespace Treasury.Web.Service.Actual
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
                 return new Tuple<bool, string>(true, logStr);
             }
+        }
+
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCCAViewModel model in saveData)
+                {
+                    var _CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_CA != null && !changFlag)
+                    {
+                        if (_CA.LAST_UPDATE_DT > model.vLast_Update_Time || _CA.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+                        if (!changFlag)
+                        {
+                            _CA.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _CA.CA_USE_AFT = model.vCA_Use_AFT;
+                            _CA.CA_DESC_AFT = model.vCA_Desc_AFT;
+                            _CA.BANK_AFT = model.vCA_Bank_AFT;
+                            _CA.CA_NUMBER_AFT = model.vCA_Number_AFT;
+                            _CA.MEMO_AFT = model.vCA_Memo_AFT;
+                            _CA.LAST_UPDATE_DT = dt;
+
+                            logStr = _CA.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _CA.ITEM_ID
+                            };
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:電子憑證";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_CA != null)
+                {
+                    _CA.INVENTORY_STATUS = "1"; //在庫
+                    _CA.CA_USE_AFT= null;
+                    _CA.CA_DESC_AFT = null;
+                    _CA.BANK_AFT = null;
+                    _CA.CA_NUMBER_AFT = null;
+                    _CA.MEMO_AFT = null;
+                    _CA.LAST_UPDATE_DT = dt;
+                    logStr = _CA.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_CA != null)
+                {
+                    _CA.INVENTORY_STATUS = "1"; //在庫
+                    _CA.CA_USE = _CA.CA_USE_AFT;
+                    _CA.CA_USE_AFT = null;
+                    _CA.CA_DESC = _CA.CA_DESC_AFT;
+                    _CA.CA_DESC_AFT = null;
+                    _CA.BANK = _CA.BANK_AFT;
+                    _CA.BANK_AFT = null;
+                    _CA.CA_NUMBER = _CA.CA_NUMBER_AFT;
+                    _CA.CA_NUMBER_AFT = null;
+                    _CA.MEMO = _CA.MEMO_AFT;
+                    _CA.MEMO_AFT = null;
+                    _CA.LAST_UPDATE_DT = dt;
+                    logStr = _CA.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
 
         #endregion

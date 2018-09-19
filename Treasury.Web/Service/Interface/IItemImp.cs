@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 重要物品
     /// </summary>
-    public interface IItemImp : IApply , IAgency
+    public interface IItemImp : IApply , IAgency, ICDCAction
     {
         
         /// <summary>

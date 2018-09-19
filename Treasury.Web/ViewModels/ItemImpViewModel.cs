@@ -34,7 +34,7 @@ namespace Treasury.Web.ViewModels
         /// 重要物品金額
         /// </summary>
         [Description("重要物品金額")]
-        public decimal vItemImp_Amount { get; set; }
+        public decimal? vItemImp_Amount { get; set; }
 
         /// <summary>
         /// 重要物品預計提取日期

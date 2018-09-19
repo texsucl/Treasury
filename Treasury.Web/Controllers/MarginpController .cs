@@ -64,17 +64,64 @@ namespace Treasury.Web.Controllers
             return PartialView();
         }
 
-       /// <summary>
-       /// 抓取存入保證金物品名稱
-       /// </summary>
-       /// <returns></returns>
+        // <summary>
+        /// 存入保證金 資料庫異動畫面
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult CDCView(string AplyNo, CDCSearchViewModel data, Ref.OpenPartialViewType type)
+        {
+            var _data = ((List<CDCMarginpViewModel>)Marginp.GetCDCSearchData(data, AplyNo));
+            ViewBag.Sataus = new Service.Actual.Common().GetSysCode("INVENTORY_TYPE");
+            ViewBag.type = type;
+            ViewBag.IO = data.vTreasuryIO;
+            ViewBag.dMargin_Take_Of_Type = new SelectList(Marginp.GetMarginp_Take_Of_Type(), "Value", "Text");
+            ViewBag.dMargin_Item = new SelectList(Marginp.GetMarginpItem(), "Value", "Text");
+            data.vCreate_Uid = AccountController.CurrentUserId;
+            Cache.Invalidate(CacheList.CDCSearchViewModel);
+            Cache.Set(CacheList.CDCSearchViewModel, data);
+            Cache.Invalidate(CacheList.CDCMarginpData);
+            Cache.Set(CacheList.CDCMarginpData, _data);
+            return PartialView();
+        }
+
+        /// <summary>
+        /// jqgrid CDCcache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCDCCacheData(jqGridParam jdata)
+        {
+            if (Cache.IsSet(CacheList.CDCMarginpData))
+                return Json(jdata.modelToJqgridResult(
+                    ((List<CDCMarginpViewModel>)Cache.Get(CacheList.CDCMarginpData))
+                    .OrderBy(x => x.vPut_Date) //入庫日期
+                    .ThenBy(x => x.vAply_Uid) //存入申請人
+                    .ThenBy(x => x.vCHARGE_DEPT) //權責部門
+                    .ThenBy(x => x.vCHARGE_SECT) //權責科別
+                    .ThenBy(x => x.vMargin_Take_Of_Type) //類別
+                    .ThenBy(x => x.vTrad_Partners) //交易對象
+                                                   //.ThenBy(x => x.vTrad_Partners) //號碼?
+                    .ToList()
+                    ));
+            return null;
+        }
+
+        /// <summary>
+        /// 抓取存入保證金物品名稱
+        /// </summary>
+        /// <returns></returns>
         public JsonResult GetMarginpItem(string MARGIN_ITEM)
         {
             var MarginpItems = new List<string>();
             var data = Marginp.GetMarginpItem();
-            switch (MARGIN_ITEM.ToString()) {
+            switch (MARGIN_ITEM.ToString())
+            {
                 case "1":
-                    MarginpItems = new List<string>(){ "1", "2" };
+                    MarginpItems = new List<string>() { "1", "2" };
                     data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
                     break;
                 case "2":
@@ -85,7 +132,32 @@ namespace Treasury.Web.Controllers
                     MarginpItems = new List<string>() { "4" };
                     data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
                     break;
+            }
+            return Json(data);
+    }
 
+        /// <summary>
+        /// 抓取存入保證金物品名稱
+        /// </summary>
+        /// <returns></returns>
+        public JsonResult GetCDCMarginpItem(string MARGINITEM)
+        {
+            var MarginpItems = new List<string>();
+            var data = Marginp.GetMarginpItem();
+            switch (MARGINITEM.ToString())
+            {
+                case "1":
+                    MarginpItems = new List<string>() { "1", "2" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
+                case "2":
+                    MarginpItems = new List<string>() { "3" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
+                case "3":
+                    MarginpItems = new List<string>() { "4" };
+                    data = data.Where(x => MarginpItems.Contains(x.Value)).ToList();
+                    break;
             }
             return Json(data);
         }
@@ -125,6 +197,141 @@ namespace Treasury.Web.Controllers
             else
             {
                 result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 申請資料庫異動覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ApplyDbData()
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            var _detail = (List<CDCMarginpViewModel>)Cache.Get(CacheList.CDCMarginpData);
+            if (!_detail.Any(x => x.vAFTFlag))
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.CDCSearchViewModel))
+            {
+                CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+                result = Marginp.CDCApplyAudit(_detail.Where(x => x.vAFTFlag).ToList(), data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.CDCMarginpData);
+                    Cache.Set(CacheList.CDCMarginpData, result.Datas);
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UpdateDbData(CDCMarginpViewModel model)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCMarginpData))
+            {
+                var dbData = (List<CDCMarginpViewModel>)Cache.Get(CacheList.CDCMarginpData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItem_Id == model.vItem_Id);
+                if (updateTempData != null)
+                {
+                    var _vMargin_Take_Of_Type_AFT = model.vMargin_Take_Of_Type.CheckAFT(updateTempData.vMargin_Take_Of_Type);
+                    if (_vMargin_Take_Of_Type_AFT.Item2)
+                        updateTempData.vMargin_Take_Of_Type_AFT = _vMargin_Take_Of_Type_AFT.Item1;
+                    var _vTrad_Partners_AFT = model.vTrad_Partners.CheckAFT(updateTempData.vTrad_Partners);
+                    if (_vTrad_Partners_AFT.Item2)
+                        updateTempData.vTrad_Partners_AFT = _vTrad_Partners_AFT.Item1;
+                    var _vAmount_AFT = TypeTransfer.decimalNToString(model.vAmount).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vAmount));
+                    if (_vAmount_AFT.Item2)
+                        updateTempData.vAmount_AFT = TypeTransfer.stringToDecimal(_vAmount_AFT.Item1);
+                    var _vMargin_Item_AFT = model.vMargin_Item.CheckAFT(updateTempData.vMargin_Item);
+                    if (_vMargin_Item_AFT.Item2)
+                        updateTempData.vMargin_Item_AFT = _vMargin_Item_AFT.Item1;
+                    var _vMargin_Item_Issuer_AFT = model.vMargin_Item_Issuer.CheckAFT(updateTempData.vMargin_Item_Issuer);
+                    if (_vMargin_Item_Issuer_AFT.Item2)
+                        updateTempData.vMargin_Item_Issuer_AFT = _vMargin_Item_Issuer_AFT.Item1;
+                    var _vPledge_Item_No_AFT = model.vPledge_Item_No.CheckAFT(updateTempData.vPledge_Item_No);
+                    if (_vPledge_Item_No_AFT.Item2)
+                        updateTempData.vPledge_Item_No_AFT = _vPledge_Item_No_AFT.Item1;
+                    var _vEffective_Date_B_AFT = model.vEffective_Date_B.CheckAFT(updateTempData.vEffective_Date_B);
+                    if (_vEffective_Date_B_AFT.Item2)
+                        updateTempData.vEffective_Date_B_AFT = _vEffective_Date_B_AFT.Item1;
+                    var _vEffective_Date_E_AFT = model.vEffective_Date_E.CheckAFT(updateTempData.vEffective_Date_E);
+                    if (_vEffective_Date_E_AFT.Item2)
+                        updateTempData.vEffective_Date_E_AFT = _vEffective_Date_E_AFT.Item1;
+                    var _vDescription_AFT = model.vDescription.CheckAFT(updateTempData.vDescription);
+                    if (_vDescription_AFT.Item2)
+                        updateTempData.vDescription_AFT = _vDescription_AFT.Item1;
+                    var _vMemo_AFT = model.vMemo.CheckAFT(updateTempData.vMemo);
+                    if (_vMemo_AFT.Item2)
+                        updateTempData.vMemo_AFT = _vMemo_AFT.Item1;
+                    updateTempData.vAFTFlag = _vMargin_Take_Of_Type_AFT.Item2 || _vTrad_Partners_AFT.Item2 || _vAmount_AFT.Item2 || _vMargin_Item_AFT.Item2 || _vMargin_Item_Issuer_AFT.Item2 || _vPledge_Item_No_AFT.Item2 || _vEffective_Date_B_AFT.Item2 || _vEffective_Date_E_AFT.Item2 || _vDescription_AFT.Item2 || _vMemo_AFT.Item2;
+                    Cache.Invalidate(CacheList.CDCMarginpData);
+                    Cache.Set(CacheList.CDCMarginpData, dbData);
+                    result.Datas = dbData.Any(x => x.vAFTFlag);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設資料庫資料
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatDbData(string itemId)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCMarginpData))
+            {
+                var dbData = (List<CDCMarginpViewModel>)Cache.Get(CacheList.CDCMarginpData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItem_Id == itemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vMargin_Take_Of_Type_AFT = null;
+                    updateTempData.vTrad_Partners_AFT = null;
+                    updateTempData.vAmount_AFT = null;
+                    updateTempData.vMargin_Item_AFT = null;
+                    updateTempData.vMargin_Item_Issuer_AFT = null;
+                    updateTempData.vPledge_Item_No_AFT = null;
+                    updateTempData.vEffective_Date_B_AFT = null;
+                    updateTempData.vEffective_Date_E_AFT = null;
+                    updateTempData.vDescription_AFT = null;
+                    updateTempData.vMemo_AFT = null;
+                    updateTempData.vAFTFlag = false;
+                    Cache.Invalidate(CacheList.CDCMarginpData);
+                    Cache.Set(CacheList.CDCMarginpData, dbData);
+                    result.Datas = dbData.Any(x => x.vAFTFlag);
+                    result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
             }
             return Json(result);
         }
@@ -175,7 +382,7 @@ namespace Treasury.Web.Controllers
                 {
                     updateTempData.vMarginp_Take_Of_Type = model.vMarginp_Take_Of_Type;
                     updateTempData.vMarginp_Trad_Partners = model.vMarginp_Trad_Partners;
-                    updateTempData.vMarginp_Item = model.vItemId;
+                    updateTempData.vItemId = model.vItemId;
                     updateTempData.vMarginp_Amount = model.vMarginp_Amount;
                     updateTempData.vMarginp_Item = model.vMarginp_Item;
                     updateTempData.vMarginp_Item_Issuer = model.vMarginp_Item_Issuer;

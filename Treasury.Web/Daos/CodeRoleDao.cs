@@ -172,7 +172,7 @@ namespace Treasury.WebDaos
                                                        & (bRoleAuthType || (role.ROLE_AUTH_TYPE == roleAuthType.Trim()))
                                                        & (bisDIsabled || (role.IS_DISABLED == isDIsabled.Trim()))
                                                        & (bcUpdUserID || (role.LAST_UPDATE_UID == cUpdUserID.Trim()))
-
+                                                       orderby xAuthType.ISORTBY, role.ROLE_NAME
                                                    select new RoleMgrModel
                                                    {
                                                        cRoleID = role.ROLE_ID,

@@ -247,7 +247,7 @@ namespace Treasury.Web.Service.Actual
                                 db.CODE_USER_ROLE.AsNoTracking()
                                 .Where(x => x.USER_ID == cUserID) //登入者所擁有的角色
                                 .Join(db.CODE_ROLE_ITEM.AsNoTracking()
-                                .Where(x => x.AUTH_TYPE == "2"), //表單申請權限=Y
+                                .Where(x => x.AUTH_TYPE == "2"),//表單申請權限=Y
                                 x => x.ROLE_ID,
                                 y => y.ROLE_ID,
                                 (x, y) => y

@@ -6,6 +6,7 @@
     var englishFormat;
     var englishUpperFormat;
     var englishNumberFormat;
+    var rateFormat;
 
     dateFormat = /^((?!0000)[0-9]{4}[/|-]((0[1-9]|1[0-2])[/|-](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/|-](29|30)|(0[13578]|1[02])[/|-]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/|-]02[/|-]29)$/;
     englishFormat = /^[a-zA-Z]+$/;
@@ -13,6 +14,7 @@
     positiveInt = /^[0-9]+$/;
     englishNumberFormat = /^[a-zA-Z0-9]+$/;
     priceFormate = /^([0-9]{1,})+(.[0-9]{1,})?$/;
+    rateFormat =/^([0-9]{1,2})+(.[0-9]{1,2})?$/;
 
     window.verified = verified;
     window.created = created;
@@ -126,6 +128,26 @@
         //#endregion
         $('#' + elementid).rules('add', {
             englishUpperFormate: true,
+        })
+    }
+
+    verified.rate = function (formid, elementid, msg) {
+        msg = msg || message.english;
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+
+        //#region 客製化驗證
+
+        $.validator.addMethod("rateFormat",
+        function (value, element, arg) {
+            return verified.isRate(value);
+        }, message.rate);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            rateFormat: true,
         })
     }
 
@@ -418,6 +440,8 @@
     verified.isPrice = function (value)
     {
         value = value || '';
+        if (value == '')
+            return true;
         return priceFormate.test(value);
     }
 
@@ -429,6 +453,11 @@
     verified.isEnglishUpper = function (value) {
         value = value || '';
         return englishUpperFormat.test(value);
+    }
+
+    verified.isRate = function (value) {
+        value = value || '';
+        return rateFormat.test(value);
     }
 
     verified.isPositiveInt = function (value) {

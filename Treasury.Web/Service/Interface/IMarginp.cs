@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 存入保證金
     /// </summary>
-    public interface IMarginp : IApply , IAgency
+    public interface IMarginp : IApply , IAgency, ICDCAction
     {
         /// <summary>
         /// 抓取存入保證金類別設定

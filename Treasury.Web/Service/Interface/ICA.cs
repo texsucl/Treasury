@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 電子憑證
     /// </summary>
-    public interface ICA : IApply , IAgency
+    public interface ICA : IApply , IAgency, ICDCAction
     {
         /// <summary>
         /// 抓取電子憑證用途設定

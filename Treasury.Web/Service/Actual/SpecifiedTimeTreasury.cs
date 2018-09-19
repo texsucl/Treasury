@@ -445,7 +445,7 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _TREA_ITEM = db.TREA_ITEM.Where(x => x.TREA_ITEM_TYPE == "3").Select(x => x.ITEM_ID).ToList();
+                var _TREA_ITEM = db.TREA_ITEM.Where(x => x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
 
                 foreach (var item in ViewModel.Where(x => RegisterNo.Contains(x.vTREA_REGISTER_ID)))
                 {
@@ -474,42 +474,64 @@ namespace Treasury.Web.Service.Actual
 
                     logStrA += _TREA_OPEN_REC.modelToString(logStrA);
 
-                    #region 申請單歷程檔
+                    //#region 申請單紀錄檔
+                    ////取得流水號
+                    //List<string> workList = _TREA_OPEN_REC.OPEN_TREA_REASON.Split(';').ToList();
+                    //foreach (var workItem in workList)
+                    //{
+                    //    if (!_TREA_ITEM.Contains(workItem))
+                    //    {
+                    //        SysSeqDao sysSeqDao = new SysSeqDao();
+                    //        string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+                    //        var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+
+                    //        var _TREA_APLY_REC = db.TREA_APLY_REC
+                    //            .Add(new TREA_APLY_REC()
+                    //            {
+                    //                APLY_NO = $@"G6{qPreCode}{cId}", ////申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
+                    //                APLY_FROM = "S",
+                    //                TREA_REGISTER_ID = item.vTREA_REGISTER_ID,
+                    //                ITEM_ID = workItem,
+                    //                APLY_STATUS = "C01",
+                    //                EXPECTED_ACCESS_DATE = _TREA_OPEN_REC.OPEN_TREA_DATE,
+                    //                APLY_UNIT = _TREA_OPEN_REC.CREATE_UNIT,
+                    //                APLY_UID = _TREA_OPEN_REC.CREATE_UID,
+                    //                APLY_DT = _TREA_OPEN_REC.CREATE_DT,
+                    //                APLY_APPR_UID = SearchData.vCreateUid,
+                    //                APLY_APPR_DT = dt,
+                    //                CREATE_UID = SearchData.vCreateUid,
+                    //                CREATE_DT = dt,
+                    //                LAST_UPDATE_UID = SearchData.vCreateUid,
+                    //                LAST_UPDATE_DT = dt,
+                    //                CREATE_UNIT = SearchData.vCreateUnit
+                    //            });
+                    //        logStrA += _TREA_APLY_REC.modelToString(logStrA);
+                    //    } 
+                    //}
+                    //#endregion
+
+                    #region 申請單暫存檔
                     //取得流水號
                     List<string> workList = _TREA_OPEN_REC.OPEN_TREA_REASON.Split(';').ToList();
+                    if(workList.Count != 0)
+                    {
+                        var data = (from n in db.TREA_APLY_TEMP select n);
+                        db.TREA_APLY_TEMP.RemoveRange(data);
+                    }
                     foreach (var workItem in workList)
                     {
                         if (!_TREA_ITEM.Contains(workItem))
                         {
-                            SysSeqDao sysSeqDao = new SysSeqDao();
-                            string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                            var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
-
-                            var _TREA_APLY_REC = db.TREA_APLY_REC
-                                .Add(new TREA_APLY_REC()
+                            var _TREA_APLY_TEMP = db.TREA_APLY_TEMP
+                                .Add(new TREA_APLY_TEMP()
                                 {
-                                    APLY_NO = $@"G6{qPreCode}{cId}", ////申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                    APLY_FROM = "S",
-                                    TREA_REGISTER_ID = item.vTREA_REGISTER_ID,
                                     ITEM_ID = workItem,
-                                    APLY_STATUS = "C01",
-                                    EXPECTED_ACCESS_DATE = _TREA_OPEN_REC.OPEN_TREA_DATE,
-                                    APLY_UNIT = _TREA_OPEN_REC.CREATE_UNIT,
-                                    APLY_UID = _TREA_OPEN_REC.CREATE_UID,
-                                    APLY_DT = _TREA_OPEN_REC.CREATE_DT,
-                                    APLY_APPR_UID = SearchData.vCreateUid,
-                                    APLY_APPR_DT = dt,
-                                    CREATE_UID = SearchData.vCreateUid,
-                                    CREATE_DT = dt,
-                                    LAST_UPDATE_UID = SearchData.vCreateUid,
-                                    LAST_UPDATE_DT = dt,
-                                    CREATE_UNIT = SearchData.vCreateUnit
                                 });
-                            logStrA += _TREA_APLY_REC.modelToString(logStrA);
-                        } 
+                        }
                     }
                     #endregion
-                    logStrC += string.Format("修改前{0}^^修改後{1}", logStrB, logStrA);
+
+                        logStrC += string.Format("修改前{0}^^修改後{1}", logStrB, logStrA);
                 }
                 var validateMessage = db.GetValidationErrors().getValidateString();
                 if (validateMessage.Any())
@@ -716,7 +738,7 @@ namespace Treasury.Web.Service.Actual
                 EXEC_TIME_E = data.vEXEC_TIME_E,
                 MEMO = data.vMEMO,
                 APPR_STATUS = "1", //覆核狀態: 表單申請							  
-                REGI_STATUS = "A01", // 登記簿狀態					 
+                REGI_STATUS = "C02", // 登記簿狀態					 
                 CREATE_UID = currentUserId,
                 CREATE_DT = dt,
                 LAST_UPDATE_UID = currentUserId,
