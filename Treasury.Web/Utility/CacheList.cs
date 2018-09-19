@@ -37,20 +37,20 @@
         /// </summary>
         public static string TreasuryAccessApprSearchDetailViewData { get; private set; }
 
-		/// <summary>
-		/// 指定開庫作業(查詢條件)
-		/// </summary>
-		public static string SpecifiedTimeTreasurySearchData { get; private set; }
+        /// <summary>
+        /// 指定開庫作業(查詢條件)
+        /// </summary>
+        public static string SpecifiedTimeTreasurySearchData { get; private set; }
 
-		/// <summary>
-		/// 指定開庫作業(資料)
-		/// </summary>
-		public static string SpecifiedTimeTreasurySearchDetailViewData { get; private set; }
+        /// <summary>
+        /// 指定開庫作業(資料)
+        /// </summary>
+        public static string SpecifiedTimeTreasurySearchDetailViewData { get; private set; }
 
-		/// <summary>5
-		/// 指定開庫作業新增申請覆核
-		/// </summary>
-		public static string SpecifiedTimeTreasuryApplyData { get; private set; }
+        /// <summary>5
+        /// 指定開庫作業新增申請覆核
+        /// </summary>
+        public static string SpecifiedTimeTreasuryApplyData { get; private set; }
 
         /// <summary>
         /// 指定開庫作業覆核畫面(查詢條件)
@@ -86,6 +86,16 @@
         /// 金庫登記簿查詢列印作業-明細
         /// </summary>
         public static string TreasuryRegisterSearchReportD { get; private set; }
+
+        /// <summary>
+        /// 入庫人員確認作業(查詢)
+        /// </summary>
+        public static string ConfirmStorageSearchData { get; private set; }
+
+        /// <summary>
+        /// 入庫人員確認作業(資料)
+        /// </summary>
+        public static string ConfirmStorageSearchDetailViewData { get; private set; }
 
         /// <summary>
         /// 明細資料(空白票據)
@@ -180,6 +190,26 @@
         /// </summary>
         public static string CDCSEALData { get; private set; }
 
+        /// <summary>
+        /// 資料庫異動印章畫面
+        /// </summary>
+        public static string CDCCAData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動存出保證金畫面
+        /// </summary>
+        public static string CDCMargingData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動重要物品畫面
+        /// </summary>
+        public static string CDCItemImpData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動存入保證金畫面
+        /// </summary>
+        public static string CDCMarginpData { get; private set; }
+
         #endregion Cache資料
 
 
@@ -192,16 +222,16 @@
             TreasuryAccessSearchUpdateViewData = "TreasuryAccessSearchUpdateViewData";
             TreasuryAccessApprSearchData = "TreasuryAccessApprSearchData";
             TreasuryAccessApprSearchDetailViewData = "TreasuryAccessApprSearchDetailViewData";
-			SpecifiedTimeTreasurySearchData = "SpecifiedTimeTreasurySearchData";
-			SpecifiedTimeTreasurySearchDetailViewData = "SpecifiedTimeTreasurySearchDetailViewData";
-			SpecifiedTimeTreasuryApplyData = "SpecifiedTimeTreasuryApplyData";
+            SpecifiedTimeTreasurySearchData = "SpecifiedTimeTreasurySearchData";
+            SpecifiedTimeTreasurySearchDetailViewData = "SpecifiedTimeTreasurySearchDetailViewData";
+            SpecifiedTimeTreasuryApplyData = "SpecifiedTimeTreasuryApplyData";
             SpecifiedTimeTreasuryApprSearchData = "SpecifiedTimeTreasuryApprSearchData";
             SpecifiedTimeTreasuryApprSearchDetailViewData = "SpecifiedTimeTreasuryApprSearchDetailViewData";
             SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
             BeforeOpenTreasuryRoutine = "BeforeOpenTreasuryRoutine";
             BeforeOpenTreasuryStorage = "BeforeOpenTreasuryStorage";
-            TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
-            TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
+            ConfirmStorageSearchData = "ConfirmStorageSearchData";
+            ConfirmStorageSearchDetailViewData = "ConfirmStorageSearchDetailViewData";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";
@@ -221,6 +251,12 @@
             DepositData_D_All = "DepositData_D_All";
             CDCSearchViewModel = "CDCSearchViewModel";
             CDCSEALData = "CDCSEALData";
+            CDCCAData = "CDCCAData";
+            CDCMargingData = "CDCMargingData";
+            CDCItemImpData = "CDCItemImpData";
+            CDCMarginpData = "CDCMarginpData";
+            TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
+            TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料
 
         }
