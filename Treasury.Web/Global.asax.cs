@@ -1,5 +1,4 @@
-﻿
-using Dapper;
+﻿using Dapper;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -12,6 +11,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.SessionState;
+using Treasury.WebScheduler;
 
 namespace Treasury.Web
 {
@@ -35,9 +35,7 @@ namespace Treasury.Web
 
             AntiForgeryConfig.SuppressXFrameOptionsHeader = true;
 
-           // JobScheduler.Start();
-
-
+            JobScheduler.Start();
         }
 
         protected void Application_BeginRequest(Object sender, EventArgs e)

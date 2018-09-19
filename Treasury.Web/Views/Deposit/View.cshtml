@@ -455,27 +455,45 @@
                 else
                     $('#' + DepositDep_No_B).val(created.padLeft(_Check_No_B, $('#' + DepositDep_No_E).val().length, '0'));
             }
-        });
-
-        //存單號碼(迄)帶出張數
-        $('#' + DepositDep_No_E).off('blur', function () { });
-        $('#' + DepositDep_No_E).on('blur', function () {
-            if ($('#' + DepositDep_No_E).val().length <= 7) {
-                var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
-                var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
-                if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
-                    $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+            
+            //存單號碼(迄)帶出張數
+            if ($(this).attr('id') == DepositDep_No_E)
+            {
+                if ($('#' + DepositDep_No_E).val().length <= 7) {
+                    var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+                    var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
+                    if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+                        $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+                    }
+                    else {
+                        $('#' + DepositDep_Cnt).val('');
+                    }
                 }
-                else
-                {
+                else {
                     $('#' + DepositDep_Cnt).val('');
                 }
             }
-            else
-            {
-                $('#' + DepositDep_Cnt).val('');
-            }
         });
+
+        //存單號碼(迄)帶出張數
+        //$('#' + DepositDep_No_E).off('blur', function () { });
+        //$('#' + DepositDep_No_E).on('blur', function () {
+        //    if ($('#' + DepositDep_No_E).val().length <= 7) {
+        //        var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+        //        var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
+        //        if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+        //            $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+        //        }
+        //        else
+        //        {
+        //            $('#' + DepositDep_Cnt).val('');
+        //        }
+        //    }
+        //    else
+        //    {
+        //        $('#' + DepositDep_Cnt).val('');
+        //    }
+        //});
 
         //張數算出存單號碼(迄)
         $('#' + DepositDep_Cnt).off('blur', function () { });
@@ -483,7 +501,8 @@
             var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
             var _Deposit_Dep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
             if (!isNaN(_Deposit_Dep_Cnt) && !isNaN(_Deposit_Dep_Cnt)) {
-                $('#' + DepositDep_No_E).val(_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1);
+                //$('#' + DepositDep_No_E).val(_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1);
+                $('#' + DepositDep_No_E).val(created.padLeft((_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1), $('#' + DepositDep_No_B).val().length, '0'));
             }
             else
             {
