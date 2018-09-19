@@ -76,7 +76,17 @@
         /// 金庫登記簿執行作業(開庫前)-已入庫確認資料
         /// </summary>
         public static string BeforeOpenTreasuryStorage { get; private set; }
-        
+
+        /// <summary>
+        /// 金庫登記簿查詢列印作業-查詢結果
+        /// </summary>
+        public static string TreasuryRegisterSearchReportM { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿查詢列印作業-明細
+        /// </summary>
+        public static string TreasuryRegisterSearchReportD { get; private set; }
+
         /// <summary>
         /// 明細資料(空白票據)
         /// </summary>
@@ -190,6 +200,8 @@
             SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
             BeforeOpenTreasuryRoutine = "BeforeOpenTreasuryRoutine";
             BeforeOpenTreasuryStorage = "BeforeOpenTreasuryStorage";
+            TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
+            TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             BILLTempData = "BILLTempData";
             BILLDayData = "BILLDayData";
             ESTATEAllData = "ESTATEAllData";

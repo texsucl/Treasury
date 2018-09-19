@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Treasury.Web.Service.Actual;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
+using Treasury.WebActionFilter;
 using Treasury.WebUtility;
 
 /// <summary>
@@ -23,6 +24,8 @@ using Treasury.WebUtility;
 /// 
 namespace Treasury.Web.Controllers
 {
+    [Authorize]
+    [CheckSessionFilterAttribute]
     public class BeforeOpenTreasuryController : CommonController
     {
         // GET: BeforeOpenTreasury
