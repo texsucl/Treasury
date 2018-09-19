@@ -57,8 +57,10 @@ namespace Treasury.Web.Service.Actual
 
                 result = db.TREA_OPEN_REC.AsNoTracking()
                     .Where(x => x.REGI_STATUS == Regi_Status)
-                    .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
-                    .AsEnumerable().Select(x => x.TREA_REGISTER_ID).FirstOrDefault();
+                    .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)                    
+                    .AsEnumerable()
+                    .Where(x => DateTime.Parse(x.OPEN_TREA_TIME + ":00") >= DateTime.Now)
+                    .Select(x => x.TREA_REGISTER_ID).FirstOrDefault();
             }
 
             return result;

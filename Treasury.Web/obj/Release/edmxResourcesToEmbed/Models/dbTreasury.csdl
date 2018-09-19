@@ -345,31 +345,6 @@
     <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
     <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
   </EntityType>
-  <EntityType Name="MAIL_TIME">
-    <Key>
-      <PropertyRef Name="MAIL_TIME_ID" />
-    </Key>
-    <Property Name="MAIL_TIME_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="INTERVAL_MIN" Type="Int32" />
-    <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
-    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-    <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
-  </EntityType>
   <EntityType Name="MAIL_TIME_HIS">
     <Key>
       <PropertyRef Name="APLY_NO" />
@@ -683,7 +658,6 @@
     <EntitySet Name="MAIL_CONTENT_HIS" EntityType="Self.MAIL_CONTENT_HIS" />
     <EntitySet Name="MAIL_RECEIVE" EntityType="Self.MAIL_RECEIVE" />
     <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="Self.MAIL_RECEIVE_HIS" />
-    <EntitySet Name="MAIL_TIME" EntityType="Self.MAIL_TIME" />
     <EntitySet Name="MAIL_TIME_HIS" EntityType="Self.MAIL_TIME_HIS" />
     <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" />
     <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" />
@@ -725,6 +699,7 @@
     <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
     <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
     <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
+    <EntitySet Name="MAIL_TIME" EntityType="dbTreasuryModel.MAIL_TIME" />
     <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
@@ -1131,11 +1106,34 @@
     <Property Name="APPR_Date" Type="DateTime" Precision="0" />
     <Property Name="APPR_Time" Type="Time" Precision="7" />
   </EntityType>
+  <EntityType Name="MAIL_TIME">
+    <Key>
+      <PropertyRef Name="MAIL_TIME_ID" />
+    </Key>
+    <Property Name="MAIL_TIME_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="FUNC_ID" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="INTERVAL_MIN" Type="Int32" />
+    <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="DATA_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+    <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+  </EntityType>
   <EntityType Name="SYS_JOB_REC">
     <Key>
       <PropertyRef Name="JOB_ITEM_ID" />
-      <PropertyRef Name="JOB_ID" />
-      <PropertyRef Name="CREATE_TIME" />
     </Key>
     <Property Name="JOB_ITEM_ID" Type="String" Nullable="false" MaxLength="11" FixedLength="false" Unicode="false" />
     <Property Name="JOB_ID" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />

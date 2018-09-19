@@ -6,6 +6,7 @@ namespace Treasury.WebUtility
 {
     public static class TypeTransfer
     {
+
         #region String To Int?
 
         /// <summary>

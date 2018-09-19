@@ -176,6 +176,121 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCMarginpViewModel> result = new List<CDCMarginpViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_DEP_RECEIVED.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCMarginpViewModel()
+                        {
+                            vItem_Id = x.ITEM_ID,
+                            vlItem_Id = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vBook_No = x.BOOK_NO,
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vMargin_Take_Of_Type = x.MARGIN_TAKE_OF_TYPE,
+                            vMargin_Take_Of_Type_AFT = x.MARGIN_TAKE_OF_TYPE_AFT,
+                            vTrad_Partners = x.TRAD_PARTNERS,
+                            vTrad_Partners_AFT = x.TRAD_PARTNERS_AFT,
+                            vAmount = x.AMOUNT,
+                            vAmount_AFT = x.AMOUNT_AFT,
+                            vMargin_Item = x.MARGIN_ITEM,
+                            vMargin_Item_AFT = x.MARGIN_ITEM_AFT,
+                            vMargin_Item_Issuer = x.MARGIN_ITEM_ISSUER,
+                            vMargin_Item_Issuer_AFT = x.MARGIN_ITEM_ISSUER_AFT,
+                            vPledge_Item_No = x.PLEDGE_ITEM_NO,
+                            vPledge_Item_No_AFT = x.PLEDGE_ITEM_NO_AFT,
+                            vEffective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
+                            vEffective_Date_B_AFT = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B_AFT),
+                            vEffective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                            vEffective_Date_E_AFT = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E_AFT),
+                            vDescription = x.DESCRIPTION,
+                            vDescription_AFT = x.DESCRIPTION_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_DEP_RECEIVED.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCMarginpViewModel()
+                        {
+                            vItem_Id = x.ITEM_ID,
+                            vlItem_Id = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vBook_No = x.BOOK_NO,
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vMargin_Take_Of_Type = x.MARGIN_TAKE_OF_TYPE,
+                            vMargin_Take_Of_Type_AFT = x.MARGIN_TAKE_OF_TYPE_AFT,
+                            vTrad_Partners = x.TRAD_PARTNERS,
+                            vTrad_Partners_AFT = x.TRAD_PARTNERS_AFT,
+                            vAmount = x.AMOUNT,
+                            vAmount_AFT = x.AMOUNT_AFT,
+                            vMargin_Item = x.MARGIN_ITEM,
+                            vMargin_Item_AFT = x.MARGIN_ITEM_AFT,
+                            vMargin_Item_Issuer = x.MARGIN_ITEM_ISSUER,
+                            vMargin_Item_Issuer_AFT = x.MARGIN_ITEM_ISSUER_AFT,
+                            vPledge_Item_No = x.PLEDGE_ITEM_NO,
+                            vPledge_Item_No_AFT = x.PLEDGE_ITEM_NO_AFT,
+                            vEffective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),
+                            vEffective_Date_B_AFT = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B_AFT),
+                            vEffective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),
+                            vEffective_Date_E_AFT = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E_AFT),
+                            vDescription = x.DESCRIPTION,
+                            vDescription_AFT = x.DESCRIPTION_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCharge_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                });
+            }
+            return result;
+        }
+
         #endregion
 
         #region Save Data
@@ -601,6 +716,169 @@ namespace Treasury.Web.Service.Actual
                 db.OTHER_ITEM_APLY.RemoveRange(otherItemAplys);
                 return new Tuple<bool, string>(true, logStr);
             }
+        }
+
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCMarginpViewModel model in saveData)
+                {
+                    var _Marginp = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == model.vItem_Id);
+                    if (_Marginp != null && !changFlag)
+                    {
+                        if (_Marginp.LAST_UPDATE_DT > model.vLast_Update_Time || _Marginp.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+                        if (!changFlag)
+                        {
+                            _Marginp.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _Marginp.MARGIN_TAKE_OF_TYPE_AFT = model.vMargin_Take_Of_Type_AFT;
+                            _Marginp.TRAD_PARTNERS_AFT = model.vTrad_Partners_AFT;
+                            _Marginp.AMOUNT_AFT = model.vAmount_AFT;
+                            _Marginp.MARGIN_ITEM_AFT = model.vMargin_Item_AFT;
+                            _Marginp.MARGIN_ITEM_ISSUER_AFT = model.vMargin_Item_Issuer_AFT;
+                            _Marginp.PLEDGE_ITEM_NO_AFT = model.vPledge_Item_No_AFT;
+                            _Marginp.EFFECTIVE_DATE_B_AFT = TypeTransfer.stringToDateTimeN(model.vEffective_Date_B_AFT);
+                            _Marginp.EFFECTIVE_DATE_E_AFT = TypeTransfer.stringToDateTimeN(model.vEffective_Date_E_AFT);
+                            _Marginp.DESCRIPTION_AFT = model.vDescription_AFT;
+                            _Marginp.MEMO_AFT = model.vMemo_AFT;
+                            _Marginp.LAST_UPDATE_DT = dt;
+
+                            logStr = _Marginp.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _Marginp.ITEM_ID
+                            };
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:存入保證金";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Marginp = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Marginp != null)
+                {
+                    _Marginp.INVENTORY_STATUS = "1"; //在庫
+                    _Marginp.MARGIN_TAKE_OF_TYPE_AFT = null;
+                    _Marginp.TRAD_PARTNERS_AFT = null;
+                    _Marginp.AMOUNT_AFT = null;
+                    _Marginp.MARGIN_ITEM_AFT = null;
+                    _Marginp.MARGIN_ITEM_ISSUER_AFT = null;
+                    _Marginp.PLEDGE_ITEM_NO_AFT = null;
+                    _Marginp.EFFECTIVE_DATE_B_AFT = null;
+                    _Marginp.EFFECTIVE_DATE_E_AFT = null;
+                    _Marginp.DESCRIPTION_AFT = null;
+                    _Marginp.MEMO_AFT = null;
+                    _Marginp.LAST_UPDATE_DT = dt;
+                    logStr = _Marginp.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Marginp = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Marginp != null)
+                {
+                    _Marginp.INVENTORY_STATUS = "1"; //在庫
+                    _Marginp.MARGIN_TAKE_OF_TYPE = _Marginp.MARGIN_TAKE_OF_TYPE_AFT;
+                    _Marginp.MARGIN_TAKE_OF_TYPE_AFT = null;
+                    _Marginp.TRAD_PARTNERS = _Marginp.TRAD_PARTNERS_AFT;
+                    _Marginp.TRAD_PARTNERS_AFT = null;
+                    _Marginp.AMOUNT = _Marginp.AMOUNT_AFT;
+                    _Marginp.AMOUNT_AFT = null;
+                    _Marginp.MARGIN_ITEM = _Marginp.MARGIN_ITEM_AFT;
+                    _Marginp.MARGIN_ITEM_AFT = null;
+                    _Marginp.MARGIN_ITEM_ISSUER = _Marginp.MARGIN_ITEM_ISSUER_AFT;
+                    _Marginp.MARGIN_ITEM_ISSUER_AFT = null;
+                    _Marginp.PLEDGE_ITEM_NO = _Marginp.PLEDGE_ITEM_NO_AFT;
+                    _Marginp.PLEDGE_ITEM_NO_AFT = null;
+                    _Marginp.EFFECTIVE_DATE_B = _Marginp.EFFECTIVE_DATE_B_AFT;
+                    _Marginp.EFFECTIVE_DATE_B_AFT = null;
+                    _Marginp.EFFECTIVE_DATE_E = _Marginp.EFFECTIVE_DATE_E_AFT;
+                    _Marginp.EFFECTIVE_DATE_E_AFT = null;
+                    _Marginp.DESCRIPTION = _Marginp.DESCRIPTION_AFT;
+                    _Marginp.DESCRIPTION_AFT = null;
+                    _Marginp.MEMO = _Marginp.MEMO_AFT;
+                    _Marginp.MEMO_AFT = null;
+                    _Marginp.LAST_UPDATE_DT = dt;
+                    logStr = _Marginp.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
 
         #endregion

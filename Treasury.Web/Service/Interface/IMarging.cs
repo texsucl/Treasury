@@ -10,7 +10,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 存出保證金
     /// </summary>
-    public interface IMarging : IApply, IAgency
+    public interface IMarging : IApply, IAgency ,ICDCAction
     {
         /// <summary>
         /// 類別

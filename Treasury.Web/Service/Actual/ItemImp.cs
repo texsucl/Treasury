@@ -52,10 +52,10 @@ namespace Treasury.Web.Service.Actual
                             .FirstOrDefault(x => x.APLY_NO == aplyNo);
                 if (_TAR != null)
                 {
-                    //使用單號去其他存取項目檔抓取物品編號
+                    //使用單號去其他存取項目檔抓取歸檔編號
                     var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
-                    //使用物品編號去重要物品庫存資料檔抓取資料
+                    //使用歸檔編號去重要物品庫存資料檔抓取資料
                     var details = db.ITEM_IMPO.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
                     if (details.Any())
@@ -75,7 +75,6 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit">申請單位</param>
         /// <param name="aplyNo">取出單號</param>
         /// <returns></returns>
-        
         public List<ItemImpViewModel> GetDbDataByUnit(string vAplyUnit = null, string aplyNo = null)
         {
             var result = new List<ItemImpViewModel>();
@@ -127,6 +126,103 @@ namespace Treasury.Web.Service.Actual
                              vLast_Update_Time = x.LAST_UPDATE_DT
                          }));
                 }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCItemImpViewModel> result = new List<CDCItemImpViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_IMPO.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCItemImpViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vlItem_Id = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vItemImp_Name = x.ITEM_NAME,
+                            vItemImp_Name_AFT = x.ITEM_NAME_AFT,
+                            vItemImp_Quantity = x.QUANTITY,
+                            vItemImp_Quantity_AFT = x.QUANTITY_AFT,
+                            vItemImp_Amount = x.AMOUNT,
+                            vItemImp_Amount_AFT = x.AMOUNT_AFT,
+                            vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                            vItemImp_Expected_Date_AFT =TypeTransfer.dateTimeNToString( x.EXPECTED_ACCESS_DATE_AFT),
+                            vItemImp_Description = x.DESCRIPTION,
+                            vItemImp_Description_AFT = x.DESCRIPTION_AFT,
+                            vItemImp_MEMO = x.MEMO,
+                            vItemImp_MEMO_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_IMPO.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCItemImpViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vlItem_Id = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPUT_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAPLY_UID = x.APLY_UID,
+                            vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCHARGE_DEPT = x.CHARGE_DEPT,
+                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCHARGE_SECT = x.CHARGE_SECT,
+                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vItemImp_Name = x.ITEM_NAME,
+                            vItemImp_Name_AFT = x.ITEM_NAME_AFT,
+                            vItemImp_Quantity = x.QUANTITY,
+                            vItemImp_Quantity_AFT = x.QUANTITY_AFT,
+                            vItemImp_Amount = x.AMOUNT,
+                            vItemImp_Amount_AFT = x.AMOUNT_AFT,
+                            vItemImp_Expected_Date =TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                            vItemImp_Expected_Date_AFT = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE_AFT),
+                            vItemImp_Description = x.DESCRIPTION,
+                            vItemImp_Description_AFT = x.DESCRIPTION_AFT,
+                            vItemImp_MEMO = x.MEMO,
+                            vItemImp_MEMO_AFT = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCHARGE_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                });
             }
             return result;
         }
@@ -503,6 +599,153 @@ namespace Treasury.Web.Service.Actual
             }
         }
 
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCItemImpViewModel model in saveData)
+                {
+                    var _ItemImp = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_ItemImp != null && !changFlag)
+                    {
+                        if (_ItemImp.LAST_UPDATE_DT > model.vLast_Update_Time || _ItemImp.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+                        if (!changFlag)
+                        {
+                            _ItemImp.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _ItemImp.ITEM_NAME_AFT = model.vItemImp_Name_AFT;
+                            _ItemImp.QUANTITY_AFT = model.vItemImp_Quantity_AFT;
+                            _ItemImp.AMOUNT_AFT = model.vItemImp_Amount_AFT;
+                            _ItemImp.EXPECTED_ACCESS_DATE_AFT = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_AFT);
+                            _ItemImp.DESCRIPTION_AFT = model.vItemImp_Description_AFT;
+                            _ItemImp.MEMO_AFT = model.vItemImp_MEMO_AFT;
+                            _ItemImp.LAST_UPDATE_DT = dt;
+
+                            logStr = _ItemImp.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _ItemImp.ITEM_ID
+                            };
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:重要物品";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _ItemImp = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_ItemImp != null)
+                {
+                    _ItemImp.INVENTORY_STATUS = "1"; //在庫
+                    _ItemImp.ITEM_NAME_AFT = null;
+                    _ItemImp.QUANTITY_AFT = null;
+                    _ItemImp.AMOUNT_AFT = null;
+                    _ItemImp.EXPECTED_ACCESS_DATE_AFT = null;
+                    _ItemImp.DESCRIPTION_AFT = null;
+                    _ItemImp.MEMO_AFT = null;
+                    _ItemImp.LAST_UPDATE_DT = dt;
+                    logStr = _ItemImp.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _ItemImp = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_ItemImp != null)
+                {
+                    _ItemImp.INVENTORY_STATUS = "1"; //在庫
+                    _ItemImp.ITEM_NAME = _ItemImp.ITEM_NAME_AFT;
+                    _ItemImp.ITEM_NAME_AFT = null;
+                    _ItemImp.QUANTITY = _ItemImp.QUANTITY_AFT;
+                    _ItemImp.QUANTITY_AFT = null;
+                    _ItemImp.AMOUNT =_ItemImp.AMOUNT_AFT;
+                    _ItemImp.AMOUNT_AFT = null;
+                    _ItemImp.EXPECTED_ACCESS_DATE = _ItemImp.EXPECTED_ACCESS_DATE_AFT;
+                    _ItemImp.EXPECTED_ACCESS_DATE_AFT = null;
+                    _ItemImp.DESCRIPTION = _ItemImp.DESCRIPTION_AFT;
+                    _ItemImp.DESCRIPTION_AFT = null;
+                    _ItemImp.MEMO = _ItemImp.MEMO_AFT;
+                    _ItemImp.MEMO_AFT = null;
+                    _ItemImp.LAST_UPDATE_DT = dt;
+                    logStr = _ItemImp.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
         #endregion
 
         #region privateFunction
@@ -517,7 +760,7 @@ namespace Treasury.Web.Service.Actual
         {
             return data.Select(x => new ItemImpViewModel()
             {
-                vItemId = x.ITEM_ID, //物品編號
+                vItemId = x.ITEM_ID, //歸檔編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vItemImp_Name = x.ITEM_NAME, //重要物品名稱
                 vItemImp_Quantity = x.QUANTITY, //重要物品數量

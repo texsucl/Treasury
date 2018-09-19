@@ -21,8 +21,8 @@ namespace Treasury.Web.Service.Actual
             var result = new CDCViewModel();
             List<SelectOption> jobProject = new List <SelectOption>(); //作業項目
             List<SelectOption> treasuryIO = new List <SelectOption>(); //金庫內外
-            List<SelectOption> dMargin_Dep_Type = new List<SelectOption>(); //存入保證金類別
-            List<SelectOption> tMargin_Dep_Type = new List<SelectOption>(); //存出保證金類別
+            List<SelectOption> dMargin_Take_Of_Type = new List<SelectOption>(); //存入保證金類別
+            List<SelectOption> dMarging_Dep_Type = new List<SelectOption>(); //存出保證金類別
             List<SelectOption> Estate_Form_No = new List<SelectOption>(); //不動產權狀狀別
                        
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -49,7 +49,7 @@ namespace Treasury.Web.Service.Actual
                     Text = x.CODE,
                     }).ToList();
 
-                dMargin_Dep_Type = sysCode
+                dMargin_Take_Of_Type = sysCode
                     .Where(x => x.CODE_TYPE == "MARGIN_TAKE_OF_TYPE")
                     .OrderBy(x => x.ISORTBY)
                     .AsEnumerable().Select(x => new SelectOption()
@@ -57,9 +57,9 @@ namespace Treasury.Web.Service.Actual
                         Value = x.CODE,
                         Text = x.CODE_VALUE,
                     }).ToList();
-                dMargin_Dep_Type.Insert(0, all);
+                dMargin_Take_Of_Type.Insert(0, all);
 
-                tMargin_Dep_Type = sysCode
+                dMarging_Dep_Type = sysCode
                    .Where(x => x.CODE_TYPE == "MARGING_TYPE")
                    .OrderBy(x => x.ISORTBY)
                    .AsEnumerable().Select(x => new SelectOption()
@@ -67,7 +67,7 @@ namespace Treasury.Web.Service.Actual
                        Value = x.CODE,
                        Text = x.CODE_VALUE,
                    }).ToList(); 
-                tMargin_Dep_Type.Insert(0, all);
+                dMarging_Dep_Type.Insert(0, all);
 
                 Estate_Form_No = sysCode
                  .Where(x => x.CODE_TYPE == "ESTATE_TYPE")
@@ -83,8 +83,8 @@ namespace Treasury.Web.Service.Actual
             result.vTreasuryIO = treasuryIO;
             result.vJobProject = jobProject;
             result.vEstate_From_No = Estate_Form_No;
-            result.vMarging = tMargin_Dep_Type;
-            result.vMarginp = dMargin_Dep_Type;
+            result.vMarging = dMarging_Dep_Type;
+            result.vMarginp = dMargin_Take_Of_Type;
             result.vBook_No = new Estate().GetBuildName();
             result.vName = new Stock().GetStockName();
             result.vTRAD_Partners = new Deposit().GetTRAD_Partners();

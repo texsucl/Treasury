@@ -1,0 +1,586 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div id="CDCMARGINGjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CDCMarging_Act">
+        <input type="button" id="CDCMargingApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDCMargingBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDCMargingDialog" style="display:none;">
+        <form id="CDCMargingDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vPUT_DATE" name="vPUT_DATE"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>冊號 : </label>
+                    </td>
+                    <td>
+                        <label id="vBook_No" name="vBook_No"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vAPLY_UID_Name" name="vAPLY_UID_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <label id="vCHARGE_Name" name="vCHARGE_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>類別 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dMarging_Dep_Type", (SelectList)ViewBag.dMarging_Dep_Type, new { @class = "CDCMargingUpdateType" })
+                        <span class="red" style="padding-left:20px" id="sCDCMargin_Dep_Type"></span>
+                    </td>
+                    <td>
+                        <label>交易對象 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCMargingUpdateType" id="tCDCTrad_Partners" name="tCDCTrad_Partners" maxlength="30" />
+                        <span class="red" style="padding-left:20px" id="sCDCTrad_Partners"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>歸檔編號 : </label>
+                    </td>
+                    <td>
+                        <label id="vlItem_Id"></label>
+                    </td>
+                    <td>
+                        <label>金額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCMargingUpdateType" id="tCDCAmount" name="tCDCAmount" />
+                        <span class="red" style="padding-left:20px" id="sCDCAmount"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>職場代號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCMargingUpdateType" id="tCDCWorkplace_Code" name="tCDCWorkplace_Code" maxlength="7" />
+                        <span class="red" style="padding-left:20px" id="sCDCWorkplace_Code"></span>
+                    </td>
+                    <td>
+                        <label>說明 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCMargingUpdateType" id="tCDCDescription" name="tCDCDescription" maxlength="100" />
+                        <span class="red" style="padding-left:20px" id="sCDCDescription"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCMargingUpdateType" id="tCDCMemo" name="tCDCMemo" maxlength="200" />
+                        <span class="red" style="padding-left:20px" id="sCDCMemo"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" id="hItem_PK" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" id="CDCMargingUpdateTemp" value="修改" class="btn btn-primary" />
+                    </td>
+                    <td colspan="2" style="text-align:right;">
+                        <input type="button" id="CDCMargingCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDCMargingUrl = {};
+        CDCMargingUrl.getData = '@Url.Action("GetCDCCacheData", "Marging")';
+        CDCMargingUrl.UpdateDbData = '@Url.Action("UpdateDbData", "Marging")';
+        CDCMargingUrl.ApplyDbData = '@Url.Action("ApplyDbData", "Marging")';
+        CDCMargingUrl.RepeatDbData = '@Url.Action("RepeatDbData", "Marging")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var CDCMargingDialogId = 'CDCMargingDialog'; //dialogId
+        var CDCMargingFormId = 'CDCMargingDialogForm'; //formId
+        var vPut_DateId = 'vPUT_DATE'; //入庫日期Id(label)
+        var vBook_NoId = 'vBook_No'; //冊號Id(label)
+        var vAply_Uid_NameId = 'vAPLY_UID_Name'; //存入申請人Id(label)
+        var vCharge_NameId = 'vCHARGE_Name' //權責單位Id(label)
+        var dCDCMarging_Dep_TypeId = 'dMarging_Dep_Type'; //類別Id(dropdownlist)
+        var sCDCMarging_Dep_TypeId = 'sCDCMargin_Dep_Type'; //類別Id(span)
+        var tCDCTrad_PartnersId = 'tCDCTrad_Partners'; //交易對象Id(text)
+        var sCDCTrad_PartnersId = 'sCDCTrad_Partners'; //交易對象Id(span)
+        var vlItem_Id = 'vlItem_Id'; //歸檔編號Id(label)
+        var tCDCAmountId = 'tCDCAmount'; //金額Id(text)
+        var sCDCAmountId = 'sCDCAmount'; //金額Id(span)
+        var tCDCWorkplace_CodeId = 'tCDCWorkplace_Code'; //職場代號Id(text)
+        var sCDCWorkplace_CodeId = 'sCDCWorkplace_Code'; //職場代號Id(span)
+        var tCDCDescriptionId = 'tCDCDescription'; //說明Id(text)
+        var sCDCDescriptionId = 'sCDCDescription'; //說明Id(span)
+        var tCDCMemoId = 'tCDCMemo'; //備註Id(text)
+        var sCDCMemoId = 'sCDCMemo'; //備註Id(span)
+        var CDCMargingItemPK = 'hItem_PK'; //網頁PK(hidden)
+
+        var CDCMarging_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDCMarging_Act_Type)
+            $('.CDCMarging_Act').show(); //申請異動主畫面進來
+
+        var CDCMarging_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDCMarging_ApplyFlag)
+            $('#CDCMargingApply').hide();
+
+        var CDCMargingConfirmFlag = false; //離開時提醒訊息
+
+        //#endregion 參數設定
+
+        //#region 初始動作
+        CDCMargingDbGrid();
+        setCDCMargingVerified();
+        //#endregion 初始動作
+        
+        //#region 註冊verified
+        function setCDCMargingVerified() {
+            verified.required(CDCMargingFormId, tCDCTrad_PartnersId, message.required('交易對象')); //交易對象為必填
+            verified.required(CDCMargingFormId, tCDCAmountId, message.required('金額')); //金額為必填
+            verified.price(CDCMargingFormId, tCDCAmountId); //金額 僅能輸入數字(正)
+        }
+        //#endregion 註冊verified
+       
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDCMargingApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCMargingApplyFun(); });
+                    break;
+                case 'CDCMargingBack':
+                case 'CDCMargingCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'CDCMargingBack' &&
+                                CDCMargingConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+                case 'CDCMargingUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCMargingUpdateTempFun(); });
+                    break;
+            }
+        });
+
+        //申請覆核
+        function CDCMargingApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDCMargingUrl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDCMargingApply'));
+                }
+            })
+        }
+        //#endregion 註冊事件
+
+        //#region 初始設定
+
+        //#endregion 初始設定
+
+        //#region function
+
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox MargingTakeOuts customerCheck'></div>";
+            return str;
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+            {
+                <text>
+                case '@item.Value':
+                    return '@item.Text';
+                    </text>
+            }
+        }
+                default:
+                    return '';
+            }
+        }
+
+        function formattervMargin_Dep_Type(cellvalue, options, rdata) {
+            if (rdata.vMargin_Dep_Type_AFT != null) {
+                switch (rdata.vMargin_Dep_Type_AFT) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dMarging_Dep_Type))
+                         {
+                             <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                         }
+                     }
+                }
+            } else {
+                switch (rdata.vMargin_Dep_Type) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dMarging_Dep_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function unformattervMargin_Dep_Type(cellvalue, options, rdata) {
+            return rdata.vMargin_Dep_Type;
+        }
+
+        function formattervTrad_Partners(cellvalue, options, rdata) {
+            if (rdata.vTrad_Partners_AFT != null)
+                return '<span class="red">' + rdata.vTrad_Partners_AFT + '</span>';
+            else
+                return rdata.vTrad_Partners || '';
+        }
+
+        function formattervAmount(cellvalue, options, rdata) {
+            if (rdata.vAmount_AFT != null)
+                return '<span class="red">' + customerUtility.addCommas(rdata.vAmount_AFT) + '</span>';
+            else
+                return customerUtility.addCommas(rdata.vAmount) || '';
+        }
+
+        function formattervWorkplace_Code(cellvalue, options, rdata) {
+            if (rdata.vWorkplace_Code_AFT != null)
+                return '<span class="red">' + rdata.vWorkplace_Code_AFT + '</span>';
+            else
+                return rdata.vWorkplace_Code || '';
+        }
+
+        function formattervDescription(cellvalue, options, rdata) {
+            if (rdata.vDescription_AFT != null)
+                return '<span class="red">' + rdata.vDescription_AFT + '</span>';
+            else
+                return rdata.vDescription || '';
+        }
+
+        function formattervMemo(cellvalue, options, rdata) {
+            if (rdata.vMemo_AFT != null)
+                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
+            else
+                return rdata.vMemo || '';
+        }
+
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCMarging' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCMarging' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCMarging' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function CDCMargingDbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '冊號', '存入申請人', '權責單位',
+                '類別', '交易對象', '歸檔編號', '金額', '職場代號', '說明', '備註',
+                '類別異動前', '交易對象異動前', '金額異動前', '職場代號異動前', '說明異動前', '備註異動前',
+                '類別異動後', '交易對象異動後', '金額異動後', '職場代號異動後', '說明異動後', '備註異動後',
+                '網頁PK', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus, align: 'center' });
+            colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 50, align: 'center', sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 170, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vMargin_Dep_Type_Show", index: "vMargin_Dep_Type_Show", width: 70, align: 'center', sortable: false, formatter: formattervMargin_Dep_Type, unformatter: unformattervMargin_Dep_Type });
+            colModelArray.push({ name: "vTrad_Partners_Show", index: "vTrad_Partners_Show", width: 100, align: 'center', sortable: false, formatter: formattervTrad_Partners });
+            colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, align: 'center', sortable: false });
+            colModelArray.push({ name: "vAmount_Show", index: "vAmount_Show", width: 80,align: 'right', sortable: false, formatter: formattervAmount });
+            colModelArray.push({ name: "vWorkplace_Code_Show", index: "vWorkplace_Code_Show", width: 100, align: 'center', sortable: false, formatter: formattervWorkplace_Code });
+            colModelArray.push({ name: "vDescription_Show", index: "vDescription_Show", width: 100, align: 'center', sortable: false, formatter: formattervDescription });
+            colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, align: 'center', sortable: false, formatter: formattervMemo });
+
+            colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", hidden: true });
+            colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", hidden: true });
+            colModelArray.push({ name: "vAmount", index: "vAmount", hidden: true });
+            colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", hidden: true });
+            colModelArray.push({ name: "vDescription", index: "vDescription" ,hidden: true });
+            colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+
+            colModelArray.push({ name: "vMargin_Dep_Type_AFT", index: "vMargin_Dep_Type_AFT", hidden: true });
+            colModelArray.push({ name: "vTrad_Partners_AFT", index: "vTrad_Partners_AFT", hidden: true });
+            colModelArray.push({ name: "vAmount_AFT", index: "vAmount_AFT", hidden: true });
+            colModelArray.push({ name: "vWorkplace_Code_AFT", index: "vWorkplace_Code_AFT", hidden: true });
+            colModelArray.push({ name: "vDescription_AFT", index: "vDescription_AFT", hidden: true });
+            colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT", hidden: true });
+
+            colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDCMARGINGjqgridDiv',
+                'CDCMargingTempList',
+                'CDCMargingTempPeger',
+                CDCMargingUrl.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '查詢資料',
+                jqgridCustom.getPage('CDCMARGINGjqgridDiv'),
+                CDCMargingTempCompleteFun,
+                true
+                );
+        }
+
+        function CDCMargingTempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDCMargingRepeat(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1') {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDCMargingRepeat(listId, rowid) {
+            var itemId = $("#" + listId).getRowData(rowid).vItem_PK;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDCMargingUrl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDCMargingDbGrid();
+                    CDCMargingConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //#region dialog
+        function dialogOpen(type, rowid)
+        {
+            $('#' + CDCMargingDialogId).validate().resetForm();
+            var listId = 'CDCMargingTempList';
+            var MargingUpdateClass = 'CDCMargingUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDCMargingDialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '存出保證金',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDCMargingUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#CDCMargingUpdateTemp').show();
+                $('.' + MargingUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('.' + MargingUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDCMargingDialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            if ($('#' + dCDCMarging_Dep_TypeId + ' option').length > 0) {
+                $('#' + dCDCMarging_Dep_TypeId).val($($('#' + dCDCMarging_Dep_TypeId + ' option')[0]).val())
+            }
+            if ($('#' + sCDCMarging_Dep_TypeId + ' option').length > 0) {
+                $('#' + sCDCMarging_Dep_TypeId).text($($('#' + sCDCMarging_Dep_TypeId + ' option')[0]).text())
+            }
+            $('#' + vPut_DateId).text('');
+            $('#' + vBook_NoId).text('');
+            $('#' + vAply_Uid_NameId).text('');
+            $('#' + vCharge_NameId).text('');
+            $('#' + dCDCMarging_Dep_TypeId).val('');
+            $('#' + sCDCMarging_Dep_TypeId).text('');
+            $('#' + tCDCTrad_PartnersId).val('');
+            $('#' + sCDCTrad_PartnersId).text('');
+            $('#' + vlItem_Id).text('');
+            $('#' + tCDCAmountId).val('');
+            $('#' + sCDCAmountId).text('');
+            $('#' + tCDCWorkplace_CodeId).val(''); 
+            $('#' + sCDCWorkplace_CodeId).text('');
+            $('#' + tCDCDescriptionId).val('');
+            $('#' + sCDCDescriptionId).text('');
+            $('#' + tCDCMemoId).val('');
+            $('#' + sCDCMemoId).text('');
+            $('#' + CDCMargingItemPK).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + vPut_DateId).text(data.vPut_Date);
+                $('#' + vBook_NoId).text(data.vBook_No);
+                $('#' + vAply_Uid_NameId).text(data.vAply_Uid_Name);
+                $('#' + vCharge_NameId).text(data.vCharge_Name);
+                $('#' + dCDCMarging_Dep_TypeId).val(data.vMargin_Dep_Type.split('-')[0]);
+                $('#' + sCDCMarging_Dep_TypeId).text(data.vMargin_Dep_Type_AFT);
+                $('#' + tCDCTrad_PartnersId).val(data.vTrad_Partners);
+                $('#' + sCDCTrad_PartnersId).text(data.vTrad_Partners_AFT);
+                $('#' + vlItem_Id).text(data.vlItem_Id);
+                $('#' + tCDCAmountId).val(data.vAmount);
+                $('#' + sCDCAmountId).text(data.vAmount_AFT);
+                $('#' + tCDCWorkplace_CodeId).val(data.vWorkplace_Code);
+                $('#' + sCDCWorkplace_CodeId).text(data.vWorkplace_Code_AFT);
+                $('#' + tCDCDescriptionId).val(data.vDescription);
+                $('#' + sCDCDescriptionId).text(data.vDescription_AFT);
+                $('#' + tCDCMemoId).val(data.vMemo);
+                $('#' + sCDCMemoId).text(data.vMemo_AFT);
+                $('#' + CDCMargingItemPK).val(data.vItem_PK);
+            }
+        }
+
+        //修改存出保證金暫存資料
+        function CDCMargingUpdateTempFun() {
+            if ($('#' + CDCMargingFormId).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDCMargingViewModel(
+                            $('#' + CDCMargingItemPK).val(),
+                            $('#' + dCDCMarging_Dep_TypeId).val().trim(),
+                            $('#' + tCDCTrad_PartnersId).val().trim(),
+                            $('#' + tCDCAmountId).val().trim(),
+                            $('#' + tCDCWorkplace_CodeId).val().trim(),
+                            $('#' + tCDCDescriptionId).val().trim(),
+                            $('#' + tCDCMemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDCMargingUrl.UpdateDbData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDCMargingUpdateTemp'));
+                        CDCMargingDbGrid();
+                        CDCMargingConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+
+        //#endregion dialog
+
+        //#region jqgrid
+
+        //#endregion jqgrid
+        
+        function CDCMargingViewModel(
+            vItem_PK,
+            vMargin_Dep_Type,
+            vTrad_Partners,
+            vAmount,
+            vWorkplace_Code,
+            vDescription,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItem_PK'] = vItem_PK;
+            obj['vMargin_Dep_Type'] = vMargin_Dep_Type;
+            obj['vTrad_Partners'] = vTrad_Partners;
+            obj['vAmount'] = vAmount;
+            obj['vWorkplace_Code'] = vWorkplace_Code;
+            obj['vDescription'] = vDescription;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+        //#endregion function
+    });
+</script>
