@@ -17,7 +17,8 @@ namespace Treasury.Web.Models
         public string ITEM_ID { get; set; }
         public string INVENTORY_STATUS { get; set; }
         public string ITEM_NAME { get; set; }
-        public Nullable<int> QUANTITY { get; set; }
+        public int QUANTITY { get; set; }
+        public Nullable<int> REMAINING { get; set; }
         public Nullable<decimal> AMOUNT { get; set; }
         public Nullable<System.DateTime> EXPECTED_ACCESS_DATE { get; set; }
         public string DESCRIPTION { get; set; }

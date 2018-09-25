@@ -12,16 +12,11 @@ namespace Treasury.Web.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class CODE_USER_HIS
+    public partial class IMPO_APLY
     {
         public string APLY_NO { get; set; }
-        public string USER_ID { get; set; }
-        public string EXEC_ACTION { get; set; }
-        public string IS_DISABLED { get; set; }
-        public string IS_DISABLED_B { get; set; }
-        public string IS_MAIL { get; set; }
-        public string IS_MAIL_B { get; set; }
-        public string MEMO { get; set; }
-        public string MEMO_B { get; set; }
+        public string ITEM_ID { get; set; }
+        public int QUANTITY { get; set; }
+        public System.DateTime GET_DATE { get; set; }
     }
 }

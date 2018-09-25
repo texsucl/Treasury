@@ -74,12 +74,13 @@ namespace Treasury.Web.Models
         public virtual DbSet<ITEM_DEP_ORDER_D> ITEM_DEP_ORDER_D { get; set; }
         public virtual DbSet<ITEM_DEP_ORDER_M> ITEM_DEP_ORDER_M { get; set; }
         public virtual DbSet<ITEM_DEP_RECEIVED> ITEM_DEP_RECEIVED { get; set; }
-        public virtual DbSet<ITEM_IMPO> ITEM_IMPO { get; set; }
         public virtual DbSet<ITEM_REFUNDABLE_DEP> ITEM_REFUNDABLE_DEP { get; set; }
         public virtual DbSet<ITEM_STOCK> ITEM_STOCK { get; set; }
         public virtual DbSet<TREA_OPEN_REC> TREA_OPEN_REC { get; set; }
         public virtual DbSet<INVENTORY_CHG_APLY> INVENTORY_CHG_APLY { get; set; }
         public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<SYS_JOB_REC> SYS_JOB_REC { get; set; }
+        public virtual DbSet<IMPO_APLY> IMPO_APLY { get; set; }
+        public virtual DbSet<ITEM_IMPO> ITEM_IMPO { get; set; }
     }
 }

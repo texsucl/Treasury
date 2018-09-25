@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using Treasury.Web.Models;
 using Treasury.WebBO;
@@ -24,40 +25,66 @@ namespace Treasury.Web.Scheduler
                 var dtn = DateTime.Now;
                 dtnstr = $"{ dtn.Hour.ToString().PadLeft(2, '0')}:{dtn.Minute.ToString().PadLeft(2, '0')}";
                 Extension.NlogSet($"SEND_TIME:{dtnstr}");
-                _MT = db.MAIL_TIME.AsNoTracking()
-                    .FirstOrDefault(x => x.SEND_TIME != null && x.SEND_TIME == dtnstr);
-            }
-            if (_MT != null)
-            {
-                Extension.NlogSet($"MAIL_TIME有");
-                Routine(dtnstr);
-            }
+                _MT = db.MAIL_TIME.FirstOrDefault(
+                    x => x.SEND_TIME != null &&
+                    x.SEND_TIME == dtnstr &&
+                    x.IS_DISABLED != "Y" &&
+                    x.SCHEDULER_STATUS != "Y");
+                if (_MT != null)
+                {
+                    try
+                    {
+                        _MT.SCHEDULER_STATUS = "Y";
+                        _MT.SCHEDULER_UPDATE_DT = dtn;
+                        db.SaveChanges();
+                        Extension.NlogSet($"MAIL_TIME 有找到例行性排程設定檔案");
+                        Routine(dtnstr, dtn);
+                    }
+                    catch (Exception ex)
+                    {
+                        Extension.NlogSet($"每日例行作業錯誤,Exception:{ex.exceptionMessage()}!!");
+                    }
+                    finally
+                    {
+                        var _MT2 = db.MAIL_TIME
+                                .FirstOrDefault(x =>
+                                x.SEND_TIME != null &&
+                                x.SEND_TIME == dtnstr &&
+                                x.SCHEDULER_UPDATE_DT == dtn);
+                        if (_MT2 != null)
+                        {
+                            _MT2.SCHEDULER_STATUS = "N";
+                            _MT2.SCHEDULER_UPDATE_DT = dtn;
+                            db.SaveChanges();
+                        }
+                    }
+                }
+            }       
+
 
             Extension.NlogSet("[Execute]執行結束!!");
         }
 
-        public void Routine(string dateTime)
+        public void Routine(string dateTime,DateTime _dtn)
         {
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var dtn = DateTime.Now;
                 var _split = dateTime.Split(':');
                 var hh = _split[0];
                 var mm = _split.Length > 1 ?  _split[1] : string.Empty;
-                var dt = new DateTime(dtn.Year,dtn.Month,dtn.Day, Convert.ToInt32(hh),Convert.ToInt32(mm),0);
+                var dt = new DateTime(_dtn.Year, _dtn.Month, _dtn.Day, Convert.ToInt32(hh),Convert.ToInt32(mm),0);
                 SysSeqDao sysSeqDao = new SysSeqDao();
                 String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
                 var _Mail_Time = db.MAIL_TIME.AsNoTracking()
                     .FirstOrDefault(x =>
                     x.SEND_TIME != null &&
-                    x.SEND_TIME == dateTime);
-
-                if (_Mail_Time != null &&
-                    !db.SYS_JOB_REC.AsNoTracking()
-                    .Any(x => x.JOB_ID == _Mail_Time.FUNC_ID &&
-                              x.CREATE_TIME == dt))
+                    x.SEND_TIME == dateTime &&
+                    x.IS_DISABLED != "Y" &&
+                    x.SCHEDULER_UPDATE_DT == _dtn);
+                if (_Mail_Time != null)
                 {
                     string errorMsg = string.Empty;
+     
                     var MailTId = sysSeqDao.qrySeqNo("MailT", qPreCode).ToString().PadLeft(3, '0');
                     var _JOB_ITEM_ID = $@"{qPreCode}W{MailTId}";
                     try
@@ -69,7 +96,7 @@ namespace Treasury.Web.Scheduler
                             JOB_ID = _Mail_Time.MAIL_TIME_ID,
                             CREATE_TIME = dt,
                             STATUS = "2",
-                            START_TIME = dtn,
+                            START_TIME = _dtn,
                         });
 
                         var test = db.GetValidationErrors().getValidateString();
@@ -94,10 +121,10 @@ namespace Treasury.Web.Scheduler
                             OPEN_TREA_TIME = _Mail_Time.TREA_OPEN_TIME, //開庫時間
                             EXEC_TIME_B = _Mail_Time.EXEC_TIME_B, //系統區間(起)
                             EXEC_TIME_E = _Mail_Time.EXEC_TIME_E, //系統區間(迄)
-                            OPEN_TREA_DATE = dtn,
+                            OPEN_TREA_DATE = _dtn,
                             APPR_STATUS = "1",
                             REGI_STATUS = "C02",
-                            CREATE_DT = dtn,
+                            CREATE_DT = _dtn,
                             OPEN_TYPE = "Y" //Y為例行性
                         };
                         db.TREA_OPEN_REC.Add(_TOR);
@@ -117,6 +144,10 @@ namespace Treasury.Web.Scheduler
                         db.TREA_APLY_TEMP.RemoveRange(db.TREA_APLY_TEMP);
                         #endregion
 
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine("例行作業項目:");
+                        int num = 1;
+
                         #region 將例行作業項目寫入【申請單紀錄暫存檔】
                         _Trea_Item.ForEach(x =>
                         {
@@ -124,8 +155,9 @@ namespace Treasury.Web.Scheduler
                             {
                                 ITEM_ID = x.ITEM_ID
                             });
+                            sb.AppendLine($"{num}. {x.ITEM_DESC}");
+                            num += 1;
                         });
-
                         #endregion
 
                         #endregion
@@ -136,6 +168,14 @@ namespace Treasury.Web.Scheduler
                         sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
                         sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
                         sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+
+                        sms.Mail_Send(
+                            new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                            new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+                            null,
+                            "金庫每日例行開庫通知",
+                            sb.ToString()
+                            );
 
                         #endregion
                         test = db.GetValidationErrors().getValidateString();

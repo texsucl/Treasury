@@ -1,0 +1,354 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-金庫登記簿查詢列印作業";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary solid">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TRSR_Form">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>入庫日期 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="tCreate_Date_From" name="tCreate_Date_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="tCreate_Date_To" name="tCreate_Date_To" />
+                            </td>
+                            <td>
+                                <label>金庫登記簿單號 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="tTrea_Register_Id" name="tTrea_Register_Id" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" id="TRSR_Search" value="查詢" class="btn btn-primary" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+        @*查詢區塊*@
+        <div class="row">
+            <div id="TRSRjqgridDiv_Search" class="col-lg-12 jqd">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    @*明細*@
+    <div id="DetailDialog" style="display:none;">
+        <form>
+            <table>
+                <tr>
+                    <td></td>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="lCreate_Date"></label>
+                    </td>
+                    <td>
+                        <label>金庫登記簿單號 : </label>
+                    </td>
+                    <td>
+                        <label id="lTrea_Register_Id"></label>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <label>入庫時間 : </label>
+                    </td>
+                    <td>
+                        <label id="lActual_Put_Time"></label>
+                    </td>
+                    <td>
+                        <label>出庫時間 : </label>
+                    </td>
+                    <td>
+                        <label id="lActual_Get_Time"></label>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <input type="button" id="TRSR_Print" value="列印金庫登記簿" class="btn btn-primary" />
+                    </td>
+                    <td colspan="2"></td>
+                    <td colspan="2" align="left">
+                        <input type="button" id="TRSR_Back" value="回上一頁" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <div id="TRSRjqgridDiv_Detail" class="col-lg-12 jqd">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TRSR_Url = {};
+        TRSR_Url.getData = '@Url.Action("GetCacheData", "TreasuryRegisterSearchReport")';
+        TRSR_Url.SearchData = '@Url.Action("SearchData", "TreasuryRegisterSearchReport")';
+        TRSR_Url.DetailData = '@Url.Action("DetailData", "TreasuryRegisterSearchReport")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var TRSR_FormId = 'TRSR_Form'; //formId
+        var TRSR_Create_Date_From = 'tCreate_Date_From';//入庫日期(起)
+        var TRSR_Create_Date_To = 'tCreate_Date_To';//入庫日期(迄)
+        var TRSR_Trea_Register_Id = 'tTrea_Register_Id';//金庫登記簿單號Id
+
+        var TRSR_Detail_Create_Date = 'lCreate_Date';//入庫日期
+        var TRSR_Detail_Trea_Register_Id = 'lTrea_Register_Id';//金庫登記簿單號
+        var TRSR_Detail_Actual_Put_Time = 'lActual_Put_Time';//入庫時間
+        var TRSR_Detail_Actual_Get_Time = 'lActual_Get_Time';//出庫時間
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else
+        {
+            //#region 初始動作
+            setVerified();
+            //#endregion 初始動作
+
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TRSR_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { SearchFun(); });
+                        break;
+                    case 'TRSR_Print':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { PrintFun(); });
+                        break;
+                    case 'TRSR_Back':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                        break;
+                }
+            });
+            //#endregion 註冊事件
+        }
+
+        //#region 註冊verified
+        function setVerified() {
+            created.createDatepickerRange(TRSR_Create_Date_From, TRSR_Create_Date_To);
+        }
+        //#endregion 註冊verified
+
+        //查詢
+        function SearchFun()
+        {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    vCreate_Date_From: $('#' + TRSR_Create_Date_From).val(),
+                    vCreate_Date_To: $('#' + TRSR_Create_Date_To).val(),
+                    vTrea_Register_Id: $('#' + TRSR_Trea_Register_Id).val()
+                }),
+                dataType: "json",
+                url: TRSR_Url.SearchData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                SearchGrid();
+            })
+        }
+
+        //列印
+        function PrintFun() {
+            var parms = [];
+            setTimeout(
+                function () {
+                    parms.push(customerUtility.reportParm('vTreaRegisterId', $('#' + TRSR_Detail_Trea_Register_Id).html()));
+                    parms.push(customerUtility.reportParm('vUser_Id', '@ViewBag.vUser_Id'));
+                    customerUtility.report(
+                        customerUtility.reportModel('金庫登記簿', 'TREASURY_REGISTER'),
+                        parms,
+                        null
+                        );
+                }, 100);
+        }
+
+        //明細
+        function DetailFun()
+        {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    vTrea_Register_Id: $('#' + TRSR_Detail_Trea_Register_Id).html()
+                }),
+                dataType: "json",
+                url: TRSR_Url.DetailData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                DetailGrid();
+            })
+        }
+
+        //#region dialog
+        function dialogOpen(listId, rowid) {
+            var dialogId = 'DetailDialog';
+
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "left top", of: window },
+                title: '金庫登記簿明細',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+
+            dialogSetData(listId, rowid);
+            DetailFun();
+            $('#' + dialogId).dialog('open');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + TRSR_Detail_Create_Date).html(data.vCreate_Dt);
+                $('#' + TRSR_Detail_Trea_Register_Id).html(data.vTrea_Register_Id);
+                $('#' + TRSR_Detail_Actual_Put_Time).html(data.vActual_Put_Time);
+                $('#' + TRSR_Detail_Actual_Get_Time).html(data.vActual_Get_Time);
+            }
+        }
+
+        //#endregion dialog
+
+        //#region jqgrid
+        function formatterTrea_Register_Id(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogTrea_Register_Id' style='text-decoration:underline;' return:false; id='" + options.gid + "Trea_Register_Id" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
+        function TRSRunformatter(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function TRSR_SearchFun(listId) {
+            jqgridCustom.randerAction(listId, 'Search', tempActFun_S);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //金庫登記簿單號
+                $(this).find('td').find('a.DialogTrea_Register_Id').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        var tempActFun_S = {};
+        tempActFun_S.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun_S.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun_S.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //查詢結果
+        function SearchGrid()
+        {
+            var colNameArray = ['開庫類型', '金庫登記簿單號', '開庫時間', '實際入庫時間', '實際出庫時間', '登記簿狀態', '入庫日期'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vOpen_Trea_Type", index: "vOpen_Trea_Type", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vTrea_Register_Id", index: "vTrea_Register_Id", width: 150, sortable: false, align: 'center', formatter: formatterTrea_Register_Id, unformat: TRSRunformatter });
+            colModelArray.push({ name: "vOpen_Trea_Time", index: "vOpen_Trea_Time", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vActual_Put_Time", index: "vActual_Put_Time", width: 130, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vActual_Get_Time", index: "vActual_Get_Time", width: 130, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vRegi_Status", index: "vRegi_Status", width: 190, sortable: false });
+            colModelArray.push({ name: "vCreate_Dt", index: "vCreate_Dt", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'TRSRjqgridDiv_Search',
+                'SearchList',
+                'SearchPeger',
+                TRSR_Url.getData,
+                {
+                    type: 'Search'
+                },
+                colNameArray,
+                colModelArray,
+                '查詢結果',
+                jqgridCustom.getPage('TRSRjqgridDiv_Search'),
+                TRSR_SearchFun,
+                true
+                );
+        }
+
+        //金庫登記簿明細
+        function DetailGrid()
+        {
+            var colNameArray = ['入庫作業類型', '存取項目', '印章內容', '作業別', '申請單號', '入庫原因', '入庫人員', '實際作業別', '實際入庫人員'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vItem_Op_Type", index: "vItem_Op_Type", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vItem_Desc", index: "vItem_Desc", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", width: 100, sortable: false });
+            colModelArray.push({ name: "vAccess_Type", index: "vAccess_Type", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 100, sortable: false });
+            colModelArray.push({ name: "vAccess_Reason", index: "vAccess_Reason", width: 100, sortable: false });
+            colModelArray.push({ name: "vConfirm", index: "vConfirm", width: 100 });
+            colModelArray.push({ name: "vActual_Access_Type", index: "vActual_Access_Type", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vActual_Access_Uid", index: "vActual_Access_Uid", width: 100, sortable: false });
+            jqgridCustom.createJqgridByCache(
+                'TRSRjqgridDiv_Detail',
+                'DetailList',
+                'DetailPeger',
+                TRSR_Url.getData,
+                {
+                    type: 'Detail'
+                },
+                colNameArray,
+                colModelArray,
+                '查詢結果',
+                jqgridCustom.getPage('TRSRjqgridDiv_Detail'),
+                TRSR_SearchFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+
+    });
+</script>

@@ -29,5 +29,6 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> FREEZE_DT { get; set; }
         public Nullable<System.DateTime> LAST_LOGIN_DT { get; set; }
         public Nullable<System.DateTime> LAST_LOGOUT_DT { get; set; }
+        public string MEMO { get; set; }
     }
 }

@@ -1,0 +1,542 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="">
+    <div id="CDCCAjqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CDCCA_Act">
+        <input type="button" id="CDCCAApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDCCABack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDCCADialog" style="display:none;">
+        <form id="CDCCADialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vPUT_Date" name="vPUT_Date"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vAPLY_UID_Name" name="vAPLY_UID_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <label id="vCHARGE_Name" name="vCHARGE_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>用途 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dCA_Use", (SelectList)ViewBag.dCA_Use, new { @class = "CDCCAUpdateType" })
+                        <span class="red" style="padding-left:20px" id="sCDCCA_Use"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>類型 : </label>
+                    </td>
+                    <td>
+                       @Html.DropDownList("dCA_Desc", (SelectList)ViewBag.dCA_Desc, new { @class = "CDCCAUpdateType" })
+                    <span class="red" style="padding-left:20px" id="sCDCCA_Desc"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>銀行 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCCA_Bank" name="tCDCCA_Bank" class="CDCCAUpdateType" maxlength="8"/>
+                        <span class="red" style="padding-left:20px" id="sCDCCA_Bank"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>號碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tCDCCA_Number" name="tCDCCA_Number" class="CDCCAUpdateType"  maxlength="13"/>
+                        <span class="red" style="padding-left:20px" id="sCDCCA_Number"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tCDCCA_Memo" name="tCDCCA_Memo" class="CDCCAUpdateType" maxlength="200"/>
+                        <span class="red" style="padding-left:20px" id="sCDCCA_Memo"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                       <input type="hidden" id="hCA_ITEM_ID"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="CDCCAUpdateTemp" value="修改" class="btn btn-primary"  />
+                    </td>
+                    <td  style="text-align:right;">
+                        <input type="button" id="CDCCACancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDCCAurl = {};
+        CDCCAurl.getData = '@Url.Action("GetCDCCacheData", "CA")';
+        CDCCAurl.ApplyDbData = '@Url.Action("ApplyDbData", "CA")';
+        CDCCAurl.UpdateDbData = '@Url.Action("UpdateDbData", "CA")';
+        CDCCAurl.RepeatDbData = '@Url.Action("RepeatDbData", "CA")';
+        //#endregion
+
+        //#region 參數設定
+        //庫存資料
+        var CDCCADialogId = 'CDCCADialog'; //dialogId
+        var CDCCADialogFormId = 'CDCCADialogForm'; //dialogFormId
+        var vPUT_DateId = 'vPUT_Date'; //入庫日期(label)
+        var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
+        var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
+        var dCA_UseId = 'dCA_Use'; //用途Id(text)
+        var sCDCCA_UseId = 'sCDCCA_Use'; //用途Id(span)
+        var dCA_DescId = 'dCA_Desc'; //類型Id(text)
+        var sCDCCA_DescId = 'sCDCCA_Desc'; //類型Id(span)
+        var tCDCCA_BankId = 'tCDCCA_Bank'; //銀行Id(text)
+        var sCDCCA_BankId = 'sCDCCA_Bank'; //銀行Id(span)
+        var tCDCCA_NumberId = 'tCDCCA_Number'; //號碼Id(text)
+        var sCDCCA_NumberId = 'sCDCCA_Number'; //號碼Id(span)
+        var tCDCCA_MemoId = 'tCDCCA_Memo'; //備註Id(text)
+        var sCDCCA_MemoId = 'sCDCCA_Memo'; //備註Id(span)
+        var hCDCCA_ITEM_ID = 'hCA_ITEM_ID'; //物品單號Id(hidden)
+
+        var CDCCA_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDCCA_Act_Type)
+            $('.CDCCA_Act').show(); //申請異動主畫面近來
+        
+        var CDCCA_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDCCA_ApplyFlag)
+            $('#CDCCAApply').hide();
+
+        var CDCCAConfirmFlag = false; //離開時提醒訊息
+        //#region 初始動作
+        CDCCADbGrid();
+        setCDCCAVerified();
+        //#endregion
+ 
+        //#region 註冊verified
+        function setCDCCAVerified() {
+            verified.required(CDCCADialogFormId, tCDCCA_NumberId, message.required('號碼')); //號碼為必填
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDCCAApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCCAApplyFun(); });
+                    break;
+                case 'CDCCABack':
+                case 'CDCCACancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        if (id == 'CDCCABack' &&
+                            CDCCAConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+                case 'CDCCAUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCCAUpdateTempFun(); });
+                    break;
+            }
+        });
+
+
+        function CDCCAApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDCCAurl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDCCAApply'));
+                }
+            })
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                    @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                           <text>
+                           case '@item.Value':
+                           return '@item.Text';
+                           </text>
+                        }
+                    }
+                default:
+            return '';
+            }
+        }
+
+        function formattervCA_Use(cellvalue, options, rdata) {
+            if (rdata.vCA_Use_AFT != null) {
+                switch (rdata.vCA_Use_AFT) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dCA_Use))
+                         {
+                             <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                         }
+                     }
+                }
+            } else {
+                switch (rdata.vCA_Use) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dCA_Use))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function unformattervCA_Use(cellvalue, options, rdata) {
+            return rdata.vCA_Use;
+        }
+
+        function formattervCA_Desc(cellvalue, options, rdata) {
+            if (rdata.vCA_Desc_AFT != null) {
+                switch (rdata.vCA_Desc_AFT) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dCA_Desc))
+                         {
+                             <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                         }
+                     }
+                }
+            } else {
+                switch (rdata.vCA_Desc) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dCA_Desc))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function unformattervCA_Desc(cellvalue, options, rdata) {
+            return rdata.vCA_Desc;
+        }
+
+        function formattervCA_Bank(cellvalue, options, rdata) {
+            if (rdata.vCA_Bank_AFT != null)
+                return '<span class="red">' + rdata.vCA_Bank_AFT + '</span>';
+            else
+                return rdata.vCA_Bank || '';
+        }
+
+        function formattervCA_Number(cellvalue, options, rdata) {
+            if (rdata.vCA_Number_AFT != null)
+                return '<span class="red">' + rdata.vCA_Number_AFT + '</span>';
+            else
+                return rdata.vCA_Number || '';
+        }
+
+        function formattervCA_Memo(cellvalue, options, rdata) {
+            if (rdata.vCA_Memo_AFT != null)
+                return '<span class="red">' + rdata.vCA_Memo_AFT + '</span>';
+            else
+                return rdata.vCA_Memo || '';
+        }
+
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCCA' + options.gid + 'Updata' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCCA' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCCA' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function CDCCADbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+                '用途', '類型', '銀行', '號碼', '備註',
+                '用途異動前', '類型異動前', '銀行異動前', '號碼異動前', '備註異動前',
+                '用途異動後', '類型異動後', '銀行異動後', '號碼異動後', '備註異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus,  align: 'center' });
+            colModelArray.push({ name: "vPUT_Date", index: "vPUT_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });
+            
+            colModelArray.push({ name: "vCA_Use_Show", index: "vCA_Use_Show", width: 80, align: 'center', sortable: false, formatter: formattervCA_Use, unformatter: unformattervCA_Use });
+            colModelArray.push({ name: "vCA_Desc_Show", index: "vCA_Desc_Show", width: 80, align: 'center', sortable: false, formatter: formattervCA_Desc, unformatter: unformattervCA_Desc });
+            colModelArray.push({ name: "vCA_Bank_Show", index: "vCA_Bank_Show", width: 100, align: 'center', sortable: false, formatter: formattervCA_Bank });
+            colModelArray.push({ name: "vCA_Number_Show", index: "vCA_Number_Show", width: 100, align: 'center', sortable: false, formatter: formattervCA_Number });
+            colModelArray.push({ name: "vCA_Memo_Show", index: "vCA_Memo_Show", width: 100, align: 'center', sortable: false, formatter: formattervCA_Memo });
+
+            colModelArray.push({ name: "vCA_Use", index: "vCA_Use", hidden: true });
+            colModelArray.push({ name: "vCA_Desc", index: "vCA_Desc", hidden: true });
+            colModelArray.push({ name: "vCA_Bank", index: "vCA_Bank", hidden: true });
+            colModelArray.push({ name: "vCA_Number", index: "vCA_Number", hidden: true });
+            colModelArray.push({ name: "vCA_Memo", index: "vCA_Memo", hidden: true });
+
+            colModelArray.push({ name: "vCA_Use_AFT", index: "vCA_Use_AFT", hidden: true });
+            colModelArray.push({ name: "vCA_Desc_AFT", index: "vCA_Desc_AFT", hidden: true });
+            colModelArray.push({ name: "vCA_Bank_AFT", index: "vCA_Bank_AFT", hidden: true });
+            colModelArray.push({ name: "vCA_Number_AFT", index: "vCA_Number_AFT", hidden: true });
+            colModelArray.push({ name: "vCA_Memo_AFT", index: "vCA_Memo_AFT", hidden: true });
+           
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDCCAjqgridDiv',
+                'CDCCATempList',
+                'CDCCATempPeger',
+                CDCCAurl.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '查詢資料',
+                jqgridCustom.getPage('CDCCAjqgridDiv'),
+                CDCCATempCompleteFun,
+                true
+                );
+        }
+
+        function CDCCATempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDCCARepeat(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1')
+                {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDCCARepeat(listId, rowid)
+        {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDCCAurl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDCCADbGrid();
+                    CDCCAConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //#region function
+
+        function dialogOpen(type, rowid)
+        {
+            $('#' + CDCCADialogFormId).validate().resetForm();
+            var listId = 'CDCCATempList';
+            var CAUpdateClass = 'CDCCAUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDCCADialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '電子憑證',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDCCAUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#CDCCAUpdateTemp').show();
+                $('.' + CAUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('.' + CAUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDCCADialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            $('#' + vPUT_DateId).text('');
+            $('#' + vAPLY_UID_NameId).text('');
+            $('#' + vCHARGE_NameId).text('');
+            $('#' + dCA_UseId).val('');
+            $('#' + sCDCCA_UseId).text('');
+            $('#' + dCA_DescId).val('');
+            $('#' + sCDCCA_DescId).text('');
+            $('#' + tCDCCA_BankId).val('');
+            $('#' + sCDCCA_BankId).text('');
+            $('#' + tCDCCA_NumberId).val('');
+            $('#' + sCDCCA_NumberId).text('');
+            $('#' + tCDCCA_MemoId).val('');
+            $('#' + sCDCCA_MemoId).text('');
+            $('#' + hCDCCA_ITEM_ID).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + vPUT_DateId).text(data.vPUT_Date);
+                $('#' + vAPLY_UID_NameId).text(data.vAPLY_UID_Name);
+                $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
+                $('#' + dCA_UseId).val(data.vCA_Use);
+                $('#' + sCDCCA_UseId).text(data.vCA_Use_AFT);
+                $('#' + dCA_DescId).val(data.vCA_Desc);
+                $('#' + sCDCCA_DescId).text(data.vCA_Desc_AFT);
+                $('#' + tCDCCA_BankId).val(data.vCA_Bank);
+                $('#' + sCDCCA_BankId).text(data.vCA_Bank_AFT);
+                $('#' + tCDCCA_NumberId).val(data.vCA_Number);
+                $('#' + sCDCCA_NumberId).text(data.vCA_Number_AFT);
+                $('#' + tCDCCA_MemoId).val(data.vCA_Memo);
+                $('#' + sCDCCA_MemoId).text(data.vCA_Memo_AFT);
+                $('#' + hCDCCA_ITEM_ID).val(data.vItemId);
+            }
+        }
+
+
+        function CDCCAUpdateTempFun()
+        {
+            if ($('#' + CDCCADialogFormId).valid())
+            {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDCCAViewModel(
+                            $('#' + hCDCCA_ITEM_ID).val(),
+                            $('#' + dCA_UseId).val().trim(),
+                            $('#' + dCA_DescId).val().trim(),
+                            $('#' + tCDCCA_BankId).val().trim(),
+                            $('#' + tCDCCA_NumberId).val().trim(),
+                            $('#' + tCDCCA_MemoId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDCCAurl.UpdateDbData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDCCAUpdateTemp'));
+                        CDCCADbGrid();
+                        CDCCAConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+
+        function CDCCAViewModel(
+            vItemId,
+            vCA_Use,
+            vCA_Desc,
+            vCA_Bank,
+            vCA_Number,
+            vCA_Memo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vCA_Use'] = vCA_Use;
+            obj['vCA_Desc'] = vCA_Desc;
+            obj['vCA_Bank'] = vCA_Bank;
+            obj['vCA_Number'] = vCA_Number;
+            obj['vCA_Memo'] = vCA_Memo;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>
