@@ -725,7 +725,7 @@ namespace Treasury.Web.Service.Actual
                     _ItemImp.INVENTORY_STATUS = "1"; //在庫
                     _ItemImp.ITEM_NAME = _ItemImp.ITEM_NAME_AFT;
                     _ItemImp.ITEM_NAME_AFT = null;
-                    _ItemImp.QUANTITY = _ItemImp.QUANTITY_AFT;
+                    _ItemImp.QUANTITY = TypeTransfer.intNToInt(_ItemImp.QUANTITY_AFT);
                     _ItemImp.QUANTITY_AFT = null;
                     _ItemImp.AMOUNT =_ItemImp.AMOUNT_AFT;
                     _ItemImp.AMOUNT_AFT = null;

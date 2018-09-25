@@ -34,5 +34,7 @@ namespace Treasury.Web.Models
         public string FREEZE_UID { get; set; }
         public Nullable<System.DateTime> FREEZE_DT { get; set; }
         public string OPEN_TYPE { get; set; }
+        public string SCHEDULER_STATUS { get; set; }
+        public Nullable<System.DateTime> SCHEDULER_UPDATE_DT { get; set; }
     }
 }

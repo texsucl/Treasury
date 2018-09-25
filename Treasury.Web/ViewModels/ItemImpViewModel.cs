@@ -28,7 +28,7 @@ namespace Treasury.Web.ViewModels
         /// 重要物品數量
         /// </summary>
         [Description("重要物品數量")]
-        public int? vItemImp_Quantity { get; set; }
+        public int vItemImp_Quantity { get; set; }
 
         /// <summary>
         /// 重要物品金額

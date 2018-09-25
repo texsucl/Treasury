@@ -19,7 +19,7 @@ namespace Treasury.Web.Models
         public string TRAD_PARTNERS { get; set; }
         public string MARGIN_TAKE_OF_TYPE { get; set; }
         public string MARGIN_ITEM { get; set; }
-        public Nullable<decimal> AMOUNT { get; set; }
+        public decimal AMOUNT { get; set; }
         public string MARGIN_ITEM_ISSUER { get; set; }
         public string PLEDGE_ITEM_NO { get; set; }
         public Nullable<System.DateTime> EFFECTIVE_DATE_B { get; set; }

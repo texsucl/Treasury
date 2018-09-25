@@ -854,7 +854,7 @@ namespace Treasury.Web.Service.Actual
                     _Marginp.MARGIN_TAKE_OF_TYPE_AFT = null;
                     _Marginp.TRAD_PARTNERS = _Marginp.TRAD_PARTNERS_AFT;
                     _Marginp.TRAD_PARTNERS_AFT = null;
-                    _Marginp.AMOUNT = _Marginp.AMOUNT_AFT;
+                    _Marginp.AMOUNT = TypeTransfer.decimalNToDecimal(_Marginp.AMOUNT_AFT);
                     _Marginp.AMOUNT_AFT = null;
                     _Marginp.MARGIN_ITEM = _Marginp.MARGIN_ITEM_AFT;
                     _Marginp.MARGIN_ITEM_AFT = null;
