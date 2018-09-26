@@ -702,7 +702,6 @@
     <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
     <EntitySet Name="MAIL_TIME" EntityType="dbTreasuryModel.MAIL_TIME" />
     <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
-    <EntitySet Name="IMPO_APLY" EntityType="dbTreasuryModel.IMPO_APLY" />
     <EntitySet Name="ITEM_IMPO" EntityType="dbTreasuryModel.ITEM_IMPO" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
@@ -837,6 +836,9 @@
     </Key>
     <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
     <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="Memo_I" Type="Int32" />
+    <Property Name="Memo_S" Type="Int32" />
+    <Property Name="Memo_D" Type="Int32" />
   </EntityType>
   <EntityType Name="ITEM_CA">
     <Key>
@@ -1120,16 +1122,6 @@
     <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
     <Property Name="CREATE_TIME" Type="DateTime" Nullable="false" Precision="3" />
   </EntityType>
-  <EntityType Name="IMPO_APLY">
-    <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="ITEM_ID" />
-    </Key>
-    <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
-    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-    <Property Name="QUANTITY" Type="Int32" Nullable="false" />
-    <Property Name="GET_DATE" Type="DateTime" Nullable="false" Precision="0" />
-  </EntityType>
   <EntityType Name="ITEM_IMPO">
     <Key>
       <PropertyRef Name="ITEM_ID" />
@@ -1138,7 +1130,7 @@
     <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="ITEM_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
     <Property Name="QUANTITY" Type="Int32" Nullable="false" />
-    <Property Name="REMAINING" Type="Int32" />
+    <Property Name="REMAINING" Type="Int32" Nullable="false" />
     <Property Name="AMOUNT" Type="Decimal" Precision="18" Scale="0" />
     <Property Name="EXPECTED_ACCESS_DATE" Type="DateTime" Precision="0" />
     <Property Name="DESCRIPTION" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
@@ -1152,7 +1144,7 @@
     <Property Name="GET_DATE" Type="DateTime" Precision="3" />
     <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
     <Property Name="ITEM_NAME_AFT" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
-    <Property Name="QUANTITY_AFT" Type="Int32" />
+    <Property Name="REMAINING_AFT" Type="Int32" />
     <Property Name="AMOUNT_AFT" Type="Decimal" Precision="18" Scale="0" />
     <Property Name="EXPECTED_ACCESS_DATE_AFT" Type="DateTime" Precision="0" />
     <Property Name="DESCRIPTION_AFT" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />

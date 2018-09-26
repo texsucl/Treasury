@@ -18,7 +18,7 @@ namespace Treasury.Web.Models
         public string INVENTORY_STATUS { get; set; }
         public string ITEM_NAME { get; set; }
         public int QUANTITY { get; set; }
-        public Nullable<int> REMAINING { get; set; }
+        public int REMAINING { get; set; }
         public Nullable<decimal> AMOUNT { get; set; }
         public Nullable<System.DateTime> EXPECTED_ACCESS_DATE { get; set; }
         public string DESCRIPTION { get; set; }
@@ -32,7 +32,7 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> GET_DATE { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
         public string ITEM_NAME_AFT { get; set; }
-        public Nullable<int> QUANTITY_AFT { get; set; }
+        public Nullable<int> REMAINING_AFT { get; set; }
         public Nullable<decimal> AMOUNT_AFT { get; set; }
         public Nullable<System.DateTime> EXPECTED_ACCESS_DATE_AFT { get; set; }
         public string DESCRIPTION_AFT { get; set; }

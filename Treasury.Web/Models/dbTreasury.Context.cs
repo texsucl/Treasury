@@ -80,7 +80,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<INVENTORY_CHG_APLY> INVENTORY_CHG_APLY { get; set; }
         public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<SYS_JOB_REC> SYS_JOB_REC { get; set; }
-        public virtual DbSet<IMPO_APLY> IMPO_APLY { get; set; }
         public virtual DbSet<ITEM_IMPO> ITEM_IMPO { get; set; }
     }
 }
