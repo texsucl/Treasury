@@ -94,10 +94,16 @@ namespace Treasury.Web.ViewModels
         public int? vItemImp_Quantity { get; set; }
 
         /// <summary>
+        /// 重要物品剩餘數量
+        /// </summary>
+        [Description("重要物品剩餘數量")]
+        public int vItemImp_Remaining { get; set; }
+
+        /// <summary>
         /// 重要物品數量_異動後
         /// </summary>
         [Description("重要物品數量_異動後")]
-        public int? vItemImp_Quantity_AFT { get; set; }
+        public int? vItemImp_Remaining_AFT { get; set; }
 
         /// <summary>
         /// 重要物品金額

@@ -198,7 +198,7 @@ namespace Treasury.Web.Controllers
                         updateTempData.vItemImp_Name_AFT = _vItemImp_Name_AFT.Item1;
                     var _vItemImp_Quantity_AFT = TypeTransfer.intNToString(model.vItemImp_Quantity).CheckAFT(TypeTransfer.intNToString(updateTempData.vItemImp_Quantity));
                     if (_vItemImp_Quantity_AFT.Item2)
-                        updateTempData.vItemImp_Quantity_AFT = TypeTransfer.stringToIntN(_vItemImp_Quantity_AFT.Item1);
+                        updateTempData.vItemImp_Remaining_AFT = TypeTransfer.stringToIntN(_vItemImp_Quantity_AFT.Item1);
                     var _vItemImp_Amount_AFT = TypeTransfer.decimalNToString(model.vItemImp_Amount).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vItemImp_Amount));
                     if (_vItemImp_Amount_AFT.Item2)
                         updateTempData.vItemImp_Amount_AFT = TypeTransfer.stringToDecimal(_vItemImp_Amount_AFT.Item1);
@@ -245,7 +245,7 @@ namespace Treasury.Web.Controllers
                 if (updateTempData != null)
                 {
                     updateTempData.vItemImp_Name_AFT = null;
-                    updateTempData.vItemImp_Quantity_AFT = null;
+                    updateTempData.vItemImp_Remaining_AFT = null;
                     updateTempData.vItemImp_Amount_AFT = null;
                     updateTempData.vItemImp_Expected_Date_AFT = null;
                     updateTempData.vItemImp_Description_AFT = null;
