@@ -26,7 +26,7 @@ using System.Data.Entity.Infrastructure;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class Estate : Common , IEstate
+    public class Estate : Common, IEstate
     {
 
         public Estate()
@@ -41,19 +41,21 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public List<SelectOption> GetEstateFromNo()
         {
-            List<SelectOption> result = new List<SelectOption>() {
+            List<SelectOption> result = new List<SelectOption>()
+            {
                 //new SelectOption() { Text = " ", Value = " " }
             };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(
                     db.SYS_CODE.AsNoTracking()
-                    .Where(x=>x.CODE_TYPE == "ESTATE_TYPE")
+                    .Where(x => x.CODE_TYPE == "ESTATE_TYPE")
                     .OrderBy(x => x.ISORTBY)
-                    .AsEnumerable().Select(x => new SelectOption() {
+                    .AsEnumerable().Select(x => new SelectOption()
+                    {
                         Value = x.CODE_VALUE,
                         Text = x.CODE_VALUE
-                }));
+                    }));
             }
             return result;
         }
@@ -66,7 +68,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public List<SelectOption> GetBuildName(string vAplyUnit = null, string aplyNo = null)
         {
-            return GetBuildNameorBookNo("BUILDING_NAME" , vAplyUnit , aplyNo);
+            return GetBuildNameorBookNo("BUILDING_NAME", vAplyUnit, aplyNo);
         }
 
         /// <summary>
@@ -77,7 +79,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public List<SelectOption> GetBookNo(string vAplyUnit = null, string aplyNo = null)
         {
-            return GetBuildNameorBookNo("BOOK_NO" , vAplyUnit , aplyNo);
+            return GetBuildNameorBookNo("BOOK_NO", vAplyUnit, aplyNo);
         }
 
         /// <summary>
@@ -119,9 +121,9 @@ namespace Treasury.Web.Service.Actual
                 x.COL == "BUILDING_NAME" &&
                 x.ITEM_ID == _item_Id &&
                 x.COL_VALUE.Contains(building_Name)
-                ).OrderBy(x=>x.GROUP_NO)
+                ).OrderBy(x => x.GROUP_NO)
                 .AsEnumerable()
-                .Select(x=> $@"大樓名稱:{x.COL_VALUE},冊號:{x.GROUP_NO}")
+                .Select(x => $@"大樓名稱:{x.COL_VALUE},冊號:{x.GROUP_NO}")
                 .ToList();
                 if (same.Any())
                 {
@@ -176,7 +178,7 @@ namespace Treasury.Web.Service.Actual
                             result.vDetail = GetDetailModel(details, _Inventory_types).ToList();
                         }
                         else if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString()) //取出
-                        {                          
+                        {
                             var _vDetail = GetDetailModel(details, _Inventory_types, true).ToList();
                             if (EditFlag) //可以修改時需加入庫存資料
                             {
@@ -192,7 +194,7 @@ namespace Treasury.Web.Service.Actual
                             }
                             result.vDetail = _vDetail.OrderBy(x => x.vItemId).ToList();
                         }
-                        
+
                     }
                 }
             }
@@ -206,7 +208,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit">申請單位</param>
         /// <param name="aplyNo">單號</param>
         /// <returns></returns>
-        public List<EstateDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit ,string aplyNo = null)
+        public List<EstateDetailViewModel> GetDataByGroupNo(int groupNo, string vAplyUnit, string aplyNo = null)
         {
             var result = new List<EstateDetailViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -219,20 +221,138 @@ namespace Treasury.Web.Service.Actual
                 List<string> itemIds = new List<string>();
                 if (!aplyNo.IsNullOrWhiteSpace()) //有單號須加單號資料
                 {
-                    itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aplyNo).Select(x=>x.ITEM_ID).ToList();
-                    result.AddRange(GetDetailModel(db.ITEM_REAL_ESTATE.Where(x => 
+                    itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(GetDetailModel(db.ITEM_REAL_ESTATE.Where(x =>
                     x.GROUP_NO == groupNo &&
                     itemIds.Contains(x.ITEM_ID)).AsEnumerable(), _Inventory_types));
                 }
                 result.AddRange(
                     GetDetailModel(db.ITEM_REAL_ESTATE.AsNoTracking()
-                    .Where(x => !itemIds.Contains(x.ITEM_ID) , !aplyNo.IsNullOrWhiteSpace())
+                    .Where(x => !itemIds.Contains(x.ITEM_ID), !aplyNo.IsNullOrWhiteSpace())
                     .Where(x => x.GROUP_NO == groupNo)
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .AsEnumerable(), _Inventory_types));
             }
+            return result;
+        }
+
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCEstateViewModel> result = new List<CDCEstateViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                var _item_Id = Ref.TreaItemType.D1014.ToString();
+                var _Item_Book = db.ITEM_BOOK.AsNoTracking()
+                    .Where(x => x.ITEM_ID == _item_Id).ToList();
+                var _Estate_Form_No_Name = db.SYS_CODE
+                    .Where(x => x.CODE_TYPE == "ESTATE_TYPE")
+                    .Where(x => x.CODE == searchModel.vEstate_Form_No)
+                    .Select(x => x.CODE_VALUE).FirstOrDefault();
+                var Group_No = string.IsNullOrEmpty(searchModel.vBookNo) ? 0 : int.Parse(searchModel.vBookNo);
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_REAL_ESTATE.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .Where(x => x.GROUP_NO == Group_No, searchModel.vBookNo != null)
+                        .Where(x => x.ESTATE_FORM_NO == _Estate_Form_No_Name, searchModel.vEstate_Form_No != "All")
+                        .AsEnumerable()
+                        .Select((x) => new CDCEstateViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vIB_Book_No = x.GROUP_NO.ToString(),
+                            vIB_Building_Name = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "BUILDING_NAME")?.COL_VALUE,
+                            vIB_Located = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "LOCATED")?.COL_VALUE,
+                            vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
+                            vEstate_Form_No = x.ESTATE_FORM_NO,
+                            vEstate_Form_No_Aft = x.ESTATE_FORM_NO_AFT,
+                            vEstate_Date = x.ESTATE_DATE.ToString("yyyy/MM/dd"),
+                            vEstate_Date_Aft = x.ESTATE_DATE_AFT?.ToString("yyyy/MM/dd"),
+                            vOwnership_Cert_No = x.OWNERSHIP_CERT_NO,
+                            vOwnership_Cert_No_Aft = x.OWNERSHIP_CERT_NO_AFT,
+                            vLand_Building_No = x.LAND_BUILDING_NO,
+                            vLand_Building_No_Aft = x.LAND_BUILDING_NO_AFT,
+                            vHouse_No = x.HOUSE_NO,
+                            vHouse_No_Aft = x.HOUSE_NO_AFT,
+                            vEstate_Seq = x.ESTATE_SEQ,
+                            vEstate_Seq_Aft = x.ESTATE_SEQ_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_REAL_ESTATE.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCEstateViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vIB_Book_No = x.GROUP_NO.ToString(),
+                            vIB_Building_Name = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "BUILDING_NAME")?.COL_VALUE,
+                            vIB_Located = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "LOCATED")?.COL_VALUE,
+                            vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
+                            vEstate_Form_No = x.ESTATE_FORM_NO,
+                            vEstate_Form_No_Aft = x.ESTATE_FORM_NO_AFT,
+                            vEstate_Date = x.ESTATE_DATE.ToString("yyyy/MM/dd"),
+                            vEstate_Date_Aft = x.ESTATE_DATE_AFT?.ToString("yyyy/MM/dd"),
+                            vOwnership_Cert_No = x.OWNERSHIP_CERT_NO,
+                            vOwnership_Cert_No_Aft = x.OWNERSHIP_CERT_NO_AFT,
+                            vLand_Building_No = x.LAND_BUILDING_NO,
+                            vLand_Building_No_Aft = x.LAND_BUILDING_NO_AFT,
+                            vHouse_No = x.HOUSE_NO,
+                            vHouse_No_Aft = x.HOUSE_NO_AFT,
+                            vEstate_Seq = x.ESTATE_SEQ,
+                            vEstate_Seq_Aft = x.ESTATE_SEQ_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                });
+            }
+
             return result;
         }
         #endregion
@@ -267,7 +387,7 @@ namespace Treasury.Web.Service.Actual
                                 return result;
                             }
                         }
-                        else if(taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())
+                        else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                         {
                             if (!_first.vDetail.Any(x => x.vtakeoutFlag))
                             {
@@ -366,7 +486,7 @@ namespace Treasury.Web.Service.Actual
                                 var details = _first.vDetail;
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
 
-                               
+
                                 List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId
                                 List<string> updateItemIds = new List<string>(); //更新 itemId
                                 List<ITEM_REAL_ESTATE> inserts = new List<ITEM_REAL_ESTATE>(); //新增資料
@@ -425,7 +545,7 @@ namespace Treasury.Web.Service.Actual
                                                     //PUT_DATE = dt, //存入日期時間
                                                     LAST_UPDATE_DT = dt, //最後修改時間
                                                 };
-                                                _IRE_Item_Id = _IRE.ITEM_ID; 
+                                                _IRE_Item_Id = _IRE.ITEM_ID;
                                                 inserts.Add(_IRE);
                                             }
                                             logStr += _IRE.modelToString(logStr);
@@ -453,7 +573,7 @@ namespace Treasury.Web.Service.Actual
                                             else if (_IRE.INVENTORY_STATUS == "4") //原先為預約取出
                                             {
                                                 updateItemIds.Add(_IRE.ITEM_ID);
-                                            }                                   
+                                            }
                                         }
                                         else
                                         {
@@ -472,7 +592,8 @@ namespace Treasury.Web.Service.Actual
                                     var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
                                     db.ITEM_REAL_ESTATE.RemoveRange(db.ITEM_REAL_ESTATE.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
-                                    db.OTHER_ITEM_APLY.AddRange(inserts.Select(x=>new OTHER_ITEM_APLY() {
+                                    db.OTHER_ITEM_APLY.AddRange(inserts.Select(x => new OTHER_ITEM_APLY()
+                                    {
                                         APLY_NO = taData.vAplyNo,
                                         ITEM_ID = x.ITEM_ID
                                     }));
@@ -755,6 +876,162 @@ namespace Treasury.Web.Service.Actual
             }
         }
 
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCEstateViewModel model in saveData)
+                {
+                    var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_Estate != null && !changFlag)
+                    {
+                        if (_Estate.LAST_UPDATE_DT > model.vLast_Update_Time || _Estate.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+
+                        if (!changFlag)
+                        {
+                            _Estate.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _Estate.ESTATE_FORM_NO_AFT = model.vEstate_Form_No_Aft;
+                            _Estate.ESTATE_DATE_AFT = TypeTransfer.stringToDateTimeN(model.vEstate_Date_Aft);
+                            _Estate.OWNERSHIP_CERT_NO_AFT = model.vOwnership_Cert_No_Aft;
+                            _Estate.LAND_BUILDING_NO_AFT = model.vLand_Building_No_Aft;
+                            _Estate.HOUSE_NO_AFT = model.vHouse_No_Aft;
+                            _Estate.ESTATE_SEQ_AFT = model.vEstate_Seq_Aft;
+                            _Estate.MEMO_AFT = model.vMemo_Aft;
+                            _Estate.LAST_UPDATE_DT = dt;
+
+                            logStr = _Estate.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _Estate.ITEM_ID
+                            };
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:不動產權狀";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Estate != null)
+                {
+                    _Estate.INVENTORY_STATUS = "1"; //在庫
+                    _Estate.ESTATE_FORM_NO_AFT = null;
+                    _Estate.ESTATE_DATE_AFT = null;
+                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
+                    _Estate.LAND_BUILDING_NO_AFT = null;
+                    _Estate.HOUSE_NO_AFT = null;
+                    _Estate.ESTATE_SEQ_AFT = null;
+                    _Estate.MEMO_AFT = null;
+                    _Estate.LAST_UPDATE_DT = dt;
+                    logStr = _Estate.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Estate != null)
+                {
+                    _Estate.INVENTORY_STATUS = "1"; //在庫
+                    _Estate.ESTATE_FORM_NO = _Estate.ESTATE_FORM_NO_AFT;
+                    _Estate.ESTATE_FORM_NO_AFT = null;
+                    if(!string.IsNullOrEmpty(_Estate.ESTATE_DATE_AFT.ToString()))
+                    {
+                        _Estate.ESTATE_DATE = DateTime.Parse(_Estate.ESTATE_DATE_AFT.ToString());
+                    }
+                    _Estate.ESTATE_DATE_AFT = null;
+                    _Estate.OWNERSHIP_CERT_NO = _Estate.OWNERSHIP_CERT_NO_AFT;
+                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
+                    _Estate.LAND_BUILDING_NO = _Estate.LAND_BUILDING_NO_AFT;
+                    _Estate.LAND_BUILDING_NO_AFT = null;
+                    _Estate.HOUSE_NO = _Estate.HOUSE_NO_AFT;
+                    _Estate.HOUSE_NO_AFT = null;
+                    _Estate.ESTATE_SEQ = _Estate.ESTATE_SEQ_AFT;
+                    _Estate.ESTATE_SEQ_AFT = null;
+                    _Estate.MEMO = _Estate.MEMO_AFT;
+                    _Estate.MEMO_AFT = null;
+                    _Estate.LAST_UPDATE_DT = dt;
+                    logStr = _Estate.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
         #endregion
 
         #region privateFunction
@@ -765,7 +1042,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="vAplyUnit"></param>
         /// <param name="parm"></param>
         /// <returns></returns>
-        private List<SelectOption> GetBuildNameorBookNo(string parm,string vAplyUnit = null, string aplyNo = null)
+        private List<SelectOption> GetBuildNameorBookNo(string parm, string vAplyUnit = null, string aplyNo = null)
         {
             List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Value = " ", Text = " " } };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -775,7 +1052,7 @@ namespace Treasury.Web.Service.Actual
                 if (!vAplyUnit.IsNullOrWhiteSpace())
                 {
                     groupNos = db.ITEM_REAL_ESTATE.AsNoTracking()
-                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), 
+                    .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(),
                     !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(),
                     !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
@@ -836,7 +1113,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="_Inventory_types"></param>
         /// <param name="takeoutFlag"></param>
         /// <returns></returns>
-        private IEnumerable<EstateDetailViewModel> GetDetailModel(IEnumerable<ITEM_REAL_ESTATE> data,List<SYS_CODE> _Inventory_types,bool takeoutFlag = false)
+        private IEnumerable<EstateDetailViewModel> GetDetailModel(IEnumerable<ITEM_REAL_ESTATE> data, List<SYS_CODE> _Inventory_types, bool takeoutFlag = false)
         {
             return data.Select(x => new EstateDetailViewModel()
             {

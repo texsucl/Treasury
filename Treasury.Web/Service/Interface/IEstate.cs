@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 不動產權狀
     /// </summary>
-    public interface IEstate : IApply , IAgency
+    public interface IEstate : IApply, IAgency, ICDCAction
     {
         /// <summary>
         /// 抓取狀別 土地,建物,他項權利,其他
