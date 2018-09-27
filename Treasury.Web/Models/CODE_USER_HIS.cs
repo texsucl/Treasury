@@ -21,5 +21,7 @@ namespace Treasury.Web.Models
         public string IS_DISABLED_B { get; set; }
         public string IS_MAIL { get; set; }
         public string IS_MAIL_B { get; set; }
+        public string MEMO { get; set; }
+        public string MEMO_B { get; set; }
     }
 }

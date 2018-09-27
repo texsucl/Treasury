@@ -173,7 +173,7 @@ namespace Treasury.Web.Service.Actual
                             vItemImp_Name = x.ITEM_NAME,
                             vItemImp_Name_AFT = x.ITEM_NAME_AFT,
                             vItemImp_Quantity = x.QUANTITY,
-                            vItemImp_Quantity_AFT = x.QUANTITY_AFT,
+                            vItemImp_Remaining_AFT = x.REMAINING_AFT,
                             vItemImp_Amount = x.AMOUNT,
                             vItemImp_Amount_AFT = x.AMOUNT_AFT,
                             vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
@@ -207,7 +207,7 @@ namespace Treasury.Web.Service.Actual
                             vItemImp_Name = x.ITEM_NAME,
                             vItemImp_Name_AFT = x.ITEM_NAME_AFT,
                             vItemImp_Quantity = x.QUANTITY,
-                            vItemImp_Quantity_AFT = x.QUANTITY_AFT,
+                            vItemImp_Remaining_AFT = x.REMAINING_AFT,
                             vItemImp_Amount = x.AMOUNT,
                             vItemImp_Amount_AFT = x.AMOUNT_AFT,
                             vItemImp_Expected_Date =TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
@@ -314,6 +314,7 @@ namespace Treasury.Web.Service.Actual
                                                 }
                                                 _II.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
                                                 _II.QUANTITY = item.vItemImp_Quantity; //重要物品數量
+                                                //_II.REMAINING = item.vItemImp_Quantity; //重要物品剩餘數量
                                                 _II.AMOUNT = item.vItemImp_Amount; //重要物品金額
                                                 _II.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date); //重要物品預計提取日期
                                                 _II.DESCRIPTION = item.vDescription;//說明
@@ -330,6 +331,7 @@ namespace Treasury.Web.Service.Actual
                                                     INVENTORY_STATUS = "3", //預約存入
                                                     ITEM_NAME = item.vItemImp_Name, //重要物品名稱
                                                     QUANTITY = item.vItemImp_Quantity, //重要物品數量
+                                                    REMAINING = item.vItemImp_Quantity, //重要物品剩餘數量
                                                     AMOUNT = item.vItemImp_Amount, //重要物品金額
                                                     EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date), //重要物品預計提取日期
                                                     DESCRIPTION = item.vDescription,//說明
@@ -432,6 +434,7 @@ namespace Treasury.Web.Service.Actual
                                                 INVENTORY_STATUS = "3", //預約存入
                                                 ITEM_NAME = item.vItemImp_Name, //重要物品名稱
                                                 QUANTITY = item.vItemImp_Quantity, //重要物品數量
+                                                REMAINING = item.vItemImp_Quantity, //重要物品剩餘數量
                                                 AMOUNT = item.vItemImp_Amount, //重要物品金額
                                                 EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date), //重要物品預計提取日期
                                                 DESCRIPTION = item.vDescription,//說明
@@ -629,7 +632,7 @@ namespace Treasury.Web.Service.Actual
                         {
                             _ItemImp.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
                             _ItemImp.ITEM_NAME_AFT = model.vItemImp_Name_AFT;
-                            _ItemImp.QUANTITY_AFT = model.vItemImp_Quantity_AFT;
+                            _ItemImp.REMAINING_AFT = model.vItemImp_Remaining_AFT;
                             _ItemImp.AMOUNT_AFT = model.vItemImp_Amount_AFT;
                             _ItemImp.EXPECTED_ACCESS_DATE_AFT = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_AFT);
                             _ItemImp.DESCRIPTION_AFT = model.vItemImp_Description_AFT;
@@ -691,7 +694,7 @@ namespace Treasury.Web.Service.Actual
                 {
                     _ItemImp.INVENTORY_STATUS = "1"; //在庫
                     _ItemImp.ITEM_NAME_AFT = null;
-                    _ItemImp.QUANTITY_AFT = null;
+                    _ItemImp.REMAINING_AFT = null;
                     _ItemImp.AMOUNT_AFT = null;
                     _ItemImp.EXPECTED_ACCESS_DATE_AFT = null;
                     _ItemImp.DESCRIPTION_AFT = null;
@@ -725,8 +728,8 @@ namespace Treasury.Web.Service.Actual
                     _ItemImp.INVENTORY_STATUS = "1"; //在庫
                     _ItemImp.ITEM_NAME = _ItemImp.ITEM_NAME_AFT;
                     _ItemImp.ITEM_NAME_AFT = null;
-                    _ItemImp.QUANTITY = _ItemImp.QUANTITY_AFT;
-                    _ItemImp.QUANTITY_AFT = null;
+                    _ItemImp.QUANTITY = TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT);
+                    _ItemImp.REMAINING_AFT = null;
                     _ItemImp.AMOUNT =_ItemImp.AMOUNT_AFT;
                     _ItemImp.AMOUNT_AFT = null;
                     _ItemImp.EXPECTED_ACCESS_DATE = _ItemImp.EXPECTED_ACCESS_DATE_AFT;

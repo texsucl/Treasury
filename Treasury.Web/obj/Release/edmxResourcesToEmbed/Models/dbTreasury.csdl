@@ -150,6 +150,8 @@
     <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="IS_MAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="IS_MAIL_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
   </EntityType>
   <EntityType Name="DEP_CHK_ITEM">
     <Key>
@@ -694,13 +696,14 @@
     <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_D" />
     <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_M" />
     <EntitySet Name="ITEM_DEP_RECEIVED" EntityType="dbTreasuryModel.ITEM_DEP_RECEIVED" />
-    <EntitySet Name="ITEM_IMPO" EntityType="dbTreasuryModel.ITEM_IMPO" />
     <EntitySet Name="ITEM_REFUNDABLE_DEP" EntityType="dbTreasuryModel.ITEM_REFUNDABLE_DEP" />
     <EntitySet Name="ITEM_STOCK" EntityType="dbTreasuryModel.ITEM_STOCK" />
     <EntitySet Name="TREA_OPEN_REC" EntityType="dbTreasuryModel.TREA_OPEN_REC" />
     <EntitySet Name="INVENTORY_CHG_APLY" EntityType="dbTreasuryModel.INVENTORY_CHG_APLY" />
     <EntitySet Name="MAIL_TIME" EntityType="dbTreasuryModel.MAIL_TIME" />
     <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
+    <EntitySet Name="IMPO_APLY" EntityType="dbTreasuryModel.IMPO_APLY" />
+    <EntitySet Name="ITEM_IMPO" EntityType="dbTreasuryModel.ITEM_IMPO" />
   </EntityContainer>
   <EntityType Name="CODE_USER">
     <Key>
@@ -721,6 +724,7 @@
     <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
     <Property Name="LAST_LOGIN_DT" Type="DateTime" Precision="3" />
     <Property Name="LAST_LOGOUT_DT" Type="DateTime" Precision="3" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
   </EntityType>
   <EntityType Name="CODE_USER_ROLE">
     <Key>
@@ -965,35 +969,6 @@
     <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
   </EntityType>
-  <EntityType Name="ITEM_IMPO">
-    <Key>
-      <PropertyRef Name="ITEM_ID" />
-    </Key>
-    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-    <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
-    <Property Name="ITEM_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
-    <Property Name="QUANTITY" Type="Int32" />
-    <Property Name="AMOUNT" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
-    <Property Name="EXPECTED_ACCESS_DATE" Type="DateTime" Precision="0" />
-    <Property Name="DESCRIPTION" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="APLY_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="APLY_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
-    <Property Name="GET_DATE" Type="DateTime" Precision="3" />
-    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-    <Property Name="ITEM_NAME_AFT" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
-    <Property Name="QUANTITY_AFT" Type="Int32" />
-    <Property Name="AMOUNT_AFT" Type="Decimal" Precision="18" Scale="0" />
-    <Property Name="EXPECTED_ACCESS_DATE_AFT" Type="DateTime" Precision="0" />
-    <Property Name="DESCRIPTION_AFT" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-    <Property Name="MEMO_AFT" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-    <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-    <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-  </EntityType>
   <EntityType Name="ITEM_REFUNDABLE_DEP">
     <Key>
       <PropertyRef Name="ITEM_ID" />
@@ -1130,6 +1105,8 @@
     <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
     <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
     <Property Name="OPEN_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SCHEDULER_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="SCHEDULER_UPDATE_DT" Type="DateTime" Precision="3" />
   </EntityType>
   <EntityType Name="SYS_JOB_REC">
     <Key>
@@ -1142,5 +1119,45 @@
     <Property Name="STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
     <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
     <Property Name="CREATE_TIME" Type="DateTime" Nullable="false" Precision="3" />
+  </EntityType>
+  <EntityType Name="IMPO_APLY">
+    <Key>
+      <PropertyRef Name="APLY_NO" />
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="QUANTITY" Type="Int32" Nullable="false" />
+    <Property Name="GET_DATE" Type="DateTime" Nullable="false" Precision="0" />
+  </EntityType>
+  <EntityType Name="ITEM_IMPO">
+    <Key>
+      <PropertyRef Name="ITEM_ID" />
+    </Key>
+    <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="ITEM_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="QUANTITY" Type="Int32" Nullable="false" />
+    <Property Name="REMAINING" Type="Int32" />
+    <Property Name="AMOUNT" Type="Decimal" Precision="18" Scale="0" />
+    <Property Name="EXPECTED_ACCESS_DATE" Type="DateTime" Precision="0" />
+    <Property Name="DESCRIPTION" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="APLY_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APLY_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
+    <Property Name="GET_DATE" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="ITEM_NAME_AFT" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="QUANTITY_AFT" Type="Int32" />
+    <Property Name="AMOUNT_AFT" Type="Decimal" Precision="18" Scale="0" />
+    <Property Name="EXPECTED_ACCESS_DATE_AFT" Type="DateTime" Precision="0" />
+    <Property Name="DESCRIPTION_AFT" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="MEMO_AFT" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
   </EntityType>
 </Schema>

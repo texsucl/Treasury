@@ -16,5 +16,8 @@ namespace Treasury.Web.Models
     {
         public string APLY_NO { get; set; }
         public string ITEM_ID { get; set; }
+        public Nullable<int> Memo_I { get; set; }
+        public Nullable<int> Memo_S { get; set; }
+        public Nullable<int> Memo_D { get; set; }
     }
 }

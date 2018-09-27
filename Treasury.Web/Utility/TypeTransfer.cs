@@ -311,6 +311,22 @@ namespace Treasury.WebUtility
 
         #endregion Double? To Decimal
 
+        #region Decimal? To Decimal
+
+        /// <summary>
+        /// Double? 轉 Decimal (null 回傳 0d)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal decimalNToDecimal(Decimal? value)
+        {
+            if (value.HasValue)
+                return value.Value;
+            return 0M;
+        }
+
+        #endregion Decimal? To Decimal
+
         #region DateTime? To String
 
         /// <summary>
