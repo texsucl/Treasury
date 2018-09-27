@@ -1005,22 +1005,19 @@ namespace Treasury.Web.Service.Actual
                 if (_Estate != null)
                 {
                     _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO = _Estate.ESTATE_FORM_NO_AFT;
+                    _Estate.ESTATE_FORM_NO = string.IsNullOrEmpty(_Estate.ESTATE_FORM_NO_AFT) ? _Estate.ESTATE_FORM_NO : _Estate.ESTATE_FORM_NO_AFT;
                     _Estate.ESTATE_FORM_NO_AFT = null;
-                    if(!string.IsNullOrEmpty(_Estate.ESTATE_DATE_AFT.ToString()))
-                    {
-                        _Estate.ESTATE_DATE = DateTime.Parse(_Estate.ESTATE_DATE_AFT.ToString());
-                    }
+                    _Estate.ESTATE_DATE = string.IsNullOrEmpty(_Estate.ESTATE_DATE_AFT.ToString()) ? _Estate.ESTATE_DATE : DateTime.Parse(_Estate.ESTATE_DATE_AFT.ToString());
                     _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO = _Estate.OWNERSHIP_CERT_NO_AFT;
+                    _Estate.OWNERSHIP_CERT_NO = string.IsNullOrEmpty(_Estate.OWNERSHIP_CERT_NO_AFT) ? _Estate.OWNERSHIP_CERT_NO : _Estate.OWNERSHIP_CERT_NO_AFT;
                     _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO = _Estate.LAND_BUILDING_NO_AFT;
+                    _Estate.LAND_BUILDING_NO = string.IsNullOrEmpty(_Estate.LAND_BUILDING_NO_AFT) ? _Estate.LAND_BUILDING_NO : _Estate.LAND_BUILDING_NO_AFT;
                     _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO = _Estate.HOUSE_NO_AFT;
+                    _Estate.HOUSE_NO = string.IsNullOrEmpty(_Estate.HOUSE_NO_AFT) ? _Estate.HOUSE_NO : _Estate.HOUSE_NO_AFT;
                     _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ = _Estate.ESTATE_SEQ_AFT;
+                    _Estate.ESTATE_SEQ = string.IsNullOrEmpty(_Estate.ESTATE_SEQ_AFT) ? _Estate.ESTATE_SEQ : _Estate.ESTATE_SEQ_AFT;
                     _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO = _Estate.MEMO_AFT;
+                    _Estate.MEMO = string.IsNullOrEmpty(_Estate.MEMO_AFT) ? _Estate.MEMO : _Estate.MEMO_AFT;
                     _Estate.MEMO_AFT = null;
                     _Estate.LAST_UPDATE_DT = dt;
                     logStr = _Estate.modelToString(logStr);

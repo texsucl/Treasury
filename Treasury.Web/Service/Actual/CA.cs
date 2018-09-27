@@ -743,15 +743,15 @@ namespace Treasury.Web.Service.Actual
                 if (_CA != null)
                 {
                     _CA.INVENTORY_STATUS = "1"; //在庫
-                    _CA.CA_USE = _CA.CA_USE_AFT;
+                    _CA.CA_USE = string.IsNullOrEmpty(_CA.CA_USE_AFT) ? _CA.CA_USE : _CA.CA_USE_AFT;
                     _CA.CA_USE_AFT = null;
-                    _CA.CA_DESC = _CA.CA_DESC_AFT;
+                    _CA.CA_DESC = string.IsNullOrEmpty(_CA.CA_DESC_AFT) ? _CA.CA_DESC : _CA.CA_DESC_AFT;
                     _CA.CA_DESC_AFT = null;
-                    _CA.BANK = _CA.BANK_AFT;
+                    _CA.BANK = string.IsNullOrEmpty(_CA.BANK_AFT) ? _CA.BANK : _CA.BANK_AFT;
                     _CA.BANK_AFT = null;
-                    _CA.CA_NUMBER = _CA.CA_NUMBER_AFT;
+                    _CA.CA_NUMBER = string.IsNullOrEmpty(_CA.CA_NUMBER_AFT) ? _CA.CA_NUMBER : _CA.CA_NUMBER_AFT;
                     _CA.CA_NUMBER_AFT = null;
-                    _CA.MEMO = _CA.MEMO_AFT;
+                    _CA.MEMO = string.IsNullOrEmpty(_CA.MEMO_AFT) ? _CA.MEMO : _CA.MEMO_AFT;
                     _CA.MEMO_AFT = null;
                     _CA.LAST_UPDATE_DT = dt;
                     logStr = _CA.modelToString(logStr);
