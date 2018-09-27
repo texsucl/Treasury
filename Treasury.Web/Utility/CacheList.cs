@@ -210,6 +210,11 @@
         /// </summary>
         public static string CDCMarginpData { get; private set; }
 
+        /// <summary>
+        /// 資料庫異動不動產權狀畫面
+        /// </summary>
+        public static string CDCEstateData { get; private set; }
+
         #endregion Cache資料
 
 
@@ -255,6 +260,7 @@
             CDCMargingData = "CDCMargingData";
             CDCItemImpData = "CDCItemImpData";
             CDCMarginpData = "CDCMarginpData";
+            CDCEstateData = "CDCEstateData";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料

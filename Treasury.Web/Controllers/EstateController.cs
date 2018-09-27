@@ -16,9 +16,9 @@ using Treasury.Web.Enum;
 ///           需求單號：
 ///           初版
 /// ==============================================
-/// 修改日期/修改人：
+/// 修改日期/修改人：侯蔚鑫
 /// 需求單號：
-/// 修改內容：
+/// 修改內容：資料異動功能-不動產權狀
 /// ==============================================
 /// </summary>
 /// 
@@ -87,6 +87,29 @@ namespace Treasury.Web.Controllers
                 ViewBag.group = _data.vGroupNo;
             }
             ViewBag.dActType = _dActType;
+            return PartialView();
+        }
+
+        /// <summary>
+        /// 不動產 資料庫異動畫面
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult CDCView(string AplyNo, CDCSearchViewModel data, Ref.OpenPartialViewType type)
+        {
+            var _data = ((List<CDCEstateViewModel>)Estate.GetCDCSearchData(data, AplyNo));
+            ViewBag.Sataus = new Service.Actual.Common().GetSysCode("INVENTORY_TYPE");
+            ViewBag.type = type;
+            ViewBag.IO = data.vTreasuryIO;
+            ViewBag.dEstate_Building_Name = new SelectList(Estate.GetBuildName(), "Value", "Text");
+            ViewBag.dEstate_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
+            data.vCreate_Uid = AccountController.CurrentUserId;
+            Cache.Invalidate(CacheList.CDCSearchViewModel);
+            Cache.Set(CacheList.CDCSearchViewModel, data);
+            Cache.Invalidate(CacheList.CDCEstateData);
+            Cache.Set(CacheList.CDCEstateData, _data);
             return PartialView();
         }
 
@@ -375,6 +398,28 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// jqgrid CDCcache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCDCCacheData(jqGridParam jdata)
+        {
+            if (Cache.IsSet(CacheList.CDCEstateData))
+                return Json(jdata.modelToJqgridResult(
+                    ((List<CDCEstateViewModel>)Cache.Get(CacheList.CDCEstateData))
+                    .OrderBy(x => x.vPut_Date) //入庫日期
+                    .ThenBy(x => x.vAply_Uid) //存入申請人
+                    .ThenBy(x => x.vCharge_Dept) //權責部門
+                    .ThenBy(x => x.vCharge_Sect) //權責科別
+                    .ThenBy(x => x.vIB_Book_No) //存取項目冊號資料檔-冊號
+                    .ThenBy(x => x.vEstate_Form_No) //狀別
+                    .ToList()
+                    ));
+            return null;
+        }
+
+        /// <summary>
         /// 不動產預設資料
         /// </summary>
         /// <param name="AccessType"></param>
@@ -394,6 +439,133 @@ namespace Treasury.Web.Controllers
                 Cache.Set(CacheList.ESTATEAllData, data);
                 Cache.Set(CacheList.ESTATEData, data.vDetail);
             }
+        }
+
+        /// <summary>
+        /// 修改資料庫資料
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UpdateDbData(CDCEstateViewModel model)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCEstateData))
+            {
+                var dbData = (List<CDCEstateViewModel>)Cache.Get(CacheList.CDCEstateData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                if (updateTempData != null)
+                {
+                    var _vEstate_Form_No_Aft = model.vEstate_Form_No.CheckAFT(updateTempData.vEstate_Form_No);
+                    if (_vEstate_Form_No_Aft.Item2)
+                        updateTempData.vEstate_Form_No_Aft = _vEstate_Form_No_Aft.Item1;
+                    var _vEstate_Date_Aft = model.vEstate_Date.CheckAFT(updateTempData.vEstate_Date);
+                    if (_vEstate_Date_Aft.Item2)
+                        updateTempData.vEstate_Date_Aft = _vEstate_Date_Aft.Item1;
+                    var _vOwnership_Cert_No_Aft = model.vOwnership_Cert_No.CheckAFT(updateTempData.vOwnership_Cert_No);
+                    if (_vOwnership_Cert_No_Aft.Item2)
+                        updateTempData.vOwnership_Cert_No_Aft = _vOwnership_Cert_No_Aft.Item1;
+                    var _vLand_Building_No_Aft = model.vLand_Building_No.CheckAFT(updateTempData.vLand_Building_No);
+                    if (_vLand_Building_No_Aft.Item2)
+                        updateTempData.vLand_Building_No_Aft = _vLand_Building_No_Aft.Item1;
+                    var _vHouse_No_Aft = model.vHouse_No.CheckAFT(updateTempData.vHouse_No);
+                    if (_vHouse_No_Aft.Item2)
+                        updateTempData.vHouse_No_Aft = _vHouse_No_Aft.Item1;
+                    var _vEstate_Seq_Aft = model.vEstate_Seq.CheckAFT(updateTempData.vEstate_Seq);
+                    if (_vEstate_Seq_Aft.Item2)
+                        updateTempData.vEstate_Seq_Aft = _vEstate_Seq_Aft.Item1;
+                    var _vMemo_Aft = model.vMemo.CheckAFT(updateTempData.vMemo);
+                    if (_vMemo_Aft.Item2)
+                        updateTempData.vMemo_Aft = _vMemo_Aft.Item1;
+
+                    updateTempData.vAftFlag = _vEstate_Form_No_Aft.Item2 || _vEstate_Date_Aft.Item2 || _vOwnership_Cert_No_Aft.Item2 || _vLand_Building_No_Aft.Item2 || _vHouse_No_Aft.Item2 || _vEstate_Seq_Aft.Item2|| _vMemo_Aft.Item2;
+                    Cache.Invalidate(CacheList.CDCEstateData);
+                    Cache.Set(CacheList.CDCEstateData, dbData);
+                    result.Datas = dbData.Any(x => x.vAftFlag);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設資料庫資料
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatDbData(string itemId)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCEstateData))
+            {
+                var dbData = (List<CDCEstateViewModel>)Cache.Get(CacheList.CDCEstateData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == itemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vEstate_Form_No_Aft = null;
+                    updateTempData.vEstate_Date_Aft = null;
+                    updateTempData.vOwnership_Cert_No_Aft = null;
+                    updateTempData.vLand_Building_No_Aft = null;
+                    updateTempData.vHouse_No_Aft = null;
+                    updateTempData.vEstate_Seq_Aft = null;
+                    updateTempData.vMemo_Aft = null;
+                    updateTempData.vAftFlag = false;
+                    Cache.Invalidate(CacheList.CDCEstateData);
+                    Cache.Set(CacheList.CDCEstateData, dbData);
+                    result.Datas = dbData.Any(x => x.vAftFlag);
+                    result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 申請資料庫異動覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ApplyDbData()
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            var _detail = (List<CDCEstateViewModel>)Cache.Get(CacheList.CDCEstateData);
+            if (!_detail.Any(x => x.vAftFlag))
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.CDCSearchViewModel))
+            {
+                CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+                result = Estate.CDCApplyAudit(_detail.Where(x => x.vAftFlag).ToList(), data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.CDCEstateData);
+                    Cache.Set(CacheList.CDCEstateData, result.Datas);
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
         }
 
     }
