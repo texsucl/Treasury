@@ -794,17 +794,17 @@ namespace Treasury.Web.Service.Actual
                 if (_Marging != null)
                 {
                     _Marging.INVENTORY_STATUS = "1"; //在庫
-                    _Marging.MARGIN_DEP_TYPE = _Marging.MARGIN_DEP_TYPE_AFT;
+                    _Marging.MARGIN_DEP_TYPE = string.IsNullOrEmpty(_Marging.MARGIN_DEP_TYPE_AFT) ? _Marging.MARGIN_DEP_TYPE : _Marging.MARGIN_DEP_TYPE_AFT;
                     _Marging.MARGIN_DEP_TYPE_AFT = null;
-                    _Marging.TRAD_PARTNERS = _Marging.TRAD_PARTNERS_AFT;
+                    _Marging.TRAD_PARTNERS = string.IsNullOrEmpty(_Marging.TRAD_PARTNERS_AFT) ? _Marging.TRAD_PARTNERS : _Marging.TRAD_PARTNERS_AFT;
                     _Marging.TRAD_PARTNERS_AFT = null;
-                    _Marging.AMOUNT = _Marging.AMOUNT_AFT;
+                    _Marging.AMOUNT = string.IsNullOrEmpty(TypeTransfer.decimalNToString(_Marging.AMOUNT_AFT)) ? _Marging.AMOUNT : _Marging.AMOUNT_AFT;
                     _Marging.AMOUNT_AFT = null;
-                    _Marging.WORKPLACE_CODE = _Marging.WORKPLACE_CODE_AFT;
+                    _Marging.WORKPLACE_CODE = string.IsNullOrEmpty(_Marging.WORKPLACE_CODE_AFT) ? _Marging.WORKPLACE_CODE : _Marging.WORKPLACE_CODE_AFT;
                     _Marging.WORKPLACE_CODE_AFT = null;
-                    _Marging.DESCRIPTION = _Marging.DESCRIPTION_AFT;
+                    _Marging.DESCRIPTION = string.IsNullOrEmpty(_Marging.DESCRIPTION_AFT) ? _Marging.DESCRIPTION : _Marging.DESCRIPTION_AFT;
                     _Marging.DESCRIPTION_AFT = null;
-                    _Marging.MEMO = _Marging.MEMO_AFT;
+                    _Marging.MEMO = string.IsNullOrEmpty(_Marging.MEMO_AFT) ? _Marging.MEMO : _Marging.MEMO_AFT;
                     _Marging.MEMO_AFT = null;
                     _Marging.LAST_UPDATE_DT = dt;
                     logStr = _Marging.modelToString(logStr);

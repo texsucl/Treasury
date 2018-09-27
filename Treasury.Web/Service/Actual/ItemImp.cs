@@ -726,17 +726,36 @@ namespace Treasury.Web.Service.Actual
                 if (_ItemImp != null)
                 {
                     _ItemImp.INVENTORY_STATUS = "1"; //在庫
-                    _ItemImp.ITEM_NAME = _ItemImp.ITEM_NAME_AFT;
+                    _ItemImp.ITEM_NAME = string.IsNullOrEmpty(_ItemImp.ITEM_NAME_AFT) ? _ItemImp.ITEM_NAME : _ItemImp.ITEM_NAME_AFT;
                     _ItemImp.ITEM_NAME_AFT = null;
-                    _ItemImp.QUANTITY = TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT);
+                    //比較剩餘數量異動值
+                    int QUANTITY_N = 0;
+                    if (TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT) == 0)
+                    {
+                        QUANTITY_N = _ItemImp.QUANTITY;
+                    }
+                    else
+                    {
+                        //剩餘數量及剩餘數量_異動後比較
+                        if (_ItemImp.REMAINING > TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT))
+                        {
+                            QUANTITY_N = _ItemImp.QUANTITY - (_ItemImp.REMAINING - TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT));
+                        }
+                        else if (_ItemImp.REMAINING < TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT))
+                        {
+                            QUANTITY_N = _ItemImp.QUANTITY + (TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT - _ItemImp.REMAINING));
+                        }
+                    }
+                    _ItemImp.QUANTITY = QUANTITY_N;
+                    _ItemImp.REMAINING = TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT) == 0 ? _ItemImp.REMAINING : TypeTransfer.intNToInt(_ItemImp.REMAINING_AFT);
                     _ItemImp.REMAINING_AFT = null;
-                    _ItemImp.AMOUNT =_ItemImp.AMOUNT_AFT;
+                    _ItemImp.AMOUNT = string.IsNullOrEmpty(TypeTransfer.decimalNToString(_ItemImp.AMOUNT_AFT)) ? _ItemImp.AMOUNT : _ItemImp.AMOUNT_AFT;
                     _ItemImp.AMOUNT_AFT = null;
-                    _ItemImp.EXPECTED_ACCESS_DATE = _ItemImp.EXPECTED_ACCESS_DATE_AFT;
+                    _ItemImp.EXPECTED_ACCESS_DATE = string.IsNullOrEmpty(TypeTransfer.dateTimeNToString(_ItemImp.EXPECTED_ACCESS_DATE_AFT)) ? _ItemImp.EXPECTED_ACCESS_DATE : _ItemImp.EXPECTED_ACCESS_DATE_AFT;
                     _ItemImp.EXPECTED_ACCESS_DATE_AFT = null;
-                    _ItemImp.DESCRIPTION = _ItemImp.DESCRIPTION_AFT;
+                    _ItemImp.DESCRIPTION = string.IsNullOrEmpty(_ItemImp.DESCRIPTION_AFT) ? _ItemImp.DESCRIPTION : _ItemImp.DESCRIPTION_AFT;
                     _ItemImp.DESCRIPTION_AFT = null;
-                    _ItemImp.MEMO = _ItemImp.MEMO_AFT;
+                    _ItemImp.MEMO = string.IsNullOrEmpty(_ItemImp.MEMO_AFT) ? _ItemImp.MEMO : _ItemImp.MEMO_AFT;
                     _ItemImp.MEMO_AFT = null;
                     _ItemImp.LAST_UPDATE_DT = dt;
                     logStr = _ItemImp.modelToString(logStr);

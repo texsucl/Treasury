@@ -691,9 +691,9 @@ namespace Treasury.Web.Service.Actual
                 if (_seal != null)
                 {
                     _seal.INVENTORY_STATUS = "1"; //在庫
-                    _seal.MEMO = _seal.MEMO_AFT;
+                    _seal.MEMO = string.IsNullOrEmpty(_seal.MEMO_AFT) ? _seal.MEMO : _seal.MEMO_AFT;
                     _seal.MEMO_AFT = null;
-                    _seal.SEAL_DESC = _seal.SEAL_DESC_AFT;
+                    _seal.SEAL_DESC = string.IsNullOrEmpty(_seal.SEAL_DESC_AFT) ? _seal.SEAL_DESC : _seal.SEAL_DESC_AFT;
                     _seal.SEAL_DESC_AFT = null;
                     _seal.LAST_UPDATE_DT = dt;
                     logStr = _seal.modelToString(logStr);
