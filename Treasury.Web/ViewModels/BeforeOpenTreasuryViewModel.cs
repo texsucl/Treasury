@@ -64,4 +64,19 @@ namespace Treasury.Web.ViewModels
         [Description("印章內容")]
         public string vSeal_Desc { get; set; }
     }
+
+    public class TreaOpenRec
+    {
+        /// <summary>
+        /// 金庫登記簿單號
+        /// </summary>
+        [Description("金庫登記簿單號")]
+        public string vTreaRegisterId { get; set; }
+
+        /// <summary>
+        /// 開庫類型
+        /// </summary>
+        [Description("開庫類型")]
+        public string vOpenTreaTypeName { get; set; }
+    }
 }

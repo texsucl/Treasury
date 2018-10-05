@@ -99,6 +99,26 @@ namespace Treasury.Web.Service.Actual
             return depts;
         }
 
+        /// <summary>
+        /// 取得新值
+        /// </summary>
+        /// <param name="Old">原值</param>
+        /// <param name="Aft">異動值</param>
+        /// <returns></returns>
+        protected string GetNewValue(string Old, string Aft)
+        {
+            string NewValue = string.Empty;
+
+            if (string.IsNullOrEmpty(Aft))
+                NewValue = Old;
+            else if (Aft.ToUpper() == "NULL")
+                NewValue = null;
+            else
+                NewValue = Aft;
+
+            return NewValue;
+        }
+
         #endregion
 
         #region Save Data

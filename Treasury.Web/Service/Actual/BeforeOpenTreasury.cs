@@ -21,46 +21,37 @@ namespace Treasury.Web.Service.Actual
 
         #region GetData
         /// <summary>
-        /// 開庫類型
+        /// 金庫登記簿
         /// </summary>
         /// <returns></returns>
-        public List<SelectOption> GetOpenTreaType()
+        public TreaOpenRec GetTreaOpenRec()
         {
-            var result = new List<SelectOption>();
-            using (TreasuryDBEntities db = new TreasuryDBEntities())
-            {
-                result = db.SYS_CODE.AsNoTracking()
-                    .Where(x => x.CODE_TYPE == "OPEN_TREA_TYPE")
-                    .OrderBy(x => x.ISORTBY)
-                    .AsEnumerable()
-                    .Select(x => new SelectOption()
-                    {
-                        Value = x.CODE,
-                        Text = x.CODE_VALUE
-                    }).ToList();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 金庫登記簿單號
-        /// </summary>
-        /// <returns></returns>
-        public string GetTreaRegisterId()
-        {
-            var result = string.Empty;
+            var result = new TreaOpenRec();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var Regi_Status = Ref.AccessProjectFormStatus.C02.ToString();
                 var OTD = DateTime.Now.ToString("yyyy-MM-dd");
+                var OTT = DateTime.Now.ToString("HH:mm");
+                var _OpenTreaType = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == "OPEN_TREA_TYPE");
 
                 result = db.TREA_OPEN_REC.AsNoTracking()
                     .Where(x => x.REGI_STATUS == Regi_Status)
-                    .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)                    
-                    .AsEnumerable()
-                    .Where(x => DateTime.Parse(x.OPEN_TREA_TIME + ":00") >= DateTime.Now)
-                    .Select(x => x.TREA_REGISTER_ID).FirstOrDefault();
+                    .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
+                    .AsEnumerable()                    
+                    .Where(x => DateTime.Parse(x.EXEC_TIME_B) <= DateTime.Parse(OTT))
+                    .Where(x => DateTime.Parse(x.EXEC_TIME_E) >= DateTime.Parse(OTT))
+                   .Select(x => new TreaOpenRec()
+                   {
+                       vTreaRegisterId = x.TREA_REGISTER_ID,
+                       vOpenTreaTypeName = _OpenTreaType.FirstOrDefault(y => y.CODE == x.OPEN_TREA_TYPE)?.CODE_VALUE
+                   }).FirstOrDefault();
+            }
+
+            //無符合開庫資料
+            if(result==null)
+            {
+                result = new TreaOpenRec() { vTreaRegisterId = "", vOpenTreaTypeName = "" };
             }
 
             return result;
@@ -174,10 +165,9 @@ namespace Treasury.Web.Service.Actual
 
                         //畫面上「已入庫確認資料」
                         var _TAR_List = db.TREA_APLY_REC.AsNoTracking()
-                            .Where(x => x.TREA_REGISTER_ID == null)
                             .Where(x => x.CONFIRM_UID != null)
                             .Where(x => x.APLY_STATUS == Regi_Status)
-                            .Where(x => x.EXPECTED_ACCESS_DATE.ToString() == OTD)
+                            .Where(x => x.TREA_REGISTER_ID == _TOR_Data.TREA_REGISTER_ID)
                             .AsEnumerable().ToList();
 
                         if (_TAR_List.Any())

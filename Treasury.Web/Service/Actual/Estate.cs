@@ -255,17 +255,19 @@ namespace Treasury.Web.Service.Actual
                 var _item_Id = Ref.TreaItemType.D1014.ToString();
                 var _Item_Book = db.ITEM_BOOK.AsNoTracking()
                     .Where(x => x.ITEM_ID == _item_Id).ToList();
-                var _Estate_Form_No_Name = db.SYS_CODE
-                    .Where(x => x.CODE_TYPE == "ESTATE_TYPE")
-                    .Where(x => x.CODE == searchModel.vEstate_Form_No)
-                    .Select(x => x.CODE_VALUE).FirstOrDefault();
-                var Group_No = string.IsNullOrEmpty(searchModel.vBookNo) ? 0 : int.Parse(searchModel.vBookNo);
                 if (aply_No.IsNullOrWhiteSpace())
                 {
                     var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
                     var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
                     var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
                     var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+
+                    var _Estate_Form_No_Name = db.SYS_CODE
+                        .Where(x => x.CODE_TYPE == "ESTATE_TYPE")
+                        .Where(x => x.CODE == searchModel.vEstate_Form_No)
+                        .Select(x => x.CODE_VALUE).FirstOrDefault();
+                    var Group_No = string.IsNullOrEmpty(searchModel.vBookNo) ? 0 : int.Parse(searchModel.vBookNo);
+
                     result.AddRange(db.ITEM_REAL_ESTATE.AsNoTracking()
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
@@ -922,6 +924,9 @@ namespace Treasury.Web.Service.Actual
                                 APLY_NO = _data.Item1,
                                 ITEM_ID = _Estate.ITEM_ID
                             };
+
+                            db.OTHER_ITEM_APLY.Add(_OIA);
+
                             logStr = _OIA.modelToString(logStr);
                         }
                     }
@@ -1005,19 +1010,19 @@ namespace Treasury.Web.Service.Actual
                 if (_Estate != null)
                 {
                     _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO = string.IsNullOrEmpty(_Estate.ESTATE_FORM_NO_AFT) ? _Estate.ESTATE_FORM_NO : _Estate.ESTATE_FORM_NO_AFT;
+                    _Estate.ESTATE_FORM_NO = GetNewValue(_Estate.ESTATE_FORM_NO, _Estate.ESTATE_FORM_NO_AFT);
                     _Estate.ESTATE_FORM_NO_AFT = null;
-                    _Estate.ESTATE_DATE = string.IsNullOrEmpty(_Estate.ESTATE_DATE_AFT.ToString()) ? _Estate.ESTATE_DATE : DateTime.Parse(_Estate.ESTATE_DATE_AFT.ToString());
+                    _Estate.ESTATE_DATE = DateTime.Parse(GetNewValue(_Estate.ESTATE_DATE.ToString(), _Estate.ESTATE_DATE_AFT.ToString()));
                     _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO = string.IsNullOrEmpty(_Estate.OWNERSHIP_CERT_NO_AFT) ? _Estate.OWNERSHIP_CERT_NO : _Estate.OWNERSHIP_CERT_NO_AFT;
+                    _Estate.OWNERSHIP_CERT_NO = GetNewValue(_Estate.OWNERSHIP_CERT_NO, _Estate.OWNERSHIP_CERT_NO_AFT);
                     _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO = string.IsNullOrEmpty(_Estate.LAND_BUILDING_NO_AFT) ? _Estate.LAND_BUILDING_NO : _Estate.LAND_BUILDING_NO_AFT;
+                    _Estate.LAND_BUILDING_NO = GetNewValue(_Estate.LAND_BUILDING_NO, _Estate.LAND_BUILDING_NO_AFT);
                     _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO = string.IsNullOrEmpty(_Estate.HOUSE_NO_AFT) ? _Estate.HOUSE_NO : _Estate.HOUSE_NO_AFT;
+                    _Estate.HOUSE_NO = GetNewValue(_Estate.HOUSE_NO, _Estate.HOUSE_NO_AFT);
                     _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ = string.IsNullOrEmpty(_Estate.ESTATE_SEQ_AFT) ? _Estate.ESTATE_SEQ : _Estate.ESTATE_SEQ_AFT;
+                    _Estate.ESTATE_SEQ = GetNewValue(_Estate.ESTATE_SEQ,_Estate.ESTATE_SEQ_AFT);
                     _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO = string.IsNullOrEmpty(_Estate.MEMO_AFT) ? _Estate.MEMO : _Estate.MEMO_AFT;
+                    _Estate.MEMO = GetNewValue(_Estate.MEMO ,_Estate.MEMO_AFT);
                     _Estate.MEMO_AFT = null;
                     _Estate.LAST_UPDATE_DT = dt;
                     logStr = _Estate.modelToString(logStr);

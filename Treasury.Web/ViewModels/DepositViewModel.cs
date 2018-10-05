@@ -26,7 +26,7 @@ namespace Treasury.Web.ViewModels
         /// 編號
         /// </summary>
         [Description("編號")]
-        public string vRowNum { get; set; }
+        public int vRowNum { get; set; }
 
         /// <summary>
         /// 物品編號

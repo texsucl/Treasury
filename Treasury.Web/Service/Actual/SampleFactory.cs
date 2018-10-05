@@ -46,6 +46,38 @@ namespace Treasury.Web.Service.Actual
             return null;
         }
 
-
+        /// <summary>
+        /// 回傳 類型
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public ICDCAction GetCDCAction(TreaItemType itemId)
+        {
+            switch (itemId)
+            {
+                //case TreaItemType.D1012:
+                //    return new Bill();
+                case TreaItemType.D1008:
+                case TreaItemType.D1009:
+                case TreaItemType.D1010:
+                case TreaItemType.D1011:
+                    return new Seal();
+                case TreaItemType.D1014:
+                    return new Estate();
+                case TreaItemType.D1024:
+                    return new CA();
+                //case TreaItemType.D1015:
+                //    return new Stock();
+                case TreaItemType.D1016:
+                    return new Marging();
+                //case TreaItemType.D1013:
+                //    return new Deposit();
+                case TreaItemType.D1017:
+                    return new Marginp();
+                case TreaItemType.D1018:
+                    return new ItemImp();
+            }
+            return null;
+        }
     }
 }

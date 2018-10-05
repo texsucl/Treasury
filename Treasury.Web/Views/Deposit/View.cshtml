@@ -456,46 +456,38 @@
                     $('#' + DepositDep_No_B).val(created.padLeft(_Check_No_B, $('#' + DepositDep_No_E).val().length, '0'));
             }
             
-            //存單號碼(迄)帶出張數
-            if ($(this).attr('id') == DepositDep_No_E)
-            {
-                if ($('#' + DepositDep_No_E).val().length <= 7) {
-                    var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
-                    var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
-                    if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
-                        $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
-                    }
-                    else {
-                        $('#' + DepositDep_Cnt).val('');
-                    }
+            //計算張數
+            if ($('#' + DepositDep_No_B + ',#' + DepositDep_No_E).val().length <= 7) {
+                var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+                var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
+                if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+                    $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
                 }
                 else {
                     $('#' + DepositDep_Cnt).val('');
                 }
             }
+            else {
+                $('#' + DepositDep_Cnt).val('');
+            }
+
+            //計算面額小計
+            if ($('#' + DepositDenomination).val().length <= 13) {
+                var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+                var _Denomination = parseInt($('#' + DepositDenomination).val());
+                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                    $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                }
+                else {
+                    $('#' + DepositSubtotal_Denomination).html('');
+                }
+            }
+            else {
+                $('#' + DepositSubtotal_Denomination).html('');
+            }
         });
 
-        //存單號碼(迄)帶出張數
-        //$('#' + DepositDep_No_E).off('blur', function () { });
-        //$('#' + DepositDep_No_E).on('blur', function () {
-        //    if ($('#' + DepositDep_No_E).val().length <= 7) {
-        //        var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
-        //        var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
-        //        if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
-        //            $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
-        //        }
-        //        else
-        //        {
-        //            $('#' + DepositDep_Cnt).val('');
-        //        }
-        //    }
-        //    else
-        //    {
-        //        $('#' + DepositDep_Cnt).val('');
-        //    }
-        //});
-
-        //張數算出存單號碼(迄)
+        //張數輸入完畢
         $('#' + DepositDep_Cnt).off('blur', function () { });
         $('#' + DepositDep_Cnt).on('blur', function () {
             var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
@@ -508,11 +500,27 @@
             {
                 $('#' + DepositDep_No_E).val('');
             }
+
+            //計算面額小計
+            if ($('#' + DepositDenomination).val().length <= 13) {
+                var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+                var _Denomination = parseInt($('#' + DepositDenomination).val());
+                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                    $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                }
+                else {
+                    $('#' + DepositSubtotal_Denomination).html('');
+                }
+            }
+            else {
+                $('#' + DepositSubtotal_Denomination).html('');
+            }
         });
 
         //單張面額輸入完畢
         $('#' + DepositDenomination).off('blur', function () { });
         $('#' + DepositDenomination).on('blur', function () {
+            //計算面額小計
             if ($('#' + DepositDenomination).val().length <= 13) {
                 var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
                 var _Denomination = parseInt($('#' + DepositDenomination).val());

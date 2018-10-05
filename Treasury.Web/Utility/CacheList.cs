@@ -186,6 +186,16 @@
         public static string CDCSearchViewModel { get; private set; }
 
         /// <summary>
+        /// 資料庫異動覆核畫面(查詢條件)
+        /// </summary>
+        public static string CDCApprSearchData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動覆核畫面(資料)
+        /// </summary>
+        public static string CDCApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
         /// 資料庫異動印章畫面
         /// </summary>
         public static string CDCSEALData { get; private set; }
@@ -255,6 +265,8 @@
             DepositData_D = "DepositData_D";
             DepositData_D_All = "DepositData_D_All";
             CDCSearchViewModel = "CDCSearchViewModel";
+            CDCApprSearchData = "CDCApprSearchData";
+            CDCApprSearchDetailViewData = "CDCApprSearchDetailViewData";
             CDCSEALData = "CDCSEALData";
             CDCCAData = "CDCCAData";
             CDCMargingData = "CDCMargingData";

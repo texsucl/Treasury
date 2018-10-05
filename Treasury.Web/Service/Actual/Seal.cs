@@ -615,6 +615,9 @@ namespace Treasury.Web.Service.Actual
                                 APLY_NO = _data.Item1,
                                 ITEM_ID = _seal.ITEM_ID
                             };
+
+                            db.OTHER_ITEM_APLY.Add(_OIA);
+
                             logStr = _OIA.modelToString(logStr);
                         }
                     }
@@ -691,9 +694,9 @@ namespace Treasury.Web.Service.Actual
                 if (_seal != null)
                 {
                     _seal.INVENTORY_STATUS = "1"; //在庫
-                    _seal.MEMO = string.IsNullOrEmpty(_seal.MEMO_AFT) ? _seal.MEMO : _seal.MEMO_AFT;
+                    _seal.MEMO = GetNewValue(_seal.MEMO, _seal.MEMO_AFT);
                     _seal.MEMO_AFT = null;
-                    _seal.SEAL_DESC = string.IsNullOrEmpty(_seal.SEAL_DESC_AFT) ? _seal.SEAL_DESC : _seal.SEAL_DESC_AFT;
+                    _seal.SEAL_DESC = GetNewValue(_seal.SEAL_DESC, _seal.SEAL_DESC_AFT);
                     _seal.SEAL_DESC_AFT = null;
                     _seal.LAST_UPDATE_DT = dt;
                     logStr = _seal.modelToString(logStr);
