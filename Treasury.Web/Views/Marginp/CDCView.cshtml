@@ -147,6 +147,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
                     <td colspan="2">
                         <input type="button" id="CDCMarginpUpdateTemp" value="修改" class="btn btn-primary" />
                     </td>
@@ -361,10 +367,12 @@
         }
 
         function formattervTrad_Partners(cellvalue, options, rdata) {
-            if (rdata.vTrad_Partners_AFT != null)
-                return '<span class="red">' + rdata.vTrad_Partners_AFT + '</span>';
-            else
+            if (rdata.vTrad_Partners_AFT == null)
                 return rdata.vTrad_Partners || '';
+            else if (rdata.vTrad_Partners_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vTrad_Partners_AFT + '</span>';
         }
 
         function formattervAmount(cellvalue, options, rdata) {
@@ -408,17 +416,21 @@
         }
 
         function formattervMargin_Item_Issuer(cellvalue, options, rdata) {
-            if (rdata.vMargin_Item_Issuer_AFT != null)
-                return '<span class="red">' + rdata.vMargin_Item_Issuer_AFT + '</span>';
-            else
+            if (rdata.vMargin_Item_Issuer_AFT == null)
                 return rdata.vMargin_Item_Issuer || '';
+            else if (rdata.vMargin_Item_Issuer_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMargin_Item_Issuer_AFT + '</span>';
         }
 
         function formattervPledge_Item_No(cellvalue, options, rdata) {
-            if (rdata.vPledge_Item_No_AFT != null)
-                return '<span class="red">' + rdata.vPledge_Item_No_AFT + '</span>';
-            else
+            if (rdata.vPledge_Item_No_AFT == null)
                 return rdata.vPledge_Item_No || '';
+            else if (rdata.vPledge_Item_No_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vPledge_Item_No_AFT + '</span>';
         }
 
         function formattervEffective_Date_B(cellvalue, options, rdata) {
@@ -436,17 +448,21 @@
         }
 
         function formattervDescription(cellvalue, options, rdata) {
-            if (rdata.vDescription_AFT != null)
-                return '<span class="red">' + rdata.vDescription_AFT + '</span>';
-            else
+            if (rdata.vDescription_AFT == null)
                 return rdata.vDescription || '';
+            else if (rdata.vDescription_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vDescription_AFT + '</span>';
         }
 
         function formattervMemo(cellvalue, options, rdata) {
-            if (rdata.vMemo_AFT != null)
-                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
-            else
+            if (rdata.vMemo_AFT == null)
                 return rdata.vMemo || '';
+            else if (rdata.vMemo_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
         }
 
         function formatterAct(cellvalue, options, rdata) {
@@ -687,6 +703,21 @@
         //修改存入保證金暫存資料
         function CDCMarginpUpdateTempFun() {
             if ($('#' + CDCMarginpFormId).valid()) {
+                if ($('#' + tCDCTrad_PartnersId).val().trim().toUpperCase() == 'NULL')
+                {
+                    customerUtility.alert('交易對象不可為空值', 'w');
+                    return
+                }
+                else if ($('#' + tCDCMargin_Item_IssuerId).val().trim().toUpperCase() == 'NULL')
+                {
+                    customerUtility.alert('物品發行人不可為空值', 'w');
+                    return
+                }
+                else if ($('#' + tCDCPledge_Item_NoId).val().trim().toUpperCase() == 'NULL')
+                {
+                    customerUtility.alert('質押標的號碼不可為空值', 'w');
+                    return
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -701,7 +732,7 @@
                             $('#' + tCDCEffective_Date_BId).val().trim(),
                             $('#' + tCDCEffective_Date_EId).val().trim(),
                             $('#' + tCDCDescriptionId).val().trim(),
-                            $('#' + tCDCMemoId).html().trim())
+                            $('#' + tCDCMemoId).val().trim())
                     }),
                     dataType: "json",
                     url: CDCMarginpUrl.UpdateDbData,

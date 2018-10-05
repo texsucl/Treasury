@@ -987,7 +987,7 @@ namespace Treasury.Web.Service.Actual
         {
             return data.Select(x => new Deposit_M()
             {
-                vRowNum = vRowNum,  //編號
+                vRowNum = int.Parse(vRowNum),  //編號
                 vItem_Id = x.ITEM_ID,   //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,   //代碼.庫存狀態 
                 vCurrency = x.CURRENCY, //幣別

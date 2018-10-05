@@ -57,6 +57,9 @@
                     <td colspan="2"><span class="red">* 紅色的字代表修改後的參數</span></td>
                 </tr>
                 <tr>
+                    <td colspan="2"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+               <tr>
                     <td colspan="2">
                        <input type="hidden" id="hSEAL_ITEM_ID"/>
                     </td>
@@ -177,17 +180,21 @@
         }
 
         function formattervSeal_Desc(cellvalue, options, rdata) {
-            if (rdata.vSeal_Desc_AFT != null)
-                return '<span class="red">' + rdata.vSeal_Desc_AFT + '</span>';
-            else
+            if (rdata.vSeal_Desc_AFT == null)
                 return rdata.vSeal_Desc || '';
+            else if (rdata.vSeal_Desc_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vSeal_Desc_AFT + '</span>';
         }
 
         function formattervMemo(cellvalue, options, rdata) {
-            if (rdata.vMemo_AFT != null)
-                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
-            else
+            if (rdata.vMemo_AFT == null)
                 return rdata.vMemo || '';
+            else if (rdata.vMemo_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
         }
 
         function formatterAct(cellvalue, options, rdata) {
@@ -370,6 +377,10 @@
         {
             if ($('#' + CDCSEALDialogFormId).valid())
             {
+                if ($('#' + tCDCSEAL_DESCId).val().trim().toUpperCase() == 'NULL') {
+                    customerUtility.alert('印章內容不可為空值', 'w');
+                    return
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({

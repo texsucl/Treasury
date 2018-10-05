@@ -231,6 +231,13 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("暫存資料尚未申請覆核,是否繼續動作?")]
             application_Audit_Confirm,
+
+            /// <summary>
+            /// 輸入null為清空該欄位
+            /// </summary>
+            [Description("輸入null為清空該欄位")]
+            null_Input,
+
         }
     }
 

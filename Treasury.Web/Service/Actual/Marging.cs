@@ -197,12 +197,18 @@ namespace Treasury.Web.Service.Actual
                             vCHARGE_SECT = x.CHARGE_SECT,
                             vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
                             vMargin_Dep_Type = x.MARGIN_DEP_TYPE,
+                            vMargin_Dep_Type_AFT = x.MARGIN_DEP_TYPE_AFT,
                             vTrad_Partners = x.TRAD_PARTNERS,
+                            vTrad_Partners_AFT = x.TRAD_PARTNERS_AFT,
                             vlItem_Id = x.ITEM_ID,
                             vAmount = x.AMOUNT,
+                            vAmount_AFT = x.AMOUNT_AFT,
                             vWorkplace_Code = x.WORKPLACE_CODE,
+                            vWorkplace_Code_AFT = x.WORKPLACE_CODE_AFT,
                             vDescription = x.DESCRIPTION,
+                            vDescription_AFT = x.DESCRIPTION_AFT,
                             vMemo = x.MEMO,
+                            vMemo_AFT = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                 }
@@ -714,6 +720,9 @@ namespace Treasury.Web.Service.Actual
                                 APLY_NO = _data.Item1,
                                 ITEM_ID = _Marging.ITEM_ID
                             };
+
+                            db.OTHER_ITEM_APLY.Add(_OIA);
+
                             logStr = _OIA.modelToString(logStr);
                         }
                     }
@@ -794,17 +803,17 @@ namespace Treasury.Web.Service.Actual
                 if (_Marging != null)
                 {
                     _Marging.INVENTORY_STATUS = "1"; //在庫
-                    _Marging.MARGIN_DEP_TYPE = string.IsNullOrEmpty(_Marging.MARGIN_DEP_TYPE_AFT) ? _Marging.MARGIN_DEP_TYPE : _Marging.MARGIN_DEP_TYPE_AFT;
+                    _Marging.MARGIN_DEP_TYPE = GetNewValue(_Marging.MARGIN_DEP_TYPE, _Marging.MARGIN_DEP_TYPE_AFT);
                     _Marging.MARGIN_DEP_TYPE_AFT = null;
-                    _Marging.TRAD_PARTNERS = string.IsNullOrEmpty(_Marging.TRAD_PARTNERS_AFT) ? _Marging.TRAD_PARTNERS : _Marging.TRAD_PARTNERS_AFT;
+                    _Marging.TRAD_PARTNERS = GetNewValue(_Marging.TRAD_PARTNERS, _Marging.TRAD_PARTNERS_AFT);
                     _Marging.TRAD_PARTNERS_AFT = null;
                     _Marging.AMOUNT = string.IsNullOrEmpty(TypeTransfer.decimalNToString(_Marging.AMOUNT_AFT)) ? _Marging.AMOUNT : _Marging.AMOUNT_AFT;
                     _Marging.AMOUNT_AFT = null;
-                    _Marging.WORKPLACE_CODE = string.IsNullOrEmpty(_Marging.WORKPLACE_CODE_AFT) ? _Marging.WORKPLACE_CODE : _Marging.WORKPLACE_CODE_AFT;
+                    _Marging.WORKPLACE_CODE = GetNewValue(_Marging.WORKPLACE_CODE, _Marging.WORKPLACE_CODE_AFT);
                     _Marging.WORKPLACE_CODE_AFT = null;
-                    _Marging.DESCRIPTION = string.IsNullOrEmpty(_Marging.DESCRIPTION_AFT) ? _Marging.DESCRIPTION : _Marging.DESCRIPTION_AFT;
+                    _Marging.DESCRIPTION = GetNewValue(_Marging.DESCRIPTION, _Marging.DESCRIPTION_AFT);
                     _Marging.DESCRIPTION_AFT = null;
-                    _Marging.MEMO = string.IsNullOrEmpty(_Marging.MEMO_AFT) ? _Marging.MEMO : _Marging.MEMO_AFT;
+                    _Marging.MEMO = GetNewValue(_Marging.MEMO, _Marging.MEMO_AFT);
                     _Marging.MEMO_AFT = null;
                     _Marging.LAST_UPDATE_DT = dt;
                     logStr = _Marging.modelToString(logStr);

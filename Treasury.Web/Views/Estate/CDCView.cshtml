@@ -123,6 +123,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="4"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
                     <td colspan="2">
                         <input type="button" id="CDC_EstateUpdateTemp" value="修改" class="btn btn-primary" />
                     </td>
@@ -405,45 +411,57 @@
         }
 
         function formattervEstate_Date(cellvalue, options, rdata) {
-            if (rdata.vEstate_Date_Aft != null)
-                return '<span class="red">' + rdata.vEstate_Date_Aft + '</span>';
-            else
+            if (rdata.vEstate_Date_Aft == null)
                 return rdata.vEstate_Date || '';
+            else if (rdata.vEstate_Date_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vEstate_Date_Aft + '</span>';
         }
 
         function formattervOwnership_Cert_No(cellvalue, options, rdata) {
-            if (rdata.vOwnership_Cert_No_Aft != null)
-                return '<span class="red">' + rdata.vOwnership_Cert_No_Aft + '</span>';
-            else
+            if (rdata.vOwnership_Cert_No_Aft == null)
                 return rdata.vOwnership_Cert_No || '';
+            else if (rdata.vOwnership_Cert_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else 
+                return '<span class="red">' + rdata.vOwnership_Cert_No_Aft + '</span>';
         }
 
         function formattervLand_Building_No(cellvalue, options, rdata) {
-            if (rdata.vLand_Building_No_Aft != null)
-                return '<span class="red">' + rdata.vLand_Building_No_Aft + '</span>';
-            else
+            if (rdata.vLand_Building_No_Aft == null)
                 return rdata.vLand_Building_No || '';
+            else if (rdata.vLand_Building_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vLand_Building_No_Aft + '</span>';
         }
 
         function formattervHouse_No(cellvalue, options, rdata) {
-            if (rdata.vHouse_No_Aft != null)
-                return '<span class="red">' + rdata.vHouse_No_Aft + '</span>';
-            else
+            if (rdata.vHouse_No_Aft == null)
                 return rdata.vHouse_No || '';
+            else if (rdata.vHouse_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vHouse_No_Aft + '</span>';
         }
 
         function formattervEstate_Seq(cellvalue, options, rdata) {
-            if (rdata.vEstate_Seq_Aft != null)
-                return '<span class="red">' + rdata.vEstate_Seq_Aft + '</span>';
-            else
+            if (rdata.vEstate_Seq_Aft == null)
                 return rdata.vEstate_Seq || '';
+            else if (rdata.vEstate_Seq_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vEstate_Seq_Aft + '</span>';
         }
 
         function formattervMemo(cellvalue, options, rdata) {
-            if (rdata.vMemo_Aft != null)
-                return '<span class="red">' + rdata.vMemo_Aft + '</span>';
-            else
+            if (rdata.vMemo_Aft == null)
                 return rdata.vMemo || '';
+            else if (rdata.vMemo_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_Aft + '</span>';
         }
 
         function CDC_EstateTempCompleteFun(listId) {
@@ -612,7 +630,7 @@
             switch ($('#' + CDC_Estate_Form_No).val()) {
                 case '土地':
                     $.each($('.land'), function () {
-                        if ($(this).val().trim() == '') {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
                             _checkFlag = false;
                         }
@@ -626,7 +644,7 @@
                     break;
                 case '建物':
                     $.each($('.build'), function () {
-                        if ($(this).val().trim() == '') {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
                             _checkFlag = false;
                         }
@@ -640,7 +658,7 @@
                     break;
                 case '他項權利':
                     $.each($('.otherRight'), function () {
-                        if ($(this).val().trim() == '') {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
                             _checkFlag = false;
                         }
@@ -660,7 +678,7 @@
                         })
                     }
                     $.each($('.other'), function () {
-                        if ($(this).val().trim() == '') {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
                             _checkFlag = false;
                         }

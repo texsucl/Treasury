@@ -14,16 +14,10 @@ namespace Treasury.Web.Service.Interface
     public interface IBeforeOpenTreasury
     {
         /// <summary>
-        /// 開庫類型
+        /// 金庫登記簿
         /// </summary>
         /// <returns></returns>
-        List<SelectOption> GetOpenTreaType();
-
-        /// <summary>
-        /// 金庫登記簿單號
-        /// </summary>
-        /// <returns></returns>
-        string GetTreaRegisterId(); 
+        TreaOpenRec GetTreaOpenRec(); 
 
         /// <summary>
         /// 取得每日例行進出未確認項目

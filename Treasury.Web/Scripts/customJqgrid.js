@@ -262,6 +262,10 @@
                 },
                 loadComplete: function () {
                     jqgridCustom.updatePagerIcons($(this));
+                    if (typeof completeFun != "undefined" && typeof completeFun == "function")
+                        completeFun(listId);
+                    if (overflowFlag)
+                        $('#' + jqgridDivId).find('.ui-jqgrid-bdiv').css('overflow', 'unset');
                     if (page != '1' && $("#" + listId).getRowData().length == 0)
                     {
                         jqgridCustom.createJqgridByCache(
@@ -276,15 +280,13 @@
                         "1",
                         completeFun,
                         rownumberFlag,
+                        width,
+                        height,
                         rowNum,
                         rowList,
-                        height,
-                        width)
+                        overflowFlag
+                        )
                     }
-                    if (typeof completeFun != "undefined" && typeof completeFun == "function")
-                        completeFun(listId);
-                    if (overflowFlag)
-                        $('#' + jqgridDivId).find('.ui-jqgrid-bdiv').css('overflow', 'unset');
                 }
             });
             $('#' + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false, search: false, refresh: false });

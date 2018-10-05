@@ -646,6 +646,9 @@ namespace Treasury.Web.Service.Actual
                                 APLY_NO = _data.Item1,
                                 ITEM_ID = _ItemImp.ITEM_ID
                             };
+
+                            db.OTHER_ITEM_APLY.Add(_OIA);
+
                             logStr = _OIA.modelToString(logStr);
                         }
                     }

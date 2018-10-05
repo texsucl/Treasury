@@ -196,7 +196,7 @@ namespace Treasury.Web.Controllers
                 
                 if (tempData.Count == 0)
                 {
-                    model.vRowNum = "1";
+                    model.vRowNum = 1;
                     model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                     tempData.Add(model);
                     Cache.Invalidate(CacheList.DepositData_M);
@@ -209,7 +209,7 @@ namespace Treasury.Web.Controllers
                     //同一申請單號內的承作日期要一樣
                     if (tempData.Select(x => x.vCommit_Date).FirstOrDefault() == model.vCommit_Date)
                     {
-                        model.vRowNum = (tempData.Max(x => int.Parse(x.vRowNum)) + 1).ToString();
+                        model.vRowNum = (tempData.Max(x => x.vRowNum) + 1);
                         model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                         tempData.Add(model);
                         Cache.Invalidate(CacheList.DepositData_M);
