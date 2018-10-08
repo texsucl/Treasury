@@ -343,7 +343,7 @@ namespace Treasury.Web.Controllers
                    return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
                case "Appr":
                    var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(ApprDatas));
+                   return Json(jdata.modelToJqgridResult(ApprDatas.OrderByDescending(x=>x.vAPLY_NO).ToList()));
            }           
            return null;
         }

@@ -40,12 +40,17 @@ namespace Treasury.Web.Report.Data
                         .Where(x => OIAs.Contains(x.ITEM_ID))
                         .Where(x => x.CURRENCY == "NTD", isNTD == "Y")
                         .Where(x => x.CURRENCY != "NTD", isNTD == "N")
-                        .Where(x => x.DEP_TYPE == vDep_Type)
+                        .Where(x => x.DEP_TYPE == vDep_Type , vDep_Type != "0")
+                        .OrderBy(x => x.DEP_TYPE)
+                        .ThenBy(x => x.ITEM_ID)
                         .ToList();
 
                     if (_IDOM_DataList.Any())
                     {
-                        foreach (var MasterData in _IDOM_DataList)
+                        //設值否=N
+                        var _IDOM_DataNList = _IDOM_DataList.Where(x => x.DEP_SET_QUALITY == "N").ToList();
+
+                        foreach (var MasterData in _IDOM_DataNList)
                         {
                             Decimal TOTAL_DENOMINATION = 0;
 
@@ -57,9 +62,10 @@ namespace Treasury.Web.Report.Data
                             {
                                 ReportData = new DepositReportData()
                                 {
-                                    TYPE = "Data",
+                                    TYPE = "Data-N",
                                     EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                                    DEP_TYPE = MasterData.DEP_TYPE,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
                                     DEP_CNT = DetailData.DEP_CNT,
@@ -74,8 +80,54 @@ namespace Treasury.Web.Report.Data
 
                             ReportData = new DepositReportData()
                             {
-                                TYPE = "Data",
+                                TYPE = "Data-N",
                                 EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
+                                DEP_TYPE = MasterData.DEP_TYPE,
+                                TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                                TOTAL_DENOMINATION = TOTAL_DENOMINATION
+                            };
+
+                            ReportDataList.Add(ReportData);
+                        }
+
+                        //設值否=Y
+                        var _IDOM_DataYList = _IDOM_DataList.Where(x => x.DEP_SET_QUALITY == "Y").ToList();
+
+                        if (_IDOM_DataYList.Any()) //設質否
+                            _REC.DEP_SET_QUALITY = "Y";
+
+                        foreach (var MasterData in _IDOM_DataYList)
+                        {
+                            Decimal TOTAL_DENOMINATION = 0;
+
+                            //使用物品編號去定期存單庫存資料明細檔抓取資料
+                            var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
+                                .Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList();
+
+                            foreach (var DetailData in _IDOD_DataList)
+                            {
+                                ReportData = new DepositReportData()
+                                {
+                                    TYPE = "Data-Y",
+                                    EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
+                                    TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                                    DEP_TYPE = MasterData.DEP_TYPE,
+                                    DEP_NO_B = DetailData.DEP_NO_B,
+                                    DEP_NO_E = DetailData.DEP_NO_E,
+                                    DEP_CNT = DetailData.DEP_CNT,
+                                    DENOMINATION = DetailData.DENOMINATION,
+                                };
+
+                                ReportDataList.Add(ReportData);
+
+                                TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
+                            }
+
+                            ReportData = new DepositReportData()
+                            {
+                                TYPE = "Data-Y",
+                                EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
+                                DEP_TYPE = MasterData.DEP_TYPE,
                                 TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                 TOTAL_DENOMINATION = TOTAL_DENOMINATION
                             };
@@ -98,7 +150,7 @@ namespace Treasury.Web.Report.Data
                     //是否項次1
                     if (item.ISORTBY==1)
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@1", TOTAL_DEP_CNT.ToString());
+                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@1", TOTAL_DEP_CNT.ToString().formateThousand());
                     }
                     else
                     {

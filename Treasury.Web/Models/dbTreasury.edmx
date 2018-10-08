@@ -831,8 +831,8 @@
           <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Memo_I" Type="int" />
-          <Property Name="Memo_S" Type="int" />
-          <Property Name="Memo_D" Type="int" />
+          <Property Name="Memo_S" Type="nvarchar" MaxLength="100" />
+          <Property Name="Memo_D" Type="datetime" />
         </EntityType>
         <EntityType Name="PIA_EXEC_TYPE">
           <Key>
@@ -1905,7 +1905,6 @@
           <EntitySet Name="ITEM_BOOK" EntityType="dbTreasuryModel.ITEM_BOOK" />
           <EntitySet Name="BLANK_NOTE_APLY" EntityType="dbTreasuryModel.BLANK_NOTE_APLY" />
           <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
-          <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
           <EntitySet Name="ITEM_CA" EntityType="dbTreasuryModel.ITEM_CA" />
           <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_D" />
           <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_M" />
@@ -1917,6 +1916,7 @@
           <EntitySet Name="MAIL_TIME" EntityType="dbTreasuryModel.MAIL_TIME" />
           <EntitySet Name="SYS_JOB_REC" EntityType="dbTreasuryModel.SYS_JOB_REC" />
           <EntitySet Name="ITEM_IMPO" EntityType="dbTreasuryModel.ITEM_IMPO" />
+          <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2042,17 +2042,6 @@
           <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
           <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="OTHER_ITEM_APLY">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="ITEM_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
-          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="Memo_I" Type="Int32" />
-          <Property Name="Memo_S" Type="Int32" />
-          <Property Name="Memo_D" Type="Int32" />
         </EntityType>
         <EntityType Name="ITEM_CA">
           <Key>
@@ -2365,6 +2354,17 @@
           <Property Name="MEMO_AFT" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="OTHER_ITEM_APLY">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="ITEM_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Memo_I" Type="Int32" />
+          <Property Name="Memo_S" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Memo_D" Type="DateTime" Precision="3" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3133,17 +3133,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="OTHER_ITEM_APLY">
-            <EntityTypeMapping TypeName="dbTreasuryModel.OTHER_ITEM_APLY">
-              <MappingFragment StoreEntitySet="OTHER_ITEM_APLY">
-                <ScalarProperty Name="Memo_D" ColumnName="Memo_D" />
-                <ScalarProperty Name="Memo_S" ColumnName="Memo_S" />
-                <ScalarProperty Name="Memo_I" ColumnName="Memo_I" />
-                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="ITEM_CA">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_CA">
               <MappingFragment StoreEntitySet="ITEM_CA">
@@ -3463,6 +3452,17 @@
                 <ScalarProperty Name="ITEM_NAME" ColumnName="ITEM_NAME" />
                 <ScalarProperty Name="INVENTORY_STATUS" ColumnName="INVENTORY_STATUS" />
                 <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OTHER_ITEM_APLY">
+            <EntityTypeMapping TypeName="dbTreasuryModel.OTHER_ITEM_APLY">
+              <MappingFragment StoreEntitySet="OTHER_ITEM_APLY">
+                <ScalarProperty Name="Memo_D" ColumnName="Memo_D" />
+                <ScalarProperty Name="Memo_S" ColumnName="Memo_S" />
+                <ScalarProperty Name="Memo_I" ColumnName="Memo_I" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

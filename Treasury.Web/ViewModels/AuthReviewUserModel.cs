@@ -40,6 +40,11 @@ namespace Treasury.WebViewModels
 
         public string isMailDescB { get; set; }
 
+        [Display(Name = "備註")]
+        public string memo { get; set; }
+
+        public string memoB { get; set; }
+
         [Display(Name = "覆核結果")]
         public String apprStatus { get; set; }
 
@@ -72,6 +77,8 @@ namespace Treasury.WebViewModels
             isMailDesc = "";
             isMailB = "";
             isMailDescB = "";
+            memo = "";
+            memoB = "";
             apprStatus = "";
             apprStatusDesc = "";
             execAction = "";

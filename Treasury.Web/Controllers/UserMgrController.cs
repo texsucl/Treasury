@@ -30,7 +30,7 @@ using System.Transactions;
 /// ==============================================
 /// </summary>
 
-namespace Treasury.Web.Controllers
+namespace Treasury.WebControllers
 {
 
     [Authorize]
@@ -463,7 +463,9 @@ namespace Treasury.Web.Controllers
                             return Json(new { success = false, err = "該使用者不存在系統!!" }, JsonRequestBehavior.AllowGet);
                         else {
                             if (StringUtil.toString(userMgrModel.isDisabled).Equals(StringUtil.toString(userO.IS_DISABLED))
-                                && StringUtil.toString(userMgrModel.isMail).Equals(StringUtil.toString(userO.IS_MAIL)))
+                                && StringUtil.toString(userMgrModel.isMail).Equals(StringUtil.toString(userO.IS_MAIL))
+                                && StringUtil.toString(userMgrModel.vMemo).Equals(StringUtil.toString(userO.MEMO))
+                                )
                                 bUserChg = false;
                             else
                                 bUserChg = true;
@@ -576,10 +578,12 @@ namespace Treasury.Web.Controllers
                         userHis.USER_ID = userMgrModel.cUserID;
                         userHis.IS_DISABLED = userMgrModel.isDisabled;
                         userHis.IS_MAIL = userMgrModel.isMail;
+                        userHis.MEMO = userMgrModel.vMemo;
                         if (!"A".Equals(execAction))
                         {
                             userHis.IS_DISABLED_B = userO.IS_DISABLED;
                             userHis.IS_MAIL_B = userO.IS_MAIL;
+                            userHis.MEMO_B = userO.MEMO;
                             userHis.EXEC_ACTION = "U";
                         }
                         else

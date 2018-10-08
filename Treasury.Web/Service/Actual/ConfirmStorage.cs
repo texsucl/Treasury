@@ -90,8 +90,11 @@ namespace Treasury.Web.Service.Actual
                         itemId = (from T1 in _CODE_USER_ROLE
                                   join T2 in _CODE_ROLE_ITEM
                                   on T1.ROLE_ID equals T2.ROLE_ID
+                                  where T1.USER_ID == cUserId       
+                                  where T2.AUTH_TYPE == "1"
                                   join T3 in _CODE_ROLE
                                   on T2.ROLE_ID equals T3.ROLE_ID
+                                  where T3.IS_DISABLED != "Y"
                                   join T4 in _TREA_ITEM
                                   on T2.ITEM_ID equals T4.ITEM_ID
                                   group T4 by T4.ITEM_ID into G
@@ -101,6 +104,7 @@ namespace Treasury.Web.Service.Actual
                         itemOpType = (from T1 in _CODE_USER_ROLE
                                   join T2 in _CODE_ROLE_ITEM
                                   on T1.ROLE_ID equals T2.ROLE_ID
+                                  where T2.AUTH_TYPE == "1"
                                   join T3 in _CODE_ROLE
                                   on T2.ROLE_ID equals T3.ROLE_ID
                                   join T4 in _TREA_ITEM
@@ -125,8 +129,8 @@ namespace Treasury.Web.Service.Actual
                                 Text = x.ITEM_DESC
                             }).ToList();
 
-                        var whichItem = item.FirstOrDefault().Value;
-                        var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whichItem).TREA_ITEM_NAME;
+                        var whichItem = item.FirstOrDefault()?.Value;
+                        var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whichItem)?.TREA_ITEM_NAME;
                         
                         if (itemName != null)
                         {
@@ -240,7 +244,7 @@ namespace Treasury.Web.Service.Actual
             return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>, string, List<string>>(sealItem, accessType, item, itemOpType, registerId, itemId);
         }
 
-        public Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string>SealIdList,string ItemId = null)
+        public Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string>SealIdList, List<string> RowItemIdList, string ItemId = null)
         {
             List<SelectOption> vItem = new List<SelectOption>();
             List<SelectOption> vSealItem = new List<SelectOption>();
@@ -253,6 +257,7 @@ namespace Treasury.Web.Service.Actual
                     vItem = db.TREA_ITEM.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == data)
                         .Where(x => ItemIdList.Contains(x.ITEM_ID))
+                        .Where(x => !RowItemIdList.Contains(x.ITEM_ID))
                         .AsEnumerable()
                         .Select(x => new SelectOption()
                         {
@@ -260,25 +265,36 @@ namespace Treasury.Web.Service.Actual
                             Text = x.ITEM_DESC
                         }).ToList();
 
+                    var whichitemName = _TREA_ITEM.AsNoTracking();
                     if (!ItemId.IsNullOrWhiteSpace())
                     {
                         var _TREA_ITEM_NAME = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_ID == ItemId).FirstOrDefault()?.TREA_ITEM_NAME;
                         ItemIds.AddRange(
-                             db.TREA_ITEM.AsNoTracking().Where(x => x.TREA_ITEM_NAME == _TREA_ITEM_NAME).Select(x => x.ITEM_ID));
+                             db.TREA_ITEM.AsNoTracking().Where(x => x.TREA_ITEM_NAME == _TREA_ITEM_NAME).Select(x => x.ITEM_ID).ToList());
+
+                    }
+                    else
+                    {
+                        var whitchItem = vItem.FirstOrDefault()?.Value;
+                        var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whitchItem)?.TREA_ITEM_NAME;
+                        ItemIds.AddRange(_TREA_ITEM
+                                .Where(x => x.TREA_ITEM_NAME == itemName)
+                                .Select(x => x.ITEM_ID).ToList());
                     }
 
 
-                    var whitchItem = vItem.FirstOrDefault().Value;
-                    var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whitchItem).TREA_ITEM_NAME;
-                    var whichitemName = _TREA_ITEM
-                                .Where(x => x.TREA_ITEM_NAME == itemName)
-                                .Select(x => x.ITEM_ID).ToList();
+                    //var whitchItem = vItem.FirstOrDefault()?.Value;
+                    //var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whitchItem)?.TREA_ITEM_NAME;
+                    //var whichitemName = _TREA_ITEM
+                    //            .Where(x => x.TREA_ITEM_NAME == itemName)
+                    //            .Select(x => x.ITEM_ID).ToList();
                     if (AccessType == "P")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
-                       .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
+                       //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                        .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                       .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                       //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                       .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
                        .Where(x => x.INVENTORY_STATUS == "6")
                        .AsEnumerable()
                        .Select(x => new SelectOption()
@@ -290,7 +306,7 @@ namespace Treasury.Web.Service.Actual
                     else if (AccessType == "G")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
-                      .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
+                      //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                       .Where(x => !SealIdList.Contains(x.ITEM_ID))
                       .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
                       .Where(x => x.INVENTORY_STATUS == "1")
@@ -304,7 +320,7 @@ namespace Treasury.Web.Service.Actual
                     else if(AccessType == "S")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
-                     .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
+                     //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
                      .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
                      .Where(x => x.INVENTORY_STATUS == "1")
@@ -318,7 +334,7 @@ namespace Treasury.Web.Service.Actual
                     else if (AccessType == "A")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
-                     .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
+                     //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
                      .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
                      .Where(x => x.INVENTORY_STATUS == "2")
@@ -332,7 +348,7 @@ namespace Treasury.Web.Service.Actual
                     else if (AccessType == "B")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
-                     .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
+                     //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
                      .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
                      .Where(x => x.INVENTORY_STATUS == "1")
@@ -372,7 +388,7 @@ namespace Treasury.Web.Service.Actual
                         vitem = db.ITEM_SEAL.AsNoTracking()
                        .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                        .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                       .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                       //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                        .Where(x => x.INVENTORY_STATUS == "6")
                        .AsEnumerable()
                        .Select(x => new SelectOption()
@@ -386,7 +402,7 @@ namespace Treasury.Web.Service.Actual
                         vitem = db.ITEM_SEAL.AsNoTracking()
                       .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                       .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                      .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                      //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                       .Where(x => x.INVENTORY_STATUS == "1")
                       .AsEnumerable()
                       .Select(x => new SelectOption()
@@ -400,7 +416,7 @@ namespace Treasury.Web.Service.Actual
                         vitem = db.ITEM_SEAL.AsNoTracking()
                       .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                       .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                      .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                      //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                       .Where(x => x.INVENTORY_STATUS == "1")
                       .AsEnumerable()
                       .Select(x => new SelectOption()
@@ -414,7 +430,7 @@ namespace Treasury.Web.Service.Actual
                         vitem = db.ITEM_SEAL.AsNoTracking()
                      .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                     .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                     //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                      .Where(x => x.INVENTORY_STATUS == "2")
                      .AsEnumerable()
                      .Select(x => new SelectOption()
@@ -428,7 +444,7 @@ namespace Treasury.Web.Service.Actual
                         vitem = db.ITEM_SEAL.AsNoTracking()
                      .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                     .Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                     //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                      .Where(x => x.INVENTORY_STATUS == "1")
                      .AsEnumerable()
                      .Select(x => new SelectOption()
@@ -936,6 +952,8 @@ namespace Treasury.Web.Service.Actual
                                            ACCESS_REASON = vOpType == "4" ? rowdata.vACCESS_REASON : null,
                                            APLY_STATUS = applyStatus,
                                            APLY_UID = cUserId,
+                                           CONFIRM_UID = cUserId,
+                                           CONFIRM_DT = now,
                                            APLY_DT = now,
                                            CREATE_UID = cUserId,
                                            CREATE_DT = now,
@@ -967,7 +985,7 @@ namespace Treasury.Web.Service.Actual
                                         var _ITEM_SEAL = db.ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == rowdata.vSEAL_ITEM_ID);
                                         var _INVENTORY_STATUS = string.Empty;
                                        
-                                         switch (rowdata.vACCESS_TYPE)
+                                         switch (rowdata.vACCESS_TYPE_CODE)
                                         {
                                                  //存入
                                             case "P":

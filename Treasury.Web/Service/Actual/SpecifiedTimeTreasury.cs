@@ -291,7 +291,7 @@ namespace Treasury.Web.Service.Actual
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
             string logStr = string.Empty; //log    
-                                          //bool 登入者與申請者為同一人
+            //bool 登入者與申請者為同一人
             if (data.vCREATE_UID == currentUserId)
             {
                 if (data.vAPLY_STATUS_ID == ((int)Ref.ApplyStatus._1).ToString() || data.vAPLY_STATUS_ID == ((int)Ref.ApplyStatus._3).ToString())

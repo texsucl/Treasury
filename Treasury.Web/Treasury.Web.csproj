@@ -331,8 +331,13 @@
     <Compile Include="BO\UserFunc.cs" />
     <Compile Include="BO\Utility.cs" />
     <Compile Include="BO\ValidateUtil.cs" />
+    <Compile Include="Controllers\AfterOpenTreasuryController.cs" />
     <Compile Include="Controllers\BeforeOpenTreasuryController.cs" />
     <Compile Include="Controllers\CAController.cs" />
+    <Compile Include="Controllers\TREAReviewWorkController.cs" />
+    <Compile Include="Controllers\TreasuryRegisterSearchReportController.cs" />
+    <Compile Include="Controllers\TreasuryRegistrationController.cs" />
+    <Compile Include="Controllers\TreasuryReportController.cs" />
     <Compile Include="Controllers\CDCController.cs" />
     <Compile Include="Controllers\ConfirmStorageController.cs" />
     <Compile Include="Controllers\DepositController.cs" />
@@ -347,7 +352,6 @@
     <Compile Include="Controllers\SpecifiedTimeTreaController.cs" />
     <Compile Include="Controllers\StockController.cs" />
     <Compile Include="Controllers\TreasuryAccessController.cs" />
-    <Compile Include="Controllers\TreasuryRegisterSearchReportController.cs" />
     <Compile Include="Controllers\UserApprController.cs" />
     <Compile Include="Controllers\RoleApprController.cs" />
     <Compile Include="Controllers\AuthReviewController.cs" />
@@ -616,6 +620,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Report\Data\DEPOSIT_MARGING.cs" />
+    <Compile Include="Report\Data\TREASURYREGISTRATION.cs" />
     <Compile Include="Report\Data\TREASURY_REGISTER.cs" />
     <Compile Include="Report\Data\CA.cs" />
     <Compile Include="Report\Data\DEPOSIT_G.cs" />
@@ -655,7 +661,12 @@
     <Compile Include="Scheduler\JobScheduler.cs" />
     <Compile Include="Scheduler\SrcOprUnitJob.cs" />
     <Compile Include="Scheduler\UserMaintainUnitJob.cs" />
+    <Compile Include="Service\Actual\AftereOpenTreasury.cs" />
     <Compile Include="Service\Actual\BeforeOpenTreasury.cs" />
+    <Compile Include="Service\Actual\TREAReviewWork.cs" />
+    <Compile Include="Service\Actual\TreasuryRegisterSearchReport.cs" />
+    <Compile Include="Service\Actual\TreasuryRegistration.cs" />
+    <Compile Include="Service\Actual\TreasuryReport.cs" />
     <Compile Include="Service\Actual\CDC.cs" />
     <Compile Include="Scheduler\DailyRoutineJob.cs" />
     <Compile Include="Service\Actual\ConfirmStorage.cs" />
@@ -674,11 +685,15 @@
     <Compile Include="Service\Actual\SpecifiedTimeTreasury.cs" />
     <Compile Include="Service\Actual\Stock.cs" />
     <Compile Include="Service\Actual\TreasuryAccess.cs" />
-    <Compile Include="Service\Actual\TreasuryRegisterSearchReport.cs" />
+    <Compile Include="Service\Interface\IAftereOpenTreasury.cs" />
     <Compile Include="Service\Interface\IAgency.cs" />
     <Compile Include="Service\Interface\IBeforeOpenTreasury.cs" />
     <Compile Include="Service\Interface\IBill.cs" />
     <Compile Include="Service\Interface\IApply.cs" />
+    <Compile Include="Service\Interface\ITREAReviewWork.cs" />
+    <Compile Include="Service\Interface\ITreasuryRegisterSearchReport.cs" />
+    <Compile Include="Service\Interface\ITreasuryRegistration.cs" />
+    <Compile Include="Service\Interface\ITreasuryReport.cs" />
     <Compile Include="Service\Interface\ICDC.cs" />
     <Compile Include="Service\Interface\ICDCAction.cs" />
     <Compile Include="Service\Interface\IConfirmStorage.cs" />
@@ -693,7 +708,6 @@
     <Compile Include="Service\Interface\ISpecifiedTimeTreasury.cs" />
     <Compile Include="Service\Interface\IStock.cs" />
     <Compile Include="Service\Interface\ITreasuryAccess.cs" />
-    <Compile Include="Service\Interface\ITreasuryRegisterSearchReport.cs" />
     <Compile Include="Utility\CacheList.cs" />
     <Compile Include="Utility\Extension.cs" />
     <Compile Include="Utility\Jqgrid.cs" />
@@ -702,6 +716,10 @@
     <Compile Include="Utility\Report.cs" />
     <Compile Include="Utility\TypeTransfer.cs" />
     <Compile Include="Utility\Utility.cs" />
+    <Compile Include="ViewModels\AfterOpenTreasuryInsertViewModel.cs" />
+    <Compile Include="ViewModels\AfterOpenTreasurySearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\AfterOpenTreasurySearchViewModel.cs" />
+    <Compile Include="ViewModels\AfterOpenTreasuryUnconfirmedDetailViewModel.cs" />
     <Compile Include="ViewModels\AuthReviewModel.cs" />
     <Compile Include="ViewModels\AuthReviewQryModel.cs" />
     <Compile Include="ViewModels\AuthReviewRoleModel.cs" />
@@ -714,6 +732,11 @@
     <Compile Include="ViewModels\CDCMarginpViewModel .cs" />
     <Compile Include="ViewModels\CDCSealViewModel.cs" />
     <Compile Include="ViewModels\CDCSearchViewModel.cs" />
+    <Compile Include="ViewModels\TREAReviewWorkDetailViewModel.cs" />
+    <Compile Include="ViewModels\TREAReviewWorkSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\TreasuryRegisterSearchReportViewModel.cs" />
+    <Compile Include="ViewModels\TreasuryRegistration.cs" />
+    <Compile Include="ViewModels\TreasuryReportViewModel.cs" />
     <Compile Include="ViewModels\CDCViewModel.cs" />
     <Compile Include="ViewModels\ConfirmStorageDeleteViewModel.cs" />
     <Compile Include="ViewModels\ConfirmStorageInsertViewModel.cs" />
@@ -765,7 +788,6 @@
     <Compile Include="ViewModels\TreasuryAccessSearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryAccessViewModel.cs" />
     <Compile Include="ViewModels\BaseUserInfoModel.cs" />
-    <Compile Include="ViewModels\TreasuryRegisterSearchReportViewModel.cs" />
     <Compile Include="ViewModels\UnitInfoModel.cs" />
     <Compile Include="ViewModels\CodeUserHisModel.cs" />
     <Compile Include="ViewModels\UserMgrModel.cs" />
@@ -1257,13 +1279,12 @@
     <Content Include="Views\CDC\Index.cshtml" />
     <Content Include="Views\Seal\CDCView.cshtml" />
     <Content Include="Views\BeforeOpenTreasury\Index.cshtml" />
-    <Content Include="Views\TreasuryRegisterSearchReport\Index.cshtml" />
     <Content Include="Views\ConfirmStorage\Index.cshtml" />
-    <Content Include="Views\CA\CDCView.cshtml" />
-    <Content Include="Views\ItemImp\CDCView.cshtml" />
-    <Content Include="Views\Marging\CDCView.cshtml" />
-    <Content Include="Views\Marginp\CDCView.cshtml" />
-    <Content Include="Views\SpecifiedTimeTrea\Appr.cshtml" />
+    <Content Include="Views\TreasuryReport\Index.cshtml" />
+    <Content Include="Views\TreasuryRegisterSearchReport\Index.cshtml" />
+    <Content Include="Views\TreasuryRegistration\Index.cshtml" />
+    <Content Include="Views\TREAReviewWork\Index.cshtml" />
+    <Content Include="Views\AfterOpenTreasury\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1306,12 +1327,21 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Report\Rdlc\DEPOSIT_G.rdlc" />
+    <Content Include="Report\Rdlc\DEPOSIT_G.rdlc">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Report\Rdlc\TREASURY_REGISTER.rdlc">
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Report\Rdlc\DEPOSIT_MARGING.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\DEPOSIT_SEAL.rdlc" />
+    <EmbeddedResource Include="Report\Rdlc\TREASURYREGISTRATION.rdlc" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

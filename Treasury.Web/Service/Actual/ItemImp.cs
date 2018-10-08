@@ -53,8 +53,9 @@ namespace Treasury.Web.Service.Actual
                 if (_TAR != null)
                 {
                     //使用單號去其他存取項目檔抓取歸檔編號
-                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
-                        .Where(x => x.APLY_NO == _TAR.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    var OTHER_ITEM_APLYs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _TAR.APLY_NO).ToList();
+                    var OIAs = OTHER_ITEM_APLYs.Select(x => x.ITEM_ID).ToList();
                     //使用歸檔編號去重要物品庫存資料檔抓取資料
                     var details = db.ITEM_IMPO.AsNoTracking()
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
@@ -62,7 +63,12 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types).ToList();
+                        result = GetDetailModel(details, _Inventory_types, OTHER_ITEM_APLYs).ToList();
+                        result.ForEach(x =>
+                        {
+                            x.vtakeoutFlag = x.vItemImp_G_Quantity == null ? false :
+                                             (x.vItemImp_G_Quantity.Value == 0 ? false : true);
+                        });
                     }
                 }
             }
@@ -86,16 +92,17 @@ namespace Treasury.Web.Service.Actual
                     result = db.ITEM_IMPO.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
-                    .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .Where(x => x.INVENTORY_STATUS == "1" && x.REMAINING != 0) //庫存 & 剩餘數量不能為0
                     .AsEnumerable()
                     .Select(x => 
                     new ItemImpViewModel() {
+                        vShowItemId = x.ITEM_ID, //歸檔編號
                         vItemId = x.ITEM_ID,
                         vStatus = Ref.AccessInventoryType._1.GetDescription(),
+                        vItemImp_Remaining = x.REMAINING,                     
                         vItemImp_Name = x.ITEM_NAME,
                         vItemImp_Quantity = x.QUANTITY,
                         vItemImp_Amount = x.AMOUNT,
-                        //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
                         vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
                         vDescription = x.DESCRIPTION,
                         vMemo = x.MEMO,
@@ -106,25 +113,38 @@ namespace Treasury.Web.Service.Actual
                 }
                 if (!aplyNo.IsNullOrWhiteSpace())
                 {
-                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
-                        .Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
-                        result.AddRange(db.ITEM_IMPO.AsNoTracking().Where(
-                        x => itemIds.Contains(x.ITEM_ID)).AsEnumerable()
-                        .Select(x =>
-                         new ItemImpViewModel()
-                         {
-                             vItemId = x.ITEM_ID,
-                             vStatus = Ref.AccessInventoryType._4.GetDescription(),
-                             vItemImp_Name = x.ITEM_NAME,
-                        vItemImp_Quantity = x.QUANTITY,
-                        vItemImp_Amount = x.AMOUNT,
-                        //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
-                        vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
-                        vDescription = x.DESCRIPTION,
-                        vMemo = x.MEMO,
-                             vtakeoutFlag = true,
-                             vLast_Update_Time = x.LAST_UPDATE_DT
-                         }));
+                    var OIAs = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aplyNo).ToList();
+                    var itemIds = OIAs.Select(x => x.ITEM_ID).ToList();
+                    itemIds.ForEach(x =>
+                    {
+                        var del = result.FirstOrDefault(y => y.vItemId == x);
+                        if (del != null)
+                            result.Remove(del);
+                    });
+                    db.ITEM_IMPO.AsNoTracking().Where(x =>
+                    itemIds.Contains(x.ITEM_ID)).ToList()
+                    .ForEach(x =>
+                    {
+                        var _Quantity = TypeTransfer.intNToInt(OIAs.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.Memo_I);
+                        result.Add(
+                            new ItemImpViewModel()
+                            {
+                                vShowItemId = x.ITEM_ID, //歸檔編號
+                                vItemId = x.ITEM_ID,
+                                vStatus = Ref.AccessInventoryType._4.GetDescription(),
+                                vItemImp_G_Quantity = _Quantity,
+                                vItemImp_Remaining = x.REMAINING + _Quantity,
+                                vItemImp_Name = x.ITEM_NAME,
+                                vItemImp_Quantity = x.QUANTITY,
+                                vItemImp_Amount = x.AMOUNT,
+                                vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE),
+                                vDescription = x.DESCRIPTION,
+                                vMemo = x.MEMO,
+                                vtakeoutFlag = true,
+                                vLast_Update_Time = x.LAST_UPDATE_DT
+                            });
+                    });
                 }
             }
             return result;
@@ -288,8 +308,9 @@ namespace Treasury.Web.Service.Actual
                                 #region 重要物品庫存資料檔
 
                                 var _dept = intra.getDept_Sect(taData.vAplyUnit);
-                                List<string> oldItemIds = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).Select(x => x.ITEM_ID).ToList(); //原有 itemId 
-                                List<string> updateItemIds = new List<string>(); //更新 itemId
+                                List<OTHER_ITEM_APLY> oldOIAs = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).ToList(); //原有OTHER_ITEM_APLY
+                                List<string> oldItemIds = oldOIAs.Select(x => x.ITEM_ID).ToList(); //原有 itemId 
+                                List<Tuple<string,int?>> updateItemIds = new List<Tuple<string,int?>>(); //更新 itemId
                                 List<string> cancelItemIds = new List<string>(); //取消 itemId
                                 List<ITEM_IMPO> inserts = new List<ITEM_IMPO>(); //新增資料
 
@@ -314,12 +335,12 @@ namespace Treasury.Web.Service.Actual
                                                 }
                                                 _II.ITEM_NAME = item.vItemImp_Name; //重要物品名稱
                                                 _II.QUANTITY = item.vItemImp_Quantity; //重要物品數量
-                                                //_II.REMAINING = item.vItemImp_Quantity; //重要物品剩餘數量
+                                                _II.REMAINING = item.vItemImp_Quantity; //重要物品剩餘數量
                                                 _II.AMOUNT = item.vItemImp_Amount; //重要物品金額
                                                 _II.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(item.vItemImp_Expected_Date); //重要物品預計提取日期
                                                 _II.DESCRIPTION = item.vDescription;//說明
                                                 _II.MEMO = item.vMemo; //備註
-                                                updateItemIds.Add(item.vItemId);
+                                                updateItemIds.Add(new Tuple<string, int?>(item.vItemId,null));
                                                 logStr += _II.modelToString(logStr);
                                             }
                                             else
@@ -361,23 +382,39 @@ namespace Treasury.Web.Service.Actual
                                         //預約取出
                                         if (item.vtakeoutFlag)
                                         {
-                                            if (_II.INVENTORY_STATUS == "1") //原先為在庫
+                                            var old = oldOIAs.FirstOrDefault(x => x.ITEM_ID == _II.ITEM_ID);
+                                            if (old != null) //原先就為取出
                                             {
-                                                _II.INVENTORY_STATUS = "4"; //預約取出
-                                                _II.LAST_UPDATE_DT = dt;  //最後修改時間
-                                                updateItemIds.Add(_II.ITEM_ID);
+                                                if (old.Memo_I != item.vItemImp_G_Quantity) //取出數量不相等 (修改)
+                                                {
+                                                    //(新)剩餘數量 = (舊)剩餘數量 + 原先取出數量 - 畫面取出數量
+                                                    _II.REMAINING = _II.REMAINING + old.Memo_I.Value - item.vItemImp_G_Quantity.Value;
+                                                    _II.LAST_UPDATE_DT = dt;
+                                                    updateItemIds.Add(new Tuple<string, int?>(_II.ITEM_ID, item.vItemImp_G_Quantity));
+                                                }
+                                                else //相等
+                                                {
+                                                    updateItemIds.Add(new Tuple<string, int?>(_II.ITEM_ID, old.Memo_I));
+                                                }
+                                                //else 相等
                                             }
-                                            else if (_II.INVENTORY_STATUS == "4") //原先為預約取出
+                                            else //新增取出
                                             {
-                                                updateItemIds.Add(_II.ITEM_ID);
+                                                _II.REMAINING = _II.REMAINING - item.vItemImp_G_Quantity.Value;
+                                                _II.LAST_UPDATE_DT = dt;
+                                                updateItemIds.Add(new Tuple<string, int?>(_II.ITEM_ID, item.vItemImp_G_Quantity));
                                             }
                                         }
                                         else
                                         {
-                                            if (_II.INVENTORY_STATUS == "4") //原先為在庫
+                                            if (oldItemIds.Contains(item.vItemId))
                                             {
-                                                _II.INVENTORY_STATUS = "1"; //預約取出
-                                                _II.LAST_UPDATE_DT = dt;  //最後修改時間
+                                                var old = oldOIAs.FirstOrDefault(x => x.ITEM_ID == _II.ITEM_ID);
+                                                if (old != null) //原先為取出
+                                                {
+                                                    _II.REMAINING = _II.REMAINING + old.Memo_I.Value;
+                                                    _II.LAST_UPDATE_DT = dt;
+                                                }
                                             }
                                         }
                                     }
@@ -385,7 +422,7 @@ namespace Treasury.Web.Service.Actual
 
                                 if (taData.vAccessType == Ref.AccessProjectTradeType.P.ToString()) //存入
                                 {
-                                    var delItemId = oldItemIds.Where(x => !updateItemIds.Contains(x)).ToList();
+                                    var delItemId = oldItemIds.Where(x => !updateItemIds.Select(y=>y.Item1).ToList().Contains(x)).ToList();
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo && delItemId.Contains(x.ITEM_ID)).ToList());
                                     db.ITEM_IMPO.RemoveRange(db.ITEM_IMPO.Where(x => delItemId.Contains(x.ITEM_ID)).ToList());
                                     db.OTHER_ITEM_APLY.AddRange(inserts.Select(x => new OTHER_ITEM_APLY()
@@ -401,7 +438,8 @@ namespace Treasury.Web.Service.Actual
                                     db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
                                     {
                                         APLY_NO = taData.vAplyNo,
-                                        ITEM_ID = x
+                                        ITEM_ID = x.Item1,
+                                        Memo_I = x.Item2
                                     }));
                                 }
                                 #endregion
@@ -455,7 +493,7 @@ namespace Treasury.Web.Service.Actual
                                     else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
                                     {
                                         //只抓取預約取出
-                                        if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
+                                        if (item.vItemImp_G_Quantity != null)
                                         {
                                             var _II = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                             _II_Item_Id = _II.ITEM_ID;
@@ -464,12 +502,10 @@ namespace Treasury.Web.Service.Actual
                                                 result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
-                                            _II.INVENTORY_STATUS = "4"; //預約取出
-                                                                        //_IRE.GET_DATE = dt; //取出日期時間
+                                            _II.REMAINING = (_II.REMAINING - item.vItemImp_G_Quantity.Value); //(新)剩餘數量 = (原)剩餘數量 - 取出數量
                                             _II.LAST_UPDATE_DT = dt;  //最後修改時間
                                         }
                                     }
-
 
                                     #region 其它存取項目申請資料檔
                                     if (!_II_Item_Id.IsNullOrWhiteSpace())
@@ -478,7 +514,8 @@ namespace Treasury.Web.Service.Actual
                                         new OTHER_ITEM_APLY()
                                         {
                                             APLY_NO = _TAR.APLY_NO,
-                                            ITEM_ID = _II_Item_Id
+                                            ITEM_ID = _II_Item_Id,
+                                            Memo_I = item.vItemImp_G_Quantity
                                         });
                                     }
                                     #endregion
@@ -547,11 +584,14 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> ObSolete(TreasuryDBEntities db, string aply_No, string access_Type, string logStr, DateTime dt)
         {
-            var itemIds = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+            var OISs = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == aply_No).ToList();
+            var itemIds = OISs.Select(x => x.ITEM_ID).ToList();
             if (access_Type == Ref.AccessProjectTradeType.G.ToString()) //取出狀態重要物品庫存資料檔要復原
             {
                 foreach (var item in db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
+                    var OIS = OISs.First(x => x.ITEM_ID == item.ITEM_ID);
+                    item.REMAINING = item.REMAINING + OIS.Memo_I.Value;
                     item.INVENTORY_STATUS = "1"; //復原為在庫
                     item.LAST_UPDATE_DT = dt;
                     logStr += item.modelToString(logStr);
@@ -587,6 +627,8 @@ namespace Treasury.Web.Service.Actual
             {
                 foreach (var item in db.ITEM_IMPO.Where(x => itemIds.Contains(x.ITEM_ID)))
                 {
+                    var OIS = otherItemAplys.First(x => x.ITEM_ID == item.ITEM_ID);
+                    item.REMAINING = item.REMAINING + OIS.Memo_I.Value;
                     item.INVENTORY_STATUS = "1"; //復原為在庫
                     item.LAST_UPDATE_DT = dt;
                     logStr += item.modelToString(logStr);
@@ -759,20 +801,22 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<ItemImpViewModel> GetDetailModel(IEnumerable<ITEM_IMPO> data,List<SYS_CODE> _Inventory_types)
+        private IEnumerable<ItemImpViewModel> GetDetailModel(IEnumerable<ITEM_IMPO> data,List<SYS_CODE> _Inventory_types,List<OTHER_ITEM_APLY> OIAs)
         {
             return data.Select(x => new ItemImpViewModel()
             {
+                vShowItemId = x.ITEM_ID, //歸檔編號
+                vItemImp_Remaining = x.REMAINING, //剩餘數量
                 vItemId = x.ITEM_ID, //歸檔編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vItemImp_Name = x.ITEM_NAME, //重要物品名稱
+                vItemImp_G_Quantity = OIAs.FirstOrDefault(y => x.ITEM_ID == y.ITEM_ID)?.Memo_I, // 取出數量
                 vItemImp_Quantity = x.QUANTITY, //重要物品數量
                 vItemImp_Amount = x.AMOUNT, //重要物品金額
                 //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
                 vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
                 vDescription = x.DESCRIPTION,//說明
                 vMemo = x.MEMO, //備註
-                vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
         }

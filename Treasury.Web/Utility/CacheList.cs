@@ -88,6 +88,31 @@
         public static string TreasuryRegisterSearchReportD { get; private set; }
 
         /// <summary>
+        /// 金庫登記簿執行作業(關庫後) - 查詢
+        /// </summary>
+        public static string AfterOpenTreasurySearchData { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿執行作業(關庫後) - 資料
+        /// </summary>
+        public static string AfterOpenTreasurySearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿執行作業(關庫後) - 未確認表單資料
+        /// </summary>
+        public static string AfterOpenTreasuryUnconfirmedDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿覆核作業(資料)
+        /// </summary>
+        public static string TREAReviewWorkDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 金庫登記簿覆核作業(單號查資料)
+        /// </summary>
+        public static string TREAReviewWorkSearchDetailViewData { get; private set; }
+
+        /// <summary>
         /// 入庫人員確認作業(查詢)
         /// </summary>
         public static string ConfirmStorageSearchData { get; private set; }
@@ -216,6 +241,8 @@
         static CacheList()
         {
             #region Cache資料
+            TREAReviewWorkDetailViewData = "TREAReviewWorkDetailViewData";
+            TREAReviewWorkSearchDetailViewData = "TREAReviewWorkSearchDetailViewData";
             TreasuryAccessViewData = "TreasuryAccessViewData";
             TreasuryAccessSearchData = "TreasuryAccessSearchData";
             TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
@@ -228,6 +255,9 @@
             SpecifiedTimeTreasuryApprSearchData = "SpecifiedTimeTreasuryApprSearchData";
             SpecifiedTimeTreasuryApprSearchDetailViewData = "SpecifiedTimeTreasuryApprSearchDetailViewData";
             SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
+            AfterOpenTreasurySearchData = "AfterOpenTreasurySearchData";
+            AfterOpenTreasurySearchDetailViewData = "AfterOpenTreasurySearchDetailViewData";
+            AfterOpenTreasuryUnconfirmedDetailViewData = "AfterOpenTreasuryUnconfirmedDetailViewData";
             BeforeOpenTreasuryRoutine = "BeforeOpenTreasuryRoutine";
             BeforeOpenTreasuryStorage = "BeforeOpenTreasuryStorage";
             ConfirmStorageSearchData = "ConfirmStorageSearchData";

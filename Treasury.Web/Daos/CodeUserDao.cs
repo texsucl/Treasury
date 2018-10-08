@@ -13,7 +13,7 @@ using System.Data.Entity.SqlServer;
 using System.Transactions;
 using System.Data.SqlClient;
 
-/// <summary>    
+/// <summary>
 /// 功能說明：
 /// 初版作者：20171023 黃黛鈺
 /// 修改歷程：20171023 黃黛鈺 
@@ -147,6 +147,7 @@ INSERT INTO [dbo].[CODE_USER]
            ,[USER_UNIT]
            ,[IS_DISABLED]
            ,[IS_MAIL]
+           ,[MEMO]
            ,[DATA_STATUS]
            ,[CREATE_UID]
            ,[CREATE_DT]
@@ -161,6 +162,7 @@ INSERT INTO [dbo].[CODE_USER]
 ,@USER_UNIT
 ,@IS_DISABLED
 ,@IS_MAIL
+,@MEMO
 ,@DATA_STATUS
 ,@CREATE_UID
 ,@CREATE_DT
@@ -185,6 +187,7 @@ INSERT INTO [dbo].[CODE_USER]
                 command.Parameters.AddWithValue("@USER_UNIT", StringUtil.toString(user.USER_UNIT));
                 command.Parameters.AddWithValue("@IS_DISABLED", StringUtil.toString(user.IS_DISABLED));
                 command.Parameters.AddWithValue("@IS_MAIL", StringUtil.toString(user.IS_MAIL));
+                command.Parameters.AddWithValue("@MEMO", StringUtil.toString(user.MEMO));
                 command.Parameters.AddWithValue("@DATA_STATUS", StringUtil.toString(user.DATA_STATUS));
                 command.Parameters.AddWithValue("@CREATE_UID", StringUtil.toString(user.CREATE_UID));
 
@@ -314,6 +317,7 @@ INSERT INTO [dbo].[CODE_USER]
                             isDisabledDesc = xFlag.CODE_VALUE.Trim(),
                             isMail = user.IS_MAIL,
                             isMailDesc = xMail.CODE_VALUE.Trim(),
+                            vMemo = user.MEMO.Trim(),
                             cUserID = user.USER_ID.Trim(),
                             cCrtUserID = user.CREATE_UID.Trim(),
                             cCrtDate = user.CREATE_DT == null ? "" : SqlFunctions.DateName("year", user.CREATE_DT) + "/" +
@@ -360,6 +364,7 @@ INSERT INTO [dbo].[CODE_USER]
                   set USER_UNIT = @USER_UNIT 
                      ,IS_DISABLED = @IS_DISABLED
                      ,IS_MAIL = @IS_MAIL
+                     ,MEMO = @MEMO
                      ,DATA_STATUS = @DATA_STATUS
         ,CREATE_UID = @CREATE_UID
         ,CREATE_DT = @CREATE_DT
@@ -386,6 +391,7 @@ INSERT INTO [dbo].[CODE_USER]
                 cmd.Parameters.AddWithValue("@USER_UNIT", StringUtil.toString(user.USER_UNIT));
                 cmd.Parameters.AddWithValue("@IS_DISABLED", StringUtil.toString(user.IS_DISABLED));
                 cmd.Parameters.AddWithValue("@IS_MAIL", StringUtil.toString(user.IS_MAIL));
+                cmd.Parameters.AddWithValue("@MEMO", StringUtil.toString(user.MEMO));
 
                 cmd.Parameters.AddWithValue("@DATA_STATUS", StringUtil.toString(user.DATA_STATUS));
                 cmd.Parameters.AddWithValue("@CREATE_UID", StringUtil.toString(user.CREATE_UID));
@@ -462,6 +468,7 @@ INSERT INTO [dbo].[CODE_USER]
             content += StringUtil.toString(codeUser.USER_UNIT) + "|";
             content += StringUtil.toString(codeUser.IS_DISABLED) + "|";
             content += StringUtil.toString(codeUser.IS_MAIL) + "|";
+            content += StringUtil.toString(codeUser.MEMO) + "|";
             content += StringUtil.toString(codeUser.DATA_STATUS) + "|";
 
 

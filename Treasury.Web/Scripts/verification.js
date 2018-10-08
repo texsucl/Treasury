@@ -14,7 +14,7 @@
     positiveInt = /^[0-9]+$/;
     englishNumberFormat = /^[a-zA-Z0-9]+$/;
     priceFormate = /^([0-9]{1,})+(.[0-9]{1,})?$/;
-    rateFormat =/^([0-9]{1,2})+(.[0-9]{1,2})?$/;
+    rateFormat = /^([0-9]{1,2})?(\.[0-9]{1,4})?$/;
 
     window.verified = verified;
     window.created = created;

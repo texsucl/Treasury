@@ -108,15 +108,17 @@ namespace Treasury.Web.Controllers
         /// <param name="AccessType">P,G</param>
         /// <param name="vSEAL_ITEM_ID">印章ID</param>
         /// <returns></returns>
-        public JsonResult OpTypeChange(string OpTypeId, List<string>ItemIdList, string AccessType,string vSEAL_ITEM_ID = null,string ItemId = null)
+        public JsonResult OpTypeChange(string OpTypeId, List<string>ItemIdList, string AccessType,string vSEAL_ITEM_ID = null,string ItemId = null, bool RemoveRowData = true)
         {
             var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
+            List<string> rowItemIdList = new List<string>();
             List<string> sealIdList = new List<string>();
             ViewData.ForEach(x => {
-                //if(x.vACCESS_TYPE_CODE == AccessType)
-                if(x.vSEAL_ITEM_ID != null && vSEAL_ITEM_ID != x.vSEAL_ITEM_ID )
+                if (x.vITEM_ID != null && RemoveRowData == true)
+                    rowItemIdList.Add(x.vITEM_ID);
+                if (x.vSEAL_ITEM_ID != null && vSEAL_ITEM_ID != x.vSEAL_ITEM_ID )
                 sealIdList.Add(x.vSEAL_ITEM_ID); });
-            var result = ConfirmStorage.ItemOpTypeChange(OpTypeId, ItemIdList, AccessType, sealIdList, ItemId);
+            var result = ConfirmStorage.ItemOpTypeChange(OpTypeId, ItemIdList, AccessType, sealIdList, rowItemIdList, ItemId);
             return Json(result);
         }
 

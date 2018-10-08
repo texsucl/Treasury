@@ -32,11 +32,10 @@ namespace Treasury.Web.Report.Data
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                _REC.APLY_NO = aply_No;
                 _REC.CURRENCY = isNTD == "Y" ? "台幣" : "外幣";
 
-                _REC.DEP_TYPE = db.SYS_CODE.AsNoTracking()
-                    .Where(x => x.CODE_TYPE == "DEP_TYPE" && x.CODE == vDep_Type)
-                    .Select(x => x.CODE_VALUE).FirstOrDefault();
+                _REC.DEP_TYPE = vDep_Type;
 
                 //_REC.SYS_TYPE = DateTime.Now.DateToTaiwanDate(9);
                 _REC.SYS_TYPE = TypeTransfer.dateTimeToString(DateTime.Now,false);
@@ -57,7 +56,7 @@ namespace Treasury.Web.Report.Data
                     _REC.COMMIT_DATE = TypeTransfer.dateTimeToString(_IDOM_DataList
                         .Where(x => x.CURRENCY == "NTD", isNTD == "Y")
                         .Where(x => x.CURRENCY != "NTD", isNTD == "N")
-                        .Where(x => x.DEP_TYPE == vDep_Type)
+                        .Where(x => x.DEP_TYPE == vDep_Type, vDep_Type != "0")
                         .Select(x => x.COMMIT_DATE).FirstOrDefault(),false);
                 }
             }
@@ -75,8 +74,27 @@ namespace Treasury.Web.Report.Data
             }
         }
 
+        protected void SetDetail(string aply_No)
+        {
+            var depts = new List<VW_OA_DEPT>();
+            var emps = new List<V_EMPLY2>();
+            _REC = new REC();
+            //var sys
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().Where(x => x.DPT_CD != null).ToList();
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+            }
+        }
         protected class REC
         {
+            public REC() {
+                DEP_SET_QUALITY = "N";
+            }
+
+            [Description("申請單號")]
+            public string APLY_NO { get; set; }
+
             [Description("台幣/外幣")]
             public string CURRENCY { get; set; }
 
@@ -88,6 +106,9 @@ namespace Treasury.Web.Report.Data
 
             [Description("承作日期")]
             public string COMMIT_DATE { get; set; }
+
+            [Description("設質否")]
+            public string DEP_SET_QUALITY { get; set; }
 
         }
 
@@ -108,6 +129,9 @@ namespace Treasury.Web.Report.Data
 
             [Description("存單類型")]
             public string DEP_TYPE { get; set; }
+
+            [Description("存單類型(中文)")]
+            public string DEP_TYPE_D { get; set; }
 
             [Description("存單號碼(起)")]
             public string DEP_NO_B { get; set; }
@@ -131,5 +155,42 @@ namespace Treasury.Web.Report.Data
             public string DEP_CHK_ITEM_DESC { get; set; }
 
         }
+        protected class DepositReportMarginpgData
+        {
+            [Description("類別")]
+            public string MARGIN_DEP_TYPE { get; set; }
+
+            [Description("歸檔編號")]
+            public string ITEM_ID { get; set; }
+
+            [Description("冊號")]
+            public string BOOK_NO { get; set; }
+
+            [Description("入庫日期")]
+            public DateTime? PUT_DATE { get; set; }
+
+            [Description("權責部門")]
+            public string CHARGE_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string CHARGE_SECT { get; set; }
+
+
+            [Description("交易對象")]
+            public string TRAD_PARTNERS { get; set; }
+
+            [Description("金額")]
+            public decimal? AMOUNT { get; set; }
+
+            [Description("職場代號 ")]
+            public string WORKPLACE_CODE { get; set; }
+
+            [Description("說明")]
+            public string DESCRIPTION { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+        }
+
     }
 }

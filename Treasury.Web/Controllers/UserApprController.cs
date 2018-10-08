@@ -29,7 +29,7 @@ using Treasury.Web.Daos;
 /// ==============================================
 /// </summary>
 /// 
-namespace Treasury.Web.Controllers
+namespace Treasury.WebControllers
 {
     [Authorize]
     [CheckSessionFilterAttribute]
@@ -247,6 +247,7 @@ namespace Treasury.Web.Controllers
 
                     userData.isMailB = StringUtil.toString(codeUser.IS_MAIL);
                     userData.isDisabledB = StringUtil.toString(codeUser.IS_DISABLED);
+                    userData.memoB = StringUtil.toString(codeUser.MEMO);
 
                 }
                 else {
@@ -254,13 +255,16 @@ namespace Treasury.Web.Controllers
                     {
                         userData.isMail = StringUtil.toString(codeUserHis.IS_MAIL);
                         userData.isDisabled = StringUtil.toString(codeUserHis.IS_DISABLED);
+                        userData.memo = StringUtil.toString(codeUserHis.MEMO);
                     }
                     else {
                         userData.isMail = StringUtil.toString(codeUserHis.IS_MAIL);
                         userData.isDisabled = StringUtil.toString(codeUserHis.IS_MAIL);
+                        userData.memo = StringUtil.toString(codeUserHis.MEMO);
 
                         userData.isMailB = StringUtil.toString(codeUserHis.IS_MAIL_B);
                         userData.isDisabledB = StringUtil.toString(codeUserHis.IS_DISABLED_B);
+                        userData.memoB = StringUtil.toString(codeUserHis.MEMO_B);
                     }
                 }
 
@@ -379,6 +383,7 @@ namespace Treasury.Web.Controllers
                             cODEUSERO.USER_ID = StringUtil.toString(codeUserHis.USER_ID);
                             cODEUSERO.IS_DISABLED = codeUserHis.IS_DISABLED;
                             cODEUSERO.IS_MAIL = codeUserHis.IS_MAIL;
+                            cODEUSERO.MEMO = codeUserHis.MEMO;
                             cODEUSERO.DATA_STATUS = "1";
                             cODEUSERO.CREATE_UID = authAppr.CREATE_UID;
                             cODEUSERO.CREATE_DT = authAppr.CREATE_DT;
@@ -421,6 +426,7 @@ namespace Treasury.Web.Controllers
                         {
                             cODEUSERO.IS_DISABLED = codeUserHis.IS_DISABLED;
                             cODEUSERO.IS_MAIL = StringUtil.toString(codeUserHis.IS_MAIL);
+                            cODEUSERO.MEMO = StringUtil.toString(codeUserHis.MEMO);
                         }
 
 
@@ -498,7 +504,7 @@ namespace Treasury.Web.Controllers
 
                                 break;
                             case "D":
-                                dRole = codeUserRoleDao.qryByKey(cODEUSERO.USER_ID, d.roleId);
+                                dRole = codeUserRoleDao.qryByKey(d.userId, d.roleId);
 
                                 //新增LOG
 
