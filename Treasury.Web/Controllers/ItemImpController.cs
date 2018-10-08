@@ -196,9 +196,9 @@ namespace Treasury.Web.Controllers
                     var _vItemImp_Name_AFT = model.vItemImp_Name.CheckAFT(updateTempData.vItemImp_Name);
                     if (_vItemImp_Name_AFT.Item2)
                         updateTempData.vItemImp_Name_AFT = _vItemImp_Name_AFT.Item1;
-                    var _vItemImp_Quantity_AFT = TypeTransfer.intNToString(model.vItemImp_Quantity).CheckAFT(TypeTransfer.intNToString(updateTempData.vItemImp_Quantity));
-                    if (_vItemImp_Quantity_AFT.Item2)
-                        updateTempData.vItemImp_Remaining_AFT = TypeTransfer.stringToIntN(_vItemImp_Quantity_AFT.Item1);
+                    var _vItemImp_Remaining_AFT = TypeTransfer.intNToString(model.vItemImp_Remaining).CheckAFT(TypeTransfer.intNToString(updateTempData.vItemImp_Remaining));
+                    if (_vItemImp_Remaining_AFT.Item2)
+                        updateTempData.vItemImp_Remaining_AFT = TypeTransfer.stringToIntN(_vItemImp_Remaining_AFT.Item1);
                     var _vItemImp_Amount_AFT = TypeTransfer.decimalNToString(model.vItemImp_Amount).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vItemImp_Amount));
                     if (_vItemImp_Amount_AFT.Item2)
                         updateTempData.vItemImp_Amount_AFT = TypeTransfer.stringToDecimal(_vItemImp_Amount_AFT.Item1);
@@ -211,7 +211,7 @@ namespace Treasury.Web.Controllers
                     var _vItemImp_MEMO_AFT = model.vItemImp_MEMO.CheckAFT(updateTempData.vItemImp_MEMO);
                     if (_vItemImp_MEMO_AFT.Item2)
                         updateTempData.vItemImp_MEMO_AFT = _vItemImp_MEMO_AFT.Item1;
-                    updateTempData.vAFTFlag = _vItemImp_Name_AFT.Item2 || _vItemImp_Quantity_AFT.Item2 || _vItemImp_Amount_AFT.Item2 || _vItemImp_Expected_Date_AFT.Item2 || _vItemImp_Description_AFT.Item2 || _vItemImp_MEMO_AFT.Item2;
+                    updateTempData.vAFTFlag = _vItemImp_Name_AFT.Item2 || _vItemImp_Remaining_AFT.Item2 || _vItemImp_Amount_AFT.Item2 || _vItemImp_Expected_Date_AFT.Item2 || _vItemImp_Description_AFT.Item2 || _vItemImp_MEMO_AFT.Item2;
                     Cache.Invalidate(CacheList.CDCItemImpData);
                     Cache.Set(CacheList.CDCItemImpData, dbData);
                     result.Datas = dbData.Any(x => x.vAFTFlag);

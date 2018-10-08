@@ -53,7 +53,7 @@ namespace Treasury.Web.Scheduler
                                 .FirstOrDefault(x =>
                                 x.SEND_TIME != null &&
                                 x.SEND_TIME == dtnstr &&
-                                x.SCHEDULER_UPDATE_DT == dtn);
+                                x.MAIL_CONTENT_ID == "01");
                         if (_MT2 != null)
                         {
                             Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");

@@ -611,20 +611,24 @@
                 close: function (event, ui) {
                     customerUtility.closeDialog(this);
                 }
-            });
+            });       
             $('#CDCMarginpUpdateTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
             }
-            else if (type == '@Ref.ActionType.Edit.ToString()') {
+            else if (type == '@Ref.ActionType.Edit.ToString()') {           
                 dialogSetData(listId, rowid);
                 $('#CDCMarginpUpdateTemp').show();
                 $('.' + MarginpUpdateClass).prop('disabled', false);
+                $('#' + tCDCEffective_Date_BId).next().prop('disabled', false);
+                $('#' + tCDCEffective_Date_EId).next().prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData(listId, rowid);
                 $('.' + MarginpUpdateClass).prop('disabled', true);
+                $('#' + tCDCEffective_Date_BId).next().prop('disabled', true);
+                $('#' + tCDCEffective_Date_EId).next().prop('disabled', true);
             }
             $('#' + CDCMarginpDialogId).dialog('open');
         }

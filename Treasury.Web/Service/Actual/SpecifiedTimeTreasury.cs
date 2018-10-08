@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Text;
 using System.Web;
 using Treasury.Web.Enum;
 using Treasury.Web.Models;
@@ -443,6 +444,8 @@ namespace Treasury.Web.Service.Actual
             DateTime dt = DateTime.Now;
             string logStrC = string.Empty; //combin Log
 
+            List<TREA_OPEN_REC> TORs = new List<TREA_OPEN_REC>();
+
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TREA_ITEM = db.TREA_ITEM.Where(x => x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
@@ -460,6 +463,7 @@ namespace Treasury.Web.Service.Actual
                         result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vTREA_REGISTER_ID}");
                         return result;
                     }
+                    TORs.Add(_TREA_OPEN_REC);
                     var applyStatus = ((int)Ref.ApplyStatus._2).ToString(); // 狀態: 覆核完成
                     string logStrB = string.Empty; //修改前 Log
                     string logStrA = string.Empty; //修改後 Log
@@ -543,6 +547,39 @@ namespace Treasury.Web.Service.Actual
                     try
                     {
                         db.SaveChanges();
+
+                        #region 寄信
+                        foreach(var TOR in TORs)
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            sb.AppendLine(
+        $@"您好,
+通知今日金庫開關庫時間為:{TOR.OPEN_TREA_TIME}，請準時至金庫門口集合。
+為配合金庫大門之啟閉，請有權人在:{TOR.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
+");
+                            try
+                            {
+                                var sms = new SendMail.SendMailSelf();
+                                sms.smtpPort = 25;
+                                sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                                sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                                sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                                sms.Mail_Send(
+                                    new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                                    new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+                                    null,
+                                    "金庫指定開庫通知",
+                                    sb.ToString()
+                                    );
+
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+
+                        #endregion
 
                         #region LOG
                         //新增LOG

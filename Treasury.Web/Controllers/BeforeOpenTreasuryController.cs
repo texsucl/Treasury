@@ -110,9 +110,20 @@ namespace Treasury.Web.Controllers
             Cache.Invalidate(CacheList.BeforeOpenTreasuryRoutine);
             Cache.Invalidate(CacheList.BeforeOpenTreasuryStorage);
 
-            //設定資料
-            Cache.Set(CacheList.BeforeOpenTreasuryRoutine, BeforeOpenTreasury.GetRoutineList());
-            Cache.Set(CacheList.BeforeOpenTreasuryStorage, BeforeOpenTreasury.GetStorageList(TreaRegisterId));
+            if (TreaRegisterId.IsNullOrWhiteSpace())
+            {
+                //設定資料
+                Cache.Set(CacheList.BeforeOpenTreasuryRoutine, new List<BeforeOpenTreasuryViewModel>());
+                Cache.Set(CacheList.BeforeOpenTreasuryStorage, new List<BeforeOpenTreasuryViewModel>());
+            }
+            else
+            {
+                //設定資料
+                Cache.Set(CacheList.BeforeOpenTreasuryRoutine, BeforeOpenTreasury.GetRoutineList());
+                Cache.Set(CacheList.BeforeOpenTreasuryStorage, BeforeOpenTreasury.GetStorageList(TreaRegisterId));
+            }
+
+
         }
     }
 }

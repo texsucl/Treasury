@@ -971,7 +971,7 @@ namespace Treasury.Web.Service.Actual
             {
                 vItem = data.ITEM_ID,
                 vItemDec = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC,
-                vAPLY_DT = data.APLY_DT?.DateToTaiwanDate(9),
+                vAPLY_DT = data.APLY_DT?.ToString("yyyy/MM/dd"),
                 vAPLY_NO = data.APLY_NO,
                 vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME,
                 vAPLY_UID = data.APLY_UID,

@@ -349,7 +349,7 @@ namespace Treasury.Web.Service.Actual
             {
                 vItem_Id = data.ITEM_ID,
                 vItem_Desc = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC,
-                vAply_Dt = data.CREATE_Date?.DateToTaiwanDate(9),
+                vAply_Dt = data.CREATE_Date?.ToString("yyyy/MM/dd"),
                 vAply_No = data.APLY_NO,
                 vAply_Uid = data.CREATE_UID,
                 vAply_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == data.CREATE_UID)?.EMP_NAME,
