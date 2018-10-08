@@ -93,7 +93,8 @@
 
             //#region 初始設定
             created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
-
+            verified.required(TAFormId, 'APLY_DT_From', message.required('入庫日期(起)')); //入庫日期(起)為必填
+            verified.required(TAFormId, 'APLY_DT_To', message.required('入庫日期(迄)')); //入庫日期(迄)為必填
 
             //$('input:button').each(function () {
             //    var id = $(this).attr('id');
@@ -128,21 +129,24 @@
 
         //#region 呼叫報表
         function TAReport() {
-                        var title = '';
-                        var parms = [];
-                        var aply_dt_from = $('#APLY_DT_From').val();
-                        var aply_dt_to = $('#APLY_DT_To').val();
-                        var _vOpenTreaType = $('#vOpenTreaType').val();
-                        parms.push(customerUtility.reportParm('APLY_DT_From', aply_dt_from));
-                        parms.push(customerUtility.reportParm('APLY_DT_To', aply_dt_to));
-                        parms.push(customerUtility.reportParm('vOpenTreaType', _vOpenTreaType));
+            $('#' + TAFormId).validate().resetForm();
+            if ($('#' + TAFormId).valid())
+            {
+                var title = '';
+                var parms = [];
+                var aply_dt_from = $('#APLY_DT_From').val();
+                var aply_dt_to = $('#APLY_DT_To').val();
+                var _vOpenTreaType = $('#vOpenTreaType').val();
+                parms.push(customerUtility.reportParm('APLY_DT_From', aply_dt_from));
+                parms.push(customerUtility.reportParm('APLY_DT_To', aply_dt_to));
+                parms.push(customerUtility.reportParm('vOpenTreaType', _vOpenTreaType));
 
-                        customerUtility.report(
-                            customerUtility.reportModel('金庫登記簿報表 ', 'TREASURYREGISTRATION'),
-                            parms,
-                            parms
-                        );
-                            
+                customerUtility.report(
+                    customerUtility.reportModel('金庫登記簿報表 ', 'TREASURYREGISTRATION'),
+                    parms,
+                    parms
+                );
+            }                         
         }
 
         //#endregion

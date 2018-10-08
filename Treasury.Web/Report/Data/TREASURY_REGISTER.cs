@@ -47,8 +47,8 @@ namespace Treasury.Web.Report.Data
                         vSeal_Desc = IS.SEAL_DESC
                     }).ToList();
                 ReportDataList = GetReportModel(db.TREA_APLY_REC.AsNoTracking()
-                    .Where(x => x.CONFIRM_UID != null)
-                    .Where(x => x.APLY_STATUS == Aply_Status)
+                    //.Where(x => x.CONFIRM_UID != null)
+                    //.Where(x => x.APLY_STATUS == Aply_Status)
                     .Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
                     .AsEnumerable(), _Item_Desc, _Access_Type, _Seal_Desc, emps).ToList();
             }
