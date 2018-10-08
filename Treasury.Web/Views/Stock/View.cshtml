@@ -148,7 +148,7 @@
                         <label>股數小計 : </label>
                     </td>
                     <td>
-                        <input type="text" class="StockInsertType" id="tNumber_Of_Shares" name="tNumber_Of_Shares" />
+                        <input type="text" class="StockInsertType" id="tNumber_Of_Shares" name="tNumber_Of_Shares" disabled />
                     </td>
                     <td>
                         <label>備註說明 : </label>
@@ -410,6 +410,8 @@
             switch ($("#dStock_Type").val()) {
                 case "S":
                     Type_S();
+                    if ($('#dStock_Area_Type').val() != 'F')
+                        $('#tAmount_Per_Share').val('10'); //修正股票類型變換為股票時 每股金額 預設帶回10 -- by mark 20180903
                     break;
                 case "P":
                     Type_P();
@@ -516,7 +518,6 @@
             }).done(function (result) {
                 StockDetailGrid();
             })
-
         }
 
         //股票類型
@@ -527,12 +528,13 @@
             $("#tStock_No_E").attr("Disabled", false);
             $("#tAmount_Per_Share").attr("Disabled", false);
             $("#tSingle_Number_Of_Shares").attr("Disabled", false);
-            $("#tNumber_Of_Shares").attr("Disabled", false);
-            $("#tMemo").attr("Disabled", false);
-            $('#tAmount_Per_Share').val('10'); //修正股票類型變換為股票時 每股金額 預設帶回10 -- by mark 20180903
+            //$("#tNumber_Of_Shares").attr("Disabled", false);
+            $("#tMemo").attr("Disabled", false);           
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
                     $("#tStock_Total").attr("Disabled", true);
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
                     break;
                 case "F"://國外
                     $("#tStock_Total").attr("Disabled", false);
@@ -544,7 +546,7 @@
         function Type_P() {
             $("#dStock_Type").attr("Disabled", false);
             $("#tStock_Total").attr("Disabled", false);
-            $("#tNumber_Of_Shares").attr("Disabled", false);
+            //$("#tNumber_Of_Shares").attr("Disabled", false);
             $("#tMemo").attr("Disabled", false);
 
             switch ($("#dStock_Area_Type").val()) {
@@ -561,6 +563,8 @@
                     $("#tSingle_Number_Of_Shares").attr("Disabled", true);
                     $("#lDenomination").html('');
                     $('#lDenomination_Total').html('');
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
                     break;
                 case "F"://國外
                     $("#tStock_No_Preamble").attr("Disabled", false);
@@ -593,7 +597,7 @@
                     $("#lDenomination").html('');
                     $('#lDenomination_Total').html('');
                     $("#tNumber_Of_Shares").val('');
-                    $("#tNumber_Of_Shares").attr("Disabled", true);
+                    //$("#tNumber_Of_Shares").attr("Disabled", true);
                     break;
                 case "F"://國外
                     $("#tStock_No_Preamble").attr("Disabled", false);
@@ -601,7 +605,7 @@
                     $("#tStock_No_E").attr("Disabled", false);
                     $("#tAmount_Per_Share").attr("Disabled", false);
                     $("#tSingle_Number_Of_Shares").attr("Disabled", false);
-                    $("#tNumber_Of_Shares").attr("Disabled", false);
+                    //$("#tNumber_Of_Shares").attr("Disabled", false);
                     break;
             }
         }
@@ -789,12 +793,12 @@
                 colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -825,7 +829,7 @@
                 colModelArray.push({ name: "vTreaBatchNo", index: "vTreaBatchNo", width: 100, sortable: false, align: 'center', formatter: formatterTreaBatchNo, unformat: STOCKunformatter });
                 colModelArray.push({ name: "vAplyDate", index: "vAplyDate", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAplyName", index: "vAplyName", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vNumberOfSharesTotal", index: "vNumberOfSharesTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vNumberOfSharesTotal", index: "vNumberOfSharesTotal", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 jqgridCustom.createJqgridByCache(
                     'STOCKjqgridDiv1',
                     'StockTempList',
@@ -854,12 +858,12 @@
             colModelArray.push({ name: "vStockNoPreamble", index: "vStockNoPreamble", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vStockNoB", index: "vStockNoB", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vStockNoE", index: "vStockNoE", width: 100, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-            colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-            colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-            colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-            colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-            colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vStockTotal", index: "vStockTotal", width: 60, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vDenomination", index: "vDenomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
             colModelArray.push({ name: "vMemo", index: "vMemo", width: 80, sortable: false, align: 'center' });
             jqgridCustom.createJqgridByCache(
                 'STOCKjqgridDiv2',
@@ -1063,7 +1067,9 @@
             $('#' + Stock_No_B).val('');
             $('#' + Stock_No_E).val('');
             $('#' + Stock_Total).val('');
-            $('#' + Amount_Per_Share).val('10');//預設10
+            $('#' + Amount_Per_Share).val('');
+            if ($('#dStock_Area_Type').val() != 'F')
+                $('#' + Amount_Per_Share).val('10');//預設10
             $('#' + Single_Number_Of_Shares).val('');
             $('#' + Denomination).html('');
             $('#' + Denomination_Total).html('');
@@ -1086,6 +1092,7 @@
                 {
                     switch (data.vStockType.split('-')[0]) {
                         case "S":
+                            Type_S();
                             $('#' + Stock_No_Preamble).val(data.vStockNoPreamble);
                             $('#' + Stock_No_B).val(data.vStockNoB);
                             $('#' + Stock_No_E).val(data.vStockNoE);
@@ -1095,19 +1102,18 @@
                             $('#' + Denomination).html(data.vDenomination);
                             $('#' + Denomination_Total).html(data.vDenominationTotal);
                             $('#' + Number_Of_Shares).val(data.vNumberOfShares);
-                            $('#' + Memo).val(data.vMemo);
-                            Type_S();
+                            $('#' + Memo).val(data.vMemo);                           
                             break;
                         case "P":
+                            Type_P();
                             $('#' + Stock_Total).val(data.vStockTotal);
                             $('#' + Number_Of_Shares).val(data.vNumberOfShares);
-                            $('#' + Memo).val(data.vMemo);
-                            Type_P();
+                            $('#' + Memo).val(data.vMemo);                           
                             break;
                         case "C":
-                            $('#' + Stock_Total).val(data.vStockTotal);
-                            $('#' + Memo).val(data.vMemo);
                             Type_C();
+                            $('#' + Stock_Total).val(data.vStockTotal);
+                            $('#' + Memo).val(data.vMemo);                          
                             break;
                     }
 
@@ -1160,7 +1166,12 @@
                             break;
                     }
                 }
-
+                else if ($("#dStock_Area_Type").val() == "F") {
+                    if (!Check_F()) {
+                        customerUtility.alert('除了類型欄位有值外,需再有一個欄位有值才算有新增存入明細', 'w');
+                        return false;
+                    }
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -1218,7 +1229,13 @@
                             break;
                     }
                 }
-
+                else if ($("#dStock_Area_Type").val() == "F") {
+                    if (!Check_F())
+                    {
+                        customerUtility.alert('除了類型欄位有值外,需再有一個欄位有值才算有新增存入明細', 'w');
+                        return false;
+                    }
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -1283,6 +1300,16 @@
                     }
                 })
             }
+        }
+
+        //區域=國外  除了類型欄位有值外,需再有一個欄位有值才算有新增存入明細 
+        function Check_F(){
+            var flag = false;
+            $('.StockInsertType:not(#dStock_Type)').each(function () {
+                if ($(this).val().trim() != '')
+                    flag = true;
+            })
+            return flag;
         }
 
         //股票必填檢查

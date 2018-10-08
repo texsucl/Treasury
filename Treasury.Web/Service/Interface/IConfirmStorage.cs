@@ -35,7 +35,7 @@ namespace Treasury.Web.Service.Interface
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string> SealIdList,string ItemId = null);
+        Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string> SealIdList, List<string> RowItemIdList, string ItemId = null);
 
         /// <summary>
         /// 新增

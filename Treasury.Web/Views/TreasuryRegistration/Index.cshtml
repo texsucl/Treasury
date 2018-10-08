@@ -1,0 +1,153 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@{
+    ViewBag.Title = "金庫報表相關作業-金庫登記簿查詢";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TAForm">
+                     <table >
+                         <tr>
+                             <td>
+                                 <label>入庫日期:</label>
+                             </td>
+                             <td>
+                                 @*@Html.RadioButton("cIFeaturesType", "TAInsert", new { @checked = true }) 新增申請
+                                 @Html.RadioButton("cIFeaturesType", "TASearch") 查詢*@
+                                 <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                 <label> ~&ensp;</label>
+                                 <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                             </td>
+                         </tr>
+                         <tr class="TAInsert">
+                             <td>
+                                 <label >開庫模式:</label>
+                             </td>
+                             <td>
+                                 @Html.DropDownList("vOpenTreaType", new SelectList(Model.vOpenTreaType, "Value", "Text"))
+                                 @*@Html.DropDownList("aProject", (SelectList)ViewBag.aProject, new { @class = "TAInsert" })*@
+                                 @*@Html.DropDownList("aProjectAll", (SelectList)ViewBag.aProjectAll, new { @class = "TASearch", @style = "display:none;" })*@
+                             </td>
+                         </tr>
+                         <tr  style="text-align:center">
+                             <td colspan="4">
+                                 <input type="hidden" id="TAR_AplyNo" />
+                                 <input type="button" class="TAInsert btn btn-primary" id="TAI_Insert" value="匯出報表" />
+                                 @*@Html.Hidden("hCREATE_Dep", (string)ViewBag.hCREATE_Dep)
+                                 @Html.Hidden("hCREATE_User", (string)ViewBag.hCREATE_User)*@
+                             </td>
+                         </tr>
+                     </table>
+                    <div id="TASearchDetail">
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+
+        //#region url設定
+
+        var openInsertDetailId = 'TAOpenInsertDetail';
+        var openSearchDetailId = 'TAOpenSearchDetail';
+        var TAFormId = 'TAForm';
+        var EXP_ACCESS_DATEId = 'EXP_ACCESS_DATE';
+        var aProjectId = 'aProject';
+        var aIUnitId = 'aIUnit';
+        var applicantId = 'applicant';
+        var aProjectAllId = 'aProjectAll';
+        var aSUnitAllId = 'aSUnitAll';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else
+        {
+
+            //#region 初始設定
+            created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
+
+
+            //$('input:button').each(function () {
+            //    var id = $(this).attr('id');
+            //    switch (id) {
+            //        case 'TAI_Insert':
+            //            $('#' + id).on('click', function () { TAInsert(); });
+            //            break;
+            //        case 'TAI_Search':
+            //            $('#' + id).on('click', function () { TASearch(); });
+            //            break;
+            //        case 'TAI_Print':
+            //            $('#' + id).on('click', function () { TAReport(); });
+            //            break;
+            //        case 'TAI_Back':
+            //            $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+            //            break;
+            //    }
+            //});
+
+            $('#aIUnit').on('change', function () {
+                setApplicant($(this).val())
+            });
+
+            //#endregion
+
+        }
+
+        $('input:button').each(function () {
+            $('#' + 'TAI_Insert').off('click');
+        $('#' + 'TAI_Insert').on('click', function () { TAReport(); });
+        })
+
+        //#region 呼叫報表
+        function TAReport() {
+                        var title = '';
+                        var parms = [];
+                        var aply_dt_from = $('#APLY_DT_From').val();
+                        var aply_dt_to = $('#APLY_DT_To').val();
+                        var _vOpenTreaType = $('#vOpenTreaType').val();
+                        parms.push(customerUtility.reportParm('APLY_DT_From', aply_dt_from));
+                        parms.push(customerUtility.reportParm('APLY_DT_To', aply_dt_to));
+                        parms.push(customerUtility.reportParm('vOpenTreaType', _vOpenTreaType));
+
+                        customerUtility.report(
+                            customerUtility.reportModel('金庫登記簿報表 ', 'TREASURYREGISTRATION'),
+                            parms,
+                            parms
+                        );
+                            
+        }
+
+        //#endregion
+
+    });
+</script>
+
+

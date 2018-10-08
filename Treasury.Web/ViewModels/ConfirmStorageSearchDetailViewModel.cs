@@ -28,15 +28,15 @@ namespace Treasury.Web.ViewModels
         public string vITEM_ID { get; set; }
 
         /// <summary>
-        /// 印鑑物品編號
+        /// 印章內容編號
         /// </summary>
-        [Description("印鑑物品編號")]
+        [Description("印章內容編號")]
         public string vSEAL_ITEM_ID { get; set; }
 
         /// <summary>
-        /// 印鑑物品
+        /// 印章內容
         /// </summary>
-        [Description("印鑑物品")]
+        [Description("印章內容")]
         public string vSEAL_ITEM { get; set; }
 
         /// <summary>

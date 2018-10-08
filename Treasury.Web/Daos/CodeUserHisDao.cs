@@ -120,6 +120,8 @@ namespace Treasury.WebDaos
                    ,[IS_DISABLED_B]
                    ,[IS_MAIL]
                    ,[IS_MAIL_B]
+                   ,[MEMO]
+                   ,[MEMO_B]
                    ,[EXEC_ACTION])
 
              VALUES
@@ -129,6 +131,8 @@ namespace Treasury.WebDaos
                    ,@IS_DISABLED_B
                    ,@IS_MAIL
                    ,@IS_MAIL_B
+                   ,@MEMO
+                   ,@MEMO_B
                    ,@EXEC_ACTION)
         ";
 
@@ -145,6 +149,8 @@ namespace Treasury.WebDaos
                 cmd.Parameters.AddWithValue("@IS_DISABLED_B", StringUtil.toString(codeUserHis.IS_DISABLED_B));
                 cmd.Parameters.AddWithValue("@IS_MAIL", StringUtil.toString(codeUserHis.IS_MAIL));
                 cmd.Parameters.AddWithValue("@IS_MAIL_B", StringUtil.toString(codeUserHis.IS_MAIL_B));
+                cmd.Parameters.AddWithValue("@MEMO", StringUtil.toString(codeUserHis.MEMO));
+                cmd.Parameters.AddWithValue("@MEMO_B", StringUtil.toString(codeUserHis.MEMO_B));
                 cmd.Parameters.AddWithValue("@EXEC_ACTION", StringUtil.toString(codeUserHis.EXEC_ACTION));
 
 

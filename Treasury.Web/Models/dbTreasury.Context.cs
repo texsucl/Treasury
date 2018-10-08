@@ -69,7 +69,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<ITEM_BOOK> ITEM_BOOK { get; set; }
         public virtual DbSet<BLANK_NOTE_APLY> BLANK_NOTE_APLY { get; set; }
         public virtual DbSet<ITEM_BLANK_NOTE> ITEM_BLANK_NOTE { get; set; }
-        public virtual DbSet<OTHER_ITEM_APLY> OTHER_ITEM_APLY { get; set; }
         public virtual DbSet<ITEM_CA> ITEM_CA { get; set; }
         public virtual DbSet<ITEM_DEP_ORDER_D> ITEM_DEP_ORDER_D { get; set; }
         public virtual DbSet<ITEM_DEP_ORDER_M> ITEM_DEP_ORDER_M { get; set; }
@@ -81,5 +80,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<MAIL_TIME> MAIL_TIME { get; set; }
         public virtual DbSet<SYS_JOB_REC> SYS_JOB_REC { get; set; }
         public virtual DbSet<ITEM_IMPO> ITEM_IMPO { get; set; }
+        public virtual DbSet<OTHER_ITEM_APLY> OTHER_ITEM_APLY { get; set; }
     }
 }
