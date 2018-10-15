@@ -1,0 +1,838 @@
+﻿@using Treasury.Web.Enum;
+@{
+    ViewBag.Title = "金庫進出管理作業 - 金庫登記簿執行作業(關庫後)";
+    var opScope = ViewBag.opScope;
+}
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary solid">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+                {
+                    <div>
+                        <form id="AOT_Form">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <label>入庫日期 :&ensp;</label>
+                                    </td>
+                                    <td>
+                                        <input type="text" id="AOT_DT" name="AOT_DT" disabled="disabled" />
+                                    </td>
+                                    <td>
+                                        <label>金庫登記簿單號 :&ensp;</label>
+                                    </td>
+                                    <td>
+                                        @Html.DropDownList("RegisterID", (SelectList)ViewBag.RegisterList)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="button" class="btn btn-primary" id="Search" value="查詢" />
+                                    </td>
+                                    <td colspan="2">
+                                        <input type="button" class="btn btn-primary" id="Print" value="列印金庫登記簿" disabled="disabled" />
+                                    </td>
+                                    <td colspan="2">
+                                        <input type="button" class="btn btn-primary" id="Apply" value="申請覆核" disabled="disabled" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                }       
+        </div>
+    </div>
+    <div id="DetailsDiv" style="display:none;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#menu1">登打出入庫時間</a></li>
+            <li><a data-toggle="tab" href="#menu2">修改金庫登記簿</a></li>
+            <li><a data-toggle="tab" href="#menu3">未確認表單資料</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="menu1" class="tab-pane fade in active">
+                <h3>登打出入庫時間</h3>
+                <form>
+                    <table>
+                        <tr>
+                            <td>
+                                <label>入庫時間 :&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" id="INTRA_T" name="INTRA_T" class="timepicker" size="4" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>出庫時間 :&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" id="OUTTRA_T" name="OUTTRA_T" class="timepicker" size="4" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <input type="button" class="btn btn-primary" id="ConfrimedSave" value="確定存檔" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div id="menu2" class="tab-pane fade">
+                <h3>修改金庫登記簿</h3>
+                <div id="SearchjqgridDiv" class="jqd"></div>
+                <div>
+                    <input type="button" id="Insert" value="新增" class="btn btn-primary" style="display:none" />
+                </div>
+            </div>
+            <div id="menu3" class="tab-pane fade">
+                <h3>未確認表單資料</h3>
+                <div>
+                    <input type="button" id="UnconfirmedData" value="未確認表單資料" class="btn btn-primary" @*style="display:none"*@ />
+                </div>
+                <div id="UnconfirmedDataDiv" class="jqd"></div>
+                <div>
+                    <input type="button" id="InsertUnconfirmedData" value="新增至金庫登記簿" class="btn btn-primary" style="display:none" />
+                </div>
+            </div>
+    </div>
+    <div id="UpdateDialog" style="display:none;" role="dialog">
+        <form id="UpdateForm">
+            <table>
+                <tr>
+                    <td><label>作業類型 :&ensp;</label></td>
+                    <td colspan="3">@Html.DropDownList("ItemOpType", (SelectList)ViewBag.ItemOpType)</td>
+                </tr>
+                <tr>
+                    <td><label>存取項目 :&ensp;</label></td>
+                    <td>@Html.DropDownList("TreaItem", (SelectList)ViewBag.TreaItem)</td>
+                    <td class="ShowOrNot" style="display:none">@Html.DropDownList("AccessType", (SelectList)ViewBag.AccessType)</td>
+                    <td id="SealItemTd" class="ShowOrNot">@Html.DropDownList("SealItem", (SelectList)ViewBag.SealItem)</td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>入庫原因 :&ensp;</label>
+                    </td>
+                    <td colspan="3">
+                        <input type="text" id="InsertReason" maxlength="50" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>實際入庫人員 :&ensp;</label>
+                    </td>
+                    <td colspan="3">
+                        @Html.DropDownList("ActualAccessEmps", (SelectList)ViewBag.Emps)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>實際作業別 :&ensp;</label>
+                    </td>
+                    <td colspan="3">
+                        @Html.DropDownList("ActualAccessType", (SelectList)ViewBag.AccessType)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" class="btn btn-primary" id="InsertConfirm" value="新增" disabled="disabled" />
+                        <input type="button" class="btn btn-primary" id="UpdateConfirm" value="修改" disabled="disabled" />
+                    </td>
+                    @*<td colspan="3">
+                            <input type="hidden" id="_hvSEAL_ITEM_ID" />
+                            <input type="hidden" id="huuid" />
+                        </td>*@
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.InsertUnconfirmedData = '@Url.Action("InsertUnconfirmedData", "AfterOpenTreasury")';
+        UrlFor.SearchUnconfirmedData = '@Url.Action("SearchUnconfirmedData", "AfterOpenTreasury")';
+        UrlFor.Search = '@Url.Action("Search", "AfterOpenTreasury")';
+        UrlFor.Confrimed = '@Url.Action("Confrimed", "AfterOpenTreasury")';
+        UrlFor.Apply = '@Url.Action("Apply", "AfterOpenTreasury")';
+        UrlFor.CheckPGTime = '@Url.Action("CheckPGTime", "AfterOpenTreasury")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "AfterOpenTreasury")';
+        UrlFor.Change = '@Url.Action("Change", "AfterOpenTreasury")';
+        UrlFor.Insert = '@Url.Action("Insert", "AfterOpenTreasury")';
+        UrlFor.Update = '@Url.Action("Update", "AfterOpenTreasury")';
+        UrlFor.Delete = '@Url.Action("Delete", "AfterOpenTreasury")';
+        UrlFor.GetActualUsers = '@Url.Action("GetActualUsers", "AfterOpenTreasury")';
+        UrlFor.TakeOutData = '@Url.Action("TakeOutData", "AfterOpenTreasury")';
+        //#endregion
+        //region 變數設定 name
+        var AOT_DT = 'AOT_DT';
+        var AOT_Form = 'AOT_Form';
+        var RegisterID = 'RegisterID';
+        var TABS_ID = 'TABS_ID';
+        var INTRA_T = 'INTRA_T';
+        var OUTTRA_T = 'OUTTRA_T';
+        var Print = 'Print';
+        var Apply = 'Apply';
+        var Insert = 'Insert';
+        var RegisterID = 'RegisterID';
+        var DetailsDiv = 'DetailsDiv';
+        var ItemOpType = 'ItemOpType';
+        var AccessType = 'AccessType';
+        var SealItem = 'SealItem';
+        var INTRA_T = 'INTRA_T';
+        var TreaItem = 'TreaItem';
+        var UpdateForm = 'UpdateForm'
+        var InsertReason = 'InsertReason';
+        var InsertConfirm = 'InsertConfirm';
+        var UpdateConfirm = 'UpdateConfirm';
+        var ActualAccessType = 'ActualAccessType';
+        var ActualAccessEmps = 'ActualAccessEmps';
+        var UnconfirmedData = 'UnconfirmedData';
+        var InsertUnconfirmedData = 'InsertUnconfirmedData';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+               }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //初始畫面
+            setTimepicker();
+            //region datepicker
+            var today = $.datepicker.formatDate('yy/mm/dd', new Date());
+            $('#' + AOT_DT).val(today);
+            //created.createDatepicker(AOT_DT, today);
+            //verified.datepicker(AOT_Form, AOT_DT, $('#' + AOT_DT).val());
+            //verified.required(AOT_Form, AOT_DT, message.required('入庫日期'));
+            //#endregion
+        }
+
+        //region 產生產生button事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'Search':
+                    $('#' + id).on('click', function () { formSearch(); });
+                    break;
+                case 'ConfrimedSave':
+                    $('#' + id).on('click', function () { ConfrimedSave(); });
+                    break;
+                case 'Apply':
+                    $('#' + id).on('click', function () { formApply(); });
+                    break;
+                case 'Insert':
+                    $('#' + id).on('click', function () { OpenInsert(); });
+                    break;
+                case 'InsertConfirm':
+                    $('#' + id).on('click', function () { InsertFun(); });
+                    break;
+                case 'UnconfirmedData':
+                    $('#' + id).on('click', function () { SearchUnconfirmedData(); });
+                    break;
+                case 'InsertUnconfirmedData':
+                    $('#' + id).on('click', function () { InsertUnconfirmedDetail(); });
+                    break;
+                case 'Print':
+                    $('#' + id).on('click', function () { PrintFun(); });
+                    break;
+            }
+        });
+        //#endregion
+        //region 設定Timepicker
+        function setTimepicker() {
+            $('.timepicker').timepicker({
+                timeFormat: 'H:i',
+                step: 10,
+                minTime: '8:00',
+                maxTime: '23:00',
+                defaultTime: '8:00',
+                startTime: '08:00',
+                dynamic: false,
+                dropdown: true,
+                scrollbar: true
+            });
+        }
+        //#endregion
+        //Dialog SelectedChange 事件
+        $('#' + ItemOpType).change(function () {
+            var opType = $('#' + ItemOpType).val();
+            listChange(opType, null, null);
+        });
+        $('#' + TreaItem).change(function () {
+            var opType = $('#' + ItemOpType).val();
+            var treaItem = $('#' + TreaItem).val();
+            listChange(opType, treaItem, null);
+        });
+        $('#' + AccessType).change(function () {
+            var opType = $('#' + ItemOpType).val();
+            var treaItem = $('#' + TreaItem).val();
+            var accessType = $('#' + AccessType).val();
+            listChange(opType, treaItem, accessType);
+        });
+        //#endregion
+        //Dialog SelectedChange
+        function listChange(opType, treaItem, accessType) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    ItemOpType: opType,
+                    TreaItem: treaItem,
+                    AccessType: accessType
+                }),
+                url: UrlFor.Change,
+                contentType: 'application/json'
+            }).done(function (result) {
+                $('#TreaItem').find('option').remove();
+                customerUtility.addoption('TreaItem', result.Item1);
+                $('#' + ActualAccessEmps).find('option').remove();
+                customerUtility.addoption('ActualAccessEmps', result.Item3);
+                if (treaItem != null) {
+                    $('#' + TreaItem).val(treaItem);
+                }
+                if (accessType == null) {
+                    $('#' + AccessType).val("P");
+                }
+                if (opType == "2") {
+                    $('.ShowOrNot').show();
+                    //if ($('#TreaItem option').length > 0) {
+                    //    $('#TreaItem').val($($('#TreaItem option')[0]).val()).change();
+                    //}
+                    $('#SealItemTd').children().remove();
+                    $('#SealItemTd').append('<select id="SealItem" name="SealItem"></select>');
+                    customerUtility.addoption('SealItem', result.Item2);
+                }
+                else {
+                    $('.ShowOrNot').hide();
+                    $('#SealItemTd').empty();
+                }
+            });
+        }
+        //#endregion
+        //region 金庫登記簿單號SelectedChange事件
+        $('#' + RegisterID).change(function () {
+            $('#' + Print).prop('disabled', true);
+            $('#' + Apply).prop('disabled', true);
+            $('#' + DetailsDiv).prop('disabled', true);
+        });
+        //#endregion
+        //}
+        //region 新增至金庫登記簿
+        function InsertUnconfirmedDetail() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    RegisterID: $('#' + RegisterID).val()
+                }),
+                url: UrlFor.InsertUnconfirmedData,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                } else {
+                    customerUtility.alert(result.DESCRIPTION, 's');
+                    UnconfirmedGrid();
+                }
+            });
+        }
+        //#endregion
+        //region 查詢未確認資料
+        function SearchUnconfirmedData() {
+            $.ajax({
+                type: 'POST',
+                data: null,
+                url: UrlFor.SearchUnconfirmedData,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+                else {
+                    UnconfirmedGrid();
+                    $('#' + InsertUnconfirmedData).prop('disabled', false);
+                    $('#' + InsertUnconfirmedData).show();
+                }
+            });
+        }
+        //region 查詢
+        function formSearch() {
+            //if ($('#' + AOT_Form).valid()) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    searchModel: SearchViewModel(
+                        $('#' + AOT_DT).val(),
+                        $('#' + RegisterID).val()
+                        )
+                }),
+                url: UrlFor.Search,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                    $('#' + DetailsDiv).prop('disabled', true);
+                    $('#' + Apply).prop('disabled', true);
+                    $('#' + Print).prop('disabled', true);
+                    $('#' + DetailsDiv).hide();
+                    $('#' + Insert).hide();
+                } else {
+                    $('#' + DetailsDiv).prop('disabled', false);
+                    $('#' + Apply).prop('disabled', false);
+                    $('#' + Print).prop('disabled', false);
+                    $('#' + DetailsDiv).show();
+                    $('#' + Insert).show();
+                    SearchGrid();
+                }
+            });
+        }
+        //#endregion
+        //region 申請覆核
+        function formApply() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    registerID: $('#' + RegisterID).val()
+                }),
+                url: UrlFor.CheckPGTime,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+                else {
+                    if (result.Datas.vACTUAL_GET_TIME == null || result.Datas.vACTUAL_PUT_TIME == null) {
+                        customerUtility.alert("尚未輸入出入庫時間，請先登打出入庫時間!!", 'w');
+                        return false;
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            registerID: $('#' + RegisterID).val()
+                        }),
+                        url: UrlFor.Apply,
+                        contentType: 'application/json'
+                    }).done(function (result) {
+                        if (!result.RETURN_FLAG) {
+                            customerUtility.alert(result.DESCRIPTION, 'w');
+                        }
+                        else {
+                            customerUtility.alert(result.DESCRIPTION, 's');
+                            SearchGrid();
+                        }
+                    });
+                }
+            });
+        }
+        //#endregion
+        //region 確定存檔
+        function ConfrimedSave() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    searchModel: SearchViewModel(
+                        null,
+                        $('#' + RegisterID).val(),
+                        $('#' + INTRA_T).val(),
+                        $('#' + OUTTRA_T).val()
+                        )
+                }),
+                url: UrlFor.Confrimed,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+                else {
+                    customerUtility.alert(result.DESCRIPTION, 's');
+                    $('#' + INTRA_T).val('');
+                    $('#' + OUTTRA_T).val('');
+                }
+            });
+        }
+        //#endregion
+        //region 新增
+        function InsertFun() {
+            var registerID = $('#' + RegisterID).val();
+            console.log(registerID);
+            var opType = $('#' + ItemOpType).val();
+            var treaItem = $('#' + TreaItem).val();
+            var reason = $('#' + InsertReason).val();
+            var actualAccType = $('#' + ActualAccessType).val();
+            var actualAccEmp = $('#' + ActualAccessEmps).val();
+            var InsertReason = $('#' + InsertReason).val();
+            var accessType;
+            var SealItemId;
+            if (opType == "4") {
+                if (InsertReason.length == 0) {
+                    customerUtility.alert("請輸入入庫原因!!", 'w');
+                    return false;
+                }
+            }
+            if (opType == "2") {
+                //accessType = $('#AccessType option:selected').text();
+                accessTypeCode = $('#' + AccessType).val();
+                SealItemId = $('#' + SealItem).val();
+            }
+            if (confirm("確定新增?")) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        InsertModel: InsertViewModel(
+                          registerID,
+                          opType,
+                          treaItem,
+                          InsertReason,
+                          actualAccType,
+                          actualAccEmp,
+                          SealItemId,
+                          accessTypeCode
+                          )
+                    }),
+                    url: UrlFor.Insert,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    if (!result.RETURN_FLAG) {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    } else {
+                        customerUtility.alert(result.DESCRIPTION, 's');
+                        SearchGrid();
+                    }
+                });
+            }
+        }
+        //#endregion
+        //region 修改
+        function UpdateFun(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                var actualAccType = $('#' + ActualAccessType).val();
+                var actualAccEmp = $('#' + ActualAccessEmps).val();
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        APLYNO: data.hvAPLY_NO,
+                        ActualAccEmp: actualAccEmp,
+                        ActualAccType: actualAccType
+                    }),
+                    url: UrlFor.Update,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    if (!result.RETURN_FLAG) {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    } else {
+                        customerUtility.alert(result.DESCRIPTION, 's');
+                        SearchGrid();
+                    }
+                });
+            }
+        }
+        //#endregion
+        //region 刪除
+        function DeleteFun(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+
+                if (data.vITeM_OP_TYPE == "3") {
+                    customerUtility.alert("此為不可刪除作業項目!!", 'w');
+                    return false;
+                }
+                if (confirm("是否刪除 " + data.vITEM_DESC + "??")) {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            APLYNO: data.hvAPLY_NO
+                        }),
+                        url: UrlFor.Delete,
+                        contentType: 'application/json'
+                    }).done(function (result) {
+                        if (!result.RETURN_FLAG) {
+                            customerUtility.alert(result.DESCRIPTION, 'w');
+                        } else {
+                            customerUtility.alert(result.DESCRIPTION, 's');
+                            SearchGrid();
+                        }
+                    });
+                }
+            }
+        }
+        //#endregion
+        //#region jqGrid 單號變連結
+        function formatREGISTERID(cellvalue, option, rdata) {
+            if (rdata.vITeM_OP_TYPE == "3") {
+                return "<a href='#' id='" + option.gid + "REGISTERID" + option.rowId + "' class='DialogREGISTERID' style='text-decoration:underline;' return:false; name='" + cellvalue + "' title='" + cellvalue + "'>" + cellvalue + "</a>";
+            }
+            return "";
+        }
+        //#endregion
+        //#region jqGrid 單號顯示原本樣式
+        function unformatREGISTERID(cellvalue, option, rdata) {
+            return cellvalue;
+        }
+        //#endregion
+        ////#region jqGrid checkbox
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox UnconfirmedTakeouts customerCheck'></div>";
+            return str;
+        }
+        //#endregion
+        //region 查詢UnconfirmedTable
+        function UnconfirmedGrid() {
+            var colUnconTitleArray = ['確認', '作業類型', '存取項目', '印章內容', '作業別', '申請單號', '入庫原因', '申請人員', '申請時間', '存取項目編號', '印章編號', '作業別編號', 'h申請單號', '申請人員編號'];
+            var colUnconModelArray = [
+                { name: "IsTakeout", index: "IsTakeout", width: 70, sortable: false, align: 'center', formatter: formatterTakeOut },
+                { name: "vITEM_OP_TYPE", index: "vITEM_OP_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vITEM_DESC", index: "vITEM_DESC", width: 85, sortable: false, align: 'center' },
+                { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 65, sortable: false, align: 'center' },
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatREGISTERID, unformat: unformatREGISTERID },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 175, sortable: false, align: 'center' },
+                { name: "APLY_NAME", index: "APLY_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "APLY_DT", index: "APLY_DT", width: 70, sortable: false, align: 'center' },
+                { name: "vITEM_ID", index: "vITEM_ID", hidden: true },
+                { name: "vSEAL_ITEM_ID", index: "vSEAL_ITEM_ID", hidden: true },
+                { name: "vACCESS_TYPE_CODE", index: "vACCESS_TYPE_CODE", hidden: true },
+                { name: "hvAPLY_NO", index: "hvAPLY_NO", hidden: true },
+                { name: "APLY_UID", index: "APLY_UID", hidden: true },
+            ];
+            jqgridCustom.createJqgridByCache(
+                'UnconfirmedDataDiv',
+                'UnconfirmedDataList',
+                'UnconfirmedDataPeger',
+                 UrlFor.GetData,
+              {
+                  type: 'UnconfirmedData'
+              },
+              colUnconTitleArray,
+              colUnconModelArray,
+              '未確認表單資料',
+              jqgridCustom.getPage('UnconfirmedDataDiv'),
+              UnconfirmedTakeOutFun,
+              true
+                );
+        }
+        //#endregion
+        //region 查詢Table
+        function SearchGrid() {
+            var colTitleArray = ['動作', '作業類型', '存取項目', '印章內容', '作業別', '申請單號', '入庫原因', '入庫人員', '實際入庫人員', '實際作業別', '存取項目編號', '印章內容編號', 'h申請單號'];
+            var colModelArray = [
+                { name: "act", index: "act", width: 85, sortable: false, align: 'center' },
+                { name: "vITEM_OP_TYPE", index: "vITEM_OP_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vITEM_DESC", index: "vITEM_DESC", width: 85, sortable: false, align: 'center' },
+                { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 65, sortable: false, align: 'center' },
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatREGISTERID, unformat: unformatREGISTERID },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 175, sortable: false, align: 'center' },
+                { name: "vCONFIRM_NAME", index: "vCONFIRM_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "ACTUAL_ACCESS_NAME", index: "ACTUAL_ACCESS_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "ACTUAL_ACCESS_TYPE", index: "ACTUAL_ACCESS_TYPE", width: 70, sortable: false, align: 'center' },
+                { name: "vITEM_ID", index: "vITEM_ID", hidden: true },
+                { name: "vSEAL_ITEM_ID", index: "vSEAL_ITEM_ID", hidden: true },
+                { name: "hvAPLY_NO", index: "hvAPLY_NO", hidden: true },
+            ];
+            jqgridCustom.createJqgridByCache(
+                'SearchjqgridDiv',
+                'SearchList',
+                'SearchPeger',
+                UrlFor.GetData,
+              {
+                  type: 'Search'
+              },
+              colTitleArray,
+              colModelArray,
+              '金庫登記簿-修改',
+              jqgridCustom.getPage('SearchjqgridDiv'),
+              SearchGridDoneFun,
+              true
+           );
+        }
+        //#endregion
+        //region Unconfirmed Grid 點擊事件
+        function UnconfirmedTakeOutFun(listId) {
+            jqgridCustom.randerAction(listId, 'Unconfirmed', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.UnconfirmedTakeouts').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        takeout(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+        //#endregion
+        //region 打勾事件
+        function takeout(rowid, flag) {
+            var listId = 'UnconfirmedDataList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    checkedmodel: data.hvAPLY_NO,
+                    takeoutFlag: flag
+                }),
+                dataType: "json",
+                url: UrlFor.TakeOutData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    UnconfirmedGrid();
+                }
+            });
+        }
+        //#endregion
+        //region Search Grid 點擊事件
+        function SearchGridDoneFun(listId) {
+            jqgridCustom.randerAction(listId, 'Update', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //$(this).find('.actionViewIcon').hide();
+            });
+        }
+        //#endregion
+        //region 修改、刪除、檢視
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            var listId = 'SearchList';
+            DeleteFun(listId, i);
+        }
+        tempActFun.View = function (i) {
+            @*dialogOpen('@Ref.ActionType.View.ToString()', i);*@
+        }
+        //#endregion
+        function OpenInsert() {
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+        //region 修改、刪除、檢視事件
+        function dialogOpen(type, rowid) {
+            $('#' + UpdateForm).validate().resetForm();
+            ResetDialog();
+            var dialogId = 'UpdateDialog';
+            var listId = 'SearchList';
+            var title = customerUtility.getDialogType(type);
+            var data = $("#" + listId).getRowData(rowid);
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '作業',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#InsertConfirm,#UpdateConfirm').hide();
+            if (type == '@Ref.ActionType.Edit.ToString()') {
+                $('#UpdateConfirm').show();
+                $('#UpdateConfirm').prop('disabled', false);
+                $('#InsertConfirm').prop('disabled', true);
+                $('#' + ItemOpType).prop('disabled', true);
+                $('#' + TreaItem).prop('disabled', true);
+                $('#' + InsertReason).prop('disabled', true);
+
+                $('#' + TreaItem).empty();
+                $('#' + ItemOpType).val(data.vITEM_OP_TYPE);
+                $('#' + TreaItem).append($('<option></option>').val(data.vITEM_ID).html(data.vITEM_DESC));
+                $('#' + InsertReason).val(data.vACCESS_REASON);
+
+                if (data.vITEM_OP_TYPE == "2") {
+                    $('#' + AccessType).prop('disabled', true);
+                    $('#' + AccessType).empty();
+                    $('#' + SealItem).empty();
+                    $('#' + AccessType).append($('<option></option>').val(data.vACCESS_TYPE_CODE).html(data.vACCESS_TYPE));
+                    $('#' + SealItem).append($('<option></option>').val(data.vACCESS_TYPE).html(data.vACCESS_TYPE));
+                }
+                else {
+                    $('.ShowOrNot').hide();
+                    $('#SealItemTd').empty();
+                }
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        TreaItem: $('#' + TreaItem).val()
+                    }),
+                    url: UrlFor.GetActualUsers,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    $('#' + ActualAccessEmps).find('option').remove();
+                    customerUtility.addoption('ActualAccessEmps', result);
+                });
+                $('#' + UpdateConfirm).on('click', function () { UpdateFun(listId, rowid); });
+            }
+            else if (type == '@Ref.ActionType.Add.ToString()') {
+                $('#' + InsertConfirm).show();
+                $('#' + InsertConfirm).prop('disabled', false);
+                //if ($('#ItemOpType option').length > 0) {
+                //    $('#' + ItemOpType).val($($('#ItemOpType option')[0]).val()).change();
+                //}
+                //$('#' + InsertConfirm).on('click', function () { InsertFun(listId, rowid); });
+            }
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+        //region 查詢 ViewModel
+        function SearchViewModel(vAOT_DT, vTREA_REGISTER_ID, vACTUAL_PUT_TIME, vACTUAL_GET_TIME) {
+            var obj = {};
+            obj['vCREATE_DT'] = vAOT_DT;
+            obj['vTREA_REGISTER_ID'] = vTREA_REGISTER_ID;
+            obj['vACTUAL_PUT_TIME'] = vACTUAL_PUT_TIME;
+            obj['vACTUAL_GET_TIME'] = vACTUAL_GET_TIME;
+            return obj;
+        }
+        //#endregion
+        //region 新增 ViewModel
+        function InsertViewModel(vTREA_REGISTER_ID, vITEM_OP_TYPE, vITEM_ID, vACCESS_REASON, ACTUAL_ACCESS_TYPE, ACTUAL_ACCESS_UID, vSEAL_ITEM_ID, vACCESS_TYPE_CODE) {
+            var obj = {};
+            obj['vTREA_REGISTER_ID'] = vTREA_REGISTER_ID;
+            obj['vITEM_OP_TYPE'] = vITEM_OP_TYPE;
+            obj['vITEM_ID'] = vITEM_ID;
+            obj['vACCESS_REASON'] = vACCESS_REASON;
+            obj['ACTUAL_ACCESS_TYPE'] = ACTUAL_ACCESS_TYPE;
+            obj['ACTUAL_ACCESS_UID'] = ACTUAL_ACCESS_UID;
+            obj['vSEAL_ITEM_ID'] = vSEAL_ITEM_ID;
+            obj['vACCESS_TYPE_CODE'] = vACCESS_TYPE_CODE;
+            return obj;
+        }
+        //#endregion
+        //region 列印
+        function PrintFun() {
+            var parms = [];
+            setTimeout(
+                function () {
+                    parms.push(customerUtility.reportParm('vTreaRegisterId', $('#' + RegisterID).val()));
+                    parms.push(customerUtility.reportParm('vUser_Id', '@ViewBag.vUser_Id'));
+                    customerUtility.report(
+                        customerUtility.reportModel('金庫登記簿', 'TREASURY_REGISTER'),
+                        parms,
+                        null
+                        );
+                }, 100);
+        }
+        //#endregion
+        function ResetDialog() {
+            $('#InsertConfirm').prop('disabled', false);
+            $('#' + ItemOpType).prop('disabled', false);
+            $('#' + TreaItem).prop('disabled', false);
+            $('#InsertReason').prop('disabled', false);
+            $('#' + InsertReason).val('');
+        }
+
+    });
+</script>

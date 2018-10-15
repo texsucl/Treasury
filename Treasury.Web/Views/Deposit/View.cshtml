@@ -86,7 +86,7 @@
                         <label>利率% : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_M" id="tInterest_Rate" name="tInterest_Rate" maxlength="5" />
+                        <input type="text" class="DepositInsertType_M" id="tInterest_Rate" name="tInterest_Rate" maxlength="7" />
                     </td>
                     <td>
                         <label>存單類型 : </label>
@@ -164,13 +164,13 @@
                         <label>存單號碼(起) : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_D" id="tDep_No_B" name="tDep_No_B" maxlength="9" />
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_B" name="tDep_No_B" maxlength="10" />
                     </td>
                     <td>
                         <label>存單號碼(迄) : </label>
                     </td>
                     <td>
-                        <input type="text" class="DepositInsertType_D" id="tDep_No_E" name="tDep_No_E" maxlength="9" />
+                        <input type="text" class="DepositInsertType_D" id="tDep_No_E" name="tDep_No_E" maxlength="10" />
                     </td>
                 </tr>
                 <tr>
@@ -456,20 +456,35 @@
                     $('#' + DepositDep_No_B).val(created.padLeft(_Check_No_B, $('#' + DepositDep_No_E).val().length, '0'));
             }
             
-            //計算張數
-            if ($('#' + DepositDep_No_B + ',#' + DepositDep_No_E).val().length <= 7) {
-                var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
-                var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
-                if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
-                    $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+            //存單號碼(迄)帶出張數
+            //if ($(this).attr('id') == DepositDep_No_E)
+            //{
+                if ($('#' + DepositDep_No_E).val().length <= 10) {
+                    var _Deposit_Dep_No_B = parseInt($('#' + DepositDep_No_B).val());
+                    var _Deposit_Dep_No_E = parseInt($('#' + DepositDep_No_E).val());
+                    if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+                        $('#' + DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+
+                        var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+                        var _Denomination = parseInt($('#' + DepositDenomination).val());
+                        if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                            $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                        }
+                        else {
+                            $('#' + DepositSubtotal_Denomination).html('');
+                        }
+                    }
+                    else {
+                        $('#' + DepositDep_Cnt).val('');
+                    }
                 }
                 else {
                     $('#' + DepositDep_Cnt).val('');
                 }
-            }
-            else {
-                $('#' + DepositDep_Cnt).val('');
-            }
+            //}
+            //else {
+            //   $('#' + DepositDep_Cnt).val('');
+            //}
 
             //計算面額小計
             if ($('#' + DepositDenomination).val().length <= 13) {
@@ -501,16 +516,10 @@
                 $('#' + DepositDep_No_E).val('');
             }
 
-            //計算面額小計
-            if ($('#' + DepositDenomination).val().length <= 13) {
-                var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
-                var _Denomination = parseInt($('#' + DepositDenomination).val());
-                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
-                    $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
-                }
-                else {
-                    $('#' + DepositSubtotal_Denomination).html('');
-                }
+            var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
+            var _Denomination = parseInt($('#' + DepositDenomination).val());
+            if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
             }
             else {
                 $('#' + DepositSubtotal_Denomination).html('');
@@ -1249,9 +1258,9 @@
                     return
                 }
                 //承作日期及到期日檢核
-                if (CheckDate_Commit_Expiry() == false) {
-                    return
-                }
+                //if (CheckDate_Commit_Expiry() == false) {
+                //    return
+                //}
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({

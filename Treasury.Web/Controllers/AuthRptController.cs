@@ -279,7 +279,7 @@ namespace Treasury.WebControllers
                     cRoleId = group.Key.cRoleId,
                     cRoleName = group.Key.cRoleName,
                     vMemo = group.Key.vMemo
-                }).ToList<FuncRoleModel>();
+                }).OrderBy(x => x.cRoleName).ToList<FuncRoleModel>();
 
 
             ////表頭
@@ -296,7 +296,7 @@ namespace Treasury.WebControllers
 
                 strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(funcRoleModel.cRoleName) + "</td>";
+                strTable = strTable + "<td colspan='4' style='border-right:#000000 1px solid;' align='left' width='10%'><span style='font-weight:bold;font-size:14px; '>角色名稱：</span>" + StringUtil.toString(funcRoleModel.cRoleName) + "</td>";
                 strTable = strTable + "</tr>";
 
 
@@ -394,7 +394,7 @@ namespace Treasury.WebControllers
                 {
                     roleId = group.Key.roleId,
                     roleName = group.Key.roleName
-                }).ToList<CodeRoleEquipModel>();
+                }).OrderBy(x => x.roleName).ToList<CodeRoleEquipModel>();
 
 
             ////表頭
@@ -410,14 +410,14 @@ namespace Treasury.WebControllers
 
                 strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(codeRoleEquipModel.roleName) + "</td>";
+                strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'><span style='font-weight:bold;font-size:14px; '>角色名稱：</span>" + StringUtil.toString(codeRoleEquipModel.roleName) + "</td>";
                 strTable = strTable + "</tr>";
 
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='55%'>設備名稱</td>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管模式</td>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管方式</td>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%' >保管順位</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px; border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='55%'>設備名稱</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管模式</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%'>控管方式</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='15%' >保管順位</td>";
                 strTable = strTable + "</tr>";
 
                 foreach (CodeRoleEquipModel d in rptData.Where(
@@ -437,6 +437,10 @@ namespace Treasury.WebControllers
 
                 }
 
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
+                strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'></td>";
+                strTable = strTable + "</tr>";
                 strTable = strTable + "</table>";
 
             }
@@ -472,7 +476,7 @@ namespace Treasury.WebControllers
                 {
                     roleId = group.Key.roleId,
                     roleName = group.Key.roleName
-                }).ToList<CodeRoleItemModel>();
+                }).OrderBy(x => x.roleName).ToList<CodeRoleItemModel>();
 
 
 
@@ -484,12 +488,12 @@ namespace Treasury.WebControllers
 
                 strTable = strTable + "<table align='center' cellpadding='2' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td colspan='2' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'>角色名稱：" + StringUtil.toString(codeRoleItemModel.roleName) + "</td>";
+                strTable = strTable + "<td colspan='2' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='left' width='10%'><span style='font-weight:bold;font-size:14px; '>角色名稱：</span>" + StringUtil.toString(codeRoleItemModel.roleName) + "</td>";
                 strTable = strTable + "</tr>";
 
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='60%'>作業類型</td>";
-                strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='40%'>存取項目</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='60%'>作業類型</td>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='40%'>存取項目</td>";
 
                 strTable = strTable + "</tr>";
 
@@ -508,6 +512,10 @@ namespace Treasury.WebControllers
 
                 }
 
+                strTable = strTable + "<tr>";
+                strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
+                strTable = strTable + "<td colspan='2' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'></td>";
+                strTable = strTable + "</tr>";
                 strTable = strTable + "</table>";
 
             }
@@ -686,36 +694,32 @@ namespace Treasury.WebControllers
                         strTable += "<br/>";
                         strTable = strTable + "<table border='0' width='100%' style='font-size:12px;'>";
                         strTable = strTable + "<tr>";
-                        strTable = strTable + "<td align='left'>" + "單位：" + StringUtil.toString(authRptModel.cWorkUnitCode)
+                        strTable = strTable + "<td align='left'>" + "<span style='font-weight:bold;font-size:16px; '>單位：</span>" + StringUtil.toString(authRptModel.cWorkUnitCode)
                             + StringUtil.toString(authRptModel.cWorkUnitDesc) + "</td>";
 
-                        strTable = strTable + "<td align='left'>" + "網路帳號：" + StringUtil.toString(authUser.cUserID) + "</td>";
+                        strTable = strTable + "<td align='left'>" + "<span style='font-weight:bold;font-size:16px; '>網路帳號：</span>" + StringUtil.toString(authUser.cUserID) + "</td>";
 
-                        strTable = strTable + "<td align='left'>" + "中文姓名：" + StringUtil.toString(roleList[0].cUserName) + "</td>";
+                        strTable = strTable + "<td align='left'>" + "<span style='font-weight:bold;font-size:16px; '>中文姓名：</span>" + StringUtil.toString(roleList[0].cUserName) + "</td>";
 
 
                         strTable = strTable + "</tr>";
                         strTable = strTable + "</table>";
 
                         strTable = strTable + "<table align='center' cellpadding='5' cellspacing='0' width='100%'  style='font-size:12px;border-top:#000000 1px solid;border-left:#000000 1px solid'>";
-                        strTable = strTable + "<tr>";
-
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
-                        strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'></td>";
-                        strTable = strTable + "</tr>";
+                        
 
                         strTable = strTable + "<tr>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='10%'>角色群組</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>授權功能</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>金庫設備權限</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%' >存取項目權限</td>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>表單申請權限</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center' width='10%'>角色群組</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>授權功能</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%'>金庫設備權限</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'  width='20%' >存取項目權限</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>表單申請權限</td>";
                         strTable = strTable + "</tr>";
 
 
 
                         strTable = strTable + "<tr>";
-                        strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>角色名稱</td>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>角色名稱</td>";
                         strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleF + "</td>";
                         strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleE + "</td>";
                         strTable = strTable + "<td style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>" + strRoleI + "</td>";
@@ -723,7 +727,10 @@ namespace Treasury.WebControllers
                         
                         strTable = strTable + "</tr>";
 
-
+                        strTable = strTable + "<tr>";
+                        strTable = strTable + "<td style='font-weight:bold;font-size:14px;border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'>備註</td>";
+                        strTable = strTable + "<td colspan='4' style='border-bottom:#000000 1px solid;border-right:#000000 1px solid;' align='center'></td>";
+                        strTable = strTable + "</tr>";
 
 
                         strTable = strTable + "</table>";
@@ -756,10 +763,10 @@ namespace Treasury.WebControllers
             if ("userRole".Equals(rptType))
             {
 
-                strTable = strTable + "<td colspan='2' align='center'>" + "金庫管理系統-使用者角色報表" + "</td>";
+                strTable = strTable + "<td colspan='2' align='center'><span style='font-weight:bold;font-size:20px; '>" + "金庫管理系統-使用者角色報表" + "</span></td>";
                 strTable = strTable + "</tr>";
                 strTable = strTable + "<tr>";
-                strTable = strTable + "<td  colspan='2' align='center'>" + "<br/> 單位：" + pDetCd + pDetName + "</td>";
+                strTable = strTable + "<td  colspan='2' align='center'>" + "<br/> <span style='font-weight:bold;font-size:18px; '>單位：</span>" + pDetCd + pDetName + "</td>";
 
                 strTable = strTable + "</tr>";
 
@@ -767,7 +774,7 @@ namespace Treasury.WebControllers
 
             else
             {
-                strTable = strTable + "<td colspan='2' align='center'>" + "金庫管理系統-角色功能報表" + "</td>";
+                strTable = strTable + "<td colspan='2' align='center'><span style='font-weight:bold;font-size:20px; '>" + "金庫管理系統-角色功能報表" + "</span></td>";
                 strTable = strTable + "</tr>";
             }
 
@@ -782,16 +789,16 @@ namespace Treasury.WebControllers
                 strTable = strTable + "<tr>";
                 switch (roleAuthType) {
                     case "F":
-                        strTable = strTable + "<td>" + "<br/>角色群組：功能權限</td>";
+                        strTable = strTable + "<td>" + "<br/><span style='font-weight:bold;font-size:16px; '>角色群組：</span>功能權限</td>";
                         break;
                     case "E":
-                        strTable = strTable + "<td>" + "<br/>角色群組：金庫設備權限</td>";
+                        strTable = strTable + "<td>" + "<br/><span style='font-weight:bold;font-size:20px; '>角色群組：</span>金庫設備權限</td>";
                         break;
                     case "I":
-                        strTable = strTable + "<td>" + "<br/>角色群組：存取項目</td>";
+                        strTable = strTable + "<td>" + "<br/><span style='font-weight:bold;font-size:20px; '>角色群組：</span>存取項目</td>";
                         break;
                     case "A":
-                        strTable = strTable + "<td>" + "<br/>角色群組：表單申請</td>";
+                        strTable = strTable + "<td>" + "<br/><span style='font-weight:bold;font-size:20px; '>角色群組：</span>表單申請</td>";
                         break;
 
                 }

@@ -48,7 +48,7 @@
                             <tr>
                                 <td width="150px"></td>
                                 <td width="120px">
-                                    <label>金庫登記簿帳號 :&ensp;</label>
+                                    <label>金庫登記簿單號 :&ensp;</label>
                                 </td>
                                 <td>
                                     <input type="text" id="TREA_REGISTER_ID" name="TREA_REGISTER_ID" size="17" maxlength="10" />
@@ -136,6 +136,7 @@
         var SearchForm = 'confirmForm';
         var APLY_DT_From = 'APLY_DT_From';
         var APLY_DT_To = 'APLY_DT_To';
+        var TREA_REGISTER_ID = 'TREA_REGISTER_ID';
         //#endregion
 
         var opScope = '@Html.Raw(ViewBag.opScope)';
@@ -162,9 +163,11 @@
             customerUtility.alert("目前無開庫記錄資料,請至指定開庫作業進行動作", 'w');
         }
         else {
-            console.log('@Html.Raw(ViewBag.register_ID)');
+            //console.log('@Html.Raw(ViewBag.register_ID)');
             //初始畫面
             var _register_ID = '@Html.Raw(ViewBag.register_ID)';
+            $('#' + TREA_REGISTER_ID).val(_register_ID);
+            $('#' + TREA_REGISTER_ID).prop('disabled', true);
             //region datepicker
             var today = $.datepicker.formatDate('yy/mm/dd', new Date());
             //created.createDatepicker(APLY_DT_From, today);
@@ -247,18 +250,24 @@
                 }).done(function (result) {
                     $('#TreaItem').find('option').remove();
                     customerUtility.addoption('TreaItem', result.Item1);
-                    if (opTypeId == "2") {
-                        $('.ShowOrNot').show();
+                    if (opTypeId == "2") {       
                         if ($('#TreaItem option').length > 0) {
+                            $('.ShowOrNot').show();
                             $('#TreaItem').val($($('#TreaItem option')[0]).val()).change();
+                            $('#AccessItemTd').children().remove();
+                            $('#AccessItemTd').append('<select id="AccessItem" name="AccessItem"></select>');
+                            customerUtility.addoption('AccessItem', result.Item2);
                         }
-                        $('#AccessItemTd').children().remove();
-                        $('#AccessItemTd').append('<select id="AccessItem" name="AccessItem"></select>');
-                        customerUtility.addoption('AccessItem', result.Item2);
                     }
                     else {
                         $('.ShowOrNot').hide();
                         $('#AccessItemTd').empty();
+                    }
+                    //vITeM_OP_TYPE == "2" != "4" 不能輸入
+                    if (opTypeId != "4") {
+                        $('#InsertReason').prop('disabled', true);
+                    } else {
+                        $('#InsertReason').prop('disabled', false);
                     }
                 });
             })
@@ -286,6 +295,12 @@
                         $('.ShowOrNot').hide();
                         $('#AccessItemTd').empty();
                     }
+                    //vITeM_OP_TYPE == "2" != "4" 不能輸入
+                    if (result.Item1 != "4") {
+                        $('#InsertReason').prop('disabled', true);
+                    } else {
+                        $('#InsertReason').prop('disabled', false);
+                    }
                 });
             })
             //#endregion
@@ -312,6 +327,12 @@
                     else {
                         $('.ShowOrNot').hide();
                         $('#AccessItemTd').empty();
+                    }
+                    //vITeM_OP_TYPE == "2" != "4" 不能輸入
+                    if (result.Item1 != "4") {
+                        $('#InsertReason').prop('disabled', true);
+                    } else {
+                        $('#InsertReason').prop('disabled', false);
                     }
                 });
             });
@@ -365,6 +386,7 @@
                         if (result.RETURN_FLAG) {
                             if ($('input[name="IS_CHECKED"]').is(':checked')) {
                                 ACSearchStorageGrid();
+                                
                             }
                             else {
                                 SearchStorageGrid();
@@ -453,6 +475,7 @@
                 contentType: 'application/json',
             }).done(function (result) {
                 var _IdCheck = [];
+                var accessTypeCode = ""; //?? P or G  20181008 不知道是什麼參數 by Mark
                 //$('#SearchJqgridDiv input[type="checkbox"]').each(function () {
                 //    _IdCheck.push($(this).val());
                 //    alert("XX")
@@ -792,6 +815,7 @@
             });
             $('#InsertConfirm,#UpdateConfirm').hide();
             if (type == '@Ref.ActionType.Edit.ToString()') {
+                $('#InsertReason').val('');
                 $('#UpdateConfirm').show();
                 $('#UpdateConfirm').prop('disabled', false);
                 $('#InsertConfirm').prop('disabled', true);
@@ -807,7 +831,8 @@
                         ItemIdList: ITEM_ID_List,
                         AccessType: accessType,
                         vSEAL_ITEM_ID: $('#_hvSEAL_ITEM_ID').val(),
-                        ItemId: data.hITEM_ID
+                        ItemId: data.hITEM_ID,
+                        RemoveRowData: false
                     }),
                     url: UrlFor.OpTypeChange,
                     contentType: 'application/json',
@@ -829,6 +854,13 @@
                     else {
                         $('.ShowOrNot').hide();
                         $('#AccessItemTd').empty();
+                    }
+                    //vITeM_OP_TYPE != "4" 不能輸入
+                    if (data.vITeM_OP_TYPE != "4") {
+                        $('#InsertReason').prop('disabled', true);
+                    } else {
+                        $('#InsertReason').prop('disabled', false);
+                        $('#InsertReason').val(data.vACCESS_REASON);
                     }
                 });
             }

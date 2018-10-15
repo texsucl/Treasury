@@ -7,6 +7,12 @@ namespace Treasury.Web.ViewModels
     public class ItemImpViewModel : ITreaItem
     {
         /// <summary>
+        /// 歸檔編號(同物品單號)
+        /// </summary>
+        [Description("歸檔編號")]
+        public string vShowItemId { get; set; }
+
+        /// <summary>
         /// 物品單號
         /// </summary>
         [Description("物品單號")]
@@ -29,6 +35,18 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("重要物品數量")]
         public int vItemImp_Quantity { get; set; }
+
+        /// <summary>
+        /// 重要物品剩餘數量
+        /// </summary>
+        [Description("重要物品剩餘數量")]
+        public int vItemImp_Remaining { get; set; }
+
+        /// <summary>
+        /// 重要物品取出數量
+        /// </summary>
+        [Description("重要物品取出數量")]
+        public int? vItemImp_G_Quantity { get; set; }
 
         /// <summary>
         /// 重要物品金額

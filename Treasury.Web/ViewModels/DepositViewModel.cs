@@ -229,9 +229,9 @@ namespace Treasury.Web.ViewModels
         public string isNTD { get; set; }
 
         /// <summary>
-        /// 存單類型
+        /// 存單類型 (0:一般+NCD,1:一般,2:NCD)
         /// </summary>
-        [Description("存單類型")]
+        [Description("存單類型(0:一般+NCD,1:一般,2:NCD)")]
         public string vDep_Type { get; set; }
     }
 }

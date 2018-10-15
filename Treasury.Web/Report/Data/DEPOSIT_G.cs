@@ -40,8 +40,14 @@ namespace Treasury.Web.Report.Data
                         .Where(x => OIAs.Contains(x.ITEM_ID))
                         .Where(x => x.CURRENCY == "NTD", isNTD == "Y")
                         .Where(x => x.CURRENCY != "NTD", isNTD == "N")
-                        .Where(x => x.DEP_TYPE == vDep_Type)
+                        .Where(x => x.DEP_TYPE != null)
+                        .Where(x => x.DEP_TYPE == vDep_Type , vDep_Type != "0")
+                        .OrderBy(x=>x.DEP_TYPE)
+                        .ThenBy(x=> x.ITEM_ID)
                         .ToList();
+
+                    var DEP_TYPEs = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == "DEP_TYPE").ToList() ;
 
                     if (_IDOM_DataList.Any())
                     {
@@ -61,6 +67,7 @@ namespace Treasury.Web.Report.Data
                                     TYPE = "Data-N",
                                     EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterDataN.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterDataN.TRAD_PARTNERS,
+                                    DEP_TYPE = MasterDataN.DEP_TYPE,
                                     DEP_NO_B = DetailData.DEP_NO_B,
                                     DEP_NO_E = DetailData.DEP_NO_E,
                                     DEP_CNT = DetailData.DEP_CNT,
@@ -75,6 +82,9 @@ namespace Treasury.Web.Report.Data
 
                         //設值否=Y
                         var _IDOM_DataYList = _IDOM_DataList.Where(x => x.DEP_SET_QUALITY == "Y").ToList();
+
+                        if (_IDOM_DataYList.Any()) //設質否
+                            _REC.DEP_SET_QUALITY = "Y";
 
                         foreach (var MasterDataY in _IDOM_DataYList)
                         {
@@ -92,7 +102,8 @@ namespace Treasury.Web.Report.Data
                                     CURRENCY=_REC.CURRENCY,
                                     EXPIRY_DATE=TypeTransfer.dateTimeToString(MasterDataY.EXPIRY_DATE,false),
                                     TRAD_PARTNERS=MasterDataY.TRAD_PARTNERS,
-                                    DEP_TYPE=_REC.DEP_TYPE,
+                                    DEP_TYPE_D = DEP_TYPEs.FirstOrDefault(x=>x.CODE == MasterDataY.DEP_TYPE)?.CODE_VALUE,
+                                    DEP_TYPE　= MasterDataY.DEP_TYPE,
                                     DEP_NO_B=DetailData.DEP_NO_B,
                                     DEP_NO_E=DetailData.DEP_NO_E,
                                     DEP_CNT=DetailData.DEP_CNT,
@@ -110,7 +121,7 @@ namespace Treasury.Web.Report.Data
                                 CURRENCY = _REC.CURRENCY,
                                 EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterDataY.EXPIRY_DATE,false),
                                 TRAD_PARTNERS = MasterDataY.TRAD_PARTNERS,
-                                DEP_TYPE = _REC.DEP_TYPE,
+                                DEP_TYPE = MasterDataY.DEP_TYPE,
                                 TOTAL_DENOMINATION = TOTAL_DENOMINATION
                             };
 
@@ -129,10 +140,10 @@ namespace Treasury.Web.Report.Data
                 {
                     string DEP_CHK_ITEM_DESC = string.Empty;
 
-                    //是否項次1
+                    //是否為項次5 確認當日交易已全數交割完成，到期存單共@2張
                     if (item.ISORTBY == 5)
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@2", TOTAL_DEP_CNT.ToString());
+                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@2", TOTAL_DEP_CNT.ToString().formateThousand());
                     }
                     else
                     {

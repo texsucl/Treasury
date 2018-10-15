@@ -10,7 +10,6 @@ using Treasury.Web.Controllers;
 using Treasury.Web.ViewModels;
 using System.Linq;
 using Treasury.Web.Enum;
-
 /// <summary>
 /// 功能說明：資料查詢異動作業
 /// 初版作者：20180828 卓建毅

@@ -54,11 +54,11 @@
                 </tr>
                 <tr>
                     <td>
-                        <label>數量 : </label>
+                        <label>剩餘數量 : </label>
                     </td>
                     <td>
-                        <input type="text" id="tCDCItemImp_Quantity" name="tCDCItemImp_Quantity" class="CDCItemImpUpdateType" />
-                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Quantity"></span>
+                        <input type="text" id="tCDCItemImp_Remaining" name="tCDCItemImp_Remaining" class="CDCItemImpUpdateType" />
+                        <span class="red" style="padding-left:20px" id="sCDCItemImp_Remaining"></span>
                     </td>
                 </tr>
                 <tr>
@@ -135,8 +135,8 @@
         var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
         var tCDCItemImp_NameId = 'tCDCItemImp_Name'; //物品名稱Id(text)
         var sCDCItemImp_NameId = 'sCDCItemImp_Name'; //物品名稱Id(span)
-        var tCDCItemImp_QuantityId = 'tCDCItemImp_Quantity'; //數量Id(text)
-        var sCDCItemImp_QuantityId = 'sCDCItemImp_Quantity'; //數量Id(span)
+        var tCDCItemImp_RemainingId = 'tCDCItemImp_Remaining'; //剩餘數量Id(text)
+        var sCDCItemImp_RemainingId = 'sCDCItemImp_Remaining'; //剩餘數量Id(span)
         var tCDCItemImp_AmountId = 'tCDCItemImp_Amount'; //金額Id(text)
         var sCDCItemImp_AmountId = 'sCDCItemImp_Amount'; //金額Id(span)
         var tCDCItemImp_Expected_DateId = 'tCDCItemImp_Expected_Date'; //預計提取日期Id(text)
@@ -167,7 +167,7 @@
             verified.required(CDCItemImpDialogFormId, tCDCItemImp_NameId, message.required('物品名稱')); //物品名稱為必填
             verified.required(CDCItemImpDialogFormId, tCDCItemImp_AmountId, message.required('金額')); //金額為必填
             verified.price(CDCItemImpDialogFormId, tCDCItemImp_AmountId); //金額驗證
-            verified.number(CDCItemImpDialogFormId, tCDCItemImp_QuantityId); //數量輸入為數字
+            verified.number(CDCItemImpDialogFormId, tCDCItemImp_RemainingId); //數量輸入為數字
         }
         //#endregion
     
@@ -235,11 +235,11 @@
                 return rdata.vItemImp_Name || '';
         }
 
-        function formattervItemImp_Quantity(cellvalue, options, rdata) {
-            if (rdata.vItemImp_Quantity_AFT != null)
-                return '<span class="red">' + rdata.vItemImp_Quantity_AFT + '</span>';
+        function formattervItemImp_Remaining(cellvalue, options, rdata) {
+            if (rdata.vItemImp_Remaining_AFT != null)
+                return '<span class="red">' + rdata.vItemImp_Remaining_AFT + '</span>';
             else
-                return rdata.vItemImp_Quantity || '';
+                return rdata.vItemImp_Remaining || '';
         }
 
         function formattervItemImp_Amount(cellvalue, options, rdata) {
@@ -287,7 +287,7 @@
 
         function CDCItemImpDbGrid() {
             var colNameArray = ['動作', '狀態', '入庫日期', '歸檔編號', '存入申請人', '權責單位',
-                '物品名稱', '數量', '金額', '預計提取日期', '說明', '備註',
+                '物品名稱', '剩餘數量', '金額', '預計提取日期', '說明', '備註',
                 '物品名稱異動前', '數量異動前', '金額異動前', '預計提取日期異動前', '說明異動前', '備註異動前',
                 '物品名稱異動後', '數量異動後', '金額異動後', '預計提取日期異動後', '說明異動後', '備註異動後',
                 '物品編號', '狀態Id'];
@@ -300,21 +300,21 @@
             colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });
             
             colModelArray.push({ name: "vItemImp_Name_Show", index: "vItemImp_Name_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Name });
-            colModelArray.push({ name: "vItemImp_Quantity_Show", index: "vItemImp_Quantity_Show", width: 60, align: 'right', sortable: false, formatter: formattervItemImp_Quantity });
+            colModelArray.push({ name: "vItemImp_Remaining_Show", index: "vItemImp_Remaining_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Remaining });
             colModelArray.push({ name: "vItemImp_Amount_Show", index: "vItemImp_Amount_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Amount });
             colModelArray.push({ name: "vItemImp_Expected_Date_Show", index: "vItemImp_Expected_Date_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Expected_Date });
             colModelArray.push({ name: "vItemImp_Description_Show", index: "vItemImp_Description_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Description });
             colModelArray.push({ name: "vItemImp_MEMO_Show", index: "vItemImp_MEMO_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_MEMO });
 
             colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", hidden: true });
-            colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", hidden: true });
+            colModelArray.push({ name: "vItemImp_Remaining", index: "vItemImp_Remaining", hidden: true });
             colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", hidden: true });
             colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", hidden: true });
             colModelArray.push({ name: "vItemImp_Description", index: "vItemImp_Description", hidden: true });
             colModelArray.push({ name: "vItemImp_MEMO", index: "vItemImp_MEMO", hidden: true });
 
             colModelArray.push({ name: "vItemImp_Name_AFT", index: "vItemImp_Name_AFT", hidden: true });
-            colModelArray.push({ name: "vItemImp_Quantity_AFT", index: "vItemImp_Quantity_AFT", hidden: true });
+            colModelArray.push({ name: "vItemImp_Remaining_AFT", index: "vItemImp_Remaining_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_Amount_AFT", index: "vItemImp_Amount_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_Expected_Date_AFT", index: "vItemImp_Expected_Date_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_Description_AFT", index: "vItemImp_Description_AFT", hidden: true });
@@ -422,11 +422,13 @@
                 dialogSetData(listId, rowid);
                 $('#CDCItemImpUpdateTemp').show();
                 $('.' + ItemImpUpdateClass).prop('disabled', false);
+                $('#' + tCDCItemImp_Expected_DateId).next().prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()')
             {
                 dialogSetData(listId, rowid);
                 $('.' + ItemImpUpdateClass).prop('disabled', true);
+                $('#' + tCDCItemImp_Expected_DateId).next().prop('disabled', true);
             }
             $('#' + CDCItemImpDialogId).dialog('open');
         }
@@ -438,8 +440,8 @@
             $('#' + vCHARGE_NameId).text('');
             $('#' + tCDCItemImp_NameId).val('');
             $('#' + sCDCItemImp_NameId).text('');
-            $('#' + tCDCItemImp_QuantityId).val('');
-            $('#' + sCDCItemImp_QuantityId).text('');
+            $('#' + tCDCItemImp_RemainingId).val('');
+            $('#' + sCDCItemImp_RemainingId).text('');
             $('#' + tCDCItemImp_AmountId).val('');
             $('#' + sCDCItemImp_AmountId).text('');
             $('#' + tCDCItemImp_Expected_DateId).val('');
@@ -464,8 +466,8 @@
                 $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
                 $('#' + tCDCItemImp_NameId).val(data.vItemImp_Name);
                 $('#' + sCDCItemImp_NameId).text(data.vItemImp_Name_AFT);
-                $('#' + tCDCItemImp_QuantityId).val(data.vItemImp_Quantity);
-                $('#' + sCDCItemImp_QuantityId).text(data.vItemImp_Quantity_AFT);
+                $('#' + tCDCItemImp_RemainingId).val(data.vItemImp_Remaining);
+                $('#' + sCDCItemImp_RemainingId).text(data.vItemImp_Remaining_AFT);
                 $('#' + tCDCItemImp_AmountId).val(data.vItemImp_Amount);
                 $('#' + sCDCItemImp_AmountId).text(data.vItemImp_Amount_AFT);
                 $('#' + tCDCItemImp_Expected_DateId).val(data.vItemImp_Expected_Date);
@@ -489,7 +491,7 @@
                         model: CDCItemImpViewModel(
                             $('#' + ItemImp_ITEM_ID).val(),
                             $('#' + tCDCItemImp_NameId).val().trim(),
-                            $('#' + tCDCItemImp_QuantityId).val().trim(),
+                            $('#' + tCDCItemImp_RemainingId).val().trim(),
                             $('#' + tCDCItemImp_AmountId).val().trim(),
                             $('#' + tCDCItemImp_Expected_DateId).val().trim(),
                             $('#' + tCDCItemImp_DescriptionId).val().trim(),
@@ -512,7 +514,7 @@
         function CDCItemImpViewModel(
             vItemId,
             vItemImp_Name,
-            vItemImp_Quantity,
+            vItemImp_Remaining,
             vItemImp_Amount,
             vItemImp_Expected_Date,
             vItemImp_Description,
@@ -521,7 +523,7 @@
             var obj = {};
             obj['vItemId'] = vItemId;
             obj['vItemImp_Name'] = vItemImp_Name;
-            obj['vItemImp_Quantity'] = vItemImp_Quantity;
+            obj['vItemImp_Remaining'] = vItemImp_Remaining;
             obj['vItemImp_Amount'] = vItemImp_Amount;
             obj['vItemImp_Expected_Date'] = vItemImp_Expected_Date;
             obj['vItemImp_Description'] = vItemImp_Description;

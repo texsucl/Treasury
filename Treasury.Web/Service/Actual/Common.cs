@@ -75,7 +75,7 @@ namespace Treasury.Web.Service.Actual
         /// 獲取 員工資料
         /// </summary>
         /// <returns></returns>
-        protected List<V_EMPLY2> GetEmps()
+        public List<V_EMPLY2> GetEmps()
         {
             var emps = new List<V_EMPLY2>();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
@@ -89,7 +89,7 @@ namespace Treasury.Web.Service.Actual
         /// 獲取 部門資料
         /// </summary>
         /// <returns></returns>
-        protected List<VW_OA_DEPT> GetDepts()
+        public List<VW_OA_DEPT> GetDepts()
         {
             var depts = new List<VW_OA_DEPT>();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())

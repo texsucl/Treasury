@@ -90,6 +90,12 @@ namespace Treasury.WebViewModels
 
         public string roleName { get; set; }
 
+        [MaxLength(250)]
+        [Display(Name = "備註")]
+        public string vMemo { get; set; }
+
+        public string vMemoB { get; set; }
+
 
         public UserMgrModel()
         {
@@ -105,6 +111,8 @@ namespace Treasury.WebViewModels
             isMailDesc = "";
             isMailB = "";
             isMailDescB = "";
+            vMemo = "";
+            vMemoB = "";
             cWorkUnitCode = "";
             cWorkUnitDesc = "";
             codeRole = "";

@@ -370,7 +370,7 @@ namespace Treasury.Web.Service.Actual
         public List<DepositReportGroupData> GetReportGroupData(string vAplyNo)
         {
             List<DepositReportGroupData> result = new List<DepositReportGroupData>();
-            DepositReportGroupData GroupData = new DepositReportGroupData();
+
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TAR = db.TREA_APLY_REC.AsNoTracking()
@@ -386,23 +386,45 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => OIAs.Contains(x.ITEM_ID)).ToList();
 
                     //台幣
-                    var GroupDataList_NTD = _IDOM_DataList.Where(x => x.CURRENCY == "NTD").GroupBy(x => new { x.DEP_TYPE });
+                    var GroupDataList_NTD = _IDOM_DataList
+                        .Where(x => x.CURRENCY == "NTD" && x.DEP_TYPE != null)
+                        .GroupBy(x => new { x.DEP_TYPE }).ToList();
 
-                    foreach(var item in GroupDataList_NTD)
+                    if (GroupDataList_NTD.Any())
                     {
-                        GroupData = new DepositReportGroupData { isNTD = "Y", vDep_Type = item.Key.DEP_TYPE };
-
-                        result.Add(GroupData);
+                        if (GroupDataList_NTD.Count >= 2) //一般+NCD
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "Y", vDep_Type = "0" });
+                        }
+                        else if (GroupDataList_NTD.Any(x => x.Key.DEP_TYPE == "1")) //一般
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "Y", vDep_Type = "1" });
+                        }
+                        else if (GroupDataList_NTD.Any(x => x.Key.DEP_TYPE == "2")) //NCD
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "Y", vDep_Type = "2" });
+                        }
                     }
 
                     //外幣
-                    var GroupDataList_NNTD = _IDOM_DataList.Where(x => x.CURRENCY != "NTD").GroupBy(x => new { x.DEP_TYPE });
+                    var GroupDataList_NNTD = _IDOM_DataList
+                        .Where(x => x.CURRENCY != "NTD" && x.DEP_TYPE != null)
+                        .GroupBy(x => new { x.DEP_TYPE }).ToList();
 
-                    foreach (var item in GroupDataList_NNTD)
+                    if (GroupDataList_NNTD.Any())
                     {
-                        GroupData = new DepositReportGroupData { isNTD = "N", vDep_Type = item.Key.DEP_TYPE };
-
-                        result.Add(GroupData);
+                        if (GroupDataList_NNTD.Count >= 2) //一般+NCD
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "N", vDep_Type = "0" });
+                        }
+                        else if (GroupDataList_NNTD.Any(x => x.Key.DEP_TYPE == "1")) //一般
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "N", vDep_Type = "1" });
+                        }
+                        else if (GroupDataList_NNTD.Any(x => x.Key.DEP_TYPE == "2")) //NCD
+                        {
+                            result.Add(new DepositReportGroupData { isNTD = "N", vDep_Type = "2" });
+                        }
                     }
                 }
             }

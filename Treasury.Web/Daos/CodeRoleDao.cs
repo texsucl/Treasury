@@ -165,7 +165,7 @@ namespace Treasury.WebDaos
 
                                                    join codeAuthType in db.SYS_CODE.Where(x => x.CODE_TYPE == "ROLE_AUTH_TYPE") on role.ROLE_AUTH_TYPE equals codeAuthType.CODE into psAuthType
                                                    from xAuthType in psAuthType.DefaultIfEmpty()
-
+                                                   
                                                    where 1 == 1
 
                                                        & (bCodeRole || (role.ROLE_ID == codeRole.Trim()))

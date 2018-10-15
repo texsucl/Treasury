@@ -196,9 +196,9 @@ namespace Treasury.Web.Controllers
                     var _vItemImp_Name_AFT = model.vItemImp_Name.CheckAFT(updateTempData.vItemImp_Name);
                     if (_vItemImp_Name_AFT.Item2)
                         updateTempData.vItemImp_Name_AFT = _vItemImp_Name_AFT.Item1;
-                    var _vItemImp_Quantity_AFT = TypeTransfer.intNToString(model.vItemImp_Quantity).CheckAFT(TypeTransfer.intNToString(updateTempData.vItemImp_Quantity));
-                    if (_vItemImp_Quantity_AFT.Item2)
-                        updateTempData.vItemImp_Remaining_AFT = TypeTransfer.stringToIntN(_vItemImp_Quantity_AFT.Item1);
+                    var _vItemImp_Remaining_AFT = TypeTransfer.intNToString(model.vItemImp_Remaining).CheckAFT(TypeTransfer.intNToString(updateTempData.vItemImp_Remaining));
+                    if (_vItemImp_Remaining_AFT.Item2)
+                        updateTempData.vItemImp_Remaining_AFT = TypeTransfer.stringToIntN(_vItemImp_Remaining_AFT.Item1);
                     var _vItemImp_Amount_AFT = TypeTransfer.decimalNToString(model.vItemImp_Amount).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vItemImp_Amount));
                     if (_vItemImp_Amount_AFT.Item2)
                         updateTempData.vItemImp_Amount_AFT = TypeTransfer.stringToDecimal(_vItemImp_Amount_AFT.Item1);
@@ -211,7 +211,7 @@ namespace Treasury.Web.Controllers
                     var _vItemImp_MEMO_AFT = model.vItemImp_MEMO.CheckAFT(updateTempData.vItemImp_MEMO);
                     if (_vItemImp_MEMO_AFT.Item2)
                         updateTempData.vItemImp_MEMO_AFT = _vItemImp_MEMO_AFT.Item1;
-                    updateTempData.vAFTFlag = _vItemImp_Name_AFT.Item2 || _vItemImp_Quantity_AFT.Item2 || _vItemImp_Amount_AFT.Item2 || _vItemImp_Expected_Date_AFT.Item2 || _vItemImp_Description_AFT.Item2 || _vItemImp_MEMO_AFT.Item2;
+                    updateTempData.vAFTFlag = _vItemImp_Name_AFT.Item2 || _vItemImp_Remaining_AFT.Item2 || _vItemImp_Amount_AFT.Item2 || _vItemImp_Expected_Date_AFT.Item2 || _vItemImp_Description_AFT.Item2 || _vItemImp_MEMO_AFT.Item2;
                     Cache.Invalidate(CacheList.CDCItemImpData);
                     Cache.Set(CacheList.CDCItemImpData, dbData);
                     result.Datas = dbData.Any(x => x.vAFTFlag);
@@ -369,27 +369,55 @@ namespace Treasury.Web.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult TakeOutData(ItemImpViewModel model,bool takeoutFlag)
+        public JsonResult TakeOutData(ItemImpViewModel model)
         {
             MSGReturnModel<bool> result = new MSGReturnModel<bool>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
-            //transType(model);
             if (Cache.IsSet(CacheList.ItemImpData))
             {
                 var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
                 var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
                 if (updateTempData != null)
                 {
-                    if (takeoutFlag)
-                    {
-                        updateTempData.vStatus = Ref.AccessInventoryType._4.GetDescription();
-                    }
-                    else
-                    {
-                        updateTempData.vStatus = Ref.AccessInventoryType._1.GetDescription();
-                    }
-                    updateTempData.vtakeoutFlag = takeoutFlag;
+                    updateTempData.vtakeoutFlag = true;
+                    updateTempData.vItemImp_G_Quantity = model.vItemImp_G_Quantity;
+                    if(model.vItemImp_G_Quantity == null || model.vItemImp_G_Quantity.Value == 0)
+                        updateTempData.vtakeoutFlag = false;
+                    Cache.Invalidate(CacheList.ItemImpData);
+                    Cache.Set(CacheList.ItemImpData, tempData);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設事件動作(復原該筆庫存)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatData(ItemImpViewModel model)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.ItemImpData))
+            {
+                var tempData = (List<ItemImpViewModel>)Cache.Get(CacheList.ItemImpData);
+                var updateTempData = tempData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vItemImp_G_Quantity = null;
+                    updateTempData.vtakeoutFlag = false;
                     Cache.Invalidate(CacheList.ItemImpData);
                     Cache.Set(CacheList.ItemImpData, tempData);
                     result.RETURN_FLAG = true;
@@ -473,17 +501,5 @@ namespace Treasury.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// 西元年轉民國年
-        /// </summary>
-        //private void transType(ItemImpViewModel model)
-        //{
-        //    if (model != null)
-        //    {
-        //        var date = TypeTransfer.stringToDateTimeN(model.vItemImp_Expected_Date_2);
-        //        model.vItemImp_Expected_Date_1 =
-        //            (date == null ? null : date.Value.DateToTaiwanDate(9));
-        //    } 
-        //}
     }
 }

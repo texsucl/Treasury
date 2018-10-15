@@ -101,7 +101,7 @@ namespace Treasury.Web.Controllers
             {
                 case "Search":
                     if (Cache.IsSet(CacheList.TreasuryRegisterSearchReportM))
-                        return Json(jdata.modelToJqgridResult(((List<TreasuryRegisterSearch>)Cache.Get(CacheList.TreasuryRegisterSearchReportM)).OrderBy(x => x.vTrea_Register_Id).ToList()));
+                        return Json(jdata.modelToJqgridResult(((List<TreasuryRegisterSearch>)Cache.Get(CacheList.TreasuryRegisterSearchReportM)).OrderByDescending(x => x.vTrea_Register_Id).ToList()));
                     break;
                 case "Detail":
                     if (Cache.IsSet(CacheList.TreasuryRegisterSearchReportD))

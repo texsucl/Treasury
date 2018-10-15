@@ -89,6 +89,82 @@
             </table>
         </form>
     </div>
+
+    <div id="ItemImpTakeOutDialog" style="display:none">
+        <form id="ItemImpDialogTakeOutForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>物品名稱 : </label>
+                    </td>
+                    <td>
+                        <label id="lItemImp_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>剩餘數量 : </label>
+                    </td>
+                    <td>
+                        <label id="lItemImp_G_Remaining"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>取出數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_G_Quantity" name="tItemImp_G_Quantity"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>金額 : </label>
+                    </td>
+                    <td>
+                        <label id="lItemImp_Amount"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>預計提取日期 : </label>
+                    </td>
+                    <td>
+                        <label id="lItemImp_Expected_Date"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>說明 : </label>
+                    </td>
+                    <td>
+                        <label id="lItemImp_Description"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tItemImpTakeOut_MEMO" name="tItemImpTakeOut_MEMO" disabled style="width:207px;height:80px;" maxlength="200" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" id="hTakeOutItemImp_ITEM_ID" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="ItemImpTakeOutTemp" value="修改" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ItemImpTakeOutCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -117,6 +193,16 @@
         var ItemImp_Description = 'tItemImp_Description';//說明(text)
         var ItemImp_MemoId = 'tItemImp_MEMO'; //備註Id(texarea)
         var ItemImp_Item_IdHlId = 'hItemImp_ITEM_ID'; //物品標號Id(hidden)
+        var ItemImpTakeOutDialogId = 'ItemImpTakeOutDialog'; //取出-TakeOutDialogId
+        var ItemImpDialogTakeOutFormId = 'ItemImpDialogTakeOutForm'; //取出-DialogTakeOutForm
+        var lItemImp_Name = 'lItemImp_Name'; //取出-物品名稱Id(label)
+        var lItemImp_G_Remaining = 'lItemImp_G_Remaining'; //取出-剩餘數量Id(label)
+        var tItemImp_G_Quantity = 'tItemImp_G_Quantity'; //取出-取出數量Id(text)
+        var lItemImp_Amount = 'lItemImp_Amount'; //取出-金額Id(label)
+        var lItemImp_Expected_Date = 'lItemImp_Expected_Date'; //取出-預計提取日期Id(label)
+        var lItemImp_Description = 'lItemImp_Description'; //取出-說明Id(label)
+        var tItemImpTakeOut_MEMO = 'tItemImpTakeOut_MEMO'; //取出-備註Id(texarea)
+        var ITakeOuttemImp_Item_IdHlId = 'hTakeOutItemImp_ITEM_ID'; //取出-物品標號Id(hidden)
         //var ItemImp_Expected_Date_2 = 'tItemImp_Expected_Date_2';//預計提取日期西元年(hidden)
         var ItemImp_Act_Type = 'True' == '@ViewBag.dActType'; //覆核狀態
         var type = $('input[name=cProjectType]:checked').val(); //存入 or 取出
@@ -156,6 +242,7 @@
             verified.required(ItemImpDialogFormId, ItemImp_Quantity, message.required('重要物品數量'));//重要物品數量為必填
             //verified.datepicker(ItemImpDialogFormId, ItemImp_Expected_Date, $('#' + ItemImp_Expected_Date).val());
             verified.price(ItemImpDialogFormId, ItemImp_Amount); //重要物品金額驗證
+            verified.number(ItemImpDialogTakeOutFormId, tItemImp_G_Quantity); //取出物品數量輸入為數字         
             verified.number(ItemImpDialogFormId, ItemImp_Quantity);//重要物品數量輸入為數字
         }
         //#endregion
@@ -180,7 +267,16 @@
                         }
                         ItemImpCancelFun();
                     });
-
+                    break;
+                case 'ItemImpTakeOutTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ItemImpTakeOutTempFun(); });
+                    break;
+                case 'ItemImpTakeOutCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        customerUtility.closeDialog(this);
+                    });
                     break;
                 case 'ItemImpBack':
                 case 'ItemImpCancelTemp':
@@ -245,30 +341,33 @@
         }
 
         function formatterTakeOut(cellvalue, options, rdata) {
-            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
-                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox ItemImptakeouts customerCheck'></div>";
+            var str = '';
+            str += '<div class="btn-group">';
+            if (ItemImp_Act_Type)
+            {
+                str += '<a title="取出" class="btn actionTakeout" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="ItemImp' + options.gid + 'TakeOut' + options.rowId + '" return:false;="">';
+                str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            }
+            str += '<a title="查詢" class="btn actionSearch" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="ItemImp' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '</div>';
             return str;
         }
 
 
-
-
-
-
-
         function ItemImpTempGrid() {
-
             if (typeFlag) { //存入
-                var colNameArray = ['動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品單號'];
+                var colNameArray = ['動作', '歸檔編號', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註','ItemId'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vShowItemId", index: "vItemId", width: 120, align: 'center' });
                 colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 100, sortable: false });
                 colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", align: 'center', width: 100, sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
-                colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+                colModelArray.push({ name: "vItemId", index: "vItemId", hidden:true });
                 //colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
                 jqgridCustom.createJqgridByCache(
                     'ItemImpjqgridDiv',
@@ -287,22 +386,25 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '重要物品名稱', '重要物品數量', '重要物品金額', '預計提取日期', '說明', '備註', '物品編號'];
+                var colNameArray = [ '動作', '歸檔編號', '重要物品名稱', '剩餘數量', '取出數量', '重要物品金額', '預計提取日期', '說明', '備註', '重要物品數量' ,'ItemId'];
                 var colModelArray = [];
                 if (!ItemImp_Act_Type) {
-                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
-                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                    //colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, align: 'center', formatter: formatterTakeOut });
                 }
                 else {
-                    colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
-                    colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
+                    //colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
+                    colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, align: 'center', formatter: formatterTakeOut });
                 }
-                colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 100, sortable: false });
-                colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", width: 100, sortable: false });
-                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 270, sortable: false });
+                colModelArray.push({ name: "vShowItemId", index: "vItemId", width: 100, align: 'center' });
+                colModelArray.push({ name: "vItemImp_Name", index: "vItemImp_Name", width: 90, sortable: false });
+                colModelArray.push({ name: "vItemImp_Remaining", index: "vItemImp_Remaining", width: 90, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vItemImp_G_Quantity", index: "vItemImp_G_Quantity", width: 90, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vItemImp_Amount", index: "vItemImp_Amount", width:110, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", align: 'center', width: 110, sortable: false });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 90, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 210, sortable: false });
+                colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
                 //colModelArray.push({ name: "vItemImp_Expected_Date_2", index: "vItemImp_Expected_Date_2", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -325,42 +427,66 @@
         function ItemImpTempTakeOutFun(listId) {
             jqgridCustom.randerAction(listId, 'ItemImpTemp', tempActFun);
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
-                $(this).find('.actionEditIcon').hide();
-                $(this).find('.actionDeleIcon').hide();
-                $(this).find('td').find('.ItemImptakeouts').each(function () {
+                $(this).find('td').find('a.actionTakeout').each(function () {
                     $(this).off('click');
                     $(this).on('click', function () {
-                        takeout(i + 1, $(this).prop('checked'));
+                        takeout(i + 1);
+                    });
+                });
+                $(this).find('td').find('a.actionSearch').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        search(i + 1);
                     });
                 });
             });
         }
 
-        function takeout(rowid, flag) {
+        function takeout(rowid) {
+            dialogTakeOutOpen(rowid, '取出');
+            $('#' + tItemImp_G_Quantity).prop('disabled', false);
+            $('#ItemImpTakeOutTemp').show();
+        }
+
+        function search(rowid) {
+            dialogTakeOutOpen(rowid, '查詢');
+            $('#' + tItemImp_G_Quantity).prop('disabled', true);
+            $('#ItemImpTakeOutTemp').hide();
+        }
+
+        function dialogTakeOutOpen(rowid,title) {
+            $('#' + ItemImpDialogTakeOutFormId).validate().resetForm();
+            var dialogId = ItemImpTakeOutDialogId;
             var listId = 'ItemImpTempList';
-            var data = $("#" + listId).getRowData(rowid);
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify({
-                    model: ItemImpViewModel(data.vItemId),
-                    takeoutFlag: flag
-                }),
-                dataType: "json",
-                url: ItemImpurl.TakeOutData,
-                contentType: 'application/json',
-            }).done(function (result) {
-                if (result.RETURN_FLAG) {
-                    ItemImpTempGrid();
-                    if (ItemImp_Aply_No_Flag) //從查詢畫面進來的
-                    {
-                        ItemImpConfirmFlag = true;
-                    }
-                    else //新增存入畫面
-                    {
-                        ItemImpConfirmFlag = result.Datas;
-                    }
+            $('#' + dialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '重要物品',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
                 }
             });
+            var data = $("#" + listId).getRowData(rowid);
+            $('#' + lItemImp_Name).text('');
+            $('#' + lItemImp_Name).text(data.vItemImp_Name);
+            $('#' + lItemImp_G_Remaining).text('');
+            $('#' + lItemImp_G_Remaining).text(customerUtility.addCommas(data.vItemImp_Remaining));
+            $('#' + tItemImp_G_Quantity).val('');
+            $('#' + tItemImp_G_Quantity).val(data.vItemImp_G_Quantity);
+            $('#' + lItemImp_Amount).text('');
+            $('#' + lItemImp_Amount).text(customerUtility.addCommas(data.vItemImp_Amount));
+            $('#' + lItemImp_Expected_Date).text('');
+            $('#' + lItemImp_Expected_Date).text(data.vItemImp_Expected_Date);
+            $('#' + lItemImp_Description).text('');
+            $('#' + lItemImp_Description).text(data.vDescription);
+            $('#' + tItemImpTakeOut_MEMO).val('');
+            $('#' + tItemImpTakeOut_MEMO).val(data.vMemo);
+            $('#' + ITakeOuttemImp_Item_IdHlId).val('');
+            $('#' + ITakeOuttemImp_Item_IdHlId).val(data.vItemId);
+            $('#' + dialogId).dialog('open');
         }
 
         function ItemImpTempCompleteFun(listId) {
@@ -415,7 +541,7 @@
                 if ('@ViewBag.CustodianFlag' != "True")
                 {
                     $('#' + ItemImp_MemoId).prop('disabled', true);
-                }                
+                }
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
                 dialogSetData(listId, rowid);
@@ -564,6 +690,34 @@
             })
         }
 
+        function ItemImpTakeOutTempFun() {
+            if ($('#' + ItemImpDialogTakeOutFormId).valid())
+            {
+                if (Number($('#' + tItemImp_G_Quantity).val()) > Number(customerUtility.removeCommas($('#lItemImp_G_Remaining').text()))) {
+                    customerUtility.alert('取出數量不能大於剩餘數量', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        vItemId: $('#' + ITakeOuttemImp_Item_IdHlId).val(),
+                        vItemImp_G_Quantity: $('#' + tItemImp_G_Quantity).val()
+                    }),
+                    dataType: "json",
+                    url: ItemImpurl.TakeOutData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        ItemImpTempGrid();
+                        ItemImpConfirmFlag = result.Datas;
+                        customerUtility.closeDialog($('#ItemImpTakeOutTemp'));
+                    }
+                })
+            }
+
+
+        }
 
 
         function ItemImpViewModel(
