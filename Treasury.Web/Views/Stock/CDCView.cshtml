@@ -1,0 +1,714 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div id="CDC_Stock_M_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+    </div>
+    <div style="text-align:center;display:none;" class="CDC_Stock_Act">
+        <input type="button" id="CDC_Stock_M_Back" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDC_Stock_M_Dialog" style="display:none;">
+        <div class="col-sm-24">
+            <form>
+                <table>
+                    <tr>
+                        <td style="width:200px" align="right">
+                            <label>編號:</label>
+                        </td>
+                        <td style="width:100px">
+                            <label id="lIB_Group_No"></label>
+                        </td>
+                        <td style="width:200px" align="right">
+                            <label>股票名稱:</label>
+                        </td>
+                        <td style="width:300px">
+                            <label id="lIB_Name"></label>
+                        </td>
+                        <td style="width:200px" align="right">
+                            <label>區域:</label>
+                        </td>
+                        <td style="width:100px">
+                            <label id="lIB_Area"></label>
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <label>備註:</label>
+                        </td>
+                        <td colspan="6">
+                            <label id="lIB_Memo"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <label>入庫批號:</label>
+                        </td>
+                        <td>
+                            <label id="lStock_Trea_Batch_No"></label>
+                        </td>
+                        <td align="right">
+                            <label>總股數:</label>
+                        </td>
+                        <td colspan="4">
+                            <label id="lNumber_Of_Shares_Total"></label>
+                            <span class="red" style="padding-left:20px" id="sNumber_Of_Shares_Total"></span>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="CDC_Stock_D_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+        </div>
+        <div style="text-align:center;display:none;" class="CDC_Stock_Act">
+            <input type="button" id="CDC_StockApply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="CDC_Stock_D_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="CDC_Stock_D_Dialog" style="display:none;">
+        <form id="CDC_StockForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="lPut_Date" name="lPut_Date"></label>
+                    </td>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="lAply_Uid_Name" name="lAply_Uid_Name"></label>
+                    </td>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <lable id="lCharge_Name" name="lCharge_Name"></lable>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dStock_Type", (SelectList)ViewBag.dStock_Type, new { @class = "CDC_StockUpdateType" })
+                        <span class="red" style="padding-left:20px" id="sStock_Type"></span>
+                    </td>
+                    <td>
+                        <label>序號前置碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tStock_No_Preamble" name="tStock_No_Preamble" />
+                        <span class="red" style="padding-left:20px" id="sStock_No_Preamble"></span>
+                    </td>
+                    <td>
+                        <label>序號(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tStock_No_B" name="tStock_No_B" />
+                        <span class="red" style="padding-left:20px" id="sStock_No_B"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>序號(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tStock_No_E" name="tStock_No_E" />
+                        <span class="red" style="padding-left:20px" id="sStock_No_E"></span>
+                    </td>
+                    <td>
+                        <label>張數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tStock_Total" name="tStock_Total" />
+                        <span class="red" style="padding-left:20px" id="sStock_Total"></span>
+                    </td>
+                    <td>
+                        <label>每股金額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tAmount_Per_Share" name="tAmount_Per_Share" />
+                        <span class="red" style="padding-left:20px" id="sAmount_Per_Share"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>單張股數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tSingle_Number_Of_Shares" name="tSingle_Number_Of_Shares" />
+                        <span class="red" style="padding-left:20px" id="sSingle_Number_Of_Shares"></span>
+                    </td>
+                    <td>
+                        <label>單張面額 : </label>
+                    </td>
+                    <td>
+                        <label id="lDenomination"></label>
+                        <span class="red" style="padding-left:20px" id="sDenomination"></span>
+                    </td>
+                    <td>
+                        <label>面額小計 : </label>
+                    </td>
+                    <td>
+                        <label id="lDenomination_Total"></label>
+                        <span class="red" style="padding-left:20px" id="sDenomination_Total"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>股數小計 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tNumber_Of_Shares" name="tNumber_Of_Shares" />
+                        <span class="red" style="padding-left:20px" id="sNumber_Of_Shares"></span>
+                    </td>
+                    <td>
+                        <label>備註說明 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_StockUpdateType" id="tMemo" name="tMemo" />
+                        <span class="red" style="padding-left:20px" id="sMemo"></span>
+                    </td>
+                    <td>
+                        <input type="hidden" id="hItemId" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="CDC_StockUpdateTemp" value="修改" class="btn btn-primary" />
+                    </td>
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="CDC_StockCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDC_StockUrl = {};
+        CDC_StockUrl.getData = '@Url.Action("GetCDCCacheData", "Stock")';
+        CDC_StockUrl.UpdateDbData = '@Url.Action("UpdateDbData", "Stock")';
+        CDC_StockUrl.ApplyDbData = '@Url.Action("ApplyDbData", "Stock")';
+        CDC_StockUrl.RepeatDbData = '@Url.Action("RepeatDbData", "Stock")';
+        CDC_StockUrl.GetCDCStockDetailDate = '@Url.Action("GetCDCStockDetailDate", "Stock")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var CDC_StockDialog_M_Id = 'CDC_Stock_M_Dialog'; //dialogId
+        var CDC_StockIB_Group_No = 'lIB_Group_No';//編號Id
+        var CDC_StockIB_Name = 'lIB_Name';//股票名稱Id
+        var CDC_StockIB_Area = 'lIB_Area';//區域Id
+        var CDC_StockIB_Memo = 'lIB_Memo';//備註Id
+        var CDC_StockStock_Trea_Batch_No = 'lStock_Trea_Batch_No';//入庫批號Id
+        var CDC_StockNumber_Of_Shares_Total = 'lNumber_Of_Shares_Total';//總股數Id
+        var CDC_StockNumber_Of_Shares_Total_Aft = 'sNumber_Of_Shares_Total';//總股數_異動後Id
+
+        var CDC_StockDialog_D_Id = 'CDC_Stock_D_Dialog'; //dialogId
+        var CDC_StockFormId = 'CDC_StockForm'; //formId
+        var CDC_StockPut_Date = 'lPut_Date';//入庫日期Id
+        var CDC_StockAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
+        var CDC_StockCharge_Name = 'lCharge_Name';//權責單位Id
+        var CDC_StockStock_Type = 'dStock_Type';//類型Id
+        var CDC_StockStock_Type_Aft = 'sStock_Type';//類型_異動後Id
+        var CDC_StockStock_No_Preamble = 'tStock_No_Preamble';//序號前置碼Id
+        var CDC_StockStock_No_Preamble_Aft = 'sStock_No_Preamble';//序號前置碼_異動後Id
+        var CDC_StockStock_No_B = 'tStock_No_B';//序號(起)Id
+        var CDC_StockStock_No_B_Aft = 'sStock_No_B';//序號(起)_異動後Id
+        var CDC_StockStock_No_E = 'tStock_No_E';//序號(迄)Id
+        var CDC_StockStock_No_E_Aft = 'sStock_No_E';//序號(迄)_異動後Id
+        var CDC_StockStock_Total = 'tStock_Total';//張數Id
+        var CDC_StockStock_Cnt_Aft = 'sStock_Total';//張數_異動後Id
+        var CDC_StockAmount_Per_Share = 'tAmount_Per_Share';//每股金額Id
+        var CDC_StockAmount_Per_Share_Aft = 'sAmount_Per_Share';//每股金額_異動後Id
+        var CDC_StockSingle_Number_Of_Shares = 'tSingle_Number_Of_Shares';//單張股數Id
+        var CDC_StockSingle_Number_Of_Shares_Aft = 'sSingle_Number_Of_Shares';//單張股數_異動後Id
+        var CDC_StockDenomination = 'lDenomination';//單張面額Id
+        var CDC_StockDenomination_Aft = 'sDenomination';//單張面額_異動後Id
+        var CDC_StockDenomination_Total = 'lDenomination_Total';//面額小計Id
+        var CDC_StockDenomination_Total_Aft = 'sDenomination_Total';//面額小計_異動後Id
+        var CDC_StockNumber_Of_Shares = 'tNumber_Of_Shares';//股數小計Id
+        var CDC_StockNumber_Of_Shares_Aft = 'sNumber_Of_Shares';//股數小計_異動後Id
+        var CDC_StockMemo = 'tMemo';//備註說明Id
+        var CDC_StockMemo_Aft = '';//備註說明_異動後Id
+        var CDC_StockItemId = 'hItemId';//物品單號Id
+
+        var CDC_Stock_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDC_Stock_Act_Type)
+            $('.CDC_Stock_Act').show(); //申請異動主畫面進來
+
+        var CDC_Stock_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDC_Stock_ApplyFlag)
+            $('#CDC_StockApply').hide();
+
+        var CDC_StockConfirmFlag = false; //離開時提醒訊息
+
+        //#endregion 參數設定
+
+        //#region 初始動作
+        CDC_Stock_M_DbGrid();
+        //setStockVerified();
+        //#endregion 初始動作
+
+        //#endregion dialog
+        function dialog_M_Open(type, rowid) {
+            var listId = 'CDC_Stock_M_TempList';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDC_StockDialog_M_Id).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '股票入庫批號資料',
+                width: '1300px',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            if (type == '@Ref.ActionType.Add.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetDataM(listId, rowid);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetDataM(listId, rowid);
+            }
+            GetCDCStockDetailDate(listId, rowid);
+            $('#' + CDC_StockDialog_M_Id).dialog('open');
+        }
+
+        function dialogSetDataM(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + CDC_StockIB_Group_No).text(data.vIB_Group_No);
+                $('#' + CDC_StockIB_Name).text(data.vIB_Name);
+                $('#' + CDC_StockIB_Area).text(data.vIB_Area);
+                $('#' + CDC_StockIB_Memo).text(data.vIB_Memo);
+                $('#' + CDC_StockStock_Trea_Batch_No).text(data.vTrea_Batch_No);
+                $('#' + CDC_StockNumber_Of_Shares_Total).text(customerUtility.addCommas(data.vNumber_Of_Shares_Total));
+                if (data.vNumber_Of_Shares_Total_Aft != -1)
+                    $('#' + CDC_StockNumber_Of_Shares_Total_Aft).val(customerUtility.addCommas(data.vNumber_Of_Shares_Total_Aft));
+            }
+        }
+
+        function dialog_D_Open(type, rowid) {
+            var listId = 'CDC_Stock_D_TempList';
+            var StockUpdateClass = 'CDC_StockUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDC_StockDialog_D_Id).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '股票',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDC_StockUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetDataD(listId, rowid);
+                $('#CDC_StockUpdateTemp').show();
+                $('.' + StockUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetDataD(listId, rowid);
+                $('.' + StockUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDC_StockDialog_D_Id).dialog('open');
+        }
+
+        function ResetDialog() {
+
+        }
+
+        function dialogSetDataD(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + CDC_StockPut_Date).text(data.vPut_Date);
+                $('#' + CDC_StockAply_Uid_Name).text(data.vAply_Uid_Name);
+                $('#' + CDC_StockCharge_Name).text(data.vCharge_Name);
+
+                $('#' + CDC_EstateIB_Book_No).text(data.vIB_Book_No);
+                $('#' + CDC_EstateIB_Building_Name).text(data.vIB_Building_Name);
+                $('#' + CDC_EstateIB_Located).text(data.vIB_Located);
+                $('#' + CDC_EstateIB_Memo).val(data.vIB_Memo);
+
+                //$('#' + CDC_Estate_Form_No).val(data.vEstate_Form_No);
+                //$('#' + CDC_Estate_Form_No_Aft).text(data.vEstate_Form_No_Aft);
+                //$('#' + CDC_Estate_Date).val(data.vEstate_Date);
+                //$('#' + CDC_Estate_Date_Aft).text(data.vEstate_Date_Aft);
+                //$('#' + CDC_Ownership_Cert_No).val(data.vOwnership_Cert_No);
+                //$('#' + CDC_Ownership_Cert_No_Aft).text(data.vOwnership_Cert_No_Aft);
+                //$('#' + CDC_Land_Building_No).val(data.vLand_Building_No);
+                //$('#' + CDC_Land_Building_No_Aft).text(data.vLand_Building_No_Aft);
+                //$('#' + CDC_House_No).val(data.vHouse_No);
+                //$('#' + CDC_House_No_Aft).text(data.vHouse_No_Aft);
+                //$('#' + CDC_Estate_Seq).val(data.vEstate_Seq);
+                //$('#' + CDC_Estate_Seq_Aft).text(data.vEstate_Seq_Aft);
+                //$('#' + CDC_Memo).val(data.vMemo);
+                //$('#' + CDC_Memo_Aft).text(data.vMemo_Aft);
+                //$('#' + CDC_ItemId).val(data.vItemId);
+            }
+        }
+        //#region dialog
+
+        //#region jqgrid
+        function formatterActM(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            //str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            //str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+        function formattervNumber_Of_Shares_Total(cellvalue, options, rdata) {
+            if (rdata.vNumber_Of_Shares_Total_Aft == -1)
+                return customerUtility.addCommas(rdata.vNumber_Of_Shares_Total) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vNumber_Of_Shares_Total_Aft) + '</span>';
+        }
+
+        function unformattervStock(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function CDC_Stock_M_TempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialog_M_Open('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialog_M_Open('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_EstateRepeat(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function CDC_Stock_M_DbGrid() {
+            var colNameArray = ['動作', '群組編號', '股票名稱', '入庫批號', '區域', '備註',
+                '總股數', '總股數異動前', '總股數異動後'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterActM });
+            colModelArray.push({ name: "vIB_Group_No", index: "vIB_Group_No", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vIB_Name", index: "vIB_Name", width: 150, sortable: false });
+            colModelArray.push({ name: "vTrea_Batch_No", index: "vTrea_Batch_No", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vIB_Area", index: "vIB_Area", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vIB_Memo", index: "vIB_Memo", width: 150, sortable: false });
+
+            colModelArray.push({ name: "vNumber_Of_Shares_Total_Show", index: "vNumber_Of_Shares_Total_Show", width: 90, sortable: false, align: 'right', formatter: formattervNumber_Of_Shares_Total, unformatter: unformattervStock });
+            colModelArray.push({ name: "vNumber_Of_Shares_Total", index: "vNumber_Of_Shares_Total", hidden: true });
+            colModelArray.push({ name: "vNumber_Of_Shares_Total_Aft", index: "vNumber_Of_Shares_Total_Aft", hidden: true });
+            jqgridCustom.createJqgridByCache(
+               'CDC_Stock_M_jqgridDiv',
+               'CDC_Stock_M_TempList',
+               'CDC_Stock_M_TempPeger',
+               CDC_StockUrl.getData,
+               {
+                   type: 'M'
+               },
+               colNameArray,
+               colModelArray,
+               '查詢資料-入庫批號',
+               jqgridCustom.getPage('CDC_Stock_M_jqgridDiv'),
+               CDC_Stock_M_TempCompleteFun,
+               true
+               );
+        }
+
+        function CDC_Stock_D_TempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialog_D_Open('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialog_D_Open('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_EstateRepeat(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function formatterActD(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCStock' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                            <text>
+                case '@item.Value':
+                    return '@item.Text';
+                    </text>
+                        }
+                }
+                default:
+                    return '';
+            }
+        }
+
+        function formattervStock_Type(cellvalue, options, rdata) {
+            if (rdata.vStock_Type_Aft != null) {
+                switch (rdata.vStock_Type_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dStock_Type))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '<span class="red">' + '@item.Text' + '</span>';
+                            </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vStock_Type) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dStock_Type))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervStock_No_Preamble(cellvalue, options, rdata) {
+            if (rdata.vStock_No_Preamble_Aft == null)
+                return rdata.vStock_No_Preamble || '';
+            else if (rdata.vStock_No_Preamble_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vStock_No_Preamble_Aft + '</span>';
+        }
+
+        function formattervStock_No_B(cellvalue, options, rdata) {
+            if (rdata.vStock_No_B_Aft == null)
+                return rdata.vStock_No_B || '';
+            else
+                return '<span class="red">' + rdata.vStock_No_B_Aft + '</span>';
+        }
+
+        function formattervStock_No_E(cellvalue, options, rdata) {
+            if (rdata.vStock_No_E_Aft == null)
+                return rdata.vStock_No_E || '';
+            else
+                return '<span class="red">' + rdata.vStock_No_E_Aft + '</span>';
+        }
+
+        function formattervStock_Cnt(cellvalue, options, rdata) {
+            if (rdata.vStock_Cnt_Aft == null)
+                return customerUtility.addCommas(rdata.vStock_Cnt) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vStock_Cnt_Aft) + '</span>';
+        }
+
+        function formattervAmount_Per_Share(cellvalue, options, rdata) {
+            if (rdata.vAmount_Per_Share_Aft == null)
+                return customerUtility.addCommas(rdata.vAmount_Per_Share) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vAmount_Per_Share_Aft) + '</span>';
+        }
+
+        function formattervAmount_Per_Share(cellvalue, options, rdata) {
+            if (rdata.vAmount_Per_Share_Aft == null)
+                return customerUtility.addCommas(rdata.vAmount_Per_Share) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vAmount_Per_Share_Aft) + '</span>';
+        }
+
+        function formattervSingle_Number_Of_Shares(cellvalue, options, rdata) {
+            if (rdata.vSingle_Number_Of_Shares_Aft == null)
+                return customerUtility.addCommas(rdata.vSingle_Number_Of_Shares) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vSingle_Number_Of_Shares_Aft) + '</span>';
+        }
+
+        function formattervDenomination(cellvalue, options, rdata) {
+            if (rdata.vDenomination_Aft == null)
+                return customerUtility.addCommas(rdata.vDenomination) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vDenomination_Aft) + '</span>';
+        }
+
+        function formattervDenominationTotal(cellvalue, options, rdata) {
+            if (rdata.vDenominationTotal_Aft == null)
+                return customerUtility.addCommas(rdata.vDenominationTotal) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vDenominationTotal_Aft) + '</span>';
+        }
+
+        function formattervNumberOfShares(cellvalue, options, rdata) {
+            if (rdata.vNumberOfShares_Aft == null)
+                return customerUtility.addCommas(rdata.vNumberOfShares) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vNumberOfShares_Aft) + '</span>';
+        }
+
+        function formattervMemo(cellvalue, options, rdata) {
+            if (rdata.vMemo_Aft == null)
+                return rdata.vMemo || '';
+            else if (rdata.vMemo_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_Aft + '</span>';
+        }
+
+        function CDC_Stock_D_DbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+                '股票類型', '序號前置碼', '序號(起)', '序號(迄)', '張數', '每股金額', '單張股數', '單張面額', '面額小計', '股數小計', '備註說明',
+                '股票類型異動前', '序號前置碼異動前', '序號(起)異動前', '序號(迄)異動前', '張數異動前', '每股金額異動前', '單張股數異動前', '單張面額異動前', '面額小計異動前', '股數小計異動前', '備註說明異動前',
+                '股票類型異動後', '序號前置碼異動後', '序號(起)異動後', '序號(迄)異動後', '張數異動後', '每股金額異動後', '單張股數異動後', '單張面額異動後', '面額小計異動後', '股數小計異動後', '備註說明異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterActD });
+            colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
+            colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+
+            colModelArray.push({ name: "vStock_Type_Show", index: "vStock_Type_Show", width: 90, sortable: false, align: 'center', formatter: formattervStock_Type, unformatter: unformattervStock });
+            colModelArray.push({ name: "vStock_No_Preamble_Show", index: "vStock_No_Preamble_Show", width: 90, sortable: false, align: 'center', formatter: formattervStock_No_Preamble });
+            colModelArray.push({ name: "vStock_No_B_Show", index: "vStock_No_B_Show", width: 90, sortable: false, formatter: formattervStock_No_B, align: 'center' });
+            colModelArray.push({ name: "vStock_No_E_Show", index: "vStock_No_E_Show", width: 90, sortable: false, formatter: formattervStock_No_E, align: 'center' });
+            colModelArray.push({ name: "vStock_Cnt_Show", index: "vStock_Cnt_Show", width: 120, sortable: false, formatter: formattervStock_Cnt, align: 'right' });
+            colModelArray.push({ name: "vAmount_Per_Share_Show", index: "vAmount_Per_Share_Show", width: 100, sortable: false, formatter: formattervAmount_Per_Share, align: 'right' });
+            colModelArray.push({ name: "vSingle_Number_Of_Shares_Show", index: "vSingle_Number_Of_Shares_Show", width: 100, sortable: false, formatter: formattervSingle_Number_Of_Shares, align: 'right' });
+            colModelArray.push({ name: "vDenomination_Show", index: "vDenomination_Show", width: 90, sortable: false, formatter: formattervDenomination, align: 'right' });
+            colModelArray.push({ name: "vDenominationTotal_Show", index: "vDenominationTotal_Show", width: 90, sortable: false, align: 'center', formatter: formattervDenominationTotal, align: 'right' });
+            colModelArray.push({ name: "vNumberOfShares_Show", index: "vNumberOfShares_Show", width: 90, sortable: false, formatter: formattervNumberOfShares, align: 'right' });
+            colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 90, sortable: false, formatter: formattervMemo });
+
+            colModelArray.push({ name: "vStock_Type", index: "vStock_Type", hidden: true });
+            colModelArray.push({ name: "vStock_No_Preamble", index: "vStock_No_Preamble", hidden: true });
+            colModelArray.push({ name: "vStock_No_B", index: "vStock_No_B", hidden: true });
+            colModelArray.push({ name: "vStock_No_E", index: "vStock_No_E", hidden: true });
+            colModelArray.push({ name: "vStock_Cnt", index: "vStock_Cnt", hidden: true });
+            colModelArray.push({ name: "vAmount_Per_Share", index: "vAmount_Per_Share", hidden: true });
+            colModelArray.push({ name: "vSingle_Number_Of_Shares", index: "vSingle_Number_Of_Shares", hidden: true });
+            colModelArray.push({ name: "vDenomination", index: "vDenomination", hidden: true });
+            colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", hidden: true });
+            colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", hidden: true });
+            colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+
+            colModelArray.push({ name: "vStock_Type_Aft", index: "vStock_Type_Aft", hidden: true });
+            colModelArray.push({ name: "vStock_No_Preamble_Aft", index: "vStock_No_Preamble_Aft", hidden: true });
+            colModelArray.push({ name: "vStock_No_B_Aft", index: "vStock_No_B_Aft", hidden: true });
+            colModelArray.push({ name: "vStock_No_E_Aft", index: "vStock_No_E_Aft", hidden: true });
+            colModelArray.push({ name: "vStock_Cnt_Aft", index: "vStock_Cnt_Aft", hidden: true });
+            colModelArray.push({ name: "vAmount_Per_Share_Aft", index: "vAmount_Per_Share_Aft", hidden: true });
+            colModelArray.push({ name: "vSingle_Number_Of_Shares_Aft", index: "vSingle_Number_Of_Shares_Aft", hidden: true });
+            colModelArray.push({ name: "vDenomination_Aft", index: "vDenomination_Aft", hidden: true });
+            colModelArray.push({ name: "vDenominationTotal_Aft", index: "vDenominationTotal_Aft", hidden: true });
+            colModelArray.push({ name: "vNumberOfShares_Aft", index: "vNumberOfShares_Aft", hidden: true });
+            colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
+
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
+            jqgridCustom.createJqgridByCache(
+               'CDC_Stock_D_jqgridDiv',
+               'CDC_Stock_D_TempList',
+               'CDC_Stock_D_TempPeger',
+               CDC_StockUrl.getData,
+               {
+                   type: 'D'
+               },
+               colNameArray,
+               colModelArray,
+               '查詢資料-明細資料',
+               jqgridCustom.getPage('CDC_Stock_D_jqgridDiv'),
+               CDC_Stock_D_TempCompleteFun,
+               true
+               );
+        }
+        //#endregion jqgrid
+
+        //取得股票明細內容
+        function GetCDCStockDetailDate(listId, rowid) {
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    Group_No: data.vIB_Group_No,
+                    Trea_Batch_No: data.vTrea_Batch_No
+                }),
+                dataType: "json",
+                url: CDC_StockUrl.GetCDCStockDetailDate,
+                contentType: 'application/json',
+            }).done(function (result) {
+                CDC_Stock_D_DbGrid();
+            })
+
+        }
+
+
+    });
+</script>

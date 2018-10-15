@@ -1309,6 +1309,11 @@
                     customerUtility.alert('迄號不可小於起號!', 'w');
                     return false;
                 }
+                //面額小計檢查
+                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt($('#' + DepositSubtotal_Denomination).html()) <= 0) {
+                    customerUtility.alert('面額小計不可為空或小於等於0', 'w');
+                    return
+                }
 
                 $.ajax({
                     type: "POST",
@@ -1396,7 +1401,12 @@
                     customerUtility.alert('迄號不可小於起號!', 'w');
                     return false;
                 }
-
+                //面額小計檢查
+                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt($('#' + DepositSubtotal_Denomination).html()) <= 0) {
+                    customerUtility.alert('面額小計不可為空或小於等於0', 'w');
+                    return
+                }
+                
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({

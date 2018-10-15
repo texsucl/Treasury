@@ -11,7 +11,7 @@ namespace Treasury.Web.Service.Interface
     /// <summary>
     /// 股票
     /// </summary>
-    public interface IStock : IApply, IAgency
+    public interface IStock : IApply, IAgency, ICDCAction
     {
         /// <summary>
         /// 股票編號(新增股票)
@@ -59,6 +59,14 @@ namespace Treasury.Web.Service.Interface
         /// <param name="treaBatchNo">入庫批號</param>
         /// <returns></returns>
         List<StockDetailViewModel> GetDetailData(int groupNo, int treaBatchNo);
+
+        /// <summary>
+        /// 使用 群組編號及入庫批號 抓取異動在庫股票明細資料
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
+        /// <returns></returns>
+        List<CDCStockViewModel> GetCDCDetailData(int groupNo, int treaBatchNo);
 
         /// <summary>
         /// 使用 申請單號 抓取資料
