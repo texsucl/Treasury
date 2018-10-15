@@ -97,6 +97,31 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 股票 資料庫異動畫面
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult CDCView(string AplyNo, CDCSearchViewModel data, Ref.OpenPartialViewType type)
+        {
+            var _data = ((List<CDCStockViewModel>)Stock.GetCDCSearchData(data, AplyNo));
+            ViewBag.Sataus = new Service.Actual.Common().GetSysCode("INVENTORY_TYPE");
+            ViewBag.type = type;
+            ViewBag.IO = data.vTreasuryIO;
+            ViewBag.dStock_Type = new SelectList(Stock.GetStockType(), "Value", "Text");
+            data.vCreate_Uid = AccountController.CurrentUserId;
+            Cache.Invalidate(CacheList.CDCSearchViewModel);
+            Cache.Set(CacheList.CDCSearchViewModel, data);
+            Cache.Invalidate(CacheList.CDCStockDataM);
+            Cache.Set(CacheList.CDCStockDataM, _data);
+
+            Cache.Invalidate(CacheList.CDCStockData);
+            Cache.Set(CacheList.CDCStockData, new List<CDCStockViewModel>());
+            return PartialView();
+        }
+
+        /// <summary>
         /// 覆核資料
         /// </summary>
         /// <param name="vStockDate">股票資料</param>
@@ -204,6 +229,25 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.StockTempData, _data);
             result.RETURN_FLAG = true;
 
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 取得異動在庫股票明細
+        /// </summary>
+        /// <param name="groupNo">群組編號</param>
+        /// <param name="treaBatchNo">入庫批號</param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCDCStockDetailDate(int Group_No, int Trea_Batch_No)
+        {
+            MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+
+            var _data = Stock.GetCDCDetailData(Group_No, Trea_Batch_No);
+            Cache.Invalidate(CacheList.CDCStockDataD);
+            Cache.Set(CacheList.CDCStockDataD, _data);
             return Json(result);
         }
 
@@ -420,6 +464,28 @@ namespace Treasury.Web.Controllers
                 case "Stock":
                     if (Cache.IsSet(CacheList.StockMainData))
                         return Json(jdata.modelToJqgridResult(((List<StockDetailViewModel>)Cache.Get(CacheList.StockMainData)).OrderBy(x=>x.vTreaBatchNo).ToList()));
+                    break;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// jqgrid CDCcache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCDCCacheData(jqGridParam jdata,string type)
+        {
+            switch (type)
+            {
+                case "M":
+                    if (Cache.IsSet(CacheList.CDCStockDataM))
+                        return Json(jdata.modelToJqgridResult(((List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataM)).OrderBy(x => x.vTrea_Batch_No).ToList()));
+                    break;
+                case "D":
+                    if (Cache.IsSet(CacheList.CDCStockDataD))
+                        return Json(jdata.modelToJqgridResult(((List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataD)).OrderBy(x => x.vItemId).ToList()));
                     break;
             }
             return null;
