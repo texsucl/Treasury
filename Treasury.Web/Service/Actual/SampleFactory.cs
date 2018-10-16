@@ -66,8 +66,8 @@ namespace Treasury.Web.Service.Actual
                     return new Estate();
                 case TreaItemType.D1024:
                     return new CA();
-                //case TreaItemType.D1015:
-                //    return new Stock();
+                case TreaItemType.D1015:
+                    return new Stock();
                 case TreaItemType.D1016:
                     return new Marging();
                 //case TreaItemType.D1013:

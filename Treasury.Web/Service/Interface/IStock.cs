@@ -63,10 +63,12 @@ namespace Treasury.Web.Service.Interface
         /// <summary>
         /// 使用 群組編號及入庫批號 抓取異動在庫股票明細資料
         /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
         /// <param name="groupNo">群組編號</param>
         /// <param name="treaBatchNo">入庫批號</param>
+        /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        List<CDCStockViewModel> GetCDCDetailData(int groupNo, int treaBatchNo);
+        List<CDCStockViewModel> GetCDCDetailData(CDCSearchViewModel searchModel, int groupNo, int treaBatchNo, string aplyNo);
 
         /// <summary>
         /// 使用 申請單號 抓取資料
