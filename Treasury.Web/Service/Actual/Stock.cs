@@ -229,55 +229,106 @@ namespace Treasury.Web.Service.Actual
         /// <summary>
         /// 使用 群組編號及入庫批號 抓取異動在庫股票明細資料
         /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
         /// <param name="groupNo">群組編號</param>
         /// <param name="treaBatchNo">入庫批號</param>
+        /// <param name="aplyNo">申請單號</param>
         /// <returns></returns>
-        public List<CDCStockViewModel> GetCDCDetailData(int groupNo, int treaBatchNo)
+        public List<CDCStockViewModel> GetCDCDetailData(CDCSearchViewModel searchModel, int groupNo, int treaBatchNo, string aplyNo)
         {
             var result = new List<CDCStockViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var emps = GetEmps();
                 var depts = GetDepts();
-                result = db.ITEM_STOCK.AsNoTracking()
-                    .Where(x => x.GROUP_NO == groupNo)
-                    .Where(x => x.TREA_BATCH_NO == treaBatchNo)
-                    .AsEnumerable()
-                    .Select((x) => new CDCStockViewModel()
-                    {
-                        vItemId = x.ITEM_ID,
-                        vStatus = x.INVENTORY_STATUS,
-                        vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
-                        vAply_Uid = x.APLY_UID,
-                        vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
-                        vCharge_Dept = x.CHARGE_DEPT,
-                        vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
-                        vCharge_Sect = x.CHARGE_SECT,
-                        vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
-                        vStock_Type=x.STOCK_TYPE,
-                        vStock_Type_Aft=x.STOCK_TYPE_AFT,
-                        vStock_No_Preamble=x.STOCK_NO_PREAMBLE,
-                        vStock_No_Preamble_Aft=x.STOCK_NO_PREAMBLE_AFT,
-                        vStock_No_B=x.STOCK_NO_B,
-                        vStock_No_B_Aft=x.STOCK_NO_B_AFT,
-                        vStock_No_E=x.STOCK_NO_E,
-                        vStock_No_E_Aft=x.STOCK_NO_E_AFT,
-                        vStock_Cnt=x.STOCK_CNT,
-                        vStock_Cnt_Aft=x.STOCK_CNT_AFT,
-                        vAmount_Per_Share=x.AMOUNT_PER_SHARE,
-                        vAmount_Per_Share_Aft=x.AMOUNT_PER_SHARE_AFT,
-                        vSingle_Number_Of_Shares=x.SINGLE_NUMBER_OF_SHARES,
-                        vSingle_Number_Of_Shares_Aft=x.SINGLE_NUMBER_OF_SHARES_AFT,
-                        vDenomination=x.DENOMINATION,
-                        vDenomination_Aft=x.DENOMINATION_AFT,
-                        vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,
-                        vDenominationTotal_Aft= GetDenominationTotal_Aft(x.STOCK_CNT,x.STOCK_CNT_AFT,x.DENOMINATION,x.DENOMINATION_AFT),
-                        vNumberOfShares=x.NUMBER_OF_SHARES,
-                        vNumberOfShares_Aft=x.NUMBER_OF_SHARES_AFT,
-                        vMemo=x.MEMO,
-                        vMemo_Aft=x.MEMO_AFT,
-                        vLast_Update_Time = x.LAST_UPDATE_DT
-                    }).ToList();
+                if (aplyNo.IsNullOrWhiteSpace())
+                {
+                    result = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => x.GROUP_NO == groupNo)
+                        .Where(x => x.TREA_BATCH_NO == treaBatchNo)
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .AsEnumerable()
+                        .Select((x) => new CDCStockViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vStock_Type = x.STOCK_TYPE,
+                            vStock_Type_Aft = x.STOCK_TYPE_AFT,
+                            vStock_No_Preamble = x.STOCK_NO_PREAMBLE,
+                            vStock_No_Preamble_Aft = x.STOCK_NO_PREAMBLE_AFT,
+                            vStock_No_B = x.STOCK_NO_B,
+                            vStock_No_B_Aft = x.STOCK_NO_B_AFT,
+                            vStock_No_E = x.STOCK_NO_E,
+                            vStock_No_E_Aft = x.STOCK_NO_E_AFT,
+                            vStock_Cnt = x.STOCK_CNT,
+                            vStock_Cnt_Aft = x.STOCK_CNT_AFT,
+                            vAmount_Per_Share = x.AMOUNT_PER_SHARE,
+                            vAmount_Per_Share_Aft = x.AMOUNT_PER_SHARE_AFT,
+                            vSingle_Number_Of_Shares = x.SINGLE_NUMBER_OF_SHARES,
+                            vSingle_Number_Of_Shares_Aft = x.SINGLE_NUMBER_OF_SHARES_AFT,
+                            vDenomination = x.DENOMINATION,
+                            vDenomination_Aft = x.DENOMINATION_AFT,
+                            vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,
+                            vDenominationTotal_Aft = GetDenominationTotal_Aft(x.STOCK_CNT, x.STOCK_CNT_AFT, x.DENOMINATION, x.DENOMINATION_AFT),
+                            vNumberOfShares = x.NUMBER_OF_SHARES,
+                            vNumberOfShares_Aft = x.NUMBER_OF_SHARES_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList();
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aplyNo).Select(x => x.ITEM_ID).ToList();
+
+                    result = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCStockViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vStock_Type = x.STOCK_TYPE,
+                            vStock_Type_Aft = x.STOCK_TYPE_AFT,
+                            vStock_No_Preamble = x.STOCK_NO_PREAMBLE,
+                            vStock_No_Preamble_Aft = x.STOCK_NO_PREAMBLE_AFT,
+                            vStock_No_B = x.STOCK_NO_B,
+                            vStock_No_B_Aft = x.STOCK_NO_B_AFT,
+                            vStock_No_E = x.STOCK_NO_E,
+                            vStock_No_E_Aft = x.STOCK_NO_E_AFT,
+                            vStock_Cnt = x.STOCK_CNT,
+                            vStock_Cnt_Aft = x.STOCK_CNT_AFT,
+                            vAmount_Per_Share = x.AMOUNT_PER_SHARE,
+                            vAmount_Per_Share_Aft = x.AMOUNT_PER_SHARE_AFT,
+                            vSingle_Number_Of_Shares = x.SINGLE_NUMBER_OF_SHARES,
+                            vSingle_Number_Of_Shares_Aft = x.SINGLE_NUMBER_OF_SHARES_AFT,
+                            vDenomination = x.DENOMINATION,
+                            vDenomination_Aft = x.DENOMINATION_AFT,
+                            vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,
+                            vDenominationTotal_Aft = GetDenominationTotal_Aft(x.STOCK_CNT, x.STOCK_CNT_AFT, x.DENOMINATION, x.DENOMINATION_AFT),
+                            vNumberOfShares = x.NUMBER_OF_SHARES,
+                            vNumberOfShares_Aft = x.NUMBER_OF_SHARES_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList();
+                }
             }
 
             return result;
@@ -416,31 +467,27 @@ namespace Treasury.Web.Service.Actual
                             vIB_Area = _Area.FirstOrDefault(z => z.CODE == _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "AREA")?.COL_VALUE)?.CODE_VALUE,
                             vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
                             vTrea_Batch_No = x.TREA_BATCH_NO,
-                            vNumber_Of_Shares_Total = GetNumberOfSharesTotal(x.GROUP_NO, x.TREA_BATCH_NO),
-                            vNumber_Of_Shares_Total_Aft = -1
+                            vNumber_Of_Shares_Total = GetCDCNumberOfSharesTotal(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No),
+                            vNumber_Of_Shares_Total_Aft = GetCDCNumberOfSharesTotal_Aft(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No)
                         }).ToList());
                 }
                 else
                 {
                     var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
-                    result.AddRange(db.ITEM_REAL_ESTATE.AsNoTracking()
+                    result.AddRange(db.ITEM_STOCK.AsNoTracking()
                         .Where(x => itemIds.Contains(x.ITEM_ID))
-                        .AsEnumerable()
+                        .AsEnumerable().Distinct(new ItemStockComparer())
                         .Select((x) => new CDCStockViewModel()
                         {
-                            vItemId = x.ITEM_ID,
-                            vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
-                            vAply_Uid = x.APLY_UID,
-                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
-                            vCharge_Dept = x.CHARGE_DEPT,
-                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
-                            vCharge_Sect = x.CHARGE_SECT,
-                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
-                            vMemo = x.MEMO,
-                            vMemo_Aft = x.MEMO_AFT,
-                            vLast_Update_Time = x.LAST_UPDATE_DT
+                            vAply_No = aply_No,
+                            vIB_Group_No = x.GROUP_NO.ToString(),
+                            vIB_Name = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "NAME")?.COL_VALUE,
+                            vIB_Area = _Area.FirstOrDefault(z => z.CODE == _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "AREA")?.COL_VALUE)?.CODE_VALUE,
+                            vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
+                            vTrea_Batch_No = x.TREA_BATCH_NO,
+                            vNumber_Of_Shares_Total = GetCDCNumberOfSharesTotal(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No),
+                            vNumber_Of_Shares_Total_Aft = GetCDCNumberOfSharesTotal_Aft(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No)
                         }).ToList());
                 }
                 result.ForEach(x =>
@@ -1012,7 +1059,72 @@ namespace Treasury.Web.Service.Actual
             DateTime dt = DateTime.Now;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCStockViewModel model in saveData)
+                {
+                    var _Stock = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_Stock != null && !changFlag)
+                    {
+                        if (_Stock.LAST_UPDATE_DT > model.vLast_Update_Time || _Stock.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
 
+                        if (!changFlag)
+                        {
+                            _Stock.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _Stock.STOCK_TYPE_AFT = model.vStock_Type_Aft;
+                            _Stock.STOCK_NO_PREAMBLE_AFT = model.vStock_No_Preamble_Aft;
+                            _Stock.STOCK_NO_B_AFT = model.vStock_No_B_Aft;
+                            _Stock.STOCK_NO_E_AFT = model.vStock_No_E_Aft;
+                            _Stock.STOCK_CNT_AFT = model.vStock_Cnt_Aft;
+                            _Stock.AMOUNT_PER_SHARE_AFT = model.vAmount_Per_Share_Aft;
+                            _Stock.SINGLE_NUMBER_OF_SHARES_AFT = model.vSingle_Number_Of_Shares_Aft;
+                            _Stock.DENOMINATION_AFT = model.vDenomination_Aft;
+                            _Stock.NUMBER_OF_SHARES_AFT = model.vNumberOfShares_Aft;
+                            _Stock.MEMO_AFT = model.vMemo_Aft;
+                            _Stock.LAST_UPDATE_DT = dt;
+
+                            logStr = _Stock.modelToString(logStr);
+
+                            var _OIA = new OTHER_ITEM_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _Stock.ITEM_ID
+                            };
+
+                            db.OTHER_ITEM_APLY.Add(_OIA);
+
+                            logStr = _OIA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:股票";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
             }
 
             return result;
@@ -1030,19 +1142,22 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var itemID in itemIDs)
             {
-                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
-                if (_Estate != null)
+                var _Stock = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Stock != null)
                 {
-                    _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO_AFT = null;
-                    _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO_AFT = null;
-                    _Estate.LAST_UPDATE_DT = dt;
-                    logStr = _Estate.modelToString(logStr);
+                    _Stock.INVENTORY_STATUS = "1"; //在庫
+                    _Stock.STOCK_TYPE_AFT = null;
+                    _Stock.STOCK_NO_PREAMBLE_AFT = null;
+                    _Stock.STOCK_NO_B_AFT = null;
+                    _Stock.STOCK_NO_E_AFT = null;
+                    _Stock.STOCK_CNT_AFT = null;
+                    _Stock.AMOUNT_PER_SHARE_AFT = null;
+                    _Stock.SINGLE_NUMBER_OF_SHARES_AFT = null;
+                    _Stock.DENOMINATION_AFT = null;
+                    _Stock.NUMBER_OF_SHARES_AFT = null;
+                    _Stock.MEMO_AFT = null;
+                    _Stock.LAST_UPDATE_DT = dt;
+                    logStr = _Stock.modelToString(logStr);
                 }
                 else
                 {
@@ -1064,26 +1179,32 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var itemID in itemIDs)
             {
-                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
-                if (_Estate != null)
+                var _Stock = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Stock != null)
                 {
-                    _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO = GetNewValue(_Estate.ESTATE_FORM_NO, _Estate.ESTATE_FORM_NO_AFT);
-                    _Estate.ESTATE_FORM_NO_AFT = null;
-                    _Estate.ESTATE_DATE = DateTime.Parse(GetNewValue(_Estate.ESTATE_DATE.ToString(), _Estate.ESTATE_DATE_AFT.ToString()));
-                    _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO = GetNewValue(_Estate.OWNERSHIP_CERT_NO, _Estate.OWNERSHIP_CERT_NO_AFT);
-                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO = GetNewValue(_Estate.LAND_BUILDING_NO, _Estate.LAND_BUILDING_NO_AFT);
-                    _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO = GetNewValue(_Estate.HOUSE_NO, _Estate.HOUSE_NO_AFT);
-                    _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ = GetNewValue(_Estate.ESTATE_SEQ, _Estate.ESTATE_SEQ_AFT);
-                    _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO = GetNewValue(_Estate.MEMO, _Estate.MEMO_AFT);
-                    _Estate.MEMO_AFT = null;
-                    _Estate.LAST_UPDATE_DT = dt;
-                    logStr = _Estate.modelToString(logStr);
+                    _Stock.INVENTORY_STATUS = "1"; //在庫
+                    _Stock.STOCK_TYPE = GetNewValue(_Stock.STOCK_TYPE, _Stock.STOCK_TYPE_AFT);
+                    _Stock.STOCK_TYPE_AFT = null;
+                    _Stock.STOCK_NO_PREAMBLE = GetNewValue(_Stock.STOCK_NO_PREAMBLE, _Stock.STOCK_NO_PREAMBLE_AFT);
+                    _Stock.STOCK_NO_PREAMBLE_AFT = null;
+                    _Stock.STOCK_NO_B = GetNewValue(_Stock.STOCK_NO_B, _Stock.STOCK_NO_B_AFT);
+                    _Stock.STOCK_NO_B_AFT = null;
+                    _Stock.STOCK_NO_E = GetNewValue(_Stock.STOCK_NO_E, _Stock.STOCK_NO_E_AFT);
+                    _Stock.STOCK_NO_E_AFT = null;
+                    _Stock.STOCK_CNT = TypeTransfer.stringToIntN(GetNewValue(TypeTransfer.intNToString(_Stock.STOCK_CNT), TypeTransfer.intNToString(_Stock.STOCK_CNT_AFT)));
+                    _Stock.STOCK_CNT_AFT = null;
+                    _Stock.AMOUNT_PER_SHARE = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Stock.AMOUNT_PER_SHARE), TypeTransfer.decimalNToString(_Stock.AMOUNT_PER_SHARE_AFT)));
+                    _Stock.AMOUNT_PER_SHARE_AFT = null;
+                    _Stock.SINGLE_NUMBER_OF_SHARES = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Stock.SINGLE_NUMBER_OF_SHARES), TypeTransfer.decimalNToString(_Stock.SINGLE_NUMBER_OF_SHARES_AFT)));
+                    _Stock.SINGLE_NUMBER_OF_SHARES_AFT = null;
+                    _Stock.DENOMINATION = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Stock.DENOMINATION), TypeTransfer.decimalNToString(_Stock.DENOMINATION_AFT)));
+                    _Stock.DENOMINATION_AFT = null;
+                    _Stock.NUMBER_OF_SHARES = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Stock.NUMBER_OF_SHARES), TypeTransfer.decimalNToString(_Stock.NUMBER_OF_SHARES_AFT)));
+                    _Stock.NUMBER_OF_SHARES_AFT = null;
+                    _Stock.MEMO = GetNewValue(_Stock.MEMO, _Stock.MEMO_AFT);
+                    _Stock.MEMO_AFT = null;
+                    _Stock.LAST_UPDATE_DT = dt;
+                    logStr = _Stock.modelToString(logStr);
                 }
                 else
                 {
@@ -1214,6 +1335,7 @@ namespace Treasury.Web.Service.Actual
 
             return NewStock_Cnt * NewDenomination;
         }
+
         //計算總股數
         private int GetNumberOfSharesTotal(int GroupNo, int TreaBatchNo)
         {
@@ -1228,7 +1350,113 @@ namespace Treasury.Web.Service.Actual
             }
         }
 
-        
+        //計算異動總股數
+        private int GetCDCNumberOfSharesTotal(CDCSearchViewModel searchModel, int GroupNo, int TreaBatchNo, string aply_No = null)
+        {
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var NumberOfSharesTotal = db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.GROUP_NO == GroupNo)
+                    .Where(x => x.TREA_BATCH_NO == TreaBatchNo)
+                    .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                    .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                    .Sum(x => x.NUMBER_OF_SHARES);
+
+                    return (int)NumberOfSharesTotal;
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    var StockList = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable().ToList();
+
+                    int result = 0;
+
+                    if (StockList.Count==0)
+                    {
+                        result = 0;
+                    }
+                    else
+                    {
+                        StockList.ForEach(x =>
+                        {
+                            //總股數
+                            //有股數才加總
+                            if (x.NUMBER_OF_SHARES != null)
+                                result += (int)x.NUMBER_OF_SHARES;
+                        });
+                    }
+
+                    return result;
+                }
+            }
+        }
+        //計算異動總股數_異動後
+        private int GetCDCNumberOfSharesTotal_Aft(CDCSearchViewModel searchModel, int GroupNo, int TreaBatchNo, string aply_No = null)
+        {
+            int result = 0, Number_Of_Shares_Total = 0, Number_Of_Shares_Total_Aft = 0;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                List<ITEM_STOCK> tempData = new List<ITEM_STOCK>();
+
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    tempData = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => x.GROUP_NO == GroupNo)
+                        .Where(x => x.TREA_BATCH_NO == TreaBatchNo)
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .ToList();
+
+                }
+                else
+                {
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    tempData = db.ITEM_STOCK.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable().ToList();
+                }
+
+                if (tempData.Count == 0)
+                {
+                    result = 0;
+                }
+                else
+                {
+                    tempData.ForEach(x =>
+                    {
+                        //總股數
+                        //有股數才加總
+                        if (x.NUMBER_OF_SHARES != null)
+                            Number_Of_Shares_Total += (int)x.NUMBER_OF_SHARES;
+
+                        #region 總股數_異動後
+                        //判斷是否有股數_異動後
+                        if (x.NUMBER_OF_SHARES_AFT != null)
+                            Number_Of_Shares_Total_Aft += (int)x.NUMBER_OF_SHARES_AFT;
+                        //有股數才加總
+                        else if (x.NUMBER_OF_SHARES != null)
+                            Number_Of_Shares_Total_Aft += (int)x.NUMBER_OF_SHARES;
+                        #endregion
+                    });
+                }
+
+                //總股數_異動後相同總股數
+                if (Number_Of_Shares_Total == Number_Of_Shares_Total_Aft)
+                    result = -1;
+                else
+                    result = Number_Of_Shares_Total_Aft;
+
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// 申請刪除 & 作廢 股票資料庫要復原的事件
         /// </summary>

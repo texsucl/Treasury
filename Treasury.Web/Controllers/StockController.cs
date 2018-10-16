@@ -106,6 +106,7 @@ namespace Treasury.Web.Controllers
         public ActionResult CDCView(string AplyNo, CDCSearchViewModel data, Ref.OpenPartialViewType type)
         {
             var _data = ((List<CDCStockViewModel>)Stock.GetCDCSearchData(data, AplyNo));
+            ViewBag.AplyNo = AplyNo;
             ViewBag.Sataus = new Service.Actual.Common().GetSysCode("INVENTORY_TYPE");
             ViewBag.type = type;
             ViewBag.IO = data.vTreasuryIO;
@@ -115,9 +116,6 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.CDCSearchViewModel, data);
             Cache.Invalidate(CacheList.CDCStockDataM);
             Cache.Set(CacheList.CDCStockDataM, _data);
-
-            Cache.Invalidate(CacheList.CDCStockData);
-            Cache.Set(CacheList.CDCStockData, new List<CDCStockViewModel>());
             return PartialView();
         }
 
@@ -239,13 +237,14 @@ namespace Treasury.Web.Controllers
         /// <param name="treaBatchNo">入庫批號</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetCDCStockDetailDate(int Group_No, int Trea_Batch_No)
+        public JsonResult GetCDCStockDetailDate(int Group_No, int Trea_Batch_No, string Aply_No)
         {
             MSGReturnModel<StockDetailViewModel> result = new MSGReturnModel<StockDetailViewModel>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
 
-            var _data = Stock.GetCDCDetailData(Group_No, Trea_Batch_No);
+            CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+            var _data = Stock.GetCDCDetailData(data, Group_No, Trea_Batch_No, Aply_No);
             Cache.Invalidate(CacheList.CDCStockDataD);
             Cache.Set(CacheList.CDCStockDataD, _data);
             return Json(result);
@@ -492,6 +491,150 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 修改資料庫資料
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UpdateDbData(CDCStockViewModel model)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCStockDataD))
+            {
+                var dbData = (List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataD);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                if (updateTempData != null)
+                {
+                    var _vStock_Type_Aft = model.vStock_Type.CheckAFT(updateTempData.vStock_Type);
+                    if (_vStock_Type_Aft.Item2)
+                        updateTempData.vStock_Type_Aft = _vStock_Type_Aft.Item1;
+                    var _vStock_No_Preamble_Aft = model.vStock_No_Preamble.CheckAFT(updateTempData.vStock_No_Preamble);
+                    if (_vStock_No_Preamble_Aft.Item2)
+                        updateTempData.vStock_No_Preamble_Aft = _vStock_No_Preamble_Aft.Item1;
+                    var _vStock_No_B_Aft = model.vStock_No_B.CheckAFT(updateTempData.vStock_No_B);
+                    if (_vStock_No_B_Aft.Item2)
+                        updateTempData.vStock_No_B_Aft = _vStock_No_B_Aft.Item1;
+                    var _vStock_No_E_Aft = model.vStock_No_E.CheckAFT(updateTempData.vStock_No_E);
+                    if (_vStock_No_E_Aft.Item2)
+                        updateTempData.vStock_No_E_Aft = _vStock_No_E_Aft.Item1;
+                    var _vStock_Cnt_Aft = TypeTransfer.intNToString(model.vStock_Cnt).CheckAFT(TypeTransfer.intNToString(updateTempData.vStock_Cnt));
+                    if (_vStock_Cnt_Aft.Item2)
+                        updateTempData.vStock_Cnt_Aft = TypeTransfer.stringToIntN(_vStock_Cnt_Aft.Item1);
+                    var _vAmount_Per_Share_Aft = TypeTransfer.decimalNToString(model.vAmount_Per_Share).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vAmount_Per_Share));
+                    if (_vAmount_Per_Share_Aft.Item2)
+                        updateTempData.vAmount_Per_Share_Aft = TypeTransfer.stringToDecimal(_vAmount_Per_Share_Aft.Item1);
+                    var _vSingle_Number_Of_Shares_Aft = TypeTransfer.decimalNToString(model.vSingle_Number_Of_Shares).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vSingle_Number_Of_Shares));
+                    if (_vSingle_Number_Of_Shares_Aft.Item2)
+                        updateTempData.vSingle_Number_Of_Shares_Aft = TypeTransfer.stringToDecimal(_vSingle_Number_Of_Shares_Aft.Item1);
+                    var _vDenomination_Aft = TypeTransfer.decimalNToString(model.vDenomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vDenomination));
+                    if (_vDenomination_Aft.Item2)
+                        updateTempData.vDenomination_Aft = TypeTransfer.stringToDecimal(_vDenomination_Aft.Item1);
+                    var _vDenominationTotal_Aft = TypeTransfer.decimalNToString(model.vDenominationTotal).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vDenominationTotal));
+                    if (_vDenominationTotal_Aft.Item2)
+                        updateTempData.vDenominationTotal_Aft = TypeTransfer.stringToDecimal(_vDenominationTotal_Aft.Item1);
+                    var _vNumberOfShares_Aft = TypeTransfer.decimalNToString(model.vNumberOfShares).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vNumberOfShares));
+                    if (_vNumberOfShares_Aft.Item2)
+                        updateTempData.vNumberOfShares_Aft = TypeTransfer.stringToDecimal(_vNumberOfShares_Aft.Item1);
+                    var _vMemo_Aft = model.vMemo.CheckAFT(updateTempData.vMemo);
+                    if (_vMemo_Aft.Item2)
+                        updateTempData.vMemo_Aft = _vMemo_Aft.Item1;
+
+                    updateTempData.vAftFlag = _vStock_Type_Aft.Item2 || _vStock_No_Preamble_Aft.Item2 || _vStock_No_B_Aft.Item2 || _vStock_No_E_Aft.Item2 || _vStock_Cnt_Aft.Item2 ||
+                        _vAmount_Per_Share_Aft.Item2 || _vSingle_Number_Of_Shares_Aft.Item2 || _vDenomination_Aft.Item2 || _vDenominationTotal_Aft.Item2 || _vNumberOfShares_Aft.Item2 || _vMemo_Aft.Item2;
+                    Cache.Invalidate(CacheList.CDCStockDataD);
+                    Cache.Set(CacheList.CDCStockDataD, dbData);
+                    result.Datas = dbData.Any(x => x.vAftFlag);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設資料庫資料
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatDbData(string itemId)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCStockDataD))
+            {
+                var dbData = (List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataD);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == itemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vStock_Type_Aft = null;
+                    updateTempData.vStock_No_Preamble_Aft = null;
+                    updateTempData.vStock_No_B_Aft = null;
+                    updateTempData.vStock_No_E_Aft = null;
+                    updateTempData.vStock_Cnt_Aft = null;
+                    updateTempData.vAmount_Per_Share_Aft = null;
+                    updateTempData.vSingle_Number_Of_Shares_Aft = null;
+                    updateTempData.vDenomination_Aft = null;
+                    updateTempData.vDenominationTotal_Aft = null;
+                    updateTempData.vNumberOfShares_Aft = null;
+                    updateTempData.vMemo_Aft = null;
+                    updateTempData.vAftFlag = false;
+                    Cache.Invalidate(CacheList.CDCStockDataD);
+                    Cache.Set(CacheList.CDCStockDataD, dbData);
+                    result.Datas = dbData.Any(x => x.vAftFlag);
+                    result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 申請資料庫異動覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ApplyDbData()
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            var _detail = (List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataD);
+            if (!_detail.Any(x => x.vAftFlag))
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.CDCSearchViewModel))
+            {
+                CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+                result = Stock.CDCApplyAudit(_detail.Where(x => x.vAftFlag).ToList(), data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.CDCStockDataD);
+                    Cache.Set(CacheList.CDCStockDataD, result.Datas);
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        /// <summary>
         /// 設定股票Cache資料
         /// </summary>
         /// <param name="GroupNo">申請單號</param>
@@ -551,6 +694,50 @@ namespace Treasury.Web.Controllers
                         result += (int)x.vNumberOfShares;
                 });
             }
+
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 計算總股數_異動後
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Number_Of_Shares_Total_Aft()
+        {
+            var tempData = (List<CDCStockViewModel>)Cache.Get(CacheList.CDCStockDataD);
+
+            int result = 0, Number_Of_Shares_Total = 0, Number_Of_Shares_Total_Aft = 0;
+
+            if (tempData.Count == 0)
+            {
+                result = 0;
+            }
+            else
+            {
+                tempData.ForEach(x =>
+                {
+                    //總股數
+                    //有股數才加總
+                    if (x.vNumberOfShares != null)
+                        Number_Of_Shares_Total += (int)x.vNumberOfShares;
+
+                    #region 總股數_異動後
+                    //判斷是否有股數_異動後
+                    if (x.vNumberOfShares_Aft != null)
+                        Number_Of_Shares_Total_Aft += (int)x.vNumberOfShares_Aft;
+                    //有股數才加總
+                    else if (x.vNumberOfShares != null)
+                        Number_Of_Shares_Total_Aft += (int)x.vNumberOfShares;
+                    #endregion
+                });
+            }
+
+            //總股數_異動後相同總股數
+            if (Number_Of_Shares_Total == Number_Of_Shares_Total_Aft)
+                result = -1;
+            else
+                result = Number_Of_Shares_Total_Aft;
 
             return Json(result);
         }

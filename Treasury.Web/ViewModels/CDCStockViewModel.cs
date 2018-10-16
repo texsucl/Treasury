@@ -72,6 +72,11 @@ namespace Treasury.Web.ViewModels
         public string vCharge_Name { get; set; }
 
         /// <summary>
+        /// 申請單號
+        /// </summary>
+        [Description("申請單號")]
+        public string vAply_No { get; set; }
+        /// <summary>
         /// 存取項目冊號資料檔-編號
         /// </summary>
         [Description("存取項目冊號資料檔-編號")]
