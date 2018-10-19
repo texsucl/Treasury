@@ -471,7 +471,126 @@ namespace Treasury.Web.Service.Actual
             result = result.Distinct(new SelectOption_Comparer()).OrderBy(x => x.Value).ToList();
 
             return result;
-        } 
+        }
+
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCDepositViewModel> result = new List<CDCDepositViewModel>();
+            List<CDCDeposit_M> CDC_MasterDataList = new List<CDCDeposit_M>();
+            List<CDCDeposit_D> CDC_DetailDataList = new List<CDCDeposit_D>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    var Commit_Date = TypeTransfer.stringToDateTime(searchModel.vCommit_Date);
+                    var Expiry_Date= TypeTransfer.stringToDateTime(searchModel.vExpiry_Date);
+
+                    CDC_MasterDataList.AddRange(db.ITEM_DEP_ORDER_M.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        //.Where(x => x.COMMIT_DATE == Commit_Date, searchModel.vCommit_Date != null)
+                        //.Where(x => x.EXPIRY_DATE == Expiry_Date, searchModel.vExpiry_Date != null)
+                        .Where(x => x.TRAD_PARTNERS == searchModel.vTRAD_Partners, searchModel.vTRAD_Partners != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCDeposit_M()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCurrency = x.CURRENCY,
+                            vCurrency_Aft = x.CURRENCY_AFT,
+                            vTrad_Partners = x.TRAD_PARTNERS,
+                            vTrad_Partners_Aft = x.TRAD_PARTNERS_AFT,
+                            vCommit_Date = TypeTransfer.dateTimeToString(x.COMMIT_DATE, false),
+                            vCommit_Date_Aft = TypeTransfer.dateTimeNToString(x.COMMIT_DATE_AFT),
+                            vExpiry_Date = TypeTransfer.dateTimeToString(x.EXPIRY_DATE, false),
+                            vExpiry_Date_Aft = TypeTransfer.dateTimeNToString(x.EXPIRY_DATE_AFT),
+                            vInterest_Rate_Type = x.INTEREST_RATE_TYPE,
+                            vInterest_Rate_Type_Aft = x.INTEREST_RATE_TYPE_AFT,
+                            vInterest_Rate = x.INTEREST_RATE,
+                            vInterest_Rate_Aft = x.INTEREST_RATE_AFT,
+                            vDep_Type = x.DEP_TYPE,
+                            vDep_Type_Aft = x.DEP_TYPE_AFT,
+                            vTotal_Denomination = x.TOTAL_DENOMINATION,
+                            vTotal_Denomination_Aft = x.TOTAL_DENOMINATION_AFT,
+                            vDep_Set_Quality = x.DEP_SET_QUALITY,
+                            vDep_Set_Quality_Aft = x.DEP_SET_QUALITY_AFT,
+                            vAuto_Trans = x.AUTO_TRANS,
+                            vAuto_Trans_Aft = x.AUTO_TRANS_AFT,
+                            vTrans_Expiry_Date = TypeTransfer.dateTimeNToString(x.TRANS_EXPIRY_DATE),
+                            vTrans_Expiry_Date_Aft = TypeTransfer.dateTimeNToString(x.TRANS_EXPIRY_DATE_AFT),
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vTrans_Tms = x.TRANS_TMS,
+                            vTrans_Tms_Aft = x.TRANS_TMS_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                else
+                {
+
+                }
+                CDC_MasterDataList.ForEach(x =>
+                {
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                });
+
+                #region 取得明細資料
+                var MasterItemIdList = CDC_MasterDataList.Select(x => x.vItemId).ToList();
+
+                CDC_DetailDataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
+                    .Where(x => MasterItemIdList.Contains(x.ITEM_ID))
+                    .AsEnumerable()
+                    .Select((x) => new CDCDeposit_D()
+                    {
+                        vItemId = x.ITEM_ID,
+                        vData_Seq = x.DATA_SEQ.ToString(),
+                        vDep_No_Preamble = x.DEP_NO_PREAMBLE,
+                        vDep_No_Preamble_Aft = x.DEP_NO_PREAMBLE_AFT,
+                        vDep_No_B = x.DEP_NO_B,
+                        vDep_No_B_Aft = x.DEP_NO_B_AFT,
+                        vDep_No_E = x.DEP_NO_E,
+                        vDep_No_E_Aft = x.DEP_NO_E_AFT,
+                        vDep_No_Tail = x.DEP_NO_TAIL,
+                        vDep_No_Tail_Aft = x.DEP_NO_TAIL_AFT,
+                        vDep_Cnt = x.DEP_CNT,
+                        vDep_Cnt_Aft = x.DEP_CNT_AFT,
+                        vDenomination = x.DENOMINATION,
+                        vDenomination_Aft = x.DENOMINATION_AFT,
+                        vSubtotal_Denomination = x.SUBTOTAL_DENOMINATION,
+                        vSubtotal_Denomination_Aft = x.SUBTOTAL_DENOMINATION_AFT
+                    }).ToList();
+                #endregion
+
+            }
+
+            result.Add(new CDCDepositViewModel() { vDeposit_M = CDC_MasterDataList, vDeposit_D = CDC_DetailDataList });
+
+            return result;
+        }
         #endregion
 
         #region SaveData
@@ -911,6 +1030,101 @@ namespace Treasury.Web.Service.Actual
         {
             return Process(db, aply_No, logStr, dt, access_Type, false);
         }
+
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Estate != null)
+                {
+                    _Estate.INVENTORY_STATUS = "1"; //在庫
+                    _Estate.ESTATE_FORM_NO_AFT = null;
+                    _Estate.ESTATE_DATE_AFT = null;
+                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
+                    _Estate.LAND_BUILDING_NO_AFT = null;
+                    _Estate.HOUSE_NO_AFT = null;
+                    _Estate.ESTATE_SEQ_AFT = null;
+                    _Estate.MEMO_AFT = null;
+                    _Estate.LAST_UPDATE_DT = dt;
+                    logStr = _Estate.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Estate != null)
+                {
+                    _Estate.INVENTORY_STATUS = "1"; //在庫
+                    _Estate.ESTATE_FORM_NO = GetNewValue(_Estate.ESTATE_FORM_NO, _Estate.ESTATE_FORM_NO_AFT);
+                    _Estate.ESTATE_FORM_NO_AFT = null;
+                    _Estate.ESTATE_DATE = DateTime.Parse(GetNewValue(_Estate.ESTATE_DATE.ToString(), _Estate.ESTATE_DATE_AFT.ToString()));
+                    _Estate.ESTATE_DATE_AFT = null;
+                    _Estate.OWNERSHIP_CERT_NO = GetNewValue(_Estate.OWNERSHIP_CERT_NO, _Estate.OWNERSHIP_CERT_NO_AFT);
+                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
+                    _Estate.LAND_BUILDING_NO = GetNewValue(_Estate.LAND_BUILDING_NO, _Estate.LAND_BUILDING_NO_AFT);
+                    _Estate.LAND_BUILDING_NO_AFT = null;
+                    _Estate.HOUSE_NO = GetNewValue(_Estate.HOUSE_NO, _Estate.HOUSE_NO_AFT);
+                    _Estate.HOUSE_NO_AFT = null;
+                    _Estate.ESTATE_SEQ = GetNewValue(_Estate.ESTATE_SEQ, _Estate.ESTATE_SEQ_AFT);
+                    _Estate.ESTATE_SEQ_AFT = null;
+                    _Estate.MEMO = GetNewValue(_Estate.MEMO, _Estate.MEMO_AFT);
+                    _Estate.MEMO_AFT = null;
+                    _Estate.LAST_UPDATE_DT = dt;
+                    logStr = _Estate.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
         #endregion
 
         #region privation function
@@ -1009,7 +1223,7 @@ namespace Treasury.Web.Service.Actual
         {
             return data.Select(x => new Deposit_M()
             {
-                vRowNum = int.Parse(vRowNum),  //編號
+                vRowNum = string.IsNullOrEmpty(vRowNum) ? 0 : int.Parse(vRowNum),  //編號
                 vItem_Id = x.ITEM_ID,   //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,   //代碼.庫存狀態 
                 vCurrency = x.CURRENCY, //幣別
