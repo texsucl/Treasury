@@ -70,7 +70,7 @@ namespace Treasury.Web.Controllers
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             Cache.Invalidate(CacheList.ConfirmStorageSearchData);
             Cache.Set(CacheList.ConfirmStorageSearchData, searchModel);
-            var datas = ConfirmStorage.GetSearchDetail(searchModel);
+            var datas = ConfirmStorage.GetSearchDetail(searchModel, AccountController.CurrentUserId);
             if (datas.Any())
             {
                 Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
@@ -89,10 +89,13 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public JsonResult GetItemId(string ItemId, string AccessType,string vSEAL_ITEM_ID = null,string _ItemId = null)
         {
+            
             var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
             List<string> sealIdList = new List<string>();
             ViewData.ForEach(x => {
                 //if (x.vACCESS_TYPE_CODE == AccessType)
+                //if(x.vITEM_ID == "D1023" && x.vAPLY_UID == cUserId)
+
                 if(x.vSEAL_ITEM_ID != null && x.vSEAL_ITEM_ID != ItemId)
                     sealIdList.Add(x.vSEAL_ITEM_ID);
             });
@@ -108,17 +111,21 @@ namespace Treasury.Web.Controllers
         /// <param name="AccessType">P,G</param>
         /// <param name="vSEAL_ITEM_ID">印章ID</param>
         /// <returns></returns>
-        public JsonResult OpTypeChange(string OpTypeId, List<string>ItemIdList, string AccessType,string vSEAL_ITEM_ID = null,string ItemId = null, bool RemoveRowData = true)
+        public JsonResult OpTypeChange(string OpTypeId, List<string>ItemIdList, string AccessType,string vSEAL_ITEM_ID = null,string ItemId = null, bool RemoveRowData = true, string RegisterId = null)
         {
             var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
+            var cUserId = AccountController.CurrentUserId;
             List<string> rowItemIdList = new List<string>();
             List<string> sealIdList = new List<string>();
             ViewData.ForEach(x => {
-                if (x.vITEM_ID != null && RemoveRowData == true)
+                if (x.vITEM_ID != null && RemoveRowData == true && x.vITeM_OP_TYPE != "2" && x.vITEM_ID != "D1023")
                     rowItemIdList.Add(x.vITEM_ID);
-                if (x.vSEAL_ITEM_ID != null && vSEAL_ITEM_ID != x.vSEAL_ITEM_ID )
-                sealIdList.Add(x.vSEAL_ITEM_ID); });
-            var result = ConfirmStorage.ItemOpTypeChange(OpTypeId, ItemIdList, AccessType, sealIdList, rowItemIdList, ItemId);
+                if (x.vITEM_ID != null && RemoveRowData == true && x.vITEM_ID == "D1023" && x.vAPLY_UID == cUserId)
+                    rowItemIdList.Add(x.vITEM_ID);
+                if (x.vSEAL_ITEM_ID != null && vSEAL_ITEM_ID != x.vSEAL_ITEM_ID)
+                    sealIdList.Add(x.vSEAL_ITEM_ID);
+            });
+            var result = ConfirmStorage.ItemOpTypeChange(OpTypeId, ItemIdList, AccessType, sealIdList, rowItemIdList, ItemId, RegisterId, cUserId);
             return Json(result);
         }
 
@@ -159,7 +166,9 @@ namespace Treasury.Web.Controllers
                     vACCESS_REASON = InsertModel.vACCESS_REASON,
                     vCONFIRM_UID = InsertModel.vCurrentUid,
                     vITEM = InsertModel.vITEM,
+                    hITEM = InsertModel.vITEM,
                     vSEAL_ITEM = InsertModel.vSEAL_ITEM,
+                    vAPLY_UID = AccountController.CurrentUserId,
                     uuid = InsertModel.uuid
                 });
 
@@ -178,7 +187,7 @@ namespace Treasury.Web.Controllers
         /// <param name="InsertModel"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult Update(ConfirmStorageInsertViewModel updateModel)
+        public JsonResult Update(ConfirmStorageInsertViewModel updateModel, string registerId)
         {
             //MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
             //result.RETURN_FLAG = false;
@@ -193,7 +202,9 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.insert_Fail.GetDescription();
+            var searchData = (ConfirmStorageSearchViewModel)Cache.Get(CacheList.ConfirmStorageSearchData);
             var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
+            bool is_CreateUser = false;
 
             if(updateModel != null)
             {
@@ -201,15 +212,44 @@ namespace Treasury.Web.Controllers
                 .Where(x => x.vITeM_OP_TYPE != "3")
                 .FirstOrDefault(x => x.uuid == updateModel.uuid);
 
-                newViewData.vSEAL_ITEM_ID = updateModel.vSEAL_ITEM_ID;
-                newViewData.vSEAL_ITEM = updateModel.vSEAL_ITEM;
-                newViewData.vACCESS_TYPE = updateModel.vACCESS_TYPE;
-                newViewData.vACCESS_REASON = updateModel.vACCESS_REASON;
-                newViewData.vACCESS_TYPE_CODE = updateModel.vACCESS_TYPE_CODE;
-                Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
-                Cache.Set(CacheList.ConfirmStorageSearchDetailViewData, ViewData);
-                result.RETURN_FLAG = true;
-                result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                if (updateModel.v_IS_CHECKED == null)
+                {
+                    if(newViewData.vITEM_ID == "D1023")
+                    {
+                        is_CreateUser = ConfirmStorage.CheckIsCreateUser(AccountController.CurrentUserId, registerId);
+                        if (!is_CreateUser)
+                        {
+                            result.DESCRIPTION = "非申請人，無法修改";
+                            result.RETURN_FLAG = false;
+                            return Json(result);
+                        }
+                    }
+                    newViewData.vSEAL_ITEM_ID = updateModel.vSEAL_ITEM_ID;
+                    newViewData.vSEAL_ITEM = updateModel.vSEAL_ITEM;
+                    newViewData.vACCESS_TYPE = updateModel.vACCESS_TYPE;
+                    newViewData.vACCESS_REASON = updateModel.vACCESS_REASON;
+                    newViewData.vACCESS_TYPE_CODE = updateModel.vACCESS_TYPE_CODE;
+                    Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
+                    Cache.Set(CacheList.ConfirmStorageSearchDetailViewData, ViewData);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    if (newViewData.vITEM_ID == "D1023" && newViewData.vAPLY_UID != AccountController.CurrentUserId)
+                    {
+                        result.DESCRIPTION = "非申請人，無法修改";
+                        result.RETURN_FLAG = false;
+                        return Json(result);
+                    }
+                    result = ConfirmStorage.UpdateData(updateModel, searchData, newViewData.hvAPLY_NO);
+                    if (result.RETURN_FLAG)
+                    {
+                        Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
+                        Cache.Set(CacheList.ConfirmStorageSearchDetailViewData, result.Datas);
+                    }
+                }
+ 
             }
 
             return Json(result);
@@ -228,20 +268,18 @@ namespace Treasury.Web.Controllers
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
             var searchData = (ConfirmStorageSearchViewModel)Cache.Get(CacheList.ConfirmStorageSearchData);
-            if(searchData.v_IS_CHECKED == null)
+            var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
+            var rowData = ViewData
+                          .Where(x => x.vITeM_OP_TYPE != "3" &&x.uuid == DeleteModel.uuid)
+                         .FirstOrDefault();
+            if (searchData.v_IS_CHECKED == null)
             {
                 //MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
                 //result.RETURN_FLAG = false;
                 //result.DESCRIPTION = Ref.MessageType.insert_Fail.GetDescription();
-                var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
 
                 if (DeleteModel != null)
                 {
-                    var rowData = ViewData
-                    .Where(x => x.vITeM_OP_TYPE != "3" &&
-                    x.uuid == DeleteModel.uuid)
-                    .FirstOrDefault();
-
                     ViewData.Remove(rowData);
 
                     Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
@@ -252,6 +290,12 @@ namespace Treasury.Web.Controllers
             }
             else
             {
+                if (rowData.vITEM_ID == "D1023" && rowData.vAPLY_UID != AccountController.CurrentUserId)
+                {
+                    result.DESCRIPTION = "非申請人，無法修改";
+                    result.RETURN_FLAG = false;
+                    return Json(result);
+                }
                 result = ConfirmStorage.DeteleData(DeleteModel, searchData);
                 if (result.RETURN_FLAG)
                 {

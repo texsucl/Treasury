@@ -59,8 +59,12 @@ namespace Treasury.Web.Controllers
 			Cache.Set(CacheList.SpecifiedTimeTreasurySearchData, searchModel);
 			ViewBag.opScope = GetopScope("~/SpecifiedTimeTrea/");
 			var data = SpecifiedTimeTreasury.GetTreaItem();
-			//作業類型1
-			ViewBag.workType1 = Extension.CheckBoxString("WorkType1", data.Item1, null, 1).Replace('\'','\"');
+
+            Dictionary<string, object> attr =
+            new Dictionary<string, object>();
+            attr.Add("class", "forclick");
+            //作業類型1
+            ViewBag.workType1 = Extension.CheckBoxString("WorkType1", data.Item1, attr, 1).Replace('\'','\"');
 			//作業類型2
 			ViewBag.workType2 = Extension.CheckBoxString("WorkType2", data.Item2, null, 1).Replace('\'', '\"');
 			//作業類型3
@@ -275,6 +279,31 @@ namespace Treasury.Web.Controllers
                     Cache.Invalidate(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData);
                     Cache.Set(CacheList.SpecifiedTimeTreasuryApprSearchDetailViewData, result.Datas);
                 }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 檢查開庫紀錄檔是否有狀態不為E01的單號
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult CheckRegisterId()
+        {
+            MSGReturnModel<List<string>> result = new MSGReturnModel<List<string>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+            var datas = SpecifiedTimeTreasury.CheckRegisterId();
+            if(datas != null)
+            {
+                //有單號 不繼續作業
+                result.RETURN_FLAG = false;
+                result.DESCRIPTION = string.Format("尚有金庫登記簿未申請覆核，請儘速完成。\r\n金庫登記簿單號:{0}", string.Join(",", datas));
+            }
+            else
+            {
+                //無單號 繼續作業
+                result.RETURN_FLAG = true;
             }
             return Json(result);
         }

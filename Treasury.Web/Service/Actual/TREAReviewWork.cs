@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Text;
 using System.Web;
 using Treasury.Web.Enum;
 using Treasury.Web.Models;
@@ -97,8 +98,11 @@ namespace Treasury.Web.Service.Actual
             }
             DateTime dt = DateTime.Now;
             string logStr = string.Empty; //Log
+            string aplyNoUid = "";
             string status = Ref.AccessProjectFormStatus.E01.ToString(); // 已完成出入庫，通知申請人員
             List<string> approvedList = new List<string>();
+            List<string> applyUidList = new List<string>();
+            List<TREA_OPEN_REC> TORs = new List<TREA_OPEN_REC>();
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -122,8 +126,9 @@ namespace Treasury.Web.Service.Actual
                     _TREA_OPEN_REC.LAST_UPDATE_UID = cUserId;
                     _TREA_OPEN_REC.LAST_UPDATE_DT = dt;
 
+                    TORs.Add(_TREA_OPEN_REC);
                     logStr += _TREA_OPEN_REC.modelToString(logStr);
-                    approvedList.Add(item.hvTREA_REGISTER_ID);
+                    //approvedList.Add(item.hvTREA_REGISTER_ID);
 
                     var _TREA_APLY_REC = db.TREA_APLY_REC.Where(y => y.TREA_REGISTER_ID == item.hvTREA_REGISTER_ID)
                         .Where(y => y.APLY_STATUS == "D02")
@@ -186,21 +191,38 @@ namespace Treasury.Web.Service.Actual
                         switch(_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID)?.TREA_ITEM_TYPE)
                         {
                             case "BILL": // 空白票據
-                                var _BLANK_NOTE_APLY_ITEM_ID = db.BLANK_NOTE_APLY.FirstOrDefault(x => x.APLY_NO == y.APLY_NO)?.ITEM_ID;
-
-                                var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == _BLANK_NOTE_APLY_ITEM_ID);
+                                var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.AsNoTracking().FirstOrDefault(x => x.APLY_NO == y.APLY_NO);
 
                                 if (y.ACCESS_TYPE == "P")
                                 {
-                                    _ITEM_BLANK_NOTE.INVENTORY_STATUS = "1";
+                                    var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
+                                    ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE() {
+                                        ITEM_ID = _BLANK_NOTE_APLY.ITEM_ID,
+                                        INVENTORY_STATUS = "1",
+                                        ISSUING_BANK = _BLANK_NOTE_APLY.ISSUING_BANK,
+                                        CHECK_TYPE = _BLANK_NOTE_APLY.CHECK_TYPE,
+                                        CHECK_NO_TRACK = _BLANK_NOTE_APLY.CHECK_NO_TRACK,
+                                        CHECK_NO_B = _BLANK_NOTE_APLY.CHECK_NO_B,
+                                        CHECK_NO_E = _BLANK_NOTE_APLY.CHECK_NO_E,
+                                        APLY_DEPT = GetUserDPT(cUserId),
+                                        APLY_SECT = y.APLY_UNIT,
+                                        APLY_UID = y.APLY_UID,
+                                        CHARGE_DEPT = GetUserDPT(cUserId),
+                                        CHARGE_SECT = y.APLY_UNIT,
+                                        CREATE_DT = dt
+                                    });
+                                    logStr += ADD_ITEM_BLANK_NOTE.modelToString(logStr);
                                 }
                                 else if (y.ACCESS_TYPE == "G")
                                 {
-                                    _ITEM_BLANK_NOTE.INVENTORY_STATUS = "2";
-                                }
-                                _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-
-                                logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
+                                    var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == _BLANK_NOTE_APLY.ITEM_ID);
+                                    if(_ITEM_BLANK_NOTE.INVENTORY_STATUS == "4")
+                                    {
+                                        _ITEM_BLANK_NOTE.INVENTORY_STATUS = "2";
+                                        _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
+                                        logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
+                                    }      
+                                }         
                                 break;
                             case "ESTATE": // 不動產
                                 var _ITEM_REAL_ESTATE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
@@ -351,7 +373,10 @@ namespace Treasury.Web.Service.Actual
                         logStr += ARH.modelToString(logStr);
                         db.APLY_REC_HIS.Add(ARH);
                         #endregion
-                        approvedList.Add(y.APLY_NO);
+                        aplyNoUid = string.Format("{0};{1}", y.APLY_NO, y.APLY_UID);
+                        approvedList.Add(aplyNoUid);
+                        //approvedList.Add(y.APLY_NO);
+                        //applyUidList.Add(y.APLY_UID);
                     });
                 }
                 var validateMessage = db.GetValidationErrors().getValidateString();
@@ -364,6 +389,71 @@ namespace Treasury.Web.Service.Actual
                     try
                     {
                         db.SaveChanges();
+
+                        #region 寄信
+                        foreach(var NoUid in approvedList)
+                        {
+                            var aplyNo = NoUid.Split(';')[0];
+                            var aplyUid = NoUid.Split(';')[1];
+                            StringBuilder sb = new StringBuilder();
+                            sb.AppendLine(
+                                $@"您好，通知您
+申請單號 {aplyNo}已完成出入庫相關作業!
+1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
+2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
+                                );
+
+                            try
+                            {
+                                var sms = new SendMail.SendMailSelf();
+                                sms.smtpPort = 25;
+                                sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                                sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                                sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                                sms.Mail_Send(
+                                   new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                                   new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+                                   null,
+                                   "存取作業確認通知",
+                                   sb.ToString()
+                                   );
+                            }
+                            catch (Exception ex)
+                            {
+                                result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                            }
+                        }
+
+//                        foreach (var TOR in TORs)
+//                        {
+//                            StringBuilder sb = new StringBuilder();
+//                            sb.AppendLine(
+
+//        $@"您好,
+//通知今日金庫開關庫時間為:{TOR.OPEN_TREA_TIME}，請準時至金庫門口集合。
+//為配合金庫大門之啟閉，請有權人在:{TOR.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
+//");
+//                            try
+//                            {
+//                                var sms = new SendMail.SendMailSelf();
+//                                sms.smtpPort = 25;
+//                                sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+//                                sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+//                                sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+//                                sms.Mail_Send(
+//                                    new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+//                                    new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+//                                    null,
+//                                    "存取作業確認通知",
+//                                    sb.ToString()
+//                                    );
+//                            }
+//                            catch(Exception ex)
+//                            {
+//                                result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+//                            }
+//                        }
+                        #endregion
 
                         #region LOG
                         //新增LOG
@@ -499,6 +589,32 @@ namespace Treasury.Web.Service.Actual
                 }
             }
             return user;
+        }
+
+        /// <summary>
+        /// 查部門
+        /// </summary>
+        public string GetUserDPT(string cUserID)
+        {
+            string DPT_CD = "";
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                var _emply_DPT_CD = dbINTRA.V_EMPLY2.AsNoTracking().FirstOrDefault(x => x.USR_ID == cUserID)?.DPT_CD;
+                if (_emply_DPT_CD != null)
+                {
+                    var _VW_OA_DEPT = dbINTRA.VW_OA_DEPT.AsNoTracking().FirstOrDefault(x => x.DPT_CD == _emply_DPT_CD);
+                    if(_VW_OA_DEPT.Dpt_type == "4")
+                    {
+                        DPT_CD = _VW_OA_DEPT.UP_DPT_CD;
+                    }
+                    else if(_VW_OA_DEPT.Dpt_type == "3")
+                    {
+                        DPT_CD = _VW_OA_DEPT.DPT_CD;
+                    }
+
+                }
+            }
+            return DPT_CD;
         }
     }
 }

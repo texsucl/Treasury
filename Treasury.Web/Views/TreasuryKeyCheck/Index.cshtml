@@ -1,0 +1,206 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@using Treasury.Web.ViewModels;
+@model Treasury.Web.ViewModels.TreasuryKeyCheckViewModel
+@{
+    ViewBag.Title = "金庫鑰匙密碼保管清單-主畫面";
+    var opScope = ViewBag.opScope;
+    
+}
+
+<style>
+    .customertb input[type=text] {
+        width: 110px;
+    }
+    .customertb td {
+        width: 80px;
+    }
+</style>
+<div class="container margin-top-5" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0") //權限
+            {
+                <form id="TKCForm">
+                    <table class="customertb">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>生效日期:</label>
+                            </td>
+                            <td colspan="9">
+                                <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>管控模式:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("CONTROL_MODE", new SelectList(Model.CONTROL_MODE, "Value", "Text"))
+                            </td>
+                            <td>
+                                <label>方式:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("CUSTODY_MODE", new SelectList(Model.CUSTODY_MODE, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>保管人:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("EMP_NAME", new SelectList(Model.EMP_NAME, "Value", "Text"))
+                            </td>
+                            <td>
+                                <label>代理人:</label>
+                            </td>
+                            <td colspan="4">
+                               @Html.DropDownList("AGENT_NAME", new SelectList(Model.AGENT_NAME, "Value", "Text"))
+                            </td>
+                        </tr>
+                        <tr style="text-align: center ">
+                            <td colspan="10">
+                                <input type="button" class=" btn btn-primary" id="TKC_Export" value="匯出報表" />
+                            </td>
+                        </tr>               
+
+                    </table>
+                </form>
+
+            }
+        </div>
+     </div>
+</div>
+    @*查詢區塊*@
+<div>
+
+</div>
+<script type="text/javascript">
+    $(function () {
+        debugger
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        //#region url設定
+        var openInsertDetailId = 'TKCOpenInsertDetail';
+        var openSearchDetailId = 'TKCOpenSearchDetail';
+        var TAFormId = 'TKCForm';
+        var EXP_ACCESS_DATEId = 'EXP_ACCESS_DATE';
+        var aProjectId = 'aProject';
+        var aIUnitId = 'aIUnit';
+        var applicantId = 'applicant';
+        var aProjectAllId = 'aProjectAll';
+        var aSUnitAllId = 'aSUnitAll';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            //#region url設定
+            var TKCurl = {};
+            @*TKCurl.getName = '@Url.Action("GetNAME", "TreasuryKeyCheck")';*@
+            //#endregion
+
+            var TKCFormId = 'TKCForm';
+            var JobProjectId = 'JobProject';
+            var APLY_DT_FromId = 'APLY_DT_From';
+            var APLY_DT_ToId = 'APLY_DT_To';
+            var openSearchDetailId = 'TKCOpenSearchDetail';
+            var _date = created.getOnlyDate();
+            ///#region 初始設定
+            created.createDatepickerRange(APLY_DT_FromId, APLY_DT_ToId);//生效日期
+            //$('#' + APLY_DT_FromId).datepicker("option", "maxDate", created.getOnlyDateStr(true));
+            verified.datepicker(TKCFormId, EXP_ACCESS_DATEId, $('#' + EXP_ACCESS_DATEId).val());
+
+           ///#endregion
+            $('input:button').each(function () {
+                $('#' + 'TKC_Export').off('click');
+                $('#' + 'TKC_Export').on('click', function () { TKCReport(); });
+            })
+
+            function TKCReport() {
+                if( $('input:text').val() != "")
+                {
+                    var listId = 'TKCReportList';
+                            var reportType = '';
+                            var title = '';
+                            var parms = [];
+                            var extensionParms = [];
+                            var APLY_DT_From_report= $('#APLY_DT_From').val();
+                            var APLY_DT_To_report = $('#APLY_DT_To').val();
+                            var CONTROL_MODE_val_report = $('#CONTROL_MODE').val();
+
+                            var CUSTODY_MODE_val_report = $('#CUSTODY_MODE').val();
+                            var CONTROL_MODE_report = $('#CONTROL_MODE :selected').text();
+                            var CUSTODY_MODE_report = $('#CUSTODY_MODE :selected').text();
+                            var EMP_NAME__val_report = $('#EMP_NAME').val();
+                            var EMP_NAME_report = $('#EMP_NAME :selected').text();
+                            var AGENT_NAME_val_report = $('#AGENT_NAME').val();
+                            var AGENT_NAME_report = $('#AGENT_NAME :selected').text();
+                            
+                    //前端畫面資料
+                            parms.push(customerUtility.reportParm('APLY_DT_From', APLY_DT_From_report));
+                            parms.push(customerUtility.reportParm('APLY_DT_To', APLY_DT_To_report));
+                            parms.push(customerUtility.reportParm('CONTROL_MODE', CONTROL_MODE_val_report));
+                            parms.push(customerUtility.reportParm('CONTROL_MODE_t', CONTROL_MODE_report));
+                            parms.push(customerUtility.reportParm('CUSTODY_MODE', CUSTODY_MODE_val_report));
+                            parms.push(customerUtility.reportParm('EMP_NAME', EMP_NAME__val_report));
+                            parms.push(customerUtility.reportParm('AGENT_NAME', AGENT_NAME_val_report));
+
+                            extensionParms.push(customerUtility.reportParm('APLY_DT_From', DecideString(APLY_DT_From_report)));
+                            extensionParms.push(customerUtility.reportParm('APLY_DT_To', DecideString(APLY_DT_To_report)));
+                            extensionParms.push(customerUtility.reportParm('CONTROL_MODE', DecideString(CONTROL_MODE_report)));
+                            extensionParms.push(customerUtility.reportParm('CUSTODY_MODE', DecideString(CUSTODY_MODE_report)));
+                            extensionParms.push(customerUtility.reportParm('EMP_NAME', DecideString(EMP_NAME_report)));
+                            extensionParms.push(customerUtility.reportParm('AGENT_NAME', DecideString(AGENT_NAME_report)));
+                    customerUtility.report(
+                        customerUtility.reportModel('金庫鑰匙密碼保管清單 ', 'TREASURYKEYCHECK'),
+                        parms,
+                        extensionParms)
+                       
+               }
+                  else {
+                    customerUtility.alert('請至少輸入一個時間', 'w');
+                }  
+            };
+
+            function DecideString(str) {
+                if (str == null || str == '') {
+                    str = " ";
+                }
+                return str
+            }
+                ///#region 申請項目設定檔案
+ 
+                //#endregion
+
+            }
+
+        });
+
+
+</script>

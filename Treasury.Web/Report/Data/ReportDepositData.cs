@@ -175,7 +175,6 @@ namespace Treasury.Web.Report.Data
             [Description("權責科別")]
             public string CHARGE_SECT { get; set; }
 
-
             [Description("交易對象")]
             public string TRAD_PARTNERS { get; set; }
 
@@ -191,6 +190,201 @@ namespace Treasury.Web.Report.Data
             [Description("備註")]
             public string MEMO { get; set; }
         }
+        protected class DepositReportSealData
+        {
+            [Description("項次")]
+            public int ROW { get; set; }
 
+            [Description("入庫日期")]
+            public DateTime? PUT_DATE { get; set; }
+
+            [Description("權責部門")]
+            public string CHARGE_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string CHARGE_SECT { get; set; }
+
+            [Description("印章內容")]
+            public string SEAL_DESC { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+        }
+        protected class DepositReportCAData
+        {
+            [Description("項次")]
+            public int ROW { get; set; }
+
+            [Description("入庫日期")]
+            public DateTime? PUT_DATE { get; set; }
+
+            [Description("權責部門")]
+            public string CHARGE_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string CHARGE_SECT { get; set; }
+
+            [Description("用途")]
+            public string CA_USE { get; set; }
+
+            [Description("類型")]
+            public string CA_DESC { get; set; }
+
+            [Description("銀行")]
+            public string BANK { get; set; }
+
+            [Description("號碼")]
+            public string CA_NUMBER { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+           
+        }
+        protected class DepositReportESTATEData
+        {
+            [Description("項次")]
+            public int ROW { get; set; }
+
+            [Description("入庫日期")]
+            public DateTime? PUT_DATE { get; set; }
+
+            [Description("狀別")]
+            public string ESTATE_FORM_NO { get; set; }
+
+            [Description("發狀日")]
+            public DateTime? ESTATE_DATE { get; set; }
+
+            [Description("字號")]
+            public string OWNERSHIP_CERT_NO { get; set; }
+
+            [Description("地/建號")]
+            public string LAND_BUILDING_NO { get; set; }
+
+            [Description("門牌號")]
+            public string HOUSE_NO { get; set; }
+            
+            [Description("流水號/編號")]
+            public string ESTATE_SEQ { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+            [Description("冊號")]
+            public string BOOK_NO_DETAIL { get; set; }
+
+            [Description("大樓名稱")]
+            public string BUILDING_NAME { get; set; }
+
+            [Description("坐落")]
+            public string LOCATED { get; set; }
+
+            [Description("權責部門")]
+            public string CHARGE_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string CHARGE_SECT { get; set; }
+
+        }
+        protected class DepositReportSTOCKData
+        {
+            [Description("入庫日期")]
+            public DateTime? PUT_DATE { get; set; }
+
+            [Description("權責部門")]
+            public string CHARGE_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string CHARGE_SECT { get; set; }
+
+            [Description("區域")]
+            public string AREA { get; set; }
+
+            [Description("序號(起)")]
+            public string STOCK_NO_B { get; set; }
+
+            [Description("序號(迄)")]
+            public string STOCK_NO_E { get; set; }
+
+            [Description("張數")]
+            public int? STOCK_CNT { get; set; }
+
+            [Description("單張面額")]
+            public decimal? DENOMINATION { get; set; }
+
+            [Description("股數")]
+            public decimal? NUMBER_OF_SHARES { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+            [Description("編號")]
+            public string BOOK_NO { get; set; }
+
+            [Description("股票名稱")]
+            public string NAME { get; set; }
+
+        }
+        protected class DepositReportDEPOSIT_DEP_ORDER_M_Data
+        {
+            [Description("承作日期")]
+            public DateTime? COMMIT_DATE { get; set; }
+
+            [Description("到期日")]
+            public DateTime? EXPIRY_DATE { get; set; }
+
+            [Description("權責部門")]
+            public string APLY_DEPT { get; set; }
+
+            [Description("權責科別")]
+            public string APLY_SECT { get; set; }
+
+            [Description("交易對象")]
+            public string TRAD_PARTNERS { get; set; }
+
+            [Description("幣別")]
+            public string CURRENCY { get; set; }
+
+            [Description("交易類型")]
+            public string DEP_TYPE { get; set; }
+
+            [Description("票面利率")]
+            public Decimal? INTEREST_RATE { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+            [Description("存單號碼(起)")]
+            public string DEP_NO_B { get; set; }
+
+            [Description("存單號碼(迄)")]
+            public string DEP_NO_E { get; set; }
+
+            [Description("單張面額")]
+            public string DENOMINATION { get; set; }
+        }
+        protected class TreasuryKeyCheckReport
+        {
+            [Description("方式")]
+            public string CUSTODY_MODE { get; set; }
+
+            [Description("設備名稱")]
+            public string EQUIP_NAME { get; set; }
+
+            [Description("保管人(部門/科別)")]
+            public string EMP_NAME { get; set; }
+
+            [Description("代理人(部門/科別)")]
+            public string AGENT_NAME { get; set; }
+
+            [Description("備註")]
+            public string MEMO { get; set; }
+
+            [Description("編號")]
+            public int? ROW { get; set; }
+
+
+        }
     }
 }

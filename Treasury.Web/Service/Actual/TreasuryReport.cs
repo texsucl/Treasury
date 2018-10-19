@@ -21,6 +21,7 @@ namespace Treasury.Web.Service.Actual
             var result = new TreasuryReportViewModel();
             List<SelectOption>jobProject = new List<SelectOption>(); //庫存表名稱
             List<SelectOption>vName = new List<SelectOption>(); //股票編號
+
             List<SelectOption>dept = new List<SelectOption>(); //權責部門
             List<SelectOption>branch = new List<SelectOption>(); //權責科別
 
@@ -40,11 +41,11 @@ namespace Treasury.Web.Service.Actual
                 var ITEM_SEALs= db.ITEM_SEAL.AsNoTracking()//抓取在庫的所有資料
                 .Where(x => x.INVENTORY_STATUS == "1").ToList();
                 
-               foreach(var item  in    ITEM_SEALs.GroupBy(x=>x.CHARGE_DEPT))
-               {
-                  var a =item.Key;
-                  var b = item;
-               }
+               //foreach(var item  in    ITEM_SEALs.GroupBy(x=>x.CHARGE_DEPT))
+               //{
+               //   var a =item.Key;
+               //   var b = item;
+               //}
                     
 
              var i1 =ITEM_SEALs.Select(x=>x.CHARGE_DEPT).Distinct()
@@ -53,10 +54,14 @@ namespace Treasury.Web.Service.Actual
                     Value = x,
                     Text = deps.FirstOrDefault(y => y.DPT_CD == x)?.DPT_NAME
                     }).ToList();
-
-
-            result.vName = new Stock().GetStockName();
-            result.vBook_No = new Estate().GetBuildName();
+            var vNames =  new Stock().GetStockName();
+                vNames.RemoveAt(0);
+                vNames.Insert(0,new SelectOption(){Value="All",Text="All"});
+            result.vName =vNames;
+                var vBook_Nos = new Estate().GetBuildName();
+            vBook_Nos.RemoveAt(0);
+                vBook_Nos.Insert(0,new SelectOption(){Value="All",Text="All"});
+            result.vBook_No = vBook_Nos;
             result.vTRAD_Partners = new Deposit().GetTRAD_Partners();
             result.vdept = i1;
             result.vjobProject= jobProject;

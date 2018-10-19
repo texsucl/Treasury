@@ -423,7 +423,7 @@ namespace Treasury.Web.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private List<BillViewModel> SetBillViewRowNum(List<BillViewModel> data)
+        public List<BillViewModel> SetBillViewRowNum(List<BillViewModel> data)
         {
             int rownum = 1;
             data.OrderBy(x => x.vIssuingBank)
@@ -441,7 +441,7 @@ namespace Treasury.Web.Controllers
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private List<BillViewModel> SetBillTakeOutViewModelGroup(List<BillViewModel> data)
+        public List<BillViewModel> SetBillTakeOutViewModelGroup(List<BillViewModel> data)
         {
             var result = new List<BillViewModel>();
             if (data.Any())

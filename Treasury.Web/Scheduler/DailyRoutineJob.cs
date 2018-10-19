@@ -49,16 +49,26 @@ namespace Treasury.Web.Scheduler
                     finally
                     {
                         Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
-                        var _MT2 = db.MAIL_TIME.ToList()
-                                .FirstOrDefault(x =>
+                        var _MT2 = db.MAIL_TIME
+                                .Where(x =>
                                 x.SEND_TIME != null &&
                                 x.SEND_TIME == dtnstr &&
-                                x.MAIL_CONTENT_ID == "01");
-                        if (_MT2 != null)
+                                x.MAIL_CONTENT_ID == "01").ToList();
+                        if (_MT2.Any())
                         {
                             Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
-                            _MT2.SCHEDULER_STATUS = "N";
-                            db.SaveChanges();
+                            foreach (var item in _MT2)
+                            {
+                                item.SCHEDULER_STATUS = "N";
+                            }
+                            try
+                            {
+                                db.SaveChanges();
+                            }
+                            catch
+                            {
+
+                            }
                         }
                         else
                         {

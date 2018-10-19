@@ -40,7 +40,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
                     .AsEnumerable()                    
                     .Where(x => DateTime.Parse(x.EXEC_TIME_B) <= DateTime.Parse(OTT))
-                    .Where(x => DateTime.Parse(x.EXEC_TIME_E) >= DateTime.Parse(OTT))
+                    .Where(x => DateTime.Parse(x.OPEN_TREA_TIME) >= DateTime.Parse(OTT))
                    .Select(x => new TreaOpenRec()
                    {
                        vTreaRegisterId = x.TREA_REGISTER_ID,

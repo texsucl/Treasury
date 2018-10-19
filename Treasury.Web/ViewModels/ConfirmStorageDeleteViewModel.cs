@@ -50,5 +50,11 @@ namespace Treasury.Web.ViewModels
         [Description("PKID")]
         public string uuid { get; set; }
 
+        /// <summary>
+        /// 已確認
+        /// </summary>
+        [Description("已確認")]
+        public string v_IS_CHECKED { get; set; }
+
     }
 }

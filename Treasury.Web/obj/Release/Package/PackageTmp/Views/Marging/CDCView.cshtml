@@ -105,6 +105,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" id="hCA_ITEM_ID" />
+                    </td>
+                </tr>
+                <tr>
                     <td colspan="2">
                         <input type="button" id="CDCMargingUpdateTemp" value="修改" class="btn btn-primary" />
                     </td>
@@ -281,10 +292,12 @@
         }
 
         function formattervTrad_Partners(cellvalue, options, rdata) {
-            if (rdata.vTrad_Partners_AFT != null)
-                return '<span class="red">' + rdata.vTrad_Partners_AFT + '</span>';
-            else
+            if (rdata.vTrad_Partners_AFT == null)
                 return rdata.vTrad_Partners || '';
+            else if (rdata.vTrad_Partners_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vTrad_Partners_AFT + '</span>';
         }
 
         function formattervAmount(cellvalue, options, rdata) {
@@ -295,24 +308,30 @@
         }
 
         function formattervWorkplace_Code(cellvalue, options, rdata) {
-            if (rdata.vWorkplace_Code_AFT != null)
-                return '<span class="red">' + rdata.vWorkplace_Code_AFT + '</span>';
-            else
+            if (rdata.vWorkplace_Code_AFT == null)
                 return rdata.vWorkplace_Code || '';
+            else if (rdata.vWorkplace_Code_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vWorkplace_Code_AFT + '</span>';
         }
 
         function formattervDescription(cellvalue, options, rdata) {
-            if (rdata.vDescription_AFT != null)
-                return '<span class="red">' + rdata.vDescription_AFT + '</span>';
-            else
+            if (rdata.vDescription_AFT == null)
                 return rdata.vDescription || '';
+            else if (rdata.vDescription_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vDescription_AFT + '</span>';
         }
 
         function formattervMemo(cellvalue, options, rdata) {
-            if (rdata.vMemo_AFT != null)
-                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
-            else
+            if (rdata.vMemo_AFT == null)
                 return rdata.vMemo || '';
+            else if (rdata.vMemo_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_AFT + '</span>';
         }
 
         function formatterAct(cellvalue, options, rdata) {
@@ -530,6 +549,11 @@
         //修改存出保證金暫存資料
         function CDCMargingUpdateTempFun() {
             if ($('#' + CDCMargingFormId).valid()) {
+                if ($('#' + tCDCTrad_PartnersId).val().trim().toUpperCase() == 'NULL')
+                {
+                    customerUtility.alert('交易對象不可為空值', 'w');
+                    return
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
