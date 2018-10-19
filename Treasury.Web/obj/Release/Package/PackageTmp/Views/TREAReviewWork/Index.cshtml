@@ -1,0 +1,419 @@
+﻿@using Treasury.Web.Enum;
+
+@{
+    ViewBag.Title = "金庫進出管理作業-金庫登記簿覆核作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <div>
+                    <div id="SearchjqgridDiv" class="jqd"></div>
+                </div>
+                <div>
+                    <input type="button" class="btn btn-primary" id="Approved" value="核准" disabled="disabled"/>
+                    <input type="button" class="btn btn-primary" id="Reject" value="駁回" disabled="disabled"/>
+                </div>
+            }
+            <div id="IsRejectDialog" style="display:none" role="dialog">
+                <table>
+                    <tr>
+                        <td>
+                            <textarea id="IsRejectText" maxlength="50" style="width:98%"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" id="Y_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                            <input type="button" id="N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="RIDDialog" style="display:none" role="dialog" class="myDialog">
+                <table>
+                    <tr>
+                        <td><label>入庫日期 :&ensp;</label> </td>
+                        <td><input type="text" id="txtOPEN_TREA_DATE" maxlength="15" size="15"/></td>
+                        <td><label>金庫登記簿單號 :&ensp;</label> </td>
+                        <td><input type="text" id="txtTREA_REGISTER_ID" maxlength="15" size="15"/></td>
+                    </tr>
+                    <tr>
+                        <td><label>入庫時間 :&ensp;</label> </td>
+                        <td><input type="text" id="txtACTUAL_PUT_TIME" maxlength="15" size="15"/></td>
+                        <td><label>出庫時間 :&ensp;</label> </td>
+                        <td><input type="text" id="txtACTUAL_GET_TIME" maxlength="15" size="15"/></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" id="Print" class="btn btn-primary" style="" value="列印金庫登記簿" />
+                            <input type="button" id="TurnBack" class="btn btn-primary" style="margin-right:10px;float:right;" value="回上一頁" />
+                            @Html.Hidden("h_REGISTER_ID", "")
+                        </td>   
+                    </tr>
+                </table>
+                <div id="DetilsjqgridDiv" class="jqd"></div>
+            </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.GetFirstDatas = '@Url.Action("GetFirstDatas", "TREAReviewWork")';
+        UrlFor.Approved = '@Url.Action("Approved", "TREAReviewWork")';
+        UrlFor.Reject = '@Url.Action("Reject", "TREAReviewWork")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "TREAReviewWork")';
+        UrlFor.CheckedData = '@Url.Action("CheckedData", "TREAReviewWork")';
+        UrlFor.GetDetailsDatas = '@Url.Action("GetDetailsDatas", "TREAReviewWork")';
+        //#endregion
+        //region 變數設定 name
+        var Approved = 'Approved';
+        var Reject = 'Reject';
+        var IsRejectText = 'IsRejectText';
+        var txtOPEN_TREA_DATE = 'txtOPEN_TREA_DATE';
+        var txtTREA_REGISTER_ID = 'txtTREA_REGISTER_ID';
+        var txtACTUAL_PUT_TIME = 'txtACTUAL_PUT_TIME';
+        var txtACTUAL_GET_TIME = 'txtACTUAL_GET_TIME';
+        var Print = 'Print';
+        var h_REGISTER_ID = 'h_REGISTER_ID';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //初始畫面
+            getFirstDatas();
+        }
+
+        //region 產生產生button事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'Approved':
+                    $('#' + id).on('click', function () { formApproved(); });
+                    break;
+                case 'Reject':
+                    $('#' + id).on('click', function () { formReject(); });
+                    break;
+                case 'Y_Reject':
+                    $('#' + id).on('click', function () { formRejectY(); });
+                    break;
+                case 'Print':
+                    $('#' + id).on('click', function () { PrintFun(); });
+                    break;
+                case 'TurnBack':
+                    $('#' + id).click(function () { customerUtility.closeDialog($(this)); });
+                    break;
+            }
+        });
+        //#endregion
+        //region 初始資料
+        function getFirstDatas() {
+            $.ajax({
+                type: 'POST',
+                data: null,
+                url: UrlFor.GetFirstDatas,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                    $("#" + Approved).prop('disabled', true);
+                    $("#" + Reject).prop('disabled', true);
+                }
+                else {
+                    SearchGrid();
+                    $("#" + Approved).prop('disabled', false);
+                    $("#" + Reject).prop('disabled', false);
+                }
+            });
+        };
+        //#endregion
+        //region 核准
+        function formApproved() {
+            $.ajax({
+                type: 'POST',
+                data: null,
+                url: UrlFor.Approved,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+                else {
+                    customerUtility.alert(result.DESCRIPTION, 's');
+                    SearchGrid();
+                }
+            });
+        }
+        //#endregion
+        //region 是否駁回
+        function formReject() {
+            var flag = false;
+            if ($('.ApprovedIschecked:checked').length > 0) {
+                    flag = true;
+            }
+            if (!flag) {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'IsRejectDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#' + IsRejectText).val('');
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+        //region 駁回
+        function formRejectY() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    rejectReason: $('#' + IsRejectText).val().trim()
+                }),
+                url: UrlFor.Reject,
+                contentType: 'application/json'
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 's');
+                    customerUtility.closeDialog($('#IsRejectDialog'));
+                    SearchGrid();
+                }
+                else {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+            });
+        }
+        //#endregion
+        //region 單號查Details
+        function GetDetailsData(data) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    registerId: data.hvTREA_REGISTER_ID
+                }),
+                url: UrlFor.GetDetailsDatas,
+                contentType: 'application/json'
+            }).done(function (result) {
+                $('#' + h_REGISTER_ID).val('');
+                if (!result.RETURN_FLAG) {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+                else {
+                    DeatilsGrid();
+                    var x = result.Datas;
+                    alert(x);
+                    $('#' + h_REGISTER_ID).val(result.Datas);
+                    console.log($('#' + h_REGISTER_ID).val());
+                }
+            });
+        }
+        //#endregion
+        //#region jqGrid 單號變連結
+        function formatREGISTERID(cellvalue, option, rdata) {
+            return "<a href='#' id='" + option.gid + "REGISTERID" + option.rowId + "' class='DialogREGISTERID' style='text-decoration:underline;' return:false; name='" + cellvalue + "' title='" + cellvalue + "'>" + cellvalue + "</a>";
+        }
+        //#endregion
+        //#region jqGrid 單號顯示原本樣式
+        function unformatREGISTERID(cellvalue, option, rdata) {
+            return cellvalue;
+        }
+        //#endregion
+        ////#region jqGrid checkbox
+        function formatterTakeOut(cellvalue, options, rdata) {
+            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox ApprovedIschecked customerCheck'></div>";
+            return str;
+        }
+        //#endregion
+        //region 初始畫面Table
+        function SearchGrid() {
+            var colTitleArray = ['選取', '開褲類型', '開庫工作單號', '開庫時間', '實際入庫時間', '實際出庫時間', '登記簿狀態','h金庫登記簿單號', '開登記庫日期']
+            var colModelArray = [
+                { name: "Ischecked", index: "Ischecked", width: 70, sortable: false, align: 'center', formatter: formatterTakeOut },
+                { name: "vOPEN_TREA_TYPE", index: "vOPEN_TREA_TYPE", width: 130, sortable: false, align: 'center' },
+                { name: "vTREA_REGISTER_ID", index: "vTREA_REGISTER_ID", width: 130, sortable: false, align: 'center', formatter: formatREGISTERID, unformat: unformatREGISTERID },
+                { name: "vOPEN_TREA_TIME", index: "vOPEN_TREA_TIME", width: 65, sortable: false, align: 'center' },
+                { name: "vACTUAL_PUT_TIME", index: "vACTUAL_PUT_TIME", width: 100, sortable: false, align: 'center' },
+                { name: "vACTUAL_GET_TIME", index: "vACTUAL_GET_TIME", width: 100, sortable: false, align: 'center' },
+                { name: "vREGI_STATUS", index: "vREGI_STATUS", width: 130, sortable: false, align: 'center' },
+                { name: "hvTREA_REGISTER_ID", index: "hvTREA_REGISTER_ID", hidden: true },
+                { name: "vOPEN_TREA_DATE", index: "vOPEN_TREA_DATE", hidden: true }
+            ];
+            jqgridCustom.createJqgridByCache(
+                'SearchjqgridDiv',
+                'SearchList',
+                'SearchPeger',
+                UrlFor.GetData,
+                {
+                    type: 'Search'
+                },
+                colTitleArray,
+                colModelArray,
+                '查詢結果',
+                jqgridCustom.getPage('SearchjqgridDiv'),
+                SearchGridDoneFun,
+                true
+                );
+        }
+        //#endregion
+        //region 單號查詢
+        function DeatilsGrid() {
+            var colDeatilsTitleArray = ['作業類型', '存取項目', '印章內容', '作業別', '申請單號', '入庫原因', '入庫人員', '實際作業別', '實際入庫人員'];
+            var colDeatilsModelArray = [
+                { name: "vITEM_OP_TYPE", index: "vITEM_OP_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vITEM_DESC", index: "vITEM_DESC", width: 85, sortable: false, align: 'center' },
+                { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 65, sortable: false, align: 'center' },
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 175, sortable: false, align: 'center' },
+                { name: "vCONFIRM_NAME", index: "vCONFIRM_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "vACTUAL_ACCESS_TYPE", index: "vACTUAL_ACCESS_TYPE", width: 65, sortable: false, align: 'center' },
+                { name: "vACTUAL_ACCESS_NAME", index: "vACTUAL_ACCESS_NAME", width: 70, sortable: false, align: 'center' }
+            ];
+            jqgridCustom.createJqgridByCache(
+                'DetilsjqgridDiv',
+                'DetilsjqgridList',
+                'DetilsjqgridPeger',
+                 UrlFor.GetData,
+              {
+                  type: 'DetilsData'
+              },
+              colDeatilsTitleArray,
+              colDeatilsModelArray,
+              '申請細項',
+              jqgridCustom.getPage('DetilsjqgridDiv'),
+              null,
+              true
+                );
+        }
+        //#endregion
+        //region Search Grid 點擊事件
+        function SearchGridDoneFun(listId) {
+            //jqgridCustom.randerAction(listId, 'Unconfirmed', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionDeleIcon').hide();
+                $(this).find('td').find('.ApprovedIschecked').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        forChecked(i + 1, $(this).prop('checked'));
+                    });
+                });
+                $(this).find('td').find('a.DialogREGISTERID').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        OpenRegisterIDFun(listId, i + 1, false);
+                    });
+                });
+            });
+        }
+        //#endregion
+        //region 打勾事件
+        function forChecked(rowid, flag) {
+            var listId = 'SearchList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    checkedModel: data.hvTREA_REGISTER_ID,
+                    checkedFlag: flag
+                }),
+                dataType: "json",
+                url: UrlFor.CheckedData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    SearchGrid();
+                }
+            });
+        }
+        //#endregion
+        //region 開啟金庫登記簿單號
+        function OpenRegisterIDFun(listId, rowId, closeFlag) {
+            var data = $("#" + listId).getRowData(rowId);
+            //var whitchMethod = "Search";
+            //formInsert(whitchMethod, data);
+            formOpen(data);
+        }
+        //#endregion
+        //region 註冊事件開啟Dialog and 查詢事件
+        function formOpen(data) {
+            openRIDDialog("查詢結果", 800, 'RIDDialog', false, false);
+            getDialogElement(data);
+        }
+        //#endregion
+        //#region 開啟RegisterId事件(打開Dialog)
+        function openRIDDialog(title, width, dialogId, closeFalg, custodianFlag) {
+            title = title || '';
+            width = width || 'auto';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+        //region 產生 DetilsDialog 元素
+        function getDialogElement(data) {
+            $('#' + txtOPEN_TREA_DATE).prop('disabled', true);
+            $('#' + txtTREA_REGISTER_ID).prop('disabled', true);
+            $('#' + txtACTUAL_PUT_TIME).prop('disabled', true);
+            $('#' + txtACTUAL_GET_TIME).prop('disabled', true);
+            $('#' + txtOPEN_TREA_DATE).val(data.vOPEN_TREA_DATE);
+            $('#' + txtTREA_REGISTER_ID).val(data.hvTREA_REGISTER_ID);
+            $('#' + txtACTUAL_PUT_TIME).val(data.vACTUAL_PUT_TIME);
+            $('#' + txtACTUAL_GET_TIME).val(data.vACTUAL_GET_TIME);
+
+            GetDetailsData(data);
+            
+        }
+        //#endregion
+        //region 列印
+        function PrintFun() {
+            var parms = [];
+            setTimeout(
+                function () {
+                    parms.push(customerUtility.reportParm('vTreaRegisterId', $('#' + h_REGISTER_ID).val()));
+                    parms.push(customerUtility.reportParm('vUser_Id', '@ViewBag.vUser_Id'));
+                    customerUtility.report(
+                        customerUtility.reportModel('金庫登記簿', 'TREASURY_REGISTER'),
+                        parms,
+                        null
+                        );
+                }, 100);
+        }
+        //#endregion
+    });
+</script>

@@ -115,6 +115,11 @@ namespace Treasury.Web.Service.Actual
                 DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
                 DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E).DateToLatestTime();
 
+                List<string> notShowList = new List<string>();
+                notShowList.Add("D1001");
+                notShowList.Add("D1002");
+                notShowList.Add("D1003");
+
                 var _data = db.TREA_OPEN_REC.AsNoTracking()
                     .Where(x => x.OPEN_TREA_TYPE == "2") //開庫類型: 2.指定時間開庫
                     .Where(x => x.CREATE_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
@@ -137,6 +142,7 @@ namespace Treasury.Web.Service.Actual
                         vAPLY_STATUS = x.sysCode.CODE_VALUE,
                         vOPEN_TREA_REASON = "取" +
                         string.Join("及", x.open.OPEN_TREA_REASON.Split(';').ToList()
+                        .Where(z => !notShowList.Contains(z))                      
                         .Select(z => _item.FirstOrDefault(y => y.ITEM_ID == z)?.ITEM_DESC)
                         .Where(z => z != null)
                         ),
@@ -223,7 +229,7 @@ namespace Treasury.Web.Service.Actual
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
             string logStr = string.Empty; //log    
-                                          //bool 登入者與申請者為同一人
+            //bool 登入者與申請者為同一人
             if (data.vCREATE_UID == currentUserId)
             {
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -575,7 +581,7 @@ namespace Treasury.Web.Service.Actual
                             }
                             catch (Exception ex)
                             {
-
+                                result.DESCRIPTION = $"Email 發送失敗請人工通知。";
                             }
                         }
 
@@ -762,14 +768,13 @@ namespace Treasury.Web.Service.Actual
             SysSeqDao sysSeqDao = new SysSeqDao();
             string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             var cId = sysSeqDao.qrySeqNo("W", qPreCode).ToString().PadLeft(2, '0');
-
             //統一取系統時間
             DateTime dt = DateTime.Now;
             return new TREA_OPEN_REC()
             {
                 TREA_REGISTER_ID = $@"W{qPreCode}{cId}", //申請單號 W+系統日期YYYMMDD(民國年)+2碼流水號,
                 OPEN_TREA_TYPE = "2", //開庫類型: 指定時間開庫
-                OPEN_TREA_REASON = string.Join(";", data.vOPEN_TREA_REASON_ID.ToArray()),
+                OPEN_TREA_REASON = string.Join(";", data.vOPEN_TREA_REASON_ID),
                 OPEN_TREA_TIME = data.vOPEN_TREA_TIME,
                 EXEC_TIME_B = data.vEXEC_TIME_B,
                 EXEC_TIME_E = data.vEXEC_TIME_E,
@@ -783,6 +788,25 @@ namespace Treasury.Web.Service.Actual
                 OPEN_TREA_DATE = Convert.ToDateTime(data.vOPEN_TREA_DATE),
                 CREATE_UNIT = GetUserInfo(currentUserId).DPT_ID
             };
+        }
+
+        /// <summary>
+        /// 檢查開庫紀錄檔是否有狀態不為E01的單號
+        /// </summary>
+        /// <returns></returns>
+        public List<string> CheckRegisterId()
+        {
+            List<string> result = new List<string>();
+            string status = Ref.AccessProjectFormStatus.E01.ToString(); //已完成出入庫，通知申請人員
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking();
+                result = _TREA_OPEN_REC
+                    .Where(x => x.REGI_STATUS != status || x.APPR_STATUS != "4")
+                    .Select(x => x.TREA_REGISTER_ID).ToList();
+            }
+            result = null;   //測試用
+            return result;
         }
     }
 }

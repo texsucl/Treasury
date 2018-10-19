@@ -504,7 +504,7 @@ namespace Treasury.WebControllers
 
                                 break;
                             case "D":
-                                dRole = codeUserRoleDao.qryByKey(d.userId, d.roleId);
+                                dRole = codeUserRoleDao.qryByKey(cODEUSERO.USER_ID, d.roleId);
 
                                 //新增LOG
 

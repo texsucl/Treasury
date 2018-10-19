@@ -27,7 +27,7 @@ namespace Treasury.Web.Service.Actual
             var empty = new SelectOption() { Text = string.Empty, Value = string.Empty };
 
             BaseUserInfoModel user = GetUserInfo(cUserId); //填表人 資料
-            
+
             try
             {
                 using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
@@ -43,54 +43,10 @@ namespace Treasury.Web.Service.Actual
                         var today = DateTime.Today;
                         var now = DateTime.Now;
 
-                        //itemId = _CODE_USER_ROLE.AsNoTracking()
-                        //           .Where(x => x.USER_ID == cUserId) //登入者所擁有的角色
-                        //           .Join(_CODE_ROLE_ITEM.AsNoTracking()
-                        //           .Where(x => x.AUTH_TYPE == "1"),//表單申請權限=Y
-                        //           x => x.ROLE_ID,
-                        //           y => y.ROLE_ID,
-                        //           (x, y) => new { _CODE_ROLE_ITEM = y }
-                        //           ).Join(_CODE_ROLE.AsNoTracking()
-                        //           .Where(x => x.IS_DISABLED == "N"),
-                        //           x => x._CODE_ROLE_ITEM.ROLE_ID,
-                        //           z => z.ROLE_ID,
-                        //           (x, z) => new { _CODE_ROLE_ITEM = x }
-                        //           ).Join(_TREA_ITEM.AsNoTracking(),
-                        //           x => x._CODE_ROLE_ITEM._CODE_ROLE_ITEM.ITEM_ID,
-                        //           y => y.ITEM_ID,
-                        //           (x, y) => y
-                        //           ).Distinct()
-                        //           .AsEnumerable()
-                        //           .Select(x => x.ITEM_ID).ToList();
-
-                        //itemOpType = _CODE_USER_ROLE.AsNoTracking()
-                        //           .Where(x => x.USER_ID == cUserId) //登入者所擁有的角色
-                        //           .Join(_CODE_ROLE_ITEM.AsNoTracking()
-                        //           .Where(x => x.AUTH_TYPE == "1"),//表單申請權限=Y
-                        //           x => x.ROLE_ID,
-                        //           y => y.ROLE_ID,
-                        //           (x, y) => new { _CODE_ROLE_ITEM = y }
-                        //           ).Join(_CODE_ROLE.AsNoTracking()
-                        //           .Where(x => x.IS_DISABLED == "N"),
-                        //           x => x._CODE_ROLE_ITEM.ROLE_ID,
-                        //           z => z.ROLE_ID,
-                        //           (x, z) => new { _CODE_ROLE_ITEM = x }
-                        //           ).Join(_TREA_ITEM.AsNoTracking(),
-                        //           x => x._CODE_ROLE_ITEM._CODE_ROLE_ITEM.ITEM_ID,
-                        //           y => y.ITEM_ID,
-                        //           (x, y) => y
-                        //           ).Distinct()
-                        //           .AsEnumerable()
-                        //           .Select(x => new SelectOption()
-                        //           {
-                        //               Value = x.ITEM_OP_TYPE,
-                        //               Text = x.ITEM_OP_TYPE
-                        //           }).ToList();
-
                         itemId = (from T1 in _CODE_USER_ROLE
                                   join T2 in _CODE_ROLE_ITEM
                                   on T1.ROLE_ID equals T2.ROLE_ID
-                                  where T1.USER_ID == cUserId       
+                                  where T1.USER_ID == cUserId
                                   where T2.AUTH_TYPE == "1"
                                   join T3 in _CODE_ROLE
                                   on T2.ROLE_ID equals T3.ROLE_ID
@@ -102,19 +58,20 @@ namespace Treasury.Web.Service.Actual
                                   select G.Key).ToList();
 
                         itemOpType = (from T1 in _CODE_USER_ROLE
-                                  join T2 in _CODE_ROLE_ITEM
-                                  on T1.ROLE_ID equals T2.ROLE_ID
-                                  where T2.AUTH_TYPE == "1"
-                                  join T3 in _CODE_ROLE
-                                  on T2.ROLE_ID equals T3.ROLE_ID
-                                  join T4 in _TREA_ITEM
-                                  on T2.ITEM_ID equals T4.ITEM_ID
-                                  orderby T4.ITEM_ID
-                                  select new SelectOption()
-                                  {
-                                      Value = T4.ITEM_OP_TYPE,
-                                      Text = T4.ITEM_OP_TYPE
-                                  }).ToList();
+                                      join T2 in _CODE_ROLE_ITEM
+                                      on T1.ROLE_ID equals T2.ROLE_ID
+                                      where T2.AUTH_TYPE == "1"
+                                      join T3 in _CODE_ROLE
+                                      on T2.ROLE_ID equals T3.ROLE_ID
+                                      join T4 in _TREA_ITEM
+                                      on T2.ITEM_ID equals T4.ITEM_ID
+                                      orderby T4.ITEM_ID
+                                      where T4.ITEM_OP_TYPE != "3"
+                                      select new SelectOption()
+                                      {
+                                          Value = T4.ITEM_OP_TYPE,
+                                          Text = T4.ITEM_OP_TYPE
+                                      }).ToList();
 
                         itemOpType = itemOpType.Distinct(new SelectOption_Comparer()).OrderBy(x => x.Value).ToList();
 
@@ -122,7 +79,7 @@ namespace Treasury.Web.Service.Actual
 
                         item = _TREA_ITEM
                             .Where(x => x.ITEM_OP_TYPE == whichType)
-                            .Where(x => itemId.Contains(x.ITEM_ID))                          
+                            .Where(x => itemId.Contains(x.ITEM_ID))
                             .Select(x => new SelectOption()
                             {
                                 Value = x.ITEM_ID,
@@ -131,7 +88,7 @@ namespace Treasury.Web.Service.Actual
 
                         var whichItem = item.FirstOrDefault()?.Value;
                         var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whichItem)?.TREA_ITEM_NAME;
-                        
+
                         if (itemName != null)
                         {
                             var whichitemName = _TREA_ITEM
@@ -147,37 +104,6 @@ namespace Treasury.Web.Service.Actual
                                    Text = x.SEAL_DESC
                                }).ToList();
                         }
-
-                        //item = _CODE_USER_ROLE.AsNoTracking()
-                        //           .Where(x => x.USER_ID == cUserId) //登入者所擁有的角色
-                        //           .Join(_CODE_ROLE_ITEM.AsNoTracking()
-                        //           .Where(x => x.AUTH_TYPE == "1"),//表單申請權限=Y
-                        //           x => x.ROLE_ID,
-                        //           y => y.ROLE_ID,
-                        //           (x, y) => new { _CODE_ROLE_ITEM = y}
-                        //           ).Join(_CODE_ROLE.AsNoTracking()
-                        //           .Where(x => x.IS_DISABLED == "N"),
-                        //           x => x._CODE_ROLE_ITEM.ROLE_ID,
-                        //           z => z.ROLE_ID,
-                        //           (x, z) => new { _CODE_ROLE_ITEM = x}
-                        //           ).Join(db.TREA_ITEM.AsNoTracking(),
-                        //           x => x._CODE_ROLE_ITEM._CODE_ROLE_ITEM.ITEM_ID,
-                        //           y => y.ITEM_ID,
-                        //           (x, y) => y
-                        //           ).AsEnumerable()
-                        //           .Select(x => new SelectOption() {
-                        //               Value = x.ITEM_ID,
-                        //               Text = x.ITEM_DESC
-                        //           }).ToList();
-
-                        //storageType = db.SYS_CODE.AsNoTracking()
-                        //.Where(x => x.CODE_TYPE == "OPEN_TREA_TYPE")
-                        //.AsEnumerable()
-                        //.Select(x => new SelectOption()
-                        //{
-                        //    Value = x.CODE,
-                        //    Text = x.CODE_VALUE
-                        //}).ToList();
 
                         accessType = db.SYS_CODE.AsNoTracking()
                             .Where(x => x.CODE_TYPE == "ACCESS_TYPE")
@@ -205,57 +131,67 @@ namespace Treasury.Web.Service.Actual
                 throw ex;
             }
 
-            //try
-            //{
-            //    using (TreasuryDBEntities db = new TreasuryDBEntities())
-            //    {
-            //        storageType = db.SYS_CODE.AsNoTracking()
-            //            .Where(x => x.CODE_TYPE == "OPEN_TREA_TYPE")
-            //            .AsEnumerable()
-            //            .Select(x => new SelectOption()
-            //            {
-            //                Value = x.CODE,
-            //                Text = x.CODE_VALUE
-            //            }).ToList();
-
-            //        accessType = db.SYS_CODE.AsNoTracking()
-            //            .Where(x => x.CODE_TYPE == "ACCESS_TYPE")
-            //            .AsEnumerable()
-            //            .Select(x => new SelectOption()
-            //            {
-            //                Value = x.CODE,
-            //                Text = x.CODE_VALUE
-            //            }).ToList();
-
-            //        //item = db.TREA_ITEM.AsNoTracking()
-            //        //    .Select(x => new SelectOption()
-            //        //    {
-            //        //        Value = x.ITEM_ID,
-            //        //        Text = x.ITEM_DESC
-            //        //    }).ToList();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    var message = ex.exceptionMessage();
-            //    throw ex;
-            //}
-
             return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>, string, List<string>>(sealItem, accessType, item, itemOpType, registerId, itemId);
         }
 
-        public Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string>SealIdList, List<string> RowItemIdList, string ItemId = null)
+
+        /// <summary>
+        /// 查作業類型 & 印鑑內容下拉選單
+        /// </summary>
+        /// <param name="OpTypeId"></param>
+        /// <param name="ItemIdList"></param>
+        /// <param name="AccessType"></param>
+        /// <param name="SealIdList"></param>
+        /// <param name="RowItemIdList"></param>
+        /// <param name="ItemId"></param>
+        /// <returns></returns>
+        public Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string OpTypeId, List<string> ItemIdList, string AccessType, List<string> SealIdList, List<string> RowItemIdList, string ItemId = null, string RegisterId = null, string cUserId = null)
         {
             List<SelectOption> vItem = new List<SelectOption>();
             List<SelectOption> vSealItem = new List<SelectOption>();
             List<string> ItemIds = new List<string>();
-            if (!data.IsNullOrWhiteSpace())
+
+            if (!OpTypeId.IsNullOrWhiteSpace())
             {
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
+                    var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
+                        .Where(x => x.TREA_REGISTER_ID == RegisterId)
+                        .Where(x => x.APLY_STATUS == "C02");
+
+                    var _TREA_APLY_TEMP_ITEM_ID = db.TREA_APLY_TEMP.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == "D1023")?.ITEM_ID;
+                    if(_TREA_APLY_TEMP_ITEM_ID != null)
+                    {
+                        var _TREA_OPEN_REC_CREATE_UID = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == RegisterId)?.CREATE_UID;
+                        if(_TREA_OPEN_REC_CREATE_UID == cUserId)
+                               RowItemIdList.Add(_TREA_APLY_TEMP_ITEM_ID);
+                    }
+
+                    _TREA_APLY_REC.ToList().ForEach(x => {
+                        if (x.ITEM_ID != "D1023" && !RowItemIdList.Contains(x.ITEM_ID))
+                            RowItemIdList.Add(x.ITEM_ID);
+                        else if(x.ITEM_ID == "D1023" && x.APLY_UID == cUserId && !RowItemIdList.Contains(x.ITEM_ID))
+                            RowItemIdList.Add(x.ITEM_ID);
+
+                        var _TREA_ITEM_ForSealRemove = db.TREA_ITEM.AsNoTracking()
+                        .FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID);
+                        if(_TREA_ITEM_ForSealRemove.ITEM_OP_TYPE == "2")
+                        {
+                            var itemName = _TREA_ITEM_ForSealRemove.ITEM_OP_TYPE;
+
+                            var whereName = db.TREA_ITEM.AsNoTracking().Where(y => y.TREA_ITEM_NAME == itemName).ToString();
+
+                            var _ITEM_SEAL_ForSealRemove = db.ITEM_SEAL.AsNoTracking().Where(y => y.TREA_ITEM_NAME == whereName);
+                            _ITEM_SEAL_ForSealRemove.ToList().ForEach(y => {
+                                if (!SealIdList.Contains(y.ITEM_ID))
+                                    SealIdList.Add(y.ITEM_ID);
+                            });
+                        }
+                    });
+
                     var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
                     vItem = db.TREA_ITEM.AsNoTracking()
-                        .Where(x => x.ITEM_OP_TYPE == data)
+                        .Where(x => x.ITEM_OP_TYPE == OpTypeId)
                         .Where(x => ItemIdList.Contains(x.ITEM_ID))
                         .Where(x => !RowItemIdList.Contains(x.ITEM_ID))
                         .AsEnumerable()
@@ -288,6 +224,7 @@ namespace Treasury.Web.Service.Actual
                     //var whichitemName = _TREA_ITEM
                     //            .Where(x => x.TREA_ITEM_NAME == itemName)
                     //            .Select(x => x.ITEM_ID).ToList();
+                    
                     if (AccessType == "P")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
@@ -317,7 +254,7 @@ namespace Treasury.Web.Service.Actual
                           Text = x.SEAL_DESC
                       }).ToList();
                     }
-                    else if(AccessType == "S")
+                    else if (AccessType == "S")
                     {
                         vSealItem = db.ITEM_SEAL.AsNoTracking()
                      //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
@@ -337,7 +274,7 @@ namespace Treasury.Web.Service.Actual
                      //.Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
                      .Where(x => ItemIds.Contains(x.TREA_ITEM_NAME))
-                     .Where(x => x.INVENTORY_STATUS == "2")
+                     .Where(x => x.INVENTORY_STATUS == "6")
                      .AsEnumerable()
                      .Select(x => new SelectOption()
                      {
@@ -366,10 +303,11 @@ namespace Treasury.Web.Service.Actual
             return null;
         }
 
-        public Tuple<string, List<SelectOption>> GetItemOpType(string data, string AccessType, List<string> SealIdList,string ItemId = null)
+        public Tuple<string, List<SelectOption>> GetItemOpType(string data, string AccessType, List<string> SealIdList, string ItemId = null)
         {
             string vOpType = string.Empty;
             List<SelectOption> vitem = new List<SelectOption>();
+
             if (!data.IsNullOrWhiteSpace())
             {
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -383,12 +321,14 @@ namespace Treasury.Web.Service.Actual
                                 .Where(x => x.TREA_ITEM_NAME == itemName)
                                 .Select(x => x.ITEM_ID).ToList();
 
+
+
                     if (AccessType == "P")
                     {
                         vitem = db.ITEM_SEAL.AsNoTracking()
                        .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
-                       .Where(x => !SealIdList.Contains(x.ITEM_ID))
-                       //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
+                       .Where(x => !SealIdList.Contains(x.ITEM_ID))         //畫面已經有的印章
+                                                                            //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
                        .Where(x => x.INVENTORY_STATUS == "6")
                        .AsEnumerable()
                        .Select(x => new SelectOption()
@@ -397,7 +337,7 @@ namespace Treasury.Web.Service.Actual
                            Text = x.SEAL_DESC
                        }).ToList();
                     }
-                    else if(AccessType == "G")
+                    else if (AccessType == "G")
                     {
                         vitem = db.ITEM_SEAL.AsNoTracking()
                       .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
@@ -411,7 +351,7 @@ namespace Treasury.Web.Service.Actual
                           Text = x.SEAL_DESC
                       }).ToList();
                     }
-                    else if(AccessType == "S")
+                    else if (AccessType == "S")
                     {
                         vitem = db.ITEM_SEAL.AsNoTracking()
                       .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
@@ -431,7 +371,7 @@ namespace Treasury.Web.Service.Actual
                      .Where(x => whichitemName.Contains(x.TREA_ITEM_NAME))
                      .Where(x => !SealIdList.Contains(x.ITEM_ID))
                      //.Where(x => x.TREA_ITEM_NAME == ItemId, !ItemId.IsNullOrWhiteSpace())
-                     .Where(x => x.INVENTORY_STATUS == "2")
+                     .Where(x => x.INVENTORY_STATUS == "6")
                      .AsEnumerable()
                      .Select(x => new SelectOption()
                      {
@@ -465,7 +405,7 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public List<ConfirmStorageSearchDetailViewModel> GetSearchDetail(ConfirmStorageSearchViewModel data)
+        public List<ConfirmStorageSearchDetailViewModel> GetSearchDetail(ConfirmStorageSearchViewModel data, string cUserId = null)
         {
             List<ConfirmStorageSearchDetailViewModel> result = new List<ConfirmStorageSearchDetailViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -479,29 +419,44 @@ namespace Treasury.Web.Service.Actual
                 var _TREA_APLY_TEMP = db.TREA_APLY_TEMP.AsNoTracking().AsQueryable();
                 var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.AsNoTracking();
                 var _SYS_CODE = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "ACCESS_TYPE").ToList();
+                List<string> confirmItemIdList = new List<string>();
+                List<string> confirmAplyNoList = new List<string>();
 
-                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x =>x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
+                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
                 if (data.v_IS_CHECKED == null)  //是否已確認
                 {
+                    var _ConfirmData = db.TREA_APLY_REC.AsNoTracking().AsQueryable()
+                        .Where(x => x.APLY_STATUS == "C02")
+                        .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
+                        .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace()).ToList();
+                    _ConfirmData.ForEach(x => {
+                        if(x.ITEM_ID != "D1023" || (x.ITEM_ID == "D1023" && x.APLY_UID == cUserId)) //如果其他業務的申請人不是自己不用排除
+                            confirmItemIdList.Add(x.ITEM_ID);
+                    });
+                    
                     _TREA_APLY_REC = _TREA_APLY_REC
                    .Where(x => x.APLY_STATUS == "C01")
                    .Where(x => x.EXPECTED_ACCESS_DATE <= _vAPLY_DT_E, _vAPLY_DT_E != null)
                    .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
+                   .Where(x => !confirmItemIdList.Contains(x.ITEM_ID))
                    .Where(x => _TREA_ITEM.Contains(x.ITEM_ID))
                    .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace());
 
                     _TREA_APLY_TEMP = _TREA_APLY_TEMP
-                    .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID));
+                    .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
+                    .Where(x => !confirmItemIdList.Contains(x.ITEM_ID));
 
-                    _TREA_APLY_TEMP.ToList().ForEach(x => {
+                    _TREA_APLY_TEMP.ToList().ForEach(x =>
+                    {
                         var _ITeM_OP_TYPE = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE;
                         var _SEAL_ITEM = _ITEM_SEAL.Where(y => y.TREA_ITEM_NAME == x.ITEM_ID).ToList();
                         result.Add(new ConfirmStorageSearchDetailViewModel()
                         {
                             vITeM_OP_TYPE = _ITeM_OP_TYPE,
                             vITEM_ID = x.ITEM_ID,
-                            vITEM = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
-                        });
+                            vITEM = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC,
+                            hITEM = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
+                        });          
                     });
                 }
                 else
@@ -511,7 +466,6 @@ namespace Treasury.Web.Service.Actual
                    .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
                    .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace());
                 }
-
 
                 _TREA_APLY_REC.ToList().ForEach(x =>
                 {
@@ -534,8 +488,14 @@ namespace Treasury.Web.Service.Actual
                         vCONFIRM_DT = x.CONFIRM_DT?.ToString("yyyy/MM/dd HH:mm"),
                         vACCESS_REASON = x.APLY_STATUS == "C02" ? x.ACCESS_REASON : null,
                         hvAPLY_NO = x.APLY_NO,
+                        vAPLY_UID = x.APLY_UID,
+                        hCONFIRM_Name = GetUserInfo(x.CONFIRM_UID).EMP_Name,
+                        hCONFIRM_UID = x.CONFIRM_UID,
+                        hITEM = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                     });
+
                 });
+
                 result.ForEach(x => { x.uuid = Guid.NewGuid().ToString(); });
                 return result;
             }
@@ -642,11 +602,11 @@ namespace Treasury.Web.Service.Actual
                     //    });
                     //logStr += _APLY_REC_HIS.modelToString(logStr);
                     //#endregion
-   
+
                 }
                 if (result.RETURN_FLAG)
                 {
-                    result.Datas = GetSearchDetail(searchData);
+                    result.Datas = GetSearchDetail(searchData, data.vCurrentUid);
                 }
             }
             return result;
@@ -658,7 +618,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="searchData"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> UpdateData(ConfirmStorageInsertViewModel data, ConfirmStorageSearchViewModel searchData)
+        public MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> UpdateData(ConfirmStorageInsertViewModel data, ConfirmStorageSearchViewModel searchData, string APLY_NO)
         {
             var result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -668,13 +628,14 @@ namespace Treasury.Web.Service.Actual
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
                     string logStr = string.Empty;
-                    #region 申請單暫存檔
-                    var _TREA_APLY_TEMP = db.TREA_APLY_TEMP.FirstOrDefault(x => x.ITEM_ID == data.vITEM_ID);
-                    _TREA_APLY_TEMP.ACCESS_TYPE = data.vACCESS_TYPE;
-                    _TREA_APLY_TEMP.ACCESS_REASON = data.vACCESS_REASON;
+                    #region 申請單紀錄檔
+                    var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == APLY_NO);
+
+                    _TREA_APLY_REC.ACCESS_TYPE = data.vACCESS_TYPE;
+                    _TREA_APLY_REC.ACCESS_REASON = data.vACCESS_REASON;
                     #endregion
 
-                    logStr += _TREA_APLY_TEMP.modelToString(logStr);
+                    logStr += _TREA_APLY_REC.modelToString(logStr);
 
                     var validateMessage = db.GetValidationErrors().getValidateString();
                     if (validateMessage.Any())
@@ -707,7 +668,7 @@ namespace Treasury.Web.Service.Actual
                 }
                 if (result.RETURN_FLAG)
                 {
-                    result.Datas = GetSearchDetail(searchData);
+                    result.Datas = GetSearchDetail(searchData, data.vCurrentUid);
                 }
             }
             return result;
@@ -796,6 +757,9 @@ namespace Treasury.Web.Service.Actual
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
                     var TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == data.vAPLY_NO);
+                    //var _TREA_ITEM_TREA_ITEM_TYPE = db.TREA_ITEM.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == data.vITEM_ID)?.TREA_ITEM_TYPE;
+
+                    //if (_TREA_ITEM_TREA_ITEM_TYPE == "SEAL")
                     if (data.vITeM_OP_TYPE == "2")
                     {
                         var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.FirstOrDefault(x => x.APLY_NO == TREA_APLY_REC.APLY_NO);
@@ -814,7 +778,7 @@ namespace Treasury.Web.Service.Actual
                                 break;
                             //存入用印
                             case "A":
-                                _INVENTORY_STATUS = "2";
+                                _INVENTORY_STATUS = "6";
                                 break;
                             //取出存入
                             case "B":
@@ -822,10 +786,23 @@ namespace Treasury.Web.Service.Actual
                                 break;
                         }
                         _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
+                        logStr += _ITEM_SEAL.modelToString(logStr);
+                    }             
+                    var delete_APLY_REC_HIS = db.APLY_REC_HIS.RemoveRange(db.APLY_REC_HIS.Where(x => x.APLY_NO == TREA_APLY_REC.APLY_NO));
+                    logStr += delete_APLY_REC_HIS.modelToString(logStr);
+                    //if (data.vITeM_OP_TYPE == "1" || data.vITeM_OP_TYPE == "4")
+                    if (data.vITeM_OP_TYPE != "3")
+                    {
+                        var delete_TREA_APLY_REC = db.TREA_APLY_REC.Remove(TREA_APLY_REC);
+                        logStr += delete_TREA_APLY_REC.modelToString(logStr);
                     }
-                    db.APLY_REC_HIS.RemoveRange(db.APLY_REC_HIS.Where(x => x.APLY_NO == TREA_APLY_REC.APLY_NO));                
-                    var DeleteData = db.TREA_APLY_REC.Remove(TREA_APLY_REC);
-                    logStr += DeleteData.modelToString(logStr);            
+                    //if (data.vITeM_OP_TYPE == "2" || data.vITeM_OP_TYPE == "3")
+                    //{
+                    //    TREA_APLY_REC.TREA_REGISTER_ID = string.Empty;
+                    //    TREA_APLY_REC.APLY_STATUS = "C01";
+                    //    logStr += TREA_APLY_REC.modelToString(logStr);
+                    //}
+                    
                     var validateMessage = db.GetValidationErrors().getValidateString();
                     if (validateMessage.Any())
                     {
@@ -857,11 +834,11 @@ namespace Treasury.Web.Service.Actual
                     }
                 }
             }
-           
-            
+
+
             if (result.RETURN_FLAG)
             {
-                result.Datas = GetSearchDetail(searchData);
+                result.Datas = GetSearchDetail(searchData, data.vCurrentUid);
             }
             return result;
         }
@@ -873,7 +850,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchData"></param>
         /// <param name="viewData"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId,string register_ID)
+        public MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId, string register_ID)
         {
             var result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -888,17 +865,21 @@ namespace Treasury.Web.Service.Actual
                 bool _flag = true;
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
-                    data.ForEach(x => {
+                    var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == register_ID);
+                    data.ForEach(x =>
+                    {
                         var vItemId = x.Split(';')[0];
                         var vOpType = x.Split(';')[1];
                         var vAply = x.Split(';')[2];
-                        var rowdata = viewData.Where(y => y.vITEM_ID == vItemId)
-                        .Where(y => y.vITeM_OP_TYPE == vOpType)
-                        .Where(y => y.vAPLY_NO == vAply, !vAply.IsNullOrWhiteSpace())
-                        .FirstOrDefault();
+                        var vuuid = x.Split(';')[3];
+                        //var rowdata = viewData.Where(y => y.vITEM_ID == vItemId)
+                        //.Where(y => y.vITeM_OP_TYPE == vOpType)
+                        //.Where(y => y.vAPLY_NO == vAply, !vAply.IsNullOrWhiteSpace())
+                        //.FirstOrDefault();
+                        var rowdata = viewData.FirstOrDefault(y => y.uuid == vuuid);
 
                         if (_flag && vOpType == "2" && (
-                        rowdata.vSEAL_ITEM_ID.IsNullOrWhiteSpace() || 
+                        rowdata.vSEAL_ITEM_ID.IsNullOrWhiteSpace() ||
                         rowdata.vACCESS_TYPE_CODE.IsNullOrWhiteSpace()))
                         {
                             result.DESCRIPTION = "請輸入印章內容、作業別!!";
@@ -906,7 +887,7 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            if(_flag && vOpType == "4" && rowdata.vACCESS_REASON.IsNullOrWhiteSpace())
+                            if (_flag && vOpType == "4" && rowdata.vACCESS_REASON.IsNullOrWhiteSpace())
                             {
                                 result.DESCRIPTION = "請輸入入庫原因!!";
                                 _flag = false;
@@ -934,7 +915,7 @@ namespace Treasury.Web.Service.Actual
                                         });
                                     logStr += _APLY_REC_HIS.modelToString(logStr);
                                 }
-                                else if(_flag)
+                                else if (_flag)
                                 {
                                     SysSeqDao sysSeqDao = new SysSeqDao();
                                     string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
@@ -946,15 +927,17 @@ namespace Treasury.Web.Service.Actual
                                        {
                                            APLY_NO = applyNO,
                                            APLY_FROM = "M",
-                                           ITEM_ID =  vItemId,
+                                           ITEM_ID = vItemId,
                                            //ITEM_ID = vOpType == "2" ? vItemId + rowdata.vSEAL_ITEM_ID : vItemId,
                                            ACCESS_TYPE = vOpType == "2" ? rowdata.vACCESS_TYPE_CODE : null,
                                            ACCESS_REASON = vOpType == "4" ? rowdata.vACCESS_REASON : null,
                                            APLY_STATUS = applyStatus,
-                                           APLY_UID = cUserId,
+                                           APLY_UID = rowdata.vAPLY_UID == null? _TREA_OPEN_REC.CREATE_UID : rowdata.vAPLY_UID,
+                                           APLY_UNIT = rowdata.vAPLY_UID == null ? GetUserInfo(_TREA_OPEN_REC.CREATE_UID).DPT_ID : GetUserInfo(rowdata.vAPLY_UID).DPT_ID,
+                                           APLY_DT = rowdata.vAPLY_UID == null ? _TREA_OPEN_REC.CREATE_DT : now,
+                                           CREATE_UNIT = GetUserInfo(cUserId).DPT_ID,
                                            CONFIRM_UID = cUserId,
                                            CONFIRM_DT = now,
-                                           APLY_DT = now,
                                            CREATE_UID = cUserId,
                                            CREATE_DT = now,
                                            TREA_REGISTER_ID = register_ID
@@ -984,23 +967,23 @@ namespace Treasury.Web.Service.Actual
                                         #endregion
                                         var _ITEM_SEAL = db.ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == rowdata.vSEAL_ITEM_ID);
                                         var _INVENTORY_STATUS = string.Empty;
-                                       
-                                         switch (rowdata.vACCESS_TYPE_CODE)
+
+                                        switch (rowdata.vACCESS_TYPE_CODE)
                                         {
-                                                 //存入
+                                            //存入
                                             case "P":
                                                 _INVENTORY_STATUS = "9";
                                                 break;
-                                                //取出,用印
+                                            //取出,用印
                                             case "G":
                                             case "S":
                                                 _INVENTORY_STATUS = "5";
                                                 break;
-                                                //存入用印
+                                            //存入用印
                                             case "A":
-                                                _INVENTORY_STATUS = "3";
+                                                _INVENTORY_STATUS = "9";
                                                 break;
-                                                //取出存入
+                                            //取出存入
                                             case "B":
                                                 _INVENTORY_STATUS = "1";
                                                 break;
@@ -1008,13 +991,13 @@ namespace Treasury.Web.Service.Actual
                                         _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
                                         logStr += _ITEM_SEAL.modelToString(logStr);
                                     }
-
-                                    var _deleteData = db.TREA_APLY_TEMP.FirstOrDefault(y => y.ITEM_ID == rowdata.vITEM_ID);
-                                    if (_deleteData != null)
-                                    {
-                                        db.TREA_APLY_TEMP.Remove(_deleteData);
-                                        logStr += _deleteData.modelToString(logStr);
-                                    }
+                                    //不刪除temp 檔
+                                    //var _deleteData = db.TREA_APLY_TEMP.FirstOrDefault(y => y.ITEM_ID == rowdata.vITEM_ID);
+                                    //if (_deleteData != null)
+                                    //{
+                                    //    db.TREA_APLY_TEMP.Remove(_deleteData);
+                                    //    logStr += _deleteData.modelToString(logStr);
+                                    //}
                                 }
                             }
                         }
@@ -1055,11 +1038,31 @@ namespace Treasury.Web.Service.Actual
                 }
                 if (result.RETURN_FLAG)
                 {
-                    result.Datas  = GetSearchDetail(searchData);
+                    result.Datas = GetSearchDetail(searchData, cUserId);
                 }
                 return result;
             }
             return null;
+        }
+    
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cUserID"></param>
+        /// <returns></returns>
+        public bool CheckIsCreateUser(string cUserID, string RegisterId)
+        {
+            bool result = false;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TREA_OPEN_REC_CREATE_UID = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == RegisterId)?.CREATE_UID;
+                if (_TREA_OPEN_REC_CREATE_UID == cUserID)
+                    result = true;
+                else
+                    result = false;
+            }
+            return result;
         }
     }
 }

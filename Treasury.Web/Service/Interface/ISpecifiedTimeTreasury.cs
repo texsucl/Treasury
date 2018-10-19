@@ -82,5 +82,11 @@ namespace Treasury.Web.Service.Interface
         /// <param name="RegisterNo"></param>
         /// <returns></returns>
         List<SpecifiedTimeTreasuryApprReasonDetailViewModel> GetReasonDetail(List<string> RegisterNo);
+
+        /// <summary>
+        /// 檢查開庫紀錄檔是否有狀態不為E01的單號
+        /// </summary>
+        /// <returns></returns>
+        List<string> CheckRegisterId();
     }
 }

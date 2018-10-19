@@ -31,38 +31,17 @@ namespace Treasury.Web.Report.Data
                 var dtn = DateTime.Now.Date;
                 var _APLY_ODT_From = TypeTransfer.stringToDateTimeN(APLY_ODT_From);
                 var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To);
-
-               var _IRD=  db.ITEM_REFUNDABLE_DEP.AsNoTracking()//判斷是否在庫
+                
+                    var _IRD=  db.ITEM_REFUNDABLE_DEP.AsNoTracking()//判斷是否在庫
                      .Where(x=> x.INVENTORY_STATUS == "1" ,_APLY_DT == dtn )
                      .Where(x=> x.PUT_DATE <=_APLY_DT  && _APLY_DT < x.GET_DATE,_APLY_DT != dtn )
                      .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
-                     .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All").ToList()
+                     .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
+                    .Where(x=> x.PUT_DATE >= _APLY_ODT_From ,_APLY_ODT_From != null  )
+                    .Where(x=> x.PUT_DATE <= _APLY_ODT_To ,   _APLY_ODT_To != null  )
+                    .ToList()
                      ;
-                if( _IRD.Any() &&  ( _APLY_ODT_From != null ||_APLY_ODT_To != null)){
-                var items = _IRD.Select(x=>x.ITEM_ID).ToList();
-                var OIA   =   db.OTHER_ITEM_APLY.AsNoTracking() //利用物品編號去找申請單號
-                   .Where(x => items.Contains( x.ITEM_ID))
-                   .Select(x => x.APLY_NO).ToList();
-              var TAR=  db.TREA_APLY_REC.AsNoTracking() //利用申請單號判斷實際入庫時間,取得申請單號
-                    .Where(x => OIA.Contains(x.APLY_NO))
-                    .Where(x=> x.CONFIRM_DT >= _APLY_ODT_From ,_APLY_ODT_From != null  )
-                    .Where(x=> x.CONFIRM_DT <= _APLY_ODT_To ,   _APLY_ODT_To != null  )
-                    .Select(x=>x.APLY_NO).ToList();
-                //申請單號(APLY_NO) =>  入庫確認時間(CONFIRM_DT) 
-                //申請單號(APLY_NO) <=  物品編號(ITEM_ID)
-                    
-              var _OIAs = db.OTHER_ITEM_APLY.AsNoTracking()//用申請單號找到物品編號
-                  .Where(x =>TAR.Contains(x.APLY_NO))
-                  .Select(x => x.ITEM_ID).ToList();
-                      
-                var _IRD_Data = db.ITEM_REFUNDABLE_DEP.AsNoTracking()//用物品編號找到存出保證金明細資料
-                    .Where(x =>_OIAs.Contains(x.ITEM_ID)).ToList();                  
-                    _datas = _IRD_Data;             
-               }
-                else
-                {
                 _datas = _IRD;
-                }
                   var depts = new List<VW_OA_DEPT>();
                   var types = new List<SYS_CODE>(); 
                    using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
@@ -74,14 +53,14 @@ namespace Treasury.Web.Report.Data
                        types = dbt.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null).ToList();
 
                     }
-                   foreach(var Stockdata in _datas) 
+                   foreach(var Stockdata in _datas.OrderBy(x => x.MARGIN_DEP_TYPE).ThenBy(x => x.ITEM_ID).ThenBy(x => x.BOOK_NO).ThenBy(x => x.PUT_DATE).ThenBy(x => x.CHARGE_DEPT).ThenBy(x => x.CHARGE_SECT)) 
                     {
-                                ReportData = new DepositReportMarginpgData()
+                                ReportData = new DepositReportMarginpgData()   
                                 {
                                     MARGIN_DEP_TYPE = getMDTtype( types,Stockdata.MARGIN_DEP_TYPE),
                                     ITEM_ID =Stockdata.ITEM_ID,
                                     BOOK_NO =Stockdata.BOOK_NO,
-                                    PUT_DATE = Stockdata.PUT_DATE,
+                                    PUT_DATE =Stockdata.PUT_DATE,
                                     CHARGE_DEPT =getEmpName(depts,Stockdata.CHARGE_DEPT),
                                     CHARGE_SECT= getEmpName(depts,Stockdata.CHARGE_SECT),
                                     TRAD_PARTNERS = Stockdata.TRAD_PARTNERS,

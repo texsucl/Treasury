@@ -86,6 +86,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
                     <td >
                         <input type="button" id="CDCCAUpdateTemp" value="修改" class="btn btn-primary"  />
                     </td>
@@ -272,24 +278,30 @@
         }
 
         function formattervCA_Bank(cellvalue, options, rdata) {
-            if (rdata.vCA_Bank_AFT != null)
-                return '<span class="red">' + rdata.vCA_Bank_AFT + '</span>';
-            else
+            if (rdata.vCA_Bank_AFT == null)
                 return rdata.vCA_Bank || '';
+            else if (rdata.vCA_Bank_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vCA_Bank_AFT + '</span>';
         }
 
         function formattervCA_Number(cellvalue, options, rdata) {
-            if (rdata.vCA_Number_AFT != null)
-                return '<span class="red">' + rdata.vCA_Number_AFT + '</span>';
-            else
+            if (rdata.vCA_Number_AFT == null)
                 return rdata.vCA_Number || '';
+            else if (rdata.vCA_Number_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vCA_Number_AFT + '</span>';
         }
 
         function formattervCA_Memo(cellvalue, options, rdata) {
-            if (rdata.vCA_Memo_AFT != null)
-                return '<span class="red">' + rdata.vCA_Memo_AFT + '</span>';
-            else
+            if (rdata.vCA_Memo_AFT == null)
                 return rdata.vCA_Memo || '';
+            else if (rdata.vCA_Memo_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vCA_Memo_AFT + '</span>';
         }
 
         function formatterAct(cellvalue, options, rdata) {
@@ -493,6 +505,11 @@
         {
             if ($('#' + CDCCADialogFormId).valid())
             {
+                if ($('#' + tCDCCA_NumberId).val().trim().toUpperCase() == 'NULL')
+                {
+                    customerUtility.alert('號碼不可為空值', 'w');
+                    return
+                }
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
