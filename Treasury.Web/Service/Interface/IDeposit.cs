@@ -7,7 +7,7 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Interface
 {
-    public interface IDeposit : IApply, IAgency
+    public interface IDeposit : IApply, IAgency, ICDCAction
     {
         /// <summary>
         /// 幣別

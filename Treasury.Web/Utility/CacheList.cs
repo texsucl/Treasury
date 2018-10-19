@@ -259,7 +259,22 @@
         /// 資料庫異動股票畫面明細頁
         /// </summary>
         public static string CDCStockDataD { get; private set; }
-        
+
+        /// <summary>
+        /// 資料庫異動定期存單畫面(主檔)
+        /// </summary>
+        public static string CDCDepositDataM { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動定期存單畫面(明細)
+        /// </summary>
+        public static string CDCDepositDataD { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動定期存單畫面(明細儲存)
+        /// </summary>
+        public static string CDCDepositDataD_All { get; private set; }
+
         #endregion Cache資料
 
 
@@ -315,6 +330,9 @@
             CDCEstateData = "CDCEstateData";
             CDCStockDataM = "CDCStockDataM";
             CDCStockDataD = "CDCStockDataD";
+            CDCDepositDataM = "CDCDepositDataM";
+            CDCDepositDataD = "CDCDepositDataD";
+            CDCDepositDataD_All = "CDCDepositDataD_All";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料
