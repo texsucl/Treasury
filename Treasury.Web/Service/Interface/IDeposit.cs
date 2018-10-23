@@ -48,6 +48,15 @@ namespace Treasury.Web.Service.Interface
         List<Deposit_D> GetDataByTradPartners(string vTrad_Partners, string vAplyNo = null);
 
         /// <summary>
+        /// 使用 交易對象 抓取異動在庫定期單明細資料
+        /// </summary>
+        /// <param name="vTrad_Partners">交易對象</param>
+        /// <param name="vItemId">物品單號</param>
+        /// <param name="vData_Seq">明細流水號</param>
+        /// <returns></returns>
+        List<CDCDeposit_D> GetCDC_DataByTradPartners(string vTrad_Partners, string vItemId, string vData_Seq);
+
+        /// <summary>
         /// 查詢畫面資料
         /// </summary>
         /// <param name="vAplyUnit">申請單位</param>
