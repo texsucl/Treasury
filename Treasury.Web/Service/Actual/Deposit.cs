@@ -237,6 +237,57 @@ namespace Treasury.Web.Service.Actual
         }
 
         /// <summary>
+        /// 使用 交易對象 抓取異動在庫定期單明細資料
+        /// </summary>
+        /// <param name="vTrad_Partners">交易對象</param>
+        /// <param name="vItemId">物品單號</param>
+        /// <param name="vData_Seq">明細流水號</param>
+        /// <returns></returns>
+        public List<CDCDeposit_D> GetCDC_DataByTradPartners(string vTrad_Partners, string vItemId, string vData_Seq)
+        {
+            var result = new List<CDCDeposit_D>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                //庫存狀態
+                List<string> Status = new List<string> { "1", "3", "4", "8" };
+
+                //取得符合交易對象的物品編號
+                var ItemIdList = db.ITEM_DEP_ORDER_M.AsNoTracking()
+                    .Where(x => x.TRAD_PARTNERS == vTrad_Partners)
+                    .Where(x => Status.Contains(x.INVENTORY_STATUS))
+                    .Select(x => x.ITEM_ID).ToList();
+
+                int DataSeq = int.Parse(vData_Seq);
+
+                result = db.ITEM_DEP_ORDER_D.AsNoTracking()
+                    .Where(x => ItemIdList.Contains(x.ITEM_ID))
+                    .Where(x => x.ITEM_ID != vItemId && x.DATA_SEQ != DataSeq)
+                    .AsEnumerable()
+                    .Select(x => new CDCDeposit_D()
+                    {
+                        vItemId = x.ITEM_ID,
+                        vData_Seq = x.DATA_SEQ.ToString(),
+                        vDep_No_Preamble = x.DEP_NO_PREAMBLE,
+                        vDep_No_Preamble_Aft = x.DEP_NO_PREAMBLE_AFT,
+                        vDep_No_B = x.DEP_NO_B,
+                        vDep_No_B_Aft = x.DEP_NO_B_AFT,
+                        vDep_No_E = x.DEP_NO_E,
+                        vDep_No_E_Aft = x.DEP_NO_E_AFT,
+                        vDep_No_Tail = x.DEP_NO_TAIL,
+                        vDep_No_Tail_Aft = x.DEP_NO_TAIL_AFT,
+                        vDep_Cnt = x.DEP_CNT,
+                        vDep_Cnt_Aft = x.DEP_CNT_AFT,
+                        vDenomination = x.DENOMINATION,
+                        vDenomination_Aft = x.DENOMINATION_AFT,
+                        vSubtotal_Denomination = x.SUBTOTAL_DENOMINATION,
+                        vSubtotal_Denomination_Aft = x.SUBTOTAL_DENOMINATION_AFT
+                    }).ToList();
+
+            }
+
+            return result;
+        }
+        /// <summary>
         /// 查詢畫面資料
         /// </summary>
         /// <param name="vAplyUnit">申請單位</param>
@@ -505,9 +556,9 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
-                        //.Where(x => x.COMMIT_DATE == Commit_Date, searchModel.vCommit_Date != null)
-                        //.Where(x => x.EXPIRY_DATE == Expiry_Date, searchModel.vExpiry_Date != null)
-                        .Where(x => x.TRAD_PARTNERS == searchModel.vTRAD_Partners, searchModel.vTRAD_Partners != null)
+                        .Where(x => x.COMMIT_DATE == Commit_Date, searchModel.vCommit_Date != null)
+                        .Where(x => x.EXPIRY_DATE == Expiry_Date, searchModel.vExpiry_Date != null)
+                        .Where(x => x.TRAD_PARTNERS == searchModel.vTRAD_Partners, searchModel.vTRAD_Partners != "All")
                         .AsEnumerable()
                         .Select((x) => new CDCDeposit_M()
                         {

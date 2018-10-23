@@ -565,8 +565,15 @@ namespace Treasury.WebUtility
             if (oldpar.IsNullOrWhiteSpace() && !value.IsNullOrWhiteSpace())
                 return new Tuple<string, bool>(value,true);
             if (!oldpar.IsNullOrWhiteSpace() && !value.IsNullOrWhiteSpace() && (oldpar == value))
-                return new Tuple<string, bool>(null, false); ;
+                return new Tuple<string, bool>(null, false); 
             return new Tuple<string, bool>(value, true);
+        }
+
+        public static Tuple<Decimal?, bool> CheckAFT(this Decimal value, decimal oldpar)
+        {
+            if (oldpar == value)
+                return new Tuple<Decimal?, bool>(null, false);
+            return new Tuple<Decimal?, bool>(value, true);
         }
 
         public static string formateThousand(this string value)

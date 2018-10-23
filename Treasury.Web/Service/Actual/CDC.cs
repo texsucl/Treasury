@@ -87,7 +87,12 @@ namespace Treasury.Web.Service.Actual
             result.vMarginp = dMargin_Take_Of_Type;
             result.vBook_No = new Estate().GetBuildName();
             result.vName = new Stock().GetStockName();
-            result.vTRAD_Partners = new Deposit().GetTRAD_Partners();
+            var TRAD_PartnersList = new List<SelectOption>()
+            {
+                new SelectOption() { Text = "All", Value = "All" }
+            };
+            TRAD_PartnersList.AddRange(new Deposit().GetTRAD_Partners());
+            result.vTRAD_Partners = TRAD_PartnersList;
 
             return result;
         }
