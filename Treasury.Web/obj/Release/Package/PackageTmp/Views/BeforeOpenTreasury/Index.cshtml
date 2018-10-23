@@ -24,7 +24,7 @@
                                 <label>開庫類型 : </label>
                             </td>
                             <td>
-                                @Html.DropDownList("dOpen_Trea_Type", (SelectList)ViewBag.dOpen_Trea_Type)
+                                <label id="lOpen_Trea_Type">@ViewBag.lOpen_Trea_Type</label>
                             </td>
                             <td rowspan="2">
                                 <input type="button" class="TAInsert btn btn-primary" id="BOT_Draft" value="產生底稿" />
@@ -71,7 +71,6 @@
 
         //#region 參數設定
         var BOT_FormId = 'BOT_Form'; //formId
-        var BOT_Open_Trea_Type = 'dOpen_Trea_Type'; //開庫類型Id
         var BOT_Trea_Register_Id = 'lTrea_Register_Id'; //金庫登記簿單號Id
 
         //#endregion 參數設定
@@ -92,10 +91,7 @@
         }
         else {
             //#region 初始設定
-            if('@ViewBag.ShowRoutine' == 'True')
-            {
-                RoutineGrid();
-            }
+            RoutineGrid();
             StorageGrid();
             //#endregion 初始設定
 
@@ -111,22 +107,6 @@
                     case 'BOT_Print':
                         $('#' + id).off('click');
                         $('#' + id).on('click', function () { PrintFun(); });
-                        break;
-                }
-            });
-
-            //開庫類型選取
-            $('#' + BOT_Open_Trea_Type).on('change', function () {
-                switch ($('#' + BOT_Open_Trea_Type).val()) {
-                    case "1"://例行性開庫
-                        $("#BOTjqgridDiv_Routine").show();
-                        if('@ViewBag.ShowRoutine' == 'True')
-                        {
-                            RoutineGrid();
-                        }
-                        break;
-                    case "2"://指定時間開庫
-                        $("#BOTjqgridDiv_Routine").hide();
                         break;
                 }
             });
@@ -188,12 +168,9 @@
         //產生底稿
         function DraftFun()
         {
-            if ($('#' + BOT_Open_Trea_Type).val() == "1") {
-                if ('@ViewBag.ShowRoutine' == 'True') {
-                    if (!confirm('每日例行出入庫項目尚有人未執行〈入庫人員申請確認作業〉，確認要存檔嗎? '))
-                    {
-                        return false;
-                    }
+            if ('@ViewBag.ShowRoutine' == 'True') {
+                if (!confirm('每日例行出入庫項目尚有人未執行〈入庫人員申請確認作業〉，確認要存檔嗎? ')) {
+                    return false;
                 }
             }
 

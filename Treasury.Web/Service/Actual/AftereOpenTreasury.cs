@@ -35,6 +35,7 @@ namespace Treasury.Web.Service.Actual
             string firstItemOpType = string.Empty;
             string firstTreaItem = string.Empty;
             string status = Ref.AccessProjectFormStatus.D01.ToString(); // 金庫登記簿檢核
+            string statusFromReject = Ref.AccessProjectFormStatus.D04.ToString(); // 金庫登記簿覆核退回
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
@@ -48,6 +49,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => !x.TREA_REGISTER_ID.IsNullOrWhiteSpace())
                     .Where(x => x.CREATE_DT >= DateTime.Today && x.CREATE_DT < DateTime.Today.AddDays(1))
                     .Where(x => x.REGI_STATUS == status)
+                    .Where(x => x.REGI_STATUS == statusFromReject)
                     //.Where(x => x.ACTUAL_PUT_TIME == null)
                     .OrderBy(x => x.OPEN_TREA_TIME)
                     .AsEnumerable()
@@ -77,7 +79,7 @@ namespace Treasury.Web.Service.Actual
                         Text = x.ITEM_DESC
                     }).ToList();
 
-                firstTreaItem = treaItem.FirstOrDefault().Value;
+                firstTreaItem = treaItem.FirstOrDefault()?.Value;
 
                 actualAccessEmps = GetActualUserOption(firstTreaItem);
 
@@ -92,7 +94,7 @@ namespace Treasury.Web.Service.Actual
                         Text = x.CODE_VALUE
                     }).ToList();
 
-                string firstAccessType = accessType.FirstOrDefault().Value;
+                string firstAccessType = accessType.FirstOrDefault()?.Value;
 
 
                 switch (firstAccessType)
@@ -205,7 +207,7 @@ namespace Treasury.Web.Service.Actual
                             break;
                         case "A":
                             vSealItem = _ITEM_SEAL
-                               .Where(x => x.INVENTORY_STATUS == "2")
+                               .Where(x => x.INVENTORY_STATUS == "6")
                                .AsEnumerable()
                                .Select(x => new SelectOption()
                                {
@@ -606,16 +608,17 @@ namespace Treasury.Web.Service.Actual
                         case "P":
                             _INVENTORY_STATUS = "9";
                             break;
-                        //取出,用印
+                        //取出
                         case "G":
                             _INVENTORY_STATUS = "5";
                             break;
+                        //用印
                         case "S":
                             _INVENTORY_STATUS = "5";
                             break;
                         //存入用印
                         case "A":
-                            _INVENTORY_STATUS = "3";
+                            _INVENTORY_STATUS = "9";
                             break;
                         //取出存入
                         case "B":

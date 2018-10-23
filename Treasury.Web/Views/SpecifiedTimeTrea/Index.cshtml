@@ -191,12 +191,14 @@
             UrlFor.InsertApply = '@Url.Action("InsertApply", "SpecifiedTimeTrea")';
             UrlFor.CancelApply = '@Url.Action("CancelApply", "SpecifiedTimeTrea")';
             UrlFor.UpdateApply = '@Url.Action("UpdateApply", "SpecifiedTimeTrea")';
+            UrlFor.CheckRegisterId = '@Url.Action("CheckRegisterId", "SpecifiedTimeTrea")';
             //#endregion
             // region 變數設定 name
             var SearchFormId = 'specidiedSubmitForm';
             var APLY_DT_FromId = 'APLY_DT_From';
             var APLY_DT_ToId = 'APLY_DT_To';
             var TREA_REGISTER_ID = 'TREA_REGISTER_ID';
+            var WorkType1 = 'WorkType1';
             //#endregion
 
             var opScope = '@Html.Raw(ViewBag.opScope)';
@@ -265,8 +267,9 @@
                         timeFormat: 'H:i',
                         step: 10,
                         minTime: '8:00',
-                        maxTime: '23:00',
-                        defaultTime: '8:00',
+                        maxTime: '23:50',
+                        //defaultTime: '8:00',
+                        scrollDefault: 'now',
                         startTime: '08:00',
                         dynamic: false,
                         dropdown: true,
@@ -331,8 +334,7 @@
                         $('#' + whitchDialog + '_INTRADATE_ID').val(today).prop('disabled', true);
                         $('#' + whitchDialog + '_CASENO_ID').val('@ViewBag.emailId').prop('disabled', true);
                         $('#' + whitchDialog + '_Apply_ID').click(function () { ApplyReview(whitchDialog); });
-
-                        $('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
+                        //$('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
                         break;
                     case "Update":             
                         //產生取消申請btn
@@ -353,22 +355,53 @@
                             $('#' + whitchDialog + '_INTRADATE_ID').prop('disabled', true);
                             $('#' + whitchDialog + '_CASENO_ID').prop('disabled', true);
                             if (applyStatus == "1") {
-                                $('#' + whitchDialog + '_Cancel_ID').val('作廢');
+                                $('#' + whitchDialog + '_Cancel_ID').val('刪除/作廢');
                             }
                             if (currentUserId == data.vCREATE_UID) {
                                 $('#' + whitchDialog + '_Apply_ID').click(function () { UpdateReview(whitchDialog, data); });
                                 $('#' + whitchDialog + '_Cancel_ID').click(function () { CancelReview(whitchDialog, data); });    
                             }   
-                            $('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
+                            //$('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
                         }
                         else {
                             $('#SSTADDDialog input:text').prop('disabled', true);
                             $('#' + whitchDialog + '_Apply_ID').prop('disabled', true);
                             $('#' + whitchDialog + '_Cancel_ID').prop('disabled', true);
-                            $('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
-                        }                 
-                        break;
+                            //$('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
+                        }
                 }
+                var _typeChecked_B = [];
+                $('#SSTInsertDetail').find('input[type="checkbox"]:checked').each(function () {
+                    _typeChecked_B.push($(this).val());
+                });
+
+                $('#' + whitchDialog + '_Close_ID').click(function () {
+                    var _typeChecked_A = [];
+                    $('#SSTInsertDetail').find('input[type="checkbox"]:checked').each(function () {
+                        _typeChecked_A.push($(this).val());
+                    });
+                    if (JSON.stringify(_typeChecked_B) !== JSON.stringify(_typeChecked_A)) {
+                        if (confirm("暫存資料尚未申請覆核，是否繼續動作")) {
+                            $('#SSTADDDialog').dialog("close");
+                        }
+                    }
+                    else {
+                        $('#SSTADDDialog').dialog("close");
+                    }
+                    
+                });
+                SetChecked(WorkType1);
+            }
+            //#endregion
+            //region 金庫大門、柵門、密碼打勾
+            function SetChecked(checkBoxName) {
+                $('input:checkbox[name=' + checkBoxName + ']').each(function () {
+                    var tempVal = $(this).val();
+                    if (tempVal == 'D1001' || tempVal == 'D1002' || tempVal == 'D1003') {
+                        $(this).prop("checked", true);
+                        $(this).prop("disabled", true);
+                    }
+                });
             }
             //#endregion
             //region 驗證日期
@@ -449,6 +482,22 @@
             //#endregion
             //region 傳送事件
             function formInsert(whitchMethod, data) {
+                //查詢是否有未完成的單號
+                $.ajax({
+                    type: 'POST',
+                    data: null,
+                    url: UrlFor.CheckRegisterId,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (!result.RETURN_FLAG) {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                        $('#SSTADDDialog').dialog("close");
+                        $('#STT_Insert').prop('disabled', true);
+                        return false;
+                    } else {
+                        $('#STT_Insert').prop('disabled', false);
+                    }
+                });
                 //開啟Dialog
                 openSSTDialog("指定時間開庫-新增作業", 800, 'SSTADDDialog', false, false);
                 getDialogElement(whitchMethod, data);

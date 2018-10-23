@@ -690,7 +690,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
                     var aplyStatus = Ref.AccessProjectFormStatus.B01.ToString(); // 狀態 => 申請單位覆核完成，保管科確認中
-                    if (Properties.Settings.Default["CustodianFlag"]?.ToString() == _TREA_APLY_REC.CREATE_UID)
+                    if (Properties.Settings.Default["CustodianFlag"]?.ToString() == _TREA_APLY_REC.CREATE_UNIT)
                        //新增人員等於保管科人員 狀態 => 入庫確認中
                     {
                         aplyStatus = Ref.AccessProjectFormStatus.C01.ToString();

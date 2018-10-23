@@ -1,0 +1,731 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div id="CDC_Estate_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+    </div>
+    <div style="text-align:center;display:none;" class="CDC_Estate_Act">
+        <input type="button" id="CDC_EstateApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDC_EstateBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDC_EstateDialog" style="display:none;">
+        <form id="CDC_EstateDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="lPut_Date" name="lPut_Date"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="lAply_Uid_Name" name="lAply_Uid_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <lable id="lCharge_Name" name="lCharge_Name"></lable>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>冊號 : </label>
+                    </td>
+                    <td>
+                        <label id="lIB_Book_No" name="lIB_Book_No"></label>
+                    </td>
+                    <td>
+                        <label>大樓名稱 : </label>
+                    </td>
+                    <td>
+                        <label id="lIB_Building_Name" name="lIB_Building_Name"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>坐落 : </label>
+                    </td>
+                    <td>
+                        <label id="lIB_Located" name="lIB_Located"></label>
+                    </td>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tIB_Memo" style="width:207px" maxlength="200" disabled="disabled"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>狀別 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dEstate_From_No", (SelectList)ViewBag.dEstate_From_No, new { @class = "CDC_EstateUpdateType", @style = "width:207px" })
+                        <span class="red" style="padding-left:20px" id="sEstate_From_No"></span>
+                    </td>
+                    <td>
+                        <label>發狀日 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tEstate_Date" class="CDC_EstateUpdateType land build otherRight" />
+                        <span class="red" style="padding-left:20px" id="sEstate_Date"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>字號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tOwnership_Cert_No" class="CDC_EstateUpdateType land build otherRight" maxlength="16" />
+                        <span class="red" style="padding-left:20px" id="sOwnership_Cert_No"></span>
+                    </td>
+                    <td>
+                        <label>地/建號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tLand_Building_No" class="CDC_EstateUpdateType land build other" maxlength="10" />
+                        <span class="red" style="padding-left:20px" id="sLand_Building_No"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>門牌號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tHouse_No" class="CDC_EstateUpdateType build" maxlength="30" />
+                        <span class="red" style="padding-left:20px" id="sHouse_No"></span>
+                    </td>
+                    <td>
+                        <label>流水號/編號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tEstate_Seq" class="CDC_EstateUpdateType land build otherRight other" maxlength="16" />
+                        <span class="red" style="padding-left:20px" id="sEstate_Seq"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="tMemo" class="CDC_EstateUpdateType otherRight other" style="width:207px" maxlength="200"></textarea>
+                        <span class="red" style="padding-left:20px" id="sMemo"></span>
+                    </td>
+                    <td colspan="2">
+                        <input type="hidden" id="hItemId" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" id="CDC_EstateUpdateTemp" value="修改" class="btn btn-primary" />
+                    </td>
+                    <td colspan="2" style="text-align:right;">
+                        <input type="button" id="CDC_EstateCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDC_EstateUrl = {};
+        CDC_EstateUrl.getData = '@Url.Action("GetCDCCacheData", "Estate")';
+        CDC_EstateUrl.UpdateDbData = '@Url.Action("UpdateDbData", "Estate")';
+        CDC_EstateUrl.ApplyDbData = '@Url.Action("ApplyDbData", "Estate")';
+        CDC_EstateUrl.RepeatDbData = '@Url.Action("RepeatDbData", "Estate")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var CDC_EstateDialogId = 'CDC_EstateDialog'; //dialogId
+        var CDC_EstateFormId = 'CDC_EstateDialogForm'; //formId
+        var CDC_EstatePut_Date = 'lPut_Date';//入庫日期Id
+        var CDC_EstateAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
+        var CDC_EstateCharge_Name = 'lCharge_Name';//權責單位Id
+        var CDC_EstateIB_Book_No = 'lIB_Book_No';//冊號Id
+        var CDC_EstateIB_Building_Name = 'lIB_Building_Name';//大樓名稱Id
+        var CDC_EstateIB_Located = 'lIB_Located';//坐落Id
+        var CDC_EstateIB_Memo = 'tIB_Memo';//備註Id
+
+        var CDC_Estate_Form_No = 'dEstate_From_No';//狀別Id
+        var CDC_Estate_Form_No_Aft = 'sEstate_From_No';//狀別_異動後Id
+        var CDC_Estate_Date = 'tEstate_Date';//發狀日Id
+        var CDC_Estate_Date_Aft = 'sEstate_Date';//發狀日_異動後Id
+        var CDC_Ownership_Cert_No = 'tOwnership_Cert_No';//字號Id
+        var CDC_Ownership_Cert_No_Aft = 'sOwnership_Cert_No';//字號_異動後Id
+        var CDC_Land_Building_No = 'tLand_Building_No';//地/建號Id
+        var CDC_Land_Building_No_Aft = 'sLand_Building_No';//地/建號_異動後Id
+        var CDC_House_No = 'tHouse_No';//門牌號Id
+        var CDC_House_No_Aft = 'sHouse_No';//門牌號_異動後Id
+        var CDC_Estate_Seq = 'tEstate_Seq';//流水號/編號Id
+        var CDC_Estate_Seq_Aft = 'sEstate_Seq';//流水號/編號_異動後Id
+        var CDC_Memo = 'tMemo';//備註Id
+        var CDC_Memo_Aft = 'sMemo';//備註_異動後Id
+        var CDC_ItemId = 'hItemId';//物品單號Id
+
+
+        var CDC_Estate_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDC_Estate_Act_Type)
+            $('.CDC_Estate_Act').show(); //申請異動主畫面進來
+
+        var CDC_Estate_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDC_Estate_ApplyFlag)
+            $('#CDC_EstateApply').hide();
+
+        var CDC_EstateConfirmFlag = false; //離開時提醒訊息
+
+        //#endregion 參數設定
+
+        //#region 初始動作
+        CDC_EstateDbGrid();
+        setEstateVerified();
+        //#endregion 初始動作
+
+        //#region 註冊verified
+        function setEstateVerified() {
+            created.createDatepicker(CDC_Estate_Date, null);
+        }
+        //#endregion 註冊verified
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDC_EstateApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDC_EstateApplyFun(); });
+                    break;
+                case 'CDC_EstateBack':
+                case 'CDC_EstateCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'CDC_EstateBack' &&
+                                CDC_EstateConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+                case 'CDC_EstateUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDC_EstateUpdateTempFun(); });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        //#region function
+
+        //#endregion dialog
+        function dialogOpen(type, rowid) {
+            var listId = 'CDC_EstateTempList';
+            var EstateUpdateClass = 'CDC_EstateUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDC_EstateDialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '不動產權狀',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDC_EstateUpdateTemp').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#CDC_EstateUpdateTemp').show();
+                $('.' + EstateUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + EstateUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDC_EstateDialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            $('#' + CDC_EstatePut_Date).text('');
+            $('#' + CDC_EstateAply_Uid_Name).text('');
+            $('#' + CDC_EstateCharge_Name).text('');
+            $('#' + CDC_EstateIB_Book_No).text('');
+            $('#' + CDC_EstateIB_Building_Name).text('');
+            $('#' + CDC_EstateIB_Located).text('');
+            $('#' + CDC_EstateIB_Memo).val('');
+            $('#' + CDC_EstateIB_Memo).val('');
+
+            if ($('#' + CDC_Estate_Form_No + ' option').length > 0) {
+                $('#' + CDC_Estate_Form_No).val($($('#' + CDC_Estate_Form_No + ' option')[0]).val())
+            }
+            $('#' + CDC_Estate_Form_No_Aft).text('');
+            $('#' + CDC_Estate_Date).val('');
+            $('#' + CDC_Estate_Date_Aft).text('');
+            $('#' + CDC_Ownership_Cert_No).val('');
+            $('#' + CDC_Ownership_Cert_No_Aft).text('');
+            $('#' + CDC_Land_Building_No).val('');
+            $('#' + CDC_Land_Building_No_Aft).text('');
+            $('#' + CDC_House_No).val('');
+            $('#' + CDC_House_No_Aft).text('');
+            $('#' + CDC_Estate_Seq).val('');
+            $('#' + CDC_Estate_Seq_Aft).text('');
+            $('#' + CDC_Memo).val('');
+            $('#' + CDC_Memo_Aft).text('');
+            $('#' + CDC_ItemId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + CDC_EstatePut_Date).text(data.vPut_Date);
+                $('#' + CDC_EstateAply_Uid_Name).text(data.vAply_Uid_Name);
+                $('#' + CDC_EstateCharge_Name).text(data.vCharge_Name);
+                $('#' + CDC_EstateIB_Book_No).text(data.vIB_Book_No);
+                $('#' + CDC_EstateIB_Building_Name).text(data.vIB_Building_Name);
+                $('#' + CDC_EstateIB_Located).text(data.vIB_Located);
+                $('#' + CDC_EstateIB_Memo).val(data.vIB_Memo);
+
+                $('#' + CDC_Estate_Form_No).val(data.vEstate_Form_No);
+                $('#' + CDC_Estate_Form_No_Aft).text(data.vEstate_Form_No_Aft);
+                $('#' + CDC_Estate_Date).val(data.vEstate_Date);
+                $('#' + CDC_Estate_Date_Aft).text(data.vEstate_Date_Aft);
+                $('#' + CDC_Ownership_Cert_No).val(data.vOwnership_Cert_No);
+                $('#' + CDC_Ownership_Cert_No_Aft).text(data.vOwnership_Cert_No_Aft);
+                $('#' + CDC_Land_Building_No).val(data.vLand_Building_No);
+                $('#' + CDC_Land_Building_No_Aft).text(data.vLand_Building_No_Aft);
+                $('#' + CDC_House_No).val(data.vHouse_No);
+                $('#' + CDC_House_No_Aft).text(data.vHouse_No_Aft);
+                $('#' + CDC_Estate_Seq).val(data.vEstate_Seq);
+                $('#' + CDC_Estate_Seq_Aft).text(data.vEstate_Seq_Aft);
+                $('#' + CDC_Memo).val(data.vMemo);
+                $('#' + CDC_Memo_Aft).text(data.vMemo_Aft);
+                $('#' + CDC_ItemId).val(data.vItemId);
+            }
+        }
+        //#region dialog
+
+
+        //#region jqgrid
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCEstate' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCEstate' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCEstate' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                            <text>
+                case '@item.Value':
+                    return '@item.Text';
+                    </text>
+                        }
+                    }
+                default:
+                    return '';
+            }
+        }
+
+        function formattervIB_Book_No_Name(cellvalue, options, rdata) {
+            switch (rdata.vIB_Book_No) {
+                @{
+                        foreach (var item in ((SelectList)ViewBag.dEstate_Building_Name))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                }
+                default:
+                    return '';
+            }
+        }
+
+        function formattervEstate_Form_No(cellvalue, options, rdata) {
+            if (rdata.vEstate_Form_No_Aft != null) {
+                switch (rdata.vEstate_Form_No_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dEstate_From_No))
+                         {
+                            <text>
+                            case '@item.Value':
+                            return '<span class="red">' + '@item.Text' + '</span>';
+                            </text>
+                         }
+                    }
+                }
+            } else {
+                switch (rdata.vEstate_Form_No) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dEstate_From_No))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function unformattervEstate(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formattervEstate_Date(cellvalue, options, rdata) {
+            if (rdata.vEstate_Date_Aft == null)
+                return rdata.vEstate_Date || '';
+            else if (rdata.vEstate_Date_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vEstate_Date_Aft + '</span>';
+        }
+
+        function formattervOwnership_Cert_No(cellvalue, options, rdata) {
+            if (rdata.vOwnership_Cert_No_Aft == null)
+                return rdata.vOwnership_Cert_No || '';
+            else if (rdata.vOwnership_Cert_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else 
+                return '<span class="red">' + rdata.vOwnership_Cert_No_Aft + '</span>';
+        }
+
+        function formattervLand_Building_No(cellvalue, options, rdata) {
+            if (rdata.vLand_Building_No_Aft == null)
+                return rdata.vLand_Building_No || '';
+            else if (rdata.vLand_Building_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vLand_Building_No_Aft + '</span>';
+        }
+
+        function formattervHouse_No(cellvalue, options, rdata) {
+            if (rdata.vHouse_No_Aft == null)
+                return rdata.vHouse_No || '';
+            else if (rdata.vHouse_No_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vHouse_No_Aft + '</span>';
+        }
+
+        function formattervEstate_Seq(cellvalue, options, rdata) {
+            if (rdata.vEstate_Seq_Aft == null)
+                return rdata.vEstate_Seq || '';
+            else if (rdata.vEstate_Seq_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vEstate_Seq_Aft + '</span>';
+        }
+
+        function formattervMemo(cellvalue, options, rdata) {
+            if (rdata.vMemo_Aft == null)
+                return rdata.vMemo || '';
+            else if (rdata.vMemo_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_Aft + '</span>';
+        }
+
+        function CDC_EstateTempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_EstateRepeat(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1') {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDC_EstateRepeat(listId, rowid) {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDC_EstateUrl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDC_EstateDbGrid();
+                    CDC_EstateConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        function CDC_EstateDbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+                '冊號', '群組編號', '大樓名稱', '坐落', '備註',
+                '狀別', '發狀日', '字號', '地/建號', '門牌號', '流水號/編號', '備註',
+                '狀別異動前', '發狀日異動前', '字號異動前', '地/建號異動前', '門牌號異動前', '流水號/編號異動前', '備註異動前',
+                '狀別異動後', '發狀日異動後', '字號異動後', '地/建號異動後', '門牌號異動後', '流水號/編號異動後', '備註異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
+            colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+
+            colModelArray.push({ name: "vIB_Book_No_Name", index: "vIB_Book_No_Name", width: 200, sortable: false, align: 'center', formatter: formattervIB_Book_No_Name, unformatter: unformattervEstate });
+            colModelArray.push({ name: "vIB_Book_No", index: "vIB_Book_No", hidden: true });
+            colModelArray.push({ name: "vIB_Building_Name", index: "vIB_Building_Name", hidden: true });
+            colModelArray.push({ name: "vIB_Located", index: "vIB_Located", hidden: true });
+            colModelArray.push({ name: "vIB_Memo", index: "vIB_Memo", hidden: true });
+
+            colModelArray.push({ name: "vEstate_Form_No_Show", index: "vEstate_Form_No_Show", width: 90, sortable: false, align: 'center', formatter: formattervEstate_Form_No, unformatter: unformattervEstate });
+            colModelArray.push({ name: "vEstate_Date_Show", index: "vEstate_Date_Show", width: 90, sortable: false, align: 'center', formatter: formattervEstate_Date });
+            colModelArray.push({ name: "vOwnership_Cert_No_Show", index: "vOwnership_Cert_No_Show", width: 90, sortable: false, formatter: formattervOwnership_Cert_No });
+            colModelArray.push({ name: "vLand_Building_No_Show", index: "vLand_Building_No_Show", width: 90, sortable: false, formatter: formattervLand_Building_No });
+            colModelArray.push({ name: "vHouse_No_Show", index: "vHouse_No_Show", width: 120, sortable: false, formatter: formattervHouse_No });
+            colModelArray.push({ name: "vEstate_Seq_Show", index: "vEstate_Seq_Show", width: 100, sortable: false, formatter: formattervEstate_Seq });
+            colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, sortable: false, formatter: formattervMemo });
+
+            colModelArray.push({ name: "vEstate_Form_No", index: "vEstate_Form_No", hidden: true });
+            colModelArray.push({ name: "vEstate_Date", index: "vEstate_Date", hidden: true });
+            colModelArray.push({ name: "vOwnership_Cert_No", index: "vOwnership_Cert_No", hidden: true });
+            colModelArray.push({ name: "vLand_Building_No", index: "vLand_Building_No", hidden: true });
+            colModelArray.push({ name: "vHouse_No", index: "vHouse_No", hidden: true });
+            colModelArray.push({ name: "vEstate_Seq", index: "vEstate_Seq", hidden: true });
+            colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+
+            colModelArray.push({ name: "vEstate_Form_No_Aft", index: "vEstate_Form_No_Aft", hidden: true });
+            colModelArray.push({ name: "vEstate_Date_Aft", index: "vEstate_Date_Aft", hidden: true });
+            colModelArray.push({ name: "vOwnership_Cert_No_Aft", index: "vOwnership_Cert_No_Aft", hidden: true });
+            colModelArray.push({ name: "vLand_Building_No_Aft", index: "vLand_Building_No_Aft", hidden: true });
+            colModelArray.push({ name: "vHouse_No_Aft", index: "vHouse_No_Aft", hidden: true });
+            colModelArray.push({ name: "vEstate_Seq_Aft", index: "vEstate_Seq_Aft", hidden: true });
+            colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
+
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
+            jqgridCustom.createJqgridByCache(
+               'CDC_Estate_jqgridDiv',
+               'CDC_EstateTempList',
+               'CDC_EstateTempPeger',
+               CDC_EstateUrl.getData,
+               {
+
+               },
+               colNameArray,
+               colModelArray,
+               '查詢資料',
+               jqgridCustom.getPage('CDC_Estate_jqgridDiv'),
+               CDC_EstateTempCompleteFun,
+               true
+               );
+        }
+        //#endregion jqgrid
+
+        //申請覆核
+        function CDC_EstateApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDC_EstateUrl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDC_EstateApply'));
+                }
+            })
+        }
+
+        //修改不動產權狀暫存資料
+        function CDC_EstateUpdateTempFun() {
+            if (!EstateTempCheck()) {
+                return false;
+            }
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: CDC_EstateViewModel(
+                        $('#' + CDC_ItemId).val(),
+                        $('#' + CDC_Estate_Form_No).val(),
+                        $('#' + CDC_Estate_Date).val(),
+                        $('#' + CDC_Ownership_Cert_No).val(),
+                        $('#' + CDC_Land_Building_No).val(),
+                        $('#' + CDC_House_No).val(),
+                        $('#' + CDC_Estate_Seq).val(),
+                        $('#' + CDC_Memo).val())
+                }),
+                dataType: "json",
+                url: CDC_EstateUrl.UpdateDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDC_EstateUpdateTemp'));
+                    CDC_EstateDbGrid();
+                    CDC_EstateConfirmFlag = result.Datas;
+                }
+            })
+        }
+
+        function EstateTempCheck() {
+            var _checkFlag = true;
+            var strs = [];
+            switch ($('#' + CDC_Estate_Form_No).val()) {
+                case '土地':
+                    $.each($('.land'), function () {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                        else {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '建物':
+                    $.each($('.build'), function () {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                        else {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '他項權利':
+                    $.each($('.otherRight'), function () {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                        else {
+                            $.each(checkEstate_Date($(this).attr('id')), function () {
+                                strs.push(this);
+                                _checkFlag = false;
+                            })
+                        }
+                    })
+                    break;
+                case '其他':
+                    if ($('#' + CDC_Estate_Date).val().trim() != '') {
+                        $.each(checkEstate_Date(CDC_Estate_Date), function () {
+                            strs.push(this);
+                            _checkFlag = false;
+                        })
+                    }
+                    $.each($('.other'), function () {
+                        if ($(this).val().trim() == '' || $(this).val().trim().toUpperCase() == 'NULL') {
+                            strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim() + '不得為空');
+                            _checkFlag = false;
+                        }
+                    })
+                    break;
+            }
+            if (!_checkFlag) {
+                customerUtility.alert(strs.join(',</br>'), 'w');
+            }
+            return _checkFlag
+        }
+
+        function checkEstate_Date(id) {
+            var arr = [];
+            if (id == CDC_Estate_Date) {
+                var date = $('#' + CDC_Estate_Date).val().trim();
+                if (!verified.isDate(date)) {
+                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');
+                }
+                else if (Number(date) > Number(created.getOnlyDateStr(true, false, false))) {
+                    arr.push('發狀日需 ≦ 系統日');
+                }
+            }
+            return arr;
+        }
+
+        function CDC_EstateViewModel(
+            vItemId,
+            vEstate_Form_No,
+            vEstate_Date,
+            vOwnership_Cert_No,
+            vLand_Building_No,
+            vHouse_No,
+            vEstate_Seq,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vEstate_Form_No'] = vEstate_Form_No;
+            obj['vEstate_Date'] = vEstate_Date;
+            obj['vOwnership_Cert_No'] = vOwnership_Cert_No;
+            obj['vLand_Building_No'] = vLand_Building_No;
+            obj['vHouse_No'] = vHouse_No;
+            obj['vEstate_Seq'] = vEstate_Seq;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+        //#endregion function
+    });
+</script>

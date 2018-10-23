@@ -21,21 +21,21 @@ namespace Treasury.Web.Service.Interface
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        List<ConfirmStorageSearchDetailViewModel> GetSearchDetail(ConfirmStorageSearchViewModel data);
+        List<ConfirmStorageSearchDetailViewModel> GetSearchDetail(ConfirmStorageSearchViewModel data , string cUserId = null);
 
         /// <summary>
         /// 查作業類型 & 印鑑內容下拉選單
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        Tuple<string, List<SelectOption>> GetItemOpType(string data, string AccessType, List<string> SealIdList, string ItemId = null);
+        Tuple<string, List<SelectOption>> GetItemOpType(string OpTypeId, string AccessType, List<string> SealIdList, string ItemId = null);
 
         /// <summary>
         /// 查作業類型 & 印鑑內容下拉選單
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string> SealIdList, List<string> RowItemIdList, string ItemId = null);
+        Tuple<List<SelectOption>, List<SelectOption>> ItemOpTypeChange(string data, List<string> ItemIdList, string AccessType, List<string> SealIdList, List<string> RowItemIdList, string ItemId = null, string RegisterId = null, string cUserId = null);
 
         /// <summary>
         /// 新增
@@ -51,7 +51,7 @@ namespace Treasury.Web.Service.Interface
         /// <param name="data"></param>
         /// <param name="searchData"></param>
         /// <returns></returns>
-        MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> UpdateData(ConfirmStorageInsertViewModel data, ConfirmStorageSearchViewModel searchData);
+        MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> UpdateData(ConfirmStorageInsertViewModel data, ConfirmStorageSearchViewModel searchData, string APLY_NO);
         /// <summary>
         /// 刪除
         /// </summary>
@@ -68,6 +68,14 @@ namespace Treasury.Web.Service.Interface
         /// <param name="viewData"></param>
         /// <returns></returns>
         MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId,string register_ID);
-        
+
+         
+        bool CheckIsCreateUser(string cUserID, string RegisterId);
+        /// <summary>
+        /// 取得 人員基本資料
+        /// </summary>
+        /// <param name="cUserID"></param>
+        /// <returns></returns>
+        BaseUserInfoModel GetUserInfo(string cUserID);
     }
 }

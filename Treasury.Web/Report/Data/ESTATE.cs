@@ -44,21 +44,48 @@ temp4 as
 (
  select
 '1' AS TYPE,
-(select COL_VALUE from temp3 where COL = 'BOOK_NO') AS BOOK_NO,
-(select COL_VALUE from temp3 where COL = 'BUILDING_NAME') AS BUILDING_NAME,
-(select COL_VALUE from temp3 where COL = 'LOCATED') AS LOCATED,
+(select COL_VALUE from temp3 where COL = 'BOOK_NO') AS BOOK_NO, --冊號
+(select COL_VALUE from temp3 where COL = 'BUILDING_NAME') AS BUILDING_NAME, --大樓名稱
+(select COL_VALUE from temp3 where COL = 'LOCATED') AS LOCATED, --坐落
  null AS ESTATE_FROM_TO,
- null AS TOTAL
+ null AS TOTAL,
+ null as ESTATE_DATE, 
+ null as OWNERSHIP_CERT_NO , 
+ null as LAND_BUILDING_NO , 
+ null as HOUSE_NO , 
+ null as ESTATE_SEQ ,
+ null as MEMO
  UNION ALL
- select
+ (select
  '2' AS TYPE,
  null AS BOOK_NO,
  null AS BUILDING_NAME,
  null AS LOCATED,
- ESTATE_FORM_NO AS ESTATE_FROM_TO,
- COUNT(*)  AS TOTAL 
+ ESTATE_FORM_NO AS ESTATE_FROM_TO, --狀別
+ COUNT(*)  AS TOTAL , --總筆數
+ null as ESTATE_DATE, 
+ null as OWNERSHIP_CERT_NO , 
+ null as LAND_BUILDING_NO , 
+ null as HOUSE_NO , 
+ null as ESTATE_SEQ ,
+ null as MEMO
  from temp2
- group by ESTATE_FORM_NO
+ group by ESTATE_FORM_NO)
+ UNION ALL
+ select 
+ '3' AS TYPE,
+ null AS BOOK_NO,
+ null AS BUILDING_NAME,
+ null AS LOCATED, 
+ ESTATE_FORM_NO AS ESTATE_FROM_TO,
+ null AS TOTAL,
+ convert(varchar, ESTATE_DATE, 111) AS ESTATE_DATE , --發狀日
+ OWNERSHIP_CERT_NO , --字號
+ LAND_BUILDING_NO , --地/建號
+ HOUSE_NO , --門牌號
+ ESTATE_SEQ , --流水號/編號
+ MEMO  --備註
+ from temp2
 )
 select * from temp4;
 ";

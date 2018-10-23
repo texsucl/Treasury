@@ -1,0 +1,435 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@using Treasury.Web.ViewModels;
+@model Treasury.Web.ViewModels.TreasuryReportViewModel
+@{
+    ViewBag.Title = "保管物品庫存表列印作業-主畫面";
+    var opScope = ViewBag.opScope;
+    
+}
+
+<style>
+    .customertb input[type=text] {
+        width: 110px;
+    }
+    .customertb td {
+        width: 80px;
+    }
+</style>
+<div class="container margin-top-5" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0") //權限
+            {
+                <form id="TRForm">
+                    <table class="customertb">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >庫存表名稱:</label>
+                            </td>
+                            <td  colspan="9">
+                                @Html.DropDownList("JobProject", new SelectList(Model.vjobProject, "Value", "Text"))
+                            </td>
+                        </tr>
+
+                        <tr >
+                            <td>
+                                <label>庫存日期:</label>
+                            </td>
+                            <td colspan="4">
+                                <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                            </td>
+                            <td >
+                                <label>入庫日期:</label>
+                            </td>
+                            <td colspan="4">
+                                <input type="text" id="APLY_ODT_From" name="APLY_ODT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_ODT_To" name="APLY_ODT_To" />
+                            </td>
+                        </tr>         
+                        <tr>
+                            <td>
+                                <label>權責部門:</label>
+                            </td>
+                            <td colspan="4">
+                              @Html.DropDownList("vdept", new SelectList(Model.vdept, "Value", "Text"))
+                            </td>
+                            <td>
+                                <label>權責科別:</label>
+                            </td>
+                            <td colspan="4">
+                                @Html.DropDownList("vsect", new SelectList(new List<SelectOption>(), "Value", "Text") )
+                            </td>
+                        </tr>
+
+
+
+                        <tr class="D1013 clearTd" style="display:none;">
+                            <td>
+                                <label>交易對象:</label>
+                            </td>
+                            <td colspan="9">
+                             @Html.DropDownList("vTRAD_Partners", new SelectList(Model.vTRAD_Partners, "Value", "Text"))
+                            </td>
+                        </tr>  
+                        <tr class="D1014 clearTd" style="display:none;">
+                            <td>
+                                <label>冊號:</label>
+                            </td>
+                            <td colspan="9">
+                                @Html.DropDownList("vBook_No", new SelectList(Model.vBook_No, "Value", "Text"))
+                            </td>
+                        </tr>   
+                        <tr class="D1015 clearTd" style="display:none;">
+                            <td>
+                                <label>股票編號:</label>
+                            </td>
+                            <td colspan="9">
+                                @Html.DropDownList("vName", new SelectList(Model.vName, "Value", "Text"))
+                            </td>
+                        </tr>                        
+                        <tr  style="text-align: center ">
+                            <td colspan="10">
+                                <input type="button" class=" btn btn-primary" id="TR_Export" value="匯出報表" />
+                                <input type="button" class=" btn btn-primary" id="TR_SendTrack" value="寄送追蹤報表" />
+                            </td>
+                        </tr>                   
+                    </table>                                                     
+                </form>
+                <div id="TROpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="TROpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    @*查詢區塊*@
+
+
+</div>
+<script type="text/javascript">
+    $(function () {
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        //#region url設定
+        var openInsertDetailId = 'TAOpenInsertDetail';
+        var openSearchDetailId = 'TAOpenSearchDetail';
+        var TAFormId = 'TAForm';
+        var EXP_ACCESS_DATEId = 'EXP_ACCESS_DATE';
+        var aProjectId = 'aProject';
+        var aIUnitId = 'aIUnit';
+        var applicantId = 'applicant';
+        var aProjectAllId = 'aProjectAll';
+        var aSUnitAllId = 'aSUnitAll';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            //#region url設定
+            var TRurl = {};
+            TRurl.getName = '@Url.Action("GetNAME", "TreasuryReport")';
+            //#endregion
+
+            var TRFormId = 'TRForm';
+            var JobProjectId = 'JobProject';
+            var APLY_DT_FromId = 'APLY_DT_From';
+            var APLY_ODT_FromId = 'APLY_ODT_From';
+            var APLY_ODT_ToId = 'APLY_ODT_To';
+
+            var openSearchDetailId = 'TROpenSearchDetail';
+            var _date = created.getOnlyDate();
+            //#region 初始設定
+            created.createDatepickerRange(APLY_ODT_FromId, APLY_ODT_ToId); //入庫日期
+            created.createDatepicker(APLY_DT_FromId, '');
+            $('#' + APLY_DT_FromId).datepicker("option", "maxDate", created.getOnlyDateStr(true));
+            verified.datepicker(TRFormId, EXP_ACCESS_DATEId, $('#' + EXP_ACCESS_DATEId).val());
+
+            //TRClear();
+            //#endregion
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TR_Export':
+                        $('#' + id).on('click', function () { TRReport(); });
+                        break;
+                    case 'TR_SendTrack':
+                        $('#' + id).on('click', function () { TRSendTrack(); });
+                        break;
+                }
+            });
+
+            $('#vdept').on('change', function () {
+                GetItem($('#JobProject').val(), $(this).val())
+            });
+
+            $('#JobProject').on('change', function () {
+                GetItem($(this).val())
+            });
+
+            function TRReport() {
+                if( $('input:text').val() != "")
+                {
+                            var listId = 'TAReportList';
+                            var reportType = '';
+                            var title = '';
+                            var parms = [];
+                            var extensionParms = [];
+                            var JobProject_report = $('#JobProject').val();
+                            var JobProjectName_report = $('#JobProject  :selected').text();
+                            var DEPT_report = $('#vdept').val();
+                            var SECT_report = $('#vsect').val();
+                            var APLY_ODT_From_report = $('#APLY_ODT_From').val();
+                            var APLY_ODT_To_report = $('#APLY_ODT_To').val();
+                            var APLY_DT_From_report = $('#APLY_DT_From').val();
+                            var TRAD_Partners_report = $('#vTRAD_Partners').val();
+                            var Book_No_report = $('#vBook_No').val();
+                            var Name_report = $('#vName').val();
+                            var item = $('#JobProject').val();
+                            var itemData = GetItemData(item);
+
+                    //前端畫面資料
+                            parms.push(customerUtility.reportParm('vJobProject', JobProject_report));
+                            parms.push(customerUtility.reportParm('vdept', DEPT_report));
+                            parms.push(customerUtility.reportParm('vsect', SECT_report));
+                            parms.push(customerUtility.reportParm('APLY_ODT_From', APLY_ODT_From_report));
+                            parms.push(customerUtility.reportParm('APLY_ODT_To', APLY_ODT_To_report));
+                            parms.push(customerUtility.reportParm('APLY_DT_From', APLY_DT_From_report));
+                            parms.push(customerUtility.reportParm('vTRAD_Partners', TRAD_Partners_report));
+                            parms.push(customerUtility.reportParm('vBook_No', Book_No_report));
+                            parms.push(customerUtility.reportParm('vName', Name_report));
+                            extensionParms.push(customerUtility.reportParm('APLY_DT', DecideString(APLY_DT_From_report)));
+                            extensionParms.push(customerUtility.reportParm('vJobProject', JobProjectName_report));
+                            extensionParms.push(customerUtility.reportParm('vdept',DecideString(DEPT_report)));
+                            extensionParms.push(customerUtility.reportParm('vsect', DecideString(SECT_report)));
+                            extensionParms.push(customerUtility.reportParm('APLY_ODT_From', DecideString(APLY_ODT_From_report)));
+                            extensionParms.push(customerUtility.reportParm('APLY_ODT_To', DecideString(APLY_ODT_To_report)));
+                                
+                    customerUtility.report(
+                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                        parms,
+                        extensionParms)
+                       
+               }
+                  else {
+                    customerUtility.alert('請至少輸入一個時間', 'w');
+
+                }  
+            };
+
+            function DecideString(str) {
+                if (str == null || str == '') {
+                    str = " ";
+                }
+
+                return str
+
+            }
+
+            function GetItem(type, DEPT_ITEM) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        type: type,
+                        DEPT_ITEM: DEPT_ITEM
+                    }),
+                    dataType: "json",
+                    url: TRurl.getName,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    if (DEPT_ITEM == null) {
+                        customerUtility.addoption('vdept', result);
+                        if (result.length > 0) {
+                            $('#vdept').change();
+                        }
+                    }
+                    else {
+                        customerUtility.addoption('vsect', result);
+                    }
+                }
+                )
+            }
+
+
+            //作業項目更換畫面動作
+
+            $('#' + JobProjectId).on('change', function () {
+                $('.clearTd').hide();
+                $('.' + $(this).val()).show();
+            });
+            $('#' + JobProjectId).val($($('#' + JobProjectId + ' option')[0]).val()).change();
+
+
+            function TRSearch() {
+                switch ($('#' + JobProjectId).val()) {
+                    case '@Ref.TreaItemType.D1014.ToString()':
+                        if ($('#' + dBook_NoId).val().trim() == '') {
+                            customerUtility.alert('無選擇冊號', 'w');
+                            return false;
+                        }
+                        break;
+                    case '@Ref.TreaItemType.D1015.ToString()':
+                        if($('#'+dNameId).val().trim() == '')
+                        {
+                            customerUtility.alert('無選擇編號', 'w');
+                            return false;
+                        }
+                        break;
+                }
+
+                    if($('#' + TRFormId).valid())
+                    {
+                        var itemData = GetItemData($('#'+JobProjectId).val());
+                        if (itemData.url != '')
+                        {
+                            $.ajax({
+                                type: 'POST',
+                                data: JSON.stringify({
+                                    AplyNo : null,
+                                    data: TRSearchViewModel(
+                                        $('#'+treasuryIOId).val(),
+                                        $('#'+JobProjectId).val(),
+                                        $('#'+APLY_DT_FromId).val(),
+                                        $('#'+APLY_DT_ToId).val(),
+                                        $('#'+APLY_ODT_FromId).val(),
+                                        $('#'+APLY_ODT_ToId).val(),
+                                        $('#'+dBook_NoId).val(),
+                                        $('#'+dEstate_Form_NoId).val(),
+                                        $('#'+dNameId).val(),
+                                        $('#'+vCOMMIT_DATEId).val(),
+                                        $('#'+vEXPIRY_DATEId).val(),
+                                        $('#'+dTRAD_PartnersId).val(),
+                                        $('#'+tItem_NoId).val(),
+                                        $('#'+tBook_NoId).val(),
+                                        $('#'+Margin_Dep_TypeId).val()),
+                                    type : 2
+                                }),
+                                dataType: 'html',
+                                url: itemData.url,
+                                contentType: 'application/json',
+                                success: function (vdata, textStatus, jqXHR)
+                                {
+                                    $('#' + openSearchDetailId).children().remove();
+                                    $('#' + openSearchDetailId).html(vdata);
+                                    openTRDialog(itemData.title,itemData.openDialogWidth,'TROpenSearchDialog');
+                                }
+                            })
+                        }
+                    }
+                }
+
+                //#region 新增事件(打開Dialog)
+                function openTRDialog(title, width, dialogId)
+                {
+                    title = title || '';
+                    width = width || 'auto';
+                    title += '查詢結果';
+                    var dialogId = dialogId;
+                    $('#' + dialogId).dialog({
+                        position: {my:"top",at:"center top",of:window},
+                        title: title,
+                        width: width,
+                        autoOpen : false,
+                        resizable: false,
+                        maxHeight: 600,
+                        closeText : '取消',
+                        close: function () {
+                            $('#' + openSearchDetailId).children().remove();
+                        }
+                    });
+                    $('#' + dialogId).dialog('open');
+                }
+
+                //#region 申請項目設定檔案
+                function GetItemData(item) {
+                    item = item || '';
+                    var _reportTitle = '金庫物品庫存表';
+                    var obj = {};
+                    //obj.url = ''; //開啟金庫物品的頁面 url
+                    //obj.title = null; //開啟金庫物品的頁面 Title
+                    //obj.openDialogWidth = 860; //開啟金庫物品的頁面 寬度
+                    obj.reportTitle = _reportTitle; //報表Title
+                    obj.reportType = null; //報表類型
+
+                     switch (item) {
+                case '@Ref.TreaItemType.D1014.ToString()':
+                    obj.reportType = 'DEPOSIT_ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1008.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                    obj.reportType = 'DEPOSIT_SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1009.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                    obj.reportType = 'DEPOSIT_SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1010.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                    obj.reportType = 'DEPOSIT_SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1011.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                    obj.reportType = 'DEPOSIT_SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1015.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                    obj.openDialogWidth = 1200;
+                    obj.reportType = 'DEPOSIT_STOCK';
+                    break;
+                case '@Ref.TreaItemType.D1024.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                    obj.reportType = 'DEPOSIT_CA';
+                    break;
+                case '@Ref.TreaItemType.D1017.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                    obj.openDialogWidth = 1250;
+                    obj.reportType = 'DEPOSIT_MARGINP';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = 900;
+                    obj.reportType = 'DEPOSIT_MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1018.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                    obj.openDialogWidth = 920;
+                    obj.reportType = 'DEPOSIT_ITEMIMP';
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'DEPOSIT_DEPOSIT';
+                    break;
+                    }
+                    return obj;
+                }
+                //#endregion
+
+            }
+
+        });
+
+
+</script>

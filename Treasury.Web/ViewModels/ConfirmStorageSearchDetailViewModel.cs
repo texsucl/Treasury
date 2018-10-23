@@ -22,6 +22,12 @@ namespace Treasury.Web.ViewModels
         public string vITEM { get; set; }
 
         /// <summary>
+        /// h存取項目
+        /// </summary>
+        [Description("h存取項目")]
+        public string hITEM { get; set; }
+
+        /// <summary>
         /// 存取項目編號
         /// </summary>
         [Description("存取項目編號")]
@@ -76,6 +82,18 @@ namespace Treasury.Web.ViewModels
         public string vCONFIRM_UID { get; set; }
 
         /// <summary>
+        /// h入庫確認人員
+        /// </summary>
+        [Description("h入庫確認人員名稱")]
+        public string hCONFIRM_Name { get; set; }
+
+        /// <summary>
+        /// h入庫確認人員
+        /// </summary>
+        [Description("h入庫確認人員Id")]
+        public string hCONFIRM_UID { get; set; }
+
+        /// <summary>
         /// 入庫確認時間
         /// </summary>
         [Description("入庫確認時間")]
@@ -99,6 +117,11 @@ namespace Treasury.Web.ViewModels
         [Description("申請單號")]
         public string hvAPLY_NO { get; set; }
 
+        /// <summary>
+        /// 申請人員
+        /// </summary>
+        [Description("申請人員")]
+        public string vAPLY_UID { get; set; }
         /// <summary>
         /// PKID
         /// </summary>
