@@ -216,6 +216,11 @@
             }
             else {
                 //timepicker
+                var now = new Date();
+                Date.prototype.addMinutes = function (minutes) {
+                    this.setMinutes(this.getMinutes() + minutes);
+                    return this;
+                };
                 setTimepicker();
                 //region datepicker
                 //西元
@@ -257,7 +262,24 @@
                             $('#' + id).click(function () { formSearch(); });
                             break;
                         case 'STT_Insert':
-                            $('#' + id).click(function () { formInsert("ADD"); });
+                            $('#' + id).click(function () {
+                                //查詢是否有未完成的單號
+                                $.ajax({
+                                    type: 'POST',
+                                    data: null,
+                                    url: UrlFor.CheckRegisterId,
+                                    contentType: 'application/json',
+                                }).done(function (result) {
+                                    if (!result.RETURN_FLAG) {
+                                        customerUtility.alert(result.DESCRIPTION, 'w');
+                                        $('#STT_Insert').prop('disabled', true);
+                                        return false;
+                                    } else {
+                                        $('#STT_Insert').prop('disabled', false);
+                                        formInsert("ADD");
+                                    }
+                                });                       
+                            });
                     }
                 });
                 //#endregion 
@@ -265,11 +287,12 @@
                 function setTimepicker() {
                     $('.timepicker').timepicker({
                         timeFormat: 'H:i',
-                        step: 10,
+                        step: 1,
                         minTime: '8:00',
                         maxTime: '23:50',
                         //defaultTime: '8:00',
                         scrollDefault: 'now',
+                        //scrollDefault: now,
                         startTime: '08:00',
                         dynamic: false,
                         dropdown: true,
@@ -482,22 +505,6 @@
             //#endregion
             //region 傳送事件
             function formInsert(whitchMethod, data) {
-                //查詢是否有未完成的單號
-                $.ajax({
-                    type: 'POST',
-                    data: null,
-                    url: UrlFor.CheckRegisterId,
-                    contentType: 'application/json',
-                }).done(function (result) {
-                    if (!result.RETURN_FLAG) {
-                        customerUtility.alert(result.DESCRIPTION, 'w');
-                        $('#SSTADDDialog').dialog("close");
-                        $('#STT_Insert').prop('disabled', true);
-                        return false;
-                    } else {
-                        $('#STT_Insert').prop('disabled', false);
-                    }
-                });
                 //開啟Dialog
                 openSSTDialog("指定時間開庫-新增作業", 800, 'SSTADDDialog', false, false);
                 getDialogElement(whitchMethod, data);

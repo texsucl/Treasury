@@ -50,7 +50,7 @@ namespace Treasury.WebViewModels
         [Display(Name = "異動人員")]
         public string cUpdUserID { get; set; }
 
-        [Display(Name = "異動時間")]
+        [Display(Name = "異動日期")]
         public string cUpdDate { get; set; }
 
         [Display(Name = "異動區間")]

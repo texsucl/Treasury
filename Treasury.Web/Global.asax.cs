@@ -35,7 +35,7 @@ namespace Treasury.Web
 
             AntiForgeryConfig.SuppressXFrameOptionsHeader = true;
 
-            //JobScheduler.Start();
+            //JobScheduler.Start();  //簽入時取消註解
         }
 
         protected void Application_BeginRequest(Object sender, EventArgs e)

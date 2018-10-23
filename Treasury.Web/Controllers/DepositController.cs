@@ -167,12 +167,26 @@ namespace Treasury.Web.Controllers
                         //檢查通過
                         if (result.RETURN_FLAG)
                         {
-                            List<DepositViewModel> _datas = new List<DepositViewModel>();
-                            DepositViewModel _data = new DepositViewModel();
-                            _data.vDeposit_M = MasterDataList;
-                            _datas.Add(_data);
+                            var sysDate = DateTime.Now.ToString("yyyy/MM/dd");
+                            //找尋設質否為N,且要取出的資料,到期日不等於系統日且沒有取出原因的資料
+                            var checkData = MasterDataList.Where(x => x.vExpiry_Date != sysDate && 
+                            x.vTakeoutFlag && x.vDep_Set_Quality == "N" &&
+                            x.GetMsg.IsNullOrWhiteSpace()).Select(x=>x.vItem_Id).ToList();
+                            
+                            if (checkData.Any())
+                            {
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = $"{string.Join(",",checkData)} 到期日不等於系統日需輸入原因";
+                            }
+                            else
+                            {
+                                List<DepositViewModel> _datas = new List<DepositViewModel>();
+                                DepositViewModel _data = new DepositViewModel();
+                                _data.vDeposit_M = MasterDataList;
+                                _datas.Add(_data);
 
-                            result = Deposit.ApplyAudit(_datas, data);
+                                result = Deposit.ApplyAudit(_datas, data);
+                            }
                         }
                     }
                     else
@@ -910,6 +924,44 @@ namespace Treasury.Web.Controllers
                 }
             }
 
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 修改 取出原因
+        /// </summary>
+        /// <param name="ItemId"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult SetGetMsg(string ItemId, string msg)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.DepositData_N))
+            {
+                var tempData = (List<Deposit_M>)Cache.Get(CacheList.DepositData_N);
+                var updateTempData = tempData.FirstOrDefault(x => x.vItem_Id == ItemId);
+
+                if (updateTempData != null)
+                {
+                    var _msg = msg.IsNullOrWhiteSpace() ? null : msg;
+                    updateTempData.MsgFlag = _msg == null ? null : "Y";
+                    updateTempData.GetMsg = _msg;
+                    Cache.Invalidate(CacheList.DepositData_N);
+                    Cache.Set(CacheList.DepositData_N, tempData);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    result.Datas = tempData.Any(x => x.vTakeoutFlag) ||
+                                   tempData.Any(x => x.MsgFlag == "Y" && x.vTakeoutFlag == false);
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
             return Json(result);
         }
 

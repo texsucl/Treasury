@@ -46,11 +46,22 @@ namespace Treasury.Web.Report.Data
                         vItem_Id = OIA.ITEM_ID,
                         vSeal_Desc = IS.SEAL_DESC
                     }).ToList();
+
+                var _TREA_APLY_REC_ITEM_ID = db.TREA_APLY_REC.AsNoTracking().Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
+                    .Select(x => x.ITEM_ID)
+                    .ToList();
+                List<string> confirmedItemId = new List<string>();
+                confirmedItemId.AddRange(_TREA_APLY_REC_ITEM_ID);
+
+
                 ReportDataList = GetReportModel(db.TREA_APLY_REC.AsNoTracking()
                     //.Where(x => x.CONFIRM_UID != null)
                     //.Where(x => x.APLY_STATUS == Aply_Status)
                     .Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
                     .AsEnumerable(), _Item_Desc, _Access_Type, _Seal_Desc, emps).ToList();
+
+                ReportDataList.AddRange(GetRoutineModel(db.TREA_APLY_TEMP.AsNoTracking().Where(x => !confirmedItemId.Contains(x.ITEM_ID)).AsEnumerable(), _Item_Desc).ToList());
+                ReportDataList = ReportDataList.OrderByDescending(x => x.ACCESS_NAME).ThenBy(x => x.APLY_NO).ToList();
             }
 
             resultsTable.Tables.Add(ReportDataList.ToDataTable());
@@ -58,6 +69,20 @@ namespace Treasury.Web.Report.Data
             SetExtensionParm();
 
             return resultsTable;
+        }
+
+        /// <summary>
+        /// 申請單紀錄暫存檔資料轉畫面資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="_Item_Desc"></param>
+        /// <returns></returns>
+        private IEnumerable<Report_Treasury_Register> GetRoutineModel(IEnumerable<TREA_APLY_TEMP> data, List<TREA_ITEM> _Item_Desc)
+        {
+            return data.Select(x => new Report_Treasury_Register()
+            {
+                ITEM_DESC = _Item_Desc.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC   //代碼.庫存狀態 
+            });
         }
 
         /// <summary>

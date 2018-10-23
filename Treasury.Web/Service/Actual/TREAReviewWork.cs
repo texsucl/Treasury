@@ -187,41 +187,82 @@ namespace Treasury.Web.Service.Actual
                                 logStr += _ITEM_SEAL.modelToString(logStr);
                             }
                         }
-                        //
+                        
                         switch(_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID)?.TREA_ITEM_TYPE)
                         {
                             case "BILL": // 空白票據
-                                var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.AsNoTracking().FirstOrDefault(x => x.APLY_NO == y.APLY_NO);
+                                var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.AsNoTracking().Where(x => x.APLY_NO == y.APLY_NO);
+                                SysSeqDao sysSeqDao = new SysSeqDao();
+                                var item_Seq = "E2"; //空白票卷流水號開頭編碼
 
                                 if (y.ACCESS_TYPE == "P")
                                 {
-                                    var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
-                                    ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE() {
-                                        ITEM_ID = _BLANK_NOTE_APLY.ITEM_ID,
-                                        INVENTORY_STATUS = "1",
-                                        ISSUING_BANK = _BLANK_NOTE_APLY.ISSUING_BANK,
-                                        CHECK_TYPE = _BLANK_NOTE_APLY.CHECK_TYPE,
-                                        CHECK_NO_TRACK = _BLANK_NOTE_APLY.CHECK_NO_TRACK,
-                                        CHECK_NO_B = _BLANK_NOTE_APLY.CHECK_NO_B,
-                                        CHECK_NO_E = _BLANK_NOTE_APLY.CHECK_NO_E,
-                                        APLY_DEPT = GetUserDPT(cUserId),
-                                        APLY_SECT = y.APLY_UNIT,
-                                        APLY_UID = y.APLY_UID,
-                                        CHARGE_DEPT = GetUserDPT(cUserId),
-                                        CHARGE_SECT = y.APLY_UNIT,
-                                        CREATE_DT = dt
+                                    var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
+                                    _BLANK_NOTE_APLY.ToList().ForEach(x => {
+                                        x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = item_id;
+                                        logStr += x.modelToString(logStr);
+
+                                        var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
+                                        ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE()
+                                        {
+                                            ITEM_ID = item_id,
+                                            INVENTORY_STATUS = "1",
+                                            ISSUING_BANK = x.ISSUING_BANK,
+                                            CHECK_TYPE = x.CHECK_TYPE,
+                                            CHECK_NO_TRACK = x.CHECK_NO_TRACK,
+                                            CHECK_NO_B = x.CHECK_NO_B,
+                                            CHECK_NO_E = x.CHECK_NO_E,
+                                            APLY_DEPT = GetUserDPT(cUserId),
+                                            APLY_SECT = y.APLY_UNIT,
+                                            APLY_UID = y.APLY_UID,
+                                            CHARGE_DEPT = GetUserDPT(cUserId),
+                                            CHARGE_SECT = y.APLY_UNIT,
+                                            CREATE_DT = dt
+                                        });
+                                        logStr += ADD_ITEM_BLANK_NOTE.modelToString(logStr);
                                     });
-                                    logStr += ADD_ITEM_BLANK_NOTE.modelToString(logStr);
+                                   
                                 }
                                 else if (y.ACCESS_TYPE == "G")
                                 {
-                                    var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == _BLANK_NOTE_APLY.ITEM_ID);
-                                    if(_ITEM_BLANK_NOTE.INVENTORY_STATUS == "4")
-                                    {
-                                        _ITEM_BLANK_NOTE.INVENTORY_STATUS = "2";
-                                        _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
-                                        logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
-                                    }      
+                                    _BLANK_NOTE_APLY.ToList().ForEach(x => {
+                                        var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(z => z.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
+
+                                        if (_ITEM_BLANK_NOTE.INVENTORY_STATUS == "4")
+                                        {
+                                            _ITEM_BLANK_NOTE.INVENTORY_STATUS = "2";
+                                            _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
+                                            logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
+
+                                            x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = x.ITEM_BLANK_NOTE_ITEM_ID;
+                                            logStr += x.modelToString(logStr);
+                                        }
+                                        else
+                                        {
+                                            var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
+                                            x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = item_id;
+                                            logStr += x.modelToString(logStr);
+
+                                            var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
+                                            ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE()
+                                            {
+                                                ITEM_ID = item_id,
+                                                INVENTORY_STATUS = "2",
+                                                ISSUING_BANK = x.ISSUING_BANK,
+                                                CHECK_TYPE = x.CHECK_TYPE,
+                                                CHECK_NO_TRACK = x.CHECK_NO_TRACK,
+                                                CHECK_NO_B = x.CHECK_NO_B,
+                                                CHECK_NO_E = x.CHECK_NO_E,
+                                                APLY_DEPT = GetUserDPT(cUserId),
+                                                APLY_SECT = y.APLY_UNIT,
+                                                APLY_UID = y.APLY_UID,
+                                                CHARGE_DEPT = GetUserDPT(cUserId),
+                                                CHARGE_SECT = y.APLY_UNIT,
+                                                CREATE_DT = dt
+                                            });
+                                            logStr += x.modelToString(logStr);
+                                        }
+                                     });
                                 }         
                                 break;
                             case "ESTATE": // 不動產
@@ -611,7 +652,6 @@ namespace Treasury.Web.Service.Actual
                     {
                         DPT_CD = _VW_OA_DEPT.DPT_CD;
                     }
-
                 }
             }
             return DPT_CD;

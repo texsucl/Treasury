@@ -72,6 +72,7 @@ namespace Treasury.Web.Report.Data
                                     DEP_NO_E = DetailData.DEP_NO_E,
                                     DEP_CNT = DetailData.DEP_CNT,
                                     DENOMINATION = DetailData.DENOMINATION,
+                                    MSG = MasterDataN.GET_MSG
                                 };
 
                                 ReportDataList.Add(ReportData);

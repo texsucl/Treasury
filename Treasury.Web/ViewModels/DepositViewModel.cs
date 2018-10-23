@@ -151,6 +151,18 @@ namespace Treasury.Web.ViewModels
         public bool vTakeoutFlag { get; set; }
 
         /// <summary>
+        /// 訊息註記
+        /// </summary>
+        [Description("訊息註記")]
+        public string MsgFlag { get; set; }
+
+        /// <summary>
+        /// 取出原因
+        /// </summary>
+        [Description("取出原因")]
+        public string GetMsg { get; set; }
+
+        /// <summary>
         /// 最後更新時間 (庫存資料才有)
         /// </summary>
         [Description("最後更新時間")]

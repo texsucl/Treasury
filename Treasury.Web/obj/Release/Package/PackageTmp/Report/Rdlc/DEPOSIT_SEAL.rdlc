@@ -63,7 +63,25 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>篩選條件:</Value>
+                    <Value>篩選條件: </Value>
+                    <Style>
+                      <FontFamily>細明體</FontFamily>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>=
+IIf(Parameters!vJobProject.Value  &lt;&gt; " ","庫存表名稱:" +Parameters!vJobProject.Value ,"")
++
+IIf(Parameters!APLY_DT_From.Value  &lt;&gt; " ",  "," +"庫存日期:" +Parameters!APLY_DT_From.Value ,"")
++
+IIf(Parameters!vdept.Value  &lt;&gt; " ",  "," +"權責部門:" +Parameters!vdept.Value ,"")
++
+IIf(Parameters!vsect.Value  &lt;&gt; " ",   "," +"權責科別:"+Parameters!vsect.Value,"") 
++
+IIf(Parameters!APLY_ODT_From.Value  &lt;&gt; " ","," +"入庫日期(起):"+Parameters!APLY_ODT_From.Value ,"") 
++
+IIf(Parameters!APLY_ODT_To.Value  &lt;&gt; " ",","  +"入庫日期(迄):"+Parameters!APLY_ODT_To.Value ,"")</Value>
                     <Style>
                       <FontFamily>細明體</FontFamily>
                       <FontWeight>Bold</FontWeight>
@@ -78,7 +96,7 @@
             <Top>0.85278cm</Top>
             <Left>0.29032cm</Left>
             <Height>0.5cm</Height>
-            <Width>7.55312cm</Width>
+            <Width>19.98712cm</Width>
             <Style>
               <PaddingLeft>2pt</PaddingLeft>
               <PaddingRight>2pt</PaddingRight>
@@ -100,7 +118,7 @@
                     </Style>
                   </TextRun>
                   <TextRun>
-                    <Value>=Parameters!ACTUAL_PUT_TIME.Value</Value>
+                    <Value>=Parameters!APLY_DT_From.Value</Value>
                     <Style>
                       <FontFamily>細明體</FontFamily>
                       <FontWeight>Bold</FontWeight>
@@ -112,7 +130,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>0.17639cm</Top>
+            <Top>0.21167cm</Top>
             <Left>0.29032cm</Left>
             <Height>0.5cm</Height>
             <Width>6.75937cm</Width>
@@ -130,7 +148,7 @@
                 <TablixBody>
                   <TablixColumns>
                     <TablixColumn>
-                      <Width>2.34733cm</Width>
+                      <Width>1.44775cm</Width>
                     </TablixColumn>
                     <TablixColumn>
                       <Width>2.84018cm</Width>
@@ -139,13 +157,13 @@
                       <Width>2.73434cm</Width>
                     </TablixColumn>
                     <TablixColumn>
-                      <Width>2.55493cm</Width>
+                      <Width>2.94914cm</Width>
                     </TablixColumn>
                     <TablixColumn>
                       <Width>2.95592cm</Width>
                     </TablixColumn>
                     <TablixColumn>
-                      <Width>5.87023cm</Width>
+                      <Width>6.57072cm</Width>
                     </TablixColumn>
                   </TablixColumns>
                   <TablixRows>
@@ -440,10 +458,14 @@
                                   <TextRuns>
                                     <TextRun>
                                       <Value>=Fields!PUT_DATE.Value</Value>
-                                      <Style />
+                                      <Style>
+                                        <Format>yyyy/MM/dd</Format>
+                                      </Style>
                                     </TextRun>
                                   </TextRuns>
-                                  <Style />
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
                                 </Paragraph>
                               </Paragraphs>
                               <rd:DefaultName>PUT_DATE</rd:DefaultName>
@@ -523,7 +545,9 @@
                                       <Style />
                                     </TextRun>
                                   </TextRuns>
-                                  <Style />
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
                                 </Paragraph>
                               </Paragraphs>
                               <rd:DefaultName>CHARGE_SECT</rd:DefaultName>
@@ -563,7 +587,7 @@
                                     </TextRun>
                                   </TextRuns>
                                   <Style>
-                                    <TextAlign>Center</TextAlign>
+                                    <TextAlign>Left</TextAlign>
                                   </Style>
                                 </Paragraph>
                               </Paragraphs>
@@ -604,7 +628,7 @@
                                     </TextRun>
                                   </TextRuns>
                                   <Style>
-                                    <TextAlign>Center</TextAlign>
+                                    <TextAlign>Left</TextAlign>
                                   </Style>
                                 </Paragraph>
                               </Paragraphs>
@@ -629,7 +653,6 @@
                                 <PaddingBottom>2pt</PaddingBottom>
                               </Style>
                             </Textbox>
-                            <rd:Selected>true</rd:Selected>
                           </CellContents>
                         </TablixCell>
                       </TablixCells>
@@ -660,7 +683,7 @@
                 <Top>0.63791cm</Top>
                 <Left>0.48907cm</Left>
                 <Height>1.80854cm</Height>
-                <Width>19.30293cm</Width>
+                <Width>19.49805cm</Width>
                 <Style>
                   <Border>
                     <Style>Solid</Style>
@@ -692,7 +715,7 @@
             <KeepTogether>true</KeepTogether>
             <Top>1.68216cm</Top>
             <Left>0.29032cm</Left>
-            <Height>4.20075cm</Height>
+            <Height>2.69263cm</Height>
             <Width>19.98712cm</Width>
             <ZIndex>2</ZIndex>
             <Style>
@@ -701,8 +724,46 @@
               </Border>
             </Style>
           </Rectangle>
+          <Textbox Name="textbox20">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>列印日期:</Value>
+                    <Style>
+                      <FontFamily>細明體</FontFamily>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>=Year(Globals!ExecutionTime) - 1911 &amp; "/" &amp; Format(Globals!ExecutionTime, "MM/dd")</Value>
+                    <Style>
+                      <FontFamily>細明體</FontFamily>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>0.21167cm</Top>
+            <Left>14.44411cm</Left>
+            <Height>0.5cm</Height>
+            <Width>5.83333cm</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
-        <Height>5.88291cm</Height>
+        <Height>4.37479cm</Height>
         <Style />
       </Body>
       <Width>20.61601cm</Width>
@@ -719,7 +780,7 @@
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>=Parameters!Title.Value</Value>
+                      <Value>="印鑑庫存表"</Value>
                       <Style>
                         <FontFamily>細明體</FontFamily>
                         <FontWeight>Bold</FontWeight>
@@ -758,44 +819,6 @@
                 </Border>
               </Style>
             </Image>
-            <Textbox Name="textbox20">
-              <CanGrow>true</CanGrow>
-              <KeepTogether>true</KeepTogether>
-              <Paragraphs>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value>列印日期:</Value>
-                      <Style>
-                        <FontFamily>細明體</FontFamily>
-                        <FontWeight>Bold</FontWeight>
-                      </Style>
-                    </TextRun>
-                    <TextRun>
-                      <Value>=Parameters!APLY_DT.Value</Value>
-                      <Style>
-                        <FontFamily>細明體</FontFamily>
-                        <FontWeight>Bold</FontWeight>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Right</TextAlign>
-                  </Style>
-                </Paragraph>
-              </Paragraphs>
-              <Top>1.29104cm</Top>
-              <Left>14.78268cm</Left>
-              <Height>0.5cm</Height>
-              <Width>5.83333cm</Width>
-              <ZIndex>2</ZIndex>
-              <Style>
-                <PaddingLeft>2pt</PaddingLeft>
-                <PaddingRight>2pt</PaddingRight>
-                <PaddingTop>2pt</PaddingTop>
-                <PaddingBottom>2pt</PaddingBottom>
-              </Style>
-            </Textbox>
             <Textbox Name="textbox18">
               <CanGrow>true</CanGrow>
               <KeepTogether>true</KeepTogether>
@@ -819,7 +842,7 @@
               <Left>6.06768cm</Left>
               <Height>0.70896cm</Height>
               <Width>8.48065cm</Width>
-              <ZIndex>3</ZIndex>
+              <ZIndex>2</ZIndex>
               <Style>
                 <VerticalAlign>Middle</VerticalAlign>
                 <PaddingLeft>2pt</PaddingLeft>
@@ -863,7 +886,7 @@
               </Paragraphs>
               <rd:DefaultName>Textbox23</rd:DefaultName>
               <Top>0.17639cm</Top>
-              <Left>1.55046cm</Left>
+              <Left>0.77939cm</Left>
               <Height>0.6cm</Height>
               <Width>4.91107cm</Width>
               <Style>
@@ -899,7 +922,7 @@
               </Paragraphs>
               <rd:DefaultName>Textbox23</rd:DefaultName>
               <Top>0.17639cm</Top>
-              <Left>7.94928cm</Left>
+              <Left>6.06768cm</Left>
               <Height>0.6cm</Height>
               <Width>4.68312cm</Width>
               <ZIndex>1</ZIndex>
@@ -936,7 +959,7 @@
               </Paragraphs>
               <rd:DefaultName>Textbox23</rd:DefaultName>
               <Top>0.17639cm</Top>
-              <Left>14.21875cm</Left>
+              <Left>11.25617cm</Left>
               <Height>0.6cm</Height>
               <Width>5.86357cm</Width>
               <ZIndex>2</ZIndex>
@@ -975,15 +998,39 @@
       <DataType>String</DataType>
       <Prompt>ReportParameter1</Prompt>
     </ReportParameter>
-    <ReportParameter Name="OPEN_TREA_TYPE">
+    <ReportParameter Name="vJobProject">
       <DataType>String</DataType>
       <Prompt>ReportParameter1</Prompt>
     </ReportParameter>
-    <ReportParameter Name="ACTUAL_PUT_TIME">
+    <ReportParameter Name="vdept">
       <DataType>String</DataType>
       <Prompt>ReportParameter1</Prompt>
     </ReportParameter>
-    <ReportParameter Name="APLY_DT">
+    <ReportParameter Name="vsect">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="APLY_DT_From">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="APLY_ODT_From">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="APLY_ODT_To">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="vTRAD_Partners">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="vBook_No">
+      <DataType>String</DataType>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="vName">
       <DataType>String</DataType>
       <Prompt>ReportParameter1</Prompt>
     </ReportParameter>

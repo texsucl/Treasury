@@ -94,7 +94,7 @@ namespace Treasury.Web.Controllers
                     break;
                 case "Storage":
                     if (Cache.IsSet(CacheList.BeforeOpenTreasuryStorage))
-                        return Json(jdata.modelToJqgridResult(((List<BeforeOpenTreasuryViewModel>)Cache.Get(CacheList.BeforeOpenTreasuryStorage)).OrderBy(x => x.vAply_No).ToList()));
+                        return Json(jdata.modelToJqgridResult(((List<BeforeOpenTreasuryViewModel>)Cache.Get(CacheList.BeforeOpenTreasuryStorage)).OrderByDescending(x=>x.vConfirm).ThenBy(x => x.vAply_No).ToList()));
                     break;
             }
             return null;
@@ -119,7 +119,7 @@ namespace Treasury.Web.Controllers
             else
             {
                 //設定資料
-                Cache.Set(CacheList.BeforeOpenTreasuryRoutine, BeforeOpenTreasury.GetRoutineList());
+                Cache.Set(CacheList.BeforeOpenTreasuryRoutine, BeforeOpenTreasury.GetRoutineList(TreaRegisterId));
                 Cache.Set(CacheList.BeforeOpenTreasuryStorage, BeforeOpenTreasury.GetStorageList(TreaRegisterId));
             }
 
