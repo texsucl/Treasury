@@ -39,14 +39,16 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.REGI_STATUS == Regi_Status)
                     .Where(x => x.OPEN_TREA_DATE.ToString() == OTD)
                     .AsEnumerable()                    
-                    .Where(x => DateTime.Parse(x.EXEC_TIME_B) <= DateTime.Parse(OTT))
-                    .Where(x => DateTime.Parse(x.OPEN_TREA_TIME) >= DateTime.Parse(OTT))
+                    //.Where(x => DateTime.Parse(x.EXEC_TIME_B) <= DateTime.Parse(OTT))
+                    //.Where(x => DateTime.Parse(x.OPEN_TREA_TIME) >= DateTime.Parse(OTT))
                    .Select(x => new TreaOpenRec()
                    {
                        vTreaRegisterId = x.TREA_REGISTER_ID,
                        vOpenTreaTypeName = _OpenTreaType.FirstOrDefault(y => y.CODE == x.OPEN_TREA_TYPE)?.CODE_VALUE
                    }).FirstOrDefault();
             }
+
+            
 
             //無符合開庫資料
             if(result==null)
@@ -61,13 +63,19 @@ namespace Treasury.Web.Service.Actual
         /// 取得每日例行進出未確認項目
         /// </summary>
         /// <returns></returns>
-        public List<BeforeOpenTreasuryViewModel> GetRoutineList()
+        public List<BeforeOpenTreasuryViewModel> GetRoutineList(string TreaRegisterId)
         {
             var result = new List<BeforeOpenTreasuryViewModel>();
+            List<string> confirmedItemId = new List<string>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _Item_Desc = db.TREA_ITEM.AsNoTracking().ToList();
-                result = GetRoutineModel(db.TREA_APLY_TEMP.AsNoTracking().AsEnumerable(), _Item_Desc).ToList();
+                var _TREA_APLY_REC_ITEM_ID = db.TREA_APLY_REC.AsNoTracking().Where(x => x.TREA_REGISTER_ID == TreaRegisterId).Where(x => x.APLY_STATUS == "C02")
+                    .Select(x => x.ITEM_ID)
+                    .ToList();
+                confirmedItemId.AddRange(_TREA_APLY_REC_ITEM_ID);
+
+                result = GetRoutineModel(db.TREA_APLY_TEMP.AsNoTracking().Where(x => !confirmedItemId.Contains(x.ITEM_ID)).AsEnumerable(), _Item_Desc).ToList();
             }
 
             return result;
@@ -105,6 +113,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.APLY_STATUS == Aply_Status)
                     .Where(x => x.TREA_REGISTER_ID == TreaRegisterId)
                     .AsEnumerable(), _Item_Desc, _Access_Type, _Seal_Desc, _Confirm).ToList();
+                result.AddRange(GetRoutineList(TreaRegisterId));
             }
 
             return result;

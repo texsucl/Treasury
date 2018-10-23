@@ -60,6 +60,7 @@
           <Property Name="CHECK_NO_B" Type="varchar" MaxLength="8" Nullable="false" />
           <Property Name="CHECK_NO_E" Type="varchar" MaxLength="8" Nullable="false" />
           <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="varchar" MaxLength="12" />
+          <Property Name="ITEM_BLANK_NOTE_FINAL_ITEM_ID" Type="varchar" MaxLength="12" />
         </EntityType>
         <EntityType Name="CODE_FUNC">
           <Key>
@@ -477,6 +478,7 @@
           <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
           <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
           <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+          <Property Name="GET_MSG" Type="nvarchar" MaxLength="200" />
         </EntityType>
         <EntityType Name="ITEM_DEP_RECEIVED">
           <Key>
@@ -1903,7 +1905,6 @@
           <EntitySet Name="CODE_ROLE" EntityType="dbTreasuryModel.CODE_ROLE" />
           <EntitySet Name="CODE_ROLE_HIS" EntityType="dbTreasuryModel.CODE_ROLE_HIS" />
           <EntitySet Name="ITEM_BOOK" EntityType="dbTreasuryModel.ITEM_BOOK" />
-          <EntitySet Name="BLANK_NOTE_APLY" EntityType="dbTreasuryModel.BLANK_NOTE_APLY" />
           <EntitySet Name="ITEM_BLANK_NOTE" EntityType="dbTreasuryModel.ITEM_BLANK_NOTE" />
           <EntitySet Name="ITEM_CA" EntityType="dbTreasuryModel.ITEM_CA" />
           <EntitySet Name="ITEM_DEP_ORDER_M" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_M" />
@@ -1917,6 +1918,7 @@
           <EntitySet Name="ITEM_IMPO" EntityType="dbTreasuryModel.ITEM_IMPO" />
           <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
           <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_D" />
+          <EntitySet Name="BLANK_NOTE_APLY" EntityType="dbTreasuryModel.BLANK_NOTE_APLY" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2010,20 +2012,6 @@
           <Property Name="COL_NAME" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="COL_VALUE" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
         </EntityType>
-        <EntityType Name="BLANK_NOTE_APLY">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="ITEM_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
-          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
-          <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="CHECK_NO_TRACK" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="true" />
-          <Property Name="CHECK_NO_B" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
-          <Property Name="CHECK_NO_E" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
-          <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="ITEM_BLANK_NOTE">
           <Key>
             <PropertyRef Name="ITEM_ID" />
@@ -2112,6 +2100,7 @@
           <Property Name="MEMO_AFT" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="GET_MSG" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="ITEM_DEP_RECEIVED">
           <Key>
@@ -2365,6 +2354,21 @@
           <Property Name="DEP_CNT_AFT" Type="Int32" />
           <Property Name="DENOMINATION_AFT" Type="Decimal" Precision="18" Scale="0" />
           <Property Name="SUBTOTAL_DENOMINATION_AFT" Type="Decimal" Precision="18" Scale="0" />
+        </EntityType>
+        <EntityType Name="BLANK_NOTE_APLY">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="ITEM_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="CHECK_NO_TRACK" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="true" />
+          <Property Name="CHECK_NO_B" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="CHECK_NO_E" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_BLANK_NOTE_FINAL_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3099,20 +3103,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="BLANK_NOTE_APLY">
-            <EntityTypeMapping TypeName="dbTreasuryModel.BLANK_NOTE_APLY">
-              <MappingFragment StoreEntitySet="BLANK_NOTE_APLY">
-                <ScalarProperty Name="ITEM_BLANK_NOTE_ITEM_ID" ColumnName="ITEM_BLANK_NOTE_ITEM_ID" />
-                <ScalarProperty Name="CHECK_NO_E" ColumnName="CHECK_NO_E" />
-                <ScalarProperty Name="CHECK_NO_B" ColumnName="CHECK_NO_B" />
-                <ScalarProperty Name="CHECK_NO_TRACK" ColumnName="CHECK_NO_TRACK" />
-                <ScalarProperty Name="CHECK_TYPE" ColumnName="CHECK_TYPE" />
-                <ScalarProperty Name="ISSUING_BANK" ColumnName="ISSUING_BANK" />
-                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="ITEM_BLANK_NOTE">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_BLANK_NOTE">
               <MappingFragment StoreEntitySet="ITEM_BLANK_NOTE">
@@ -3164,6 +3154,7 @@
           <EntitySetMapping Name="ITEM_DEP_ORDER_M">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_DEP_ORDER_M">
               <MappingFragment StoreEntitySet="ITEM_DEP_ORDER_M">
+                <ScalarProperty Name="GET_MSG" ColumnName="GET_MSG" />
                 <ScalarProperty Name="CHARGE_SECT_AFT" ColumnName="CHARGE_SECT_AFT" />
                 <ScalarProperty Name="CHARGE_DEPT_AFT" ColumnName="CHARGE_DEPT_AFT" />
                 <ScalarProperty Name="MEMO_AFT" ColumnName="MEMO_AFT" />
@@ -3463,6 +3454,21 @@
                 <ScalarProperty Name="DEP_NO_PREAMBLE" ColumnName="DEP_NO_PREAMBLE" />
                 <ScalarProperty Name="DATA_SEQ" ColumnName="DATA_SEQ" />
                 <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BLANK_NOTE_APLY">
+            <EntityTypeMapping TypeName="dbTreasuryModel.BLANK_NOTE_APLY">
+              <MappingFragment StoreEntitySet="BLANK_NOTE_APLY">
+                <ScalarProperty Name="ITEM_BLANK_NOTE_FINAL_ITEM_ID" ColumnName="ITEM_BLANK_NOTE_FINAL_ITEM_ID" />
+                <ScalarProperty Name="ITEM_BLANK_NOTE_ITEM_ID" ColumnName="ITEM_BLANK_NOTE_ITEM_ID" />
+                <ScalarProperty Name="CHECK_NO_E" ColumnName="CHECK_NO_E" />
+                <ScalarProperty Name="CHECK_NO_B" ColumnName="CHECK_NO_B" />
+                <ScalarProperty Name="CHECK_NO_TRACK" ColumnName="CHECK_NO_TRACK" />
+                <ScalarProperty Name="CHECK_TYPE" ColumnName="CHECK_TYPE" />
+                <ScalarProperty Name="ISSUING_BANK" ColumnName="ISSUING_BANK" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

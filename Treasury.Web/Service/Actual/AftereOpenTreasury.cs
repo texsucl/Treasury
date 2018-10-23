@@ -36,6 +36,7 @@ namespace Treasury.Web.Service.Actual
             string firstTreaItem = string.Empty;
             string status = Ref.AccessProjectFormStatus.D01.ToString(); // 金庫登記簿檢核
             string statusFromReject = Ref.AccessProjectFormStatus.D04.ToString(); // 金庫登記簿覆核退回
+            List<string> _status = new List<string>() { status, statusFromReject };
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
@@ -47,11 +48,12 @@ namespace Treasury.Web.Service.Actual
                 reisterId = db.TREA_OPEN_REC.AsNoTracking()
                     .AsEnumerable()
                     .Where(x => !x.TREA_REGISTER_ID.IsNullOrWhiteSpace())
-                    .Where(x => x.CREATE_DT >= DateTime.Today && x.CREATE_DT < DateTime.Today.AddDays(1))
-                    .Where(x => x.REGI_STATUS == status)
-                    .Where(x => x.REGI_STATUS == statusFromReject)
+                    //.Where(x => x.CREATE_DT >= DateTime.Today && x.CREATE_DT < DateTime.Today.AddDays(1))
+                    //.Where(x => x.REGI_STATUS == status)
+                    //.Where(x => x.REGI_STATUS == statusFromReject)
+                    .Where(x => _status.Contains(x.REGI_STATUS))
                     //.Where(x => x.ACTUAL_PUT_TIME == null)
-                    .OrderBy(x => x.OPEN_TREA_TIME)
+                    //.OrderBy(x => x.OPEN_TREA_TIME)
                     .AsEnumerable()
                     .Select(x => new SelectOption()
                     {
@@ -299,7 +301,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.APLY_STATUS == status)
                     .Where(x => x.CONFIRM_UID == null)
                     .Where(x => _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID).ITEM_OP_TYPE == "3")
-                    .Where(x => x.APLY_APPR_UID != null)
+                    //.Where(x => x.APLY_APPR_UID != null)
                     .AsEnumerable()
                     .Select(x => new AfterOpenTreasuryUnconfirmedDetailViewModel()
                     {
@@ -331,6 +333,7 @@ namespace Treasury.Web.Service.Actual
         {
             List<AfterOpenTreasurySearchDetailViewModel> result = new List<AfterOpenTreasurySearchDetailViewModel>();
             string status = Ref.AccessProjectFormStatus.D01.ToString(); // 金庫登記簿檢核
+            string statusFromReject = Ref.AccessProjectFormStatus.D04.ToString(); // 金庫登記簿覆核退回
             if (!searchData.vTREA_REGISTER_ID.Any()) // 單號為必輸
                 return result;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -342,7 +345,7 @@ namespace Treasury.Web.Service.Actual
 
                 result = db.TREA_APLY_REC.AsNoTracking()
                     .Where(x => x.TREA_REGISTER_ID == searchData.vTREA_REGISTER_ID, !searchData.vTREA_REGISTER_ID.IsNullOrWhiteSpace()) //金庫登記簿單號
-                    .Where(x => x.APLY_STATUS == status)
+                    .Where(x => x.APLY_STATUS == status || x.APLY_STATUS == statusFromReject)
                     //.Where(x => x.APLY_STATUS == "C02")     //測試
                     .Join(db.TREA_OPEN_REC.AsNoTracking(),
                     x => x.TREA_REGISTER_ID,
@@ -388,9 +391,15 @@ namespace Treasury.Web.Service.Actual
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             if (!searchData.vTREA_REGISTER_ID.Any()) // 單號為必輸
                 return result;
-
             DateTime _now = DateTime.Now;
-            string dt = DateTime.Now.ToString("yyyy-MM-dd");
+            var p_split = searchData.vACTUAL_PUT_TIME.Split(':');
+            var p_hh = p_split[0];
+            var p_mm = p_split.Length > 1 ? p_split[1] : string.Empty;
+            var g_split = searchData.vACTUAL_GET_TIME.Split(':');
+            var g_hh = g_split[0];
+            var g_mm = g_split.Length > 1 ? g_split[1] : string.Empty;
+            var putTime = new DateTime(_now.Year, _now.Month, _now.Day, Convert.ToInt32(p_hh), Convert.ToInt32(p_mm), 0);
+            var getTime = new DateTime(_now.Year, _now.Month, _now.Day, Convert.ToInt32(g_hh), Convert.ToInt32(g_mm), 0);
             string logStr = string.Empty;
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -398,8 +407,8 @@ namespace Treasury.Web.Service.Actual
                 var _TREA_OPEN_REC = db.TREA_OPEN_REC
                     .FirstOrDefault(x => x.TREA_REGISTER_ID == searchData.vTREA_REGISTER_ID);
 
-                _TREA_OPEN_REC.ACTUAL_PUT_TIME = DateTime.Parse(string.Format("{0} {1}", dt, searchData.vACTUAL_PUT_TIME));
-                _TREA_OPEN_REC.ACTUAL_GET_TIME = DateTime.Parse(string.Format("{0} {1}", dt, searchData.vACTUAL_GET_TIME));
+                _TREA_OPEN_REC.ACTUAL_PUT_TIME = putTime;
+                _TREA_OPEN_REC.ACTUAL_GET_TIME = getTime;
                 _TREA_OPEN_REC.LAST_UPDATE_UID = cUserId;
                 _TREA_OPEN_REC.LAST_UPDATE_DT = _now;
 
@@ -475,7 +484,7 @@ namespace Treasury.Web.Service.Actual
                 logStr += _TREA_OPEN_REC.modelToString(logStr);
 
                 var _TREA_APLY_REC = db.TREA_APLY_REC.Where(x => x.TREA_REGISTER_ID == registerID)
-                    .Where(x => x.APLY_STATUS == "D01")
+                    .Where(x => x.APLY_STATUS == "D01" || x.APLY_STATUS == "D04")
                     //.Where(x => x.APLY_STATUS == "C02")     //測試
                     .ToList();
 

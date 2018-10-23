@@ -1,0 +1,1270 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div>
+    <div id="CDC_Deposit_M_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+    </div>
+    <div style="text-align:center;display:none;" class="CDC_Deposit_Act">
+        <input type="button" id="CDC_DepositApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDC_DepositBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDC_DepositDialog_M" style="display:none;">
+        <form id="CDC_DepositDialogForm_M">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="lPut_Date" name="lPut_Date"></label>
+                    </td>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="lAply_Uid_Name" name="lAply_Uid_Name"></label>
+                    </td>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <lable id="lCharge_Name" name="lCharge_Name"></lable>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>幣別 : </label>
+                    </td>
+                    <td>
+                        <div class="select-editable">
+                            @Html.DropDownList("dCurrency", (SelectList)ViewBag.dCurrency, new { @class = "CDC_DepositUpdateType_M", @onchange = "this.nextElementSibling.value = this.value" })
+                            <input class="CDC_DepositUpdateType_M" type="text" name="tCurrency" id="tCurrency" value="" maxlength="3" />
+                        </div>
+                    </td>
+                    <td>
+                        <label>交易對象 : </label>
+                    </td>
+                    <td>
+                        <div class="select-editable">
+                            @Html.DropDownList("dTrad_Partners", (SelectList)ViewBag.dTrad_Partners, new { @class = "CDC_DepositUpdateType_M", @onchange = "this.nextElementSibling.value = this.value" })
+                            <input class="CDC_DepositUpdateType_M" type="text" name="tTrad_Partners" id="tTrad_Partners" value="" maxlength="30" />
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <span class="red" style="padding-left:20px" id="sCurrency"></span>
+                    </td>
+                    <td></td>
+                    <td>
+                        <span class="red" style="padding-left:20px" id="sTrad_Partners"></span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>承作日期 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tCommit_Date" name="tCommit_Date" />
+                        <span class="red" style="padding-left:20px" id="sCommit_Date"></span>
+                    </td>
+                    <td>
+                        <label>到期日 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tExpiry_Date" name="tExpiry_Date" />
+                        <span class="red" style="padding-left:20px" id="sExpiry_Date"></span>
+                    </td>
+                    <td>
+                        <label>計息方式 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dInterest_Rate_Type", (SelectList)ViewBag.dInterest_Rate_Type, new { @class = "CDC_DepositUpdateType_M" })
+                        <span class="red" style="padding-left:20px" id="sInterest_Rate_Type"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>利率% : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tInterest_Rate" name="tInterest_Rate" maxlength="7" />
+                        <span class="red" style="padding-left:20px" id="sInterest_Rate"></span>
+                    </td>
+                    <td>
+                        <label>存單類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dDep_Type", (SelectList)ViewBag.dDep_Type, new { @class = "CDC_DepositUpdateType_M" })
+                        <span class="red" style="padding-left:20px" id="sDep_Type"></span>
+                    </td>
+                    <td>
+                        <label>總面額 : </label>
+                    </td>
+                    <td>
+                        <label id="lTotal_Denomination"></label>
+                        <span class="red" style="padding-left:20px" id="sTotal_Denomination"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>設質 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dDep_Set_Quality", (SelectList)ViewBag.dYN_Flag, new { @class = "CDC_DepositUpdateType_M" })
+                        <span class="red" style="padding-left:20px" id="sDep_Set_Quality"></span>
+                    </td>
+                    <td>
+                        <label>自動轉期 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dAuto_Trans", (SelectList)ViewBag.dYN_Flag, new { @class = "CDC_DepositUpdateType_M" })
+                        <span class="red" style="padding-left:20px" id="sAuto_Trans"></span>
+                    </td>
+                    <td>
+                        <label>轉期後到期日 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tTrans_Expiry_Date" name="tTrans_Expiry_Date" />
+                        <span class="red" style="padding-left:20px" id="sTrans_Expiry_Date"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td colspan="3">
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tMemo" name="tMemo" maxlength="50" style="width:500px" />
+                        <span class="red" style="padding-left:20px" id="sMemo"></span>
+                        <input type="hidden" id="hItem_Id" />
+                    </td>
+                    <td>
+                        <label>轉期次數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tTrans_Tms" name="tTrans_Tms" />
+                        <span class="red" style="padding-left:20px" id="sTrans_Tms"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <div id="CDC_Deposit_D_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="CDC_DepositUpdateTemp_M" value="修改" class="btn btn-primary" />
+                    </td>
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="CDC_DepositCancelTemp_M" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="CDC_DepositDialog_D" style="display:none;">
+        <form id="CDC_DepositDialogForm_D">
+            <table>
+                <tr>
+                    <td>
+                        <label>存單號碼前置碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDep_No_Preamble" name="tDep_No_Preamble" maxlength="3" />
+                        <span class="red" style="padding-left:20px" id="sDep_No_Preamble"></span>
+                    </td>
+                    <td>
+                        <label>存單號碼(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDep_No_B" name="tDep_No_B" maxlength="10" />
+                        <span class="red" style="padding-left:20px" id="sDep_No_B"></span>
+                    </td>
+                    <td>
+                        <label>存單號碼(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDep_No_E" name="tDep_No_E" maxlength="10" />
+                        <span class="red" style="padding-left:20px" id="sDep_No_E"></span>
+                    </td>
+                </tr>
+                <tr>
+                    @*<td>
+                        <label>存單號碼尾碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDep_No_Tail" name="tDep_No_Tail" maxlength="1" />
+                        <span class="red" style="padding-left:20px" id="sDep_No_Tail"></span>
+                    </td>*@
+                    <td>
+                        <label>張數 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDep_Cnt" name="tDep_Cnt" />
+                        <span class="red" style="padding-left:20px" id="sDep_Cnt"></span>
+                    </td>
+                    <td>
+                        <label>單張面額 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_D" id="tDenomination" name="tDenomination" maxlength="13" />
+                        <span class="red" style="padding-left:20px" id="sDenomination"></span>
+                    </td>
+                    <td>
+                        <label>面額小計 : </label>
+                    </td>
+                    <td>
+                        <label id="lSubtotal_Denomination"></label>
+                        <span class="red" style="padding-left:20px" id="sSubtotal_Denomination"></span>
+                        <input type="hidden" id="hData_Seq" />
+                    </td>
+                </tr>
+                @*<tr>
+                    <td>
+                        <label>面額小計 : </label>
+                    </td>
+                    <td>
+                        <label id="lSubtotal_Denomination"></label>
+                        <span class="red" style="padding-left:20px" id="sSubtotal_Denomination"></span>
+                        <input type="hidden" id="hData_Seq" />
+                    </td>
+                </tr>*@
+                <tr>
+                    <td colspan="3">
+                        <input type="button" id="CDC_DepositUpdateTemp_D" value="修改" class="btn btn-primary" />
+                    </td>
+
+                    <td colspan="3" style="text-align:right;">
+                        <input type="button" id="CDC_DepositCancelTemp_D" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDC_DepositUrl = {};
+        CDC_DepositUrl.getData = '@Url.Action("GetCDCCacheData", "Deposit")';
+        CDC_DepositUrl.setData = '@Url.Action("SetCDC_DetailData", "Deposit")';
+        CDC_DepositUrl.UpdateDbDataM = '@Url.Action("UpdateDbDataM", "Deposit")';
+        CDC_DepositUrl.UpdateDbDataD = '@Url.Action("UpdateDbDataD", "Deposit")';
+        CDC_DepositUrl.ApplyDbData = '@Url.Action("ApplyDbData", "Deposit")';
+        CDC_DepositUrl.RepeatDbData = '@Url.Action("RepeatDbData", "Deposit")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var CDC_DepositDialog_M_Id = 'CDC_DepositDialog_M'; //dialogId
+        var CDC_DepositDialogForm_M_Id = 'CDC_DepositDialogForm_M'; //formId
+        var CDC_DepositPut_Date = 'lPut_Date';//入庫日期Id
+        var CDC_DepositAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
+        var CDC_DepositCharge_Name = 'lCharge_Name';//權責單位Id
+        var CDC_DepositFormId_M = 'CDC_DepositDialogForm_M'; //formId
+        var CDC_DepositCurrency = 'tCurrency';//幣別Id
+        var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
+        var CDC_DepositTrad_Partners = 'tTrad_Partners';//交易對象Id
+        var CDC_DepositTrad_Partners_Aft = 'sTrad_Partners';//交易對象_異動後Id
+        var CDC_DepositCommit_Date = 'tCommit_Date';//承作日期Id
+        var CDC_DepositCommit_Date_Aft = 'sCommit_Date';//承作日期_異動後Id
+        var CDC_DepositExpiry_Date = 'tExpiry_Date';//到期日Id
+        var CDC_DepositExpiry_Date_Aft = 'sExpiry_Date';//到期日_異動後Id
+        var CDC_DepositInterest_Rate_Type = 'dInterest_Rate_Type';//計息方式Id
+        var CDC_DepositInterest_Rate_Type_Aft = 'sInterest_Rate_Type';//計息方式_異動後Id
+        var CDC_DepositInterest_Rate = 'tInterest_Rate';//利率%Id
+        var CDC_DepositInterest_Rate_Aft = 'sInterest_Rate';//利率%_異動後Id
+        var CDC_DepositDep_Type = 'dDep_Type';//存單類型Id
+        var CDC_DepositDep_Type_Aft = 'sDep_Type';//存單類型_異動後Id
+        var CDC_DepositTotal_Denomination = 'lTotal_Denomination';//總面額Id
+        var CDC_DepositTotal_Denomination_Aft = 'sTotal_Denomination';//總面額_異動後Id
+        var CDC_DepositDep_Set_Quality = 'dDep_Set_Quality';//設質Id
+        var CDC_DepositDep_Set_Quality_Aft = 'sDep_Set_Quality';//設質_異動後Id
+        var CDC_DepositAuto_Trans = 'dAuto_Trans';//自動轉期Id
+        var CDC_DepositAuto_Trans_Aft = 'sAuto_Trans';//自動轉期_異動後Id
+        var CDC_DepositTrans_Expiry_Date = 'tTrans_Expiry_Date';//轉期後到期日Id
+        var CDC_DepositTrans_Expiry_Date_Aft = 'sTrans_Expiry_Date';//轉期後到期日_異動後Id
+        var CDC_DepositMemo = 'tMemo';//備註Id
+        var CDC_DepositMemo_Aft = 'sMemo';//備註_異動後Id
+        var CDC_DepositTrans_Tms = 'tTrans_Tms';//轉期次數Id
+        var CDC_DepositTrans_Tms_Aft = 'sTrans_Tms';//轉期次數_異動後Id
+        var CDC_ItemId = 'hItem_Id';//Id
+
+        var CDC_DepositDialog_D_Id = 'CDC_DepositDialog_D'; //dialogId
+        var CDC_DepositDialogForm_D_Id = 'CDC_DepositDialogForm_D'; //formId
+        var CDC_DepositDep_No_Preamble = 'tDep_No_Preamble';//存單號碼前置碼Id
+        var CDC_DepositDep_No_Preamble_Aft = 'sDep_No_Preamble';//存單號碼前置碼_異動後Id
+        var CDC_DepositDep_No_B = 'tDep_No_B';//存單號碼(起)Id
+        var CDC_DepositDep_No_B_Aft = 'sDep_No_B';//存單號碼(起)_異動後Id
+        var CDC_DepositDep_No_E = 'tDep_No_E';//存單號碼(迄)Id
+        var CDC_DepositDep_No_E_Aft = 'sDep_No_E';//存單號碼(迄)_異動後Id
+        var CDC_DepositDep_Cnt = 'tDep_Cnt';//張數Id
+        var CDC_DepositDep_Cnt_Aft = 'sDep_Cnt';//張數_異動後Id
+        var CDC_DepositCurrency = 'tCurrency';//幣別Id
+        var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
+        var CDC_DepositCurrency = 'tCurrency';//幣別Id
+        var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
+        var CDC_ItemId = 'hItem_Id';//Id
+
+        var CDC_Deposit_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDC_Deposit_Act_Type)
+            $('.CDC_Deposit_Act').show(); //申請異動主畫面進來
+
+        var CDC_Deposit_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDC_Deposit_ApplyFlag)
+            $('#CDC_DepositApply').hide();
+
+        var CDC_DepositConfirmFlag = false; //離開時提醒訊息
+
+        //#endregion 參數設定
+
+        //#region 初始動作
+        CDC_DepositDbGrid_M();
+        setDepositVerified();
+        //#endregion 初始動作
+
+        //#region 初始設定
+        function setDialog_M() {
+            switch ($('#' + CDC_DepositDep_Set_Quality).val()) {
+                case "N":
+                    $('#' + CDC_DepositAuto_Trans).val($($('#' + CDC_DepositAuto_Trans + ' option')[1]).val())
+                    $('#' + CDC_DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + CDC_DepositTrans_Tms).attr("Disabled", true);
+                    break;
+                case "Y":
+                    $('#' + CDC_DepositAuto_Trans).val($($('#' + CDC_DepositAuto_Trans + ' option')[0]).val())
+                    $('#' + CDC_DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + CDC_DepositTrans_Tms).attr("Disabled", false);
+                    break;
+            }
+            $('#' + CDC_DepositTrans_Expiry_Date).attr("Disabled", true);
+        }
+        //#endregion 初始設定
+        //#region 註冊verified
+        function setDepositVerified() {
+            //設定承作日期及到期日函數
+            var Commit_Fun = function () {
+                $('#' + CDC_DepositExpiry_Date).datepicker("option", "minDate", $('#' + CDC_DepositCommit_Date).val());
+            }
+            var Expiry_Fun = function () {
+                $('#' + CDC_DepositTrans_Expiry_Date).val($('#' + CDC_DepositExpiry_Date).val());
+                $('#' + CDC_DepositCommit_Date).datepicker("option", "maxDate", $('#' + CDC_DepositExpiry_Date).val());
+            };
+
+            created.createDatepicker(CDC_DepositCommit_Date, null, Commit_Fun);
+            created.createDatepicker(CDC_DepositExpiry_Date, null, Expiry_Fun);
+
+            verified.required(CDC_DepositFormId_M, CDC_DepositCurrency, message.required('幣別')); //幣別為必填
+            verified.required(CDC_DepositFormId_M, CDC_DepositTrad_Partners, message.required('交易對象')); //交易對象為必填
+            verified.required(CDC_DepositFormId_M, CDC_DepositCommit_Date, message.required('承作日期')); //承作日期為必填
+            verified.required(CDC_DepositFormId_M, CDC_DepositExpiry_Date, message.required('到期日')); //到期日為必填
+            verified.required(CDC_DepositFormId_M, CDC_DepositInterest_Rate, message.required('利率%')); //利率%為必填
+
+            verified.englishUpper(CDC_DepositFormId_M, CDC_DepositCurrency); //幣別 僅能輸入英文大寫
+            verified.datepicker(CDC_DepositFormId_M, CDC_DepositCommit_Date, $('#' + CDC_DepositCommit_Date).val()); //承作日期 僅能輸入日期
+            verified.datepicker(CDC_DepositFormId_M, CDC_DepositExpiry_Date, $('#' + CDC_DepositExpiry_Date).val()); //到期日 僅能輸入日期
+            verified.rate(CDC_DepositFormId_M, CDC_DepositInterest_Rate); //利率% 格式
+
+            //verified.required(DepositFormId_D, DepositDep_No_B, message.required('存單號碼(起)')); //存單號碼(起)為必填
+            //verified.required(DepositFormId_D, DepositDep_No_E, message.required('存單號碼(迄)')); //存單號碼(迄)為必填
+            //verified.required(DepositFormId_D, DepositDep_Cnt, message.required('張數')); //張數為必填
+            //verified.required(DepositFormId_D, DepositDenomination, message.required('單張面額')); //單張面額為必填
+
+            //verified.positiveInt(DepositFormId_D, DepositDep_No_B); //存單號碼(起) 僅能輸入數字(正)
+            //verified.positiveInt(DepositFormId_D, DepositDep_No_E); //存單號碼(迄) 僅能輸入數字(正)
+            //verified.positiveInt(DepositFormId_D, DepositDep_Cnt); //張數 僅能輸入數字(正)
+
+        }
+        //#endregion 註冊verified
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDC_DepositApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDC_DepositApplyFun(); });
+                    break;
+                case 'CDC_DepositBack':
+                case 'CDC_DepositCancelTemp_M':
+                case 'CDC_DepositCancelTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            if (id == 'CDC_DepositBack' &&
+                                CDC_DepositConfirmFlag &&
+                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+                case 'CDC_DepositUpdateTemp_M':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDC_DepositUpdateTempFun_M(); });
+                    break;
+                case 'CDC_DepositUpdateTemp_D':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDC_DepositUpdateTempFun_D(); });
+                    break;
+            }
+        });
+
+        //設值選取
+        $('#' + CDC_DepositDep_Set_Quality).on('change', function () {
+            switch ($('#' + CDC_DepositDep_Set_Quality).val()) {
+                case "N":
+                    $('#' + CDC_DepositAuto_Trans).val($($('#' + CDC_DepositAuto_Trans + ' option')[1]).val())
+                    $('#' + CDC_DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + CDC_DepositTrans_Tms).attr("Disabled", true);
+                    break;
+                case "Y":
+                    $('#' + CDC_DepositAuto_Trans).val($($('#' + CDC_DepositAuto_Trans + ' option')[0]).val())
+                    $('#' + CDC_DepositAuto_Trans).attr("Disabled", true);
+                    $('#' + CDC_DepositTrans_Tms).attr("Disabled", false);
+                    break;
+            }
+        });
+
+        //#endregion 註冊事件
+
+        //#endregion dialog
+        function dialogOpen_M(type, rowid) {
+            var listId = 'CDC_Deposit_M_TempList';
+            var DepositUpdateClassM = 'CDC_DepositUpdateType_M';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDC_DepositDialog_M_Id).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定期存單',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDC_DepositUpdateTemp_M').hide();
+            SetCDC_DepositFun(listId, rowid);
+            if (type == '@Ref.ActionType.Add.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('#CDC_DepositUpdateTemp_M').show();
+                $('.' + DepositUpdateClassM).prop('disabled', false);
+                setDialog_M();
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_M(listId, rowid);
+                $('.' + DepositUpdateClassM).prop('disabled', true);
+            }
+            $('#' + CDC_DepositDialog_M_Id).dialog('open');
+        }
+
+        function ResetDialog_M()
+        {
+            $('#' + CDC_DepositPut_Date).text('');
+            $('#' + CDC_DepositAply_Uid_Name).text('');
+            $('#' + CDC_DepositCharge_Name).text('');
+
+            $('#' + CDC_DepositCurrency).val('');
+            $('#' + CDC_DepositCurrency_Aft).text('');
+            $('#' + CDC_DepositTrad_Partners).val('');
+            $('#' + CDC_DepositTrad_Partners_Aft).text('');
+
+            $('#' + CDC_DepositCommit_Date).val('');
+            $('#' + CDC_DepositCommit_Date_Aft).text('');
+            $('#' + CDC_DepositExpiry_Date).val('');
+            $('#' + CDC_DepositExpiry_Date_Aft).text('');
+            $('#' + CDC_DepositInterest_Rate_Type).val('');
+            $('#' + CDC_DepositInterest_Rate_Type_Aft).text('');
+
+            $('#' + CDC_DepositInterest_Rate).val('');
+            $('#' + CDC_DepositInterest_Rate_Aft).text('');
+            $('#' + CDC_DepositDep_Type).val('');
+            $('#' + CDC_DepositDep_Type_Aft).text('');
+            $('#' + CDC_DepositTotal_Denomination).text('');
+            $('#' + CDC_DepositTotal_Denomination_Aft).text('');
+
+            $('#' + CDC_DepositDep_Set_Quality).val('');
+            $('#' + CDC_DepositDep_Set_Quality_Aft).text('');
+            $('#' + CDC_DepositAuto_Trans).val('');
+            $('#' + CDC_DepositAuto_Trans_Aft).text('');
+            $('#' + CDC_DepositTrans_Expiry_Date).val('');
+            $('#' + CDC_DepositTrans_Expiry_Date_Aft).text('');
+
+            $('#' + CDC_DepositMemo).val('');
+            $('#' + CDC_DepositMemo_Aft).text('');
+            $('#' + CDC_DepositTrans_Tms).val('');
+            $('#' + CDC_DepositTrans_Tms_Aft).text('');
+            $('#' + CDC_ItemId).val('');
+        }
+
+        function dialogSetData_M(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog_M();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + CDC_DepositPut_Date).text(data.vPut_Date);
+                $('#' + CDC_DepositAply_Uid_Name).text(data.vAply_Uid_Name);
+                $('#' + CDC_DepositCharge_Name).text(data.vCharge_Name);
+
+                $('#' + CDC_DepositCurrency).val(data.vCurrency);
+                $('#' + CDC_DepositCurrency_Aft).text(data.vCurrency_Aft);
+                $('#' + CDC_DepositTrad_Partners).val(data.vTrad_Partners);
+                $('#' + CDC_DepositTrad_Partners_Aft).text(data.vTrad_Partners_Aft);
+
+                $('#' + CDC_DepositCommit_Date).val(data.vCommit_Date);
+                $('#' + CDC_DepositCommit_Date_Aft).text(data.vCommit_Date_Aft);
+                $('#' + CDC_DepositExpiry_Date).val(data.vExpiry_Date);
+                $('#' + CDC_DepositExpiry_Date_Aft).text(data.vExpiry_Date_Aft);
+                $('#' + CDC_DepositInterest_Rate_Type).val(data.vInterest_Rate_Type);
+                $('#' + CDC_DepositInterest_Rate_Type_Aft).text(data.vInterest_Rate_Type_Aft);
+
+                $('#' + CDC_DepositInterest_Rate).val(data.vInterest_Rate);
+                $('#' + CDC_DepositInterest_Rate_Aft).text(data.vInterest_Rate_Aft);
+                $('#' + CDC_DepositDep_Type).val(data.vDep_Type);
+                $('#' + CDC_DepositDep_Type_Aft).text(data.vDep_Type_Aft);
+                $('#' + CDC_DepositTotal_Denomination).text(data.vTotal_Denomination);
+                $('#' + CDC_DepositTotal_Denomination_Aft).text(data.vTotal_Denomination_Aft);
+
+                $('#' + CDC_DepositDep_Set_Quality).val(data.vDep_Set_Quality);
+                $('#' + CDC_DepositDep_Set_Quality_Aft).text(data.vDep_Set_Quality_Aft);
+                $('#' + CDC_DepositAuto_Trans).val(data.vAuto_Trans);
+                $('#' + CDC_DepositAuto_Trans_Aft).text(data.vAuto_Trans_Aft);
+                $('#' + CDC_DepositTrans_Expiry_Date).val(data.vTrans_Expiry_Date);
+                $('#' + CDC_DepositTrans_Expiry_Date_Aft).text(data.vTrans_Expiry_Date_Aft);
+
+                $('#' + CDC_DepositMemo).val(data.vMemo);
+                $('#' + CDC_DepositMemo_Aft).text(data.vMemo_Aft);
+                $('#' + CDC_DepositTrans_Tms).val(data.vTrans_Tms);
+                $('#' + CDC_DepositTrans_Tms_Aft).text(data.vTrans_Tms_Aft);
+                $('#' + CDC_ItemId).val(data.vItemId);
+            }
+        }
+
+        //依總項設定定期存單明細
+        function SetCDC_DepositFun(listId, rowid) {
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    vItem_Id: data.vItemId
+                }),
+                dataType: "json",
+                url: CDC_DepositUrl.setData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                CDC_DepositDbGrid_D();
+            })
+
+        }
+
+        function dialogOpen_D(type, rowid) {
+            var listId = 'CDC_Deposit_D_TempList';
+            var DepositUpdateClassD = 'CDC_DepositUpdateType_D';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDC_DepositDialog_D_Id).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '定期存單明細',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDC_DepositUpdateTemp_D').hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData_D(listId, rowid);
+                $('#CDC_DepositUpdateTemp_D').show();
+                $('.' + DepositUpdateClassD).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData_D(listId, rowid);
+                $('.' + DepositUpdateClassD).prop('disabled', true);
+            }
+            $('#' + CDC_DepositDialog_D_Id).dialog('open');
+        }
+
+        function ResetDialog_D() {
+            //$('#' + CDC_DepositPut_Date).text('');
+            //$('#' + CDC_DepositAply_Uid_Name).text('');
+            //$('#' + CDC_DepositCharge_Name).text('');
+
+            //$('#' + CDC_DepositCurrency).val('');
+            //$('#' + CDC_DepositCurrency_Aft).text('');
+            //$('#' + CDC_DepositTrad_Partners).val('');
+            //$('#' + CDC_DepositTrad_Partners_Aft).text('');
+
+            //$('#' + CDC_DepositCommit_Date).val('');
+            //$('#' + CDC_DepositCommit_Date_Aft).text('');
+            //$('#' + CDC_DepositExpiry_Date).val('');
+            //$('#' + CDC_DepositExpiry_Date_Aft).text('');
+            //$('#' + CDC_DepositInterest_Rate_Type).val('');
+            //$('#' + CDC_DepositInterest_Rate_Type_Aft).text('');
+
+            //$('#' + CDC_DepositInterest_Rate).val('');
+            //$('#' + CDC_DepositInterest_Rate_Aft).text('');
+            //$('#' + CDC_DepositDep_Type).val('');
+            //$('#' + CDC_DepositDep_Type_Aft).text('');
+            //$('#' + CDC_DepositTotal_Denomination).text('');
+            //$('#' + CDC_DepositTotal_Denomination_Aft).text('');
+
+            //$('#' + CDC_DepositDep_Set_Quality).val('');
+            //$('#' + CDC_DepositDep_Set_Quality_Aft).text('');
+            //$('#' + CDC_DepositAuto_Trans).val('');
+            //$('#' + CDC_DepositAuto_Trans_Aft).text('');
+            //$('#' + CDC_DepositTrans_Expiry_Date).val('');
+            //$('#' + CDC_DepositTrans_Expiry_Date_Aft).text('');
+
+            //$('#' + CDC_DepositMemo).val('');
+            //$('#' + CDC_DepositMemo_Aft).text('');
+            //$('#' + CDC_DepositTrans_Tms).val('');
+            //$('#' + CDC_DepositTrans_Tms_Aft).text('');
+            //$('#' + CDC_ItemId).val('');
+        }
+
+        function dialogSetData_D(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog_D();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                //$('#' + CDC_DepositCurrency).val(data.vCurrency);
+                //$('#' + CDC_DepositCurrency_Aft).text(data.vCurrency_Aft);
+                //$('#' + CDC_DepositTrad_Partners).val(data.vTrad_Partners);
+                //$('#' + CDC_DepositTrad_Partners_Aft).text(data.vTrad_Partners_Aft);
+
+                //$('#' + CDC_DepositCommit_Date).val(data.vCommit_Date);
+                //$('#' + CDC_DepositCommit_Date_Aft).text(data.vCommit_Date_Aft);
+                //$('#' + CDC_DepositExpiry_Date).val(data.vExpiry_Date);
+                //$('#' + CDC_DepositExpiry_Date_Aft).text(data.vExpiry_Date_Aft);
+                //$('#' + CDC_DepositInterest_Rate_Type).val(data.vInterest_Rate_Type);
+                //$('#' + CDC_DepositInterest_Rate_Type_Aft).text(data.vInterest_Rate_Type_Aft);
+
+                //$('#' + CDC_DepositInterest_Rate).val(data.vInterest_Rate);
+                //$('#' + CDC_DepositInterest_Rate_Aft).text(data.vInterest_Rate_Aft);
+                //$('#' + CDC_DepositDep_Type).val(data.vDep_Type);
+                //$('#' + CDC_DepositDep_Type_Aft).text(data.vDep_Type_Aft);
+                //$('#' + CDC_DepositTotal_Denomination).text(data.vTotal_Denomination);
+                //$('#' + CDC_DepositTotal_Denomination_Aft).text(data.vTotal_Denomination_Aft);
+
+                //$('#' + CDC_DepositDep_Set_Quality).val(data.vDep_Set_Quality);
+                //$('#' + CDC_DepositDep_Set_Quality_Aft).text(data.vDep_Set_Quality_Aft);
+                //$('#' + CDC_DepositAuto_Trans).val(data.vAuto_Trans);
+                //$('#' + CDC_DepositAuto_Trans_Aft).text(data.vAuto_Trans_Aft);
+                //$('#' + CDC_DepositTrans_Expiry_Date).val(data.vTrans_Expiry_Date);
+                //$('#' + CDC_DepositTrans_Expiry_Date_Aft).text(data.vTrans_Expiry_Date_Aft);
+
+                //$('#' + CDC_DepositMemo).val(data.vMemo);
+                //$('#' + CDC_DepositMemo_Aft).text(data.vMemo_Aft);
+                //$('#' + CDC_DepositTrans_Tms).val(data.vTrans_Tms);
+                //$('#' + CDC_DepositTrans_Tms_Aft).text(data.vTrans_Tms_Aft);
+                //$('#' + CDC_ItemId).val(data.vItemId);
+            }
+        }
+        //#region dialog
+
+        //#region jqgrid
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCDeposit' + options.gid + 'Update' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCDeposit' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCDeposit' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                            <text>
+                case '@item.Value':
+                    return '@item.Text';
+                    </text>
+                        }
+                }
+                default:
+                    return '';
+            }
+        }
+
+        function unformattervDeposit(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formattervCurrency(cellvalue, options, rdata) {
+            if (rdata.vCurrency_Aft != null) {
+                switch (rdata.vCurrency_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dCurrency))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vCurrency) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dCurrency))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervTrad_Partners(cellvalue, options, rdata) {
+            if (rdata.vTrad_Partners_Aft != null) {
+                switch (rdata.vTrad_Partners_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dTrad_Partners))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vTrad_Partners) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dTrad_Partners))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervCommit_Date(cellvalue, options, rdata) {
+            if (rdata.vCommit_Date_Aft == "")
+                return rdata.vCommit_Date || '';
+            else
+                return '<span class="red">' + rdata.vCommit_Date_Aft + '</span>';
+        }
+
+        function formattervExpiry_Date(cellvalue, options, rdata) {
+            if (rdata.vExpiry_Date_Aft == "")
+                return rdata.vExpiry_Date || '';
+            else
+                return '<span class="red">' + rdata.vExpiry_Date_Aft + '</span>';
+        }
+
+        function formattervInterest_Rate_Type(cellvalue, options, rdata) {
+            if (rdata.vInterest_Rate_Type_Aft != null) {
+                switch (rdata.vInterest_Rate_Type_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dInterest_Rate_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vInterest_Rate_Type) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dInterest_Rate_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervInterest_Rate(cellvalue, options, rdata) {
+            if (rdata.vInterest_Rate_Aft == null)
+                return rdata.vInterest_Rate || '';
+            else
+                return '<span class="red">' + rdata.vInterest_Rate_Aft + '</span>';
+        }
+
+        function formattervDep_Type(cellvalue, options, rdata) {
+            if (rdata.vDep_Type_Aft != null) {
+                switch (rdata.vDep_Type_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dDep_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vDep_Type) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dDep_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervTotal_Denomination(cellvalue, options, rdata) {
+            if (rdata.vTotal_Denomination_Aft == null)
+                return customerUtility.addCommas(rdata.vTotal_Denomination) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vTotal_Denomination_Aft) + '</span>';
+        }
+
+        function formattervDep_Set_Quality(cellvalue, options, rdata) {
+            if (rdata.vDep_Set_Quality_Aft != null) {
+                switch (rdata.vDep_Set_Quality_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dYN_Flag))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '<span class="red">' + '@item.Text' + '</span>';
+                            </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vDep_Set_Quality) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dYN_Flag))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervAuto_Trans(cellvalue, options, rdata) {
+            if (rdata.vAuto_Trans_Aft != null) {
+                switch (rdata.vAuto_Trans_Aft) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dYN_Flag))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '<span class="red">' + '@item.Text' + '</span>';
+                            </text>
+                        }
+                    }
+                }
+            } else {
+                switch (rdata.vAuto_Trans) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dYN_Flag))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervTrans_Expiry_Date(cellvalue, options, rdata) {
+            if (rdata.vTrans_Expiry_Date_Aft == "")
+                return rdata.vTrans_Expiry_Date || '';
+            else
+                return '<span class="red">' + rdata.vTrans_Expiry_Date_Aft + '</span>';
+        }
+
+        function formattervMemo(cellvalue, options, rdata) {
+            if (rdata.vMemo_Aft == null)
+                return rdata.vMemo || '';
+            else if (rdata.vMemo_Aft.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vMemo_Aft + '</span>';
+        }
+
+        function formattervTrans_Tms(cellvalue, options, rdata) {
+            if (rdata.vTrans_Tms_Aft == null)
+                return rdata.vTrans_Tms || '';
+            else
+                return '<span class="red">' + rdata.vTrans_Tms_Aft + '</span>';
+        }
+
+        function CDC_Deposit_M_TempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen_M('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen_M('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_DepositRepeat_M(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1') {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDC_DepositDbGrid_M() {
+            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+                '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數',
+                '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前',
+                '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後',
+                '物品編號', '狀態Id'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
+            colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+
+            colModelArray.push({ name: "vCurrency_Show", index: "vCurrency_Show", width: 70, sortable: false, align: 'center', formatter: formattervCurrency, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vTrad_Partners_Show", index: "vTrad_Partners_Show", width: 150, sortable: false, align: 'center', formatter: formattervTrad_Partners, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vCommit_Date_Show", index: "vCommit_Date_Show", width: 90, sortable: false, align: 'center', formatter: formattervCommit_Date });
+            colModelArray.push({ name: "vExpiry_Date_Show", index: "vExpiry_Date_Show", width: 90, sortable: false, formatter: formattervExpiry_Date });
+            colModelArray.push({ name: "vInterest_Rate_Type_Show", index: "vInterest_Rate_Type_Show", width: 90, sortable: false, align: 'center', formatter: formattervInterest_Rate_Type, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vInterest_Rate_Show", index: "vInterest_Rate_Show", width: 90, sortable: false, align: 'right', formatter: formattervInterest_Rate });
+            colModelArray.push({ name: "vDep_Type_Show", index: "vDep_Type_Show", width: 90, sortable: false, align: 'center', formatter: formattervDep_Type, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vTotal_Denomination_Show", index: "vTotal_Denomination_Show", width: 100, sortable: false, align: 'right', formatter: formattervTotal_Denomination });
+            colModelArray.push({ name: "vDep_Set_Quality_Show", index: "vDep_Set_Quality_Show", width: 70, sortable: false, align: 'center', formatter: formattervDep_Set_Quality, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vAuto_Trans_Show", index: "vAuto_Trans_Show", width: 90, sortable: false, align: 'center', formatter: formattervAuto_Trans, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vTrans_Expiry_Date_Show", index: "vTrans_Expiry_Date_Show", width: 100, sortable: false, align: 'center', formatter: formattervTrans_Expiry_Date });
+            colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, sortable: false, formatter: formattervMemo });
+            colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 90, sortable: false, align: 'right', formatter: formattervTrans_Tms });
+
+            colModelArray.push({ name: "vCurrency", index: "vCurrency", hidden: true });
+            colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", hidden: true });
+            colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
+            colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", hidden: true });
+            colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", hidden: true });
+            colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", hidden: true });
+            colModelArray.push({ name: "vDep_Type", index: "vDep_Type", hidden: true });
+            colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", hidden: true });
+            colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", hidden: true });
+            colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", hidden: true });
+            colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
+            colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", hidden: true });
+
+            colModelArray.push({ name: "vCurrency_Aft", index: "vCurrency_Aft", hidden: true });
+            colModelArray.push({ name: "vTrad_Partners_Aft", index: "vTrad_Partners_Aft", hidden: true });
+            colModelArray.push({ name: "vCommit_Date_Aft", index: "vCommit_Date_Aft", hidden: true });
+            colModelArray.push({ name: "vExpiry_Date_Aft", index: "vExpiry_Date_Aft", hidden: true });
+            colModelArray.push({ name: "vInterest_Rate_Type_Aft", index: "vInterest_Rate_Type_Aft", hidden: true });
+            colModelArray.push({ name: "vInterest_Rate_Aft", index: "vInterest_Rate_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_Type_Aft", index: "vDep_Type_Aft", hidden: true });
+            colModelArray.push({ name: "vTotal_Denomination_Aft", index: "vTotal_Denomination_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_Set_Quality_Aft", index: "vDep_Set_Quality_Aft", hidden: true });
+            colModelArray.push({ name: "vAuto_Trans_Aft", index: "vAuto_Trans_Aft", hidden: true });
+            colModelArray.push({ name: "vTrans_Expiry_Date_Aft", index: "vTrans_Expiry_Date_Aft", hidden: true });
+            colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
+            colModelArray.push({ name: "vTrans_Tms_Aft", index: "vTrans_Tms_Aft", hidden: true });
+
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
+            jqgridCustom.createJqgridByCache(
+               'CDC_Deposit_M_jqgridDiv',
+               'CDC_Deposit_M_TempList',
+               'CDC_Deposit_M_TempPeger',
+               CDC_DepositUrl.getData,
+               {
+                   type: 'M'
+               },
+               colNameArray,
+               colModelArray,
+               '查詢資料',
+               jqgridCustom.getPage('CDC_Deposit_M_jqgridDiv'),
+               CDC_Deposit_M_TempCompleteFun,
+               true
+               );
+        }
+
+        function formattervDep_No_Preamble(cellvalue, options, rdata) {
+            if (rdata.vDep_No_Preamble_Aft == null)
+                return rdata.vDep_No_Preamble || '';
+            else
+                return '<span class="red">' + rdata.vDep_No_Preamble_Aft + '</span>';
+        }
+
+        function formattervDep_No_B(cellvalue, options, rdata) {
+            if (rdata.vDep_No_B_Aft == null)
+                return rdata.vDep_No_B || '';
+            else
+                return '<span class="red">' + rdata.vDep_No_B_Aft + '</span>';
+        }
+
+        function formattervDep_No_E(cellvalue, options, rdata) {
+            if (rdata.vDep_No_E_Aft == null)
+                return rdata.vDep_No_E || '';
+            else
+                return '<span class="red">' + rdata.vDep_No_E_Aft + '</span>';
+        }
+
+        function formattervDep_No_Tail(cellvalue, options, rdata) {
+            if (rdata.vDep_No_Tail_Aft == null)
+                return rdata.vDep_No_Tail || '';
+            else
+                return '<span class="red">' + rdata.vDep_No_Tail_Aft + '</span>';
+        }
+
+        function formattervDep_Cnt(cellvalue, options, rdata) {
+            if (rdata.vDep_Cnt_Aft == null)
+                return customerUtility.addCommas(rdata.vDep_Cnt) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vDep_Cnt_Aft) + '</span>';
+        }
+
+        function formattervDenomination(cellvalue, options, rdata) {
+            if (rdata.vDenomination_Aft == null)
+                return customerUtility.addCommas(rdata.vDenomination) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vDenomination_Aft) + '</span>';
+        }
+
+        function formattervSubtotal_Denomination(cellvalue, options, rdata) {
+            if (rdata.vSubtotal_Denomination_Aft == null)
+                return customerUtility.addCommas(rdata.vSubtotal_Denomination) || '';
+            else
+                return '<span class="red">' + customerUtility.addCommas(rdata.vSubtotal_Denomination_Aft) + '</span>';
+        }
+
+        function CDC_Deposit_D_TempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen_D('@Ref.ActionType.Edit.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen_D('@Ref.ActionType.View.ToString()', i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_DepositRepeat_D(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function CDC_DepositDbGrid_D() {
+            var colNameArray = ['物品單號', '明細流水號', '動作',
+                '存單號碼前置碼', '存單號碼(起)', '存單號碼(迄)', '存單號碼尾碼', '張數', '單張面額', '面額小計',
+                '存單號碼前置碼異動前', '存單號碼(起)異動前', '存單號碼(迄)異動前', '存單號碼尾碼異動前', '張數異動前', '單張面額異動前', '面額小計異動前',
+                '存單號碼前置碼異動後', '存單號碼(起)異動後', '存單號碼(迄)異動後', '存單號碼尾碼異動後', '張數異動後', '單張面額異動後', '面額小計異動後'
+            ];
+            var colModelArray = [];
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vData_Seq", index: "vData_Seq", hidden: true });
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+
+            colModelArray.push({ name: "vDep_No_Preamble_Show", index: "vDep_No_Preamble_Show", width: 140, sortable: false, align: 'center', formatter: formattervDep_No_Preamble });
+            colModelArray.push({ name: "vDep_No_B_Show", index: "vDep_No_B_Show", width: 100, sortable: false, align: 'center', formatter: formattervDep_No_B });
+            colModelArray.push({ name: "vDep_No_E_Show", index: "vDep_No_E_Show", width: 100, sortable: false, align: 'center', formatter: formattervDep_No_E });
+            colModelArray.push({ name: "vDep_No_Tail_Show", index: "vDep_No_Tail_Show", width: 120, sortable: false, align: 'center', hidden: true, formatter: formattervDep_No_Tail });
+            colModelArray.push({ name: "vDep_Cnt_Show", index: "vDep_Cnt_Show", width: 80, sortable: false, align: 'right', formatter: formattervDep_Cnt });
+            colModelArray.push({ name: "vDenomination_Show", index: "vDenomination_Show", width: 100, sortable: false, align: 'right', formatter: formattervDenomination });
+            colModelArray.push({ name: "vSubtotal_Denomination_Show", index: "vSubtotal_Denomination_Show", width: 100, sortable: false, align: 'right', formatter: formattervSubtotal_Denomination });
+
+            colModelArray.push({ name: "vDep_No_Preamble", index: "vDep_No_Preamble", hidden: true });
+            colModelArray.push({ name: "vDep_No_B", index: "vDep_No_B", hidden: true });
+            colModelArray.push({ name: "vDep_No_E", index: "vDep_No_E", hidden: true });
+            colModelArray.push({ name: "vDep_No_Tail", index: "vDep_No_Tail", hidden: true });
+            colModelArray.push({ name: "vDep_Cnt", index: "vDep_Cnt", hidden: true });
+            colModelArray.push({ name: "vDenomination", index: "vDenomination", hidden: true });
+            colModelArray.push({ name: "vSubtotal_Denomination", index: "vSubtotal_Denomination", hidden: true });
+
+            colModelArray.push({ name: "vDep_No_Preamble_Aft", index: "vDep_No_Preamble_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_No_B_Aft", index: "vDep_No_B_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_No_E_Aft", index: "vDep_No_E_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_No_Tail_Aft", index: "vDep_No_Tail_Aft", hidden: true });
+            colModelArray.push({ name: "vDep_Cnt_Aft", index: "vDep_Cnt_Aft", hidden: true });
+            colModelArray.push({ name: "vDenomination_Aft", index: "vDenomination_Aft", hidden: true });
+            colModelArray.push({ name: "vSubtotal_Denomination_Aft", index: "vSubtotal_Denomination_Aft", hidden: true });
+            jqgridCustom.createJqgridByCache(
+               'CDC_Deposit_D_jqgridDiv',
+               'CDC_Deposit_D_TempList',
+               'CDC_Deposit_D_TempPeger',
+               CDC_DepositUrl.getData,
+               {
+                   type: 'D'
+               },
+               colNameArray,
+               colModelArray,
+               '明細資料',
+               jqgridCustom.getPage('CDC_Deposit_D_jqgridDiv'),
+               CDC_Deposit_D_TempCompleteFun,
+               true
+               );
+        }
+        //#endregion jqgrid
+
+        //修改定期存單總項暫存資料
+        function CDC_DepositUpdateTempFun_M() {
+            //設值=Y檢核
+            if ($('#' + CDC_DepositDep_Set_Quality).val() == "Y" && Dep_Set_Quality_Y() == false) {
+                return
+            }
+
+            if ($('#' + CDC_DepositFormId_M).valid()) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDC_DepositViewModel_M(
+                            $('#' + CDC_ItemId).val().trim(),
+                            $('#' + CDC_DepositCurrency).val().trim(),
+                            $('#' + CDC_DepositTrad_Partners).val().trim(),
+                            $('#' + CDC_DepositCommit_Date).val().trim(),
+                            $('#' + CDC_DepositExpiry_Date).val().trim(),
+                            $('#' + CDC_DepositInterest_Rate_Type).val().trim(),
+                            $('#' + CDC_DepositInterest_Rate).val().trim(),
+                            $('#' + CDC_DepositDep_Type).val().trim(),
+                            $('#' + CDC_DepositTotal_Denomination).html().trim(),
+                            $('#' + CDC_DepositDep_Set_Quality).val().trim(),
+                            $('#' + CDC_DepositAuto_Trans).val().trim(),
+                            $('#' + CDC_DepositTrans_Expiry_Date).val().trim(),
+                            $('#' + CDC_DepositTrans_Tms).val().trim(),
+                            $('#' + CDC_DepositMemo).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDC_DepositUrl.UpdateDbDataM,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDC_DepositUpdateTemp_M'));
+                        CDC_DepositDbGrid_M();
+                        CDC_DepositConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+
+        //設值=Y檢核
+        function Dep_Set_Quality_Y() {
+            if ($('#' + CDC_DepositMemo).val().trim() == "") {
+                customerUtility.alert('備註必填', 'w');
+                return false;
+            }
+
+            if ($('#' + CDC_DepositTrans_Tms).val().trim() == "") {
+                customerUtility.alert('轉期次數必填', 'w');
+                return false;
+            }
+
+            return true;
+        }
+
+        function CDC_DepositViewModel_M(
+            vItem_Id,
+            vCurrency,
+            vTrad_Partners,
+            vCommit_Date,
+            vExpiry_Date,
+            vInterest_Rate_Type,
+            vInterest_Rate,
+            vDep_Type,
+            vTotal_Denomination,
+            vDep_Set_Quality,
+            vAuto_Trans,
+            vTrans_Expiry_Date,
+            vTrans_Tms,
+            vMemo
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItem_Id;
+            obj['vCurrency'] = vCurrency;
+            obj['vTrad_Partners'] = vTrad_Partners;
+            obj['vCommit_Date'] = vCommit_Date;
+            obj['vExpiry_Date'] = vExpiry_Date;
+            obj['vInterest_Rate_Type'] = vInterest_Rate_Type;
+            obj['vInterest_Rate'] = vInterest_Rate;
+            obj['vDep_Type'] = vDep_Type;
+            obj['vTotal_Denomination'] = vTotal_Denomination;
+            obj['vDep_Set_Quality'] = vDep_Set_Quality;
+            obj['vAuto_Trans'] = vAuto_Trans;
+            obj['vTrans_Expiry_Date'] = vTrans_Expiry_Date;
+            obj['vTrans_Tms'] = vTrans_Tms;
+            obj['vMemo'] = vMemo;
+            return obj;
+        }
+
+    });
+</script>

@@ -251,10 +251,11 @@
         function setTimepicker() {
             $('.timepicker').timepicker({
                 timeFormat: 'H:i',
-                step: 10,
+                step: 1,
                 minTime: '8:00',
                 maxTime: '23:00',
-                defaultTime: '8:00',
+                //defaultTime: '8:00',
+                scrollDefault: 'now',
                 startTime: '08:00',
                 dynamic: false,
                 dropdown: true,
@@ -549,7 +550,7 @@
                     customerUtility.alert("此為不可刪除作業項目!!", 'w');
                     return false;
                 }
-                if (confirm("是否刪除 " + data.vITEM_DESC + "??")) {
+                if (confirm("是否退回 " + data.vITEM_DESC + "??")) {
                     $.ajax({
                         type: 'POST',
                         data: JSON.stringify({
@@ -699,7 +700,7 @@
         function SearchGridDoneFun(listId) {
             jqgridCustom.randerAction(listId, 'Update', tempActFun);
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
-                //$(this).find('.actionViewIcon').hide();
+                $(this).find('.actionViewIcon').hide();
             });
         }
         //#endregion

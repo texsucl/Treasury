@@ -772,8 +772,8 @@ namespace Treasury.Web.Service.Actual
                                                 result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
                                                 return result;
                                             }
-
-                                            if(item.vStatus == Ref.AccessInventoryType._4.GetDescription())
+                                            _IDOM.GET_MSG = item.GetMsg;
+                                            if (item.vStatus == Ref.AccessInventoryType._4.GetDescription())
                                             {
                                                 _IDOM.INVENTORY_STATUS = "4"; //預約取出
                                             }
@@ -950,6 +950,7 @@ namespace Treasury.Web.Service.Actual
                                         //預約取出
                                         if (item.vTakeoutFlag)
                                         {
+                                            _IDOM.GET_MSG = item.GetMsg;
                                             if (_IDOM.INVENTORY_STATUS == "1") //原先為在庫
                                             {
                                                 //判斷狀態
@@ -1291,7 +1292,9 @@ namespace Treasury.Web.Service.Actual
                 vTrans_Tms = x.TRANS_TMS,   //轉期次數
                 vMemo = x.MEMO, //備註
                 vTakeoutFlag = vTakeoutFlag,    //取出註記
-                vLast_Update_Time = x.LAST_UPDATE_DT    //最後修改時間
+                vLast_Update_Time = x.LAST_UPDATE_DT,    //最後修改時間
+                GetMsg = x.GET_MSG, //取出原因
+                MsgFlag = x.GET_MSG.IsNullOrWhiteSpace() ? null : "Y" //取出原因註記
             });
         }
 

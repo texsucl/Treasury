@@ -63,16 +63,20 @@ namespace Treasury.Web.Controllers
         /// <param name=""></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult Search(ConfirmStorageSearchViewModel searchModel)
+        public JsonResult Search(ConfirmStorageSearchViewModel searchModel, string itemId)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
+            List<string> itemIdList = new List<string>();
+            itemIdList.AddRange(itemId.Split(';'));
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             Cache.Invalidate(CacheList.ConfirmStorageSearchData);
             Cache.Set(CacheList.ConfirmStorageSearchData, searchModel);
+
             var datas = ConfirmStorage.GetSearchDetail(searchModel, AccountController.CurrentUserId);
+            datas = datas.Where(x => itemIdList.Contains(x.vITEM_ID)).ToList();
             if (datas.Any())
-            {
+            {              
                 Cache.Invalidate(CacheList.ConfirmStorageSearchDetailViewData);
                 Cache.Set(CacheList.ConfirmStorageSearchDetailViewData,datas);
                 result.RETURN_FLAG = true;
@@ -270,7 +274,7 @@ namespace Treasury.Web.Controllers
             var searchData = (ConfirmStorageSearchViewModel)Cache.Get(CacheList.ConfirmStorageSearchData);
             var ViewData = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
             var rowData = ViewData
-                          .Where(x => x.vITeM_OP_TYPE != "3" &&x.uuid == DeleteModel.uuid)
+                          .Where(x => x.uuid == DeleteModel.uuid)
                          .FirstOrDefault();
             if (searchData.v_IS_CHECKED == null)
             {
@@ -313,13 +317,15 @@ namespace Treasury.Web.Controllers
     /// <param name="type"></param>
     /// <returns></returns>
     [HttpPost]
-        public JsonResult GetCacheData(jqGridParam jdta, string type)
+        public JsonResult GetCacheData(jqGridParam jdta, string type, string itemId = null)
         {
             switch (type)
             {
                 case "Search":
+                    List<string> itemIdList = new List<string>();
+                    itemIdList.AddRange(itemId.Split(';'));
                     var SearchDatas = (List<ConfirmStorageSearchDetailViewModel>)Cache.Get(CacheList.ConfirmStorageSearchDetailViewData);
-                    return Json(jdta.modelToJqgridResult(SearchDatas.OrderBy(x => x.vITeM_OP_TYPE).ToList()));
+                    return Json(jdta.modelToJqgridResult(SearchDatas.Where(x => itemIdList.Contains(x.vITEM_ID)).OrderBy(x => x.vITeM_OP_TYPE).ToList()));
             }
             return null;
         }
