@@ -23,7 +23,7 @@ namespace Treasury.Web.Service.Interface
         /// 取得每日例行進出未確認項目
         /// </summary>
         /// <returns></returns>
-        List<BeforeOpenTreasuryViewModel> GetRoutineList();
+        List<BeforeOpenTreasuryViewModel> GetRoutineList(string TreaRegisterId);
 
         /// <summary>
         /// 取得已入庫確認資料

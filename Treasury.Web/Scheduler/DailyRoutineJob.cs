@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
+using Treasury.Web.Enum;
 using Treasury.Web.Models;
+using Treasury.Web.Service.Actual;
 using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
@@ -12,82 +14,160 @@ using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Scheduler
 {
-    public class DailyRoutineJob :IJob
+    public class DailyRoutineJob : IJob
     {
         public void Execute(IJobExecutionContext context)
         {
             Extension.NlogSet("[Execute]執行開始!!");
 
             MAIL_TIME _MT = new MAIL_TIME();
+            MAIL_TIME _mt = new MAIL_TIME();
             var dtnstr = string.Empty;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var dtn = DateTime.Now;
                 dtnstr = $"{ dtn.Hour.ToString().PadLeft(2, '0')}:{dtn.Minute.ToString().PadLeft(2, '0')}";
-                Extension.NlogSet($"SEND_TIME:{dtnstr}");            
-                _MT = db.MAIL_TIME.FirstOrDefault(
-                    x => x.SEND_TIME != null &&
-                    x.SEND_TIME == dtnstr &&
-                    x.IS_DISABLED != "Y" &&
-                    x.SCHEDULER_STATUS != "Y");
-                //var _Mail_Time_ID = _MT.MAIL_TIME_ID;
-                if (_MT != null)
-                {
-                    try
-                    {
-                        _MT.SCHEDULER_STATUS = "Y";
-                        _MT.SCHEDULER_UPDATE_DT = dtn;
-                        db.SaveChanges();
-                        Extension.NlogSet($"MAIL_TIME 有找到例行性排程設定檔案");
-                        Extension.NlogSet($"DateTime : {dtn}");
-                        Routine(db, dtnstr, dtn);
-                    }
-                    catch (Exception ex)
-                    {
-                        Extension.NlogSet($"每日例行作業錯誤,Exception:{ex.exceptionMessage()}!!");
-                    }
-                    finally
-                    {
-                        Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
-                        var _MT2 = db.MAIL_TIME
-                                .Where(x =>
-                                x.SEND_TIME != null &&
-                                x.SEND_TIME == dtnstr &&
-                                x.MAIL_CONTENT_ID == "01").ToList();
-                        if (_MT2.Any())
-                        {
-                            Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
-                            foreach (var item in _MT2)
-                            {
-                                item.SCHEDULER_STATUS = "N";
-                            }
-                            try
-                            {
-                                db.SaveChanges();
-                            }
-                            catch
-                            {
+                Extension.NlogSet($"SEND_TIME:{dtnstr}");
 
+                bool _checkFlag = true; //true 為 可以申請金庫開庫單號 
+
+                #region 8.2 金庫確認作業提醒
+                try
+                {
+                    _mt = db.MAIL_TIME.AsEnumerable().FirstOrDefault(x => x.FUNC_ID == "0000000016" && x.IS_DISABLED == "N" && DateTime.Parse(x.EXEC_TIME_B + ":00") <= DateTime.Parse(dtnstr + ":00") && DateTime.Parse(x.EXEC_TIME_E + ":00") >= DateTime.Parse(dtnstr + ":00"));
+                    if (_mt != null)
+                    {              
+                        try
+                        {
+                            var _INTERVAL_MIN = _mt.INTERVAL_MIN;
+                            if (dtn.Minute % _INTERVAL_MIN == 0)
+                            {
+                                _mt.SCHEDULER_STATUS = "Y";
+                                _mt.SCHEDULER_UPDATE_DT = dtn;
+                                db.SaveChanges();
+
+                                Extension.NlogSet($"MAIL_TIME 通知檢核啟動");
+                                Extension.NlogSet($"DateTime : {dtn}");
+
+                                _checkFlag = RemindClose(db, dtnstr, dtn, _INTERVAL_MIN);
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Extension.NlogSet($"無更新SCHEDULER_STATUS !!");
+                            Extension.NlogSet($"關庫確認作業錯誤,Exception:{ex.exceptionMessage()}!!");
+                        }
+                        finally
+                        {
+                            Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
+                            var _mt2 = db.MAIL_TIME
+                                    .Where(x =>
+                                    x.FUNC_ID == "0000000016")
+                                    .ToList();
+                            if (_mt2.Any())
+                            {
+                                Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
+                                foreach (var item in _mt2)
+                                {
+                                    item.SCHEDULER_STATUS = "N";
+                                }
+                                try
+                                {
+                                    db.SaveChanges();
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+                            else
+                            {
+                                Extension.NlogSet($"無更新SCHEDULER_STATUS !!");
+                            }
                         }
                     }
                 }
-            }       
+                catch (Exception ex)
+                {
+                    Extension.NlogSet($"8.2 關庫確認作業提醒,Exception:{ex.exceptionMessage()}!!");
+                }
+                #endregion
 
+                #region 8.1 每日例行出入庫mail通知作業
+                try
+                {
+                    _MT = db.MAIL_TIME.FirstOrDefault(
+                    x => x.SEND_TIME != null &&
+                    x.SEND_TIME == dtnstr &&
+                    x.IS_DISABLED != "Y" &&
+                    x.SCHEDULER_STATUS != "Y" &&
+                    x.SEND_TIME != "00:00" &&
+                    x.INTERVAL_MIN == 0);
+                    //var _Mail_Time_ID = _MT.MAIL_TIME_ID;
+                    if (_MT != null && _checkFlag)
+                    {
+                        try
+                        {
+                            _MT.SCHEDULER_STATUS = "Y";
+                            _MT.SCHEDULER_UPDATE_DT = dtn;
+                            db.SaveChanges();
+                            Extension.NlogSet($"MAIL_TIME 有找到例行性排程設定檔案");
+                            Extension.NlogSet($"DateTime : {dtn}");
+                            Routine(db, dtnstr, dtn);
+                        }
+                        catch (Exception ex)
+                        {
+                            Extension.NlogSet($"每日例行作業錯誤,Exception:{ex.exceptionMessage()}!!");
+                        }
+                        finally
+                        {
+                            Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
+                            var _MT2 = db.MAIL_TIME
+                                    .Where(x =>
+                                    x.SEND_TIME != null &&
+                                    x.SEND_TIME == dtnstr &&
+                                    x.MAIL_CONTENT_ID == "01").ToList();
+                            if (_MT2.Any())
+                            {
+                                Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
+                                foreach (var item in _MT2)
+                                {
+                                    item.SCHEDULER_STATUS = "N";
+                                }
+                                try
+                                {
+                                    db.SaveChanges();
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+                            else
+                            {
+                                Extension.NlogSet($"無更新SCHEDULER_STATUS !!");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Extension.NlogSet($"8.1 每日例行出入庫mail通知作業,Exception:{ex.exceptionMessage()}!!");
+                }
+
+                #endregion
+
+             
+            }
 
             Extension.NlogSet("[Execute]執行結束!!");
         }
 
-        public void Routine(TreasuryDBEntities db,string dateTime,DateTime _dtn)
+        public void Routine(TreasuryDBEntities db, string dateTime, DateTime _dtn)
         {
             var _split = dateTime.Split(':');
             var hh = _split[0];
-            var mm = _split.Length > 1 ?  _split[1] : string.Empty;
-            var dt = new DateTime(_dtn.Year, _dtn.Month, _dtn.Day, Convert.ToInt32(hh),Convert.ToInt32(mm),0);
+            var mm = _split.Length > 1 ? _split[1] : string.Empty;
+            var dt = new DateTime(_dtn.Year, _dtn.Month, _dtn.Day, Convert.ToInt32(hh), Convert.ToInt32(mm), 0);
             SysSeqDao sysSeqDao = new SysSeqDao();
             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             var _Mail_Time = db.MAIL_TIME.ToList()
@@ -99,7 +179,7 @@ namespace Treasury.Web.Scheduler
             if (_Mail_Time != null)
             {
                 string errorMsg = string.Empty;
-     
+
                 var MailTId = sysSeqDao.qrySeqNo("MailT", qPreCode).ToString().PadLeft(3, '0');
                 var _JOB_ITEM_ID = $@"{qPreCode}W{MailTId}";
                 try
@@ -116,7 +196,7 @@ namespace Treasury.Web.Scheduler
                     });
 
                     var test = db.GetValidationErrors().getValidateString();
-                    if(!test.IsNullOrWhiteSpace())
+                    if (!test.IsNullOrWhiteSpace())
                         Extension.NlogSet($"{test}");
                     db.SaveChanges();
                     #endregion
@@ -139,7 +219,7 @@ namespace Treasury.Web.Scheduler
                         EXEC_TIME_B = _Mail_Time.EXEC_TIME_B, //系統區間(起)
                         EXEC_TIME_E = _Mail_Time.EXEC_TIME_E, //系統區間(迄)
                         OPEN_TREA_DATE = _dtn,
-                        APPR_STATUS = "1",
+                        APPR_STATUS = "2",
                         REGI_STATUS = "C02",
                         CREATE_DT = _dtn,
                         OPEN_TYPE = "Y" //Y為例行性
@@ -224,7 +304,7 @@ $@"您好,
                 }
                 #region 異動【排程工作紀錄檔】資料(工作結束) 
                 var _SJR = db.SYS_JOB_REC
-                    .FirstOrDefault(x => x.JOB_ITEM_ID == _JOB_ITEM_ID);                             
+                    .FirstOrDefault(x => x.JOB_ITEM_ID == _JOB_ITEM_ID);
                 if (_SJR != null)
                 {
                     if (!errorMsg.IsNullOrWhiteSpace())
@@ -246,6 +326,169 @@ $@"您好,
                 #endregion                       
             }
             //db.MAIL_TIME          
+        }
+
+        public bool RemindClose(TreasuryDBEntities db, string dateTime, DateTime _dtn, int? _INTERVAL_MIN)
+        {
+            bool result = true;
+            var _split = dateTime.Split(':');
+            var hh = _split[0];
+            var mm = _split.Length > 1 ? _split[1] : string.Empty;
+            var dt = new DateTime(_dtn.Year, _dtn.Month, _dtn.Day, Convert.ToInt32(hh), Convert.ToInt32(mm), 0);
+            SysSeqDao sysSeqDao = new SysSeqDao();
+            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+
+            //var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking()
+            //    .Where(x => x.REGI_STATUS.Trim()[0] == 'D' && x.LAST_UPDATE_DT < _dtn.AddMinutes(Convert.ToDouble(-_INTERVAL_MIN)));
+
+
+            var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().AsEnumerable()
+                .FirstOrDefault(x => x.REGI_STATUS != "E01" && x.APPR_STATUS != "4" && x.LAST_UPDATE_DT < _dtn.AddMinutes(Convert.ToDouble(-_INTERVAL_MIN)));
+
+            if (_TREA_OPEN_REC != null)
+            {
+                result = false;
+
+                var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == _TREA_OPEN_REC.TREA_REGISTER_ID);
+
+                var _Mail_Time = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.FUNC_ID == "0000000016" && x.IS_DISABLED == "N");
+                if (_Mail_Time != null)
+                {
+                    var _MAIL_CONTENT = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _Mail_Time.MAIL_CONTENT_ID && x.IS_DISABLED == "N");
+                    string errorMsg = string.Empty;
+
+                    Extension.NlogSet($"MAIL_TIME 有找到未完成關庫覆核的金庫登記簿");
+                    Extension.NlogSet($"DateTime : {_dtn}");
+
+                    var MailTId = sysSeqDao.qrySeqNo("MailT", qPreCode).ToString().PadLeft(3, '0');
+                    var _JOB_ITEM_ID = $@"{qPreCode}W{MailTId}";
+
+                    try
+                    {
+                        #region 新增排程工作紀錄檔
+                        Extension.NlogSet($"新增排程工作紀錄檔");
+                        db.SYS_JOB_REC.Add(new SYS_JOB_REC()
+                        {
+                            JOB_ITEM_ID = _JOB_ITEM_ID,
+                            JOB_ID = _Mail_Time.MAIL_TIME_ID,
+                            CREATE_TIME = dt,
+                            STATUS = "2",
+                            START_TIME = _dtn,
+                        });
+                        var test = db.GetValidationErrors().getValidateString();
+                        if (!test.IsNullOrWhiteSpace())
+                            Extension.NlogSet($"{test}");
+                        db.SaveChanges();
+                        #endregion
+
+                        StringBuilder sb = new StringBuilder();
+
+                        switch (_TREA_OPEN_REC.REGI_STATUS)
+                        {
+                            case "C02":
+                                if(_TREA_OPEN_REC.APPR_STATUS == "3")
+                                {
+                                    sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫申請作業】，請儘速完成，謝謝");
+                                }
+                                else if(_TREA_OPEN_REC.APPR_STATUS == "1")
+                                {
+                                    sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫覆核作業】，請儘速完成，謝謝");
+                                }else if(_TREA_OPEN_REC.APPR_STATUS == "2")
+                                {
+                                    if(_TREA_APLY_REC == null)
+                                    {
+                                        sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【入庫人員確認作業】，請儘速完成，謝謝");
+                                    }
+                                    else
+                                    {
+                                        sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫前)】，請儘速完成，謝謝");
+                                    }
+                                }
+                                break;
+                            case "D01":
+                                sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫後)】，請儘速完成，謝謝");
+                                break;
+                            case "D02":
+                            case "D04":
+                                sb.AppendLine(
+$@"您好, 
+尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿覆核作業】，請儘速完成，謝謝");
+                                break;
+                        }
+
+//                        sb.AppendLine(
+//$@"您好, 
+//通知系統尚未登打金庫進 / 出入庫時間，請儘速完成，謝謝");
+
+                        #region 寄送mail給相關人員
+                        Extension.NlogSet($" 寄送mail給相關人員");
+                        try
+                        {
+                            var sms = new SendMail.SendMailSelf();
+                            sms.smtpPort = 25;
+                            sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                            sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                            sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                            Extension.NlogSet($" 寄送mail內容 : {sb.ToString()}");
+                            sms.Mail_Send(
+                                new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                                new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+                                null,
+                                "出入庫時間提醒通知",
+                                sb.ToString()
+                                );
+                        }
+                        catch (Exception ex)
+                        {
+                            Extension.NlogSet($" 寄送mail給相關人員 錯誤 : {ex.exceptionMessage()}");
+                        }
+                        test = db.GetValidationErrors().getValidateString();
+                        if (!test.IsNullOrWhiteSpace())
+                            Extension.NlogSet($"{test}");
+                        db.SaveChanges();
+                        #endregion
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMsg = ex.exceptionMessage();
+                        Extension.NlogSet($"錯誤 : {errorMsg}");
+                    }
+
+                    #region 異動【排程工作紀錄檔】資料(工作結束) 
+                    var _SJR = db.SYS_JOB_REC
+                        .FirstOrDefault(x => x.JOB_ITEM_ID == _JOB_ITEM_ID);
+                    if (_SJR != null)
+                    {
+                        if (!errorMsg.IsNullOrWhiteSpace())
+                        {
+                            _SJR.STATUS = "4"; //執行失敗
+                            _SJR.MEMO = errorMsg;
+                        }
+                        else
+                        {
+                            _SJR.STATUS = "3"; //執行成功
+                            _SJR.MEMO = null;
+                        }
+                        _SJR.END_TIME = DateTime.Now;
+                        var test = db.GetValidationErrors().getValidateString();
+                        if (!test.IsNullOrWhiteSpace())
+                            Extension.NlogSet($"{test}");
+                        db.SaveChanges();
+                    }
+                    #endregion
+                }
+            }
+            return result;
         }
     }
 }

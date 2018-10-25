@@ -802,10 +802,9 @@ namespace Treasury.Web.Service.Actual
             {
                 var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking();
                 result = _TREA_OPEN_REC
-                    .Where(x => x.REGI_STATUS != status || x.APPR_STATUS != "4")
+                    .Where(x => x.REGI_STATUS != status && x.APPR_STATUS != "4")
                     .Select(x => x.TREA_REGISTER_ID).ToList();
             }
-            result = null;   //測試用
             return result;
         }
     }

@@ -154,6 +154,9 @@ namespace Treasury.Web.Report.Data
             [Description("檢核項目")]
             public string DEP_CHK_ITEM_DESC { get; set; }
 
+            [Description("取出原因")]
+            public string MSG { get; set; }
+
         }
         protected class DepositReportMarginpgData
         {

@@ -1,4 +1,5 @@
 ﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
 @{
     ViewBag.Title = "金庫進出管理作業-入庫人員確認作業";
     //Layout = "~/Views/Shared/_Layout.cshtml";
@@ -77,8 +78,7 @@
                             </tr>
                         </table>
                     </form>
-                </div>
-                <div id="SearchjqgridDiv" class="jqd"></div>
+                </div>              
                 <input type="button" class="btn btn-primary" id="InsertApply" value="新增" style="display:none" />
                 <div id="InsertDialog" style="display:none;" role="dialog">
                     <form id="InsertForm">
@@ -115,7 +115,12 @@
                     </form>
                 </div>
             }
-        </div>
+        </div>  
+    </div>
+    <div id="SearchjqgridDiv" class="jqd"></div>
+    <div id="ACSearchjqgridDiv" class="jqd"></div>
+    <div id="TAOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TAOpenSearchDetail"></div>
     </div>
 </div>
 
@@ -123,6 +128,15 @@
     $(function () {
         //region set url
         var UrlFor = {};
+        UrlFor.openBILL = '@Url.Action("View", "Bill")';
+        UrlFor.openESTATE = '@Url.Action("View", "Estate")';
+        UrlFor.openSEAL = '@Url.Action("View", "Seal")';
+        UrlFor.openSTOCK = '@Url.Action("View", "Stock")';
+        UrlFor.openCA = '@Url.Action("View","CA")';
+        UrlFor.openMARGING = '@Url.Action("View", "Marging")';
+        UrlFor.openMARGINP = '@Url.Action("View", "Marginp")';
+        UrlFor.openDEPOSIT = '@Url.Action("View", "Deposit")';
+        UrlFor.openItemImp = '@Url.Action("View", "ItemImp")';
         UrlFor.Search = '@Url.Action("Search", "ConfirmStorage")';
         UrlFor.GetData = '@Url.Action("GetCacheData", "ConfirmStorage")';
         UrlFor.GetItemId = '@Url.Action("GetItemId", "ConfirmStorage")';
@@ -552,7 +566,7 @@
                     }).done(function (result) {
                         if (result.RETURN_FLAG) {
                             customerUtility.closeDialog($('#InsertDialog'));
-
+                            $('#ConfirmStorage').prop('disabled', false);
                             if ($('input[name="IS_CHECKED"]').is(':checked')) {
                                 ACSearchStorageGrid();
                             }
@@ -575,10 +589,10 @@
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
 
-                if (data.vITeM_OP_TYPE == "3") {
-                    customerUtility.alert("此為不可刪除作業項目!!", 'w');
-                    return false;
-                }
+                //if (data.vITeM_OP_TYPE == "3") {
+                //    customerUtility.alert("此為不可刪除作業項目!!", 'w');
+                //    return false;
+                //}
                 if (confirm("是否刪除 " + data.vITEM + "??")) {
                     $.ajax({
                         type: 'POST',
@@ -655,7 +669,8 @@
             //    return false;
             //}
             var ITEM_ID_List = $('#h_itemId').val().split(';');
-
+            $('#SearchjqgridDiv').children().remove();
+            $('#ACSearchjqgridDiv').children().remove();
             if ($('#' + SearchForm).valid()) {
                 $.ajax({
                     type: 'POST',
@@ -666,7 +681,8 @@
                             $('#TREA_REGISTER_ID').val(),
                             $('input[name="IS_CHECKED"]:checked').val(),
                             ITEM_ID_List
-                            )
+                            ),
+                        itemId: $('#h_itemId').val()
                     }),
                     url: UrlFor.Search,
                     contentType: 'application/json'
@@ -686,6 +702,7 @@
                     }
                     else {
                         customerUtility.alert(result.DESCRIPTION, 'w');
+                        $('#InsertApply').show();
                     }
                 });
             }
@@ -711,7 +728,7 @@
         function formatterCheck(cellvalue, options, rdata) {
             var str = '';
 
-            str += "<div class='checkbox checkbox-info' title=' ' style='padding-left:25px; padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+            str += "<div class='checkbox checkbox-info' title=' ' style=' padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
                 options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox ConfrimtCs customerCheck' value ='" + cellvalue + "'></div>";
 
             return str;
@@ -749,7 +766,8 @@
               'SearchPeger',
               UrlFor.GetData,
               {
-                  type: 'Search'
+                  type: 'Search',
+                  itemId: $('#h_itemId').val()
               },
               colTitleArray,
               colModelArray,
@@ -765,15 +783,15 @@
             var colTitleArray = ['動作', '確認', '作業類型', '存取項目', '作業別', '印章內容', '申請單號', '入庫原因', '確認人員', '確認時間', 'h申請單號', 'ID', 'h確認人員', 'h確認人員姓名', 'h存取項目', '印鑑物品編號', '作業別CODE', 'hitemId']
             var colModelArray = [
                 { name: "act", index: "act", width: 70, sortable: false, align: 'center' },
-                { name: "vITEM_ID", index: "vITEM_ID", width: 65, sortable: false, align: 'center', formatter: formatterCheck },
+                { name: "vITEM_ID", index: "vITEM_ID", width: 55, sortable: false, align: 'center', formatter: formatterCheck },
                 { name: "vITeM_OP_TYPE", index: "vITeM_OP_TYPE", width: 70, sortable: false, align: 'center' },
                 { name: "vITEM", index: "vITEM", width: 95, sortable: false, align: 'center' },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 65, sortable: false, align: 'center' },
                 { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 90, sortable: false, align: 'center' },
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 125, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 175, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 125, sortable: false, align: 'center' },
                 { name: "vCONFIRM_UID", index: "vCONFIRM_UID", width: 70, sortable: false, align: 'center' },
-                { name: "vCONFIRM_DT", index: "vCONFIRM_DT", width: 145, sortable: false, align: 'center' },              
+                { name: "vCONFIRM_DT", index: "vCONFIRM_DT", width: 145, sortable: false, align: 'center' },
                 { name: "hvAPLY_NO", index: "hvAPLY_NO", hidden: true },
                 { name: "uuid", index: "uuid", hidden: true },
                 { name: "hCONFIRM_UID", index: "hCONFIRM_UID", hidden: true },
@@ -784,46 +802,85 @@
                 { name: "hITEM_ID", index: "hITEM_ID", hidden: true, formatter: formatterItemId },
             ];
             jqgridCustom.createJqgridByCache(
-              'SearchjqgridDiv',
-              'SearchList',
-              'SearchPeger',
+              'ACSearchjqgridDiv',
+              'ACSearchList',
+              'ACSearchPeger',
               UrlFor.GetData,
               {
-                  type: 'Search'
+                  type: 'Search',
+                  itemId: $('#h_itemId').val()
               },
               colTitleArray,
               colModelArray,
               '確認入庫清單',
-              jqgridCustom.getPage('SearchjqgridDiv'),
+              jqgridCustom.getPage('ACSearchjqgridDiv'),
               SearchGridDoneFun,
               true
               );
         }
 
         function SearchGridDoneFun(listId) {
-            jqgridCustom.randerAction(listId, 'Confirm', tempActFun);
+            if (listId == 'SearchList') {
+                jqgridCustom.randerAction(listId, 'Confirm', tempActFun);
+            }
+            else {
+                jqgridCustom.randerAction(listId, 'Confirm', ACtempActFun);
+            }
+
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var data = $("#" + listId).getRowData(i + 1);
+                if (listId == 'SearchList') {
+                    if (data.vITeM_OP_TYPE == '3') {
+                        $(this).find('.actionEditIcon').hide();
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+                }
+                else {
+                    if (data.vITeM_OP_TYPE == '3') {
+                        $(this).find('.actionEditIcon').hide();
+                    }
+                }
                 $(this).find('.actionViewIcon').hide();
+                //申請單號
+                $(this).find('td').find('a.DialogAPLYNO').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        TAOpenAPLYNOFun(listId, i + 1, false);
+                    });
+                });
             });
+
+        }
+
+        var ACtempActFun = {};
+        ACtempActFun.Edit = function (i) {
+            dialogOpen('ACSearchList','@Ref.ActionType.Edit.ToString()', i);
+        }
+        ACtempActFun.Dele = function (i) {
+            var listId = 'ACSearchList';
+            DeleteConfirm(listId, i);
+        }
+        ACtempActFun.View = function (i) {
+            dialogOpen('ACSearchList','@Ref.ActionType.View.ToString()', i);
         }
 
         //region 修改、刪除、檢視
         var tempActFun = {};
         tempActFun.Edit = function (i) {
-            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            dialogOpen('SearchList','@Ref.ActionType.Edit.ToString()', i);
         }
         tempActFun.Dele = function (i) {
             var listId = 'SearchList';
             DeleteConfirm(listId, i);
         }
         tempActFun.View = function (i) {
-            dialogOpen('@Ref.ActionType.View.ToString()', i);
+            dialogOpen('SearchList', '@Ref.ActionType.View.ToString()', i);
         }
         //#endregion
         //region 修改、刪除、檢視事件
-        function dialogOpen(type, rowid) {
+        function dialogOpen(listId, type, rowid) {
             var dialogId = 'InsertDialog';
-            var listId = 'SearchList';
+            //var listId = 'SearchList';
             var title = customerUtility.getDialogType(type);
             var data = $("#" + listId).getRowData(rowid);
             $('#_hvSEAL_ITEM_ID').val('');
@@ -903,7 +960,7 @@
         //#region 開啟申請單號
         function TAOpenAPLYNOFun(listId, rowid, closeFalg) {
             var data = $("#" + listId).getRowData(rowid);
-            var itemId = data.vItem;
+            var itemId = data.hITEM_ID;
             //var _accessType = data.vACCESS_TYPE;
             var itemData = GetItemData(itemId);
             if (itemData.url != null) {
@@ -930,7 +987,7 @@
                             url: itemData.url,
                             contentType: 'application/json',
                             success: function (vdata, textStatus, jqXHR) {
-                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + vdata);
+                                $('#TAOpenSearchDetail').html(GetAplyNoDetail() + vdata);
                                 $('#TAVMvAplyNo').text(aplyNoData.vAplyNo);
                                 $('#TAVMvItem').text(aplyNoData.vItem);
                                 customerUtility.addoption('TAVMvAplyUnit', result.Datas.Item3);
@@ -960,6 +1017,7 @@
                                         customerUtility.addoption('TAVMvAplyUid', result);
                                     })
                                 });
+                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAOpenSearchDialog', closeFalg, result.Datas.Item2);
                             }
                         })
                     }
@@ -967,6 +1025,38 @@
             }
         }
         //#endregion
+
+        //#region 新增事件(打開Dialog)
+        function openTADialog(title, width, dialogId, closeFalg, custodianFlag) {
+            title = title || '';
+            width = width || 'auto';
+            title += '明細';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    ////查詢畫面且為可申請覆核的選項時關閉更新畫面
+                    //if (dialogId == 'TAOpenSearchDialog' && $('#TAR_AplyNo').val() != '' && closeFalg) {
+                    //    TAAccessGrid();
+                    //    TAReportGrid();
+                    //}
+                    //    //新增畫面官必須清空畫面參數
+                    //else if (dialogId == 'TAOpenInsertDialog') {
+                    //    resetTADialogDeatil();
+                    //}
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        //#endregion
+
         //region 查詢 ViewModel
         function SearchViewModel(vAPLY_DT_From, vSTORAGE_TYPE, vTREA_REGISTER_ID, v_IS_CHECKED, vITEM_ID_List) {
             var obj = {};
@@ -992,7 +1082,7 @@
             obj['vSEAL_ITEM'] = vSEAL_ITEM;
             obj['vACCESS_TYPE_CODE'] = vACCESS_TYPE_CODE;
             obj['uuid'] = uuid;
-            obj['v_IS_CHECKED'] = v_IS_CHECKED;     
+            obj['v_IS_CHECKED'] = v_IS_CHECKED;
             return obj;
         }
         //#endregion
@@ -1105,6 +1195,88 @@
             str += '</form>';
             str += '</div>';
             return str;
+        }
+        //#endregion
+
+        //#region 申請項目設定檔案
+        function GetItemData(item) {
+            item = item || '';
+            var _reportTitle = '金庫物品存取申請單';
+            var obj = {};
+            obj.url = null; //開啟金庫物品的頁面 url
+            obj.title = null; //開啟金庫物品的頁面 Title
+            obj.openDialogWidth = 860; //開啟金庫物品的頁面 寬度
+            obj.reportTitle = _reportTitle; //報表Title
+            obj.reportType = null; //報表類型
+
+            switch (item) {
+                case '@Ref.TreaItemType.D1012.ToString()':
+                    obj.url = UrlFor.openBILL;
+                    obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
+                    obj.reportType = 'BILL';
+                    break;
+                case '@Ref.TreaItemType.D1014.ToString()':
+                    obj.url = UrlFor.openESTATE;
+                    obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
+                    obj.reportType = 'ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1008.ToString()':
+                    obj.url = UrlFor.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1009.ToString()':
+                    obj.url = UrlFor.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1010.ToString()':
+                    obj.url = UrlFor.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1011.ToString()':
+                    obj.url = UrlFor.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1015.ToString()':
+                    obj.url = UrlFor.openSTOCK;
+                    obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                    obj.openDialogWidth = 1200;
+                    obj.reportType = 'STOCK';
+                    break;
+                case '@Ref.TreaItemType.D1024.ToString()':
+                    obj.url = UrlFor.openCA;
+                    obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                    obj.reportType = 'CA';
+                    break;
+                case '@Ref.TreaItemType.D1017.ToString()':
+                    obj.url = UrlFor.openMARGINP;
+                    obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                    obj.openDialogWidth = 1250;
+                    obj.reportType = 'MARGINP';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.url = UrlFor.openMARGING;
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = 900;
+                    obj.reportType = 'MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1018.ToString()':
+                    obj.url = UrlFor.openItemImp;
+                    obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                    obj.openDialogWidth = 1040;
+                    obj.reportType = 'ITEMIMP';
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.url = UrlFor.openDEPOSIT;
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'DEPOSIT';
+                    break;
+            }
+            return obj;
         }
         //#endregion
     });

@@ -119,6 +119,7 @@ namespace Treasury.Web.Service.Actual
                         registerId = _TREA_OPEN_REC.AsEnumerable()
                             .Where(x => x.OPEN_TREA_DATE == today)
                             .Where(x => x.REGI_STATUS == "C02")
+                            .Where(x => x.APPR_STATUS == "2")
                             .Where(x => DateTime.Parse(x.EXEC_TIME_B + ":00") <= now)
                             .Where(x => DateTime.Parse(x.EXEC_TIME_E + ":00") >= now)
                             .FirstOrDefault()?.TREA_REGISTER_ID;
@@ -422,7 +423,7 @@ namespace Treasury.Web.Service.Actual
                 List<string> confirmItemIdList = new List<string>();
                 List<string> confirmAplyNoList = new List<string>();
 
-                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
+                //var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").Select(x => x.ITEM_ID).ToList();
                 if (data.v_IS_CHECKED == null)  //是否已確認
                 {
                     var _ConfirmData = db.TREA_APLY_REC.AsNoTracking().AsQueryable()
@@ -436,11 +437,11 @@ namespace Treasury.Web.Service.Actual
                     
                     _TREA_APLY_REC = _TREA_APLY_REC
                    .Where(x => x.APLY_STATUS == "C01")
-                   .Where(x => x.EXPECTED_ACCESS_DATE <= _vAPLY_DT_E, _vAPLY_DT_E != null)
-                   .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
+                   //.Where(x => x.EXPECTED_ACCESS_DATE <= _vAPLY_DT_E, _vAPLY_DT_E != null)
+                   //.Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
                    .Where(x => !confirmItemIdList.Contains(x.ITEM_ID))
-                   .Where(x => _TREA_ITEM.Contains(x.ITEM_ID))
-                   .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace());
+                   //.Where(x => _TREA_ITEM.Contains(x.ITEM_ID))
+                   .Where(x => x.TREA_REGISTER_ID == null);
 
                     _TREA_APLY_TEMP = _TREA_APLY_TEMP
                     .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
@@ -633,6 +634,9 @@ namespace Treasury.Web.Service.Actual
 
                     _TREA_APLY_REC.ACCESS_TYPE = data.vACCESS_TYPE;
                     _TREA_APLY_REC.ACCESS_REASON = data.vACCESS_REASON;
+                    _TREA_APLY_REC.CONFIRM_UID = data.vCurrentUid;
+                    _TREA_APLY_REC.CONFIRM_DT = DateTime.Now;
+
                     #endregion
 
                     logStr += _TREA_APLY_REC.modelToString(logStr);
@@ -791,10 +795,36 @@ namespace Treasury.Web.Service.Actual
                     var delete_APLY_REC_HIS = db.APLY_REC_HIS.RemoveRange(db.APLY_REC_HIS.Where(x => x.APLY_NO == TREA_APLY_REC.APLY_NO));
                     logStr += delete_APLY_REC_HIS.modelToString(logStr);
                     //if (data.vITeM_OP_TYPE == "1" || data.vITeM_OP_TYPE == "4")
-                    if (data.vITeM_OP_TYPE != "3")
+                    if (data.vITeM_OP_TYPE == "1" || data.vITeM_OP_TYPE == "4")
                     {
                         var delete_TREA_APLY_REC = db.TREA_APLY_REC.Remove(TREA_APLY_REC);
                         logStr += delete_TREA_APLY_REC.modelToString(logStr);
+                    }
+                    else if(data.vITeM_OP_TYPE == "2" || data.vITeM_OP_TYPE == "3")
+                    {
+                        DateTime dt = DateTime.Now;
+                        TREA_APLY_REC.TREA_REGISTER_ID = null;
+                        TREA_APLY_REC.APLY_STATUS = "C01";
+                        TREA_APLY_REC.CONFIRM_UID = null;
+                        TREA_APLY_REC.CONFIRM_DT = null;
+                        TREA_APLY_REC.LAST_UPDATE_UID = data.vCurrentUid;
+                        TREA_APLY_REC.LAST_UPDATE_DT = dt;
+
+                        logStr += TREA_APLY_REC.modelToString(logStr);
+
+                        #region 申請單歷程檔
+                        var ARH = new APLY_REC_HIS()
+                        {
+                            APLY_NO = TREA_APLY_REC.APLY_NO,
+                            APLY_STATUS = "C01",
+                            PROC_UID = data.vCurrentUid,
+                            PROC_DT = dt
+                        };
+                        logStr += ARH.modelToString(logStr);
+
+                        db.APLY_REC_HIS.Add(ARH);
+
+                        #endregion
                     }
                     //if (data.vITeM_OP_TYPE == "2" || data.vITeM_OP_TYPE == "3")
                     //{
@@ -802,7 +832,7 @@ namespace Treasury.Web.Service.Actual
                     //    TREA_APLY_REC.APLY_STATUS = "C01";
                     //    logStr += TREA_APLY_REC.modelToString(logStr);
                     //}
-                    
+
                     var validateMessage = db.GetValidationErrors().getValidateString();
                     if (validateMessage.Any())
                     {

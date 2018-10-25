@@ -294,7 +294,7 @@ namespace Treasury.Web.Controllers
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
             var datas = SpecifiedTimeTreasury.CheckRegisterId();
-            if(datas != null)
+            if(datas.Any())
             {
                 //有單號 不繼續作業
                 result.RETURN_FLAG = false;
