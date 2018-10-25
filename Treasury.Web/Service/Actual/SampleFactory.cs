@@ -70,8 +70,8 @@ namespace Treasury.Web.Service.Actual
                     return new Stock();
                 case TreaItemType.D1016:
                     return new Marging();
-                //case TreaItemType.D1013:
-                //    return new Deposit();
+                case TreaItemType.D1013:
+                    return new Deposit();
                 case TreaItemType.D1017:
                     return new Marginp();
                 case TreaItemType.D1018:

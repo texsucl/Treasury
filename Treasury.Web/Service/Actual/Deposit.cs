@@ -602,7 +602,50 @@ namespace Treasury.Web.Service.Actual
                 }
                 else
                 {
-
+                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    CDC_MasterDataList.AddRange(db.ITEM_DEP_ORDER_M.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCDeposit_M()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCurrency = x.CURRENCY,
+                            vCurrency_Aft = x.CURRENCY_AFT,
+                            vTrad_Partners = x.TRAD_PARTNERS,
+                            vTrad_Partners_Aft = x.TRAD_PARTNERS_AFT,
+                            vCommit_Date = TypeTransfer.dateTimeToString(x.COMMIT_DATE, false),
+                            vCommit_Date_Aft = TypeTransfer.dateTimeNToString(x.COMMIT_DATE_AFT),
+                            vExpiry_Date = TypeTransfer.dateTimeToString(x.EXPIRY_DATE, false),
+                            vExpiry_Date_Aft = TypeTransfer.dateTimeNToString(x.EXPIRY_DATE_AFT),
+                            vInterest_Rate_Type = x.INTEREST_RATE_TYPE,
+                            vInterest_Rate_Type_Aft = x.INTEREST_RATE_TYPE_AFT,
+                            vInterest_Rate = x.INTEREST_RATE,
+                            vInterest_Rate_Aft = x.INTEREST_RATE_AFT,
+                            vDep_Type = x.DEP_TYPE,
+                            vDep_Type_Aft = x.DEP_TYPE_AFT,
+                            vTotal_Denomination = x.TOTAL_DENOMINATION,
+                            vTotal_Denomination_Aft = x.TOTAL_DENOMINATION_AFT,
+                            vDep_Set_Quality = x.DEP_SET_QUALITY,
+                            vDep_Set_Quality_Aft = x.DEP_SET_QUALITY_AFT,
+                            vAuto_Trans = x.AUTO_TRANS,
+                            vAuto_Trans_Aft = x.AUTO_TRANS_AFT,
+                            vTrans_Expiry_Date = TypeTransfer.dateTimeNToString(x.TRANS_EXPIRY_DATE),
+                            vTrans_Expiry_Date_Aft = TypeTransfer.dateTimeNToString(x.TRANS_EXPIRY_DATE_AFT),
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vTrans_Tms = x.TRANS_TMS,
+                            vTrans_Tms_Aft = x.TRANS_TMS_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
                 }
                 CDC_MasterDataList.ForEach(x =>
                 {
@@ -1096,7 +1139,95 @@ namespace Treasury.Web.Service.Actual
             DateTime dt = DateTime.Now;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCDepositViewModel item in saveData)
+                {
+                    //定期存單主檔覆核
+                    foreach(CDCDeposit_M model in item.vDeposit_M)
+                    {
+                        var _IDOM = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                        if(_IDOM!=null && !changFlag)
+                        {
+                            if (_IDOM.LAST_UPDATE_DT > model.vLast_Update_Time || _IDOM.INVENTORY_STATUS != "1")
+                            {
+                                changFlag = true;
+                            }
 
+                            if (!changFlag)
+                            {
+                                _IDOM.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                                _IDOM.CURRENCY_AFT = model.vCurrency_Aft;
+                                _IDOM.TRAD_PARTNERS_AFT = model.vTrad_Partners_Aft;
+                                _IDOM.COMMIT_DATE_AFT = string.IsNullOrEmpty(model.vCommit_Date_Aft) ? null : TypeTransfer.stringToDateTimeN(model.vCommit_Date_Aft);
+                                _IDOM.EXPIRY_DATE_AFT = string.IsNullOrEmpty(model.vExpiry_Date_Aft) ? null : TypeTransfer.stringToDateTimeN(model.vExpiry_Date_Aft);
+                                _IDOM.INTEREST_RATE_TYPE_AFT = model.vInterest_Rate_Type_Aft;
+                                _IDOM.INTEREST_RATE_AFT = model.vInterest_Rate_Aft;
+                                _IDOM.DEP_TYPE_AFT = model.vDep_Type_Aft;
+                                _IDOM.TOTAL_DENOMINATION_AFT = model.vTotal_Denomination_Aft;
+                                _IDOM.DEP_SET_QUALITY_AFT = model.vDep_Set_Quality_Aft;
+                                _IDOM.AUTO_TRANS_AFT = model.vAuto_Trans_Aft;
+                                _IDOM.TRANS_EXPIRY_DATE_AFT = string.IsNullOrEmpty(model.vTrans_Expiry_Date_Aft) ? null : TypeTransfer.stringToDateTimeN(model.vTrans_Expiry_Date_Aft);
+                                _IDOM.TRANS_TMS_AFT = model.vTrans_Tms_Aft;
+                                _IDOM.MEMO_AFT = model.vMemo_Aft;
+                                _IDOM.LAST_UPDATE_DT = dt;
+
+                                logStr = _IDOM.modelToString(logStr);
+
+                                //定期存單明細覆核
+                                foreach (CDCDeposit_D model_D in item.vDeposit_D.Where(x => x.vItemId == model.vItemId).ToList())
+                                {
+                                    int DataSeq = int.Parse(model_D.vData_Seq);
+                                    var _IDOD = db.ITEM_DEP_ORDER_D.FirstOrDefault(x => x.ITEM_ID == model_D.vItemId && x.DATA_SEQ == DataSeq);
+                                    _IDOD.DEP_NO_PREAMBLE_AFT = model_D.vDep_No_Preamble_Aft;
+                                    _IDOD.DEP_NO_B_AFT = model_D.vDep_No_B_Aft;
+                                    _IDOD.DEP_NO_E_AFT = model_D.vDep_No_E_Aft;
+                                    _IDOD.DEP_NO_TAIL_AFT = model_D.vDep_No_Tail_Aft;
+                                    _IDOD.DEP_CNT_AFT = model_D.vDep_Cnt_Aft;
+                                    _IDOD.DENOMINATION_AFT = model_D.vDenomination_Aft;
+                                    _IDOD.SUBTOTAL_DENOMINATION_AFT = model_D.vSubtotal_Denomination_Aft;
+
+                                    logStr = _IDOD.modelToString(logStr);
+                                }
+
+                                var _OIA = new OTHER_ITEM_APLY()
+                                {
+                                    APLY_NO = _data.Item1,
+                                    ITEM_ID = _IDOM.ITEM_ID
+                                };
+
+                                db.OTHER_ITEM_APLY.Add(_OIA);
+
+                                logStr = _OIA.modelToString(logStr);
+                            }
+                        }
+                        else
+                        {
+                            changFlag = true;
+                        }
+                    }
+                }
+
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:定期存單";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
             }
 
             return result;
@@ -1114,19 +1245,41 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var itemID in itemIDs)
             {
-                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
-                if (_Estate != null)
+                var _Deposit = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Deposit != null)
                 {
-                    _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO_AFT = null;
-                    _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO_AFT = null;
-                    _Estate.LAST_UPDATE_DT = dt;
-                    logStr = _Estate.modelToString(logStr);
+                    _Deposit.INVENTORY_STATUS = "1"; //在庫
+                    _Deposit.CURRENCY_AFT = null;
+                    _Deposit.TRAD_PARTNERS_AFT = null;
+                    _Deposit.COMMIT_DATE_AFT = null;
+                    _Deposit.EXPIRY_DATE_AFT = null;
+                    _Deposit.INTEREST_RATE_TYPE_AFT = null;
+                    _Deposit.INTEREST_RATE_AFT = null;
+                    _Deposit.DEP_TYPE_AFT = null;
+                    _Deposit.TOTAL_DENOMINATION_AFT = null;
+                    _Deposit.DEP_SET_QUALITY_AFT = null;
+                    _Deposit.AUTO_TRANS_AFT = null;
+                    _Deposit.TRANS_EXPIRY_DATE_AFT = null;
+                    _Deposit.TRANS_TMS_AFT = null;
+                    _Deposit.MEMO_AFT = null;
+                    _Deposit.LAST_UPDATE_DT = dt;
+                    logStr = _Deposit.modelToString(logStr);
+
+                    //明細
+                    var _Deposit_D_List = db.ITEM_DEP_ORDER_D.Where(x => x.ITEM_ID == itemID).ToList();
+                    foreach(var item_D in _Deposit_D_List)
+                    {
+                        var _Deposit_D = db.ITEM_DEP_ORDER_D.FirstOrDefault(x => x.ITEM_ID == item_D.ITEM_ID && x.DATA_SEQ == item_D.DATA_SEQ);
+                        _Deposit_D.DEP_NO_PREAMBLE_AFT = null;
+                        _Deposit_D.DEP_NO_B_AFT = null;
+                        _Deposit_D.DEP_NO_E_AFT = null;
+                        _Deposit_D.DEP_NO_TAIL_AFT = null;
+                        _Deposit_D.DEP_CNT_AFT = null;
+                        _Deposit_D.DENOMINATION_AFT = null;
+                        _Deposit_D.SUBTOTAL_DENOMINATION_AFT = null;
+
+                        logStr = _Deposit_D.modelToString(logStr);
+                    }
                 }
                 else
                 {
@@ -1148,26 +1301,61 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var itemID in itemIDs)
             {
-                var _Estate = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == itemID);
-                if (_Estate != null)
+                var _Deposit = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Deposit != null)
                 {
-                    _Estate.INVENTORY_STATUS = "1"; //在庫
-                    _Estate.ESTATE_FORM_NO = GetNewValue(_Estate.ESTATE_FORM_NO, _Estate.ESTATE_FORM_NO_AFT);
-                    _Estate.ESTATE_FORM_NO_AFT = null;
-                    _Estate.ESTATE_DATE = DateTime.Parse(GetNewValue(_Estate.ESTATE_DATE.ToString(), _Estate.ESTATE_DATE_AFT.ToString()));
-                    _Estate.ESTATE_DATE_AFT = null;
-                    _Estate.OWNERSHIP_CERT_NO = GetNewValue(_Estate.OWNERSHIP_CERT_NO, _Estate.OWNERSHIP_CERT_NO_AFT);
-                    _Estate.OWNERSHIP_CERT_NO_AFT = null;
-                    _Estate.LAND_BUILDING_NO = GetNewValue(_Estate.LAND_BUILDING_NO, _Estate.LAND_BUILDING_NO_AFT);
-                    _Estate.LAND_BUILDING_NO_AFT = null;
-                    _Estate.HOUSE_NO = GetNewValue(_Estate.HOUSE_NO, _Estate.HOUSE_NO_AFT);
-                    _Estate.HOUSE_NO_AFT = null;
-                    _Estate.ESTATE_SEQ = GetNewValue(_Estate.ESTATE_SEQ, _Estate.ESTATE_SEQ_AFT);
-                    _Estate.ESTATE_SEQ_AFT = null;
-                    _Estate.MEMO = GetNewValue(_Estate.MEMO, _Estate.MEMO_AFT);
-                    _Estate.MEMO_AFT = null;
-                    _Estate.LAST_UPDATE_DT = dt;
-                    logStr = _Estate.modelToString(logStr);
+                    _Deposit.INVENTORY_STATUS = "1"; //在庫
+                    _Deposit.CURRENCY = GetNewValue(_Deposit.CURRENCY, _Deposit.CURRENCY_AFT);
+                    _Deposit.CURRENCY_AFT = null;
+                    _Deposit.TRAD_PARTNERS = GetNewValue(_Deposit.TRAD_PARTNERS, _Deposit.TRAD_PARTNERS_AFT);
+                    _Deposit.TRAD_PARTNERS_AFT = null;
+                    _Deposit.COMMIT_DATE = TypeTransfer.stringToDateTime(GetNewValue(TypeTransfer.dateTimeToString(_Deposit.COMMIT_DATE), TypeTransfer.dateTimeNToString(_Deposit.COMMIT_DATE_AFT)));
+                    _Deposit.COMMIT_DATE_AFT = null;
+                    _Deposit.EXPIRY_DATE = TypeTransfer.stringToDateTime(GetNewValue(TypeTransfer.dateTimeToString(_Deposit.EXPIRY_DATE), TypeTransfer.dateTimeNToString(_Deposit.EXPIRY_DATE_AFT)));
+                    _Deposit.EXPIRY_DATE_AFT = null;
+                    _Deposit.INTEREST_RATE_TYPE = GetNewValue(_Deposit.INTEREST_RATE_TYPE, _Deposit.INTEREST_RATE_TYPE_AFT);
+                    _Deposit.INTEREST_RATE_TYPE_AFT = null;
+                    _Deposit.INTEREST_RATE = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Deposit.INTEREST_RATE), TypeTransfer.decimalNToString(_Deposit.INTEREST_RATE_AFT)));
+                    _Deposit.INTEREST_RATE_AFT = null;
+                    _Deposit.DEP_TYPE = GetNewValue(_Deposit.DEP_TYPE, _Deposit.DEP_TYPE_AFT);
+                    _Deposit.DEP_TYPE_AFT = null;
+                    _Deposit.TOTAL_DENOMINATION = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Deposit.TOTAL_DENOMINATION), TypeTransfer.decimalNToString(_Deposit.TOTAL_DENOMINATION_AFT)));
+                    _Deposit.TOTAL_DENOMINATION_AFT = null;
+                    _Deposit.DEP_SET_QUALITY = GetNewValue(_Deposit.DEP_SET_QUALITY, _Deposit.DEP_SET_QUALITY_AFT);
+                    _Deposit.DEP_SET_QUALITY_AFT = null;
+                    _Deposit.AUTO_TRANS = GetNewValue(_Deposit.AUTO_TRANS, _Deposit.AUTO_TRANS_AFT);
+                    _Deposit.AUTO_TRANS_AFT = null;
+                    _Deposit.TRANS_EXPIRY_DATE = TypeTransfer.stringToDateTimeN(GetNewValue(TypeTransfer.dateTimeNToString(_Deposit.TRANS_EXPIRY_DATE), TypeTransfer.dateTimeNToString(_Deposit.TRANS_EXPIRY_DATE_AFT)));
+                    _Deposit.TRANS_EXPIRY_DATE_AFT = null;
+                    _Deposit.TRANS_TMS = TypeTransfer.stringToIntN(GetNewValue(TypeTransfer.intNToString(_Deposit.TRANS_TMS), TypeTransfer.intNToString(_Deposit.TRANS_TMS_AFT)));
+                    _Deposit.TRANS_TMS_AFT = null;
+                    _Deposit.MEMO = GetNewValue(_Deposit.MEMO, _Deposit.MEMO_AFT);
+                    _Deposit.MEMO_AFT = null;
+                    _Deposit.LAST_UPDATE_DT = dt;
+                    logStr = _Deposit.modelToString(logStr);
+
+                    //明細
+                    var _Deposit_D_List = db.ITEM_DEP_ORDER_D.Where(x => x.ITEM_ID == itemID).ToList();
+                    foreach (var item_D in _Deposit_D_List)
+                    {
+                        var _Deposit_D = db.ITEM_DEP_ORDER_D.FirstOrDefault(x => x.ITEM_ID == item_D.ITEM_ID && x.DATA_SEQ == item_D.DATA_SEQ);
+                        _Deposit_D.DEP_NO_PREAMBLE = GetNewValue(_Deposit_D.DEP_NO_PREAMBLE, _Deposit_D.DEP_NO_PREAMBLE_AFT);
+                        _Deposit_D.DEP_NO_PREAMBLE_AFT = null;
+                        _Deposit_D.DEP_NO_B = GetNewValue(_Deposit_D.DEP_NO_B, _Deposit_D.DEP_NO_B_AFT);
+                        _Deposit_D.DEP_NO_B_AFT = null;
+                        _Deposit_D.DEP_NO_E = GetNewValue(_Deposit_D.DEP_NO_E, _Deposit_D.DEP_NO_E_AFT);
+                        _Deposit_D.DEP_NO_E_AFT = null;
+                        _Deposit_D.DEP_NO_TAIL = GetNewValue(_Deposit_D.DEP_NO_TAIL, _Deposit_D.DEP_NO_TAIL_AFT);
+                        _Deposit_D.DEP_NO_TAIL_AFT = null;
+                        _Deposit_D.DEP_CNT = TypeTransfer.stringToInt(GetNewValue(TypeTransfer.intNToString(_Deposit_D.DEP_CNT), TypeTransfer.intNToString(_Deposit_D.DEP_CNT_AFT)));
+                        _Deposit_D.DEP_CNT_AFT = null;
+                        _Deposit_D.DENOMINATION = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Deposit_D.DENOMINATION), TypeTransfer.decimalNToString(_Deposit_D.DENOMINATION_AFT)));
+                        _Deposit_D.DENOMINATION_AFT = null;
+                        _Deposit_D.SUBTOTAL_DENOMINATION = TypeTransfer.stringToDecimal(GetNewValue(TypeTransfer.decimalNToString(_Deposit_D.SUBTOTAL_DENOMINATION), TypeTransfer.decimalNToString(_Deposit_D.SUBTOTAL_DENOMINATION_AFT)));
+                        _Deposit_D.SUBTOTAL_DENOMINATION_AFT = null;
+
+                        logStr = _Deposit_D.modelToString(logStr);
+                    }
                 }
                 else
                 {
