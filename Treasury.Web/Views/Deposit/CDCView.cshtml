@@ -407,12 +407,11 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click',
                         function () {
-                            if (((id == 'CDC_DepositBack' && CDC_DepositConfirmFlag_M) || (id == 'CDC_DepositCancelTemp_M' && CDC_DepositConfirmFlag_D)) &&
+                            if (((id == 'CDC_DepositBack' && CDC_DepositConfirmFlag_M) || (id == 'CDC_DepositCancelTemp_M' && (CDC_DepositConfirmFlag_D || checkData()))) &&
                                 !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
                                 return false;
                             }
-                            else if (id == 'CDC_DepositCancelTemp_M' &&
-                                CDC_DepositConfirmFlag_D) {
+                            else if (id == 'CDC_DepositCancelTemp_M' && (CDC_DepositConfirmFlag_D || checkData())) {
                                 ResetData();
                             }
                             customerUtility.closeDialog(this);
@@ -1042,6 +1041,27 @@
             });
         }
 
+        function CDC_DepositRepeat_M(listId, rowid) {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDC_DepositUrl.RepeatDbDataM,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDC_DepositDbGrid_M();
+                    CDC_DepositConfirmFlag_M = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
         function CDC_DepositDbGrid_M() {
             var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
                 '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數',
@@ -1268,6 +1288,21 @@
         }
         //#endregion jqgrid
 
+        //申請覆核
+        function CDC_DepositApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDC_DepositUrl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDC_DepositApply'));
+                }
+            })
+        }
+
         //修改定期存單總項暫存資料
         function CDC_DepositUpdateTempFun_M() {
             //設值=Y檢核
@@ -1376,8 +1411,7 @@
         }
 
         //重設資料
-        function ResetData()
-        {
+        function ResetData() {
             $.ajax({
                 type: "POST",
                 data: JSON.stringify({
@@ -1402,6 +1436,37 @@
         function checkEnglishUpper(str) {
             var regExp = /^[A-Z]+$/;
             if (regExp.test(str))
+                return true;
+            else
+                return false;
+        }
+
+        function checkData() {
+            if ($('#' + CDC_DepositCurrency_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositTrad_Partners_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositCommit_Date_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositExpiry_Date_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositInterest_Rate_Type_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositInterest_Rate_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositDep_Type_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositTotal_Denomination_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositDep_Set_Quality_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositAuto_Trans_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositTrans_Expiry_Date_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositMemo_Aft).text() != "")
+                return true;
+            else if ($('#' + CDC_DepositTrans_Tms_Aft).text() != "")
                 return true;
             else
                 return false;

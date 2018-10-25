@@ -851,64 +851,93 @@ namespace Treasury.Web.Controllers
             {
                 var dbData = (List<CDCDeposit_M>)Cache.Get(CacheList.CDCDepositDataM);
                 var dbDataD = (List<CDCDeposit_D>)Cache.Get(CacheList.CDCDepositDataD_All);
-                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
-                if (updateTempData != null)
+                var detailData = dbDataD.Where(x => x.vItemId == model.vItemId).ToList();
+                var checkLength = true;
+                //明細序號檢驗
+                if (detailData.Count > 1)
                 {
-                    var _vCurrency_Aft = model.vCurrency.CheckAFT(updateTempData.vCurrency);
-                    if (_vCurrency_Aft.Item2)
-                        updateTempData.vCurrency_Aft = _vCurrency_Aft.Item1;
-                    var _vTrad_Partners_Aft = model.vTrad_Partners.CheckAFT(updateTempData.vTrad_Partners);
-                    if (_vTrad_Partners_Aft.Item2)
-                        updateTempData.vTrad_Partners_Aft = _vTrad_Partners_Aft.Item1;
-                    var _vCommit_Date_Aft = model.vCommit_Date.CheckAFT(updateTempData.vCommit_Date);
-                    if (_vCommit_Date_Aft.Item2)
-                        updateTempData.vCommit_Date_Aft = _vCommit_Date_Aft.Item1;
-                    var _vExpiry_Date_Aft = model.vExpiry_Date.CheckAFT(updateTempData.vExpiry_Date);
-                    if (_vExpiry_Date_Aft.Item2)
-                        updateTempData.vExpiry_Date_Aft = _vExpiry_Date_Aft.Item1;
-                    var _vInterest_Rate_Type_Aft = model.vInterest_Rate_Type.CheckAFT(updateTempData.vInterest_Rate_Type);
-                    if (_vInterest_Rate_Type_Aft.Item2)
-                        updateTempData.vInterest_Rate_Type_Aft = _vInterest_Rate_Type_Aft.Item1;
-                    var _vInterest_Rate_Aft = model.vInterest_Rate.CheckAFT(updateTempData.vInterest_Rate);
-                    if (_vInterest_Rate_Aft.Item2)
-                        updateTempData.vInterest_Rate_Aft = _vInterest_Rate_Aft.Item1;
-                    var _vDep_Type_Aft = model.vDep_Type.CheckAFT(updateTempData.vDep_Type);
-                    if (_vDep_Type_Aft.Item2)
-                        updateTempData.vDep_Type_Aft = _vDep_Type_Aft.Item1;
-                    var _vTotal_Denomination_Aft = TypeTransfer.decimalNToString(model.vTotal_Denomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vTotal_Denomination));
-                    if (_vTotal_Denomination_Aft.Item2)
-                        updateTempData.vTotal_Denomination_Aft = TypeTransfer.stringToDecimal(_vTotal_Denomination_Aft.Item1);
-                    var _vDep_Set_Quality_Aft = model.vDep_Set_Quality.CheckAFT(updateTempData.vDep_Set_Quality);
-                    if (_vDep_Set_Quality_Aft.Item2)
-                        updateTempData.vDep_Set_Quality_Aft = _vDep_Set_Quality_Aft.Item1;
-                    var _vAuto_Trans_Aft = model.vAuto_Trans.CheckAFT(updateTempData.vAuto_Trans);
-                    if (_vAuto_Trans_Aft.Item2)
-                        updateTempData.vAuto_Trans_Aft = _vAuto_Trans_Aft.Item1;
-                    var _vTrans_Expiry_Date_Aft = model.vTrans_Expiry_Date.CheckAFT(updateTempData.vTrans_Expiry_Date);
-                    if (_vTrans_Expiry_Date_Aft.Item2)
-                        updateTempData.vTrans_Expiry_Date_Aft = _vTrans_Expiry_Date_Aft.Item1;
-                    var _vMemo_Aft = model.vMemo.CheckAFT(updateTempData.vMemo);
-                    if (_vMemo_Aft.Item2)
-                        updateTempData.vMemo_Aft = _vMemo_Aft.Item1;
-                    var _vTrans_Tms_Aft = TypeTransfer.intNToString(model.vTrans_Tms).CheckAFT(TypeTransfer.intNToString(updateTempData.vTrans_Tms));
-                    if (_vTrans_Tms_Aft.Item2)
-                        updateTempData.vTrans_Tms_Aft = TypeTransfer.stringToIntN(_vTrans_Tms_Aft.Item1);
+                    foreach(var item in detailData)
+                    {
+                        //抓取自已的序號長度
+                        var New_Dep_No_Length = string.IsNullOrEmpty(item.vDep_No_B_Aft) ? item.vDep_No_B.Length : item.vDep_No_B_Aft.Length;
 
-                    updateTempData.vAftFlag = dbDataD.Any(x => x.vAftFlag) || _vCurrency_Aft.Item2 || _vTrad_Partners_Aft.Item2 || _vCommit_Date_Aft.Item2 ||
-                        _vExpiry_Date_Aft.Item2 || _vInterest_Rate_Type_Aft.Item2 || _vInterest_Rate_Aft.Item2 || _vDep_Type_Aft.Item2 ||
-                        _vTotal_Denomination_Aft.Item2 || _vDep_Set_Quality_Aft.Item2 || _vAuto_Trans_Aft.Item2 || _vTrans_Expiry_Date_Aft.Item2 ||
-                        _vMemo_Aft.Item2 || _vTrans_Tms_Aft.Item2;
+                        //比對其他物品序號長度
+                        var Check_detailData = detailData.Where(x => x.vData_Seq != item.vData_Seq).ToList();
+                        foreach(var Check_item in Check_detailData)
+                        {
+                            var Check_Dep_No_Length = string.IsNullOrEmpty(Check_item.vDep_No_B_Aft) ? Check_item.vDep_No_B.Length : Check_item.vDep_No_B_Aft.Length;
 
-                    Cache.Invalidate(CacheList.CDCDepositDataM);
-                    Cache.Set(CacheList.CDCDepositDataM, dbData);
-                    result.Datas = dbData.Any(x => x.vAftFlag);
-                    result.RETURN_FLAG = true;
-                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                            if(New_Dep_No_Length!= Check_Dep_No_Length)
+                            {
+                                checkLength = false;
+                                result.RETURN_FLAG = false;
+                                result.DESCRIPTION = "同一編號內定期存單明細存單存單號碼(起)/ 存單號碼(迄)碼數要一樣!";
+                            }
+                        }
+                    }
                 }
-                else
+
+                if(checkLength)
                 {
-                    result.RETURN_FLAG = false;
-                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                    var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                    if (updateTempData != null)
+                    {
+                        var _vCurrency_Aft = model.vCurrency.CheckAFT(updateTempData.vCurrency);
+                        if (_vCurrency_Aft.Item2)
+                            updateTempData.vCurrency_Aft = _vCurrency_Aft.Item1;
+                        var _vTrad_Partners_Aft = model.vTrad_Partners.CheckAFT(updateTempData.vTrad_Partners);
+                        if (_vTrad_Partners_Aft.Item2)
+                            updateTempData.vTrad_Partners_Aft = _vTrad_Partners_Aft.Item1;
+                        var _vCommit_Date_Aft = model.vCommit_Date.CheckAFT(updateTempData.vCommit_Date);
+                        if (_vCommit_Date_Aft.Item2)
+                            updateTempData.vCommit_Date_Aft = _vCommit_Date_Aft.Item1;
+                        var _vExpiry_Date_Aft = model.vExpiry_Date.CheckAFT(updateTempData.vExpiry_Date);
+                        if (_vExpiry_Date_Aft.Item2)
+                            updateTempData.vExpiry_Date_Aft = _vExpiry_Date_Aft.Item1;
+                        var _vInterest_Rate_Type_Aft = model.vInterest_Rate_Type.CheckAFT(updateTempData.vInterest_Rate_Type);
+                        if (_vInterest_Rate_Type_Aft.Item2)
+                            updateTempData.vInterest_Rate_Type_Aft = _vInterest_Rate_Type_Aft.Item1;
+                        var _vInterest_Rate_Aft = model.vInterest_Rate.CheckAFT(updateTempData.vInterest_Rate);
+                        if (_vInterest_Rate_Aft.Item2)
+                            updateTempData.vInterest_Rate_Aft = _vInterest_Rate_Aft.Item1;
+                        var _vDep_Type_Aft = model.vDep_Type.CheckAFT(updateTempData.vDep_Type);
+                        if (_vDep_Type_Aft.Item2)
+                            updateTempData.vDep_Type_Aft = _vDep_Type_Aft.Item1;
+                        var _vTotal_Denomination_Aft = TypeTransfer.decimalNToString(model.vTotal_Denomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vTotal_Denomination));
+                        if (_vTotal_Denomination_Aft.Item2)
+                            updateTempData.vTotal_Denomination_Aft = TypeTransfer.stringToDecimal(_vTotal_Denomination_Aft.Item1);
+                        var _vDep_Set_Quality_Aft = model.vDep_Set_Quality.CheckAFT(updateTempData.vDep_Set_Quality);
+                        if (_vDep_Set_Quality_Aft.Item2)
+                            updateTempData.vDep_Set_Quality_Aft = _vDep_Set_Quality_Aft.Item1;
+                        var _vAuto_Trans_Aft = model.vAuto_Trans.CheckAFT(updateTempData.vAuto_Trans);
+                        if (_vAuto_Trans_Aft.Item2)
+                            updateTempData.vAuto_Trans_Aft = _vAuto_Trans_Aft.Item1;
+                        var _vTrans_Expiry_Date_Aft = model.vTrans_Expiry_Date.CheckAFT(updateTempData.vTrans_Expiry_Date);
+                        if (_vTrans_Expiry_Date_Aft.Item2)
+                            updateTempData.vTrans_Expiry_Date_Aft = _vTrans_Expiry_Date_Aft.Item1;
+                        var _vMemo_Aft = model.vMemo.CheckAFT(updateTempData.vMemo);
+                        if (_vMemo_Aft.Item2)
+                            updateTempData.vMemo_Aft = _vMemo_Aft.Item1;
+                        var _vTrans_Tms_Aft = TypeTransfer.intNToString(model.vTrans_Tms).CheckAFT(TypeTransfer.intNToString(updateTempData.vTrans_Tms));
+                        if (_vTrans_Tms_Aft.Item2)
+                            updateTempData.vTrans_Tms_Aft = TypeTransfer.stringToIntN(_vTrans_Tms_Aft.Item1);
+
+                        updateTempData.vAftFlag = detailData.Any(x => x.vAftFlag) || _vCurrency_Aft.Item2 || _vTrad_Partners_Aft.Item2 || _vCommit_Date_Aft.Item2 ||
+                            _vExpiry_Date_Aft.Item2 || _vInterest_Rate_Type_Aft.Item2 || _vInterest_Rate_Aft.Item2 || _vDep_Type_Aft.Item2 ||
+                            _vTotal_Denomination_Aft.Item2 || _vDep_Set_Quality_Aft.Item2 || _vAuto_Trans_Aft.Item2 || _vTrans_Expiry_Date_Aft.Item2 ||
+                            _vMemo_Aft.Item2 || _vTrans_Tms_Aft.Item2;
+
+                        Cache.Invalidate(CacheList.CDCDepositDataM);
+                        Cache.Set(CacheList.CDCDepositDataM, dbData);
+                        result.Datas = dbData.Any(x => x.vAftFlag);
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                    }
+                    else
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                    }
                 }
             }
 
@@ -936,73 +965,63 @@ namespace Treasury.Web.Controllers
 
                     if (checkDetailData.Count > 1)
                     {
-                        //同編號明細檢核
-                        if (checkDetailData.Select(x => x.vDep_No_B).FirstOrDefault().Length != model.vDep_No_B.Length)
+                        var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId && x.vData_Seq == model.vData_Seq);
+
+                        if (updateTempData != null)
                         {
-                            result.RETURN_FLAG = false;
-                            result.DESCRIPTION = "同一編號內定期存單明細存單存單號碼(起)/ 存單號碼(迄)碼數要一樣!";
+                            var _vDep_No_Preamble_Aft = model.vDep_No_Preamble.CheckAFT(updateTempData.vDep_No_Preamble);
+                            if (_vDep_No_Preamble_Aft.Item2)
+                                updateTempData.vDep_No_Preamble_Aft = _vDep_No_Preamble_Aft.Item1;
+                            var _vDep_No_B_Aft = model.vDep_No_B.CheckAFT(updateTempData.vDep_No_B);
+                            if (_vDep_No_B_Aft.Item2)
+                                updateTempData.vDep_No_B_Aft = _vDep_No_B_Aft.Item1;
+                            var _vDep_No_E_Aft = model.vDep_No_E.CheckAFT(updateTempData.vDep_No_E);
+                            if (_vDep_No_E_Aft.Item2)
+                                updateTempData.vDep_No_E_Aft = _vDep_No_E_Aft.Item1;
+                            var _vDep_No_Tail_Aft = model.vDep_No_Tail.CheckAFT(updateTempData.vDep_No_Tail);
+                            if (_vDep_No_Tail_Aft.Item2)
+                                updateTempData.vDep_No_Tail_Aft = _vDep_No_Tail_Aft.Item1;
+                            var _vDep_Cnt_Aft = TypeTransfer.intNToString(model.vDep_Cnt).CheckAFT(TypeTransfer.intNToString(updateTempData.vDep_Cnt));
+                            if (_vDep_Cnt_Aft.Item2)
+                                updateTempData.vDep_Cnt_Aft = TypeTransfer.stringToIntN(_vDep_Cnt_Aft.Item1);
+                            var _vDenomination_Aft = TypeTransfer.decimalNToString(model.vDenomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vDenomination));
+                            if (_vDenomination_Aft.Item2)
+                                updateTempData.vDenomination_Aft = TypeTransfer.stringToDecimal(_vDenomination_Aft.Item1);
+                            var _vSubtotal_Denomination_Aft = TypeTransfer.decimalNToString(model.vSubtotal_Denomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vSubtotal_Denomination));
+                            if (_vSubtotal_Denomination_Aft.Item2)
+                                updateTempData.vSubtotal_Denomination_Aft = TypeTransfer.stringToDecimal(_vSubtotal_Denomination_Aft.Item1);
+
+                            updateTempData.vAftFlag = _vDep_No_Preamble_Aft.Item2 || _vDep_No_B_Aft.Item2 || _vDep_No_E_Aft.Item2 || _vDep_No_Tail_Aft.Item2 ||
+                                _vDep_Cnt_Aft.Item2 || _vDenomination_Aft.Item2 || _vSubtotal_Denomination_Aft.Item2;
+
+
+                            //同一編號內定期存單明細存單號號前置碼一起調整
+                            if (_vDep_No_Preamble_Aft.Item2)
+                            {
+                                foreach (var item in checkDetailData)
+                                {
+                                    item.vDep_No_Preamble_Aft = model.vDep_No_Preamble;
+                                    item.vAftFlag = true;
+                                }
+                            }
+
+                            Cache.Invalidate(CacheList.CDCDepositDataD_All);
+                            Cache.Set(CacheList.CDCDepositDataD_All, dbData);
+
+                            //依編號取出顥示明細
+                            var detailData = dbData.Where(x => x.vItemId == model.vItemId).ToList();
+                            Cache.Invalidate(CacheList.CDCDepositDataD);
+                            Cache.Set(CacheList.CDCDepositDataD, detailData);
+                            SetCDC_TotalDenomination(model.vItemId);
+
+                            result.Datas = dbData.Any(x => x.vAftFlag);
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
                         }
                         else
                         {
-                            var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId && x.vData_Seq == model.vData_Seq);
-
-                            if (updateTempData != null)
-                            {
-                                var _vDep_No_Preamble_Aft = model.vDep_No_Preamble.CheckAFT(updateTempData.vDep_No_Preamble);
-                                if (_vDep_No_Preamble_Aft.Item2)
-                                    updateTempData.vDep_No_Preamble_Aft = _vDep_No_Preamble_Aft.Item1;
-                                var _vDep_No_B_Aft = model.vDep_No_B.CheckAFT(updateTempData.vDep_No_B);
-                                if (_vDep_No_B_Aft.Item2)
-                                    updateTempData.vDep_No_B_Aft = _vDep_No_B_Aft.Item1;
-                                var _vDep_No_E_Aft = model.vDep_No_E.CheckAFT(updateTempData.vDep_No_E);
-                                if (_vDep_No_E_Aft.Item2)
-                                    updateTempData.vDep_No_E_Aft = _vDep_No_E_Aft.Item1;
-                                var _vDep_No_Tail_Aft = model.vDep_No_Tail.CheckAFT(updateTempData.vDep_No_Tail);
-                                if (_vDep_No_Tail_Aft.Item2)
-                                    updateTempData.vDep_No_Tail_Aft = _vDep_No_Tail_Aft.Item1;
-                                var _vDep_Cnt_Aft = TypeTransfer.intNToString(model.vDep_Cnt).CheckAFT(TypeTransfer.intNToString(updateTempData.vDep_Cnt));
-                                if (_vDep_Cnt_Aft.Item2)
-                                    updateTempData.vDep_Cnt_Aft = TypeTransfer.stringToIntN(_vDep_Cnt_Aft.Item1);
-                                var _vDenomination_Aft = TypeTransfer.decimalNToString(model.vDenomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vDenomination));
-                                if (_vDenomination_Aft.Item2)
-                                    updateTempData.vDenomination_Aft = TypeTransfer.stringToDecimal(_vDenomination_Aft.Item1);
-                                var _vSubtotal_Denomination_Aft = TypeTransfer.decimalNToString(model.vSubtotal_Denomination).CheckAFT(TypeTransfer.decimalNToString(updateTempData.vSubtotal_Denomination));
-                                if (_vSubtotal_Denomination_Aft.Item2)
-                                    updateTempData.vSubtotal_Denomination_Aft = TypeTransfer.stringToDecimal(_vSubtotal_Denomination_Aft.Item1);
-
-                                updateTempData.vAftFlag = _vDep_No_Preamble_Aft.Item2 || _vDep_No_B_Aft.Item2 || _vDep_No_E_Aft.Item2 || _vDep_No_Tail_Aft.Item2 ||
-                                    _vDep_Cnt_Aft.Item2 || _vDenomination_Aft.Item2 || _vSubtotal_Denomination_Aft.Item2;
-
-
-                                //同一編號內定期存單明細存單號號前置碼一起調整
-                                if(_vDep_No_Preamble_Aft.Item2)
-                                {
-                                    var updateTempDataList = dbData.Where(x => x.vItemId == model.vItemId).ToList();
-                                    foreach(var item in updateTempDataList)
-                                    {
-                                        item.vDep_No_Preamble_Aft = model.vDep_No_Preamble;
-                                        item.vAftFlag = true;
-                                    }
-                                }
-
-                                Cache.Invalidate(CacheList.CDCDepositDataD_All);
-                                Cache.Set(CacheList.CDCDepositDataD_All, dbData);
-
-                                //依編號取出顥示明細
-                                var detailData = dbData.Where(x => x.vItemId == model.vItemId).ToList();
-                                Cache.Invalidate(CacheList.CDCDepositDataD);
-                                Cache.Set(CacheList.CDCDepositDataD, detailData);
-                                SetCDC_TotalDenomination(model.vItemId);
-
-                                result.Datas = dbData.Any(x => x.vAftFlag);
-                                result.RETURN_FLAG = true;
-                                result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
-                            }
-                            else
-                            {
-                                result.RETURN_FLAG = false;
-                                result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
-                            }
+                            result.RETURN_FLAG = false;
+                            result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
                         }
                     }
                     else
@@ -1062,6 +1081,73 @@ namespace Treasury.Web.Controllers
                 result.DESCRIPTION = "重覆資料";
             }
 
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設資料庫資料(主檔)
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatDbDataM(string itemId)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCDepositDataM))
+            {
+                var dbData = (List<CDCDeposit_M>)Cache.Get(CacheList.CDCDepositDataM);
+                var dbDataD = (List<CDCDeposit_D>)Cache.Get(CacheList.CDCDepositDataD_All);
+                var detailData = dbDataD.Where(x => x.vItemId == itemId).ToList();
+
+                //清空主檔
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == itemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vCurrency_Aft = null;
+                    updateTempData.vTrad_Partners_Aft = null;
+                    updateTempData.vCommit_Date_Aft = "";
+                    updateTempData.vExpiry_Date_Aft = "";
+                    updateTempData.vInterest_Rate_Type_Aft = null;
+                    updateTempData.vInterest_Rate_Aft = null;
+                    updateTempData.vDep_Type_Aft = null;
+                    updateTempData.vTotal_Denomination_Aft = null;
+                    updateTempData.vDep_Set_Quality_Aft = null;
+                    updateTempData.vAuto_Trans_Aft = null;
+                    updateTempData.vTrans_Expiry_Date_Aft = "";
+                    updateTempData.vMemo_Aft = null;
+                    updateTempData.vTrans_Tms_Aft = null;
+                    updateTempData.vAftFlag = false;
+
+                    Cache.Invalidate(CacheList.CDCDepositDataM);
+                    Cache.Set(CacheList.CDCDepositDataM, dbData);
+
+                    //清空明細
+                    foreach (var item in detailData)
+                    {
+                        item.vDep_No_Preamble_Aft = null;
+                        item.vDep_No_B_Aft = null;
+                        item.vDep_No_E_Aft = null;
+                        item.vDep_No_Tail_Aft = null;
+                        item.vDep_Cnt_Aft = null;
+                        item.vDenomination_Aft = null;
+                        item.vSubtotal_Denomination_Aft = null;
+                        item.vAftFlag = false;
+                    }
+
+                    Cache.Invalidate(CacheList.CDCDepositDataD_All);
+                    Cache.Set(CacheList.CDCDepositDataD_All, dbDataD);
+
+                    result.Datas = dbData.Any(x => x.vAftFlag);
+                    result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
             return Json(result);
         }
 
@@ -1185,6 +1271,47 @@ namespace Treasury.Web.Controllers
 
                 result.Datas = dbData.Any(x => x.vAftFlag);
                 result.RETURN_FLAG = true;
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 申請資料庫異動覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ApplyDbData()
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            var _data = new List<CDCDepositViewModel>();
+
+            var _Deposit_M = (List<CDCDeposit_M>)Cache.Get(CacheList.CDCDepositDataM);
+            var _Deposit_D = (List<CDCDeposit_D>)Cache.Get(CacheList.CDCDepositDataD_All);
+
+            if (!_Deposit_M.Any(x => x.vAftFlag))
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.CDCSearchViewModel))
+            {
+                CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+                _data.Add(new CDCDepositViewModel()
+                {
+                    vDeposit_M = _Deposit_M.Where(x => x.vAftFlag).ToList(),
+                    vDeposit_D = _Deposit_D.Where(x => x.vAftFlag).ToList()
+                });
+                result = Deposit.CDCApplyAudit(_data, data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.CDCStockDataD);
+                    Cache.Set(CacheList.CDCStockDataD, result.Datas);
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             }
             return Json(result);
         }
