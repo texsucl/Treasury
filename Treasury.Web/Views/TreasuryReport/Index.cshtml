@@ -236,13 +236,66 @@
                     customerUtility.report(
                         customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
                         parms,
-                        extensionParms)
-                       
-               }
+                        extensionParms)                      
+                }
                   else {
                     customerUtility.alert('請至少輸入一個時間', 'w');
 
                 }  
+            };
+
+            function TRSendTrack() {
+                if ($('input:text').val() != "") {
+                    var listId = 'TAReportList';
+                    var reportType = '';
+                    var title = '';
+                    var parms = [];
+                    var extensionParms = [];
+                    var JobProject_report = $('#JobProject').val();
+                    var JobProjectName_report = $('#JobProject  :selected').text();
+                    var DEPT_report = $('#vdept').val();
+                    var DEPT_report_text = $('#vdept :selected').text();
+                    var SECT_report_text = $('#vsect :selected').text();
+                    var SECT_report = $('#vsect').val();
+                    var APLY_ODT_From_report = $('#APLY_ODT_From').val();
+                    var APLY_ODT_To_report = $('#APLY_ODT_To').val();
+                    var APLY_DT_From_report = $('#APLY_DT_From').val();
+                    var TRAD_Partners_report = $('#vTRAD_Partners').val();
+                    //var Book_No_report = $('#vBook_No :selected').text();
+                    var Book_No_report = $('#vBook_No').val();
+                    var Name_report = $('#vName').val();
+                    var item = $('#JobProject').val();
+                    var itemData = GetItemData(item);
+
+                    //前端畫面資料
+                    parms.push(customerUtility.reportParm('vJobProject', JobProject_report));
+                    parms.push(customerUtility.reportParm('vdept', DEPT_report));
+                    parms.push(customerUtility.reportParm('vsect', SECT_report));
+                    parms.push(customerUtility.reportParm('APLY_ODT_From', APLY_ODT_From_report));
+                    parms.push(customerUtility.reportParm('APLY_ODT_To', APLY_ODT_To_report));
+                    parms.push(customerUtility.reportParm('APLY_DT_From', APLY_DT_From_report));
+                    parms.push(customerUtility.reportParm('vTRAD_Partners', TRAD_Partners_report));
+                    parms.push(customerUtility.reportParm('vBook_No', Book_No_report));
+                    parms.push(customerUtility.reportParm('vName', Name_report));
+                    extensionParms.push(customerUtility.reportParm('APLY_DT', DecideString(APLY_DT_From_report)));
+                    extensionParms.push(customerUtility.reportParm('vJobProject', JobProjectName_report));
+                    extensionParms.push(customerUtility.reportParm('vdept', DecideString(DEPT_report_text)));
+                    extensionParms.push(customerUtility.reportParm('vsect', DecideString(SECT_report_text)));
+                    extensionParms.push(customerUtility.reportParm('APLY_ODT_From', DecideString(APLY_ODT_From_report)));
+                    extensionParms.push(customerUtility.reportParm('APLY_ODT_To', DecideString(APLY_ODT_To_report)));
+                    extensionParms.push(customerUtility.reportParm('vTRAD_Partners', DecideString(TRAD_Partners_report)));
+                    extensionParms.push(customerUtility.reportParm('vBook_No', DecideString(Book_No_report)));
+                    extensionParms.push(customerUtility.reportParm('vName', DecideString(Name_report)));
+
+                    customerUtility.reportSend(
+                        customerUtility.reportModel(itemData.reportTitle, itemData.reportType),
+                        parms,
+                        extensionParms)
+
+                }
+                else {
+                    customerUtility.alert('請至少輸入一個時間', 'w');
+                }
             };
 
             function DecideString(str) {

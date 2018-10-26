@@ -29,8 +29,6 @@ namespace Treasury.Web.Scheduler
                 dtnstr = $"{ dtn.Hour.ToString().PadLeft(2, '0')}:{dtn.Minute.ToString().PadLeft(2, '0')}";
                 Extension.NlogSet($"SEND_TIME:{dtnstr}");
 
-                bool _checkFlag = true; //true 為 可以申請金庫開庫單號 
-
                 #region 8.2 金庫確認作業提醒
                 try
                 {
@@ -49,7 +47,7 @@ namespace Treasury.Web.Scheduler
                                 Extension.NlogSet($"MAIL_TIME 通知檢核啟動");
                                 Extension.NlogSet($"DateTime : {dtn}");
 
-                                _checkFlag = RemindClose(db, dtnstr, dtn, _INTERVAL_MIN);
+                                RemindClose(db, dtnstr, dtn, _INTERVAL_MIN);
                             }
                         }
                         catch (Exception ex)
@@ -103,7 +101,13 @@ namespace Treasury.Web.Scheduler
                     x.SEND_TIME != "00:00" &&
                     x.INTERVAL_MIN == 0);
                     //var _Mail_Time_ID = _MT.MAIL_TIME_ID;
-                    if (_MT != null && _checkFlag)
+                    var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().AsEnumerable()
+                        .FirstOrDefault(x => 
+                        x.OPEN_TREA_TYPE != "1" &&
+                        x.REGI_STATUS != "E01" && 
+                        x.APPR_STATUS != "4");
+                    //if (_MT != null && _checkFlag)
+                    if (_MT != null && _TREA_OPEN_REC == null)
                     {
                         try
                         {
@@ -328,9 +332,9 @@ $@"您好,
             //db.MAIL_TIME          
         }
 
-        public bool RemindClose(TreasuryDBEntities db, string dateTime, DateTime _dtn, int? _INTERVAL_MIN)
+        public void RemindClose(TreasuryDBEntities db, string dateTime, DateTime _dtn, int? _INTERVAL_MIN)
         {
-            bool result = true;
+            //bool result = true;
             var _split = dateTime.Split(':');
             var hh = _split[0];
             var mm = _split.Length > 1 ? _split[1] : string.Empty;
@@ -347,7 +351,7 @@ $@"您好,
 
             if (_TREA_OPEN_REC != null)
             {
-                result = false;
+                //result = false;
 
                 var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == _TREA_OPEN_REC.TREA_REGISTER_ID);
 
@@ -488,7 +492,7 @@ $@"您好,
                     #endregion
                 }
             }
-            return result;
+            //return result;
         }
     }
 }

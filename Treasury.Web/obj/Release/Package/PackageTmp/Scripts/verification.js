@@ -328,8 +328,8 @@
 
     //範圍datepicker
     created.createDatepickerRange = function (datepickerStartid,
-        datepickerEndid) {
-        var format = 'yy/mm/dd';
+        datepickerEndid, format) {
+        format = format || 'yy/mm/dd';
 
         var from = $("#" + datepickerStartid)
                     .datepicker({

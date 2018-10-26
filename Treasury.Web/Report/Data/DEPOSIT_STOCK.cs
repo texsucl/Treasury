@@ -17,95 +17,76 @@ namespace Treasury.Web.Report.Data
             //報表資料
             List<DepositReportSTOCKData> ReportDataList = new List<DepositReportSTOCKData>();
             var resultsTable = new DataSet();
-             var ReportData = new DepositReportSTOCKData();
-             string vdept = parms.Where(x =>x.key == "vdept" ).FirstOrDefault()?.value ?? string.Empty;
-             string vsect = parms.Where(x =>x.key == "vsect" ).FirstOrDefault()?.value ?? string.Empty;
+            var ReportData = new DepositReportSTOCKData();
+            string vdept = parms.Where(x =>x.key == "vdept" ).FirstOrDefault()?.value ?? string.Empty;
+            string vsect = parms.Where(x =>x.key == "vsect" ).FirstOrDefault()?.value ?? string.Empty;
             string BOOK_NO = parms.Where(x =>x.key == "vName" ).FirstOrDefault()?.value ?? string.Empty;
             string JobProject = parms.Where(x =>x.key == "vJobProject" ).FirstOrDefault()?.value ?? string.Empty;
             string APLY_DT_From = parms.Where(x => x.key == "APLY_DT_From").FirstOrDefault()?.value ?? string.Empty; //庫存日期
             string APLY_ODT_From = parms.Where(x =>x.key == "APLY_ODT_From" ).FirstOrDefault()?.value ?? string.Empty;
             string APLY_ODT_To = parms.Where(x =>x.key == "APLY_ODT_To" ).FirstOrDefault()?.value ?? string.Empty;
-          
-            var _datas = new List<ITEM_STOCK>();
+
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _APLY_DT = TypeTransfer.stringToDateTime(APLY_DT_From);
+                var _APLY_DT = TypeTransfer.stringToDateTime(APLY_DT_From).DateToLatestTime();
+                var _APLY_DT_Date = _APLY_DT.Date;
                 var dtn = DateTime.Now.Date;
                 var _APLY_ODT_From = TypeTransfer.stringToDateTimeN(APLY_ODT_From);
-               var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To);
+                var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To).DateToLatestTime();
+                var _IS = new List<ITEM_STOCK>();
 
-                 var _IS = db.ITEM_STOCK.AsNoTracking().ToList();
-
-                if(BOOK_NO=="All"){//判斷為全部或單一
-                     _IS=  db.ITEM_STOCK.AsNoTracking()//判斷是否在庫
-                     .Where(x=> x.INVENTORY_STATUS == "1" ,_APLY_DT == dtn )
-                     .Where(x=> x.PUT_DATE <=_APLY_DT  && _APLY_DT < x.GET_DATE,_APLY_DT != dtn )
-                     .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
-                     .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
-                     .Where(x=> x.PUT_DATE >= _APLY_ODT_From ,_APLY_ODT_From != null  )
-                     .Where(x=> x.PUT_DATE <= _APLY_ODT_To ,   _APLY_ODT_To != null  ).ToList();
+                _IS=  db.ITEM_STOCK.AsNoTracking()//判斷是否在庫
+                .Where(x => INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn)
+                .Where(x =>
+                (INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS) && x.PUT_DATE <= _APLY_DT) // 在庫 且 存入日期 <= 庫存日期 
+                ||
+                (x.INVENTORY_STATUS == INVENTORY_STATUSg && 
+                 x.PUT_DATE <= _APLY_DT && 
+                 _APLY_DT < x.GET_DATE),  //存入日期 <= 庫存日期 且 庫存日期 < 取出日期
+                _APLY_DT_Date != dtn)
+                .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
+                .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
+                .Where(x=> x.PUT_DATE >= _APLY_ODT_From , _APLY_ODT_From != null)
+                .Where(x=> x.PUT_DATE <= _APLY_ODT_To , _APLY_ODT_To != null)
+                .Where(x => x.GROUP_NO.ToString() == BOOK_NO, BOOK_NO != "All") //判斷為全部或單一
+                .ToList();
+                
+                var depts = new List<VW_OA_DEPT>();
+                var types = new List<SYS_CODE>(); 
+                var book = new List<ITEM_BOOK>(); 
+                using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+                {
+                   depts = dbINTRA.VW_OA_DEPT.AsNoTracking().Where(x => x.DPT_CD != null).ToList();
                 }
-                else{
-                      _IS=  db.ITEM_STOCK.AsNoTracking()//判斷是否在庫
-                     .Where(x=> x.INVENTORY_STATUS == "1" ,_APLY_DT == dtn )
-                     .Where(x=> x.PUT_DATE <=_APLY_DT  && _APLY_DT < x.GET_DATE,_APLY_DT != dtn )
-                     .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
-                     .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
-                     .Where(x=> x.GROUP_NO.ToString()==BOOK_NO).ToList();
+
+                types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null && x.CODE_TYPE == "STOCK_AREA").ToList();
+                book = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO.ToString() !=null).ToList();
+                
+                foreach(var STOCKdata in _IS.OrderBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.GROUP_NO).ThenBy(x=>x.STOCK_NO_PREAMBLE).ThenBy(x=>x.STOCK_NO_B)) 
+                {
+                    ReportData = new DepositReportSTOCKData()
+                    {
+                        PUT_DATE = STOCKdata.PUT_DATE.dateTimeToStr(),
+                        STOCK_NO_B = STOCKdata.STOCK_NO_B,
+                        STOCK_NO_E = STOCKdata.STOCK_NO_E,
+                        STOCK_CNT = STOCKdata.STOCK_CNT,
+                        DENOMINATION = STOCKdata.DENOMINATION,
+                        NUMBER_OF_SHARES = STOCKdata.NUMBER_OF_SHARES,
+                        AREA = types.FirstOrDefault(z=>z.CODE == getArea(book, STOCKdata.GROUP_NO.ToString()))?.CODE_VALUE,
+                        CHARGE_DEPT =getEmpName(depts,STOCKdata.CHARGE_DEPT),
+                        CHARGE_SECT= getEmpName(depts,STOCKdata.CHARGE_SECT),
+                        MEMO =STOCKdata.MEMO,
+                        BOOK_NO = STOCKdata.GROUP_NO.ToString(),
+                        NAME = getName(book,STOCKdata.GROUP_NO.ToString()),
+                        CHARGE_DEPT_ID = STOCKdata.CHARGE_DEPT,
+                        CHARGE_SECT_ID = STOCKdata.CHARGE_SECT
+                    };
+                    ReportDataList.Add(ReportData);
                 }
-
-                //if( _IS.Any() &&  ( _APLY_ODT_From != null ||_APLY_ODT_To != null)){
-                //    var _IS_Data = db.ITEM_STOCK.AsNoTracking()
-                //    .Where(x => x.PUT_DATE<=_APLY_DT && _APLY_DT <x.GET_DATE )
-                //     .Where(x=> x.GROUP_NO.ToString()==BOOK_NO).ToList();                  
-                //    _datas = _IS_Data;
-                //}
-                //else
-                //{
-                //_datas = _IS;
-                //}
-
-                _datas = _IS;
-                  var depts = new List<VW_OA_DEPT>();
-                  var types = new List<SYS_CODE>(); 
-                  var book = new List<ITEM_BOOK>(); 
-                   using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-                    {
-                       depts = dbINTRA.VW_OA_DEPT.AsNoTracking().Where(x => x.DPT_CD != null).ToList();
-                    }
-                    using (dbTreasuryEntities dbt= new dbTreasuryEntities())
-                    {
-                       types = dbt.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null).ToList();
-
-                    }
-                   using (dbTreasuryEntities dbt= new dbTreasuryEntities())
-                    {
-                       book = dbt.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO.ToString() !=null).ToList();
-                    }
-                    foreach(var STOCKdata in _datas.OrderBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.GROUP_NO).ThenBy(x=>x.STOCK_NO_PREAMBLE).ThenBy(x=>x.STOCK_NO_B)) 
-                    {
-                                ReportData = new DepositReportSTOCKData()
-                                {
-                                    PUT_DATE = STOCKdata.PUT_DATE,
-                                    STOCK_NO_B = STOCKdata.STOCK_NO_B,
-                                    STOCK_NO_E = STOCKdata.STOCK_NO_E,
-                                    STOCK_CNT = STOCKdata.STOCK_CNT,
-                                    DENOMINATION = STOCKdata.DENOMINATION,
-                                    NUMBER_OF_SHARES = STOCKdata.NUMBER_OF_SHARES,
-                                    AREA = getArea(book,STOCKdata.GROUP_NO.ToString()),
-                                    CHARGE_DEPT =getEmpName(depts,STOCKdata.CHARGE_DEPT),
-                                    CHARGE_SECT= getEmpName(depts,STOCKdata.CHARGE_SECT),
-                                    MEMO =STOCKdata.MEMO,
-                                    BOOK_NO = STOCKdata.GROUP_NO.ToString(),
-                                    NAME = getName(book,STOCKdata.GROUP_NO.ToString()),
-                                };
-                                ReportDataList.Add(ReportData);
-                    }
-              }
-              resultsTable.Tables.Add(ReportDataList.ToDataTable());
-              return resultsTable;
+            }
+            resultsTable.Tables.Add(ReportDataList.ToDataTable());
+            return resultsTable;
         }
-        protected ITEM_REAL_ESTATE IRE { get; private set; }
 
         /// <summary>
         /// 使用 部門ID 獲得 部門名稱

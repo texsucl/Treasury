@@ -69,6 +69,7 @@
     //    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     //};
     
+    customerUtility.reportSendUrl = '';
     customerUtility.reportUrl = '';
     customerUtility.reportCommonUrl = '';
     //data => title,className
@@ -91,6 +92,22 @@
             }
             else
                 customerUtility.alert(result.DESCRIPTION,'e');
+        })
+    };
+
+    customerUtility.reportSend = function (data, parms, extensionParms) {
+        $.ajax({
+            type: "POST",
+            url: customerUtility.reportSendUrl,
+            contentType: 'application/json',
+            data: JSON.stringify({
+                data: data,
+                parms: parms,
+                extensionParms: extensionParms
+            }),
+        })
+        .done(function (result) {
+            customerUtility.alertAuto(result);
         })
     };
 

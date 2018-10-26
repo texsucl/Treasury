@@ -19,11 +19,11 @@ namespace Treasury.Web.Service.Actual
         public TreasuryReportViewModel GetItemId()
         {
             var result = new TreasuryReportViewModel();
-            List<SelectOption>jobProject = new List<SelectOption>(); //庫存表名稱
-            List<SelectOption>vName = new List<SelectOption>(); //股票編號
-
-            List<SelectOption>dept = new List<SelectOption>(); //權責部門
-            List<SelectOption>branch = new List<SelectOption>(); //權責科別
+            List<SelectOption> jobProject = new List<SelectOption>(); //庫存表名稱
+            List<SelectOption> vName = new List<SelectOption>(); //股票編號
+            List<SelectOption> TRAD = new List<SelectOption>(); //交易對象
+            List<SelectOption> dept = new List<SelectOption>(); //權責部門
+            List<SelectOption> branch = new List<SelectOption>(); //權責科別
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -48,25 +48,27 @@ namespace Treasury.Web.Service.Actual
                //}
                     
 
-             var i1 =ITEM_SEALs.Select(x=>x.CHARGE_DEPT).Distinct()
+                var i1 =ITEM_SEALs.Select(x=>x.CHARGE_DEPT).Distinct()
                     .OrderBy(x=>x)
                     .Select(x=>new SelectOption(){
                     Value = x,
                     Text = deps.FirstOrDefault(y => y.DPT_CD == x)?.DPT_NAME
                     }).ToList();
-            var vNames =  new Stock().GetStockName();
+                var vNames =  new Stock().GetStockName();
                 vNames.RemoveAt(0);
                 vNames.Insert(0,new SelectOption(){Value="All",Text="All"});
-            result.vName =vNames;
+                result.vName =vNames;
                 var vBook_Nos = new Estate().GetBuildName();
-            vBook_Nos.RemoveAt(0);
+                vBook_Nos.RemoveAt(0);
                 vBook_Nos.Insert(0,new SelectOption(){Value="All",Text="All"});
-            result.vBook_No = vBook_Nos;
-            result.vTRAD_Partners = new Deposit().GetTRAD_Partners();
-            result.vdept = i1;
-            result.vjobProject= jobProject;
-            return result;
-        }
+                result.vBook_No = vBook_Nos;
+                TRAD = new Deposit().GetTRAD_Partners();
+                TRAD.Insert(0, new SelectOption() { Value = "All", Text = "All" });
+                result.vTRAD_Partners = TRAD;
+                result.vdept = i1;
+                result.vjobProject= jobProject;
+                return result;
+            }
         }
 
             public  List<SelectOption> getDEPT(Ref.TreaItemType type)
