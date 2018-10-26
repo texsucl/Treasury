@@ -28,5 +28,7 @@ namespace Treasury.Web.Models
         public string CHARGE_SECT { get; set; }
         public Nullable<System.DateTime> CREATE_DT { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
+        public Nullable<System.DateTime> PUT_DATE { get; set; }
+        public Nullable<System.DateTime> GET_DATE { get; set; }
     }
 }

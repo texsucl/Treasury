@@ -391,6 +391,10 @@ namespace Treasury.Web.Service.Actual
                                                 {
                                                     //(新)剩餘數量 = (舊)剩餘數量 + 原先取出數量 - 畫面取出數量
                                                     _II.REMAINING = _II.REMAINING + old.Memo_I.Value - item.vItemImp_G_Quantity.Value;
+                                                    if (_II.REMAINING == 0)
+                                                        _II.INVENTORY_STATUS = "4";  //剩餘數量=0,預約取出
+                                                    else
+                                                        _II.INVENTORY_STATUS = "1";  //改回在庫
                                                     _II.LAST_UPDATE_DT = dt;
                                                     updateItemIds.Add(new Tuple<string, int?>(_II.ITEM_ID, item.vItemImp_G_Quantity));
                                                 }
@@ -403,6 +407,8 @@ namespace Treasury.Web.Service.Actual
                                             else //新增取出
                                             {
                                                 _II.REMAINING = _II.REMAINING - item.vItemImp_G_Quantity.Value;
+                                                if (_II.REMAINING == 0)
+                                                    _II.INVENTORY_STATUS = "4"; //剩餘數量=0,預約取出
                                                 _II.LAST_UPDATE_DT = dt;
                                                 updateItemIds.Add(new Tuple<string, int?>(_II.ITEM_ID, item.vItemImp_G_Quantity));
                                             }
@@ -415,6 +421,7 @@ namespace Treasury.Web.Service.Actual
                                                 if (old != null) //原先為取出
                                                 {
                                                     _II.REMAINING = _II.REMAINING + old.Memo_I.Value;
+                                                    _II.INVENTORY_STATUS = "1"; //改回在庫
                                                     _II.LAST_UPDATE_DT = dt;
                                                 }
                                             }
@@ -484,7 +491,6 @@ namespace Treasury.Web.Service.Actual
                                                 APLY_UID = taData.vAplyUid, //申請人
                                                 CHARGE_DEPT = _dept.Item1, //權責部門
                                                 CHARGE_SECT = _dept.Item2, //權責科別
-                                                                           //PUT_DATE = dt, //存入日期時間
                                                 LAST_UPDATE_DT = dt, //最後修改時間
                                             };
                                             _II_Item_Id = _II.ITEM_ID;
@@ -505,6 +511,8 @@ namespace Treasury.Web.Service.Actual
                                                 return result;
                                             }
                                             _II.REMAINING = (_II.REMAINING - item.vItemImp_G_Quantity.Value); //(新)剩餘數量 = (原)剩餘數量 - 取出數量
+                                            if (_II.REMAINING == 0)
+                                                _II.INVENTORY_STATUS = "4"; //剩餘數量=0,預約取出
                                             _II.LAST_UPDATE_DT = dt;  //最後修改時間
                                         }
                                     }

@@ -34,14 +34,17 @@ select * from OTHER_ITEM_APLY
 where APLY_NO =  @APLY_NO
 )
 select 
-ROW_NUMBER() OVER(order by ITEM_ID) AS ROW_NUMBER,
+ROW_NUMBER() OVER(order by II.ITEM_ID) AS ROW_NUMBER,
 ITEM_NAME,--物品名稱
-QUANTITY, --數量
+CASE WHEN temp.Memo_I is not null
+     THEN temp.Memo_I --有值為取出數量
+	 ELSE QUANTITY  --否則為存入數量(總數量)
+END AS QUANTITY, --數量
 AMOUNT, --金額
 DESCRIPTION --說明
-from
-ITEM_IMPO
-where ITEM_ID in (select ITEM_ID from temp)
+ITEM_IMPO AS II
+JOIN temp 
+on II.ITEM_ID = temp.ITEM_ID
 ";
                 using (var cmd = new SqlCommand(sql, conn))
                 {

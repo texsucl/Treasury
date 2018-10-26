@@ -322,6 +322,8 @@
           <Property Name="CHARGE_SECT" Type="varchar" MaxLength="5" Nullable="false" />
           <Property Name="CREATE_DT" Type="datetime" />
           <Property Name="LAST_UPDATE_DT" Type="datetime" />
+          <Property Name="PUT_DATE" Type="datetime" />
+          <Property Name="GET_DATE" Type="datetime" />
         </EntityType>
         <EntityType Name="ITEM_BOOK">
           <Key>
@@ -548,6 +550,7 @@
           <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
           <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
           <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+          <Property Name="ITEM_ID_FROM" Type="varchar" MaxLength="10" />
         </EntityType>
         <EntityType Name="ITEM_OTHER">
           <Key>
@@ -2030,6 +2033,8 @@
           <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
           <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="PUT_DATE" Type="DateTime" Precision="3" />
+          <Property Name="GET_DATE" Type="DateTime" Precision="3" />
         </EntityType>
         <EntityType Name="ITEM_CA">
           <Key>
@@ -2321,6 +2326,7 @@
           <Property Name="MEMO_AFT" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID_FROM" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="OTHER_ITEM_APLY">
           <Key>
@@ -3106,6 +3112,8 @@
           <EntitySetMapping Name="ITEM_BLANK_NOTE">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_BLANK_NOTE">
               <MappingFragment StoreEntitySet="ITEM_BLANK_NOTE">
+                <ScalarProperty Name="GET_DATE" ColumnName="GET_DATE" />
+                <ScalarProperty Name="PUT_DATE" ColumnName="PUT_DATE" />
                 <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
                 <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
                 <ScalarProperty Name="CHARGE_SECT" ColumnName="CHARGE_SECT" />
@@ -3396,6 +3404,7 @@
           <EntitySetMapping Name="ITEM_IMPO">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_IMPO">
               <MappingFragment StoreEntitySet="ITEM_IMPO">
+                <ScalarProperty Name="ITEM_ID_FROM" ColumnName="ITEM_ID_FROM" />
                 <ScalarProperty Name="CHARGE_SECT_AFT" ColumnName="CHARGE_SECT_AFT" />
                 <ScalarProperty Name="CHARGE_DEPT_AFT" ColumnName="CHARGE_DEPT_AFT" />
                 <ScalarProperty Name="MEMO_AFT" ColumnName="MEMO_AFT" />
