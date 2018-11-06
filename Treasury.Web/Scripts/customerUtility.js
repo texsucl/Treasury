@@ -3,7 +3,14 @@
 
     window.customerUtility = customerUtility;
 
+    customerUtility.errorSpan = function errorSpan(str) {
+        str = str || '';
+        return '<span class="red">' + str + '</span>'
+    }
+
     customerUtility.addCommas = function addCommas(nStr) {
+        if (nStr === 0)
+            nStr = '0';
         nStr = nStr || '';
         nStr += '';
         x = nStr.split('.');

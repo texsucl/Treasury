@@ -66,6 +66,12 @@ namespace Treasury.Web.ViewModels
         public string vAPLY_UID_NAME { get; set; }
 
         /// <summary>
+        /// 保管科承辦人員
+        /// </summary>
+        [Description("保管科承辦人員")]
+        public string vCUSTODY_UID { get; set; }
+
+        /// <summary>
         /// 入庫原因
         /// </summary>
         [Description("入庫原因")]

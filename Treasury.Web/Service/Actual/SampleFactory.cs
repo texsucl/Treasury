@@ -55,8 +55,8 @@ namespace Treasury.Web.Service.Actual
         {
             switch (itemId)
             {
-                //case TreaItemType.D1012:
-                //    return new Bill();
+                case TreaItemType.D1012:
+                    return new Bill();
                 case TreaItemType.D1008:
                 case TreaItemType.D1009:
                 case TreaItemType.D1010:

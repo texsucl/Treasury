@@ -126,6 +126,16 @@ namespace Treasury.Web.Controllers
                 data.vCreateUid = AccountController.CurrentUserId;
                 var _data = (List<MargingpViewModel>)Cache.Get(CacheList.MargingData);
 
+                if (AccountController.CustodianFlag) //保管科
+                {
+                    if (_data.Any(x => x.vBook_No.IsNullOrWhiteSpace()))
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = Ref.MessageType.book_No_Error.GetDescription();
+                        return Json(result);
+                    }
+                }
+
                 //取出勾選判斷
                 if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString())
                 {
@@ -218,7 +228,10 @@ namespace Treasury.Web.Controllers
                     var _vMemo_AFT = model.vMemo.CheckAFT(updateTempData.vMemo);
                     if (_vMemo_AFT.Item2)
                         updateTempData.vMemo_AFT = _vMemo_AFT.Item1;
-                    updateTempData.vAFTFlag = _vMargin_Dep_Type_AFT.Item2 || _vTrad_Partners_AFT.Item2 || _vAmount_AFT.Item2 || _vWorkplace_Code_AFT.Item2 || _vDescription_AFT.Item2 || _vMemo_AFT.Item2;
+                    var _vBook_No_AFT = model.vBook_No.CheckAFT(updateTempData.vBook_No);
+                    if (_vBook_No_AFT.Item2)
+                        updateTempData.vBook_No_AFT = _vBook_No_AFT.Item1;
+                    updateTempData.vAFTFlag = _vMargin_Dep_Type_AFT.Item2 || _vTrad_Partners_AFT.Item2 || _vAmount_AFT.Item2 || _vWorkplace_Code_AFT.Item2 || _vDescription_AFT.Item2 || _vMemo_AFT.Item2 || _vBook_No_AFT.Item2;
                     Cache.Invalidate(CacheList.CDCMargingData);
                     Cache.Set(CacheList.CDCMargingData, dbData);
                     result.Datas = dbData.Any(x => x.vAFTFlag);
@@ -251,6 +264,7 @@ namespace Treasury.Web.Controllers
                 var updateTempData = dbData.FirstOrDefault(x => x.vItem_PK == itemId);
                 if (updateTempData != null)
                 {
+                    updateTempData.vBook_No_AFT = null;
                     updateTempData.vMargin_Dep_Type_AFT = null;
                     updateTempData.vTrad_Partners_AFT = null;
                     updateTempData.vAmount_AFT = null;

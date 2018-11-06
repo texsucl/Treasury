@@ -431,7 +431,7 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
                         .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace()).ToList();
                     _ConfirmData.ForEach(x => {
-                        if(x.ITEM_ID != "D1023" || (x.ITEM_ID == "D1023" && x.APLY_UID == cUserId)) //如果其他業務的申請人不是自己不用排除
+                        if(x.ITEM_ID != "D1023" || (x.ITEM_ID == "D1023" /*&& x.APLY_UID == cUserId*/)) //如果其他業務的申請人不是自己不用排除
                             confirmItemIdList.Add(x.ITEM_ID);
                     });
                     
@@ -466,6 +466,12 @@ namespace Treasury.Web.Service.Actual
                    .Where(x => x.APLY_STATUS == "C02")
                    .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
                    .Where(x => x.TREA_REGISTER_ID == data.vTREA_REGISTER_ID, !data.vTREA_REGISTER_ID.IsNullOrWhiteSpace());
+
+                    var _removeData = _TREA_APLY_REC.Where(x => x.ITEM_ID == "D1023" && x.APLY_UID != cUserId);
+                    _TREA_APLY_REC = _TREA_APLY_REC.Where(x => !_removeData.Contains(x));
+                    //_removeData.ToList().ForEach(x => {
+                    //    _TREA_APLY_REC.ToList().Remove(x);
+                    //});
                 }
 
                 _TREA_APLY_REC.ToList().ForEach(x =>
@@ -485,12 +491,12 @@ namespace Treasury.Web.Service.Actual
                         vSEAL_ITEM_ID = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.ITEM_ID : null,
                         vSEAL_ITEM = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.SEAL_DESC : null,
                         //vSEAL_ITEM_OPTION = _ITeM_OP_TYPE == "2" ? _SEAL_ITEM.Select(y => new SelectOption() { Value = y.SEAL_DESC, Text = y.APLY_DEPT }).ToList() : null,
-                        vCONFIRM_UID = GetUserInfo(x.CONFIRM_UID).EMP_Name,
+                        vCONFIRM_UID = GetUserInfo(x.CONFIRM_UID)?.EMP_Name,
                         vCONFIRM_DT = x.CONFIRM_DT?.ToString("yyyy/MM/dd HH:mm"),
                         vACCESS_REASON = x.APLY_STATUS == "C02" ? x.ACCESS_REASON : null,
                         hvAPLY_NO = x.APLY_NO,
                         vAPLY_UID = x.APLY_UID,
-                        hCONFIRM_Name = GetUserInfo(x.CONFIRM_UID).EMP_Name,
+                        hCONFIRM_Name = GetUserInfo(x.CONFIRM_UID)?.EMP_Name,
                         hCONFIRM_UID = x.CONFIRM_UID,
                         hITEM = _ITEM_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                     });
@@ -634,8 +640,8 @@ namespace Treasury.Web.Service.Actual
 
                     _TREA_APLY_REC.ACCESS_TYPE = data.vACCESS_TYPE;
                     _TREA_APLY_REC.ACCESS_REASON = data.vACCESS_REASON;
-                    _TREA_APLY_REC.CONFIRM_UID = data.vCurrentUid;
-                    _TREA_APLY_REC.CONFIRM_DT = DateTime.Now;
+                    //_TREA_APLY_REC.CONFIRM_UID = data.vCurrentUid;
+                    //_TREA_APLY_REC.CONFIRM_DT = DateTime.Now;
 
                     #endregion
 
@@ -685,6 +691,10 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public BaseUserInfoModel GetUserInfo(string cUserID)
         {
+            if (cUserID.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
             BaseUserInfoModel user = new BaseUserInfoModel();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
             {
@@ -873,6 +883,70 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        public MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmAlreadyData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId, string register_ID)
+        {
+            var result = new MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.Check_Fail.GetDescription();
+            if (data != null)
+            {
+                DateTime now = DateTime.Now;
+                string logStr = string.Empty;
+                string applyStatus = "C02";
+                using (TreasuryDBEntities db = new TreasuryDBEntities())
+                {
+                    data.ForEach(x => {
+                        var vItemId = x.Split(';')[0];
+                        var vOpType = x.Split(';')[1];
+                        var vAply = x.Split(';')[2];
+                        var vuuid = x.Split(';')[3];
+                        var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(y => y.APLY_NO == vAply);
+                        _TREA_APLY_REC.CONFIRM_UID = cUserId;
+                        _TREA_APLY_REC.CONFIRM_DT = now;
+                        _TREA_APLY_REC.LAST_UPDATE_DT = now;
+                        logStr += _TREA_APLY_REC.modelToString(logStr);
+
+                        var _APLY_REC_HIS = db.APLY_REC_HIS
+                                        .Add(new APLY_REC_HIS()
+                                        {
+                                            APLY_NO = vAply,
+                                            PROC_DT = now,
+                                            APLY_STATUS = applyStatus,
+                                            PROC_UID = cUserId
+                                        });
+                        logStr += _APLY_REC_HIS.modelToString(logStr);
+                    });
+                    var validateMessage = db.GetValidationErrors().getValidateString();
+                    if (validateMessage.Any())
+                    {
+                        result.DESCRIPTION = validateMessage;
+                    }
+                    else
+                    {
+                        db.SaveChanges();
+
+                        #region LOG
+                        //新增LOG
+                        Log log = new Log();
+                        log.CFUNCTION = "已確認入庫-入庫確認作業";
+                        log.CACTION = "A";
+                        log.CCONTENT = logStr;
+                        LogDao.Insert(log, cUserId);
+                        #endregion
+
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = "入庫確認異動成功!";
+                    }
+                }
+                if (result.RETURN_FLAG)
+                {
+                    result.Datas = GetSearchDetail(searchData, cUserId);
+                }
+                return result;
+            }
+            return null;
+        }
+
         /// <summary>
         /// 確認入庫
         /// </summary>
@@ -963,9 +1037,9 @@ namespace Treasury.Web.Service.Actual
                                            ACCESS_REASON = vOpType == "4" ? rowdata.vACCESS_REASON : null,
                                            APLY_STATUS = applyStatus,
                                            APLY_UID = rowdata.vAPLY_UID == null? _TREA_OPEN_REC.CREATE_UID : rowdata.vAPLY_UID,
-                                           APLY_UNIT = rowdata.vAPLY_UID == null ? GetUserInfo(_TREA_OPEN_REC.CREATE_UID).DPT_ID : GetUserInfo(rowdata.vAPLY_UID).DPT_ID,
+                                           APLY_UNIT = rowdata.vAPLY_UID == null ? GetUserInfo(_TREA_OPEN_REC.CREATE_UID)?.DPT_ID : GetUserInfo(rowdata.vAPLY_UID)?.DPT_ID,
                                            APLY_DT = rowdata.vAPLY_UID == null ? _TREA_OPEN_REC.CREATE_DT : now,
-                                           CREATE_UNIT = GetUserInfo(cUserId).DPT_ID,
+                                           CREATE_UNIT = GetUserInfo(cUserId)?.DPT_ID,
                                            CONFIRM_UID = cUserId,
                                            CONFIRM_DT = now,
                                            CREATE_UID = cUserId,

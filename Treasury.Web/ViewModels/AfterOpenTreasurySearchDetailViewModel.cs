@@ -120,5 +120,12 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("h申請單號")]
         public string hvAPLY_NO { get; set; }
+
+        /// <summary>
+        /// 最後修改日期
+        /// </summary>
+        [Description("最後修改日期")]
+        public DateTime? vLAST_UPDATE_DT { get; set; }
+        
     }
 }

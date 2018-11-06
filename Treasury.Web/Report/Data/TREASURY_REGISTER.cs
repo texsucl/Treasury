@@ -52,8 +52,6 @@ namespace Treasury.Web.Report.Data
                         vSeal_Desc = IS.SEAL_DESC
                     }).ToList();
 
-
-
                 ReportDataList = GetReportModel(db.TREA_APLY_REC.AsNoTracking()
                     //.Where(x => x.CONFIRM_UID != null)
                     //.Where(x => x.APLY_STATUS == Aply_Status)
@@ -126,7 +124,7 @@ namespace Treasury.Web.Report.Data
                 ACCESS_REASON = x.ACCESS_REASON,   //入庫原因
                 ACCESS_NAME = x.CONFIRM_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.CONFIRM_UID)?.EMP_NAME,    //入庫人員
                 ACTUAL_ACCESS_TYPE = _Access_Type.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE,    //實際作業別
-                ACTUAL_ACCESS_NAME = string.IsNullOrEmpty(x.APLY_APPR_UID) ? null : x.APLY_APPR_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.APLY_APPR_UID)?.EMP_NAME    //實際入庫人員
+                ACTUAL_ACCESS_NAME = string.IsNullOrEmpty(x.ACTUAL_ACCESS_UID) ? null : x.ACTUAL_ACCESS_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.ACTUAL_ACCESS_UID)?.EMP_NAME    //實際入庫人員
             });
         }
 

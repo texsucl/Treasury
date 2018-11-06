@@ -9,6 +9,7 @@ using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
 using Treasury.Web.Enum;
+using Treasury.Web.Controllers;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 空白票券
@@ -117,7 +118,9 @@ namespace Treasury.Web.Service.Actual
             {
                 var nonShowStatus = new List<string>()
                 {
-                    Ref.AccessProjectFormStatus.E02.ToString() //申請人刪除狀態 (等同庫存有需排除)
+                    Ref.AccessProjectFormStatus.E01.ToString(),
+                    Ref.AccessProjectFormStatus.E02.ToString(), //申請人刪除狀態 (等同庫存有需排除)
+                    Ref.AccessProjectFormStatus.E03.ToString(),
                 };
                 var sys_codes = db.SYS_CODE.AsNoTracking().ToList();
                 var _Inventory_types = sys_codes
@@ -184,6 +187,111 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
+        /// <summary>
+        /// 查詢CDC資料
+        /// </summary>
+        /// <param name="searchModel">CDC 查詢畫面條件</param>
+        /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
+        /// <returns></returns>
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        {
+            List<CDCBillViewModel> result = new List<CDCBillViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var emps = GetEmps();
+                var depts = GetDepts();
+                if (aply_No.IsNullOrWhiteSpace())
+                {
+                    var PUT_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_From);
+                    var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
+                    var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
+                    var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+                    result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
+                        .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
+                        .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_To.Value, GET_DATE_To != null)
+                        .AsEnumerable()
+                        .Select((x) => new CDCBillViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vBill_Issuing_Bank = x.ISSUING_BANK,
+                            vBill_Issuing_Bank_AFT = x.ISSUING_BANK_AFT,
+                            vBill_Check_Type = x.CHECK_TYPE,
+                            vBill_Check_Type_AFT = x.CHECK_TYPE_AFT,
+                            vBill_Check_No_Track = x.CHECK_NO_TRACK,
+                            vBill_Check_No_Track_AFT = x.CHECK_NO_TRACK_AFT,
+                            vBill_Check_No_B = x.CHECK_NO_B,
+                            vBill_Check_No_B_AFT = x.CHECK_NO_B_AFT,
+                            vBill_Check_No_E = x.CHECK_NO_E,
+                            vBill_Check_No_E_AFT = x.CHECK_NO_E_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                    if (searchModel.vTreasuryIO == "N") //取出
+                    {
+                        if (result.Any())
+                        {
+                            var itemIds = result.Select(x => x.vItemId).ToList();
+                            var uids = GetAplyUidNameByBill(itemIds);
+                            result.ForEach(x =>
+                            {
+                                x.vGet_Uid_Name = uids.FirstOrDefault(y => y.itemId == x.vItemId)?.getAplyUidName;
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    var itemIds = db.BLANK_NOTE_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No).Select(x => x.ITEM_ID).ToList();
+                    result.AddRange(db.ITEM_BLANK_NOTE.AsNoTracking()
+                        .Where(x => itemIds.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select((x) => new CDCBillViewModel()
+                        {
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vBill_Issuing_Bank = x.ISSUING_BANK,
+                            vBill_Issuing_Bank_AFT = x.ISSUING_BANK_AFT,
+                            vBill_Check_Type = x.CHECK_TYPE,
+                            vBill_Check_Type_AFT = x.CHECK_TYPE_AFT,
+                            vBill_Check_No_Track = x.CHECK_NO_TRACK,
+                            vBill_Check_No_Track_AFT = x.CHECK_NO_TRACK_AFT,
+                            vBill_Check_No_B = x.CHECK_NO_B,
+                            vBill_Check_No_B_AFT = x.CHECK_NO_B_AFT,
+                            vBill_Check_No_E = x.CHECK_NO_E,
+                            vBill_Check_No_E_AFT = x.CHECK_NO_E_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
+                        }).ToList());
+                }
+                result.ForEach(x =>
+                {
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                });
+            }
+            return result;
+        }
+
         #endregion
 
         #region SaveData
@@ -216,11 +324,19 @@ namespace Treasury.Web.Service.Actual
                             {
                                 var _APLY_STATUS = Ref.AccessProjectFormStatus.A01.ToString(); //表單申請
                                 
-
                                 #region 申請單紀錄檔
                                 var _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
-                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                if (CustodyAppr.Contains(_TAR.APLY_STATUS))
+                                {
+                                    _APLY_STATUS = CustodyConfirmStatus;
+                                    _TAR.CUSTODY_UID = AccountController.CurrentUserId; //保管單位直接帶使用者
+                                    _TAR.CUSTODY_DT = dt;
+                                }
+                                else
+                                {
+                                    if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                        _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                }                                 
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
                                 logStr += _TAR.modelToString(logStr);
@@ -567,6 +683,156 @@ namespace Treasury.Web.Service.Actual
                 db.BLANK_NOTE_APLY.RemoveRange(db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == aply_No));
                 return new Tuple<bool, string>(true, logStr);
             }
+        }
+
+        /// <summary>
+        /// 庫存異動資料-申請覆核
+        /// </summary>
+        /// <param name="saveData"></param>
+        /// <param name="searchModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<IEnumerable<ICDCItem>> CDCApplyAudit(IEnumerable<ICDCItem> saveData, CDCSearchViewModel searchModel)
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                bool changFlag = false;
+                var _data = SaveINVENTORY_CHG_APLY(db, searchModel, logStr, dt);
+                logStr = _data.Item2;
+                foreach (CDCBillViewModel model in saveData)
+                {
+                    var _Bill = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == model.vItemId);
+                    if (_Bill != null && !changFlag)
+                    {
+                        if (_Bill.LAST_UPDATE_DT > model.vLast_Update_Time || _Bill.INVENTORY_STATUS != "1")
+                        {
+                            changFlag = true;
+                        }
+                        if (!changFlag)
+                        {
+                            _Bill.INVENTORY_STATUS = "8"; //庫存狀態改為「8」資料庫異動中。
+                            _Bill.ISSUING_BANK_AFT = model.vBill_Issuing_Bank_AFT;
+                            _Bill.CHECK_TYPE_AFT = model.vBill_Check_Type_AFT;
+                            _Bill.CHECK_NO_TRACK_AFT = model.vBill_Check_No_Track_AFT;
+                            _Bill.CHECK_NO_B_AFT = model.vBill_Check_No_B_AFT;
+                            _Bill.CHECK_NO_E_AFT = model.vBill_Check_No_E_AFT;
+                            _Bill.LAST_UPDATE_DT = dt;
+
+                            logStr = _Bill.modelToString(logStr);
+
+                            var _BNA = new BLANK_NOTE_APLY()
+                            {
+                                APLY_NO = _data.Item1,
+                                ITEM_ID = _Bill.ITEM_ID,
+                                CHECK_TYPE = string.Empty,
+                                CHECK_NO_TRACK = string.Empty,
+                                CHECK_NO_B = string.Empty,
+                                CHECK_NO_E = string.Empty
+                            };
+
+                            db.BLANK_NOTE_APLY.Add(_BNA);
+
+                            logStr = _BNA.modelToString(logStr);
+                        }
+                    }
+                    else
+                    {
+                        changFlag = true;
+                    }
+                }
+                if (changFlag)
+                {
+                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription();
+                }
+                else
+                {
+                    db.SaveChanges();
+                    #region LOG
+                    //新增LOG
+                    Log log = new Log();
+                    log.CFUNCTION = "申請覆核-資料庫異動:空白票據";
+                    log.CACTION = "A";
+                    log.CCONTENT = logStr;
+                    LogDao.Insert(log, searchModel.vCreate_Uid);
+                    #endregion
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{_data.Item1}");
+                    result.Datas = GetCDCSearchData(searchModel);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 庫存異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Bill = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Bill != null)
+                {
+                    _Bill.INVENTORY_STATUS = "1"; //在庫
+                    _Bill.ISSUING_BANK_AFT = null;
+                    _Bill.CHECK_TYPE_AFT = null;
+                    _Bill.CHECK_NO_TRACK_AFT = null;
+                    _Bill.CHECK_NO_B_AFT = null;
+                    _Bill.CHECK_NO_E_AFT = null;
+                    _Bill.LAST_UPDATE_DT = dt;
+                    logStr = _Bill.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Bill = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Bill != null)
+                {
+                    _Bill.INVENTORY_STATUS = "1"; //在庫
+                    _Bill.ISSUING_BANK = GetNewValue(_Bill.ISSUING_BANK, _Bill.ISSUING_BANK_AFT);
+                    _Bill.ISSUING_BANK_AFT = null;
+                    _Bill.CHECK_TYPE = GetNewValue(_Bill.CHECK_TYPE, _Bill.CHECK_TYPE_AFT);
+                    _Bill.CHECK_TYPE_AFT = null;
+                    _Bill.CHECK_NO_TRACK = GetNewValue(_Bill.CHECK_NO_TRACK, _Bill.CHECK_NO_TRACK_AFT);
+                    _Bill.CHECK_NO_TRACK_AFT = null;
+                    _Bill.CHECK_NO_B = GetNewValue(_Bill.CHECK_NO_B, _Bill.CHECK_NO_B_AFT);
+                    _Bill.CHECK_NO_B_AFT = null;
+                    _Bill.CHECK_NO_E = GetNewValue(_Bill.CHECK_NO_E, _Bill.CHECK_NO_E_AFT);
+                    _Bill.CHECK_NO_E_AFT = null;
+                    _Bill.LAST_UPDATE_DT = dt;
+                    logStr = _Bill.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
 
         #endregion

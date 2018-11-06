@@ -30,6 +30,22 @@
                         <lable id="lCharge_Name" name="lCharge_Name"></lable>
                     </td>
                 </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
+                    <td>
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 <tr>
                     <td>
                         <label>幣別 : </label>
@@ -273,6 +289,8 @@
         var CDC_DepositDialog_M_Id = 'CDC_DepositDialog_M'; //dialogId
         var CDC_DepositFormId_M = 'CDC_DepositDialogForm_M'; //formId
         var CDC_DepositPut_Date = 'lPut_Date';//入庫日期Id
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var CDC_DepositAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
         var CDC_DepositCharge_Name = 'lCharge_Name';//權責單位Id
         var CDC_DepositCurrency = 'tCurrency';//幣別Id
@@ -318,6 +336,8 @@
         var CDC_DepositSubtotal_Denomination = 'lSubtotal_Denomination';//面額小計Id
         var CDC_DepositSubtotal_Denomination_Aft = 'sSubtotal_Denomination';//面額小計_異動後Id
         var CDC_Data_Seq = 'hData_Seq';//明細流水號Id
+
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
 
         var CDC_Deposit_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDC_Deposit_Act_Type)
@@ -548,7 +568,7 @@
             var DepositUpdateClassM = 'CDC_DepositUpdateType_M';
             var title = customerUtility.getDialogType(type);;
             $('#' + CDC_DepositDialog_M_Id).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
+                position: { my: "top", at: "center top", of: window },
                 title: title + '定期存單',
                 width: 'auto',
                 autoOpen: false,
@@ -559,6 +579,7 @@
                 }
             });
             $('#CDC_DepositUpdateTemp_M').hide();
+            $('.GetClass').hide();
             SetCDC_DepositFun(listId, rowid);
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
@@ -572,6 +593,9 @@
                 isView = false;
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
+                if (GetFlag) {
+                    $('.GetClass').show();
+                }
                 dialogSetData_M(listId, rowid);
                 $('.' + DepositUpdateClassM).prop('disabled', true);
                 isView = true;
@@ -581,6 +605,8 @@
 
         function ResetDialog_M() {
             $('#' + CDC_DepositPut_Date).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
             $('#' + CDC_DepositAply_Uid_Name).text('');
             $('#' + CDC_DepositCharge_Name).text('');
 
@@ -625,6 +651,10 @@
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
                 $('#' + CDC_DepositPut_Date).text(data.vPut_Date);
+                if (GetFlag) {
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
                 $('#' + CDC_DepositAply_Uid_Name).text(data.vAply_Uid_Name);
                 $('#' + CDC_DepositCharge_Name).text(data.vCharge_Name);
 
@@ -1063,15 +1093,24 @@
         }
 
         function CDC_DepositDbGrid_M() {
-            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag)
+            {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數',
                 '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前',
                 '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後',
-                '物品編號', '狀態Id'];
+                '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
             colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
             colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false });
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
             colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
 

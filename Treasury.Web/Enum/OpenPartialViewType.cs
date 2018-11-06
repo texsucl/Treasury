@@ -23,16 +23,28 @@ namespace Treasury.Web.Enum
             TAAppr = 1,
 
             /// <summary>
-            /// 
+            /// 資料庫異動申請作業
             /// </summary>
             [Description("資料庫異動申請作業")]
             CDCIndex = 2,
 
             /// <summary>
-            /// 
+            /// 資料庫異動覆核作業
             /// </summary>
             [Description("資料庫異動覆核作業")]
             CDCAppr = 3,
+
+            /// <summary>
+            /// 保管單位承辦作業
+            /// </summary>
+            [Description("保管單位承辦作業")]
+            CustodyIndex = 4,
+
+            /// <summary>
+            /// 保管單位覆核作業
+            /// </summary>
+            [Description("保管單位覆核作業")]
+            CustodyAppr = 5,
         }
     }
 

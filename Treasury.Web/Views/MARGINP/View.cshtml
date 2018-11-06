@@ -9,7 +9,7 @@
 
     </div>
     <div style="text-align:center;display:none;" class="Marginp_Act">
-        <input type="button" id="MarginpApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="MarginpApply" value="申請覆核" class="btn btn-primary TAApplyClass" />
         <input type="button" id="MarginpCancel" value="取消申請" class="btn btn-primary" />
         <input type="button" id="MarginpBack" value="回上一頁" class="btn btn-primary" />
     </div>
@@ -33,7 +33,7 @@
                         <input type="text" id="tMarginp_Trad_Partners" name="tMarginp_Trad_Partners" class="MarginpInsertType" maxlength="30" />
                     </td>
                 </tr>
-                <tr style="display:none">
+                <tr id="trMarginp_Item_ID" style="display:none">
                     <td>
                         <label>歸檔編號 : </label>
                     </td>
@@ -147,7 +147,7 @@
 
     <script>
         $(function () {
-            //#region url設定                     
+            //#region url設定
             var Marginpurl = {};
             Marginpurl.getData = '@Url.Action("GetCacheData", "Marginp")';
             Marginpurl.InsertTempData = '@Url.Action("InsertTempData", "Marginp")';
@@ -220,19 +220,46 @@
                     $('#' + Marginp_Effective_Date_E).datepicker("option", "minDate", _date);
                     _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
                     $('#' + Marginp_Effective_Date_E).val(_date);
+                    $('#' + Marginp_Effective_Date_E).next().prop('disabled', true);
                 }
-                //有效期間(迄) 	本票：有效期間(起)+3年
-                else if ($('#dMarginp_Item').val() == '2' && verified.isDate(_date))
-                {
+                    //有效期間(迄) 	本票：有效期間(起)+3年
+                else if ($('#dMarginp_Item').val() == '2' && verified.isDate(_date)) {
                     $('#' + Marginp_Effective_Date_E).datepicker("option", "minDate", _date);
                     _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
                     $('#' + Marginp_Effective_Date_E).val(_date);
+                    $('#' + Marginp_Effective_Date_E).next().prop('disabled', true);
                 }
-                else if (verified.isDate(_date))
-                {
+                else if (verified.isDate(_date)) {
                     $('#' + Marginp_Effective_Date_E).datepicker("option", "minDate", _date);
                 }
-            })
+            });
+
+            $('#dMarginp_Item').on('change', function () {
+                var _date = $('#' + Marginp_Effective_Date_B).val();
+                if (this.value == '1')
+                {
+                    if (verified.isDate(_date))
+                    {
+                        $('#' + Marginp_Effective_Date_E).datepicker("option", "minDate", _date);
+                        _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                        $('#' + Marginp_Effective_Date_E).val(_date);
+                    }
+                    $('#' + Marginp_Effective_Date_E).next().prop('disabled', true);
+                }
+                else if (this.value == '2' && verified.isDate(_date))
+                {
+                    if (verified.isDate(_date))
+                    {
+                        $('#' + Marginp_Effective_Date_E).datepicker("option", "minDate", _date);
+                        _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                        $('#' + Marginp_Effective_Date_E).val(_date);
+                    }
+                    $('#' + Marginp_Effective_Date_E).next().prop('disabled', true);
+                }
+            });
+
+
+
             //#region 註冊verified
             function setMarginpVerified() {
                 //verified.datepicker(MarginpDialogFormId, Marginp_Effective_Date_B_2, $('#' + Marginp_Effective_Date_B_2).val());
@@ -246,7 +273,7 @@
                 verified.required(MarginpDialogFormId, Marginp_Pledge_Item_No, message.required('質押標的號碼')); //質押標的號碼為必填
                 verified.required(MarginpDialogFormId, Marginp_Effective_Date_B, message.required('有效期間(起)')); //有效期間(起)為必填
                 verified.required(MarginpDialogFormId, Marginp_Effective_Date_E, message.required('有效期間(迄)')); //有效期間(迄)為必填
-                verified.number(MarginpDialogFormId, Marginp_Book_No); //冊號為數字              
+                verified.number(MarginpDialogFormId, Marginp_Book_No); //冊號為數字
             }
             //#endregion
 
@@ -302,8 +329,10 @@
             $('#dMarginp_Take_Of_Type').on('change', function () {
                 GetMarginpItem($(this).val())
             });
-            
+
             function GetMarginpItem(MARGIN_ITEM) {
+                $('#' + Marginp_Effective_Date_E).prop('disabled', false);
+                $('#' + Marginp_Effective_Date_E).next().prop('disabled', false);
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -314,8 +343,12 @@
                     contentType: 'application/json'
                 }).done(function (result) {
                     customerUtility.addoption('dMarginp_Item', result);
+                    if (MARGIN_ITEM == '1') {
+                        $('#dMarginp_Item').change();
+                        $('#' + Marginp_Effective_Date_E).prop('disabled', true);
+                        $('#' + Marginp_Effective_Date_E).next().prop('disabled', true);
+                    }
                 })
-
             }
 
             function MarginpReset() {
@@ -431,17 +464,17 @@
                 var colNameArray = ['動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號','item_id'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
-                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, align: 'center', formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
                 colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 90, sortable: false });
-                colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item});
-                colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 110, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 110, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 110, sortable: false });
+                colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, align: 'right', sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, align: 'center', sortable: false, formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item });
+                colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, align: 'center', sortable: false });
+                colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 110, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 110, align: 'center', sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 110, align: 'center', sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 100, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 120, sortable: false });
+                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 120, align: 'center', sortable: false });
                 //colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
                 //colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
                 colModelArray.push({ name: "vItemId", index: "vItemId", sortable: false, hidden: true });
@@ -462,7 +495,7 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '類別', '交易對象', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號','item_id'];
+                var colNameArray = ['取出', '動作', '類別', '交易對象', '歸檔編號', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註', '冊號'];
 
                 var colModelArray = [];
 
@@ -474,20 +507,20 @@
                     colModelArray.push({ name: "vtakeoutFlag", index: "vtakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
                     colModelArray.push({ name: "act", index: "act", width: 45, sortable: false });
                 }
-                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
+                colModelArray.push({ name: "vMarginp_Take_Of_Type", index: "vMarginp_Take_Of_Type", width: 90, sortable: false, align: 'center', formatter: formatterMarginp_Take_Of_Type, unformat: UnformatterMarginp_Take_Of_Type });
                 colModelArray.push({ name: "vMarginp_Trad_Partners", index: "vMarginp_Trad_Partners", width: 90, sortable: false });
-                colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item });
-                colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 100, sortable: false });
-                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 100, sortable: false });
+                colModelArray.push({ name: "vItemId", index: "vItemId", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMarginp_Amount", index: "vMarginp_Amount", width: 100, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vMarginp_Item", index: "vMarginp_Item", width: 100, sortable: false, align: 'center', formatter: formatterMarginp_Item, unformat: UnformatterMarginp_Item });
+                colModelArray.push({ name: "vMarginp_Item_Issuer", index: "vMarginp_Item_Issuer", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMarginp_Pledge_Item_No", index: "vMarginp_Pledge_Item_No", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", width: 100, align: 'center', sortable: false });
+                colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", width: 100, align: 'center', sortable: false });
                 colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 110, sortable: false });
-                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 120, sortable: false });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
+                colModelArray.push({ name: "vMarginp_Book_No", index: "vMarginp_Book_No", width: 100, sortable: false, align: 'center' });
                 //colModelArray.push({ name: "vMarginp_Effective_Date_B", index: "vMarginp_Effective_Date_B", hidden: true });
                 //colModelArray.push({ name: "vMarginp_Effective_Date_E", index: "vMarginp_Effective_Date_E", hidden: true });
-                colModelArray.push({ name: "vItemId", index: "vItemId", width: 100, sortable: false , hidden:true});
                 jqgridCustom.createJqgridByCache(
                     'MarginpjqgridDiv',
                     'MarginpTempList',
@@ -514,7 +547,7 @@
                     $(this).off('click');
                     $(this).on('click', function () {
                         takeout(i + 1, $(this).prop('checked'));
-                        
+
 
                     });
                 });
@@ -573,7 +606,7 @@
         function MarginpInsertFun() {
 
             dialogOpen('@Ref.ActionType.Add.ToString()', null);
-            
+
         }
 
         function dialogOpen(type, rowid) {
@@ -593,6 +626,9 @@
                     customerUtility.closeDialog(this);
                 }
             });
+            $('#trMarginp_Item_ID').hide();
+            if (!typeFlag)
+                $('#trMarginp_Item_ID').show();
             $('#MarginpInsertTemp,#MarginpUpdateTemp,#MarginpDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
                 ResetInsertDialog();
@@ -601,9 +637,9 @@
                 $('#' + Marginp_Effective_Date_E).next().prop('disabled', false);
                 $('.' + MarginpInsertClass).prop('disabled', false);
                 if ('@ViewBag.CustodianFlag' != "True") {
-                    $('#' + Marginp_Memo).prop('disabled', true);
+                    //$('#' + Marginp_Memo).prop('disabled', true);
                     $('#' + Marginp_Book_No).prop('disabled', true);
-                }               
+                }
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
                 dialogSetData(listId, rowid);
@@ -619,7 +655,7 @@
                 $('#MarginpUpdateTemp').show();
                 $('.' + MarginpInsertClass).prop('disabled', false);
                 if ('@ViewBag.CustodianFlag' != "True") {
-                    $('#' + Marginp_Memo).prop('disabled', true);
+                    //$('#' + Marginp_Memo).prop('disabled', true);
                     $('#' + Marginp_Book_No).prop('disabled', true);
                 }
             }
@@ -630,6 +666,7 @@
                 $('.' + MarginpInsertClass).prop('disabled', true);
             }
             $('#' + dialogId).dialog('open');
+            $('#dMarginp_Take_Of_Type').change();
         }
 
             function ResetInsertDialog() {
@@ -710,6 +747,10 @@
                 customerUtility.alert('有效期間(迄)格式不為yyyy/MM/dd', 'w');
                 return false;
             }
+            if ('@ViewBag.CustodianFlag' == "True" && $('#' + Marginp_Book_No).val().trim() == '') {
+                customerUtility.alert('@Ref.MessageType.book_No_Error.GetDescription()', 'w');
+                return false;
+            }
             if ($('#' + MarginpDialogFormId).valid()) {
                 $.ajax({
                     type: "POST",
@@ -752,6 +793,10 @@
             }
             if ($('#' + Marginp_Effective_Date_E).val().trim() != '' && !verified.isDate($('#' + Marginp_Effective_Date_E).val().trim())) {
                 customerUtility.alert('有效期間(迄)格式不為yyyy/MM/dd', 'w');
+                return false;
+            }
+            if ('@ViewBag.CustodianFlag' == "True" && $('#' + Marginp_Book_No).val().trim() == '') {
+                customerUtility.alert('@Ref.MessageType.book_No_Error.GetDescription()', 'w');
                 return false;
             }
             if ($('#' + MarginpDialogFormId).valid()) {

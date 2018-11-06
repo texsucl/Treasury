@@ -76,7 +76,7 @@
 
     </div>
     <div style="text-align:center;padding-top:5px;display:none;" class="StockAct">
-        <input type="button" id="StockApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="StockApply" value="申請覆核" class="btn btn-primary TAApplyClass" />
         <input type="button" id="StockCancel" value="取消申請" class="btn btn-primary" />
         <input type="button" id="StockBack" value="回上一頁" class="btn btn-primary" />
     </div>
@@ -240,9 +240,10 @@
         var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
         if (typeFlag && Stock_Act_Type) {
             $('.Stock_P').show();
-            $('#StockInsert').show();
+            $('#StockInsert').show();            
         }
         else {
+            $("#tStock_Memo").attr("Disabled", true);
             $('#StockInsert').hide();
             $("#tStock_Name").hide();
             $("#dStock_Name").show();
@@ -438,13 +439,14 @@
         //#endregion
 
         //#region 初始設定
-        if ('@ViewBag.CustodianFlag' == "True") {
+       
+        @*if ('@ViewBag.CustodianFlag' == "True") {
             $("#tStock_Memo").attr("Disabled", false);
         }
         else {
             $("#tStock_Memo").attr("Disabled", true);
             $("#tStock_Memo").val(" ");
-        }
+        }*@
 
         $("#lStock_Trea_Batch_No").html("1");
         //#endregion
@@ -643,16 +645,16 @@
             if (!isNaN(_Stock_Total) && !isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//張數,每股金額及單張股數皆有值
             {
                 //計算單張面額
-                $('#' + Denomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + Denomination).html(customerUtility.addCommas(_Amount_Per_Share * _Single_Number_Of_Shares));
                 //計算面額小計
-                $('#' + Denomination_Total).html(_Stock_Total * _Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + Denomination_Total).html(customerUtility.addCommas(_Stock_Total * _Amount_Per_Share * _Single_Number_Of_Shares));
                 //計算股數小計
                 $('#' + Number_Of_Shares).val(_Stock_Total * _Single_Number_Of_Shares);
             }
             else if (!isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//每股金額及單張股數有值
             {
                 //計算單張面額
-                $('#' + Denomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + Denomination).html(customerUtility.addCommas(_Amount_Per_Share * _Single_Number_Of_Shares));
 
                 $('#' + Denomination_Total).html('');
                 $('#' + Number_Of_Shares).val('');
@@ -1099,8 +1101,8 @@
                             $('#' + Stock_Total).val(data.vStockTotal);
                             $('#' + Amount_Per_Share).val(data.vAmount_Per_Share);
                             $('#' + Single_Number_Of_Shares).val(data.vSingle_Number_Of_Shares);
-                            $('#' + Denomination).html(data.vDenomination);
-                            $('#' + Denomination_Total).html(data.vDenominationTotal);
+                            $('#' + Denomination).html(customerUtility.addCommas(data.vDenomination));
+                            $('#' + Denomination_Total).html(customerUtility.addCommas(data.vDenominationTotal));
                             $('#' + Number_Of_Shares).val(data.vNumberOfShares);
                             $('#' + Memo).val(data.vMemo);                           
                             break;
@@ -1132,9 +1134,9 @@
                     if (data.vSingle_Number_Of_Shares != "null")
                         $('#' + Single_Number_Of_Shares).val(data.vSingle_Number_Of_Shares);
                     if (data.vDenomination != "null")
-                        $('#' + Denomination).html(data.vDenomination);
+                        $('#' + Denomination).html(customerUtility.addCommas(data.vDenomination));
                     if (data.vDenominationTotal != "null")
-                        $('#' + Denomination_Total).html(data.vDenominationTotal);
+                        $('#' + Denomination_Total).html(customerUtility.addCommas(data.vDenominationTotal));
                     if (data.vNumberOfShares != "null")
                         $('#' + Number_Of_Shares).val(data.vNumberOfShares);
                     $('#' + Memo).val(data.vMemo);
@@ -1184,8 +1186,8 @@
                             $('#' + Stock_Total).val(),
                             $('#' + Amount_Per_Share).val(),
                             $('#' + Single_Number_Of_Shares).val(),
-                            $('#' + Denomination).html(),
-                            $('#' + Denomination_Total).html(),
+                            customerUtility.removeCommas($('#' + Denomination).html()),
+                            customerUtility.removeCommas($('#' + Denomination_Total).html()),
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val())
                     }),
@@ -1248,8 +1250,8 @@
                             $('#' + Stock_Total).val(),
                             $('#' + Amount_Per_Share).val(),
                             $('#' + Single_Number_Of_Shares).val(),
-                            $('#' + Denomination).html(),
-                            $('#' + Denomination_Total).html(),
+                            customerUtility.removeCommas($('#' + Denomination).html()),
+                            customerUtility.removeCommas($('#' + Denomination_Total).html()),
                             $('#' + Number_Of_Shares).val(),
                             $('#' + Memo).val())
                     }),
@@ -1375,10 +1377,17 @@
                 return false;
             }
 
-            if ($("#tNumber_Of_Shares").val().trim() == "") {
-                customerUtility.alert('股數小計必填', 'w');
+            //update by mark 20181101
+            if ($("#tMemo").val().trim() == "") {
+                customerUtility.alert('備註必填', 'w');
                 return false;
             }
+
+            //update by mark 20181101
+            //if ($("#tNumber_Of_Shares").val().trim() == "") {
+            //    customerUtility.alert('股數小計必填', 'w');
+            //    return false;
+            //}
 
             return true;
         }

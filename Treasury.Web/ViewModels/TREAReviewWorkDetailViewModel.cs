@@ -59,5 +59,12 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("開庫日期")]
         public string vOPEN_TREA_DATE { get; set; }
+
+        /// <summary>
+        /// 最後異動人員
+        /// </summary>
+        [Description("最後異動人員")]
+        public string vLAST_UPDATE_UID { get; set; }
+
     }
 }

@@ -61,7 +61,7 @@
                                     <label>已確認 :&ensp;</label>
                                 </td>
                                 <td>
-                                    <input type="checkbox" id="IS_CHECKED" name="IS_CHECKED" value="isChecked">
+                                    <input type="checkbox" id="IS_CHECKED" class="checkbox checkbox-info" name="IS_CHECKED" value="isChecked">
                                     @*$('input[name="IS_CHECKED"]:checked');*@
                                 </td>
                             </tr>
@@ -128,7 +128,7 @@
     $(function () {
         //region set url
         var UrlFor = {};
-        UrlFor.openBILL = '@Url.Action("View", "Bill")';
+        @*UrlFor.openBILL = '@Url.Action("View", "Bill")';
         UrlFor.openESTATE = '@Url.Action("View", "Estate")';
         UrlFor.openSEAL = '@Url.Action("View", "Seal")';
         UrlFor.openSTOCK = '@Url.Action("View", "Stock")';
@@ -136,7 +136,7 @@
         UrlFor.openMARGING = '@Url.Action("View", "Marging")';
         UrlFor.openMARGINP = '@Url.Action("View", "Marginp")';
         UrlFor.openDEPOSIT = '@Url.Action("View", "Deposit")';
-        UrlFor.openItemImp = '@Url.Action("View", "ItemImp")';
+        UrlFor.openItemImp = '@Url.Action("View", "ItemImp")';*@
         UrlFor.Search = '@Url.Action("Search", "ConfirmStorage")';
         UrlFor.GetData = '@Url.Action("GetCacheData", "ConfirmStorage")';
         UrlFor.GetItemId = '@Url.Action("GetItemId", "ConfirmStorage")';
@@ -378,7 +378,14 @@
         //#endregion
         //region 入庫確認
         function formConfirm() {
-                if (confirm("是否已確認?")) {
+            var txtConform = "";
+            if ($('input[name="IS_CHECKED"]').is(':checked')) {
+                txtConform = '是否異動已確認?';
+            } else {
+                txtConform = '是否已確認?';
+            }
+
+            if (confirm(txtConform)) {
                     var _itemIdCheck = [];
                     var cUid = $('#h_cUSER_ID').val();
 
@@ -410,7 +417,8 @@
                         type: 'POST',
                         data: JSON.stringify({
                             ConfirmModel: _itemIdCheck,
-                            register_ID : _register_ID
+                            register_ID : _register_ID,
+                            v_IS_CHECKED: $('input[name="IS_CHECKED"]:checked').val()
                         }),
                         url: UrlFor.Confirm,
                         contentType: 'application/json'
@@ -962,7 +970,7 @@
             var data = $("#" + listId).getRowData(rowid);
             var itemId = data.hITEM_ID;
             //var _accessType = data.vACCESS_TYPE;
-            var itemData = GetItemData(itemId);
+            var itemData = GetItemDataByDefault(itemId);
             if (itemData.url != null) {
                 $('#TAR_AplyNo').val(data.vAPLY_NO);
                 $.ajax({
@@ -1199,7 +1207,7 @@
         //#endregion
 
         //#region 申請項目設定檔案
-        function GetItemData(item) {
+        @*function GetItemData(item) {
             item = item || '';
             var _reportTitle = '金庫物品存取申請單';
             var obj = {};
@@ -1277,7 +1285,7 @@
                     break;
             }
             return obj;
-        }
+        }*@
         //#endregion
     });
 </script>

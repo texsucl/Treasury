@@ -50,7 +50,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
-            var datas = TREAReviewWork.GetSearchDatas();
+            var datas = TREAReviewWork.GetSearchDatas(AccountController.CurrentUserId);
             if (datas.Any())
             {
                 Cache.Invalidate(CacheList.TREAReviewWorkDetailViewData);
@@ -92,7 +92,16 @@ namespace Treasury.Web.Controllers
             if (Cache.IsSet(CacheList.TREAReviewWorkDetailViewData))
             {
                 var datas = (List<TREAReviewWorkDetailViewModel>)Cache.Get(CacheList.TREAReviewWorkDetailViewData);
-                result = TREAReviewWork.InsertApplyData(datas,AccountController.CurrentUserId);
+                if(datas.Any(x => x.Ischecked))
+                {
+                    result = TREAReviewWork.InsertApplyData(datas, AccountController.CurrentUserId);
+                }    
+                else
+                {
+                    result.DESCRIPTION = "無勾選覆核項目";
+                    return Json(result);
+                }
+                    
                 if (result.RETURN_FLAG)
                 {
                     Cache.Invalidate(CacheList.TREAReviewWorkDetailViewData);
@@ -146,7 +155,32 @@ namespace Treasury.Web.Controllers
                     Cache.Set(CacheList.TREAReviewWorkDetailViewData, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
-                    result.Datas = tempData.Any(x => x.Ischecked);
+                    //檢查已勾選的項目是否有最後修改者為目前登入者
+                    var viewModel = (List<TREAReviewWorkDetailViewModel>)Cache.Get(CacheList.TREAReviewWorkDetailViewData);
+                    bool canDo = false;
+                    viewModel.ForEach(x => {
+                        if (x.Ischecked && x.vLAST_UPDATE_UID == AccountController.CurrentUserId)
+                        {
+                            canDo = false;
+                        }
+                        else
+                        {
+                            canDo = true;
+                        }
+                    });
+                    if(viewModel.All(x => x.Ischecked == false))
+                        canDo = true;
+
+                    result.Datas = canDo;
+
+                    //if (canDo == true)
+                    //{
+                    //    result.Datas = true;   //可以執行覆核、駁回
+                    //}
+                    //else
+                    //{
+                    //    result.Datas = false;
+                    //}
                 }
                 else
                 {

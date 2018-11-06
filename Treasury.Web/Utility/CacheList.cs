@@ -18,9 +18,19 @@
         public static string TreasuryAccessSearchData { get; private set; }
 
         /// <summary>
+        /// 保管單位承辦作業(查詢條件)
+        /// </summary>
+        public static string TreasuryAccessCustodySearchData { get; private set; }
+
+        /// <summary>
         /// 金庫物品查詢畫面(資料)
         /// </summary>
         public static string TreasuryAccessSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 保管單位承辦作業(資料)
+        /// </summary>
+        public static string TreasuryAccessCustodySearchDetailViewData { get; private set; }
 
         /// <summary>
         /// 金庫物品查詢畫面(可供修改的資料)
@@ -33,9 +43,19 @@
         public static string TreasuryAccessApprSearchData { get; private set; }
 
         /// <summary>
+        /// 保管單位覆核作業(查詢條件)
+        /// </summary>
+        public static string TreasuryAccessCustodyApprSearchData { get; private set; }
+
+        /// <summary>
         /// 金庫物品覆核畫面(資料)
         /// </summary>
         public static string TreasuryAccessApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 保管單位覆核作業(資料)
+        /// </summary>
+        public static string TreasuryAccessCustodyApprSearchDetailViewData { get; private set; }
 
         /// <summary>
         /// 指定開庫作業(查詢條件)
@@ -86,6 +106,16 @@
         /// 金庫登記簿查詢列印作業-明細
         /// </summary>
         public static string TreasuryRegisterSearchReportD { get; private set; }
+
+        /// <summary>
+        /// 入庫確認查詢作業 - 查詢
+        /// </summary>
+        public static string AlreadyConfirmedSearchData { get; private set; }
+
+        /// <summary>
+        /// 入庫確認查詢作業 - 資料
+        /// </summary>
+        public static string AlreadyConfirmedSearchDetailViewData { get; private set; }
 
         /// <summary>
         /// 金庫登記簿執行作業(關庫後) - 查詢
@@ -226,7 +256,17 @@
         public static string CDCSEALData { get; private set; }
 
         /// <summary>
-        /// 資料庫異動印章畫面
+        /// 資料庫異動空白票據畫面
+        /// </summary>
+        public static string CDCBILLData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動空白票據在庫
+        /// </summary>
+        public static string CDCBILLAllData { get; private set; }
+
+        /// <summary>
+        /// 資料庫異動電子憑證畫面
         /// </summary>
         public static string CDCCAData { get; private set; }
 
@@ -285,16 +325,22 @@
             TREAReviewWorkSearchDetailViewData = "TREAReviewWorkSearchDetailViewData";
             TreasuryAccessViewData = "TreasuryAccessViewData";
             TreasuryAccessSearchData = "TreasuryAccessSearchData";
+            TreasuryAccessCustodySearchData = "TreasuryAccessCustodySearchData";
             TreasuryAccessSearchDetailViewData = "TreasuryAccessSearchDetailViewData";
+            TreasuryAccessCustodySearchDetailViewData = "TreasuryAccessCustodySearchDetailViewData";
             TreasuryAccessSearchUpdateViewData = "TreasuryAccessSearchUpdateViewData";
             TreasuryAccessApprSearchData = "TreasuryAccessApprSearchData";
+            TreasuryAccessCustodyApprSearchData = "TreasuryAccessCustodyApprSearchData";
             TreasuryAccessApprSearchDetailViewData = "TreasuryAccessApprSearchDetailViewData";
+            TreasuryAccessCustodyApprSearchDetailViewData = "TreasuryAccessCustodyApprSearchDetailViewData";
             SpecifiedTimeTreasurySearchData = "SpecifiedTimeTreasurySearchData";
             SpecifiedTimeTreasurySearchDetailViewData = "SpecifiedTimeTreasurySearchDetailViewData";
             SpecifiedTimeTreasuryApplyData = "SpecifiedTimeTreasuryApplyData";
             SpecifiedTimeTreasuryApprSearchData = "SpecifiedTimeTreasuryApprSearchData";
             SpecifiedTimeTreasuryApprSearchDetailViewData = "SpecifiedTimeTreasuryApprSearchDetailViewData";
             SpecifiedTimeTreasuryApprReasonDetailViewData = "SpecifiedTimeTreasuryApprReasonDetailViewData";
+            AlreadyConfirmedSearchData = "AlreadyConfirmedSearchData";
+            AlreadyConfirmedSearchDetailViewData = "AlreadyConfirmedSearchDetailViewData";
             AfterOpenTreasurySearchData = "AfterOpenTreasurySearchData";
             AfterOpenTreasurySearchDetailViewData = "AfterOpenTreasurySearchDetailViewData";
             AfterOpenTreasuryUnconfirmedDetailViewData = "AfterOpenTreasuryUnconfirmedDetailViewData";
@@ -323,6 +369,8 @@
             CDCApprSearchData = "CDCApprSearchData";
             CDCApprSearchDetailViewData = "CDCApprSearchDetailViewData";
             CDCSEALData = "CDCSEALData";
+            CDCBILLData = "CDCBILLData";
+            CDCBILLAllData = "CDCBILLAllData";
             CDCCAData = "CDCCAData";
             CDCMargingData = "CDCMargingData";
             CDCItemImpData = "CDCItemImpData";

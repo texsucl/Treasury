@@ -68,11 +68,11 @@ namespace Treasury.Web.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult DraftData()
+        public JsonResult DraftData(string Trea_Register_Id)
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
 
-            result = BeforeOpenTreasury.DraftData(AccountController.CurrentUserId);
+            result = BeforeOpenTreasury.DraftData(AccountController.CurrentUserId, Trea_Register_Id);
 
             return Json(result);
         }

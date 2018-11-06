@@ -27,9 +27,9 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var bill = Ref.TreaItemType.D1012.ToString(); // 空白票據項目 用於條件判斷
+                var other = Ref.TreaItemType.D1019.ToString(); // 其他物品項目 用於條件判斷
                 jobProject = db.TREA_ITEM.AsNoTracking() // 抓資料表的所有資料
-                    .Where(x => x.ITEM_OP_TYPE == "3" && x.IS_DISABLED == "N" && x.ITEM_ID != bill) //條件
+                    .Where(x => x.ITEM_OP_TYPE == "3" && x.IS_DISABLED == "N" && x.ITEM_ID != other) //條件
                     .AsEnumerable().Select(x => new SelectOption()
                     {
                         Value = x.ITEM_ID,
@@ -183,8 +183,17 @@ namespace Treasury.Web.Service.Actual
 
                     #region 對應資料檔-核可
                     //其它存取項目申請資料檔找對應物品編號(ITEM_ID)
-                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                    List<string> itemIds = new List<string>();
+                    if (_INVENTORY_CHG_APLY.ITEM_ID != Ref.TreaItemType.D1012.ToString())
+                    {
+                        itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }
+                    else
+                    {
+                        itemIds = db.BLANK_NOTE_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }                   
                     var sampleFactory = new SampleFactory();
                     var getCDCAction = sampleFactory.GetCDCAction(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _INVENTORY_CHG_APLY.ITEM_ID));
                     if (getCDCAction != null)

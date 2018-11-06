@@ -19,6 +19,22 @@
                         <label id="vPUT_Date" name="vPUT_Date"></label>
                     </td>
                 </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
+                </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
+                    </td>
+                </tr>
                 <tr>
                     <td>
                         <label>歸檔編號 : </label>
@@ -52,7 +68,15 @@
                         <span class="red" style="padding-left:20px" id="sCDCItemImp_Name"></span>
                     </td>
                 </tr>
-                <tr>
+                <tr id="trItemImp_Quantity">
+                    <td>
+                        <label>取出數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tItemImp_Quantity" name="tItemImp_Quantity" class="CDCItemImpUpdateType"/>
+                    </td>
+                </tr>
+                <tr id="trItemImp_Remaining">
                     <td>
                         <label>剩餘數量 : </label>
                     </td>
@@ -98,6 +122,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
                     <td colspan="2">
                        <input type="hidden" id="hItemImp_ITEM_ID"/>
                     </td>
@@ -130,11 +160,14 @@
         var CDCItemImpDialogId = 'CDCItemImpDialog'; //dialogId
         var CDCItemImpDialogFormId = 'CDCItemImpDialogForm'; //dialogFormId
         var vPUT_DateId = 'vPUT_Date'; //入庫日期(label)
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var vlItem_Id = 'vlItem_Id'; //歸檔編號(label)
         var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
         var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
         var tCDCItemImp_NameId = 'tCDCItemImp_Name'; //物品名稱Id(text)
         var sCDCItemImp_NameId = 'sCDCItemImp_Name'; //物品名稱Id(span)
+        var tItemImp_QuantityId = 'tItemImp_Quantity'; //取出數量(text)
         var tCDCItemImp_RemainingId = 'tCDCItemImp_Remaining'; //剩餘數量Id(text)
         var sCDCItemImp_RemainingId = 'sCDCItemImp_Remaining'; //剩餘數量Id(span)
         var tCDCItemImp_AmountId = 'tCDCItemImp_Amount'; //金額Id(text)
@@ -146,6 +179,8 @@
         var tCDCItemImp_MEMOId = 'tCDCItemImp_MEMO'; //備註Id(text)
         var sCDCItemImp_MEMOId = 'sCDCItemImp_MEMO'; //備註Id(span)
         var ItemImp_ITEM_ID = 'hItemImp_ITEM_ID'; //物品標號Id(hidden)
+
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
 
         var CDCItemImp_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDCItemImp_Act_Type)
@@ -286,21 +321,39 @@
         }
 
         function CDCItemImpDbGrid() {
-            var colNameArray = ['動作', '狀態', '入庫日期', '歸檔編號', '存入申請人', '權責單位',
-                '物品名稱', '剩餘數量', '金額', '預計提取日期', '說明', '備註',
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag) {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['歸檔編號', '存入申請人', '權責單位', '物品名稱']);
+            if (GetFlag) {
+                colNameArray.push('取出數量');
+            }
+            else {
+                colNameArray.push('剩餘數量');
+            }
+            colNameArray = colNameArray.concat(['金額', '預計提取日期', '說明', '備註',
                 '物品名稱異動前', '數量異動前', '金額異動前', '預計提取日期異動前', '說明異動前', '備註異動前',
                 '物品名稱異動後', '數量異動後', '金額異動後', '預計提取日期異動後', '說明異動後', '備註異動後',
-                '物品編號', '狀態Id'];
+                '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
             colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus,  align: 'center' });
             colModelArray.push({ name: "vPUT_Date", index: "vPUT_Date", width: 90, sortable: false, align: 'center' });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false});
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
             colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 80, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });
-            
+            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });           
             colModelArray.push({ name: "vItemImp_Name_Show", index: "vItemImp_Name_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Name });
-            colModelArray.push({ name: "vItemImp_Remaining_Show", index: "vItemImp_Remaining_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Remaining });
+            if (GetFlag) {
+                colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, align: 'right', sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+            }
+            else {
+                colModelArray.push({ name: "vItemImp_Remaining_Show", index: "vItemImp_Remaining_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Remaining });
+            }       
             colModelArray.push({ name: "vItemImp_Amount_Show", index: "vItemImp_Amount_Show", width: 100, align: 'right', sortable: false, formatter: formattervItemImp_Amount });
             colModelArray.push({ name: "vItemImp_Expected_Date_Show", index: "vItemImp_Expected_Date_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Expected_Date });
             colModelArray.push({ name: "vItemImp_Description_Show", index: "vItemImp_Description_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Description });
@@ -400,7 +453,7 @@
             var ItemImpUpdateClass = 'CDCItemImpUpdateType';
             var title = customerUtility.getDialogType(type);;
             $('#' + CDCItemImpDialogId).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
+                position: { my: "top", at: "center top", of: window },
                 title: title + '重要物品',
                 width: 'auto',
                 autoOpen: false,
@@ -410,7 +463,10 @@
                     customerUtility.closeDialog(this);
                 }
             });
+            $('#trItemImp_Quantity').hide();
+            $('#trItemImp_Remaining').hide();
             $('#CDCItemImpUpdateTemp').hide();
+            $('.GetClass').hide();
             if (type == '@Ref.ActionType.Add.ToString()')
             {
             }
@@ -426,6 +482,10 @@
             }
             else if (type == '@Ref.ActionType.View.ToString()')
             {
+                if (GetFlag) 
+                {
+                    $('.GetClass').show();
+                }
                 dialogSetData(listId, rowid);
                 $('.' + ItemImpUpdateClass).prop('disabled', true);
                 $('#' + tCDCItemImp_Expected_DateId).next().prop('disabled', true);
@@ -435,12 +495,15 @@
 
         function ResetDialog() {
             $('#' + vPUT_DateId).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
             $('#' + vlItem_Id).text('');
             $('#' + vAPLY_UID_NameId).text('');
             $('#' + vCHARGE_NameId).text('');
             $('#' + tCDCItemImp_NameId).val('');
             $('#' + sCDCItemImp_NameId).text('');
             $('#' + tCDCItemImp_RemainingId).val('');
+            $('#' + tItemImp_QuantityId).val('');            
             $('#' + sCDCItemImp_RemainingId).text('');
             $('#' + tCDCItemImp_AmountId).val('');
             $('#' + sCDCItemImp_AmountId).text('');
@@ -466,8 +529,19 @@
                 $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
                 $('#' + tCDCItemImp_NameId).val(data.vItemImp_Name);
                 $('#' + sCDCItemImp_NameId).text(data.vItemImp_Name_AFT);
-                $('#' + tCDCItemImp_RemainingId).val(data.vItemImp_Remaining);
-                $('#' + sCDCItemImp_RemainingId).text(data.vItemImp_Remaining_AFT);
+                if(GetFlag)
+                {
+                    $('#trItemImp_Quantity').show();                   
+                    $('#' + tItemImp_QuantityId).val(data.vItemImp_Quantity);
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
+                else
+                {
+                    $('#trItemImp_Remaining').show();
+                    $('#' + tCDCItemImp_RemainingId).val(data.vItemImp_Remaining);
+                    $('#' + sCDCItemImp_RemainingId).text(data.vItemImp_Remaining_AFT);
+                }                         
                 $('#' + tCDCItemImp_AmountId).val(data.vItemImp_Amount);
                 $('#' + sCDCItemImp_AmountId).text(data.vItemImp_Amount_AFT);
                 $('#' + tCDCItemImp_Expected_DateId).val(data.vItemImp_Expected_Date);

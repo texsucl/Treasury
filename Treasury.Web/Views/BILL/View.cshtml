@@ -11,7 +11,7 @@
 
     </div>
     <div style="text-align:center;padding-top:5px;display:none;"  class="BILLAct">
-        <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary" />
+        <input type="button" id="BILLApply" value="申請覆核"  class="btn btn-primary TAApplyClass" />
         <input type="button" id="BILLCancel" value="取消申請"  class="btn btn-primary" />
         <input type="button" id="BILLBack" value="回上一頁"  class="btn btn-primary" />
     </div>
@@ -699,7 +699,7 @@
             }
         }
 
-        function BILLTempCompleteFun(listId){
+        function BILLTempCompleteFun(listId) {
             jqgridCustom.randerAction(listId, 'BILLTemp', tempActFun);
         }
 
@@ -857,12 +857,7 @@
         function BILLUpdateTempFun()
         {
             if ($('#' + BILLFormId).valid()) {
-                var _Check_No_B = parseInt($('#' + BILL_Check_No_BId).val());
-                var _Check_No_E = parseInt($('#' + BILL_Check_No_EId).val());
-                if (_Check_No_B > _Check_No_E) {
-                    customerUtility.alert('迄號不可小於起號!', 'w');
-                    return false;
-                }
+ 
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({

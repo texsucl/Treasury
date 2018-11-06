@@ -44,6 +44,9 @@ namespace Treasury.Web.Service.Actual
             printsStatus.Add(Ref.AccessProjectFormStatus.D03.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.D04.ToString());
             printsStatus.Add(Ref.AccessProjectFormStatus.E01.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.E02.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.E03.ToString());
+            printsStatus.Add(Ref.AccessProjectFormStatus.E04.ToString());
             invalidStatus = new List<string>();
             invalidStatus.Add(Ref.AccessProjectFormStatus.A02.ToString());
             invalidStatus.Add(Ref.AccessProjectFormStatus.A03.ToString());
@@ -134,10 +137,28 @@ namespace Treasury.Web.Service.Actual
             bool result = false;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _TAR = db.TREA_APLY_REC.AsNoTracking()
-                            .FirstOrDefault(x => x.APLY_NO == aplyNo && x.CREATE_UID == uid);
-                if (_TAR != null)
-                    result = actionType.Contains(_TAR.APLY_STATUS);
+                //保管單位承辦作業
+                if (actionType.Contains(Ref.AccessProjectFormStatus.B01.ToString()))
+                {
+                    var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                        .FirstOrDefault(x => x.APLY_NO == aplyNo);
+                    if (_TAR != null)
+                    {
+                        //取出時只能檢視
+                        if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString())
+                            result = false;
+                        else
+                            result = true;
+                    }
+
+                }
+                else
+                {
+                    var _TAR = db.TREA_APLY_REC.AsNoTracking()
+                        .FirstOrDefault(x => x.APLY_NO == aplyNo && x.CREATE_UID == uid);
+                    if (_TAR != null)
+                        result = actionType.Contains(_TAR.APLY_STATUS);
+                }
             }
             return result;
 
@@ -334,7 +355,8 @@ namespace Treasury.Web.Service.Actual
                 var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
 
                 var _data = db.TREA_APLY_REC.AsNoTracking()
-                    .Where(x => data.vItem.Contains(x.ITEM_ID) && data.vAplyUnit.Contains(x.APLY_UNIT)) //項目 & 申請單位 
+                    .Where(x => data.vItem.Contains(x.ITEM_ID)) //項目
+                    .Where(x => data.vAplyUnit.Contains(x.APLY_UNIT) , !data.vCustodianFlag) //非保管科要加入申請單位條件 (20181105調整)
                     .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
                     .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
                     .Where(x => x.APLY_NO == data.vAPLY_NO, !data.vAPLY_NO.IsNullOrWhiteSpace()) //申請單號
