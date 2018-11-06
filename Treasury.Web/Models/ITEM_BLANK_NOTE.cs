@@ -28,5 +28,14 @@ namespace Treasury.Web.Models
         public string CHARGE_SECT { get; set; }
         public Nullable<System.DateTime> CREATE_DT { get; set; }
         public Nullable<System.DateTime> LAST_UPDATE_DT { get; set; }
+        public Nullable<System.DateTime> PUT_DATE { get; set; }
+        public Nullable<System.DateTime> GET_DATE { get; set; }
+        public string ISSUING_BANK_AFT { get; set; }
+        public string CHECK_TYPE_AFT { get; set; }
+        public string CHECK_NO_TRACK_AFT { get; set; }
+        public string CHECK_NO_B_AFT { get; set; }
+        public string CHECK_NO_E_AFT { get; set; }
+        public string CHARGE_DEPT_AFT { get; set; }
+        public string CHARGE_SECT_AFT { get; set; }
     }
 }
