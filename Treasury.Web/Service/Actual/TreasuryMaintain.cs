@@ -158,6 +158,34 @@ namespace Treasury.Web.Service.Actual
                             vAppr_Status_Name = _Appr_Status.FirstOrDefault(x => x.CODE == TES.APPR_STATUS)?.CODE_VALUE.Trim()
                         }).ToList();
                 }
+                else
+                {
+                    result = db.TREA_EQUIP_HIS.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No)
+                        .AsEnumerable()
+                        .Join(db.TREA_EQUIP.AsNoTracking()
+                        .AsEnumerable(),
+                        TES => TES.TREA_EQUIP_ID,
+                        TE => TE.TREA_EQUIP_ID,
+                        (TES, TE) => new TreasuryMaintainChangeRecordViewModel
+                        {
+                            vFreeze_Dt = TE.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                            vAply_No = TES.APLY_NO,
+                            vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TE.FREEZE_UID)?.EMP_NAME.Trim(),
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TES.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vEquip_Name = TES.EQUIP_NAME,
+                            vIs_Disabled = _Is_Disabled.FirstOrDefault(x => x.CODE == TE.IS_DISABLED)?.CODE_VALUE.Trim(),
+                            vControl_Mode_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TES.CONTROL_MODE)?.CODE_VALUE.Trim(),
+                            vControl_Mode_B_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TES.CONTROL_MODE_B)?.CODE_VALUE.Trim(),
+                            vNormal_Cnt = TES.NORMAL_CNT,
+                            vNormal_Cnt_B = TES.NORMAL_CNT_B,
+                            vReserve_Cnt = TES.RESERVE_CNT,
+                            vReserve_Cnt_B = TES.RESERVE_CNT_B,
+                            vMemo = TES.MEMO,
+                            vMemo_B = TES.MEMO_B,
+                            vAppr_Status_Name = _Appr_Status.FirstOrDefault(x => x.CODE == TES.APPR_STATUS)?.CODE_VALUE.Trim()
+                        }).ToList();
+                }
             }
 
             return result;

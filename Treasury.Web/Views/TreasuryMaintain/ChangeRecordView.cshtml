@@ -1,9 +1,7 @@
 ﻿<div>
-    <div id="TM_jqgridDiv" class="jqd" style="padding-bottom:5px;">
-
-    </div>
+    <div id="TM_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
     <div style="text-align:center;">
-        <input type="button" id="TM_Back" value="回上一頁" class="btn btn-primary" />
+        <input type="button" id="TM_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
     </div>
 </div>
 
@@ -19,7 +17,7 @@
         //#endregion 參數設定
 
         //#region 初始動作
-        TM_TempGrid();
+        TM_ChangeRecord_TempGrid();
         //#endregion 初始動作
 
         //#region 註冊事件
@@ -27,7 +25,7 @@
         $('input:button').each(function () {
             var id = $(this).attr('id');
             switch (id) {
-                case 'TM_Back':
+                case 'TM_ChangeRecord_Back':
                     $('#' + id).off('click');
                     $('#' + id).on('click',
                         function () {
@@ -39,7 +37,7 @@
         //#endregion 註冊事件
 
         //#region jqgrid
-        function TM_CompleteFun(listId) {
+        function TM_ChangeRecord_CompleteFun(listId) {
             if (isGroupHeaders) {
                 jQuery("#" + listId).jqGrid('setGroupHeaders', {
                     useColSpanStyle: true,
@@ -54,7 +52,7 @@
             }
         }
 
-        function TM_TempGrid() {
+        function TM_ChangeRecord_TempGrid() {
             var colNameArray = ['異動日期', '工作單號', '異動人員', '執行', '設備名稱', '停用註記',
                 '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
                 '覆核狀態'];
@@ -77,9 +75,9 @@
 
             colModelArray.push({ name: "vAppr_Status_Name", index: "vAppr_Status_Name", width: 80, sortable: false, align: 'center' });
             jqgridCustom.createJqgridByCache(
-                'TM_jqgridDiv',
-                'TM_TempList',
-                'TM_TempPeger',
+                'TM_ChangeRecord_jqgridDiv',
+                'TM_ChangeRecord_TempList',
+                'TM_ChangeRecord_TempPeger',
                 TM_Url.getData,
                 {
                     type: 'O'
@@ -87,8 +85,8 @@
                 colNameArray,
                 colModelArray,
                 '金庫設備異動紀錄',
-                jqgridCustom.getPage('TM_jqgridDiv'),
-                TM_CompleteFun,
+                jqgridCustom.getPage('TM_ChangeRecord_jqgridDiv'),
+                TM_ChangeRecord_CompleteFun,
                 true
                 );
         }

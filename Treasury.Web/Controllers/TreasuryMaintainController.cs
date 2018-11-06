@@ -50,27 +50,6 @@ namespace Treasury.Web.Controllers
             return View();
         }
 
-        ///// <summary>
-        ///// 金庫設備維護作業
-        ///// </summary>
-        ///// <param name="AplyNo">申請單號</param>
-        ///// <param name="data">查詢ViewModel</param>
-        ///// <param name="type">呼叫原始書面</param>
-        ///// <returns></returns>
-        //[HttpPost]
-        //public ActionResult View(string AplyNo, TreasuryMaintainSearchViewModel data, Ref.OpenPartialViewType type)
-        //{
-        //    var _data = TreasuryMaintain.GetSearchData(data, AplyNo);
-        //    ViewBag.dControl_Mode = new SelectList(new Service.Actual.Common().GetSysCode("CONTROL_MODE"), "Value", "Text");
-        //    ViewBag.type = type;
-
-        //    Cache.Invalidate(CacheList.TreasuryMaintainSearchData);
-        //    Cache.Set(CacheList.TreasuryMaintainSearchData, data);
-        //    Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
-        //    Cache.Set(CacheList.TreasuryMaintainSearchDataList, _data);
-        //    return PartialView();
-        //}
-
         /// <summary>
         /// 金庫設備異動紀錄查詢畫面
         /// </summary>
@@ -97,8 +76,8 @@ namespace Treasury.Web.Controllers
         public ActionResult ChangeRecordView(string AplyNo, TreasuryMaintainChangeRecordSearchViewModel data)
         {
             var _data = TreasuryMaintain.GetChangeRecordSearchData(data, AplyNo);
-            Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
-            Cache.Set(CacheList.TreasuryMaintainSearchDataList, _data);
+            Cache.Invalidate(CacheList.TreasuryMaintainChangeRecordSearchDataList);
+            Cache.Set(CacheList.TreasuryMaintainChangeRecordSearchDataList, _data);
             return PartialView();
         }
 
@@ -313,8 +292,8 @@ namespace Treasury.Web.Controllers
                         return Json(jdata.modelToJqgridResult(((List<TreasuryMaintainViewModel>)Cache.Get(CacheList.TreasuryMaintainSearchDataList)).OrderBy(x => x.vTrea_Equip_Id).ToList()));
                     break;
                 case "O":
-                    if (Cache.IsSet(CacheList.TreasuryMaintainSearchDataList))
-                        return Json(jdata.modelToJqgridResult(((List<TreasuryMaintainChangeRecordViewModel>)Cache.Get(CacheList.TreasuryMaintainSearchDataList)).OrderBy(x => x.vAply_No).ToList()));
+                    if (Cache.IsSet(CacheList.TreasuryMaintainChangeRecordSearchDataList))
+                        return Json(jdata.modelToJqgridResult(((List<TreasuryMaintainChangeRecordViewModel>)Cache.Get(CacheList.TreasuryMaintainChangeRecordSearchDataList)).OrderBy(x => x.vAply_No).ToList()));
                     break;
             }
             return null;
