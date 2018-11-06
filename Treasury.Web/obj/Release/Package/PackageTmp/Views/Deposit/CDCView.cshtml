@@ -264,16 +264,17 @@
         CDC_DepositUrl.UpdateDbDataM = '@Url.Action("UpdateDbDataM", "Deposit")';
         CDC_DepositUrl.UpdateDbDataD = '@Url.Action("UpdateDbDataD", "Deposit")';
         CDC_DepositUrl.ApplyDbData = '@Url.Action("ApplyDbData", "Deposit")';
-        CDC_DepositUrl.RepeatDbData = '@Url.Action("RepeatDbData", "Deposit")';
+        CDC_DepositUrl.RepeatDbDataM = '@Url.Action("RepeatDbDataM", "Deposit")';
+        CDC_DepositUrl.RepeatDbDataD = '@Url.Action("RepeatDbDataD", "Deposit")';
+        CDC_DepositUrl.ResetData = '@Url.Action("ResetData", "Deposit")';
         //#endregion url設定
 
         //#region 參數設定
         var CDC_DepositDialog_M_Id = 'CDC_DepositDialog_M'; //dialogId
-        var CDC_DepositDialogForm_M_Id = 'CDC_DepositDialogForm_M'; //formId
+        var CDC_DepositFormId_M = 'CDC_DepositDialogForm_M'; //formId
         var CDC_DepositPut_Date = 'lPut_Date';//入庫日期Id
         var CDC_DepositAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
         var CDC_DepositCharge_Name = 'lCharge_Name';//權責單位Id
-        var CDC_DepositFormId_M = 'CDC_DepositDialogForm_M'; //formId
         var CDC_DepositCurrency = 'tCurrency';//幣別Id
         var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
         var CDC_DepositTrad_Partners = 'tTrad_Partners';//交易對象Id
@@ -300,10 +301,10 @@
         var CDC_DepositMemo_Aft = 'sMemo';//備註_異動後Id
         var CDC_DepositTrans_Tms = 'tTrans_Tms';//轉期次數Id
         var CDC_DepositTrans_Tms_Aft = 'sTrans_Tms';//轉期次數_異動後Id
-        var CDC_ItemId = 'hItem_Id';//Id
+        var CDC_ItemId = 'hItem_Id';//物品單號Id
 
         var CDC_DepositDialog_D_Id = 'CDC_DepositDialog_D'; //dialogId
-        var CDC_DepositDialogForm_D_Id = 'CDC_DepositDialogForm_D'; //formId
+        var CDC_DepositFormId_D = 'CDC_DepositDialogForm_D'; //formId
         var CDC_DepositDep_No_Preamble = 'tDep_No_Preamble';//存單號碼前置碼Id
         var CDC_DepositDep_No_Preamble_Aft = 'sDep_No_Preamble';//存單號碼前置碼_異動後Id
         var CDC_DepositDep_No_B = 'tDep_No_B';//存單號碼(起)Id
@@ -312,11 +313,11 @@
         var CDC_DepositDep_No_E_Aft = 'sDep_No_E';//存單號碼(迄)_異動後Id
         var CDC_DepositDep_Cnt = 'tDep_Cnt';//張數Id
         var CDC_DepositDep_Cnt_Aft = 'sDep_Cnt';//張數_異動後Id
-        var CDC_DepositCurrency = 'tCurrency';//幣別Id
-        var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
-        var CDC_DepositCurrency = 'tCurrency';//幣別Id
-        var CDC_DepositCurrency_Aft = 'sCurrency';//幣別_異動後Id
-        var CDC_ItemId = 'hItem_Id';//Id
+        var CDC_DepositDenomination = 'tDenomination';//單張面額Id
+        var CDC_DepositDenomination_Aft = 'sDenomination';//單張面額_異動後Id
+        var CDC_DepositSubtotal_Denomination = 'lSubtotal_Denomination';//面額小計Id
+        var CDC_DepositSubtotal_Denomination_Aft = 'sSubtotal_Denomination';//面額小計_異動後Id
+        var CDC_Data_Seq = 'hData_Seq';//明細流水號Id
 
         var CDC_Deposit_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDC_Deposit_Act_Type)
@@ -326,8 +327,10 @@
         if (!CDC_Deposit_ApplyFlag)
             $('#CDC_DepositApply').hide();
 
-        var CDC_DepositConfirmFlag = false; //離開時提醒訊息
+        var CDC_DepositConfirmFlag_M = false; //離開時提醒訊息(主檔)
+        var CDC_DepositConfirmFlag_D = false; //離開時提醒訊息(明細)
 
+        var isView = false;
         //#endregion 參數設定
 
         //#region 初始動作
@@ -377,14 +380,14 @@
             verified.datepicker(CDC_DepositFormId_M, CDC_DepositExpiry_Date, $('#' + CDC_DepositExpiry_Date).val()); //到期日 僅能輸入日期
             verified.rate(CDC_DepositFormId_M, CDC_DepositInterest_Rate); //利率% 格式
 
-            //verified.required(DepositFormId_D, DepositDep_No_B, message.required('存單號碼(起)')); //存單號碼(起)為必填
-            //verified.required(DepositFormId_D, DepositDep_No_E, message.required('存單號碼(迄)')); //存單號碼(迄)為必填
-            //verified.required(DepositFormId_D, DepositDep_Cnt, message.required('張數')); //張數為必填
-            //verified.required(DepositFormId_D, DepositDenomination, message.required('單張面額')); //單張面額為必填
+            verified.required(CDC_DepositFormId_D, CDC_DepositDep_No_B, message.required('存單號碼(起)')); //存單號碼(起)為必填
+            verified.required(CDC_DepositFormId_D, CDC_DepositDep_No_E, message.required('存單號碼(迄)')); //存單號碼(迄)為必填
+            verified.required(CDC_DepositFormId_D, CDC_DepositDep_Cnt, message.required('張數')); //張數為必填
+            verified.required(CDC_DepositFormId_D, CDC_DepositDenomination, message.required('單張面額')); //單張面額為必填
 
-            //verified.positiveInt(DepositFormId_D, DepositDep_No_B); //存單號碼(起) 僅能輸入數字(正)
-            //verified.positiveInt(DepositFormId_D, DepositDep_No_E); //存單號碼(迄) 僅能輸入數字(正)
-            //verified.positiveInt(DepositFormId_D, DepositDep_Cnt); //張數 僅能輸入數字(正)
+            verified.positiveInt(CDC_DepositFormId_D, CDC_DepositDep_No_B); //存單號碼(起) 僅能輸入數字(正)
+            verified.positiveInt(CDC_DepositFormId_D, CDC_DepositDep_No_E); //存單號碼(迄) 僅能輸入數字(正)
+            verified.positiveInt(CDC_DepositFormId_D, CDC_DepositDep_Cnt); //張數 僅能輸入數字(正)
 
         }
         //#endregion 註冊verified
@@ -404,10 +407,13 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click',
                         function () {
-                            if (id == 'CDC_DepositBack' &&
-                                CDC_DepositConfirmFlag &&
+                            if (((id == 'CDC_DepositBack' && CDC_DepositConfirmFlag_M) || (id == 'CDC_DepositCancelTemp_M' && CDC_DepositConfirmFlag_D)) &&
                                 !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
                                 return false;
+                            }
+                            else if (id == 'CDC_DepositCancelTemp_M' &&
+                                CDC_DepositConfirmFlag_D) {
+                                ResetData();
                             }
                             customerUtility.closeDialog(this);
                         });
@@ -439,6 +445,102 @@
             }
         });
 
+        //存單號碼(起)或存單號碼(迄)輸入完畢
+        $('#' + CDC_DepositDep_No_B + ',#' + CDC_DepositDep_No_E).off('blur', function () { });
+        $('#' + CDC_DepositDep_No_B + ',#' + CDC_DepositDep_No_E).on('blur', function () {
+            var _Check_No_B = parseInt($('#' + CDC_DepositDep_No_B).val());
+            var _Check_No_E = parseInt($('#' + CDC_DepositDep_No_E).val());
+
+            if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E)) {
+                if ($('#' + CDC_DepositDep_No_B).val().length > $('#' + CDC_DepositDep_No_E).val().length)
+                    $('#' + CDC_DepositDep_No_E).val(created.padLeft(_Check_No_E, $('#' + CDC_DepositDep_No_B).val().length, '0'));
+                else
+                    $('#' + CDC_DepositDep_No_B).val(created.padLeft(_Check_No_B, $('#' + CDC_DepositDep_No_E).val().length, '0'));
+            }
+
+            //存單號碼(迄)帶出張數
+            //if ($(this).attr('id') == DepositDep_No_E)
+            //{
+            if ($('#' + CDC_DepositDep_No_E).val().length <= 10) {
+                var _Deposit_Dep_No_B = parseInt($('#' + CDC_DepositDep_No_B).val());
+                var _Deposit_Dep_No_E = parseInt($('#' + CDC_DepositDep_No_E).val());
+                if (!isNaN(_Deposit_Dep_No_B) && !isNaN(_Deposit_Dep_No_E) && _Deposit_Dep_No_E >= _Deposit_Dep_No_B) {
+                    $('#' + CDC_DepositDep_Cnt).val((_Deposit_Dep_No_E - _Deposit_Dep_No_B + 1));
+
+                    var _DepositDep_Cnt = parseInt($('#' + CDC_DepositDep_Cnt).val());
+                    var _Denomination = parseInt($('#' + CDC_DepositDenomination).val());
+                    if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                        $('#' + CDC_DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                    }
+                    else {
+                        $('#' + CDC_DepositSubtotal_Denomination).html('');
+                    }
+                }
+                else {
+                    $('#' + CDC_DepositDep_Cnt).val('');
+                }
+            }
+            else {
+                $('#' + CDC_DepositDep_Cnt).val('');
+            }
+
+            //計算面額小計
+            if ($('#' + CDC_DepositDenomination).val().length <= 13) {
+                var _DepositDep_Cnt = parseInt($('#' + CDC_DepositDep_Cnt).val());
+                var _Denomination = parseInt($('#' + CDC_DepositDenomination).val());
+                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                    $('#' + CDC_DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                }
+                else {
+                    $('#' + CDC_DepositSubtotal_Denomination).html('');
+                }
+            }
+            else {
+                $('#' + CDC_DepositSubtotal_Denomination).html('');
+            }
+        });
+
+        //張數輸入完畢
+        $('#' + CDC_DepositDep_Cnt).off('blur', function () { });
+        $('#' + CDC_DepositDep_Cnt).on('blur', function () {
+            var _Deposit_Dep_No_B = parseInt($('#' + CDC_DepositDep_No_B).val());
+            var _Deposit_Dep_Cnt = parseInt($('#' + CDC_DepositDep_Cnt).val());
+            if (!isNaN(_Deposit_Dep_Cnt) && !isNaN(_Deposit_Dep_Cnt)) {
+                //$('#' + DepositDep_No_E).val(_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1);
+                $('#' + CDC_DepositDep_No_E).val(created.padLeft((_Deposit_Dep_No_B + _Deposit_Dep_Cnt - 1), $('#' + CDC_DepositDep_No_B).val().length, '0'));
+            }
+            else {
+                $('#' + CDC_DepositDep_No_E).val('');
+            }
+
+            var _DepositDep_Cnt = parseInt($('#' + CDC_DepositDep_Cnt).val());
+            var _Denomination = parseInt($('#' + CDC_DepositDenomination).val());
+            if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                $('#' + CDC_DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+            }
+            else {
+                $('#' + CDC_DepositSubtotal_Denomination).html('');
+            }
+        });
+
+        //單張面額輸入完畢
+        $('#' + CDC_DepositDenomination).off('blur', function () { });
+        $('#' + CDC_DepositDenomination).on('blur', function () {
+            //計算面額小計
+            if ($('#' + CDC_DepositDenomination).val().length <= 13) {
+                var _DepositDep_Cnt = parseInt($('#' + CDC_DepositDep_Cnt).val());
+                var _Denomination = parseInt($('#' + CDC_DepositDenomination).val());
+                if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
+                    $('#' + CDC_DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                }
+                else {
+                    $('#' + CDC_DepositSubtotal_Denomination).html('');
+                }
+            }
+            else {
+                $('#' + CDC_DepositSubtotal_Denomination).html('');
+            }
+        });
         //#endregion 註冊事件
 
         //#endregion dialog
@@ -468,16 +570,17 @@
                 $('#CDC_DepositUpdateTemp_M').show();
                 $('.' + DepositUpdateClassM).prop('disabled', false);
                 setDialog_M();
+                isView = false;
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 dialogSetData_M(listId, rowid);
                 $('.' + DepositUpdateClassM).prop('disabled', true);
+                isView = true;
             }
             $('#' + CDC_DepositDialog_M_Id).dialog('open');
         }
 
-        function ResetDialog_M()
-        {
+        function ResetDialog_M() {
             $('#' + CDC_DepositPut_Date).text('');
             $('#' + CDC_DepositAply_Uid_Name).text('');
             $('#' + CDC_DepositCharge_Name).text('');
@@ -610,41 +713,20 @@
         }
 
         function ResetDialog_D() {
-            //$('#' + CDC_DepositPut_Date).text('');
-            //$('#' + CDC_DepositAply_Uid_Name).text('');
-            //$('#' + CDC_DepositCharge_Name).text('');
+            $('#' + CDC_DepositDep_No_Preamble).val('');
+            $('#' + CDC_DepositDep_No_Preamble_Aft).text('');
+            $('#' + CDC_DepositDep_No_B).val('');
+            $('#' + CDC_DepositDep_No_B_Aft).text('');
+            $('#' + CDC_DepositDep_No_E).val('');
+            $('#' + CDC_DepositDep_No_E_Aft).text('');
 
-            //$('#' + CDC_DepositCurrency).val('');
-            //$('#' + CDC_DepositCurrency_Aft).text('');
-            //$('#' + CDC_DepositTrad_Partners).val('');
-            //$('#' + CDC_DepositTrad_Partners_Aft).text('');
-
-            //$('#' + CDC_DepositCommit_Date).val('');
-            //$('#' + CDC_DepositCommit_Date_Aft).text('');
-            //$('#' + CDC_DepositExpiry_Date).val('');
-            //$('#' + CDC_DepositExpiry_Date_Aft).text('');
-            //$('#' + CDC_DepositInterest_Rate_Type).val('');
-            //$('#' + CDC_DepositInterest_Rate_Type_Aft).text('');
-
-            //$('#' + CDC_DepositInterest_Rate).val('');
-            //$('#' + CDC_DepositInterest_Rate_Aft).text('');
-            //$('#' + CDC_DepositDep_Type).val('');
-            //$('#' + CDC_DepositDep_Type_Aft).text('');
-            //$('#' + CDC_DepositTotal_Denomination).text('');
-            //$('#' + CDC_DepositTotal_Denomination_Aft).text('');
-
-            //$('#' + CDC_DepositDep_Set_Quality).val('');
-            //$('#' + CDC_DepositDep_Set_Quality_Aft).text('');
-            //$('#' + CDC_DepositAuto_Trans).val('');
-            //$('#' + CDC_DepositAuto_Trans_Aft).text('');
-            //$('#' + CDC_DepositTrans_Expiry_Date).val('');
-            //$('#' + CDC_DepositTrans_Expiry_Date_Aft).text('');
-
-            //$('#' + CDC_DepositMemo).val('');
-            //$('#' + CDC_DepositMemo_Aft).text('');
-            //$('#' + CDC_DepositTrans_Tms).val('');
-            //$('#' + CDC_DepositTrans_Tms_Aft).text('');
-            //$('#' + CDC_ItemId).val('');
+            $('#' + CDC_DepositDep_Cnt).val('');
+            $('#' + CDC_DepositDep_Cnt_Aft).text('');
+            $('#' + CDC_DepositDenomination).val('');
+            $('#' + CDC_DepositDenomination_Aft).text('');
+            $('#' + CDC_DepositSubtotal_Denomination).text('');
+            $('#' + CDC_DepositSubtotal_Denomination_Aft).text('');
+            $('#' + CDC_Data_Seq).val('');
         }
 
         function dialogSetData_D(listId, rowid) {
@@ -654,37 +736,20 @@
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
-                //$('#' + CDC_DepositCurrency).val(data.vCurrency);
-                //$('#' + CDC_DepositCurrency_Aft).text(data.vCurrency_Aft);
-                //$('#' + CDC_DepositTrad_Partners).val(data.vTrad_Partners);
-                //$('#' + CDC_DepositTrad_Partners_Aft).text(data.vTrad_Partners_Aft);
+                $('#' + CDC_DepositDep_No_Preamble).val(data.vDep_No_Preamble);
+                $('#' + CDC_DepositDep_No_Preamble_Aft).text(data.vDep_No_Preamble_Aft);
+                $('#' + CDC_DepositDep_No_B).val(data.vDep_No_B);
+                $('#' + CDC_DepositDep_No_B_Aft).text(data.vDep_No_B_Aft);
+                $('#' + CDC_DepositDep_No_E).val(data.vDep_No_E);
+                $('#' + CDC_DepositDep_No_E_Aft).text(data.vDep_No_E_Aft);
 
-                //$('#' + CDC_DepositCommit_Date).val(data.vCommit_Date);
-                //$('#' + CDC_DepositCommit_Date_Aft).text(data.vCommit_Date_Aft);
-                //$('#' + CDC_DepositExpiry_Date).val(data.vExpiry_Date);
-                //$('#' + CDC_DepositExpiry_Date_Aft).text(data.vExpiry_Date_Aft);
-                //$('#' + CDC_DepositInterest_Rate_Type).val(data.vInterest_Rate_Type);
-                //$('#' + CDC_DepositInterest_Rate_Type_Aft).text(data.vInterest_Rate_Type_Aft);
-
-                //$('#' + CDC_DepositInterest_Rate).val(data.vInterest_Rate);
-                //$('#' + CDC_DepositInterest_Rate_Aft).text(data.vInterest_Rate_Aft);
-                //$('#' + CDC_DepositDep_Type).val(data.vDep_Type);
-                //$('#' + CDC_DepositDep_Type_Aft).text(data.vDep_Type_Aft);
-                //$('#' + CDC_DepositTotal_Denomination).text(data.vTotal_Denomination);
-                //$('#' + CDC_DepositTotal_Denomination_Aft).text(data.vTotal_Denomination_Aft);
-
-                //$('#' + CDC_DepositDep_Set_Quality).val(data.vDep_Set_Quality);
-                //$('#' + CDC_DepositDep_Set_Quality_Aft).text(data.vDep_Set_Quality_Aft);
-                //$('#' + CDC_DepositAuto_Trans).val(data.vAuto_Trans);
-                //$('#' + CDC_DepositAuto_Trans_Aft).text(data.vAuto_Trans_Aft);
-                //$('#' + CDC_DepositTrans_Expiry_Date).val(data.vTrans_Expiry_Date);
-                //$('#' + CDC_DepositTrans_Expiry_Date_Aft).text(data.vTrans_Expiry_Date_Aft);
-
-                //$('#' + CDC_DepositMemo).val(data.vMemo);
-                //$('#' + CDC_DepositMemo_Aft).text(data.vMemo_Aft);
-                //$('#' + CDC_DepositTrans_Tms).val(data.vTrans_Tms);
-                //$('#' + CDC_DepositTrans_Tms_Aft).text(data.vTrans_Tms_Aft);
-                //$('#' + CDC_ItemId).val(data.vItemId);
+                $('#' + CDC_DepositDep_Cnt).val(data.vDep_Cnt);
+                $('#' + CDC_DepositDep_Cnt_Aft).text(data.vDep_Cnt_Aft);
+                $('#' + CDC_DepositDenomination).val(data.vDenomination);
+                $('#' + CDC_DepositDenomination_Aft).text(data.vDenomination_Aft);
+                $('#' + CDC_DepositSubtotal_Denomination).text(data.vSubtotal_Denomination);
+                $('#' + CDC_DepositSubtotal_Denomination_Aft).text(data.vSubtotal_Denomination_Aft);
+                $('#' + CDC_Data_Seq).val(data.vData_Seq);
             }
         }
         //#region dialog
@@ -874,9 +939,9 @@
                          foreach (var item in ((SelectList)ViewBag.dYN_Flag))
                         {
                             <text>
-                            case '@item.Value':
-                            return '<span class="red">' + '@item.Text' + '</span>';
-                            </text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
                         }
                     }
                 }
@@ -886,9 +951,9 @@
                         foreach (var item in ((SelectList)ViewBag.dYN_Flag))
                         {
                             <text>
-                            case '@item.Value':
-                            return '@item.Text';
-                            </text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
                         }
                     }
                 }
@@ -903,9 +968,9 @@
                          foreach (var item in ((SelectList)ViewBag.dYN_Flag))
                         {
                             <text>
-                            case '@item.Value':
-                            return '<span class="red">' + '@item.Text' + '</span>';
-                            </text>
+                    case '@item.Value':
+                        return '<span class="red">' + '@item.Text' + '</span>';
+                        </text>
                         }
                     }
                 }
@@ -915,9 +980,9 @@
                         foreach (var item in ((SelectList)ViewBag.dYN_Flag))
                         {
                             <text>
-                            case '@item.Value':
-                            return '@item.Text';
-                            </text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
                         }
                     }
                 }
@@ -1121,7 +1186,34 @@
                         CDC_DepositRepeat_D(listId, i + 1);
                     });
                 });
+                if (isView) {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
             });
+        }
+
+        function CDC_DepositRepeat_D(listId, rowid) {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            var Data_Seq = $("#" + listId).getRowData(rowid).vData_Seq;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId,
+                    Data_Seq: Data_Seq
+                }),
+                dataType: "json",
+                url: CDC_DepositUrl.RepeatDbDataD,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDC_DepositDbGrid_D();
+                    CDC_DepositConfirmFlag_D = result.Datas;
+                }
+                else {
+
+                }
+            })
         }
 
         function CDC_DepositDbGrid_D() {
@@ -1211,7 +1303,7 @@
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#CDC_DepositUpdateTemp_M'));
                         CDC_DepositDbGrid_M();
-                        CDC_DepositConfirmFlag = result.Datas;
+                        CDC_DepositConfirmFlag_M = result.Datas;
                     }
                 })
             }
@@ -1230,6 +1322,89 @@
             }
 
             return true;
+        }
+
+        //修改定期存單明細暫存資料
+        function CDC_DepositUpdateTempFun_D() {
+            if ($('#' + CDC_DepositFormId_D).valid()) {
+                //存單號碼前置碼格式檢查
+                if ($('#' + CDC_DepositDep_No_Preamble).val().trim() != "" && checkEnglishUpper($('#' + CDC_DepositDep_No_Preamble).val().trim()) == false) {
+                    customerUtility.alert('存單號碼前置碼僅可輸入英文大寫字母', 'w');
+                    return
+                }
+                //存單號碼(起)/(迄)檢查
+                var _Check_No_B = parseInt($('#' + CDC_DepositDep_No_B).val());
+                var _Check_No_E = parseInt($('#' + CDC_DepositDep_No_E).val());
+                if (_Check_No_B > _Check_No_E) {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+                //面額小計檢查
+                if ($('#' + CDC_DepositSubtotal_Denomination).html() == "" || parseInt($('#' + CDC_DepositSubtotal_Denomination).html()) <= 0) {
+                    customerUtility.alert('面額小計不可為空或小於等於0', 'w');
+                    return
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDC_DepositViewModel_D(
+                            $('#' + CDC_ItemId).val().trim(),
+                            $('#' + CDC_Data_Seq).val().trim(),
+                            $('#' + CDC_DepositDep_No_Preamble).val().trim(),
+                            $('#' + CDC_DepositDep_No_B).val().trim(),
+                            $('#' + CDC_DepositDep_No_E).val().trim(),
+                            //$('#' + DepositDep_No_Tail).val().trim(),
+                            null,
+                            $('#' + CDC_DepositDep_Cnt).val().trim(),
+                            $('#' + CDC_DepositDenomination).val().trim(),
+                            $('#' + CDC_DepositSubtotal_Denomination).html().trim())
+                    }),
+                    dataType: "json",
+                    url: CDC_DepositUrl.UpdateDbDataD,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDC_DepositUpdateTemp_D'));
+                        CDC_DepositDbGrid_M();
+                        CDC_DepositDbGrid_D();
+                        CDC_DepositConfirmFlag_D = result.Datas;
+                    }
+                })
+            }
+        }
+
+        //重設資料
+        function ResetData()
+        {
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: $('#' + CDC_ItemId).val().trim()
+                }),
+                dataType: "json",
+                url: CDC_DepositUrl.ResetData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDC_DepositDbGrid_M();
+                    CDC_DepositConfirmFlag_M = result.Datas;
+                    CDC_DepositConfirmFlag_D = false;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //檢查英文大寫
+        function checkEnglishUpper(str) {
+            var regExp = /^[A-Z]+$/;
+            if (regExp.test(str))
+                return true;
+            else
+                return false;
         }
 
         function CDC_DepositViewModel_M(
@@ -1266,5 +1441,28 @@
             return obj;
         }
 
+        function CDC_DepositViewModel_D(
+            vItem_Id,
+            vData_Seq,
+            vDep_No_Preamble,
+            vDep_No_B,
+            vDep_No_E,
+            vDep_No_Tail,
+            vDep_Cnt,
+            vDenomination,
+            vSubtotal_Denomination
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItem_Id;
+            obj['vData_Seq'] = vData_Seq;
+            obj['vDep_No_Preamble'] = vDep_No_Preamble;
+            obj['vDep_No_B'] = vDep_No_B;
+            obj['vDep_No_E'] = vDep_No_E;
+            obj['vDep_No_Tail'] = vDep_No_Tail;
+            obj['vDep_Cnt'] = vDep_Cnt;
+            obj['vDenomination'] = vDenomination;
+            obj['vSubtotal_Denomination'] = vSubtotal_Denomination;
+            return obj;
+        }
     });
 </script>

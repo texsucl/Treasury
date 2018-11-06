@@ -49,7 +49,7 @@ namespace Treasury.Web.Report.Data
 
                 if (_TOR != null)
                 {
-                    _REC.SYS_DATE = DateTime.Now.DateToTaiwanDate(9);
+                    _REC.SYS_DATE = DateTime.Now.ToString("yyyy/MM/dd");
                     _REC.TREA_REGISTER_ID = _TOR.TREA_REGISTER_ID;
                     _REC.USER_NAME = UserData.EMP_NAME;
                     _REC.ACTUAL_PUT_TIME = string.IsNullOrEmpty(_TOR.ACTUAL_PUT_TIME.ToString()) ? null : DateTime.Parse(_TOR.ACTUAL_PUT_TIME.ToString()).ToString("HH:mm");

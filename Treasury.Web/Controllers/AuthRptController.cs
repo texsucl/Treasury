@@ -13,6 +13,7 @@ using Treasury.Web.Daos;
 using Treasury.Web.Models;
 using Treasury.WebActionFilter;
 using Treasury.Web.ViewModels;
+using System.IO;
 
 /// <summary>
 /// 功能說明：權限報表作業
@@ -53,6 +54,7 @@ namespace Treasury.WebControllers
 
             ViewBag.opScope = opScope;
 
+            FileRelated.createFile(Server.MapPath("~/Temp/"));
 
             return View();
         }
@@ -189,7 +191,7 @@ namespace Treasury.WebControllers
                     htmlText += "</span></html>";
 
 
-                    ReportUtil reportUtil = new ReportUtil();
+                    ReportUtil reportUtil = new ReportUtil();                 
                     byte[] pdfFile = reportUtil.ConvertHtmlTextToPDF(htmlText, guid, Server.MapPath("~/Temp/"));
 
                     string url = Server.MapPath("~/Temp/") + guid + ".pdf";
@@ -241,7 +243,7 @@ namespace Treasury.WebControllers
 
                     ReportUtil reportUtil = new ReportUtil();
                     byte[] pdfFile = reportUtil.ConvertHtmlTextToPDF(htmlText, guid, Server.MapPath("~/Temp/"));
-
+                     
                     string url = Server.MapPath("~/Temp/") + guid + ".pdf";
 
                     return Json(new { success = true, guid = guid });

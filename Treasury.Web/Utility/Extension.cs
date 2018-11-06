@@ -177,11 +177,16 @@ namespace Treasury.WebUtility
             return string.IsNullOrWhiteSpace(str);
         }
 
+        public static DateTime DateToLatestTime(this DateTime datetime)
+        {
+            return datetime.AddHours(23).AddMinutes(59).AddSeconds(59);
+        }
+
         public static DateTime? DateToLatestTime(this DateTime? datetime)
         {
             if (datetime == null)
                 return null;
-            datetime = (datetime.Value.Date).AddHours(23).AddMinutes(59).AddSeconds(59);
+            datetime = (datetime.Value.Date).DateToLatestTime();
             return datetime;
         }
 
@@ -659,15 +664,22 @@ namespace Treasury.WebUtility
             return ts.ToString(@"hh\:mm\:ss").stringToStrSql();
         }
 
-        public static string dateTimeToStr(this DateTime par)
+        public static string dateTimeToStr(this DateTime par, bool allFlag = false)
         {
-            return par.ToString("yyyy/MM/dd HH:mm:ss");
+            if (allFlag)
+                return par.ToString("yyyy/MM/dd HH:mm:ss");
+            return par.ToString("yyyy/MM/dd");
         }
 
-        public static string dateTimeToStr(this DateTime? par)
+        public static string dateTimeToStr(this DateTime? par, bool allFlag = false)
         {
             if(par.HasValue)
-            return par.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            {
+                if(allFlag)
+                    return par.Value.ToString("yyyy/MM/dd HH:mm:ss"); 
+                else
+                    return par.Value.ToString("yyyy/MM/dd");
+            }
             return string.Empty;
         }
 

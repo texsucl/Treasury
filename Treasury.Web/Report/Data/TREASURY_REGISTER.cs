@@ -15,8 +15,13 @@ namespace Treasury.Web.Report.Data
         public override DataSet GetData(List<reportParm> parms)
         {
             var resultsTable = new DataSet();
+            bool temp = false;
             string vTreaRegisterId = parms.Where(x => x.key == "vTreaRegisterId").FirstOrDefault()?.value ?? string.Empty;
             string vUser_Id = parms.Where(x => x.key == "vUser_Id").FirstOrDefault()?.value ?? string.Empty;
+            string vTemp = parms.Where(x => x.key == "vTemp").FirstOrDefault()?.value ?? string.Empty;
+
+            if (vTemp == "Y")
+                temp = true;
             var Aply_Status = Ref.AccessProjectFormStatus.C02.ToString();
             SetDetail(vTreaRegisterId, vUser_Id);
 
@@ -47,11 +52,6 @@ namespace Treasury.Web.Report.Data
                         vSeal_Desc = IS.SEAL_DESC
                     }).ToList();
 
-                var _TREA_APLY_REC_ITEM_ID = db.TREA_APLY_REC.AsNoTracking().Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
-                    .Select(x => x.ITEM_ID)
-                    .ToList();
-                List<string> confirmedItemId = new List<string>();
-                confirmedItemId.AddRange(_TREA_APLY_REC_ITEM_ID);
 
 
                 ReportDataList = GetReportModel(db.TREA_APLY_REC.AsNoTracking()
@@ -60,8 +60,29 @@ namespace Treasury.Web.Report.Data
                     .Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
                     .AsEnumerable(), _Item_Desc, _Access_Type, _Seal_Desc, emps).ToList();
 
-                ReportDataList.AddRange(GetRoutineModel(db.TREA_APLY_TEMP.AsNoTracking().Where(x => !confirmedItemId.Contains(x.ITEM_ID)).AsEnumerable(), _Item_Desc).ToList());
+                if (temp)
+                {
+                    var _TREA_APLY_REC_ITEM_ID =
+                        db.TREA_APLY_REC.AsNoTracking()
+                        .Where(x => x.TREA_REGISTER_ID == vTreaRegisterId)
+                        .Select(x => x.ITEM_ID).ToList();
+                    List<string> confirmedItemId = new List<string>();
+                    confirmedItemId.AddRange(_TREA_APLY_REC_ITEM_ID);
+                    ReportDataList.AddRange(GetRoutineModel(
+                        db.TREA_APLY_TEMP.AsNoTracking()
+                        .Where(x => !confirmedItemId.Contains(x.ITEM_ID))
+                        .AsEnumerable(), _Item_Desc).ToList());
+
+
+                }
+
                 ReportDataList = ReportDataList.OrderByDescending(x => x.ACCESS_NAME).ThenBy(x => x.APLY_NO).ToList();
+
+                if (temp)
+                    ReportDataList.AddRange(new List<Report_Treasury_Register>() {
+                        new Report_Treasury_Register(),
+                        new Report_Treasury_Register()
+                    });
             }
 
             resultsTable.Tables.Add(ReportDataList.ToDataTable());
