@@ -30,8 +30,8 @@ namespace Treasury.Web.Service.Actual
             DateTime DateFrom, DateTo;
 
             DateTime.TryParse(vCreate_Date_From, out DateFrom);
-            DateTime.TryParse(vCreate_Date_To, out DateTo);
-
+            if (DateTime.TryParse(vCreate_Date_To, out DateTo))
+                DateTo = DateTo.DateToLatestTime();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _Open_Trea_Type = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "OPEN_TREA_TYPE").ToList();

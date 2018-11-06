@@ -29,8 +29,10 @@ namespace Treasury.Web.Controllers
         public ActionResult Index()
         {
             ViewBag.opScope = GetopScope("~/AfterOpenTreasury/");
-            //ViewBag.vUser_Id = AccountController.CurrentUserId;
+            var empty = new SelectOption() { Text = " ", Value = " " };
             var datas = AftereOpenTreasury.GetFristTimeDatas();
+            datas.Item3.Insert(0, empty);
+            datas.Item6.Insert(0, empty);
             ViewBag.RegisterList = new SelectList(datas.Item1, "Value", "Text");
             ViewBag.ItemOpType = new SelectList(datas.Item2, "Value", "Text");
             ViewBag.AccessType = new SelectList(datas.Item3, "Value", "Text");
@@ -51,7 +53,11 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public JsonResult Change(string ItemOpType, string TreaItem, string AccessType)
         {
-            var result = AftereOpenTreasury.DialogSelectedChange(ItemOpType, TreaItem, AccessType);
+            var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
+            var empty = new SelectOption() { Text = " ", Value = " " };
+            var result = AftereOpenTreasury.DialogSelectedChange(ItemOpType, TreaItem, AccessType, datas);
+            result.Item3.Insert(0, empty);
+            result.Item4.Insert(0, empty);
             return Json(result);
         }
 
@@ -82,19 +88,20 @@ namespace Treasury.Web.Controllers
         /// <returns></returns>
         public JsonResult InsertUnconfirmedData(string RegisterID)
         {
-            MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>>();
+            MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.insert_Fail.GetDescription();
             var searchData = (AfterOpenTreasurySearchViewModel)Cache.Get(CacheList.AfterOpenTreasurySearchData);
             if (Cache.IsSet(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData))
             {
                 var viewModel = (List<AfterOpenTreasuryUnconfirmedDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
-                var datas = AftereOpenTreasury.InsertUnconfirmedDetail(RegisterID, viewModel, AccountController.CurrentUserId);
-                if (result.RETURN_FLAG)
+                var datas = AftereOpenTreasury.InsertUnconfirmedDetail(RegisterID, viewModel, AccountController.CurrentUserId, searchData);
+                if (datas.RETURN_FLAG)
                 {
                     Cache.Invalidate(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
-                    Cache.Set(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData, datas);
+                    Cache.Set(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData, datas.Datas);
                     result.RETURN_FLAG = true;
+                    result.DESCRIPTION = datas.DESCRIPTION;
                 }    
             }
             return Json(result);
@@ -219,7 +226,7 @@ namespace Treasury.Web.Controllers
         /// <param name="ActualAccEmp"></param>
         /// <param name="ActualAccType"></param>
         /// <returns></returns>
-        public JsonResult Update(string APLYNO, string ActualAccEmp, string ActualAccType)
+        public JsonResult Update(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason)
         {
             MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -228,7 +235,7 @@ namespace Treasury.Web.Controllers
             {
                 var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
                 var searchData = (AfterOpenTreasurySearchViewModel)Cache.Get(CacheList.AfterOpenTreasurySearchData);
-                result = AftereOpenTreasury.UpdateData(APLYNO, ActualAccEmp, ActualAccType, searchData, datas, AccountController.CurrentUserId);
+                result = AftereOpenTreasury.UpdateData(APLYNO, ActualAccEmp, ActualAccType, InsertReason, searchData, datas, AccountController.CurrentUserId);
                 if (result.RETURN_FLAG)
                 {
                     Cache.Invalidate(CacheList.AfterOpenTreasurySearchDetailViewData);
@@ -236,6 +243,24 @@ namespace Treasury.Web.Controllers
                 }
             }
             return Json(result);
+        }
+
+        public JsonResult UnConfirmedUpdate(string APLYNO, string ActualAccEmp)
+        {
+            MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+            if (APLYNO != null && Cache.IsSet(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData))
+            {
+                var datas = (List<AfterOpenTreasuryUnconfirmedDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
+                result = AftereOpenTreasury.UnConfirmedUpdateDatas(APLYNO, ActualAccEmp, datas, AccountController.CurrentUserId);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
+                    Cache.Set(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData, result.Datas);
+                }
+            }
+                return Json(result);
         }
 
         /// <summary>
@@ -266,18 +291,60 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 未確認表單刪除
+        /// </summary>
+        /// <param name="APLYNO"></param>
+        /// <returns></returns>
+        public JsonResult UnconfirmedDelete(string APLYNO)
+        {
+            MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
+            if (APLYNO != null && Cache.IsSet(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData))
+            {
+                var datas = (List<AfterOpenTreasuryUnconfirmedDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
+                result = AftereOpenTreasury.UnconfirmedDeleteData(APLYNO, datas, AccountController.CurrentUserId);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData);
+                    Cache.Set(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData, result.Datas);
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
         /// 產生實際入庫人員選單
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetActualUsers(string TreaItem)
+        public JsonResult GetActualUsers(string TreaItem, string ConfirmUid)
         {
             if (!TreaItem.IsNullOrWhiteSpace())
             {
-                var result = AftereOpenTreasury.GetActualUserOption(TreaItem);
+                var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
+                var empty = new SelectOption() { Text = " ", Value = " " };
+                var result = AftereOpenTreasury.GetActualUserOption(TreaItem, datas);
+                
+                result.Remove(result.FirstOrDefault(x => x.Value == ConfirmUid));
+                result.Insert(0, empty);
                 return Json(result);
             }
             return null;
+        }
+
+        /// <summary>
+        /// 產生實際作業項目下拉選單
+        /// </summary>
+        /// <param name="AccessType"></param>
+        /// <returns></returns>
+        public JsonResult GetActualAccessType(string AccessType)
+        {
+            var empty = new SelectOption() { Text = " ", Value = " " };
+            var result = AftereOpenTreasury.GetActualAccessTypeOption();
+            result.Remove(result.FirstOrDefault(x => x.Value == AccessType));
+            result.Insert(0, empty);
+            return Json(result);
         }
 
         [HttpPost]

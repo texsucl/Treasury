@@ -28,10 +28,17 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
 
-               var deps = new Treasury.Web.Service.Actual.Common().GetDepts();
-                var bill = Ref.TreaItemType.D1012.ToString(); // 空白票據項目 用於條件判斷
+                var deps = new Treasury.Web.Service.Actual.Common().GetDepts();
+                var items = new List<string>()
+                {
+                     Ref.TreaItemType.D1012.ToString(),// 空白票據項目 用於條件判斷
+                     Ref.TreaItemType.D1019.ToString(),// 其他物品項目 用於條件判斷
+                };
+                var bill = Ref.TreaItemType.D1012.ToString(); 
                 jobProject = db.TREA_ITEM.AsNoTracking() // 抓資料表的所有資料
-                    .Where(x => x.ITEM_OP_TYPE == "3" && x.IS_DISABLED == "N" && x.ITEM_ID != bill) //條件
+                    .Where(x => x.ITEM_OP_TYPE == "3" && 
+                                x.IS_DISABLED == "N" &&
+                                !items.Contains(x.ITEM_ID)) //條件
                     .AsEnumerable().Select(x => new SelectOption()
                     {
                         Value = x.ITEM_ID,

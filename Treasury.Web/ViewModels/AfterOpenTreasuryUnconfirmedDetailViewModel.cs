@@ -89,6 +89,25 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 是否打勾
         /// </summary>
+        [Description("是否打勾")]
         public bool IsTakeout { get; set; }
+
+        /// <summary>
+        /// 實際入庫人員ID
+        /// </summary>
+        [Description("實際入庫人員ID")]
+        public string vACTUAL_ACCESS_UID { get; set; }
+
+        /// <summary>
+        /// 實際入庫人員
+        /// </summary>
+        [Description("實際入庫人員")]
+        public string vACTUAL_ACCESS_NAME { get; set; }
+
+        /// <summary>
+        /// 最後修改日期
+        /// </summary>
+        [Description("最後修改日期")]
+        public DateTime? vLAST_UPDATE_DT { get; set; }
     }
 }

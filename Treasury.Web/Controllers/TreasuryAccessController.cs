@@ -110,6 +110,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription();
+            searchModel.vCustodianFlag = AccountController.CustodianFlag;
             Cache.Invalidate(CacheList.TreasuryAccessSearchData);
             Cache.Set(CacheList.TreasuryAccessSearchData, searchModel);
             var datas = TreasuryAccess.GetSearchDetail(searchModel);
@@ -335,15 +336,20 @@ namespace Treasury.Web.Controllers
         {           
            switch (type)
            {
-               case "Access":
-                   var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
-               case "Report":
-                   var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
-               case "Appr":
-                   var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
-                   return Json(jdata.modelToJqgridResult(ApprDatas.OrderByDescending(x=>x.vAPLY_NO).ToList()));
+                case "Access":
+                    var AccessDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                    return Json(jdata.modelToJqgridResult(AccessDatas.Where(x=> Aply_Appr_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
+                case "Report":
+                    var ReportDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                    var otherType = Aply_Appr_Type;
+                    otherType.AddRange(End_Type);
+                    return Json(jdata.modelToJqgridResult(ReportDatas.Where(x => !otherType.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
+                case "End":
+                    var EndDatas = (List<TreasuryAccessSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessSearchDetailViewData);
+                    return Json(jdata.modelToJqgridResult(EndDatas.Where(x => End_Type.Contains(x.vAPLY_STATUS)).OrderByDescending(x => x.vAPLY_NO).ToList()));
+                case "Appr":
+                    var ApprDatas = (List<TreasuryAccessApprSearchDetailViewModel>)Cache.Get(CacheList.TreasuryAccessApprSearchDetailViewData);
+                    return Json(jdata.modelToJqgridResult(ApprDatas.OrderByDescending(x=>x.vAPLY_NO).ToList()));
            }           
            return null;
         }
@@ -351,7 +357,7 @@ namespace Treasury.Web.Controllers
         public void ResetSearchData()
         {
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
-            Cache.Set(CacheList.TreasuryAccessSearchData, searchData);
+            //Cache.Set(CacheList.TreasuryAccessSearchData, searchData);
             var datas = TreasuryAccess.GetSearchDetail(searchData);
             if (datas.Any())
             {

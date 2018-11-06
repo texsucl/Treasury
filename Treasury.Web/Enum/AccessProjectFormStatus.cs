@@ -59,9 +59,9 @@ namespace Treasury.Web.Enum
             B02,
 
             /// <summary>
-            /// 保管科覆核完成，入庫確認中
+            /// 金庫人員退回保管科承辦，保管科承辦確認中
             /// </summary>
-            [Description("保管科覆核完成，入庫確認中")]
+            [Description("金庫人員退回保管科承辦，保管科承辦確認中")]
             B03,
 
             /// <summary>
@@ -124,6 +124,12 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("申請單位退回作廢")]
             E03,
+
+            /// <summary>
+            /// 金庫人員退回作業
+            /// </summary>
+            [Description("金庫人員退回作廢")]
+            E04,
         }
     }
 

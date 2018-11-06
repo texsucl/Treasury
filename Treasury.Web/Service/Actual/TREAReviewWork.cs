@@ -19,7 +19,7 @@ namespace Treasury.Web.Service.Actual
         /// 取得初始資料
         /// </summary>
         /// <returns></returns>
-        public List<TREAReviewWorkDetailViewModel> GetSearchDatas()
+        public List<TREAReviewWorkDetailViewModel> GetSearchDatas(string cUserId)
         {
             List<TREAReviewWorkDetailViewModel> result = new List<TREAReviewWorkDetailViewModel>();
             string status = Ref.AccessProjectFormStatus.D02.ToString(); //金庫登記簿覆核中
@@ -31,6 +31,7 @@ namespace Treasury.Web.Service.Actual
                 var _FORM_STATUS = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
                 result = _TREA_OPEN_REC
                     .Where(x => x.REGI_STATUS == status)
+                    //.Where(x => x.CREATE_UNIT == GetUserInfo(cUserId).DPT_ID)
                     .AsEnumerable()
                     .Select(x => new TREAReviewWorkDetailViewModel {
                         vOPEN_TREA_TYPE = _OPEN_TREA_TYPE.FirstOrDefault(y => y.CODE == x.OPEN_TREA_TYPE)?.CODE_VALUE,
@@ -42,6 +43,7 @@ namespace Treasury.Web.Service.Actual
                         vREGI_STATUS = _FORM_STATUS.FirstOrDefault(y => y.CODE == x.REGI_STATUS)?.CODE_VALUE,
                         vLAST_UPDATE_DT = x.LAST_UPDATE_DT,
                         vOPEN_TREA_DATE = x.OPEN_TREA_DATE.ToString("yyyy/MM/dd"),
+                        vLAST_UPDATE_UID = x.LAST_UPDATE_UID,
                         Ischecked = false
                     }).ToList();
             }
@@ -74,7 +76,7 @@ namespace Treasury.Web.Service.Actual
                             vCONFIRM_NAME = x.CONFIRM_UID != null ? GetUserInfo(x.CONFIRM_UID)?.EMP_Name : null,
                             vACTUAL_ACCESS_TYPE = x.ACTUAL_ACCESS_TYPE != x.ACCESS_TYPE? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE : null,
                             vACTUAL_ACCESS_NAME = x.ACTUAL_ACCESS_UID != x.CONFIRM_UID ? GetUserInfo(x.ACTUAL_ACCESS_UID)?.EMP_Name : null,
-                            vTREA_REGISTER_ID = x. TREA_REGISTER_ID
+                            vTREA_REGISTER_ID = x. TREA_REGISTER_ID,
                         }).ToList();
                 }
             }
@@ -100,6 +102,7 @@ namespace Treasury.Web.Service.Actual
             string logStr = string.Empty; //Log
             string aplyNoUid = "";
             string status = Ref.AccessProjectFormStatus.E01.ToString(); // 已完成出入庫，通知申請人員
+            SysSeqDao sysSeqDao = new SysSeqDao();
             List<string> approvedList = new List<string>();
             List<string> applyUidList = new List<string>();
             List<TREA_OPEN_REC> TORs = new List<TREA_OPEN_REC>();
@@ -141,89 +144,99 @@ namespace Treasury.Web.Service.Actual
                         logStr += y.modelToString(logStr);
 
                         var vITEM_OP_TYPE = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID)?.ITEM_OP_TYPE;
-                        var _OTHER_ITEM_APLY_ITEM_ID = db.OTHER_ITEM_APLY.FirstOrDefault(x => x.APLY_NO == y.APLY_NO)?.ITEM_ID;
-                        var _ITEM_SEAL = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
-                        if (vITEM_OP_TYPE == "2")
-                        {
-                            if(_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID).TREA_ITEM_TYPE == "SEAL")
+                        //var _OTHER_ITEM_APLY_ITEM_ID = db.OTHER_ITEM_APLY.FirstOrDefault(x => x.APLY_NO == y.APLY_NO)?.ITEM_ID;
+                        var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == y.APLY_NO);
+                        _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                            var _ITEM_SEAL = db.ITEM_SEAL.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
+
+                            if (vITEM_OP_TYPE == "2")
                             {
-                                switch (y.ACCESS_TYPE)
+                                if (_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID).TREA_ITEM_TYPE == "SEAL")
                                 {
-                                    //存入
-                                    case "P":
-                                    case "S":
-                                    case "A":
-                                    case "B":
-                                        _ITEM_SEAL.INVENTORY_STATUS = "1";
-                                        break;
-                                    //取出
-                                    case "G":
-                                        _ITEM_SEAL.INVENTORY_STATUS = "6";
-                                        break;
+                                    switch (y.ACTUAL_ACCESS_TYPE)
+                                    {
+                                        //存入
+                                        case "P":
+                                        case "S":
+                                        case "A":
+                                        case "B":
+                                            _ITEM_SEAL.INVENTORY_STATUS = "1";
+                                            _ITEM_SEAL.PUT_DATE = dt;
+                                            break;
+                                        //取出
+                                        case "G":
+                                            _ITEM_SEAL.INVENTORY_STATUS = "6";
+                                            _ITEM_SEAL.GET_DATE = dt;
+                                            break;
+                                    }
+                                    _ITEM_SEAL.LAST_UPDATE_DT = dt;
+                                    logStr += _ITEM_SEAL.modelToString(logStr);
                                 }
-                                _ITEM_SEAL.LAST_UPDATE_DT = dt;
-                                logStr += _ITEM_SEAL.modelToString(logStr);
                             }
-                        }
-                        else if(vITEM_OP_TYPE == "3")
-                        {
-                            if (_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID).TREA_ITEM_TYPE == "SEAL")
+                            else if (vITEM_OP_TYPE == "3")
                             {
-                                switch (y.ACCESS_TYPE)
+                                if (_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID).TREA_ITEM_TYPE == "SEAL")
                                 {
-                                    //存入
-                                    case "P":
-                                    case "S":
-                                    case "A":
-                                    case "B":
-                                        _ITEM_SEAL.INVENTORY_STATUS = "1";
-                                        break;
-                                    //取出
-                                    case "G":
-                                        _ITEM_SEAL.INVENTORY_STATUS = "2";
-                                        break;
+                                    switch (y.ACTUAL_ACCESS_TYPE)
+                                    {
+                                        //存入
+                                        case "P":
+                                        case "S":
+                                        case "A":
+                                        case "B":
+                                            _ITEM_SEAL.INVENTORY_STATUS = "1";
+                                            _ITEM_SEAL.PUT_DATE = dt;
+                                            break;
+                                        //取出
+                                        case "G":
+                                            _ITEM_SEAL.INVENTORY_STATUS = "2";
+                                            _ITEM_SEAL.GET_DATE = dt;
+                                            break;
+                                    }
+                                    _ITEM_SEAL.LAST_UPDATE_DT = dt;
+                                    logStr += _ITEM_SEAL.modelToString(logStr);
                                 }
-                                _ITEM_SEAL.LAST_UPDATE_DT = dt;
-                                logStr += _ITEM_SEAL.modelToString(logStr);
                             }
-                        }
-                        
+                        });
+                               
                         switch(_TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == y.ITEM_ID)?.TREA_ITEM_TYPE)
                         {
                             case "BILL": // 空白票據
-                                var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.AsNoTracking().Where(x => x.APLY_NO == y.APLY_NO);
-                                SysSeqDao sysSeqDao = new SysSeqDao();
+                                var _BLANK_NOTE_APLY = db.BLANK_NOTE_APLY.Where(x => x.APLY_NO == y.APLY_NO);
+
                                 var item_Seq = "E2"; //空白票卷流水號開頭編碼
 
-                                if (y.ACCESS_TYPE == "P")
+                                if (y.ACTUAL_ACCESS_TYPE == "P")
                                 {
-                                    var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
                                     _BLANK_NOTE_APLY.ToList().ForEach(x => {
-                                        x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = item_id;
+                                        var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
+
+                                        x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = $@"{item_Seq}{item_id}"; //物品編號;
                                         logStr += x.modelToString(logStr);
 
                                         var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
                                         ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE()
                                         {
-                                            ITEM_ID = item_id,
+                                            ITEM_ID = $@"{item_Seq}{item_id}", //物品編號;
                                             INVENTORY_STATUS = "1",
                                             ISSUING_BANK = x.ISSUING_BANK,
                                             CHECK_TYPE = x.CHECK_TYPE,
                                             CHECK_NO_TRACK = x.CHECK_NO_TRACK,
                                             CHECK_NO_B = x.CHECK_NO_B,
                                             CHECK_NO_E = x.CHECK_NO_E,
-                                            APLY_DEPT = GetUserDPT(cUserId),
+                                            APLY_DEPT = GetUserDPT(y.APLY_UID),
                                             APLY_SECT = y.APLY_UNIT,
                                             APLY_UID = y.APLY_UID,
-                                            CHARGE_DEPT = GetUserDPT(cUserId),
+                                            CHARGE_DEPT = GetUserDPT(y.APLY_UID),
                                             CHARGE_SECT = y.APLY_UNIT,
-                                            CREATE_DT = dt
+                                            CREATE_DT = dt,
+                                            PUT_DATE = dt,
                                         });
                                         logStr += ADD_ITEM_BLANK_NOTE.modelToString(logStr);
                                     });
                                    
                                 }
-                                else if (y.ACCESS_TYPE == "G")
+                                else if (y.ACTUAL_ACCESS_TYPE == "G")
                                 {
                                     _BLANK_NOTE_APLY.ToList().ForEach(x => {
                                         var _ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE.FirstOrDefault(z => z.ITEM_ID == x.ITEM_BLANK_NOTE_ITEM_ID);
@@ -231,6 +244,7 @@ namespace Treasury.Web.Service.Actual
                                         if (_ITEM_BLANK_NOTE.INVENTORY_STATUS == "4")
                                         {
                                             _ITEM_BLANK_NOTE.INVENTORY_STATUS = "2";
+                                            _ITEM_BLANK_NOTE.GET_DATE = dt;
                                             _ITEM_BLANK_NOTE.LAST_UPDATE_DT = dt;
                                             logStr += _ITEM_BLANK_NOTE.modelToString(logStr);
 
@@ -240,25 +254,27 @@ namespace Treasury.Web.Service.Actual
                                         else
                                         {
                                             var item_id = sysSeqDao.qrySeqNo(item_Seq, string.Empty).ToString().PadLeft(8, '0');
-                                            x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = item_id;
+                                            x.ITEM_BLANK_NOTE_FINAL_ITEM_ID = $@"{item_Seq}{item_id}"; //物品編號;
                                             logStr += x.modelToString(logStr);
 
                                             var ADD_ITEM_BLANK_NOTE = db.ITEM_BLANK_NOTE;
                                             ADD_ITEM_BLANK_NOTE.Add(new ITEM_BLANK_NOTE()
                                             {
-                                                ITEM_ID = item_id,
+                                                ITEM_ID = $@"{item_Seq}{item_id}", //物品編號;
                                                 INVENTORY_STATUS = "2",
                                                 ISSUING_BANK = x.ISSUING_BANK,
                                                 CHECK_TYPE = x.CHECK_TYPE,
                                                 CHECK_NO_TRACK = x.CHECK_NO_TRACK,
                                                 CHECK_NO_B = x.CHECK_NO_B,
                                                 CHECK_NO_E = x.CHECK_NO_E,
-                                                APLY_DEPT = GetUserDPT(cUserId),
+                                                APLY_DEPT = GetUserDPT(y.APLY_UID),
                                                 APLY_SECT = y.APLY_UNIT,
                                                 APLY_UID = y.APLY_UID,
-                                                CHARGE_DEPT = GetUserDPT(cUserId),
+                                                CHARGE_DEPT = GetUserDPT(y.APLY_UID),
                                                 CHARGE_SECT = y.APLY_UNIT,
-                                                CREATE_DT = dt
+                                                CREATE_DT = dt,
+                                                GET_DATE = dt,
+                                                PUT_DATE = _ITEM_BLANK_NOTE.PUT_DATE
                                             });
                                             logStr += x.modelToString(logStr);
                                         }
@@ -266,141 +282,202 @@ namespace Treasury.Web.Service.Actual
                                 }         
                                 break;
                             case "ESTATE": // 不動產
-                                var _ITEM_REAL_ESTATE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_REAL_ESTATE.INVENTORY_STATUS = "1";
-                                    _ITEM_REAL_ESTATE.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_REAL_ESTATE.INVENTORY_STATUS = "2";
-                                    _ITEM_REAL_ESTATE.GET_DATE = dt;
-                                }
-                                _ITEM_REAL_ESTATE.LAST_UPDATE_DT = dt;
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_REAL_ESTATE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_REAL_ESTATE.INVENTORY_STATUS = "1";
+                                        _ITEM_REAL_ESTATE.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_REAL_ESTATE.INVENTORY_STATUS = "2";
+                                        _ITEM_REAL_ESTATE.GET_DATE = dt;
+                                    }
+                                    _ITEM_REAL_ESTATE.LAST_UPDATE_DT = dt;
 
-                                logStr += _ITEM_REAL_ESTATE.modelToString(logStr);
+                                    logStr += _ITEM_REAL_ESTATE.modelToString(logStr);
+                                    
+                                });
                                 break;
                             case "CA": // 電子憑證
-                                var _ITEM_CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_CA.INVENTORY_STATUS = "1";
-                                    _ITEM_CA.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_CA.INVENTORY_STATUS = "2";
-                                    _ITEM_CA.GET_DATE = dt;
-                                }
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_CA.INVENTORY_STATUS = "1";
+                                        _ITEM_CA.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_CA.INVENTORY_STATUS = "2";
+                                        _ITEM_CA.GET_DATE = dt;
+                                    }
 
-                                _ITEM_CA.LAST_UPDATE_DT = dt;
+                                    _ITEM_CA.LAST_UPDATE_DT = dt;
 
-                                logStr += _ITEM_CA.modelToString(logStr);
+                                    logStr += _ITEM_CA.modelToString(logStr);
+                                });   
                                 break;
                             case "DEPOSIT": //定期存單
-                                var _ITEM_DEP_ORDER_M = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_DEP_ORDER_M = db.ITEM_DEP_ORDER_M.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "1";
-                                    _ITEM_DEP_ORDER_M.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    if (_ITEM_DEP_ORDER_M.DEP_SET_QUALITY == "N")
-                                        _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "2";
-                                    else
-                                        _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "6";
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "1";
+                                        _ITEM_DEP_ORDER_M.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        if (_ITEM_DEP_ORDER_M.DEP_SET_QUALITY == "N")
+                                            _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "2";
+                                        else
+                                            _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "6";
 
-                                    _ITEM_DEP_ORDER_M.GET_DATE = dt;
-                                }
-                                _ITEM_DEP_ORDER_M.LAST_UPDATE_DT = dt;
+                                        _ITEM_DEP_ORDER_M.GET_DATE = dt;
+                                    }
+                                    _ITEM_DEP_ORDER_M.LAST_UPDATE_DT = dt;
 
-                                logStr += _ITEM_DEP_ORDER_M.modelToString(logStr);
+                                    logStr += _ITEM_DEP_ORDER_M.modelToString(logStr);
+                                });   
                                 break;
                             case "STOCK": //股票
-                                var _ITEM_STOCK = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_STOCK = db.ITEM_STOCK.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_STOCK.INVENTORY_STATUS = "1";
-                                    _ITEM_STOCK.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_STOCK.INVENTORY_STATUS = "2";
-                                    _ITEM_STOCK.GET_DATE = dt;
-                                }
-                                _ITEM_STOCK.LAST_UPDATE_DT = dt;
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_STOCK.INVENTORY_STATUS = "1";
+                                        _ITEM_STOCK.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_STOCK.INVENTORY_STATUS = "2";
+                                        _ITEM_STOCK.GET_DATE = dt;
+                                    }
+                                    _ITEM_STOCK.LAST_UPDATE_DT = dt;
 
-                                logStr += _ITEM_STOCK.modelToString(logStr);
+                                    logStr += _ITEM_STOCK.modelToString(logStr);
+                                });
                                 break;
                             case "MARGING": //存出保證金
-                                var _ITEM_REFUNDABLE_DEP = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_REFUNDABLE_DEP = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_REFUNDABLE_DEP.INVENTORY_STATUS = "1";
-                                    _ITEM_REFUNDABLE_DEP.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_REFUNDABLE_DEP.INVENTORY_STATUS = "2";
-                                    _ITEM_REFUNDABLE_DEP.GET_DATE = dt;
-                                }
-                                _ITEM_REFUNDABLE_DEP.LAST_UPDATE_DT = dt;
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_REFUNDABLE_DEP.INVENTORY_STATUS = "1";
+                                        _ITEM_REFUNDABLE_DEP.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_REFUNDABLE_DEP.INVENTORY_STATUS = "2";
+                                        _ITEM_REFUNDABLE_DEP.GET_DATE = dt;
+                                    }
+                                    _ITEM_REFUNDABLE_DEP.LAST_UPDATE_DT = dt;
 
-                                logStr += _ITEM_REFUNDABLE_DEP.modelToString(logStr);
+                                    logStr += _ITEM_REFUNDABLE_DEP.modelToString(logStr);
+                                });
                                 break;
                             case "MARGINP": //存入保證金
-                                var _ITEM_DEP_RECEIVED = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_DEP_RECEIVED.INVENTORY_STATUS = "1";
-                                    _ITEM_DEP_RECEIVED.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_DEP_RECEIVED.INVENTORY_STATUS = "2";
-                                    _ITEM_DEP_RECEIVED.GET_DATE = dt;
-                                }
-                                _ITEM_DEP_RECEIVED.LAST_UPDATE_DT = dt;
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_DEP_RECEIVED = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                logStr += _ITEM_DEP_RECEIVED.modelToString(logStr);
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_DEP_RECEIVED.INVENTORY_STATUS = "1";
+                                        _ITEM_DEP_RECEIVED.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_DEP_RECEIVED.INVENTORY_STATUS = "2";
+                                        _ITEM_DEP_RECEIVED.GET_DATE = dt;
+                                    }
+                                    _ITEM_DEP_RECEIVED.LAST_UPDATE_DT = dt;
+
+                                    logStr += _ITEM_DEP_RECEIVED.modelToString(logStr);
+                                });
                                 break;
                             case "ITEMIMP": //重要物品
-                                var _ITEM_IMPO = db.ITEM_IMPO.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_IMPO.INVENTORY_STATUS = "1";
-                                    _ITEM_IMPO.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_IMPO.INVENTORY_STATUS = "2";
-                                    _ITEM_IMPO.GET_DATE = dt;
-                                }
-                                _ITEM_IMPO.LAST_UPDATE_DT = dt;
+                                var _OTHER_ITEM_APLY_FORITEMIMP = db.OTHER_ITEM_APLY.AsNoTracking().Where(x => x.APLY_NO == y.APLY_NO);
+                                var item_SeqIMP = "E8"; //重要物品流水號開頭編碼
+                                _OTHER_ITEM_APLY_FORITEMIMP.ToList().ForEach(x => {
+                                    var _ITEM_IMPO = db.ITEM_IMPO.FirstOrDefault(z => z.ITEM_ID == x.ITEM_ID);
 
-                                logStr += _ITEM_IMPO.modelToString(logStr);
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_IMPO.INVENTORY_STATUS = "1";
+                                        _ITEM_IMPO.PUT_DATE = dt;
+                                        _ITEM_IMPO.LAST_UPDATE_DT = dt;
+                                        logStr += _ITEM_IMPO.modelToString(logStr);
+                                    }
+
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        if (_ITEM_IMPO.REMAINING == 0)
+                                        {
+                                            _ITEM_IMPO.INVENTORY_STATUS = "10"; //完全取出
+                                            _ITEM_IMPO.LAST_UPDATE_DT = dt;
+                                            logStr += _ITEM_IMPO.modelToString(logStr);
+                                        }
+                                        //取得流水號
+                                        var item_id = sysSeqDao.qrySeqNo(item_SeqIMP, string.Empty).ToString().PadLeft(8, '0');
+                                        var ADD_ITEM_IMPO = new ITEM_IMPO()
+                                        {
+                                            ITEM_ID = $@"{item_SeqIMP}{item_id}", //物品編號
+                                            INVENTORY_STATUS = "2",
+                                            ITEM_NAME = _ITEM_IMPO.ITEM_NAME,
+                                            QUANTITY = x.Memo_I != null? Convert.ToInt32(x.Memo_I) : 0,
+                                            AMOUNT = _ITEM_IMPO.AMOUNT,
+                                            EXPECTED_ACCESS_DATE = _ITEM_IMPO.EXPECTED_ACCESS_DATE,
+                                            DESCRIPTION = _ITEM_IMPO.DESCRIPTION,
+                                            MEMO = _ITEM_IMPO.MEMO,
+                                            APLY_DEPT = _ITEM_IMPO.APLY_DEPT,
+                                            APLY_SECT = _ITEM_IMPO.APLY_SECT,
+                                            APLY_UID = _ITEM_IMPO.APLY_UID,
+                                            CHARGE_DEPT = _ITEM_IMPO.CHARGE_DEPT,
+                                            CHARGE_SECT = _ITEM_IMPO.CHARGE_SECT,
+                                            GET_DATE = dt,
+                                            PUT_DATE = _ITEM_IMPO.PUT_DATE,
+                                            LAST_UPDATE_DT = dt,
+                                            ITEM_NAME_AFT = _ITEM_IMPO.ITEM_NAME_AFT,
+                                            REMAINING_AFT = _ITEM_IMPO.REMAINING_AFT,
+                                            AMOUNT_AFT = _ITEM_IMPO.AMOUNT_AFT,
+                                            DESCRIPTION_AFT = _ITEM_IMPO.DESCRIPTION_AFT,
+                                            EXPECTED_ACCESS_DATE_AFT = _ITEM_IMPO.EXPECTED_ACCESS_DATE_AFT,
+                                            MEMO_AFT = _ITEM_IMPO.MEMO_AFT,
+                                            CHARGE_DEPT_AFT = _ITEM_IMPO.CHARGE_DEPT_AFT,
+                                            CHARGE_SECT_AFT = _ITEM_IMPO.CHARGE_SECT_AFT,
+                                            REMAINING = _ITEM_IMPO.REMAINING,
+                                            ITEM_ID_FROM = _ITEM_IMPO.ITEM_ID
+                                        };
+                                        db.ITEM_IMPO.Add(ADD_ITEM_IMPO);
+                                        logStr += ADD_ITEM_IMPO.modelToString(logStr);
+                                        x.Memo_S = ADD_ITEM_IMPO.ITEM_ID;
+                                    }
+
+                                });
                                 break;
                             case "ITEMOTH": //其他物品
-                                var _ITEM_OTHER = db.ITEM_OTHER.FirstOrDefault(x => x.ITEM_ID == _OTHER_ITEM_APLY_ITEM_ID);
-                                if (y.ACCESS_TYPE == "P")
-                                {
-                                    _ITEM_OTHER.INVENTORY_STATUS = "1";
-                                    _ITEM_OTHER.PUT_DATE = dt;
-                                }
-                                else if (y.ACCESS_TYPE == "G")
-                                {
-                                    _ITEM_OTHER.INVENTORY_STATUS = "2";
-                                    _ITEM_OTHER.GET_DATE = dt;
-                                }
-                                _ITEM_OTHER.LAST_UPDATE_DT = dt;
+                                _OTHER_ITEM_APLY.ToList().ForEach(z => {
+                                    var _ITEM_OTHER = db.ITEM_OTHER.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
 
-                                logStr += _ITEM_OTHER.modelToString(logStr);
+                                    if (y.ACTUAL_ACCESS_TYPE == "P")
+                                    {
+                                        _ITEM_OTHER.INVENTORY_STATUS = "1";
+                                        _ITEM_OTHER.PUT_DATE = dt;
+                                    }
+                                    else if (y.ACTUAL_ACCESS_TYPE == "G")
+                                    {
+                                        _ITEM_OTHER.INVENTORY_STATUS = "2";
+                                        _ITEM_OTHER.GET_DATE = dt;
+                                    }
+                                    _ITEM_OTHER.LAST_UPDATE_DT = dt;
+
+                                    logStr += _ITEM_OTHER.modelToString(logStr);
+                                });
                                 break;
                         }
                         #region 申請單歷程檔
@@ -416,8 +493,7 @@ namespace Treasury.Web.Service.Actual
                         #endregion
                         aplyNoUid = string.Format("{0};{1}", y.APLY_NO, y.APLY_UID);
                         approvedList.Add(aplyNoUid);
-                        //approvedList.Add(y.APLY_NO);
-                        //applyUidList.Add(y.APLY_UID);
+
                     });
                 }
                 var validateMessage = db.GetValidationErrors().getValidateString();
@@ -506,8 +582,8 @@ namespace Treasury.Web.Service.Actual
                         #endregion
 
                         result.RETURN_FLAG = true;
-                        result.DESCRIPTION = $"申請單號 : {string.Join(",", approvedList)} 覆核成功";
-                        result.Datas = GetSearchDatas();
+                        result.DESCRIPTION = $"申請單號 : {string.Join(",", approvedList.Select(x => x.Split(';')[0]))} 覆核成功";
+                        result.Datas = GetSearchDatas(cUserId);
                     }
                     catch(DbUpdateException ex)
                     {
@@ -598,7 +674,7 @@ namespace Treasury.Web.Service.Actual
 
                         result.RETURN_FLAG = true;
                         result.DESCRIPTION = $"申請單號 : {string.Join(",", rejectList)} 已駁回";
-                        result.Datas = GetSearchDatas();
+                        result.Datas = GetSearchDatas(cUserId);
                     }
                     catch(DbUpdateException ex)
                     {
@@ -617,6 +693,10 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public BaseUserInfoModel GetUserInfo(string cUserID)
         {
+            if (cUserID.IsNullOrWhiteSpace())
+            {
+                return null;
+            }
             BaseUserInfoModel user = new BaseUserInfoModel();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
             {
@@ -644,14 +724,17 @@ namespace Treasury.Web.Service.Actual
                 if (_emply_DPT_CD != null)
                 {
                     var _VW_OA_DEPT = dbINTRA.VW_OA_DEPT.AsNoTracking().FirstOrDefault(x => x.DPT_CD == _emply_DPT_CD);
-                    if(_VW_OA_DEPT.Dpt_type == "4")
+                    if(_VW_OA_DEPT != null)
                     {
-                        DPT_CD = _VW_OA_DEPT.UP_DPT_CD;
-                    }
-                    else if(_VW_OA_DEPT.Dpt_type == "3")
-                    {
-                        DPT_CD = _VW_OA_DEPT.DPT_CD;
-                    }
+                        if (_VW_OA_DEPT.Dpt_type == "04")
+                        {
+                            DPT_CD = _VW_OA_DEPT.UP_DPT_CD?.Trim();
+                        }
+                        else if (_VW_OA_DEPT.Dpt_type == "03")
+                        {
+                            DPT_CD = _VW_OA_DEPT.DPT_CD?.Trim();
+                        }
+                    } 
                 }
             }
             return DPT_CD;

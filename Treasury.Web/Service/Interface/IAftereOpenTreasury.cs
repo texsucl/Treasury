@@ -23,14 +23,20 @@ namespace Treasury.Web.Service.Interface
         /// <param name="TreaItem"></param>
         /// <param name="AccessType"></param>
         /// <returns></returns>
-        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>> DialogSelectedChange(string ItemOpType, string TreaItem, string AccessType);
+        Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>> DialogSelectedChange(string ItemOpType, string TreaItem, string AccessType, List<AfterOpenTreasurySearchDetailViewModel> ViewDatas);
 
         /// <summary>
         /// 產生實際入庫人員選單
         /// </summary>
         /// <param name="treaItemId"></param>
         /// <returns></returns>
-        List<SelectOption> GetActualUserOption(string treaItemId);
+        List<SelectOption> GetActualUserOption(string treaItemId, List<AfterOpenTreasurySearchDetailViewModel> ViewDatas);
+
+        /// <summary>
+        /// 產生實際作業別下拉選單
+        /// </summary>
+        /// <returns></returns>
+        List<SelectOption> GetActualAccessTypeOption();
 
         /// <summary>
         /// 查詢未確認表單資料
@@ -68,7 +74,7 @@ namespace Treasury.Web.Service.Interface
         /// <param name="InsertModel"></param>
         /// <param name="cUserId"></param>
         /// <returns></returns>
-        MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> InsertUnconfirmedDetail(string RegisterID, List<AfterOpenTreasuryUnconfirmedDetailViewModel> InsertModel, string cUserId);
+        MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> InsertUnconfirmedDetail(string RegisterID, List<AfterOpenTreasuryUnconfirmedDetailViewModel> InsertModel, string cUserId, AfterOpenTreasurySearchViewModel SearchData);
 
         /// <summary>
         /// 修改
@@ -77,8 +83,19 @@ namespace Treasury.Web.Service.Interface
         /// <param name="searchData"></param>
         /// <param name="cUserId"></param>
         /// <returns></returns>
-        MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> UpdateData(string APLYNO, string ActualAccEmp, string ActualAccType, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId);
+        MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> UpdateData(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId);
 
+        /// <summary>
+        /// 未確認修改
+        /// </summary>
+        /// <param name="APLYNO"></param>
+        /// <param name="ActualAccEmp"></param>
+        /// <param name="ActualAccType"></param>
+        /// <param name="viewModels"></param>
+        /// <param name="cUserId"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> UnConfirmedUpdateDatas(string APLYNO, string ActualAccEmp, List<AfterOpenTreasuryUnconfirmedDetailViewModel> viewModels, string cUserId);
+        
         /// <summary>
         /// 刪除
         /// </summary>
@@ -88,7 +105,16 @@ namespace Treasury.Web.Service.Interface
         /// <param name="cUserId"></param>
         /// <returns></returns>
         MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> DeleteData(string APLYNO, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId, bool custodyFlag);
-        
+
+        /// <summary>
+        /// 未確認表單刪除
+        /// </summary>
+        /// <param name="APLYNO"></param>
+        /// <param name="viewModels"></param>
+        /// <param name="cUserId"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<AfterOpenTreasuryUnconfirmedDetailViewModel>> UnconfirmedDeleteData(string APLYNO, List<AfterOpenTreasuryUnconfirmedDetailViewModel> viewModels, string cUserId);
+
         /// <summary>
         /// 確定存檔
         /// </summary>

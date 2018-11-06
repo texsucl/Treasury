@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
+using Treasury.WebBO;
 
 namespace Treasury.Web.Models
 {
@@ -9,7 +11,8 @@ namespace Treasury.Web.Models
     {
         public TreasuryDBEntities()
         {
-
+            ((IObjectContextAdapter)this).ObjectContext.CommandTimeout = 300;
+            //Database.Log = str => Treasury.WebUtility.Extension.NlogSet(str, Enum.Ref.Nlog.Info);
         }
     }
 

@@ -192,14 +192,14 @@ namespace Treasury.Web.Controllers
         }
 
         public ActionResult Logout() {
-            logger.Info("[AccountController][Logout]Session[UserID]:" + Session["UserID"].ToString());
+            logger.Info("[AccountController][Logout]Session[UserID]:" + Session["UserID"]?.ToString());
             try
             {
 
                 CodeUserDao codeUserDao = new CodeUserDao();
-                CODE_USER codeUser = codeUserDao.qryUserByKey(Session["UserID"].ToString());
+                CODE_USER codeUser = codeUserDao.qryUserByKey(Session["UserID"]?.ToString());
 
-                writeLog("O", true, Session["UserID"].ToString(), codeUser);
+                writeLog("O", true, Session["UserID"]?.ToString(), codeUser);
 
                 Session.Clear();
                 Session.Abandon();

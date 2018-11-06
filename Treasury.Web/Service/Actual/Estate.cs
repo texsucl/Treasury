@@ -11,6 +11,7 @@ using Treasury.WebUtility;
 using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
+using Treasury.Web.Controllers;
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 不動產權狀
 /// 初版作者：20180628 張家華
@@ -282,7 +283,8 @@ namespace Treasury.Web.Service.Actual
                         {
                             vItemId = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
@@ -309,6 +311,19 @@ namespace Treasury.Web.Service.Actual
                             vMemo_Aft = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
+
+                    if (searchModel.vTreasuryIO == "N") //取出
+                    {
+                        if (result.Any())
+                        {
+                            var itemIds = result.Select(x => x.vItemId).ToList();
+                            var uids = GetAplyUidName(itemIds);
+                            result.ForEach(x =>
+                            {
+                                x.vGet_Uid_Name = uids.FirstOrDefault(y => y.itemId == x.vItemId)?.getAplyUidName;
+                            });
+                        }
+                    }
                 }
                 else
                 {
@@ -321,7 +336,8 @@ namespace Treasury.Web.Service.Actual
                         {
                             vItemId = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
@@ -416,8 +432,17 @@ namespace Treasury.Web.Service.Actual
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
-                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                if (CustodyAppr.Contains(_TAR.APLY_STATUS))
+                                {
+                                    _APLY_STATUS = CustodyConfirmStatus;
+                                    _TAR.CUSTODY_UID = AccountController.CurrentUserId; //保管單位直接帶使用者
+                                    _TAR.CUSTODY_DT = dt;
+                                }
+                                else
+                                {
+                                    if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                        _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                }
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -425,8 +450,14 @@ namespace Treasury.Web.Service.Actual
                                 #endregion
 
                                 #region 申請單歷程檔
-                                var _ARH = db.APLY_REC_HIS.First(x => x.APLY_NO == taData.vAplyNo);
-                                _ARH.APLY_STATUS = _APLY_STATUS;
+                                db.APLY_REC_HIS.Add(
+                                new APLY_REC_HIS()
+                                {
+                                    APLY_NO = _TAR.APLY_NO,
+                                    APLY_STATUS = _APLY_STATUS,
+                                    PROC_UID = _TAR.CREATE_UID,
+                                    PROC_DT = dt
+                                });
                                 #endregion
 
                                 #region 存取項目冊號資料檔
@@ -553,7 +584,7 @@ namespace Treasury.Web.Service.Actual
                                             logStr += _IRE.modelToString(logStr);
                                         }
                                     }
-                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus))//取出
                                     {
                                         var _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                         _IRE_Item_Id = _IRE.ITEM_ID;
@@ -601,7 +632,7 @@ namespace Treasury.Web.Service.Actual
                                     }));
                                     db.ITEM_REAL_ESTATE.AddRange(inserts);
                                 }
-                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus))//取出
                                 {
                                     foreach (var backItemId in db.OTHER_ITEM_APLY.Where(x =>
                                      x.APLY_NO == taData.vAplyNo &&

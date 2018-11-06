@@ -70,6 +70,31 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 空白票據 資料庫異動畫面
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult CDCView(string AplyNo, CDCSearchViewModel data, Ref.OpenPartialViewType type)
+        {
+            var _data = ((List<CDCBillViewModel>)Bill.GetCDCSearchData(data, AplyNo));
+            ViewBag.Sataus = new Service.Actual.Common().GetSysCode("INVENTORY_TYPE");
+            ViewBag.type = type;
+            ViewBag.IO = data.vTreasuryIO;
+            ViewBag.dBILL_Check_Type = new SelectList(Bill.GetCheckType(), "Value", "Text");
+            ViewBag.dBILL_Issuing_Bank = new SelectList(Bill.GetIssuing_Bank(), "Value", "Text");
+            data.vCreate_Uid = AccountController.CurrentUserId;
+            Cache.Invalidate(CacheList.CDCSearchViewModel);
+            Cache.Set(CacheList.CDCSearchViewModel, data);
+            Cache.Invalidate(CacheList.CDCBILLData);
+            Cache.Set(CacheList.CDCBILLData, _data);
+            Cache.Invalidate(CacheList.CDCBILLAllData);
+            Cache.Set(CacheList.CDCBILLAllData, ((List<CDCBillViewModel>)Bill.GetCDCSearchData(new CDCSearchViewModel() { vTreasuryIO = "Y" }, null)));
+            return PartialView();
+        }
+
+        /// <summary>
         /// 覆核資料
         /// </summary>
         /// <returns></returns>
@@ -95,6 +120,38 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 申請資料庫異動覆核
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ApplyDbData()
+        {
+            MSGReturnModel<IEnumerable<ICDCItem>> result = new MSGReturnModel<IEnumerable<ICDCItem>>();
+            result.RETURN_FLAG = false;
+            var _detail = (List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLData);
+            if (!_detail.Any(x => x.vAFTFlag))
+            {
+                result.DESCRIPTION = "無申請任何資料";
+            }
+            else if (Cache.IsSet(CacheList.CDCSearchViewModel))
+            {
+                CDCSearchViewModel data = (CDCSearchViewModel)Cache.Get(CacheList.CDCSearchViewModel);
+                result = Bill.CDCApplyAudit(_detail.Where(x => x.vAFTFlag).ToList(), data);
+                if (result.RETURN_FLAG)
+                {
+                    Cache.Invalidate(CacheList.CDCCAData);
+                    Cache.Set(CacheList.CDCCAData, result.Datas);
+                }
+            }
+            else
+            {
+                result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        /// <summary>
         /// 新增明細資料
         /// </summary>
         /// <param name="model"></param>
@@ -109,10 +166,10 @@ namespace Treasury.Web.Controllers
             {
                 var checkdata = (List<BillViewModel>)Cache.Get(CacheList.BILLDayData);
                 var sameFlag = checkSameData(checkdata, model);
-                if(sameFlag)
+                if(!sameFlag.IsNullOrWhiteSpace())
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = "您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!";
+                    result.DESCRIPTION = sameFlag;
                     return Json(result);
                 }
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -150,10 +207,10 @@ namespace Treasury.Web.Controllers
             {
                 var checkdata = (List<BillViewModel>)Cache.Get(CacheList.BILLDayData);
                 var sameFlag = checkSameData(checkdata, model);
-                if (sameFlag)
+                if (!sameFlag.IsNullOrWhiteSpace())
                 {
                     result.RETURN_FLAG = false;
-                    result.DESCRIPTION = "您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!";
+                    result.DESCRIPTION = sameFlag;
                     return Json(result);
                 }
                 var data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
@@ -326,6 +383,101 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 修改資料庫資料
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UpdateDbData(CDCBillViewModel model)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCBILLData))
+            {
+                var dbData = (List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
+                if (updateTempData != null)
+                {
+                    var allData = (List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLAllData);
+                    var msg = chechSameDataByCDC(allData, updateTempData);
+                    if (!msg.IsNullOrWhiteSpace())
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = msg;
+                        return Json(result);
+                    }
+                    var _vBill_Issuing_Banke_AFT = model.vBill_Issuing_Bank.CheckAFT(updateTempData.vBill_Issuing_Bank);
+                    if (_vBill_Issuing_Banke_AFT.Item2)
+                        updateTempData.vBill_Issuing_Bank_AFT = _vBill_Issuing_Banke_AFT.Item1;
+                    var _vBill_Check_Type_AFT = model.vBill_Check_Type.CheckAFT(updateTempData.vBill_Check_Type);
+                    if (_vBill_Check_Type_AFT.Item2)
+                        updateTempData.vBill_Check_Type_AFT = _vBill_Check_Type_AFT.Item1;
+                    var _vBill_Check_No_Track_AFT = model.vBill_Check_No_Track.CheckAFT(updateTempData.vBill_Check_No_Track);
+                    if (_vBill_Check_No_Track_AFT.Item2)
+                        updateTempData.vBill_Check_No_Track_AFT = _vBill_Check_No_Track_AFT.Item1;
+                    var _vBill_Check_No_B_AFT = model.vBill_Check_No_B.CheckAFT(updateTempData.vBill_Check_No_B);
+                    if (_vBill_Check_No_B_AFT.Item2)
+                        updateTempData.vBill_Check_No_B_AFT = _vBill_Check_No_B_AFT.Item1;
+                    var _vBill_Check_No_E_AFT = model.vBill_Check_No_E.CheckAFT(updateTempData.vBill_Check_No_E);
+                    if (_vBill_Check_No_E_AFT.Item2)
+                        updateTempData.vBill_Check_No_E_AFT = _vBill_Check_No_E_AFT.Item1;
+                    updateTempData.vAFTFlag = _vBill_Issuing_Banke_AFT.Item2 || _vBill_Check_Type_AFT.Item2 || _vBill_Check_No_Track_AFT.Item2 || _vBill_Check_No_B_AFT.Item2 || _vBill_Check_No_E_AFT.Item2;
+                    setDbAllData(model);
+                    Cache.Invalidate(CacheList.CDCBILLData);
+                    Cache.Set(CacheList.CDCBILLData, dbData);
+                    result.Datas = dbData.Any(x => x.vAFTFlag);
+                    result.RETURN_FLAG = true;
+                    result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 重設資料庫資料
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult RepeatDbData(string itemId)
+        {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            if (Cache.IsSet(CacheList.CDCBILLData))
+            {
+                var dbData = (List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLData);
+                var updateTempData = dbData.FirstOrDefault(x => x.vItemId == itemId);
+                if (updateTempData != null)
+                {
+                    updateTempData.vBill_Issuing_Bank_AFT = null;
+                    updateTempData.vBill_Check_Type_AFT = null;
+                    updateTempData.vBill_Check_No_Track_AFT = null;
+                    updateTempData.vBill_Check_No_B_AFT = null;
+                    updateTempData.vBill_Check_No_E_AFT = null;
+                    updateTempData.vAFTFlag = false;
+                    setDbAllData(updateTempData);
+                    Cache.Invalidate(CacheList.CDCBILLData);
+                    Cache.Set(CacheList.CDCBILLData, dbData);
+                    result.Datas = dbData.Any(x => x.vAFTFlag);
+                    result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.update_Fail.GetDescription();
+                }
+            }
+            return Json(result);
+        }
+
+        /// <summary>
         /// jqgrid cache data
         /// </summary>
         /// <param name="jdata"></param>
@@ -345,6 +497,29 @@ namespace Treasury.Web.Controllers
                         return Json(jdata.modelToJqgridResult((List<BillViewModel>)Cache.Get(CacheList.BILLDayData)));
                     break;
             }
+            return null;
+        }
+
+        /// <summary>
+        /// jqgrid CDCcache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCDCCacheData(jqGridParam jdata)
+        {
+            if (Cache.IsSet(CacheList.CDCBILLData))
+                return Json(jdata.modelToJqgridResult(
+                    ((List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLData))
+                    .OrderBy(x => x.vPut_Date) //入庫日期
+                    .ThenBy(x => x.vAply_Uid) //存入申請人
+                    .ThenBy(x => x.vCharge_Dept) //權責部門
+                    .ThenBy(x => x.vCharge_Sect) //權責科別
+                    .ThenBy(x => x.vBill_Issuing_Bank) //發票行庫
+                    .ThenBy(x => x.vBill_Check_Type) //類型
+                    .ThenBy(x => x.vItemId) //ID
+                    .ToList()
+                    ));
             return null;
         }
 
@@ -521,23 +696,89 @@ namespace Treasury.Web.Controllers
         /// <param name="data"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private bool checkSameData(List<BillViewModel> data, BillViewModel model)
+        private string checkSameData(List<BillViewModel> data, BillViewModel model)
         {
-            bool result = false;
+            string msg = string.Empty;
+            List<BillViewModel> result = new List<BillViewModel>();
             try
             {
                 data = data.Where(x => x.vItemId != model.vItemId &&
                         x.vItemId != null &&
                         x.vIssuingBank == model.vIssuingBank).ToList();
-                result = data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoB) <= int.Parse(x.vCheckNoE)) ||
-                         data.Any(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoE) && int.Parse(model.vCheckNoE) <= int.Parse(x.vCheckNoE)) ||
-                         data.Any(x => int.Parse(x.vCheckNoB) >= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoE) >= int.Parse(x.vCheckNoE));
+                result.AddRange(data.Where(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoB) <= int.Parse(x.vCheckNoE)));
+                result.AddRange(data.Where(x => int.Parse(x.vCheckNoB) <= int.Parse(model.vCheckNoE) && int.Parse(model.vCheckNoE) <= int.Parse(x.vCheckNoE)));
+                result.AddRange(data.Where(x => int.Parse(x.vCheckNoB) >= int.Parse(model.vCheckNoB) && int.Parse(model.vCheckNoE) >= int.Parse(x.vCheckNoE)));
+                
+                if (result.Any())
+                {
+                    msg = $"您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!</br>重複區段</br>發票行:{model.vIssuingBank}";
+                    result.Select(x => $"{string.Join(",", $@"支票號碼(起):{x.vCheckNoB},支票號碼(迄):{x.vCheckNoE}")}")
+                        .Distinct().ToList()
+                        .ForEach(x => msg += $"</br>{x}");
+                }              
             }
             catch
             {
 
             }
-            return result;
+            return msg;
+        }
+
+        /// <summary>
+        ///  比對資料系統檢視存入空白票據的票據的票號(起),票號(迄)是否與庫存重複
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private string chechSameDataByCDC(List<CDCBillViewModel> data, CDCBillViewModel model)
+        {
+            string msg = string.Empty;
+            List<CDCBillViewModel> result = new List<CDCBillViewModel>();
+            try
+            {
+                data = data.Where(x => x.vItemId != model.vItemId &&
+                        x.vItemId != null &&
+                        x.vBill_Issuing_Bank == model.vBill_Issuing_Bank).ToList();
+                result.AddRange(
+                    data.Where(x => 
+                    (x.vBill_Check_No_B_AFT == null ? int.Parse(x.vBill_Check_No_B) : int.Parse(x.vBill_Check_No_B_AFT)) <= int.Parse(model.vBill_Check_No_B) && 
+                    int.Parse(model.vBill_Check_No_B) <= (x.vBill_Check_No_E_AFT == null ? int.Parse(x.vBill_Check_No_E) : int.Parse(x.vBill_Check_No_E_AFT))));
+                result.AddRange(
+                    data.Where(x => 
+                    (x.vBill_Check_No_B_AFT == null ? int.Parse(x.vBill_Check_No_B) : int.Parse(x.vBill_Check_No_B_AFT)) <= int.Parse(model.vBill_Check_No_E) && 
+                    int.Parse(model.vBill_Check_No_E) <= (x.vBill_Check_No_E_AFT == null ? int.Parse(x.vBill_Check_No_E) : int.Parse(x.vBill_Check_No_E_AFT))));
+                result.AddRange(
+                    data.Where(x => 
+                    (x.vBill_Check_No_B_AFT == null ? int.Parse(x.vBill_Check_No_B) : int.Parse(x.vBill_Check_No_B_AFT)) >= int.Parse(model.vBill_Check_No_B) && 
+                    int.Parse(model.vBill_Check_No_E) >= (x.vBill_Check_No_E_AFT == null ? int.Parse(x.vBill_Check_No_E) : int.Parse(x.vBill_Check_No_E_AFT))));
+
+                if (result.Any())
+                {
+                    msg = $"您建置存入票號(起)/票號(迄)和下面當日庫存明細資料重疊敬請確認,謝謝!</br>重複區段</br>發票行:{model.vBill_Issuing_Bank}";
+                    result.Select(x => $"{string.Join(",", $@"支票號碼(起):{(x.vBill_Check_No_B_AFT ==null ? x.vBill_Check_No_B : x.vBill_Check_No_B_AFT)},支票號碼(迄):{(x.vBill_Check_No_E_AFT == null ? x.vBill_Check_No_E : x.vBill_Check_No_E_AFT)}")}")
+                        .Distinct().ToList()
+                        .ForEach(x => msg += $"</br>{x}");
+                }
+            }
+            catch
+            {
+
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// 更新在庫資料為調整後的資料
+        /// </summary>
+        /// <param name="model"></param>
+        private void setDbAllData(CDCBillViewModel model)
+        {
+            var allData = (List<CDCBillViewModel>)Cache.Get(CacheList.CDCBILLAllData);
+            var remove = allData.First(x => x.vItemId == model.vItemId);
+            allData.Remove(remove);
+            allData.Add(model);
+            Cache.Invalidate(CacheList.CDCBILLAllData);
+            Cache.Set(CacheList.CDCBILLAllData, allData);
         }
     }
 }

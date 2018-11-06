@@ -19,12 +19,30 @@
                         <label id="vPUT_DATE" name="vPUT_DATE"></label>
                     </td>
                 </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
+                </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
+                    </td>
+                </tr>
                 <tr>
                     <td>
                         <label>冊號 : </label>
                     </td>
                     <td>
-                        <label id="vBook_No" name="vBook_No"></label>
+                        @*<label id="vBook_No" name="vBook_No"></label>*@
+                        <input type="text" class="CDCMarginpUpdateType" id="vBook_No" name="vBook_No" />
+                        <span class="red" style="padding-left:20px" id="sBook_No"></span>
                     </td>
                 </tr>
                 <tr>
@@ -180,7 +198,10 @@
         var CDCMarginpDialogId = 'CDCMarginpDialog'; //dialogId
         var CDCMarginpFormId = 'CDCMarginpDialogForm'; //formId
         var vPut_DateId = 'vPUT_DATE'; //入庫日期Id(label)
-        var vBook_NoId = 'vBook_No'; //冊號Id(label)
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
+        var vBook_NoId = 'vBook_No'; //冊號Id(text)
+        var sBook_NoId = 'sBook_No'; //冊號Id(span)
         var vAply_Uid_NameId = 'vAPLY_UID_Name'; //存入申請人Id(label)
         var vCharge_NameId = 'vCHARGE_Name' //權責單位Id(label)
         var dMargin_Take_Of_TypeId = 'dMargin_Take_Of_Type'; //類別Id(dropdownlist)
@@ -206,6 +227,8 @@
         var sCDCMemoId = 'sCDCMemo'; //備註Id(span)
         var hCDCItem_Id = 'hItem_Id'; //物品單號(hidden)
 
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
+
         var CDCMarginp_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDCMarginp_Act_Type)
             $('.CDCMarginp_Act').show(); //申請異動主畫面進來
@@ -229,6 +252,8 @@
             verified.required(CDCMarginpFormId, dMargin_Take_Of_TypeId, message.required('類別')); //類別為必填
             verified.required(CDCMarginpFormId, tCDCTrad_PartnersId, message.required('交易對象')); //交易對象為必填
             verified.required(CDCMarginpFormId, tCDCAmountId, message.required('金額')); //金額為必填
+            verified.required(CDCMarginpFormId, vBook_NoId, message.required('冊號')); //冊號為必填
+            verified.price(CDCMarginpFormId, vBook_NoId); // 僅能輸入數字(正)
             verified.price(CDCMarginpFormId, tCDCAmountId); //金額驗證
             verified.required(CDCMarginpFormId, dMargin_ItemId, message.required('物品名稱')); //物品名稱為必填
             verified.required(CDCMarginpFormId, tCDCMargin_Item_IssuerId, message.required('物品發行人')); //物品發行人為必填
@@ -465,6 +490,15 @@
                 return '<span class="red">' + rdata.vMemo_AFT + '</span>';
         }
 
+        function formattervBook_No(cellvalue, options, rdata) {
+            if (rdata.vBook_No_AFT == null)
+                return rdata.vBook_No || '';
+            else if (rdata.vBook_No_AFT.toUpperCase() == 'NULL')
+                return '';
+            else
+                return '<span class="red">' + rdata.vBook_No_AFT + '</span>';
+        }
+
         function formatterAct(cellvalue, options, rdata) {
             var str = '';
             str += '<div class="btn-group">';
@@ -479,16 +513,24 @@
         }
 
         function CDCMarginpDbGrid() {
-            var colNameArray = ['動作', '狀態', '入庫日期', '冊號', '存入申請人', '權責單位',
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag) {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['冊號', '存入申請人', '權責單位',
                 '類別', '交易對象', '歸檔編號', '金額', '物品名稱', '物品發行人', '質押標的號碼', '有效期間(起)', '有效期間(迄)', '說明', '備註',
-                '類別異動前', '交易對象異動前', '金額異動前', '物品名稱異動前', '物品發行人異動前', '質押標的號碼異動前', '有效期間(起)異動前', '有效期間(迄)異動前', '說明異動前', '備註異動前',
-                '類別異動後', '交易對象異動後', '金額異動後', '物品名稱異動後', '物品發行人異動後', '質押標的號碼異動後', '有效期間(起)異動後', '有效期間(迄)異動後', '說明異動後', '備註異動後',
-                '物品單號', '狀態Id'];
+                '類別異動前', '交易對象異動前', '金額異動前', '物品名稱異動前', '物品發行人異動前', '質押標的號碼異動前', '有效期間(起)異動前', '有效期間(迄)異動前', '說明異動前', '備註異動前', '冊號異動前',
+                '類別異動後', '交易對象異動後', '金額異動後', '物品名稱異動後', '物品發行人異動後', '質押標的號碼異動後', '有效期間(起)異動後', '有效期間(迄)異動後', '說明異動後', '備註異動後', '冊號異動後',
+                '物品單號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
             colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus, align: 'center' });
             colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 100, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 60, align: 'center', sortable: false });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false });
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
+            colModelArray.push({ name: "vBook_No_Show", index: "vBook_No_Show", width: 60, align: 'center', sortable: false, formatter: formattervBook_No });
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 80, sortable: false, align: 'center' });
             colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false, align: 'center' });
 
@@ -514,6 +556,7 @@
             colModelArray.push({ name: "vEffective_Date_E", index: "vEffective_Date_E", hidden: true });
             colModelArray.push({ name: "vDescription", index: "vDescription", hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vBook_No", index: "vBook_No", hidden: true });
 
             colModelArray.push({ name: "vMargin_Take_Of_Type_AFT", index: "vMargin_Take_Of_Type_AFT", hidden: true });
             colModelArray.push({ name: "vTrad_Partners_AFT", index: "vTrad_Partners_AFT", hidden: true });
@@ -525,6 +568,7 @@
             colModelArray.push({ name: "vEffective_Date_E_AFT", index: "vEffective_Date_E_AFT", hidden: true });
             colModelArray.push({ name: "vDescription_AFT", index: "vDescription_AFT", hidden: true });
             colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT", hidden: true });
+            colModelArray.push({ name: "vBook_No_AFT", index: "vBook_No_AFT", hidden: true });
 
             colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
@@ -613,6 +657,7 @@
                 }
             });       
             $('#CDCMarginpUpdateTemp').hide();
+            $('.GetClass').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -625,6 +670,9 @@
                 $('#' + tCDCEffective_Date_EId).next().prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
+                if (GetFlag) {
+                    $('.GetClass').show();
+                }
                 dialogSetData(listId, rowid);
                 $('.' + MarginpUpdateClass).prop('disabled', true);
                 $('#' + tCDCEffective_Date_BId).next().prop('disabled', true);
@@ -636,7 +684,10 @@
         function ResetDialog() {
             created.clearDatepickerRangeValue(tCDCEffective_Date_BId, tCDCEffective_Date_EId);
             $('#' + vPut_DateId).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
             $('#' + vBook_NoId).text('');
+            $('#' + sBook_NoId).val('');
             $('#' + vAply_Uid_NameId).text('');
             $('#' + vCharge_NameId).text('');
             if ($('#' + dMargin_Take_Of_TypeId + ' option').length > 0) {
@@ -676,7 +727,12 @@
            
                 //set value
                 $('#' + vPut_DateId).text(data.vPut_Date);
-                $('#' + vBook_NoId).text(data.vBook_No);
+                if (GetFlag) {
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
+                $('#' + vBook_NoId).val(data.vBook_No);
+                $('#' + sBook_NoId).text(data.vBook_No_AFT);
                 $('#' + vAply_Uid_NameId).text(data.vAply_Uid_Name);
                 $('#' + vCharge_NameId).text(data.vCharge_Name);
                 $.when($('#' + dMargin_Take_Of_TypeId).val(data.vMargin_Take_Of_Type.split('-')[0]).change())
@@ -694,7 +750,22 @@
                 $('#' + sCDCPledge_Item_NoId).text(data.vPledge_Item_No_AFT);
                 $('#' + tCDCEffective_Date_BId).val(data.vEffective_Date_B);
                 $('#' + sCDCEffective_Date_BId).text(data.vEffective_Date_B_AFT);
-                $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
+                var _date = $('#' + tCDCEffective_Date_BId).val();
+                
+                //有效期間(迄) 	支票：有效期間(起)+1年
+                if (data.vMargin_Item == '1' && verified.isDate(_date)) {
+                    _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                    $('#' + tCDCEffective_Date_EId).val(_date);
+                    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
+                }
+                else if (data.vMargin_Item == '2' && verified.isDate(_date)) {
+                    _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                    $('#' + tCDCEffective_Date_EId).val(_date);
+                    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
+                }
+                else {
+                    $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
+                }
                 $('#' + sCDCEffective_Date_EId).text(data.vEffective_Date_E_AFT);
                 $('#' + tCDCDescriptionId).val(data.vDescription);
                 $('#' + sCDCDescriptionId).text(data.vDescription_AFT);
@@ -736,7 +807,9 @@
                             $('#' + tCDCEffective_Date_BId).val().trim(),
                             $('#' + tCDCEffective_Date_EId).val().trim(),
                             $('#' + tCDCDescriptionId).val().trim(),
-                            $('#' + tCDCMemoId).val().trim())
+                            $('#' + tCDCMemoId).val().trim(),
+                            $('#' + vBook_NoId).val().trim()),
+
                     }),
                     dataType: "json",
                     url: CDCMarginpUrl.UpdateDbData,
@@ -769,7 +842,8 @@
             vEffective_Date_B,
             vEffective_Date_E,
             vDescription,
-            vMemo
+            vMemo,
+            vBook_No
             ) {
             var obj = {};
             obj['vItem_Id'] = vItem_Id;
@@ -783,6 +857,7 @@
             obj['vEffective_Date_E'] = vEffective_Date_E;
             obj['vDescription'] = vDescription;
             obj['vMemo'] = vMemo;
+            obj['vBook_No'] = vBook_No;
             return obj;
         }
         //#endregion function

@@ -1,0 +1,655 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="">
+    <div id="CDCBilljqgridDiv" class="jqd" style="padding-bottom:5px;">
+
+    </div>
+    <div style="text-align:center;display:none;" class="CDCBill_Act">
+        <input type="button" id="CDCBillApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="CDCBillBack" value="回上一頁" class="btn btn-primary" />
+    </div>
+    <div id="CDCBillDialog" style="display:none;">
+        <form id="CDCBillDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vPut_Date" name="vPut_Date"></label>
+                    </td>
+                    <td>
+                        <label>存入申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vAply_Uid_Name" name="vAply_Uid_Name"></label>
+                    </td>
+                    <td>
+                        <label>權責單位 : </label>
+                    </td>
+                    <td>
+                        <label id="vCharge_Name" name="vCharge_Name"></label>
+                    </td>
+                </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
+                    <td>
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>發票行庫 : </label>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div class="select-editable">
+                                        @Html.DropDownList("dBILL_Issuing_Bank", (SelectList)ViewBag.dBILL_Issuing_Bank, new { @class = "CDCBILLUpdateType", @onchange = "this.nextElementSibling.value = this.value" })
+                                        <input class="CDCBILLUpdateType" type="text" name="tBILL_Issuing_Bank" id="tBILL_Issuing_Bank" value="" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="red" style="padding-left:20px" id="sBILL_Issuing_Bank"></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <label>類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dBILL_Check_Type", (SelectList)ViewBag.dBILL_Check_Type, new { @class = "CDCBILLUpdateType" })
+                        <span class="red" style="padding-left:20px" id="sBILL_Check_Type"></span>
+                    </td>
+                    <td>
+                        <label>字軌 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCBILLUpdateType" id="tBILL_Check_No_Track" onkeyup="this.value=this.value.toUpperCase()" name="tBILL_Check_No_Track" />
+                        <span class="red" style="padding-left:20px" id="sBILL_Check_No_Track"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>票號(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCBILLUpdateType" id="tBILL_Check_No_B" name="tBILL_Check_No_B" />
+                        <span class="red" style="padding-left:20px" id="sBILL_Check_No_B"></span>
+                    </td>
+                    <td>
+                        <label>票號(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="CDCBILLUpdateType" id="tBILL_Check_No_E" name="tBILL_Check_No_E" />
+                        <span class="red" style="padding-left:20px" id="sBILL_Check_No_E"></span>
+                    </td>
+                    <td>
+                        <label>總張數 : </label>
+                    </td>
+                    <td>
+                        <label id="BILL_total"></label>
+                        <label class="red" style="padding-left:20px" id="BILL_total_AFT"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                       <input type="hidden" id="hBill_ITEM_ID"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* 紅色的字代表修改後的參數</span></td>
+                </tr>
+                <tr>
+                    <td colspan="6"><span class="red">* @Ref.MessageType.null_Input.GetDescription()</span></td>
+                </tr>
+                <tr>
+                    <td >
+                        <input type="button" id="CDCBillUpdateTemp" value="修改" class="btn btn-primary"  />
+                    </td>
+                    <td   colspan="5" style="text-align:right;">
+                        <input type="button" id="CDCBillCancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+
+        var CDCBillurl = {};
+        CDCBillurl.getData = '@Url.Action("GetCDCCacheData", "Bill")';
+        CDCBillurl.ApplyDbData = '@Url.Action("ApplyDbData", "Bill")';
+        CDCBillurl.UpdateDbData = '@Url.Action("UpdateDbData", "Bill")';
+        CDCBillurl.RepeatDbData = '@Url.Action("RepeatDbData", "Bill")';
+        //#endregion
+
+        //#region 參數設定
+        //庫存資料
+        var CDCBillDialogId = 'CDCBillDialog'; //dialogId
+        var CDCBillDialogFormId = 'CDCBillDialogForm'; //dialogFormId
+        var vPut_DateId = 'vPut_Date'; //入庫日期(label)
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
+        var vAply_Uid_NameId = 'vAply_Uid_Name'; //存入申請人(label)
+        var vCharge_NameId = 'vCharge_Name'; //權責單位(label)
+        var BILL_totalId = 'BILL_total'; //總張數Id
+        var BILL_total_AFTId = 'BILL_total_AFT'; //修改後總張數Id
+
+        var dBILL_Issuing_BankId = 'dBILL_Issuing_Bank'; //發票行庫Id(dropdownList)
+        var tBILL_Issuing_BankId = 'tBILL_Issuing_Bank'; //發票行庫Id(text)
+        var sBILL_Issuing_BankId = 'sBILL_Issuing_Bank'; //發票行庫Id(span)
+        var dBILL_Check_TypeId = 'dBILL_Check_Type'; //類型Id(dropdownList)
+        var sBILL_Check_TypeId = 'sBILL_Check_Type'; //類型Id(span)
+        var tBILL_Check_No_TrackId = 'tBILL_Check_No_Track'; //字軌Id(text)
+        var sBILL_Check_No_TrackId = 'sBILL_Check_No_Track'; //字軌Id(span)
+        var tBILL_Check_No_BId = 'tBILL_Check_No_B'; //票號(起)Id(text)
+        var sBILL_Check_No_BId = 'sBILL_Check_No_B'; //票號(起)Id(span)
+        var tBILL_Check_No_EId = 'tBILL_Check_No_E'; //票號(迄)Id(text)
+        var sBILL_Check_No_EId = 'sBILL_Check_No_E'; //票號(迄)Id(span)
+        var hCDCBill_ITEM_ID = 'hBill_ITEM_ID'; //物品單號Id(hidden)
+
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
+
+        var CDCBill_Act_Type = 'CDCIndex' == '@ViewBag.type';
+        if (CDCBill_Act_Type)
+            $('.CDCBill_Act').show(); //申請異動主畫面近來
+
+        var CDCBill_ApplyFlag = 'Y' == '@ViewBag.IO';
+        if (!CDCBill_ApplyFlag)
+            $('#CDCBillApply').hide();
+
+        var CDCBillConfirmFlag = false; //離開時提醒訊息
+        //#region 初始動作
+        CDCBillDbGrid();
+        setCDCBillVerified();
+        //#endregion
+
+        //#region 註冊verified
+        function setCDCBillVerified() {
+            verified.required(CDCBillDialogFormId, tBILL_Issuing_BankId, message.required('發票行庫')); //發票行庫為必填
+            verified.maxlength(CDCBillDialogFormId, tBILL_Issuing_BankId, 10); //發票行庫最大長度(10)
+            verified.english(CDCBillDialogFormId, tBILL_Check_No_TrackId); //字軌僅能輸入英文
+            verified.required(CDCBillDialogFormId, tBILL_Check_No_TrackId, message.required('字軌')); //字軌為必填
+            verified.maxlength(CDCBillDialogFormId, tBILL_Check_No_TrackId, 4); //字軌最大長度(4)
+            verified.positiveInt(CDCBillDialogFormId, tBILL_Check_No_BId); //票號(起) 僅能輸入數字(正)
+            verified.required(CDCBillDialogFormId, tBILL_Check_No_BId, message.required('票號(起)')); //票號(起)為必填
+            verified.maxlength(CDCBillDialogFormId, tBILL_Check_No_BId, 7); //票號(起)最大長度(7)
+            verified.positiveInt(CDCBillDialogFormId, tBILL_Check_No_EId); //票號(迄) 僅能輸入數字(正)
+            verified.required(CDCBillDialogFormId, tBILL_Check_No_EId, message.required('票號(迄)')); //票號(迄)為必填
+            verified.maxlength(CDCBillDialogFormId, tBILL_Check_No_EId, 7); //票號(迄)最大長度(7)
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'CDCBillApply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCBillApplyFun(); });
+                    break;
+                case 'CDCBillBack':
+                case 'CDCBillCancelTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        if (id == 'CDCBillBack' &&
+                            CDCBillConfirmFlag &&
+                            !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                            return false;
+                        }
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+                case 'CDCBillUpdateTemp':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { CDCBillUpdateTempFun(); });
+                    break;
+            }
+        });
+
+        //計算總張數
+        $('#' + tBILL_Check_No_BId + ',#' + tBILL_Check_No_EId).off('blur', function () { });
+        $('#' + tBILL_Check_No_BId + ',#' + tBILL_Check_No_EId).on('blur', function () {
+            setBILL_total();
+        });
+
+        function setBILL_total() {
+            if ($('#' + tBILL_Check_No_BId).val().length <= 7 && $('#' + tBILL_Check_No_EId).val().length <= 7) {
+                var _Check_No_B = parseInt($('#' + tBILL_Check_No_BId).val());
+                var _Check_No_E = parseInt($('#' + tBILL_Check_No_EId).val());
+                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E >= _Check_No_B) {
+                    $('#' + BILL_totalId).html(customerUtility.addCommas(_Check_No_E - _Check_No_B + 1));
+                }
+                else {
+                    $('#' + BILL_totalId).html('');
+                }
+                if (!isNaN(_Check_No_B))
+                    $('#' + tBILL_Check_No_BId).val(created.padLeft(_Check_No_B, 7, '0'));
+                if (!isNaN(_Check_No_E))
+                    $('#' + tBILL_Check_No_EId).val(created.padLeft(_Check_No_E, 7, '0'));
+            }
+            else {
+                $('#' + BILL_totalId).html('');
+            }
+        }
+        //#endregion
+
+        function CDCBillApplyFun() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: CDCBillurl.ApplyDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#CDCBillApply'));
+                }
+            })
+        }
+
+        function formattervStatus(cellvalue, options, rdata) {
+            switch (rdata.vStatus) {
+                    @{
+                        foreach (var item in ((List<SelectOption>)ViewBag.Sataus))
+                        {
+                           <text>
+                           case '@item.Value':
+                           return '@item.Text';
+                           </text>
+                        }
+                    }
+                default:
+            return '';
+            }
+        }
+
+        function formattervBill_Issuing_Bank(cellvalue, options, rdata)
+        {
+            if (rdata.vBill_Issuing_Bank_AFT != null) {
+                return customerUtility.errorSpan(rdata.vBill_Issuing_Bank_AFT);
+            }
+            else {
+                return rdata.vBill_Issuing_Bank;
+            }
+        }
+
+        function formattervBill_Check_Type(cellvalue, options, rdata) {
+            if (rdata.vBill_Check_Type_AFT != null) {
+                switch (rdata.vBill_Check_Type_AFT) {
+                    @{
+                         foreach (var item in ((SelectList)ViewBag.dBILL_Check_Type))
+                         {
+                             <text>
+                    case '@item.Value':
+                        return customerUtility.errorSpan('@item.Text');
+                            </text>
+                         }
+                     }
+                }
+            } else {
+                switch (rdata.vBill_Check_Type) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dBILL_Check_Type))
+                        {
+                            <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+            return '';
+        }
+
+        function formattervBill_Check_No_Track(cellvalue, options, rdata) {
+            if (rdata.vBill_Check_No_Track_AFT != null) {
+                return customerUtility.errorSpan(rdata.vBill_Check_No_Track_AFT);
+            }
+            else {
+                return rdata.vBill_Check_No_Track;
+            }
+        }
+
+        function formattervBill_Check_No_B(cellvalue, options, rdata) {
+            if (rdata.vBill_Check_No_B_AFT != null) {
+                return customerUtility.errorSpan(rdata.vBill_Check_No_B_AFT);
+            }
+            else {
+                return rdata.vBill_Check_No_B;
+            }
+        }
+
+
+        function formattervBill_Check_No_E(cellvalue, options, rdata) {
+            if (rdata.vBill_Check_No_E_AFT != null) {
+                return customerUtility.errorSpan(rdata.vBill_Check_No_E_AFT);
+            }
+            else {
+                return rdata.vBill_Check_No_E;
+            }
+        }
+
+        function formatterAct(cellvalue, options, rdata) {
+            var str = '';
+            str += '<div class="btn-group">';
+            str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCBill' + options.gid + 'Updata' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+            str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCBill' + options.gid + 'Search' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-search fa-lg"></i></a>';
+            str += '<a title="重設" class="btn actionRepeatIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="CDCBill' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+            str += '<i class="fa fa-repeat fa-lg"></i></a>';
+            str += '</div>';
+            return str;
+        }
+
+        function CDCBillDbGrid() {
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag) {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['存入申請人', '權責單位',
+                '發票行庫', '類型', '字軌', '支票號碼(起)', '支票號碼(迄)',
+                '發票行庫異動前', '類型異動前', '字軌異動前', '支票號碼(起)異動前', '支票號碼(迄)異動前',
+                '發票行庫異動後', '類型異動後', '字軌異動後', '支票號碼(起)異動後', '支票號碼(迄)異動後',
+                '物品編號', '狀態Id']);
+
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
+            colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus,  align: 'center' });
+            colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false });
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vBill_Issuing_Bank_Show", index: "vBill_Issuing_Bank_Show", width: 80, align: 'center', sortable: false, formatter: formattervBill_Issuing_Bank });
+            colModelArray.push({ name: "vBill_Check_Type_Show", index: "vBill_Check_Type_Show", width: 80, align: 'center', sortable: false, formatter: formattervBill_Check_Type });
+            colModelArray.push({ name: "vBill_Check_No_Track_Show", index: "vBill_Check_No_Track_Show", width: 100, align: 'center', sortable: false, formatter: formattervBill_Check_No_Track });
+            colModelArray.push({ name: "vBill_Check_No_B_Show", index: "vBill_Check_No_B_Show", width: 100, align: 'center', sortable: false, formatter: formattervBill_Check_No_B });
+            colModelArray.push({ name: "vBill_Check_No_E_Show", index: "vBill_Check_No_E_Show", width: 100, align: 'center', sortable: false, formatter: formattervBill_Check_No_E });
+
+            colModelArray.push({ name: "vBill_Issuing_Bank", index: "vBill_Issuing_Bank", hidden: true });
+            colModelArray.push({ name: "vBill_Check_Type", index: "vBill_Check_Type", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_Track", index: "vBill_Check_No_Track", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_B", index: "vBill_Check_No_B", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_E", index: "vBill_Check_No_E", hidden: true });
+
+            colModelArray.push({ name: "vBill_Issuing_Bank_AFT", index: "vBill_Issuing_Bank_AFT", hidden: true });
+            colModelArray.push({ name: "vBill_Check_Type_AFT", index: "vBill_Check_Type_AFT", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_Track_AFT", index: "vBill_Check_No_Track_AFT", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_B_AFT", index: "vBill_Check_No_B_AFT", hidden: true });
+            colModelArray.push({ name: "vBill_Check_No_E_AFT", index: "vBill_Check_No_E_AFT", hidden: true });
+
+            colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
+            colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDCBilljqgridDiv',
+                'CDCBillTempList',
+                'CDCBillTempPeger',
+                CDCBillurl.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '查詢資料',
+                jqgridCustom.getPage('CDCBilljqgridDiv'),
+                CDCBillTempCompleteFun,
+                true
+                );
+        }
+
+        function CDCBillTempCompleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                tr.find('td').find('a.actionEditIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Edit.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionViewIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        dialogOpen('@Ref.ActionType.View.ToString()',i + 1);
+                    });
+                });
+                tr.find('td').find('a.actionRepeatIcon').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDCBillRepeat(listId, i + 1);
+                    });
+                });
+                var status = tr.find($.validator.format('td[aria-describedby$={0}_vStatus]', listId)).text();
+                if (status != '1')
+                {
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionRepeatIcon').hide();
+                }
+            });
+        }
+
+        function CDCBillRepeat(listId, rowid)
+        {
+            var itemId = $("#" + listId).getRowData(rowid).vItemId;
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    itemId: itemId
+                }),
+                dataType: "json",
+                url: CDCBillurl.RepeatDbData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    CDCBillDbGrid();
+                    CDCBillConfirmFlag = result.Datas;
+                }
+                else {
+
+                }
+            })
+        }
+
+        //#region function
+
+        function dialogOpen(type, rowid)
+        {
+            $('#' + CDCBillDialogFormId).validate().resetForm();
+            var listId = 'CDCBillTempList';
+            var BillUpdateClass = 'CDCBillUpdateType';
+            var title = customerUtility.getDialogType(type);;
+            $('#' + CDCBillDialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '空白票據',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#CDCBillUpdateTemp').hide();
+            $('.GetClass').hide();
+            if (type == '@Ref.ActionType.Add.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()')
+            {
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()')
+            {
+                dialogSetData(listId, rowid);
+                $('#CDCBillUpdateTemp').show();
+                $('.' + BillUpdateClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()')
+            {
+                if (GetFlag) {
+                    $('.GetClass').show();
+                }
+                dialogSetData(listId, rowid);
+                $('.' + BillUpdateClass).prop('disabled', true);
+            }
+            $('#' + CDCBillDialogId).dialog('open');
+            $('#' + CDCBillDialogId).parent('.ui-dialog:first').css({ 'min-width': '1100px' });
+        }
+
+        function ResetDialog() {
+            $('#' + vPut_DateId).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
+            $('#' + vAply_Uid_NameId).text('');
+            $('#' + vCharge_NameId).text('');
+            $('#' + tBILL_Issuing_BankId).val('');
+            $('#' + sBILL_Issuing_BankId).text('');
+            $('#' + sBILL_Check_TypeId).text('');
+            $('#' + tBILL_Check_No_TrackId).val('');
+            $('#' + sBILL_Check_No_TrackId).text('');
+            $('#' + tBILL_Check_No_BId).val('');
+            $('#' + sBILL_Check_No_BId).text('');
+            $('#' + tBILL_Check_No_EId).val('');
+            $('#' + sBILL_Check_No_EId).text('');
+            $('#' + hCDCBill_ITEM_ID).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + vPut_DateId).text(data.vPut_Date);
+                if (GetFlag) {
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
+                $('#' + vAply_Uid_NameId).text(data.vAply_Uid_Name);
+                $('#' + vCharge_NameId).text(data.vCharge_Name);
+                $('#' + tBILL_Issuing_BankId).val(data.vBill_Issuing_Bank);
+                $('#' + sBILL_Issuing_BankId).text(data.vBill_Issuing_Bank_AFT);
+                $('#' + dBILL_Check_TypeId).val(data.vBill_Check_Type)
+
+                if (data.vBill_Check_Type_AFT != null) {
+                    switch (data.vBill_Check_Type_AFT) {
+                        @{
+                            foreach (var item in ((SelectList)ViewBag.dBILL_Check_Type))
+                            {
+                            <text>
+                                case '@item.Value':
+                                    $('#' + sBILL_Check_TypeId).text('@item.Text');
+                            </text>
+                            }
+                        }
+                    }
+                } 
+                //$('#' + sBILL_Check_TypeId).text(data.vBill_Check_Type_AFT);
+
+                $('#' + tBILL_Check_No_TrackId).val(data.vBill_Check_No_Track);
+                $('#' + sBILL_Check_No_TrackId).text(data.vBill_Check_No_Track_AFT);
+                $('#' + tBILL_Check_No_BId).val(data.vBill_Check_No_B);
+                $('#' + sBILL_Check_No_BId).text(data.vBill_Check_No_B_AFT);
+                $('#' + tBILL_Check_No_EId).val(data.vBill_Check_No_E);
+                $('#' + sBILL_Check_No_EId).text(data.vBill_Check_No_E_AFT);
+                var _Check_No_B = parseInt(data.vBill_Check_No_B);
+                var _Check_No_E = parseInt(data.vBill_Check_No_E);
+                if (!isNaN(_Check_No_B) && !isNaN(_Check_No_E) && _Check_No_E >= _Check_No_B) {
+                    $('#' + BILL_totalId).html(customerUtility.addCommas(_Check_No_E - _Check_No_B + 1));
+                }
+                else {
+                    $('#' + BILL_totalId).html('');
+                }
+                var _Check_No_B_AFT = parseInt(data.vBill_Check_No_B_AFT);
+                var _Check_No_E_AFT = parseInt(data.vBill_Check_No_E_AFT);
+                if (!isNaN(_Check_No_B_AFT) && !isNaN(_Check_No_E_AFT) && _Check_No_E_AFT >= _Check_No_B_AFT) {
+                    $('#' + BILL_total_AFTId).html(customerUtility.addCommas(_Check_No_E_AFT - _Check_No_B_AFT + 1));
+                }
+                else {
+                    $('#' + BILL_total_AFTId).html('');
+                }
+                $('#' + hCDCBill_ITEM_ID).val(data.vItemId);
+            }
+        }
+
+
+        function CDCBillUpdateTempFun()
+        {
+            if ($('#' + CDCBillDialogFormId).valid())
+            {
+                var _Check_No_B = parseInt($('#' + tBILL_Check_No_BId).val());
+                var _Check_No_E = parseInt($('#' + tBILL_Check_No_EId).val());
+                if (_Check_No_B > _Check_No_E) {
+                    customerUtility.alert('迄號不可小於起號!', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: CDCBillViewModel(
+                            $('#' + hCDCBill_ITEM_ID).val(),
+                            $('#' + tBILL_Issuing_BankId).val().trim(),
+                            $('#' + dBILL_Check_TypeId).val(),
+                            $('#' + tBILL_Check_No_TrackId).val().trim(),
+                            $('#' + tBILL_Check_No_BId).val().trim(),
+                            $('#' + tBILL_Check_No_EId).val().trim())
+                    }),
+                    dataType: "json",
+                    url: CDCBillurl.UpdateDbData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDCBillUpdateTemp'));
+                        CDCBillDbGrid();
+                        CDCBillConfirmFlag = result.Datas;
+                    }
+                })
+            }
+        }
+
+        function CDCBillViewModel(
+            vItemId,
+            vBill_Issuing_Bank,
+            vBill_Check_Type,
+            vBill_Check_No_Track,
+            vBill_Check_No_B,
+            vBill_Check_No_E
+            ) {
+            var obj = {};
+            obj['vItemId'] = vItemId;
+            obj['vBill_Issuing_Bank'] = vBill_Issuing_Bank;
+            obj['vBill_Check_Type'] = vBill_Check_Type;
+            obj['vBill_Check_No_Track'] = vBill_Check_No_Track;
+            obj['vBill_Check_No_B'] = vBill_Check_No_B;
+            obj['vBill_Check_No_E'] = vBill_Check_No_E;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>

@@ -40,7 +40,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <label >庫存表名稱:</label>
+                                <label > 庫存表名稱:</label>
                             </td>
                             <td  colspan="9">
                                 @Html.DropDownList("JobProject", new SelectList(Model.vjobProject, "Value", "Text"), new { style = "width: 110px;" })
@@ -49,7 +49,8 @@
 
                         <tr >
                             <td>
-                                <label>庫存日期:</label>
+                                <span class="red">＊</span>
+                                <label class="red">庫存日期:</label>
                             </td>
                             <td colspan="4">
                                 <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
@@ -65,7 +66,7 @@
                         </tr>         
                         <tr>
                             <td>
-                                <label>權責部門:</label>
+                                <label> 權責部門:</label>
                             </td>
                             <td colspan="4">
                               @Html.DropDownList("vdept", new SelectList(Model.vdept, "Value", "Text"), new { style = "width: 110px;" })
@@ -77,12 +78,9 @@
                                 @Html.DropDownList("vsect", new SelectList(new List<SelectOption>(), "Value", "Text"), new { style = "width: 110px;" })
                             </td>
                         </tr>
-
-
-
                         <tr class="D1013 clearTd" style="display:none;">
                             <td>
-                                <label>交易對象:</label>
+                                <label> 交易對象:</label>
                             </td>
                             <td colspan="9">
                              @Html.DropDownList("vTRAD_Partners", new SelectList(Model.vTRAD_Partners, "Value", "Text"), new { style = "width: 110px;" })
@@ -90,7 +88,7 @@
                         </tr>  
                         <tr class="D1014 clearTd" style="display:none;">
                             <td>
-                                <label>冊號:</label>
+                                <label> 冊號:</label>
                             </td>
                             <td colspan="9">
                                 @Html.DropDownList("vBook_No", new SelectList(Model.vBook_No, "Value", "Text"), new { style = "width: 110px;" })
@@ -98,7 +96,7 @@
                         </tr>   
                         <tr class="D1015 clearTd" style="display:none;">
                             <td>
-                                <label>股票編號:</label>
+                                <label> 股票編號:</label>
                             </td>
                             <td colspan="9">
                                 @Html.DropDownList("vName", new SelectList(Model.vName, "Value", "Text"), new { style = "width: 150px;" })
@@ -126,15 +124,6 @@
     $(function () {
         var opScope = '@Html.Raw(ViewBag.opScope)';
         //#region url設定
-        var openInsertDetailId = 'TAOpenInsertDetail';
-        var openSearchDetailId = 'TAOpenSearchDetail';
-        var TAFormId = 'TAForm';
-        var EXP_ACCESS_DATEId = 'EXP_ACCESS_DATE';
-        var aProjectId = 'aProject';
-        var aIUnitId = 'aIUnit';
-        var applicantId = 'applicant';
-        var aProjectAllId = 'aProjectAll';
-        var aSUnitAllId = 'aSUnitAll';
         if (opScope == "" || opScope == "0") {
             $('#validationSummary').children().remove();
 
@@ -157,7 +146,7 @@
             var JobProjectId = 'JobProject';
             var APLY_DT_FromId = 'APLY_DT_From';
             var APLY_ODT_FromId = 'APLY_ODT_From';
-            var APLY_ODT_ToId = 'APLY_ODT_To';
+            var APLY_ODT_ToId = 'APLY_ODT_To';             
 
             var openSearchDetailId = 'TROpenSearchDetail';
             var _date = created.getOnlyDate();
@@ -165,7 +154,7 @@
             created.createDatepickerRange(APLY_ODT_FromId, APLY_ODT_ToId); //入庫日期
             created.createDatepicker(APLY_DT_FromId, '');
             $('#' + APLY_DT_FromId).datepicker("option", "maxDate", created.getOnlyDateStr(true));
-            verified.datepicker(TRFormId, EXP_ACCESS_DATEId, $('#' + EXP_ACCESS_DATEId).val());
+            verified.datepicker(TRFormId, APLY_DT_FromId, $('#' + APLY_DT_FromId).val());
 
             //TRClear();
             //#endregion
@@ -190,7 +179,8 @@
             });
 
             function TRReport() {
-                if( $('input:text').val() != "")
+                $('#' + TRFormId).validate().resetForm();
+                if ($('#' + TRFormId).valid())
                 {
                             var listId = 'TAReportList';
                             var reportType = '';
@@ -238,14 +228,15 @@
                         parms,
                         extensionParms)                      
                 }
-                  else {
-                    customerUtility.alert('請至少輸入一個時間', 'w');
+                //  else {
+                //    customerUtility.alert('請至少輸入一個時間', 'w');
 
-                }  
+                //}  
             };
 
             function TRSendTrack() {
-                if ($('input:text').val() != "") {
+                $('#' + TRFormId).validate().resetForm();
+                if ($('#' + TRFormId).valid()) {
                     var listId = 'TAReportList';
                     var reportType = '';
                     var title = '';
@@ -293,18 +284,16 @@
                         extensionParms)
 
                 }
-                else {
-                    customerUtility.alert('請至少輸入一個時間', 'w');
-                }
+                //else {
+                //    customerUtility.alert('請至少輸入一個時間', 'w');
+                //}
             };
 
             function DecideString(str) {
                 if (str == null || str == '') {
                     str = " ";
                 }
-
                 return str
-
             }
 
             function GetItem(type, DEPT_ITEM) {
@@ -426,14 +415,9 @@
                     item = item || '';
                     var _reportTitle = '金庫物品庫存表';
                     var obj = {};
-                    //obj.url = ''; //開啟金庫物品的頁面 url
-                    //obj.title = null; //開啟金庫物品的頁面 Title
-                    //obj.openDialogWidth = 860; //開啟金庫物品的頁面 寬度
                     obj.reportTitle = _reportTitle; //報表Title
                     obj.reportType = null; //報表類型
-
-                     switch (item) {
-        
+                    switch (item) {   
                 case '@Ref.TreaItemType.D1008.ToString()':
                     obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
                     obj.reportType = 'DEPOSIT_SEAL';
@@ -477,11 +461,7 @@
                 case '@Ref.TreaItemType.D1024.ToString()':
                     obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
                     obj.reportType = 'DEPOSIT_CA';
-                    break;
-                        
-          
-             
-
+                    break;                      
                     }
                     return obj;
                 }

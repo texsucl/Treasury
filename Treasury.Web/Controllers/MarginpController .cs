@@ -181,6 +181,17 @@ namespace Treasury.Web.Controllers
             {
                 TreasuryAccessViewModel data = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessViewData);
                 var _data = (List<MarginpViewModel>)Cache.Get(CacheList.MarginpData);
+
+                if (AccountController.CustodianFlag) //保管科
+                {
+                    if (_data.Any(x => x.vMarginp_Book_No.IsNullOrWhiteSpace()))
+                    {
+                        result.RETURN_FLAG = false;
+                        result.DESCRIPTION = Ref.MessageType.book_No_Error.GetDescription();
+                        return Json(result);
+                    }
+                }
+
                 if (data.vAccessType == Ref.AccessProjectTradeType.G.ToString() && !_data.Any(x => x.vtakeoutFlag))
                 {
                     result.DESCRIPTION = "無申請任何資料";
@@ -278,7 +289,10 @@ namespace Treasury.Web.Controllers
                     var _vMemo_AFT = model.vMemo.CheckAFT(updateTempData.vMemo);
                     if (_vMemo_AFT.Item2)
                         updateTempData.vMemo_AFT = _vMemo_AFT.Item1;
-                    updateTempData.vAFTFlag = _vMargin_Take_Of_Type_AFT.Item2 || _vTrad_Partners_AFT.Item2 || _vAmount_AFT.Item2 || _vMargin_Item_AFT.Item2 || _vMargin_Item_Issuer_AFT.Item2 || _vPledge_Item_No_AFT.Item2 || _vEffective_Date_B_AFT.Item2 || _vEffective_Date_E_AFT.Item2 || _vDescription_AFT.Item2 || _vMemo_AFT.Item2;
+                    var _vBook_No_AFT = model.vBook_No.CheckAFT(updateTempData.vBook_No);
+                    if (_vBook_No_AFT.Item2)
+                        updateTempData.vBook_No_AFT = _vBook_No_AFT.Item1;
+                    updateTempData.vAFTFlag = _vMargin_Take_Of_Type_AFT.Item2 || _vTrad_Partners_AFT.Item2 || _vAmount_AFT.Item2 || _vMargin_Item_AFT.Item2 || _vMargin_Item_Issuer_AFT.Item2 || _vPledge_Item_No_AFT.Item2 || _vEffective_Date_B_AFT.Item2 || _vEffective_Date_E_AFT.Item2 || _vDescription_AFT.Item2 || _vMemo_AFT.Item2 || _vBook_No_AFT.Item2;
                     Cache.Invalidate(CacheList.CDCMarginpData);
                     Cache.Set(CacheList.CDCMarginpData, dbData);
                     result.Datas = dbData.Any(x => x.vAFTFlag);

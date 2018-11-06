@@ -8,7 +8,7 @@
 
     </div>
     <div style="text-align:center;display:none;" class="MargingAct">
-        <input type="button" id="MargingApply" value="申請覆核" class="btn btn-primary" />
+        <input type="button" id="MargingApply" value="申請覆核" class="btn btn-primary TAApplyClass" />
         <input type="button" id="MargingCancel" value="取消申請" class="btn btn-primary" />
         <input type="button" id="MargingBack" value="回上一頁" class="btn btn-primary" />
     </div>
@@ -212,12 +212,13 @@
         //#region 初始設定
         function SetCustodianFlag()
         {
+            $('#' + MargingMemo).attr("Disabled", false);
             if ('@ViewBag.CustodianFlag' == "True") {
-                $('#' + MargingMemo).attr("Disabled", false);
+                //$('#' + MargingMemo).attr("Disabled", false);
                 $('#' + MargingBookNo).attr("Disabled", false);
             }
             else {
-                $('#' + MargingMemo).attr("Disabled", true);
+                //$('#' + MargingMemo).attr("Disabled", true);
                 $('#' + MargingBookNo).attr("Disabled", true);
             }
         }
@@ -407,10 +408,10 @@
                 colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 100, sortable: false, formatter: MARGINGformatterCheckType, unformat: MARGINGunformatterCheckType });
                 colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'left' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'left' });
                 colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -443,10 +444,10 @@
                 colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 100, sortable: false, formatter: MARGINGformatterCheckType, unformat: MARGINGunformatterCheckType });
                 colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'center', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDescription", index: "vDescription", width: 100, sortable: false, align: 'left' });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false, align: 'left' });
                 colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 60, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -506,6 +507,10 @@
 
         //新增存出保證金暫存資料
         function MargingInsertTempFun() {
+            if ('@ViewBag.CustodianFlag' == "True" && $('#' + MargingBookNo).val().trim() == '') {
+                customerUtility.alert('@Ref.MessageType.book_No_Error.GetDescription()', 'w');
+                return false;
+            }
             if ($('#' + MargingFormId).valid()) {
                 $.ajax({
                     type: "POST",
@@ -537,6 +542,10 @@
 
         //修改存出保證金暫存資料
         function MargingUpdateTempFun() {
+            if ('@ViewBag.CustodianFlag' == "True" && $('#' + MargingBookNo).val().trim() == '') {
+                customerUtility.alert('@Ref.MessageType.book_No_Error.GetDescription()', 'w');
+                return false;
+            }
             if ($('#' + MargingFormId).valid()) {
                 $.ajax({
                     type: "POST",

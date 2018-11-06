@@ -37,31 +37,20 @@ namespace Treasury.Web.Report.Data
                 int TOTAL= 0;
                 var _IRE = db.ITEM_REAL_ESTATE.AsNoTracking().ToList();
 
-                if(BOOK_NO=="All"){//判斷為全部或單一
-                    _IRE=  db.ITEM_REAL_ESTATE.AsNoTracking()//判斷是否在庫
-                    .Where(x => INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn)
-                    .Where(x =>
-                    (INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS) && x.PUT_DATE <= _APLY_DT) // 在庫 且 存入日期 <= 庫存日期 
-                    ||
-                    (x.INVENTORY_STATUS == INVENTORY_STATUSg && 
-                     x.PUT_DATE <= _APLY_DT && 
-                     _APLY_DT < x.GET_DATE),  //存入日期 <= 庫存日期 且 庫存日期 < 取出日期
-                    _APLY_DT_Date != dtn)
-                    .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
-                    .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
-                    .Where(x=> x.PUT_DATE >= _APLY_ODT_From , _APLY_ODT_From != null)
-                    .Where(x=> x.PUT_DATE <= _APLY_ODT_To ,   _APLY_ODT_To != null).ToList();
-                }
-                else{
-                    _IRE=  db.ITEM_REAL_ESTATE.AsNoTracking()//判斷是否在庫
-                    .Where(x=> x.INVENTORY_STATUS == "1" ,_APLY_DT == dtn )
-                    .Where(x=> x.PUT_DATE <=_APLY_DT  && _APLY_DT < x.GET_DATE,_APLY_DT != dtn )
-                    .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
-                    .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
-                    .Where(x=> x.GROUP_NO.ToString()==BOOK_NO)
-                    .Where(x=> x.PUT_DATE >= _APLY_ODT_From ,_APLY_ODT_From != null  )
-                    .Where(x=> x.PUT_DATE <= _APLY_ODT_To ,   _APLY_ODT_To != null  ).ToList();
-                }          
+                _IRE=  db.ITEM_REAL_ESTATE.AsNoTracking()//判斷是否在庫
+                .Where(x => INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn)
+                .Where(x =>
+                (INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS) && x.PUT_DATE <= _APLY_DT) // 在庫 且 存入日期 <= 庫存日期 
+                ||
+                (x.INVENTORY_STATUS == INVENTORY_STATUSg && 
+                 x.PUT_DATE <= _APLY_DT && 
+                 _APLY_DT < x.GET_DATE),  //存入日期 <= 庫存日期 且 庫存日期 < 取出日期
+                _APLY_DT_Date != dtn)
+                .Where(x => x.CHARGE_DEPT == vdept , vdept != "All")
+                .Where(x => x.CHARGE_SECT == vsect ,  vsect !="All")
+                .Where(x => x.GROUP_NO.ToString() == BOOK_NO , BOOK_NO != "All")
+                .Where(x=> x.PUT_DATE >= _APLY_ODT_From , _APLY_ODT_From != null)
+                .Where(x=> x.PUT_DATE <= _APLY_ODT_To ,   _APLY_ODT_To != null).ToList();
 
                 var depts = new List<VW_OA_DEPT>();
                 var types = new List<SYS_CODE>(); 

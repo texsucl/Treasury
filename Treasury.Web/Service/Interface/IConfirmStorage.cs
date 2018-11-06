@@ -69,7 +69,17 @@ namespace Treasury.Web.Service.Interface
         /// <returns></returns>
         MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId,string register_ID);
 
-         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="searchData"></param>
+        /// <param name="viewData"></param>
+        /// <param name="cUserId"></param>
+        /// <param name="register_ID"></param>
+        /// <returns></returns>
+        MSGReturnModel<List<ConfirmStorageSearchDetailViewModel>> ConfirmAlreadyData(List<string> data, ConfirmStorageSearchViewModel searchData, List<ConfirmStorageSearchDetailViewModel> viewData, string cUserId, string register_ID);
+
         bool CheckIsCreateUser(string cUserID, string RegisterId);
         /// <summary>
         /// 取得 人員基本資料
