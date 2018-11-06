@@ -275,6 +275,20 @@
         /// </summary>
         public static string CDCDepositDataD_All { get; private set; }
 
+        /// <summary>
+        /// 金庫設備維護作業查詢畫面
+        /// </summary>
+        public static string TreasuryMaintainSearchData { get; private set; }
+
+        /// <summary>
+        /// 金庫設備維護作業查詢結果
+        /// </summary>
+        public static string TreasuryMaintainSearchDataList { get; private set; }
+
+        /// <summary>
+        /// 金庫設備維護作業異動紀錄查詢結果
+        /// </summary>
+        public static string TreasuryMaintainChangeRecordSearchDataList { get; private set; }
         #endregion Cache資料
 
 
@@ -333,6 +347,9 @@
             CDCDepositDataM = "CDCDepositDataM";
             CDCDepositDataD = "CDCDepositDataD";
             CDCDepositDataD_All = "CDCDepositDataD_All";
+            TreasuryMaintainSearchData = "TreasuryMaintainSearchData";
+            TreasuryMaintainSearchDataList = "TreasuryMaintainSearchDataList";
+            TreasuryMaintainChangeRecordSearchDataList = "TreasuryMaintainChangeRecordSearchDataList";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料

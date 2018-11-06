@@ -1,0 +1,425 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-金庫設備維護作業";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TM_Form_Search">
+                    <table>
+                        <tr>
+                            <td align="right">
+                                <label>控管模式 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dControl_Mode_Search", (SelectList)ViewBag.dControl_Mode_Search)
+                            </td>
+                            <td align="right">
+                                <label>停用註記 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dIs_Disabled", (SelectList)ViewBag.dIs_Disabled)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="TM_Search" value="查詢" />
+                                <input type="button" class="btn btn-primary" id="TM_ChangeRecord_Search" value="開啟異動紀錄查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div id="OpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="OpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div id="TM_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="TM_Insert" value="新增存入明細" class="btn btn-primary" />
+        </div>
+        <div id="TM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="text-align:center;display:none;" class="TM_Act">
+            <input type="button" id="TM_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="TM_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="TM_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="TM_Dialog" style="display:none;">
+        <form id="TM_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>設備名稱 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="TM_InsertType" id="tEquip_Name" name="tEquip_Name" />
+                        <input type="hidden" id="hTrea_Equip_Id" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>控管模式 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dControl_Mode", (SelectList)ViewBag.dControl_Mode, new { @class = "TM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>常用數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="TM_InsertType" id="tNormal_Cnt" name="tNormal_Cnt" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備份數量 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="TM_InsertType" id="tReserve_Cnt" name="tReserve_Cnt" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>總數量 : </label>
+                    </td>
+                    <td>
+                        <label id="lSum_Cnt" name="lSum_Cnt"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="TM_InsertType" id="tMemo" name="tMemo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="TM_InsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="TM_UpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="TM_DeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="TM_CancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="OpenChangeRecordSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenChangeRecordSearchDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TM_Url = {};
+        TM_Url.search = '@Url.Action("SearchData", "TreasuryMaintain")';
+        TM_Url.getData = '@Url.Action("GetCacheData", "TreasuryMaintain")';
+        TM_Url.InsertTempData = '@Url.Action("InsertTempData", "TreasuryMaintain")';
+        TM_Url.UpdateTempData = '@Url.Action("UpdateTempData", "TreasuryMaintain")';
+        TM_Url.DeleteTempData = '@Url.Action("DeleteTempData", "TreasuryMaintain")';
+        TM_Url.ResetTempData = '@Url.Action("ResetTempData", "TreasuryMaintain")';
+        TM_Url.ApplyTempData = '@Url.Action("ApplyTempData", "TreasuryMaintain")';
+        TM_Url.Check_Equip_Name = '@Url.Action("Check_Equip_Name", "TreasuryMaintain")';
+        TM_Url.openTreasuryMaintain = '@Url.Action("View", "TreasuryMaintain")';
+        TM_Url.openChangeRecord = '@Url.Action("ChangeRecord", "TreasuryMaintain")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var TM_Form_Search_Id = 'TM_Form_Search'; //formId
+        var TM_Control_Mode_Search = 'dControl_Mode_Search'; //控管模式Id
+        var TM_Is_Disabled = 'dIs_Disabled'; //停用註記Id
+        var openSearchDetailId = 'OpenSearchDetail';
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TM_Search':
+                        $('#' + id).on('click', function () { TM_Search(); });
+                        break;
+                    case 'TM_ChangeRecord_Search':
+                        $('#' + id).on('click', function () { TM_ChangeRecord_Search(); });
+                        break;
+                }
+            });
+
+            //#endregion 註冊事件
+
+            //#region jqgrid
+            function formattervControl_Mode(cellvalue, options, rdata) {
+                switch (rdata.vControl_Mode) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dControl_Mode))
+                {
+                <text>
+                    case '@item.Value':
+                        return '@item.Text';
+                        </text>
+            }
+        }
+                }
+            }
+
+            function unformattervControl_Mode(cellvalue, options, rdata) {
+                return rdata.vControl_Mode;
+            }
+
+            function formattervData_Status_Name(cellvalue, options, rdata) {
+                if (rdata.vData_Status == 2) {
+                    return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+                }
+                else {
+                    return cellvalue;
+                }
+            }
+
+            function UnformattervData_Status_Name(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+
+            function TM_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'TM_Temp', tempActFun);
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_vData_Status]', listId)).text();
+                    var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIs_Disabled]', listId)).text();
+                    if (status != '1' || Is_Disabled == "Y") {
+                        $(this).find('.actionEditIcon').hide();
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+
+                    //異動申請單號
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+
+                });
+            }
+
+            var tempActFun = {};
+            tempActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            tempActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            tempActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+
+            function OpenAply_NoFun(listId, rowid) {
+                var data = $("#" + listId).getRowData(rowid);
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAply_No,
+                        data: TreasuryInOutChangeRecordSearchViewModel()
+                    }),
+                    dataType: 'html',
+                    url: TM_Url.openChangeRecordView,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + openChangeRecordSearchDetailId).html(data);
+                        openDialog('金庫設備異動紀錄', 1250, 'OpenChangeRecordSearchDialog');
+                    }
+                })
+            }
+
+            function openDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openChangeRecordSearchDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            function TM_TempGrid() {
+                var colNameArray = ['動作', '執行功能', '設備名稱', '控管模式', '常用數量', '備份數量', '總數量', '備註', '停用註記', '資料狀態', '資料凍結人員', '金庫設備編號', '控管模式值', '停用註記值', '資料狀態值', '異動申請單號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vEquip_Name", index: "vEquip_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vControl_Mode_Show", index: "vControl_Mode_Show", width: 70, align: 'center', sortable: false, formatter: formattervControl_Mode, unformatter: unformattervControl_Mode });
+                colModelArray.push({ name: "vNormal_Cnt", index: "vNormal_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vReserve_Cnt", index: "vReserve_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vSum_Cnt", index: "vSum_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
+                colModelArray.push({ name: "vIs_Disabled_Name", index: "vIs_Disabled_Name", width: 100, sortable: false });
+
+                colModelArray.push({ name: "vData_Status_Name", index: "vData_Status_Name", width: 100, sortable: false, align: 'center', formatter: formattervData_Status_Name, unformat: UnformattervData_Status_Name });
+                //colModelArray.push({ name: "vData_Status_Name", index: "vData_Status_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vFreeze_Uid_Name", index: "vFreeze_Uid_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vTrea_Equip_Id", index: "vTrea_Equip_Id", hidden: true });
+                colModelArray.push({ name: "vControl_Mode", index: "vControl_Mode", hidden: true });
+                colModelArray.push({ name: "vIs_Disabled", index: "vIs_Disabled", hidden: true });
+                colModelArray.push({ name: "vData_Status", index: "vData_Status", hidden: true });
+                colModelArray.push({ name: "vAply_No", index: "vAply_No", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'TM_jqgridDiv',
+                    'TM_TempList',
+                    'TM_TempPeger',
+                    TM_Url.getData,
+                    {
+                        type: 'S'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '金庫設備維護作業',
+                    jqgridCustom.getPage('TM_jqgridDiv'),
+                    TM_CompleteFun,
+                    true
+                    );
+            }
+            //#endregion jqgrid
+
+
+            function TM_Search() {
+                var dialogId = 'TM_SearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 1100,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: TreasuryInOutSearchViewModel(
+                            $('#' + TM_Control_Mode_Search).val(),
+                            $('#' + TM_Is_Disabled).val())
+                    }),
+                    url: TM_Url.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        TM_TempGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+
+
+
+
+                //$.ajax({
+                //    type: 'POST',
+                //    data: JSON.stringify({
+                //        AplyNo: null,
+                //        data: TreasuryInOutSearchViewModel(
+                //            $('#' + TM_Control_Mode_Search).val(),
+                //            $('#' + TM_Is_Disabled).val()),
+                //        type: 4
+                //    }),
+                //    dataType: 'html',
+                //    url: TM_Url.openTreasuryMaintain,
+                //    contentType: 'application/json',
+                //    success: function (vdata, textStatus, jqXHR) {
+                //        $('#' + openSearchDetailId).children().remove();
+                //        $('#' + openSearchDetailId).html(vdata);
+                //        openDialog('金庫設備維護作業', 1100, 'OpenSearchDialog');
+                //    }
+                //})
+            }
+
+            function TM_ChangeRecord_Search() {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    url: TM_Url.openChangeRecord,
+                    contentType: 'application/json',
+                    success: function (vdata, textStatus, jqXHR) {
+                        $('#' + openSearchDetailId).children().remove();
+                        $('#' + openSearchDetailId).html(vdata);
+                        openDialog('金庫設備異動紀錄', 800, 'OpenSearchDialog');
+                    }
+                })
+            }
+
+            function openDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openSearchDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            //#region 查詢畫面  ViewModel
+            function TreasuryInOutSearchViewModel(
+                vControl_Mode,
+                vIs_Disabled
+                ) {
+                var obj = {};
+                obj['vControl_Mode'] = vControl_Mode;
+                obj['vIs_Disabled'] = vIs_Disabled;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

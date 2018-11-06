@@ -33,6 +33,20 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("資料庫異動覆核作業")]
             CDCAppr = 3,
+
+            /// <summary>
+            /// 金庫進出管理申請作業
+            /// </summary>
+            [Description("金庫進出管理申請作業")]
+            TINIndex = 4,
+
+            /// <summary>
+            /// 金庫進出管理覆核作業
+            /// </summary>
+            [Description("金庫進出管理覆核作業")]
+            TINAppr = 5,
+
+
         }
     }
 

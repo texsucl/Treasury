@@ -26,5 +26,6 @@ namespace Treasury.Web.Models
         public Nullable<int> NORMAL_CNT_B { get; set; }
         public Nullable<int> RESERVE_CNT_B { get; set; }
         public string MEMO_B { get; set; }
+        public string APPR_STATUS { get; set; }
     }
 }

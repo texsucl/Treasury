@@ -50,23 +50,27 @@ namespace Treasury.Web.Service.Actual
         /// get SysCode by CodeType
         /// </summary>
         /// <param name="codeType"></param>
+        /// <param name="isAll"></param>
         /// <returns></returns>
-        public List<SelectOption> GetSysCode(string codeType)
+        public List<SelectOption> GetSysCode(string codeType, bool isAll = false)
         {
             var result = new List<SelectOption>();
             if (codeType.IsNullOrWhiteSpace())
                 return result;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                result = db.SYS_CODE.AsNoTracking()
+                if (isAll)
+                    result.Add(new SelectOption() { Text = "All", Value = "All" });
+
+                result.AddRange(db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == codeType)
-                    .OrderBy(x=>x.ISORTBY)
+                    .OrderBy(x => x.ISORTBY)
                     .AsEnumerable()
                     .Select(x => new SelectOption()
                     {
                         Text = x.CODE_VALUE,
                         Value = x.CODE
-                    }).ToList();
+                    }).ToList());
             }
             return result;
         }
