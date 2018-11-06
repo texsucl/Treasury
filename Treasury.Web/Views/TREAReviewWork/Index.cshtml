@@ -140,6 +140,7 @@
                     SearchGrid();
                     $("#" + Approved).prop('disabled', false);
                     $("#" + Reject).prop('disabled', false);
+          
                 }
             });
         };
@@ -169,7 +170,7 @@
                     flag = true;
             }
             if (!flag) {
-                customerUtility.alert('無選擇駁回項目', 'w');
+                customerUtility.alert('無勾選駁回項目', 'w');
                 return false;
             }
             var dialogId = 'IsRejectDialog';
@@ -223,10 +224,7 @@
                 }
                 else {
                     DeatilsGrid();
-                    var x = result.Datas;
-                    alert(x);
                     $('#' + h_REGISTER_ID).val(result.Datas);
-                    console.log($('#' + h_REGISTER_ID).val());
                 }
             });
         }
@@ -346,6 +344,13 @@
                 contentType: 'application/json',
             }).done(function (result) {
                 if (result.RETURN_FLAG) {
+                    if (result.Datas == true) {
+                        $("#" + Approved).prop('disabled', false);
+                        $("#" + Reject).prop('disabled', false);
+                    } else {
+                        $("#" + Approved).prop('disabled', true);
+                        $("#" + Reject).prop('disabled', true);
+                    }
                     SearchGrid();
                 }
             });
@@ -397,7 +402,7 @@
             $('#' + txtACTUAL_GET_TIME).val(data.vACTUAL_GET_TIME);
 
             GetDetailsData(data);
-            
+
         }
         //#endregion
         //region 列印

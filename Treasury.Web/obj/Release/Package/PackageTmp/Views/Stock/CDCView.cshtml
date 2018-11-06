@@ -89,6 +89,22 @@
                         <lable id="lCharge_Name" name="lCharge_Name"></lable>
                     </td>
                 </tr>
+                <tr class="GetClass">
+                    <td>
+                        <label>取出日期 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
+                    <td>
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td>
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 <tr>
                     <td>
                         <label>類型 : </label>
@@ -221,6 +237,8 @@
         var CDC_StockDialog_D_Id = 'CDC_Stock_D_Dialog'; //dialogId
         var CDC_StockFormId = 'CDC_StockForm'; //formId
         var CDC_StockPut_Date = 'lPut_Date';//入庫日期Id
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var CDC_StockAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
         var CDC_StockCharge_Name = 'lCharge_Name';//權責單位Id
         var CDC_StockStock_Type = 'dStock_Type';//類型Id
@@ -246,6 +264,8 @@
         var CDC_StockMemo = 'tMemo';//備註說明Id
         var CDC_StockMemo_Aft = 'sMemo';//備註說明_異動後Id
         var CDC_StockItemId = 'hItemId';//物品單號Id
+
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
 
         var CDC_Stock_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDC_Stock_Act_Type)
@@ -414,7 +434,7 @@
                 close: function (event, ui) {
                     customerUtility.closeDialog(this);
                 }
-            });
+            });          
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -453,7 +473,7 @@
             var StockUpdateClass = 'CDC_StockUpdateType';
             var title = customerUtility.getDialogType(type);;
             $('#' + CDC_StockDialog_D_Id).dialog({
-                position: { my: "top+30%", at: "center top", of: window },
+                position: { my: "top", at: "center top", of: window },
                 title: title + '股票',
                 width: 'auto',
                 autoOpen: false,
@@ -464,6 +484,7 @@
                 }
             });
             $('#CDC_StockUpdateTemp').hide();
+            $('.GetClass').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -474,6 +495,9 @@
                 $('.' + StockUpdateClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
+                if (GetFlag) {
+                    $('.GetClass').show();
+                }
                 dialogSetDataD(listId, rowid);
                 $('.' + StockUpdateClass).prop('disabled', true);
             }
@@ -482,6 +506,8 @@
 
         function ResetDialog() {
             $('#' + CDC_StockPut_Date).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
             $('#' + CDC_StockAply_Uid_Name).text('');
             $('#' + CDC_StockCharge_Name).text('');
 
@@ -524,6 +550,10 @@
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
                 $('#' + CDC_StockPut_Date).text(data.vPut_Date);
+                if (GetFlag) {
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
                 $('#' + CDC_StockAply_Uid_Name).text(data.vAply_Uid_Name);
                 $('#' + CDC_StockCharge_Name).text(data.vCharge_Name);
 
@@ -837,15 +867,23 @@
         }
 
         function CDC_Stock_D_DbGrid() {
-            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag) {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '股票類型', '序號前置碼', '序號(起)', '序號(迄)', '張數', '每股金額', '單張股數', '單張面額', '面額小計', '股數小計', '備註說明',
                 '股票類型異動前', '序號前置碼異動前', '序號(起)異動前', '序號(迄)異動前', '張數異動前', '每股金額異動前', '單張股數異動前', '單張面額異動前', '面額小計異動前', '股數小計異動前', '備註說明異動前',
                 '股票類型異動後', '序號前置碼異動後', '序號(起)異動後', '序號(迄)異動後', '張數異動後', '每股金額異動後', '單張股數異動後', '單張面額異動後', '面額小計異動後', '股數小計異動後', '備註說明異動後',
-                '物品編號', '狀態Id'];
+                '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterActD });
             colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
             colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false });
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
             colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
 
@@ -907,7 +945,6 @@
 
         //取得股票明細內容
         function GetCDCStockDetailDate(listId, rowid) {
-            debugger
             var data = $("#" + listId).getRowData(rowid);
             $.ajax({
                 type: "POST",

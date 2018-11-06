@@ -36,8 +36,9 @@ namespace Treasury.Web.Service.Interface
         /// 產生工作底稿
         /// </summary>
         /// <param name="currentUserId">目前使用者ID</param>
+        /// <param name="Trea_Register_Id">金庫開庫單號</param>
         /// <returns></returns>
-        MSGReturnModel<IEnumerable<ITreaItem>> DraftData(string currentUserId);
+        MSGReturnModel<IEnumerable<ITreaItem>> DraftData(string currentUserId, string Trea_Register_Id);
 
     }
 }

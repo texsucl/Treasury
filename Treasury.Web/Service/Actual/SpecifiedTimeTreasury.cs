@@ -635,7 +635,7 @@ namespace Treasury.Web.Service.Actual
                         result.DESCRIPTION = Ref.MessageType.not_Find_Any.GetDescription(null, $"單號:{item.vTREA_REGISTER_ID}");
                         return result;
                     }
-                    if (_TREA_OPEN_REC.LAST_UPDATE_DT > item.vLAST_UPDATE_DT) //資料已備更新
+                    if (_TREA_OPEN_REC.LAST_UPDATE_DT > item.vLAST_UPDATE_DT) //資料已被更新
                     {
                         result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{item.vTREA_REGISTER_ID}");
                         return result;

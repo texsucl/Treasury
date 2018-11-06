@@ -14,6 +14,8 @@ using System.Data;
 using Treasury.Web.ViewModels;
 using Treasury.Web.Controllers;
 using System.IO;
+using System.Text;
+using Treasury.Web.Models;
 
 /// <summary>
 /// 功能說明：共用 controller
@@ -34,7 +36,21 @@ namespace Treasury.Web.Controllers
     public class CommonController : BaseController
     {
         internal ICacheProvider Cache { get; set; }
+
+        /// <summary>
+        /// 可以申請覆核的狀態
+        /// </summary>
         internal List<string> Aply_Appr_Type { get; set; }
+
+        /// <summary>
+        /// 已經結束的狀態
+        /// </summary>
+        internal List<string> End_Type { get; set; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        internal List<string> Custody_Aply_Appr_Type { get; set; }
 
         protected ITreasuryAccess TreasuryAccess;
 
@@ -49,6 +65,20 @@ namespace Treasury.Web.Controllers
                 Ref.AccessProjectFormStatus.A04.ToString(),
                 Ref.AccessProjectFormStatus.A05.ToString(),
                 Ref.AccessProjectFormStatus.A06.ToString()
+            };
+            End_Type = new List<string>()
+            {               
+                Ref.AccessProjectFormStatus.E01.ToString(),
+                Ref.AccessProjectFormStatus.E02.ToString(),
+                Ref.AccessProjectFormStatus.E03.ToString(),
+                Ref.AccessProjectFormStatus.E04.ToString()
+            };
+            Custody_Aply_Appr_Type = new List<string>()
+            {
+                Ref.AccessProjectFormStatus.B01.ToString(),
+                Ref.AccessProjectFormStatus.B02.ToString(),
+                Ref.AccessProjectFormStatus.B03.ToString(),
+                Ref.AccessProjectFormStatus.B04.ToString()
             };
             TreasuryAccess = new TreasuryAccess();
         }
@@ -67,8 +97,12 @@ namespace Treasury.Web.Controllers
             {
                 case Ref.OpenPartialViewType.TAAppr: //金庫物品存取覆核作業
                     //只有檢視功能
-                    return false; 
-
+                    return false;
+                case Ref.OpenPartialViewType.CustodyAppr: //保管單位覆核作業
+                    //只有檢視功能
+                    return false;
+                case Ref.OpenPartialViewType.CustodyIndex: //保管單位承辦作業
+                    return TreasuryAccess.GetActType(AplyNo, AccountController.CurrentUserId, Custody_Aply_Appr_Type );
                 case Ref.OpenPartialViewType.TAIndex: //金庫物品存取申請作業
                 default:
                     //查詢作業 有單號的申請,如果為填表人本人可以修改
@@ -215,7 +249,7 @@ namespace Treasury.Web.Controllers
                     _DisplayName = _DisplayName.Replace("(", "-").Replace(")", "");
                     var _name = _parm.FirstOrDefault(x => x.Name == "vJobProject");
                     if (_name != null)
-                        _DisplayName = $"{_DisplayName}({_name.Values[0]})";
+                        _DisplayName = $"{_DisplayName}_{_name.Values[0]}";
                 }
                 lr.DisplayName = _DisplayName;
                 lr.Refresh();
@@ -244,19 +278,106 @@ namespace Treasury.Web.Controllers
                     saveAs = string.Format("{0}.{1}.pdf", Path.Combine(fileLocation, _DisplayName), idx);
                 }
 
-                using (var stream = new FileStream(saveAs, FileMode.Create, FileAccess.Write))
-                {
-                    stream.Write(renderedBytes, 0, renderedBytes.Length);
-                    stream.Close();
-                }
+                //using (var stream = new FileStream(saveAs, FileMode.Create, FileAccess.Write))
+                //{
+                //    stream.Write(renderedBytes, 0, renderedBytes.Length);
+                //    stream.Close();
+                //}
 
                 lr.Dispose();
 
-                #region 寄信
 
+                #region 寄信
+                List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
+                List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
+                using (TreasuryDBEntities db = new TreasuryDBEntities())
+                {
+                    using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+                    {
+                        //存許項目
+                        string vitemId = parms.FirstOrDefault(x => x.key == "vjobProject")?.value;
+                        //權責部門
+                        string vdept = parms.FirstOrDefault(x => x.key == "CHARGE_DEPT_ID")?.value;
+                        //權責科別
+                        string vsect = parms.FirstOrDefault(x => x.key == "CHARGE_SECT_ID")?.value;
+                   
+                        var _VW_OA_DEPT = dbINTRA.VW_OA_DEPT.AsNoTracking();
+                        var _V_EMPLY2 = dbINTRA.V_EMPLY2.AsNoTracking();
+
+                        var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking()
+                            .Where(x => x.ITEM_ID == vitemId, vitemId != null)
+                            .Where(x => x.CHARGE_DEPT == vdept, vitemId != null)
+                            .Where(x => x.CHARGE_SECT == vsect, vsect != null)
+                            .Where(x => x.IS_DISABLED == "N")
+                            .AsEnumerable()
+                            .Select(x => new ITEM_CHARGE_UNIT()
+                            {
+                                CHARGE_UID = x.CHARGE_UID,
+                                IS_MAIL_SECT_MGR = x.IS_MAIL_SECT_MGR,
+                                IS_MAIL_DEPT_MGR = x.IS_MAIL_DEPT_MGR
+                            }).ToList();
+                        _ITEM_CHARGE_UNIT.ForEach(x => {
+                            if (x.IS_MAIL_SECT_MGR == "Y")
+                            {
+                                //科主管員編
+                                var _VW_OA_DEPT_DPT_HEAD = _VW_OA_DEPT.FirstOrDefault(y => y.DPT_CD == vsect)?.DPT_HEAD;
+                                //人名 EMAIl
+                                var _EMP_NAME = _V_EMPLY2.FirstOrDefault(y => y.EMP_NO == _VW_OA_DEPT_DPT_HEAD);
+                                if(_EMP_NAME != null)
+                                {
+                                   _mailTo.Add(new Tuple<string, string>(_EMP_NAME.EMAIL, _EMP_NAME.EMP_NAME));
+                                }
+                            }
+                            if(x.IS_MAIL_DEPT_MGR == "Y")
+                            {
+                                //部主管員編
+                                var _UP_DPT_CD = _VW_OA_DEPT.FirstOrDefault(y => y.DPT_CD == vsect)?.UP_DPT_CD;
+                                var _VW_OA_DEPT_DPT_HEAD = _VW_OA_DEPT.FirstOrDefault(y => y.DPT_CD == _UP_DPT_CD)?.DPT_HEAD;
+                                //人名 EMAIl
+                                var _EMP_NAME = _V_EMPLY2.FirstOrDefault(y => y.EMP_NO == _VW_OA_DEPT_DPT_HEAD);
+                                if (_EMP_NAME != null)
+                                {
+                                    _ccTo.Add(new Tuple<string, string>(_EMP_NAME.EMAIL, _EMP_NAME.EMP_NAME));
+                                }
+                            }
+                        });
+                    }
+                }
+                    Dictionary<string, Stream> attachment = new Dictionary<string, Stream>();
+
+                attachment.Add(string.Format("{0}.pdf",_DisplayName), new MemoryStream(renderedBytes));
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine(
+$@"請參考附件
+");
+                    try
+                    {
+                        var sms = new SendMail.SendMailSelf();
+                        sms.smtpPort = 25;
+                        sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                        sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                        sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                        sms.Mail_Send(
+                            new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                           _mailTo,
+                            _ccTo,
+                            "金庫物品庫存表",
+                            sb.ToString(),
+                            false,
+                            attachment
+                            );
+                    
+                    }
+                    catch (Exception ex)
+                    {
+                        result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                        return Json(result);
+                }
+                
                 #endregion
 
-                System.IO.File.Delete(saveAs);
+                //System.IO.File.Delete(saveAs);
 
                 //Response.ClearHeaders();
                 //Response.ClearContent();

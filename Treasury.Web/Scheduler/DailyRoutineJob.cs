@@ -34,14 +34,15 @@ namespace Treasury.Web.Scheduler
                 {
                     _mt = db.MAIL_TIME.AsEnumerable().FirstOrDefault(x => x.FUNC_ID == "0000000016" && x.IS_DISABLED == "N" && DateTime.Parse(x.EXEC_TIME_B + ":00") <= DateTime.Parse(dtnstr + ":00") && DateTime.Parse(x.EXEC_TIME_E + ":00") >= DateTime.Parse(dtnstr + ":00"));
                     if (_mt != null)
-                    {              
-                        try
+                    {
+                        var _INTERVAL_MIN = _mt.INTERVAL_MIN;
+                        if (dtn.Minute % _INTERVAL_MIN == 0)
                         {
-                            var _INTERVAL_MIN = _mt.INTERVAL_MIN;
-                            if (dtn.Minute % _INTERVAL_MIN == 0)
+                            _mt.SCHEDULER_STATUS = "Y";
+                            _mt.SCHEDULER_UPDATE_DT = dtn;
+
+                            try
                             {
-                                _mt.SCHEDULER_STATUS = "Y";
-                                _mt.SCHEDULER_UPDATE_DT = dtn;
                                 db.SaveChanges();
 
                                 Extension.NlogSet($"MAIL_TIME 通知檢核啟動");
@@ -49,37 +50,37 @@ namespace Treasury.Web.Scheduler
 
                                 RemindClose(db, dtnstr, dtn, _INTERVAL_MIN);
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            Extension.NlogSet($"關庫確認作業錯誤,Exception:{ex.exceptionMessage()}!!");
-                        }
-                        finally
-                        {
-                            Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
-                            var _mt2 = db.MAIL_TIME
-                                    .Where(x =>
-                                    x.FUNC_ID == "0000000016")
-                                    .ToList();
-                            if (_mt2.Any())
+                            catch (Exception ex)
                             {
-                                Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
-                                foreach (var item in _mt2)
-                                {
-                                    item.SCHEDULER_STATUS = "N";
-                                }
-                                try
-                                {
-                                    db.SaveChanges();
-                                }
-                                catch
-                                {
-
-                                }
+                                Extension.NlogSet($"關庫確認作業錯誤,Exception:{ex.exceptionMessage()}!!");
                             }
-                            else
+                            finally
                             {
-                                Extension.NlogSet($"無更新SCHEDULER_STATUS !!");
+                                Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
+                                var _mt2 = db.MAIL_TIME
+                                        .Where(x =>
+                                        x.FUNC_ID == "0000000016")
+                                        .ToList();
+                                if (_mt2.Any())
+                                {
+                                    Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
+                                    foreach (var item in _mt2)
+                                    {
+                                        item.SCHEDULER_STATUS = "N";
+                                    }
+                                    try
+                                    {
+                                        db.SaveChanges();
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                }
+                                else
+                                {
+                                    Extension.NlogSet($"無更新SCHEDULER_STATUS !!");
+                                }
                             }
                         }
                     }
@@ -102,9 +103,9 @@ namespace Treasury.Web.Scheduler
                     x.INTERVAL_MIN == 0);
                     //var _Mail_Time_ID = _MT.MAIL_TIME_ID;
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().AsEnumerable()
-                        .FirstOrDefault(x => 
+                        .FirstOrDefault(x =>
                         x.OPEN_TREA_TYPE != "1" &&
-                        x.REGI_STATUS != "E01" && 
+                        x.REGI_STATUS != "E01" &&
                         x.APPR_STATUS != "4");
                     //if (_MT != null && _checkFlag)
                     if (_MT != null && _TREA_OPEN_REC == null)
@@ -160,7 +161,7 @@ namespace Treasury.Web.Scheduler
 
                 #endregion
 
-             
+
             }
 
             Extension.NlogSet("[Execute]執行結束!!");
@@ -390,20 +391,21 @@ $@"您好,
                         switch (_TREA_OPEN_REC.REGI_STATUS)
                         {
                             case "C02":
-                                if(_TREA_OPEN_REC.APPR_STATUS == "3")
+                                if (_TREA_OPEN_REC.APPR_STATUS == "3")
                                 {
                                     sb.AppendLine(
 $@"您好, 
 尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫申請作業】，請儘速完成，謝謝");
                                 }
-                                else if(_TREA_OPEN_REC.APPR_STATUS == "1")
+                                else if (_TREA_OPEN_REC.APPR_STATUS == "1")
                                 {
                                     sb.AppendLine(
 $@"您好, 
 尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫覆核作業】，請儘速完成，謝謝");
-                                }else if(_TREA_OPEN_REC.APPR_STATUS == "2")
+                                }
+                                else if (_TREA_OPEN_REC.APPR_STATUS == "2")
                                 {
-                                    if(_TREA_APLY_REC == null)
+                                    if (_TREA_APLY_REC == null)
                                     {
                                         sb.AppendLine(
 $@"您好, 
@@ -430,9 +432,9 @@ $@"您好,
                                 break;
                         }
 
-//                        sb.AppendLine(
-//$@"您好, 
-//通知系統尚未登打金庫進 / 出入庫時間，請儘速完成，謝謝");
+                        //                        sb.AppendLine(
+                        //$@"您好, 
+                        //通知系統尚未登打金庫進 / 出入庫時間，請儘速完成，謝謝");
 
                         #region 寄送mail給相關人員
                         Extension.NlogSet($" 寄送mail給相關人員");

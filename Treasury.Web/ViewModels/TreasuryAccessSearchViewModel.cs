@@ -72,5 +72,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("填表人員")]
         public string vCreateUid { get; set; }
+
+        /// <summary>
+        /// 保管科人員
+        /// </summary>
+        [Description("保管科人員")]
+        public bool vCustodianFlag { get; set; }
     }
 }

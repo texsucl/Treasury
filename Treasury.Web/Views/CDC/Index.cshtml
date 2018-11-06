@@ -176,6 +176,7 @@
 
             //#region url設定
             var CDCurl = {};
+            CDCurl.openBill = '@Url.Action("CDCView", "Bill")';
             CDCurl.openSEAL = '@Url.Action("CDCView", "Seal")';
             CDCurl.openCA = '@Url.Action("CDCView", "CA")';
             CDCurl.openMarging = '@Url.Action("CDCView", "Marging")';
@@ -242,8 +243,8 @@
                     case '@Ref.TreaItemType.D1016.ToString()':
                     case '@Ref.TreaItemType.D1017.ToString()':
                     case '@Ref.TreaItemType.D1018.ToString()':
-                            $('.clearTd_2').hide();
-                            $('.' + $(this).val()+'_2').show();
+                        $('.clearTd_2').hide();
+                        $('.' + $(this).val()+'_2').show();
                         break;
                 }
                 if($(this).val() == '@Ref.TreaItemType.D1016.ToString()')
@@ -269,10 +270,10 @@
                     $('#' + APLY_ODT_ToId).next().prop('disabled', false);
                     $('#' + APLY_ODT_FromId).prop('disabled', false);
                     $('#' + APLY_ODT_ToId).prop('disabled', false);
-                    $('#' + APLY_ODT_FromId).datepicker('setDate', _date);
-                    $('#' + APLY_ODT_ToId).datepicker('setDate', _date);
-                    $('#' + APLY_ODT_FromId).datepicker("option", "maxDate", _date);
-                    $('#' + APLY_ODT_ToId).datepicker("option", "minDate", _date);
+                    //$('#' + APLY_ODT_FromId).datepicker('setDate', _date);
+                    //$('#' + APLY_ODT_ToId).datepicker('setDate', _date);
+                    //$('#' + APLY_ODT_FromId).datepicker("option", "maxDate", _date);
+                    //$('#' + APLY_ODT_ToId).datepicker("option", "minDate", _date);
                 }
             }
             $('#'+treasuryIOId).val($($('#'+treasuryIOId+' option')[0]).val()).change();
@@ -371,10 +372,10 @@
                 $('#'+dNameId).val($($('#'+dNameId+' option')[0]).val()).change();
                 $('#'+dTRAD_PartnersId).val($($('#'+dTRAD_PartnersId+' option')[0]).val()).change();
                 $('#'+Margin_Dep_TypeId).val($($('#'+Margin_Dep_TypeId+' option')[0]).val()).change();
-                $('#' + APLY_DT_FromId).datepicker('setDate', _date);
-                $('#' + APLY_DT_ToId).datepicker('setDate', _date);
-                $('#' + APLY_DT_FromId).datepicker("option", "maxDate", _date);
-                $('#' + APLY_DT_ToId).datepicker("option", "minDate", _date);
+                //$('#' + APLY_DT_FromId).datepicker('setDate', _date);
+                //$('#' + APLY_DT_ToId).datepicker('setDate', _date);
+                //$('#' + APLY_DT_FromId).datepicker("option", "maxDate", _date);
+                //$('#' + APLY_DT_ToId).datepicker("option", "minDate", _date);
                 $('#'+tItem_NoId).val('');
                 $('#'+tBook_NoId).val('');
                 $('#'+vCOMMIT_DATEId).val('');
@@ -389,7 +390,20 @@
                 obj.title = null; //開啟金庫物品的頁面 Title
                 obj.openDialogWidth = 860; //開啟頁面 寬度
 
+                var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
+                if(GetFlag)
+                {
+                    obj.openDialogWidth = 1050; //開啟頁面 寬度
+                }
                 switch (item) {
+                    case '@Ref.TreaItemType.D1012.ToString()':
+                        obj.url = CDCurl.openBill;
+                        obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
+                        if(GetFlag)
+                            obj.openDialogWidth = 1305;
+                        else
+                            obj.openDialogWidth = 1115;
+                        break;
                     case '@Ref.TreaItemType.D1014.ToString()':
                         obj.url = CDCurl.openEstate;
                         obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
@@ -414,11 +428,15 @@
                     case '@Ref.TreaItemType.D1015.ToString()':
                         obj.url = CDCurl.openStock;
                         obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                        obj.openDialogWidth = 860;
                         break;
                     case '@Ref.TreaItemType.D1024.ToString()':
                         obj.url = CDCurl.openCA;
                         obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
-                        obj.openDialogWidth = 1100;
+                        if(GetFlag)
+                            obj.openDialogWidth = 1290;
+                        else
+                            obj.openDialogWidth = 1100;
                         break;
                     case '@Ref.TreaItemType.D1017.ToString()':
                         obj.url =  CDCurl.openMarginp;

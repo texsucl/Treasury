@@ -14,7 +14,7 @@ namespace Treasury.Web.Service.Interface
         /// 取得初始資料
         /// </summary>
         /// <returns></returns>
-        List<TREAReviewWorkDetailViewModel> GetSearchDatas();
+        List<TREAReviewWorkDetailViewModel> GetSearchDatas(string cUserId);
 
         /// <summary>
         /// 單號查Details

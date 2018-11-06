@@ -28,6 +28,18 @@ namespace Treasury.Web.ViewModels
         public string vPUT_Date { get; set; }
 
         /// <summary>
+        /// 入庫日期
+        /// </summary>
+        [Description("取出日期")]
+        public string vGet_Date { get; set; }
+
+        /// <summary>
+        /// 取出申請人
+        /// </summary>
+        [Description("取出申請人")]
+        public string vGet_Uid_Name { get; set; }
+
+        /// <summary>
         /// 存入申請人ID
         /// </summary>
         [Description("存入申請人ID")]

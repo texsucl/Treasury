@@ -156,7 +156,9 @@
     <div id="TASearchDialog" style="display:none;" role="dialog" class="myDialog">
         <div id="TAjqgridDiv1" class="col-sm-24 jqd" style="padding-bottom:5px;">
         </div>
-        <div id="TAjqgridDiv2" class="col-sm-24 jqd">
+        <div id="TAjqgridDiv2" class="col-sm-24 jqd" style="padding-bottom:5px;">
+        </div>
+        <div id="TAjqgridDiv3" class="col-sm-24 jqd">
         </div>
         <div class="TAPrintClass" style="text-align:center;margin-top:5px;">
             <input type="button" class="TAPrint btn btn-primary" id="TAI_Print" style="margin-right:10px;"  value="列印" />
@@ -180,7 +182,7 @@
 
         //#region url設定
         var TAurl = {};
-        TAurl.openBILL = '@Url.Action("View", "Bill")';
+        @*TAurl.openBILL = '@Url.Action("View", "Bill")';
         TAurl.openESTATE = '@Url.Action("View", "Estate")';
         TAurl.openSEAL = '@Url.Action("View", "Seal")';
         TAurl.openSTOCK = '@Url.Action("View", "Stock")';
@@ -188,7 +190,7 @@
         TAurl.openMARGING = '@Url.Action("View", "Marging")';
         TAurl.openMARGINP = '@Url.Action("View", "Marginp")';
         TAurl.openDEPOSIT = '@Url.Action("View", "Deposit")';
-        TAurl.openItemImp = '@Url.Action("View", "ItemImp")';
+        TAurl.openItemImp = '@Url.Action("View", "ItemImp")';*@
         TAurl.changeUnit = '@Url.Action("ChangeUnit", "TreasuryAccess")';
         TAurl.search = '@Url.Action("Search", "TreasuryAccess")';
         TAurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
@@ -392,6 +394,7 @@
                     $('#' + dialogId).css('max-height','300px;')
                     TAAccessGrid();
                     TAReportGrid();
+                    TAEndGrid();
                 }
                 else {
                     customerUtility.alert(result.DESCRIPTION,'w');
@@ -405,14 +408,14 @@
             if ($('.TAReportCs:checked').length > 0) {
                 $('.TAReportCs:checked').each(
                     function () {
-                        var listId = 'TAReportList';
+                        var listId = $(this).parents('table:first').attr('id');
                         var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
                         var item = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vItem]', listId)).text();
                         var accessType = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vACCESS_TYPE]', listId)).text();
                         var reportType = '';
                         var title = '';
                         var parms = [];
-                        var itemData = GetItemData(item);
+                        var itemData = GetItemDataByDefault(item);
                         //判斷是否定期存單
                         if (item == "D1013")
                         {
@@ -609,8 +612,46 @@
                 },
                 colNameArray,
                 colModelArray,
-                '在途/已結申請單',
+                '在途申請單',
                 jqgridCustom.getPage('TAjqgridDiv2'),
+                TAPrintGridCompeleteFun,
+                true
+                );
+        }
+
+        function TAEndGrid() {
+            var colNameArray = ['列印',
+                '存取申請項目', '申請日期', '實際存取日期', '申請單號',
+                '申請單位', '申請人', '入庫原因',
+                '表單狀態', '覆核意見/退回意見', '申請人ID', '表單狀態ID', '取出/存入', '存取申請項目'];
+            var colModelArray = [
+                { name: "vPrintFlag", index: "vPrintFlag", width: 110, sortable: false, align: 'center', formatter: formatterCheck },
+                { name: "vItemDec", index: "vItemDec", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 90, sortable: false, align: 'center' },
+                { name: "vREGI_APPR_DT", index: "vREGI_APPR_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
+                { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 150, sortable: false, align: 'left' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'left' },
+                { name: "vDESC", index: "vDESC", width: 150, sortable: false, align: 'left' },
+                { name: "vAPLY_UID", index: "vAPLY_UID", hidden: true },
+                { name: "vAPLY_STATUS", index: "vAPLY_STATUS", hidden: true },
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true },
+                { name: "vItem", index: "vItem", hidden: true },
+            ];
+            jqgridCustom.createJqgridByCache(
+                'TAjqgridDiv3',
+                'TAEndList',
+                'TAEndPeger',
+                TAurl.getData,
+                {
+                    type: 'End'
+                },
+                colNameArray,
+                colModelArray,
+                '已結申請單',
+                jqgridCustom.getPage('TAjqgridDiv3'),
                 TAPrintGridCompeleteFun,
                 true
                 );
@@ -639,6 +680,7 @@
                     {
                         TAAccessGrid();
                         TAReportGrid();
+                        TAEndGrid();
                     }
                     //新增畫面官必須清空畫面參數
                     else if (dialogId == 'TAOpenInsertDialog')
@@ -655,7 +697,7 @@
         //#region 新增事件
 
         function open(itemId) {
-            var _data = GetItemData(itemId);
+            var _data = GetItemDataByDefault(itemId);
             if ($('#aIUnit').val().trim() == '' || $('#applicant').val().trim() == '')
             {
                 customerUtility.alert('請選擇申請單位和申請人', 'w');
@@ -746,6 +788,7 @@
                 if (result.RETURN_FLAG) {
                     TAAccessGrid();
                     TAReportGrid();
+                    TAEndGrid();
                 }
             });
         }
@@ -769,6 +812,7 @@
                 if (result.RETURN_FLAG) {
                     TAAccessGrid();
                     TAReportGrid();
+                    TAEndGrid();
                 }
             });
         }
@@ -779,7 +823,7 @@
             var data = $("#" + listId).getRowData(rowid);
             var itemId = data.vItem;
             //var _accessType = data.vACCESS_TYPE;
-            var itemData = GetItemData(itemId);
+            var itemData = GetItemDataByDefault(itemId);
             if (itemData.url != null)
             {
                 $('#TAR_AplyNo').val(data.vAPLY_NO);
@@ -933,7 +977,7 @@
         //#endregion
 
         //#region 申請項目設定檔案
-        function GetItemData(item) {
+        @*function GetItemData(item) {
             item = item || '';
             var _reportTitle = '金庫物品存取申請單';
             var obj = {};
@@ -988,7 +1032,7 @@
                 case '@Ref.TreaItemType.D1017.ToString()':
                     obj.url = TAurl.openMARGINP;
                     obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
-                    obj.openDialogWidth = 1250;
+                    obj.openDialogWidth = 1325;
                     obj.reportType = 'MARGINP';
                     break;
                 case '@Ref.TreaItemType.D1016.ToString()':
@@ -1011,7 +1055,7 @@
                     break;
             }
             return obj;
-        }
+        }*@
         //#endregion
 
         //#region 金庫物品存取作業查詢畫面  ViewModel

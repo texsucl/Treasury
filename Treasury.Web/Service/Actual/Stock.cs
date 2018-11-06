@@ -11,6 +11,7 @@ using Treasury.WebDaos;
 using Treasury.WebUtility;
 using Treasury.Web.Enum;
 using System.ComponentModel;
+using Treasury.Web.Controllers;
 
 namespace Treasury.Web.Service.Actual
 {
@@ -253,7 +254,8 @@ namespace Treasury.Web.Service.Actual
                         {
                             vItemId = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
                             vCharge_Dept = x.CHARGE_DEPT,
@@ -284,6 +286,18 @@ namespace Treasury.Web.Service.Actual
                             vMemo_Aft = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList();
+                    if (searchModel.vTreasuryIO == "N") //取出
+                    {
+                        if (result.Any())
+                        {
+                            var itemIds = result.Select(x => x.vItemId).ToList();
+                            var uids = GetAplyUidName(itemIds);
+                            result.ForEach(x =>
+                            {
+                                x.vGet_Uid_Name = uids.FirstOrDefault(y => y.itemId == x.vItemId)?.getAplyUidName;
+                            });
+                        }
+                    }
                 }
                 else
                 {
@@ -297,7 +311,8 @@ namespace Treasury.Web.Service.Actual
                         {
                             vItemId = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
                             vCharge_Dept = x.CHARGE_DEPT,
@@ -541,47 +556,6 @@ namespace Treasury.Web.Service.Actual
 
                                 #endregion
 
-                                //String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                                //var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
-
-                                //#region 申請單紀錄檔
-                                //_TAR = new TREA_APLY_REC()
-                                //{
-                                //    APLY_NO = $@"G6{qPreCode}{cId}", //申請單號 G6+系統日期YYYMMDD(民國年)+3碼流水號
-                                //    APLY_FROM = AccessProjectStartupType.M.ToString(), //人工
-                                //    ITEM_ID = taData.vItem, //申請項目
-                                //    ACCESS_TYPE = taData.vAccessType, //存入(P) or 取出(G)
-                                //    ACCESS_REASON = taData.vAccessReason, //申請原因
-                                //    APLY_STATUS = _APLY_STATUS, //表單申請
-                                //    EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(taData.vExpectedAccessDate), //預計存取日期
-                                //    APLY_UNIT = taData.vAplyUnit, //申請單位
-                                //    APLY_UID = taData.vAplyUid, //申請人
-                                //    APLY_DT = dt,
-                                //    CREATE_UID = taData.vCreateUid, //新增人
-                                //    CREATE_DT = dt,
-                                //    LAST_UPDATE_UID = taData.vCreateUid,
-                                //    LAST_UPDATE_DT = dt
-                                //};
-                                //if (taData.vAplyUid != taData.vCreateUid) //當申請人不是新增人(代表為覆核單位代申請)
-                                //{
-                                //    _TAR.CUSTODY_UID = taData.vCreateUid; //覆核單位直接帶 新增人
-                                //    _TAR.CONFIRM_DT = dt;
-                                //}
-                                //logStr += _TAR.modelToString();
-                                //db.TREA_APLY_REC.Add(_TAR);
-                                //#endregion
-
-                                //#region 申請單歷程檔
-                                //db.APLY_REC_HIS.Add(
-                                //new APLY_REC_HIS()
-                                //{
-                                //    APLY_NO = _TAR.APLY_NO,
-                                //    APLY_STATUS = _TAR.APLY_STATUS,
-                                //    PROC_UID = _TAR.CREATE_UID,
-                                //    PROC_DT = dt
-                                //});
-                                //#endregion
-
                                 #region 存取項目冊號資料檔
                                 var _first = datas.First();
                                 var _StockModel = _first.vStockModel;
@@ -723,8 +697,17 @@ namespace Treasury.Web.Service.Actual
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
-                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                if (CustodyAppr.Contains(_TAR.APLY_STATUS))
+                                {
+                                    _APLY_STATUS = CustodyConfirmStatus;
+                                    _TAR.CUSTODY_UID = AccountController.CurrentUserId; //保管單位直接帶使用者
+                                    _TAR.CUSTODY_DT = dt;
+                                }
+                                else
+                                {
+                                    if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                        _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                }
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -816,7 +799,7 @@ namespace Treasury.Web.Service.Actual
                                             }
                                         }
                                     }
-                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString()) //判斷申請作業-取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus)) //判斷申請作業-取出
                                     {
                                         //取得股票明細資料
                                         var StockDetail = db.ITEM_STOCK.AsNoTracking()
@@ -873,7 +856,7 @@ namespace Treasury.Web.Service.Actual
                                     }));
                                     db.ITEM_STOCK.AddRange(inserts);
                                 }
-                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus))//取出
                                 {
                                     foreach (var backItemId in db.OTHER_ITEM_APLY.Where(x =>
                                      x.APLY_NO == taData.vAplyNo &&
@@ -1362,9 +1345,10 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.TREA_BATCH_NO == TreaBatchNo)
                     .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                     .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                    .Where(x => x.NUMBER_OF_SHARES != null)
                     .Sum(x => x.NUMBER_OF_SHARES);
 
-                    return (int)NumberOfSharesTotal;
+                    return NumberOfSharesTotal == null ? 0 : (int)NumberOfSharesTotal;
                 }
                 else
                 {

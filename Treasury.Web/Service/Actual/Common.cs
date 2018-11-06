@@ -31,7 +31,12 @@ namespace Treasury.Web.Service.Actual
         protected INTRA intra { private set; get; }
 
         protected List<string> TreasuryIn { private set; get; } //資料庫異動 金庫內查詢狀態
+
         protected string TreasuryOut { private set; get; }//資料庫異動 金庫外查詢狀態
+
+        protected List<string> CustodyAppr { private set; get; } //保管科承辦可申請覆核狀態
+
+        protected string CustodyConfirmStatus { private set; get; }//保管科承辦覆核後狀態
 
         public Common()
         {
@@ -42,6 +47,13 @@ namespace Treasury.Web.Service.Actual
                 "8" //資料異動中
             };
             TreasuryOut = "2"; //已被取出
+            CustodyAppr = new List<string>()
+            {
+                Ref.AccessProjectFormStatus.B01.ToString(),
+                Ref.AccessProjectFormStatus.B03.ToString(),
+                Ref.AccessProjectFormStatus.B04.ToString()
+            };
+            CustodyConfirmStatus = Ref.AccessProjectFormStatus.B02.ToString();
         }
 
         #region Get Date
@@ -121,6 +133,87 @@ namespace Treasury.Web.Service.Actual
                 NewValue = Aft;
 
             return NewValue;
+        }
+
+        /// <summary>
+        /// 空白票據查詢取出人
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        protected List<getUIDName> GetAplyUidNameByBill(List<string> items)
+        {
+            using (dbTreasuryEntities db = new dbTreasuryEntities())
+            {
+                var emps = GetEmps();
+                return db.BLANK_NOTE_APLY.AsNoTracking()
+                            .Where(x => items.Contains(x.ITEM_BLANK_NOTE_FINAL_ITEM_ID))
+                            .Join(db.TREA_APLY_REC.AsNoTracking()
+                            .Where(y => y.ACCESS_TYPE == "G" && y.APLY_STATUS == "E01"),
+                             x => x.APLY_NO,
+                             y => y.APLY_NO,
+                             (x, y) => new { x, y }
+                            ).AsEnumerable()
+                            .Select(
+                            item => new getUIDName
+                            {
+                                itemId = item.x.ITEM_BLANK_NOTE_FINAL_ITEM_ID,
+                                getAplyUidName = emps.FirstOrDefault(y => y.USR_ID == item.y.APLY_UID)?.EMP_NAME?.Trim()
+                            }).ToList();
+            }
+        }
+
+        /// <summary>
+        /// 重要物品查詢取出人
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        protected List<getUIDName> GetAplyUidNameByIMPO(List<string> items)
+        {
+            using (dbTreasuryEntities db = new dbTreasuryEntities())
+            {
+                var emps = GetEmps();
+                return db.OTHER_ITEM_APLY.AsNoTracking()
+                            .Where(x => x.Memo_S != null && items.Contains(x.Memo_S))
+                            .Join(db.TREA_APLY_REC.AsNoTracking()
+                            .Where(y => y.ACCESS_TYPE == "G" && y.APLY_STATUS == "E01"),
+                             x => x.APLY_NO,
+                             y => y.APLY_NO,
+                             (x, y) => new { x, y }
+                            ).AsEnumerable()
+                            .Select(
+                            item => new getUIDName
+                            {
+                                itemId = item.x.Memo_S,
+                                getAplyUidName = emps.FirstOrDefault(y => y.USR_ID == item.y.APLY_UID)?.EMP_NAME?.Trim()
+                            }).ToList();
+            }
+        }
+
+        /// <summary>
+        /// 預設查詢取出人
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        protected List<getUIDName> GetAplyUidName(List<string> items)
+        {
+            using (dbTreasuryEntities db = new dbTreasuryEntities())
+            {
+                var emps = GetEmps();
+                return db.OTHER_ITEM_APLY.AsNoTracking()
+                            .Where(x => items.Contains(x.ITEM_ID))
+                            .Join(db.TREA_APLY_REC.AsNoTracking()
+                            .Where(y => y.ACCESS_TYPE == "G" && y.APLY_STATUS == "E01"),
+                             x => x.APLY_NO,
+                             y => y.APLY_NO,
+                             (x, y) => new { x, y }
+                            ).AsEnumerable()
+                            .Select(
+                            item => new getUIDName
+                            {
+                                itemId = item.x.ITEM_ID,
+                                getAplyUidName = emps.FirstOrDefault(y => y.USR_ID == item.y.APLY_UID)?.EMP_NAME?.Trim() 
+                            }).ToList();
+            }
         }
 
         #endregion
@@ -224,5 +317,11 @@ namespace Treasury.Web.Service.Actual
 
         #endregion
 
+        public class getUIDName
+        {
+            public string itemId { get; set; }
+
+            public string getAplyUidName { get; set; }
+        }
     }
 }

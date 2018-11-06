@@ -11,6 +11,7 @@ using Treasury.WebUtility;
 using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
+using Treasury.Web.Controllers;
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 存入保證金
 /// 初版作者：20180810 王菁萱
@@ -199,6 +200,9 @@ namespace Treasury.Web.Service.Actual
                     result.AddRange(db.ITEM_DEP_RECEIVED.AsNoTracking()
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.ITEM_ID == searchModel.vItem_No, !searchModel.vItem_No.IsNullOrWhiteSpace())
+                        .Where(x => x.BOOK_NO == searchModel.vBookNo, !searchModel.vBookNo.IsNullOrWhiteSpace())
+                        .Where(x => x.MARGIN_TAKE_OF_TYPE == searchModel.vMargin_Dep_Type, searchModel.vMargin_Dep_Type != "All")
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_From.Value, GET_DATE_From != null)
@@ -209,8 +213,10 @@ namespace Treasury.Web.Service.Actual
                             vItem_Id = x.ITEM_ID,
                             vlItem_Id = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vBook_No = x.BOOK_NO,
+                            vBook_No_AFT = x.BOOK_NO_AFT,
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_DEPT = x.CHARGE_DEPT,
@@ -239,6 +245,18 @@ namespace Treasury.Web.Service.Actual
                             vMemo_AFT = x.MEMO_AFT,
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
+                    if (searchModel.vTreasuryIO == "N") //取出
+                    {
+                        if (result.Any())
+                        {
+                            var itemIds = result.Select(x => x.vlItem_Id).ToList();
+                            var uids = GetAplyUidName(itemIds);
+                            result.ForEach(x =>
+                            {
+                                x.vGet_Uid_Name = uids.FirstOrDefault(y => y.itemId == x.vlItem_Id)?.getAplyUidName;
+                            });
+                        }
+                    }
                 }
                 else
                 {
@@ -252,8 +270,10 @@ namespace Treasury.Web.Service.Actual
                             vItem_Id = x.ITEM_ID,
                             vlItem_Id = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPut_Date = x.PUT_DATE?.ToString("yyyy/MM/dd"),
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vBook_No = x.BOOK_NO,
+                            vBook_No_AFT = x.BOOK_NO_AFT,
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_DEPT = x.CHARGE_DEPT,
@@ -328,8 +348,17 @@ namespace Treasury.Web.Service.Actual
                             {
                                 #region 申請單紀錄檔
                                 _TAR = db.TREA_APLY_REC.First(x => x.APLY_NO == taData.vAplyNo);
-                                if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
-                                    _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例72
+                                if (CustodyAppr.Contains(_TAR.APLY_STATUS))
+                                {
+                                    _APLY_STATUS = CustodyConfirmStatus;
+                                    _TAR.CUSTODY_UID = AccountController.CurrentUserId; //保管單位直接帶使用者
+                                    _TAR.CUSTODY_DT = dt;
+                                }
+                                else
+                                {
+                                    if (_TAR.APLY_STATUS != _APLY_STATUS) //申請紀錄檔狀態不是在表單申請狀態
+                                        _APLY_STATUS = Ref.AccessProjectFormStatus.A05.ToString(); //為重新申請案例
+                                }
                                 _TAR.APLY_STATUS = _APLY_STATUS;
                                 _TAR.LAST_UPDATE_DT = dt;
 
@@ -439,7 +468,7 @@ namespace Treasury.Web.Service.Actual
                                             }
                                         }
                                     }
-                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
+                                    else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus))//取出
                                     {
                                         var _IDR = db.ITEM_DEP_RECEIVED.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                         if (_IDR.LAST_UPDATE_DT > item.vLast_Update_Time)
@@ -484,7 +513,7 @@ namespace Treasury.Web.Service.Actual
                                     }));
                                     db.ITEM_DEP_RECEIVED.AddRange(inserts);
                                 }
-                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString())//取出
+                                else if (taData.vAccessType == Ref.AccessProjectTradeType.G.ToString() && (_APLY_STATUS != CustodyConfirmStatus))//取出
                                 {
                                     db.OTHER_ITEM_APLY.RemoveRange(db.OTHER_ITEM_APLY.Where(x => x.APLY_NO == taData.vAplyNo).ToList());
                                     db.OTHER_ITEM_APLY.AddRange(updateItemIds.Select(x => new OTHER_ITEM_APLY()
@@ -758,6 +787,7 @@ namespace Treasury.Web.Service.Actual
                             _Marginp.DESCRIPTION_AFT = model.vDescription_AFT;
                             _Marginp.MEMO_AFT = model.vMemo_AFT;
                             _Marginp.LAST_UPDATE_DT = dt;
+                            _Marginp.BOOK_NO_AFT = model.vBook_No_AFT;
 
                             logStr = _Marginp.modelToString(logStr);
 
@@ -826,6 +856,7 @@ namespace Treasury.Web.Service.Actual
                     _Marginp.EFFECTIVE_DATE_E_AFT = null;
                     _Marginp.DESCRIPTION_AFT = null;
                     _Marginp.MEMO_AFT = null;
+                    _Marginp.BOOK_NO_AFT = null;
                     _Marginp.LAST_UPDATE_DT = dt;
                     logStr = _Marginp.modelToString(logStr);
                 }
@@ -873,6 +904,8 @@ namespace Treasury.Web.Service.Actual
                     _Marginp.DESCRIPTION_AFT = null;
                     _Marginp.MEMO = GetNewValue(_Marginp.MEMO, _Marginp.MEMO_AFT);
                     _Marginp.MEMO_AFT = null;
+                    _Marginp.BOOK_NO = GetNewValue(_Marginp.BOOK_NO, _Marginp.BOOK_NO_AFT);
+                    _Marginp.BOOK_NO_AFT = null;
                     _Marginp.LAST_UPDATE_DT = dt;
                     logStr = _Marginp.modelToString(logStr);
                 }
@@ -917,7 +950,6 @@ namespace Treasury.Web.Service.Actual
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
         }
-
         #endregion
     }
 }

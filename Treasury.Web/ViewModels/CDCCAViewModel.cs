@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace Treasury.Web.ViewModels
 {
     /// <summary>
-    /// 資料庫異動(重要物品)畫面
+    /// 資料庫異動(電子憑證)畫面
     /// </summary>
     public class CDCCAViewModel : ICDCItem
     {
@@ -26,6 +26,18 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("入庫日期")]
         public string vPUT_Date { get; set; }
+
+        /// <summary>
+        /// 入庫日期
+        /// </summary>
+        [Description("取出日期")]
+        public string vGet_Date { get; set; }
+
+        /// <summary>
+        /// 取出申請人
+        /// </summary>
+        [Description("取出申請人")]
+        public string vGet_Uid_Name { get; set; }
 
         /// <summary>
         /// 存入申請人ID

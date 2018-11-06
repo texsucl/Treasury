@@ -17,6 +17,12 @@
                     <td>
                         <label id="lPut_Date" name="lPut_Date"></label>
                     </td>
+                    <td class="GetClass">
+                        <label>取出日期 : </label>
+                    </td>
+                    <td class="GetClass">
+                        <label id="vGet_Date" name="vGet_Date"></label>
+                    </td>
                 </tr>
                 <tr>
                     <td>
@@ -24,6 +30,12 @@
                     </td>
                     <td>
                         <label id="lAply_Uid_Name" name="lAply_Uid_Name"></label>
+                    </td>
+                    <td class="GetClass">
+                        <label>取出申請人 : </label>
+                    </td>
+                    <td class="GetClass">
+                        <label id="vGet_Uid_Name" name="vGet_Uid_Name"></label>
                     </td>
                 </tr>
                 <tr>
@@ -33,6 +45,8 @@
                     <td>
                         <lable id="lCharge_Name" name="lCharge_Name"></lable>
                     </td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>
@@ -155,6 +169,8 @@
         var CDC_EstateDialogId = 'CDC_EstateDialog'; //dialogId
         var CDC_EstateFormId = 'CDC_EstateDialogForm'; //formId
         var CDC_EstatePut_Date = 'lPut_Date';//入庫日期Id
+        var vGet_DateId = 'vGet_Date';//取出日期Id
+        var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var CDC_EstateAply_Uid_Name = 'lAply_Uid_Name';//存入申請人Id
         var CDC_EstateCharge_Name = 'lCharge_Name';//權責單位Id
         var CDC_EstateIB_Book_No = 'lIB_Book_No';//冊號Id
@@ -178,6 +194,7 @@
         var CDC_Memo_Aft = 'sMemo';//備註_異動後Id
         var CDC_ItemId = 'hItemId';//物品單號Id
 
+        var GetFlag = $('#treasuryIO').val() == "N"; //取出案例
 
         var CDC_Estate_Act_Type = 'CDCIndex' == '@ViewBag.type';
         if (CDC_Estate_Act_Type)
@@ -251,6 +268,7 @@
                 }
             });
             $('#CDC_EstateUpdateTemp').hide();
+            $('.GetClass').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -261,6 +279,9 @@
                 $('.' + EstateUpdateClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
+                if (GetFlag) {
+                    $('.GetClass').show();
+                }
                 dialogSetData(listId, rowid);
                 $('.' + EstateUpdateClass).prop('disabled', true);
             }
@@ -269,6 +290,8 @@
 
         function ResetDialog() {
             $('#' + CDC_EstatePut_Date).text('');
+            $('#' + vGet_DateId).text('');
+            $('#' + vGet_Uid_NameId).text('');
             $('#' + CDC_EstateAply_Uid_Name).text('');
             $('#' + CDC_EstateCharge_Name).text('');
             $('#' + CDC_EstateIB_Book_No).text('');
@@ -304,6 +327,10 @@
                 var data = $("#" + listId).getRowData(rowid);
                 //set value
                 $('#' + CDC_EstatePut_Date).text(data.vPut_Date);
+                if (GetFlag) {
+                    $('#' + vGet_DateId).text(data.vGet_Date);
+                    $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
+                }
                 $('#' + CDC_EstateAply_Uid_Name).text(data.vAply_Uid_Name);
                 $('#' + CDC_EstateCharge_Name).text(data.vCharge_Name);
                 $('#' + CDC_EstateIB_Book_No).text(data.vIB_Book_No);
@@ -515,16 +542,24 @@
         }
 
         function CDC_EstateDbGrid() {
-            var colNameArray = ['動作', '狀態', '入庫日期', '存入申請人', '權責單位',
+            var colNameArray = ['動作', '狀態', '入庫日期'];
+            if (GetFlag) {
+                colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
+            }
+            colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '冊號', '群組編號', '大樓名稱', '坐落', '備註',
-                '狀別', '發狀日', '字號', '地/建號', '門牌號', '流水號/編號', '備註',
+                '狀別', '發狀日', '字號', '地號/建號', '門牌號', '流水號/編號', '備註',
                 '狀別異動前', '發狀日異動前', '字號異動前', '地/建號異動前', '門牌號異動前', '流水號/編號異動前', '備註異動前',
                 '狀別異動後', '發狀日異動後', '字號異動後', '地/建號異動後', '門牌號異動後', '流水號/編號異動後', '備註異動後',
-                '物品編號', '狀態Id'];
+                '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
             colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
             colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
+            if (GetFlag) {
+                colModelArray.push({ name: "vGet_Date", index: "vGet_Date", width: 90, align: 'center', sortable: false });
+                colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
+            }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
             colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
 

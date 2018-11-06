@@ -238,6 +238,11 @@ namespace Treasury.Web.Enum
             [Description("輸入null為清空該欄位")]
             null_Input,
 
+            /// <summary>
+            /// 冊號為保管科必要欄位
+            /// </summary>
+            [Description("冊號為保管科必要欄位")]
+            book_No_Error,
         }
     }
 
