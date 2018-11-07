@@ -118,7 +118,7 @@ namespace Treasury.Web.Controllers
         public JsonResult CustodyAppraisal(List<string> AplyNos, string apprDesc)
         {
             MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> result =
-new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+                new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (AplyNos.Any() && Cache.IsSet(CacheList.TreasuryAccessCustodySearchDetailViewData))
@@ -132,8 +132,8 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
                 result = TreasuryAccessCustody.CustodyApproved(searchData, datas);
                 if (result.RETURN_FLAG)
                 {
-                    Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
-                    Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
+                    Cache.Invalidate(CacheList.TreasuryAccessCustodySearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessCustodySearchDetailViewData, result.Datas);
                 }
             }
             return Json(result);
@@ -150,7 +150,7 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
         public JsonResult CustodyReject(List<string> AplyNos, string apprDesc)
         {
             MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>> result =
-    new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
+                new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
             if (AplyNos.Any() && Cache.IsSet(CacheList.TreasuryAccessCustodySearchDetailViewData))
@@ -164,8 +164,8 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
                 result = TreasuryAccessCustody.CustodyReject(searchData, datas, apprDesc);
                 if (result.RETURN_FLAG)
                 {
-                    Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
-                    Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, result.Datas);
+                    Cache.Invalidate(CacheList.TreasuryAccessCustodySearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessCustodySearchDetailViewData, result.Datas);
                 }
             }
             return Json(result);
@@ -224,8 +224,8 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
                 result = TreasuryAccessCustody.Reject(searchData, datas, apprDesc);
                 if (result.RETURN_FLAG)
                 {
-                    Cache.Invalidate(CacheList.TreasuryAccessApprSearchDetailViewData);
-                    Cache.Set(CacheList.TreasuryAccessApprSearchDetailViewData, result.Datas);
+                    Cache.Invalidate(CacheList.TreasuryAccessCustodyApprSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessCustodyApprSearchDetailViewData, result.Datas);
                 }
             }
             return Json(result);
@@ -244,7 +244,7 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
             if (!AplyNo.IsNullOrWhiteSpace())
             {
                 result.RETURN_FLAG = true;
-                var _dActType = GetActType(Ref.OpenPartialViewType.TAIndex, AplyNo);
+                var _dActType = GetActType(Ref.OpenPartialViewType.CustodyAppr, AplyNo);
                 var data = TreasuryAccess.GetByAplyNo(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
                 Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data);
@@ -265,19 +265,9 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
         public JsonResult UpdateAplyNo(TreasuryAccessViewModel data)
         {
             var cdata = (TreasuryAccessViewModel)Cache.Get(CacheList.TreasuryAccessSearchUpdateViewData);
-            if (AccountController.CustodianFlag)
-            {
-                cdata.vAccessReason = data.vAccessReason;
-                cdata.vExpectedAccessDate = data.vExpectedAccessDate;
-                cdata.vAplyUnit = data.vAplyUnit;
-                cdata.vAplyUid = data.vAplyUid;
-            }
-            else
-            {
-                cdata.vAccessReason = data.vAccessReason;
-                cdata.vExpectedAccessDate = data.vExpectedAccessDate;
-            }
-            var searchData = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
+            cdata.vAccessReason = data.vAccessReason;
+            cdata.vExpectedAccessDate = data.vExpectedAccessDate;
+            var searchData = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessCustodySearchData);
             var result = TreasuryAccessCustody.updateAplyNo(cdata,AccountController.CustodianFlag, searchData,AccountController.CurrentUserId);
             if (result.RETURN_FLAG)
             {
@@ -312,18 +302,6 @@ new MSGReturnModel<List<TreasuryAccessApprSearchDetailViewModel>>();
                    return Json(jdata.modelToJqgridResult(apprCache));
            }           
            return null;
-        }
-
-        public void ResetSearchData()
-        {
-            var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
-            Cache.Set(CacheList.TreasuryAccessSearchData, searchData);
-            var datas = TreasuryAccess.GetSearchDetail(searchData);
-            if (datas.Any())
-            {
-                Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
-                Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, datas);
-            }
         }
     }
 }

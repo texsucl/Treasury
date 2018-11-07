@@ -240,7 +240,7 @@
         var typeFlag = (type == '@Ref.AccessProjectTradeType.P.ToString()'); //存入為 True 取出 為 False
         if (typeFlag && Stock_Act_Type) {
             $('.Stock_P').show();
-            $('#StockInsert').show();            
+            $('#StockInsert').show();
         }
         else {
             $("#tStock_Memo").attr("Disabled", true);
@@ -250,6 +250,12 @@
             $("#dStock_Area_Type").attr("Disabled", true);
             $('#StockCheck').hide();
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#StockInsert').hide();
+        }
+
         //#endregion
 
         //#region url設定
@@ -439,7 +445,7 @@
         //#endregion
 
         //#region 初始設定
-       
+
         @*if ('@ViewBag.CustodianFlag' == "True") {
             $("#tStock_Memo").attr("Disabled", false);
         }
@@ -531,7 +537,7 @@
             $("#tAmount_Per_Share").attr("Disabled", false);
             $("#tSingle_Number_Of_Shares").attr("Disabled", false);
             //$("#tNumber_Of_Shares").attr("Disabled", false);
-            $("#tMemo").attr("Disabled", false);           
+            $("#tMemo").attr("Disabled", false);
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
                     $("#tStock_Total").attr("Disabled", true);
@@ -892,6 +898,11 @@
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
         }
 
         function StockTempTakeOutFun(listId) {
@@ -1104,18 +1115,18 @@
                             $('#' + Denomination).html(customerUtility.addCommas(data.vDenomination));
                             $('#' + Denomination_Total).html(customerUtility.addCommas(data.vDenominationTotal));
                             $('#' + Number_Of_Shares).val(data.vNumberOfShares);
-                            $('#' + Memo).val(data.vMemo);                           
+                            $('#' + Memo).val(data.vMemo);
                             break;
                         case "P":
                             Type_P();
                             $('#' + Stock_Total).val(data.vStockTotal);
                             $('#' + Number_Of_Shares).val(data.vNumberOfShares);
-                            $('#' + Memo).val(data.vMemo);                           
+                            $('#' + Memo).val(data.vMemo);
                             break;
                         case "C":
                             Type_C();
                             $('#' + Stock_Total).val(data.vStockTotal);
-                            $('#' + Memo).val(data.vMemo);                          
+                            $('#' + Memo).val(data.vMemo);
                             break;
                     }
 
@@ -1304,7 +1315,7 @@
             }
         }
 
-        //區域=國外  除了類型欄位有值外,需再有一個欄位有值才算有新增存入明細 
+        //區域=國外  除了類型欄位有值外,需再有一個欄位有值才算有新增存入明細
         function Check_F(){
             var flag = false;
             $('.StockInsertType:not(#dStock_Type)').each(function () {

@@ -133,6 +133,12 @@
         if (typeFlag && Marging_Act_Type) {
             $('#MargingInsert').show();
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#MargingInsert').hide();
+        }
+
         //#endregion 參數設定
 
         //#region 初始動作
@@ -342,6 +348,11 @@
             if (!Marging_Act_Type) { //申請狀態
                 $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionDeleIcon').hide();
                 });
             }

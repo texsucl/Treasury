@@ -46,6 +46,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
+            ViewBag.OPVT = type;
             ViewBag.dCurrency = new SelectList(Deposit.GetCurrency(), "Value", "Text", "NTD");
             ViewBag.dTrad_Partners = new SelectList(Deposit.GetTrad_Partners(), "Value", "Text");
             ViewBag.dInterest_Rate_Type = new SelectList(Deposit.GetInterest_Rate_Type(), "Value", "Text");

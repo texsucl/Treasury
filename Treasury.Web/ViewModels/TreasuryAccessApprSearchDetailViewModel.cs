@@ -18,6 +18,24 @@ namespace Treasury.Web.ViewModels
         public string vAPPR_DESC { get; set; }
 
         /// <summary>
+        /// 存入(P) or 取出(G)
+        /// </summary>
+        [Description("存入/取出")]
+        public string vACCESS_TYPE { get; set; }
+
+        /// <summary>
+        /// 表單狀態
+        /// </summary>
+        [Description("表單狀態")]
+        public string vAPLY_STATUS { get; set; }
+
+        /// <summary>
+        /// 表單狀態(中文)
+        /// </summary>
+        [Description("表單狀態(中文)")]
+        public string vAPLY_STATUS_D { get; set; }
+        
+        /// <summary>
         /// 點選狀態
         /// </summary>
         [Description("點選狀態")]

@@ -42,6 +42,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
+            ViewBag.OPVT = type;
             ViewBag.ESTATE_From_No = new SelectList(Estate.GetEstateFromNo(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
             var _dActType = GetActType(type, AplyNo); 

@@ -51,6 +51,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var depts = GetDepts();
                 var emps = GetEmps();
+                var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
                 var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
                 DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
                 DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E).DateToLatestTime();
@@ -58,9 +59,10 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
                     .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
                     .Where(x => x.APLY_NO == data.vAPLY_NO, !data.vAPLY_NO.IsNullOrWhiteSpace()) //申請單號
-                    .Where(x => x.APLY_STATUS == apprStatus) //符合狀態 的資料
+                    .Where(x => custodyStatus.Contains(x.APLY_STATUS)) //符合狀態 的資料
                     .AsEnumerable()
-                    .Select(x => TreaAplyRecToTAASDViewModel(data.vCreateUid, x, treaItems, depts, emps)).ToList();
+                    .Select(x => TreaAplyRecToTAASDViewModel(data.vCreateUid, x, treaItems, depts, emps, formStatus))
+                    .OrderByDescending(x => x.vAPLY_NO).ToList();
             }
             return result;
         }
@@ -77,6 +79,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var depts = GetDepts();
                 var emps = GetEmps();
+                var formStatus = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "FORM_STATUS").ToList();
                 var treaItems = db.TREA_ITEM.AsNoTracking().Where(x => x.ITEM_OP_TYPE == "3").ToList();
                 DateTime? _vAPLY_DT_S = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_S);
                 DateTime? _vAPLY_DT_E = TypeTransfer.stringToDateTimeN(data.vAPLY_DT_E).DateToLatestTime();
@@ -84,9 +87,10 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
                     .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)
                     .Where(x => x.APLY_NO == data.vAPLY_NO, !data.vAPLY_NO.IsNullOrWhiteSpace()) //申請單號
-                    .Where(x => custodyStatus.Contains(x.APLY_STATUS)) //符合狀態 的資料
+                    .Where(x => x.APLY_STATUS == apprStatus) //符合狀態 的資料
                     .AsEnumerable()
-                    .Select(x => TreaAplyRecToTAASDViewModel(data.vCreateUid, x, treaItems, depts, emps, false)).ToList();
+                    .Select(x => TreaAplyRecToTAASDViewModel(data.vCreateUid, x, treaItems, depts, emps, formStatus, false))
+                    .OrderByDescending(x=>x.vAPLY_NO).ToList();
             }
             return result;
         }
@@ -160,7 +164,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
                     var aplyStatus = Ref.AccessProjectFormStatus.B02.ToString(); // 狀態 => 保管科覆核中
-
+                    _TREA_APLY_REC.APLY_STATUS = aplyStatus;
                     _TREA_APLY_REC.CUSTODY_UID = searchData.vCreateUid;
                     _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
@@ -255,7 +259,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     aplynos.Add(item.vAPLY_NO);
                     var aplyStatus = Ref.AccessProjectFormStatus.A03.ToString(); // 狀態 => 保管科承辦覆核駁回
-
+                    _TREA_APLY_REC.APLY_STATUS = aplyStatus;
                     _TREA_APLY_REC.CUSTODY_UID = searchData.vCreateUid;
                     _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
@@ -524,11 +528,6 @@ namespace Treasury.Web.Service.Actual
                     {
                         return result;
                     }
-                    if (custodianFlag)
-                    {
-                        updateData.APLY_UNIT = data.vAplyUnit;
-                        updateData.APLY_UID = data.vAplyUid;
-                    }
                     updateData.LAST_UPDATE_UID = userId;
                     updateData.ACCESS_REASON = data.vAccessReason;
                     updateData.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(data.vExpectedAccessDate);
@@ -559,18 +558,24 @@ namespace Treasury.Web.Service.Actual
             List<TREA_ITEM> treaItems,
             List<VW_OA_DEPT> depts,
             List<V_EMPLY2> emps,
+            List<SYS_CODE> formStatus,
             bool vAPPRFlag = true
             )
         {
             return new TreasuryAccessApprSearchDetailViewModel()
             {
                 vItem = data.ITEM_ID,
+                vACCESS_TYPE = data.ACCESS_TYPE,
+                vAPLY_STATUS = data.APLY_STATUS,
+                vAPLY_STATUS_D = formStatus.FirstOrDefault(x => x.CODE == data.APLY_STATUS)?.CODE_VALUE,
                 vItemDec = treaItems.FirstOrDefault(x => x.ITEM_ID == data.ITEM_ID)?.ITEM_DESC,
                 vAPLY_DT = data.APLY_DT?.ToString("yyyy/MM/dd"),
                 vAPLY_NO = data.APLY_NO,
                 vAPLY_UNIT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == data.APLY_UNIT)?.DPT_NAME,
                 vAPLY_UID = data.APLY_UID,
                 vAPLY_UID_NAME = emps.FirstOrDefault(x => x.USR_ID == data.APLY_UID)?.EMP_NAME,
+                vCUSTODY_UID = emps.FirstOrDefault(x => x.USR_ID == data.CUSTODY_UID)?.EMP_NAME,
+                vAPPR_DESC = data.CUSTODY_APPR_DESC.IsNullOrWhiteSpace() ? data.APLY_APPR_DESC : data.CUSTODY_APPR_DESC,
                 vAPPRFlag = vAPPRFlag || ( data.CUSTODY_UID != userId),
                 vACCESS_REASON = data.ACCESS_REASON,
                 vLast_Update_Time = data.LAST_UPDATE_DT
