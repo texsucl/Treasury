@@ -90,7 +90,7 @@ namespace Treasury.Web.Controllers
              
                 try
                 {
-                    //string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
+                    string objectSid = (new SecurityIdentifier((byte[])entry.Properties["objectSid"].Value, 0).Value);
 
                     //AD驗證成功，檢查該user是否有系統權限
                     CodeUserDao codeUserDao = new CodeUserDao();
@@ -102,23 +102,23 @@ namespace Treasury.Web.Controllers
                         if ("N".Equals(codeUser.IS_DISABLED)) {
                             
                             Session["UserID"] = loginModel.UserId;
-                            //Session["AgentID"] = codeUser.CAGENTID;
+							//Session["AgentID"] = codeUser.CAGENTID;
 
-                            Session["UserName"] = "侯蔚鑫";
-                            Session["UserUnit"] = "VLX01";
+                            //Session["UserName"] = "";
+                            //Session["UserUnit"] = "";
 
                             OaEmpDao oaEmpDao = new OaEmpDao();
                             try
                             {
-                                //using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
-                                //{
-                                //    V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
-                                //    if (emp != null)
-                                //    {
-                                //        Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
-                                //        Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
-                                //    }
-                                //}
+                                using (DB_INTRAEntities dbIntra = new DB_INTRAEntities())
+                                {
+                                    V_EMPLY2 emp = oaEmpDao.qryByUsrId(loginModel.UserId, dbIntra);
+                                    if (emp != null)
+                                    {
+                                        Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
+                                        Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
+                                    }
+                                }
                             }
                             catch (Exception e)
                             {
