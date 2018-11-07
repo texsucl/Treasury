@@ -357,12 +357,24 @@ namespace Treasury.Web.Controllers
         public void ResetSearchData()
         {
             var searchData = (TreasuryAccessSearchViewModel)Cache.Get(CacheList.TreasuryAccessSearchData);
-            //Cache.Set(CacheList.TreasuryAccessSearchData, searchData);
-            var datas = TreasuryAccess.GetSearchDetail(searchData);
-            if (datas.Any())
+            if (searchData != null)
             {
-                Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
-                Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, datas);
+                var datas = TreasuryAccess.GetSearchDetail(searchData);
+                if (datas.Any())
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessSearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessSearchDetailViewData, datas);
+                }
+            }
+            var searchData2 = (TreasuryAccessApprSearchViewModel)Cache.Get(CacheList.TreasuryAccessCustodySearchData);
+            if (searchData2 != null)
+            {
+                var datas = new TreasuryAccessCustody().GetCustodySearchDetail(searchData2);
+                if (datas.Any())
+                {
+                    Cache.Invalidate(CacheList.TreasuryAccessCustodySearchDetailViewData);
+                    Cache.Set(CacheList.TreasuryAccessCustodySearchDetailViewData, datas);
+                }
             }
         }
     }

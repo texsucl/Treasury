@@ -46,8 +46,6 @@ namespace Treasury.Web.Enum
             [Description("金庫進出管理覆核作業")]
             TINAppr = 5,
 
-
-
             /// <summary>
             /// 保管單位承辦作業
             /// </summary>

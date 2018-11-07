@@ -50,6 +50,7 @@ namespace Treasury.Web.Service.Actual
             CustodyAppr = new List<string>()
             {
                 Ref.AccessProjectFormStatus.B01.ToString(),
+                Ref.AccessProjectFormStatus.B02.ToString(),
                 Ref.AccessProjectFormStatus.B03.ToString(),
                 Ref.AccessProjectFormStatus.B04.ToString()
             };

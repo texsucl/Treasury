@@ -322,6 +322,13 @@
             $('.DepositTakeOut').show();
             $('#Get_Msg').prop('disabled', false);
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#DepositInsert_M').hide();
+            $('#DepositInsert_D').hide();
+        }
+
         //#endregion 參數設定
 
         //#region 初始動作
@@ -895,6 +902,12 @@
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
+
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
         }
 
         function DepositTempTakeOutFun_N(listId) {
@@ -1026,6 +1039,12 @@
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+
         }
 
         function DepositTempTakeOutFun_D(listId) {
