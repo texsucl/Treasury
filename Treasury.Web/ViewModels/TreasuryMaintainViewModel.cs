@@ -250,5 +250,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("停用註記")]
         public string vIs_Disabled { get; set; }
+
+        /// <summary>
+        /// 金庫設備編號
+        /// </summary>
+        [Description("金庫設備編號")]
+        public string vTrea_Equip_Id { get; set; }
     }
 }

@@ -162,6 +162,7 @@ namespace Treasury.Web.Service.Actual
                 {
                     result = db.TREA_EQUIP_HIS.AsNoTracking()
                         .Where(x => x.APLY_NO == aply_No)
+                        .Where(x => x.TREA_EQUIP_ID == searchData.vTrea_Equip_Id, searchData.vTrea_Equip_Id != null)
                         .AsEnumerable()
                         .Join(db.TREA_EQUIP.AsNoTracking()
                         .AsEnumerable(),
@@ -219,7 +220,8 @@ namespace Treasury.Web.Service.Actual
                             SysSeqDao sysSeqDao = new SysSeqDao();
                             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
                             string _Aply_No = string.Empty;
-                            string _Aply_No_List = string.Empty;
+                            var cId = sysSeqDao.qrySeqNo("G2", qPreCode).ToString().PadLeft(3, '0');
+                            _Aply_No = $@"G2{qPreCode}{cId}"; //申請單號 G2+系統日期YYYMMDD(民國年)+3碼流水號
                             string logStr = string.Empty; //log
 
                             foreach (var item in datas)
@@ -292,8 +294,6 @@ namespace Treasury.Web.Service.Actual
                                 #endregion
 
                                 #region 金庫設備異動檔
-                                var cId = sysSeqDao.qrySeqNo("G2", qPreCode).ToString().PadLeft(3, '0');
-                                _Aply_No = $@"G2{qPreCode}{cId}"; //申請單號 G2+系統日期YYYMMDD(民國年)+3碼流水號
                                 var _TE_Data = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == item.vTrea_Equip_Id);
                                 if (_TE_Data == null)
                                 {
@@ -336,15 +336,6 @@ namespace Treasury.Web.Service.Actual
                                     logStr += _TEH.modelToString();
                                 }
                                 #endregion
-
-                                if(string.IsNullOrEmpty(_Aply_No_List))
-                                {
-                                    _Aply_No_List += _Aply_No;
-                                }
-                                else
-                                {
-                                    _Aply_No_List += "," + _Aply_No;
-                                }
                             }
 
                             #region Save Db
@@ -369,7 +360,7 @@ namespace Treasury.Web.Service.Actual
                                     #endregion
 
                                     result.RETURN_FLAG = true;
-                                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_Aply_No_List}");
+                                    result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_Aply_No}");
                                 }
                                 catch (DbUpdateException ex)
                                 {

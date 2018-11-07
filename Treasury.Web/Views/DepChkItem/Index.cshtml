@@ -1,0 +1,240 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-定存檢核表項目設定";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="DCI_Form_Search">
+                    <table>
+                        <tr>
+                            <td align="right">
+                                <label>停用狀態 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dIs_Disabled", (SelectList)ViewBag.dIs_Disabled)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="DCI_Search" value="查詢" />
+                                <input type="button" class="btn btn-primary" id="DCI_Order" value="排序調整" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div id="DCI_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="DCI_P_Insert" value="新增存入明細" class="btn btn-primary" />
+        </div>
+        <div id="DCI_P_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="padding-bottom:5px;">
+            <input type="button" id="DCI_G_Insert" value="新增存入明細" class="btn btn-primary" />
+        </div>
+        <div id="DCI_G_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="text-align:center;" class="DCI_Act">
+            <input type="button" id="DCI_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="DCI_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="DCI_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="DCI_OrderDetail" style="display:none" role="dialog" class="myDialog">
+        <form id="DCI_Form_Order">
+            <table>
+                <tr>
+                    <td>
+                        <label>交易別 : </label>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" class="btn btn-primary" id="DCI_Order_Search" value="查詢" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var DCI_Url = {};
+        DCI_Url.search = '@Url.Action("SearchData", "DepChkItem")';
+        DCI_Url.getData = '@Url.Action("GetCacheData", "DepChkItem")';
+        DCI_Url.InsertTempData = '@Url.Action("InsertTempData", "DepChkItem")';
+        DCI_Url.UpdateTempData = '@Url.Action("UpdateTempData", "DepChkItem")';
+        DCI_Url.DeleteTempData = '@Url.Action("DeleteTempData", "DepChkItem")';
+        DCI_Url.ResetTempData = '@Url.Action("ResetTempData", "DepChkItem")';
+        DCI_Url.ApplyTempData = '@Url.Action("ApplyTempData", "DepChkItem")';
+        DCI_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "DepChkItem")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var DCI_Form_Search_Id = 'DCI_Form_Search'; //formId
+        var DCI_Is_Disabled = 'dIs_Disabled'; //停用狀態Id
+
+        var DCI_ConfirmFlag = false; //離開時提醒訊息
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            ////#region 初始動作
+            //setDCI_Verified();
+            ////#endregion 初始動作
+
+            //#region 註冊verified
+            function setDCI_Verified() {
+                verified.required(TM_FormId, TM_Equip_Name, message.required('設備名稱')); //設備名稱為必填
+                verified.required(TM_FormId, TM_Normal_Cnt, message.required('常用數量')); //常用數量為必填
+                verified.required(TM_FormId, TM_Reserve_Cnt, message.required('備份數量')); //備份數量為必填
+
+                verified.positiveInt(TM_FormId, TM_Normal_Cnt); //常用數量 僅能輸入數字(正)
+                verified.positiveInt(TM_FormId, TM_Reserve_Cnt); //備份數量 僅能輸入數字(正)
+            }
+            //#endregion 註冊verified
+
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'DCI_Search':
+                        $('#' + id).on('click', function () { DCI_Search(); });
+                        break;
+                    case 'TM_ChangeRecord_Search':
+                        $('#' + id).on('click', function () { TM_ChangeRecord_Search(); });
+                        break;
+                    case 'TM_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TM_InsertFun(); });
+                        break;
+                    case 'TM_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TM_ApplyFun(); });
+                        break;
+                    case 'TM_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (TM_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            TM_CancelFun();
+                        });
+                        break;
+                    case 'TM_Back':
+                    case 'TM_CancelTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                            function () {
+                                if (id == 'TM_Back' &&
+                                    TM_ConfirmFlag &&
+                                    !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                    return false;
+                                }
+                                customerUtility.closeDialog(this);
+                            });
+                        break;
+                    case 'TM_InsertTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TM_InsertTempFun(); });
+                        break;
+                    case 'TM_UpdateTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TM_UpdateTempFun(); });
+                        break;
+                    case 'TM_DeleteTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TM_DeleteTempFun(); });
+                        break;
+                }
+            });
+            //#endregion 註冊事件
+
+            //#region dialog
+            //#endregion dialog
+
+            //#region jqgrid
+
+            //#endregion jqgrid
+
+            function DCI_Search()
+            {
+                var dialogId = 'DCI_SearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 1100,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: TreasuryInOutSearchViewModel(
+                            $('#' + DCI_Is_Disabled).val())
+                    }),
+                    url: DCI_Url.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        //TM_TempGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+            }
+
+            //#region 查詢畫面  ViewModel
+            function TreasuryInOutSearchViewModel(
+                vControl_Mode,
+                vIs_Disabled
+                ) {
+                var obj = {};
+                obj['vIs_Disabled'] = vIs_Disabled;
+                return obj;
+            }
+            //#endregion
+
+            //#region 異動紀錄查詢畫面  ViewModel
+            function TreasuryInOutChangeRecordSearchViewModel(
+                vAccess_Type,
+                vIsortby
+                ) {
+                var obj = {};
+                obj['vAccess_Type'] = vAccess_Type;
+                obj['vIsortby'] = vIsortby;
+                return obj;
+            }
+        }
+    });
+</script>

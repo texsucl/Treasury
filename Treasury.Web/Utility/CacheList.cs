@@ -329,6 +329,21 @@
         /// 金庫設備維護作業異動紀錄查詢結果
         /// </summary>
         public static string TreasuryMaintainChangeRecordSearchDataList { get; private set; }
+
+        /// <summary>
+        /// 定存檢核表項目查詢畫面
+        /// </summary>
+        public static string DepChkItemSearchData { get; private set; }
+
+        /// <summary>
+        /// 定存檢核表項目-存入查詢結果
+        /// </summary>
+        public static string DepChkItem_P_SearchDataList { get; private set; }
+
+        /// <summary>
+        /// 定存檢核表項目-取出查詢結果
+        /// </summary>
+        public static string DepChkItem_G_SearchDataList { get; private set; }
         #endregion Cache資料
 
 
@@ -398,6 +413,9 @@
             TreasuryMaintainSearchData = "TreasuryMaintainSearchData";
             TreasuryMaintainSearchDataList = "TreasuryMaintainSearchDataList";
             TreasuryMaintainChangeRecordSearchDataList = "TreasuryMaintainChangeRecordSearchDataList";
+            DepChkItemSearchData = "DepChkItemSearchData";
+            DepChkItem_P_SearchDataList = "DepChkItem_P_SearchDataList";
+            DepChkItem_G_SearchDataList = "DepChkItem_G_SearchDataList";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料
