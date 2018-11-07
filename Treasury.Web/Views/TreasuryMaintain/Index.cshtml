@@ -409,7 +409,7 @@
                     type: 'POST',
                     data: JSON.stringify({
                         AplyNo: data.vAply_No,
-                        data: TreasuryInOutChangeRecordSearchViewModel()
+                        data: TreasuryInOutChangeRecordSearchViewModel(data.vTrea_Equip_Id)
                     }),
                     dataType: 'html',
                     url: TM_Url.openChangeRecordView,
@@ -724,6 +724,7 @@
 
             //#region 異動紀錄查詢畫面  ViewModel
             function TreasuryInOutChangeRecordSearchViewModel(
+                vTrea_Equip_Id
                 ) {
                 var obj = {};
                 obj['vControl_Mode'] = "All";
@@ -731,6 +732,7 @@
                 obj['vAppr_Status'] = "All";
                 obj['vLast_Update_Uid'] = null;
                 obj['vIs_Disabled'] = "All";
+                obj['vTrea_Equip_Id'] = vTrea_Equip_Id;
                 return obj;
             }
         }
