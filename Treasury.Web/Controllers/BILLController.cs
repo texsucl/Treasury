@@ -42,6 +42,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data , Ref.OpenPartialViewType type)
         {
+            ViewBag.OPVT = type;
             ViewBag.dBILL_Check_Type = new SelectList(Bill.GetCheckType(), "Value", "Text");
             var ibs = Bill.GetIssuing_Bank();
             ViewBag.dBILL_Issuing_Bank = new SelectList(ibs, "Value", "Text");

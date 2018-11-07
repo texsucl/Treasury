@@ -42,6 +42,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
+            ViewBag.OPVT = type;
             var _dActType = GetActType(type, AplyNo);
             ViewBag.MarginpType = new SelectList(Marginp.GetMarginp_Take_Of_Type(), "Value", "Text"); 
             ViewBag.MarginpItem = new SelectList(Marginp.GetMarginpItem(), "Value", "Text");

@@ -223,6 +223,12 @@
         if (typeFlag && ItemImp_Act_Type) {
             $('#ItemImpInsert').show();
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#ItemImpInsert').hide();
+        }
+
         //#endregion
 
         function clearJqgrid(gridDivId) {
@@ -242,7 +248,7 @@
             verified.required(ItemImpDialogFormId, ItemImp_Quantity, message.required('重要物品數量'));//重要物品數量為必填
             //verified.datepicker(ItemImpDialogFormId, ItemImp_Expected_Date, $('#' + ItemImp_Expected_Date).val());
             verified.price(ItemImpDialogFormId, ItemImp_Amount); //重要物品金額驗證
-            verified.number(ItemImpDialogTakeOutFormId, tItemImp_G_Quantity); //取出物品數量輸入為數字         
+            verified.number(ItemImpDialogTakeOutFormId, tItemImp_G_Quantity); //取出物品數量輸入為數字
             verified.number(ItemImpDialogFormId, ItemImp_Quantity);//重要物品數量輸入為數字
         }
         //#endregion
@@ -494,6 +500,11 @@
             if (!ItemImp_Act_Type) { //申請狀態
                 $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionDeleIcon').hide();
                 });
             }

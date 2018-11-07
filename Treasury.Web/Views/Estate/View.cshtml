@@ -141,7 +141,7 @@
 
 <script>
     $(function () {
-        
+
         //#region url設定
         var ESTATEurl = {};
         ESTATEurl.Insert = '@Url.Action("InsertView", "Estate")';
@@ -249,6 +249,11 @@
                     $('#' + ESTATE_MemoTId).val(data.MEMO);
                 }
             })
+        }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#ESTATEInsert').hide();
         }
 
         //#endregion
@@ -681,6 +686,11 @@
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
         }
 
         var tempActFun = {};
@@ -874,7 +884,7 @@
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim()+'不得為空');
                             _checkFlag = false;
                         }
-                        else 
+                        else
                         {
                             $.each(checkEstate_Date($(this).attr('id')), function () {
                                 strs.push(this);
@@ -929,7 +939,7 @@
             if (!_checkFlag)
             {
                 customerUtility.alert(strs.join(',</br>'), 'w');
-            }         
+            }
             return _checkFlag
         }
 
@@ -940,11 +950,11 @@
             {
                 var date = $('#' + ESTATE_DateTId).val().trim();
                 if (!verified.isDate(date)) {
-                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');                   
+                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');
                 }
                 else if (Number(date) > Number(created.getOnlyDateStr(true, false, false))) {
                     arr.push('發狀日需 ≦ 系統日');
-                }                
+                }
             }
             return arr;
         }

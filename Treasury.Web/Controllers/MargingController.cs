@@ -45,6 +45,7 @@ namespace Treasury.Web.Controllers
         [HttpPost]
         public ActionResult View(string AplyNo, TreasuryAccessViewModel data, Ref.OpenPartialViewType type)
         {
+            ViewBag.OPVT = type;
             ViewBag.dMarging_Dep_Type = new SelectList(Marging.GetMargingType(), "Value", "Text");
             ViewBag.CustodianFlag = AccountController.CustodianFlag;
 

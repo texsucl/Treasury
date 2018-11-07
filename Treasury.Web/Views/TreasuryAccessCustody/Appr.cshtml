@@ -286,7 +286,7 @@
             $('#' + dialogId).dialog({
                 position: { my: "top", at: "center top", of: window },
                 title: '查詢畫面',
-                width: 1050,
+                width: 1170,
                 autoOpen: false,
                 maxHeight: 700,
                 resizable: false,
@@ -350,7 +350,7 @@
         function TACustodyApprGrid() {
             var colNameArray = [' ',
                 '存取項目', '申請日期', '申請單號',
-                '申請單位', '申請人', '入庫原因',
+                '申請單位', '申請人', '保管科承辦', '入庫原因', '覆核意見',
                 '存取項目ID', '覆核權限'];
             var colModelArray = [
                 { name: "vCheckFlag", index: "vCheckFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck },
@@ -359,7 +359,9 @@
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
                 { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 270, sortable: false, align: 'left' },
+                { name: "vCUSTODY_UID", index: "vCUSTODY_UID", width: 120, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 150, sortable: false, align: 'left' },
+                { name: "vAPPR_DESC", index: "vAPPR_DESC", width: 120, sortable: false, align: 'left' },
                 { name: "vItem", index: "vItem", hidden: true },
                 { name: "vAPPRFlag", index: "vAPPRFlag", hidden: true },
             ];
@@ -422,7 +424,7 @@
                             data: JSON.stringify({
                                 AplyNo: data.vAPLY_NO,
                                 data: null,
-                                type: 5 //保管單位覆核作業
+                                type: 7 //保管單位覆核作業
                             }),
                             dataType: 'html',
                             url: itemData.url,
@@ -440,10 +442,11 @@
                                 $('#TAVMApprvCreateUnit').text(aplyNoData.vCreateUnit);
                                 $('#TAVMApprvCreateUid').text(aplyNoData.vCreateUid);
                                 $('#TAVMApprvAccessReason').val(aplyNoData.vAccessReason);
-                                openTADialog(itemData.title, itemData.openDialogWidth, 'TACustodyApprOpenSearchDialog');
+                                $('.TACustodyApprAct').hide();
                                 if (apprFlag) {
                                     $('.TACustodyApprAct').show();
                                 }
+                                openTADialog(itemData.title, itemData.openDialogWidth, 'TACustodyApprOpenSearchDialog');
                             }
                         })
                     }
@@ -457,8 +460,7 @@
             title = title || '';
             width = width || 'auto';
             title += '明細';
-            var dialogId = dialogId;
-            $('.TACustodyApprAct').hide();
+            var dialogId = dialogId;          
             $('#' + dialogId).dialog({
                 position: { my: "top", at: "center top", of: window },
                 title: title,
