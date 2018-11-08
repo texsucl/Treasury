@@ -264,6 +264,8 @@
           <Property Name="ISORTBY" Type="int" Nullable="false" />
           <Property Name="DEP_CHK_ITEM_DESC" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="ITEM_ORDER" Type="int" Nullable="false" />
+          <Property Name="REPLACE" Type="nvarchar" MaxLength="20" />
           <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
           <Property Name="CREATE_DT" Type="datetime" />
@@ -286,8 +288,18 @@
           <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="DEP_CHK_ITEM_DESC" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="ITEM_ORDER" Type="int" Nullable="false" />
+          <Property Name="REPLACE" Type="nvarchar" MaxLength="20" />
           <Property Name="DEP_CHK_ITEM_DESC_B" Type="nvarchar" MaxLength="50" />
           <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+          <Property Name="ITEM_ORDER_B" Type="int" />
+          <Property Name="REPLACE_B" Type="nvarchar" MaxLength="20" />
+          <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="INVENTORY_CHG_APLY">
           <Key>
@@ -407,6 +419,9 @@
             <PropertyRef Name="IS_MAIL_DEPT_MGR" />
             <PropertyRef Name="IS_MAIL_SECT_MGR" />
             <PropertyRef Name="IS_DISABLED" />
+            <PropertyRef Name="APPR_STATUS" />
+            <PropertyRef Name="APLY_DATE" />
+            <PropertyRef Name="APLY_UID" />
           </Key>
           <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="CHARGE_UNIT_ID" Type="varchar" MaxLength="5" Nullable="false" />
@@ -422,6 +437,12 @@
           <Property Name="IS_MAIL_DEPT_MGR_B" Type="varchar" MaxLength="1" />
           <Property Name="IS_MAIL_SECT_MGR_B" Type="varchar" MaxLength="1" />
           <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="ITEM_DEP_ORDER_D">
           <Key>
@@ -754,6 +775,12 @@
           <Property Name="MAIL_SUBJECT_B" Type="nvarchar" MaxLength="50" />
           <Property Name="MAIL_CONTENT_B" Type="nvarchar" MaxLength="100" />
           <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="MAIL_RECEIVE">
           <Key>
@@ -781,7 +808,7 @@
           <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
           <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" />
         </EntityType>
         <EntityType Name="MAIL_TIME">
           <Key>
@@ -818,7 +845,7 @@
           <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
           <Property Name="MAIL_TIME_ID" Type="varchar" MaxLength="2" Nullable="false" />
           <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
-          <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="FUNC_ID" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="SEND_TIME" Type="varchar" MaxLength="5" />
           <Property Name="INTERVAL_MIN" Type="int" />
           <Property Name="TREA_OPEN_TIME" Type="varchar" MaxLength="5" />
@@ -826,7 +853,7 @@
           <Property Name="EXEC_TIME_E" Type="varchar" MaxLength="5" />
           <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
           <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
-          <Property Name="FUNC_ID_B" Type="varchar" MaxLength="10" />
+          <Property Name="FUNC_ID_B" Type="nvarchar" MaxLength="20" />
           <Property Name="SEND_TIME_B" Type="varchar" MaxLength="5" />
           <Property Name="INTERVAL_MIN_B" Type="int" />
           <Property Name="TREA_OPEN_TIME_B" Type="varchar" MaxLength="5" />
@@ -834,6 +861,14 @@
           <Property Name="EXEC_TIME_E_B" Type="varchar" MaxLength="5" />
           <Property Name="MAIL_CONTENT_ID_B" Type="varchar" MaxLength="2" />
           <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
+          <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
         </EntityType>
         <EntityType Name="OTHER_ITEM_APLY">
           <Key>
@@ -1022,7 +1057,12 @@
           <Property Name="NORMAL_CNT_B" Type="int" />
           <Property Name="RESERVE_CNT_B" Type="int" />
           <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
-          <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" />
+          <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="TREA_ITEM">
           <Key>
@@ -1070,6 +1110,12 @@
           <Property Name="DAILY_FLAG_B" Type="varchar" MaxLength="1" />
           <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
           <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+          <Property Name="APPR_DATE" Type="datetime" />
+          <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
+          <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
+          <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="TREA_OPEN_REC">
           <Key>
@@ -1201,7 +1247,13 @@
     [ITEM_CHARGE_UNIT_HIS].[CHARGE_UID_B] AS [CHARGE_UID_B], 
     [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_DEPT_MGR_B] AS [IS_MAIL_DEPT_MGR_B], 
     [ITEM_CHARGE_UNIT_HIS].[IS_MAIL_SECT_MGR_B] AS [IS_MAIL_SECT_MGR_B], 
-    [ITEM_CHARGE_UNIT_HIS].[IS_DISABLED_B] AS [IS_DISABLED_B]
+    [ITEM_CHARGE_UNIT_HIS].[IS_DISABLED_B] AS [IS_DISABLED_B], 
+    [ITEM_CHARGE_UNIT_HIS].[APPR_DATE] AS [APPR_DATE], 
+    [ITEM_CHARGE_UNIT_HIS].[APPR_STATUS] AS [APPR_STATUS], 
+    [ITEM_CHARGE_UNIT_HIS].[APLY_DATE] AS [APLY_DATE], 
+    [ITEM_CHARGE_UNIT_HIS].[APLY_UID] AS [APLY_UID], 
+    [ITEM_CHARGE_UNIT_HIS].[APPR_UID] AS [APPR_UID], 
+    [ITEM_CHARGE_UNIT_HIS].[APPR_DESC] AS [APPR_DESC]
     FROM [dbo].[ITEM_CHARGE_UNIT_HIS] AS [ITEM_CHARGE_UNIT_HIS]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="Log" EntityType="Self.Log" store:Type="Tables" store:Schema="dbo">
@@ -1398,21 +1450,8 @@
           <Property Name="APPR_DT" Type="DateTime" Precision="3" />
           <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="DEP_CHK_ITEM_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="ACCESS_TYPE" />
-            <PropertyRef Name="ISORTBY" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ACCESS_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ISORTBY" Type="Int32" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DEP_CHK_ITEM_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DEP_CHK_ITEM_DESC_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ORDER" Type="Int32" Nullable="false" />
+          <Property Name="REPLACE" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="ITEM_CHARGE_UNIT">
           <Key>
@@ -1513,39 +1552,6 @@
           <Property Name="CHARGE_DEPT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="CHARGE_SECT_AFT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="MAIL_CONTENT">
-          <Key>
-            <PropertyRef Name="MAIL_CONTENT_ID" />
-          </Key>
-          <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_SUBJECT" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="MAIL_CONTENT1" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
-          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
-          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
-          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="MAIL_CONTENT_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="MAIL_CONTENT_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_SUBJECT" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="MAIL_CONTENT" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_SUBJECT_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="MAIL_CONTENT_B" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="MAIL_RECEIVE">
           <Key>
             <PropertyRef Name="MAIL_CONTENT_ID" />
@@ -1562,42 +1568,6 @@
           <Property Name="APPR_DT" Type="DateTime" Precision="3" />
           <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="MAIL_RECEIVE_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="MAIL_CONTENT_ID" />
-            <PropertyRef Name="FUNC_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-        </EntityType>
-        <EntityType Name="MAIL_TIME_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="MAIL_TIME_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MAIL_TIME_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="FUNC_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="INTERVAL_MIN" Type="Int32" />
-          <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="MAIL_CONTENT_ID" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="FUNC_ID_B" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="SEND_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="INTERVAL_MIN_B" Type="Int32" />
-          <Property Name="TREA_OPEN_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_B_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="EXEC_TIME_E_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="MAIL_CONTENT_ID_B" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
-          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="PIA_EXEC_TYPE">
           <Key>
@@ -1748,25 +1718,6 @@
           <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
         </EntityType>
-        <EntityType Name="TREA_EQUIP_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="TREA_EQUIP_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="TREA_EQUIP_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EQUIP_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="CONTROL_MODE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="NORMAL_CNT" Type="Int32" />
-          <Property Name="RESERVE_CNT" Type="Int32" />
-          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="CONTROL_MODE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="NORMAL_CNT_B" Type="Int32" />
-          <Property Name="RESERVE_CNT_B" Type="Int32" />
-          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="APPR_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-        </EntityType>
         <EntityType Name="TREA_ITEM">
           <Key>
             <PropertyRef Name="ITEM_ID" />
@@ -1789,58 +1740,6 @@
           <Property Name="APPR_DT" Type="DateTime" Precision="3" />
           <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="TREA_ITEM_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="ITEM_ID" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ITEM_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ITEM_DESC" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="IS_TREA_ITEM" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="TREA_ITEM_NAME" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="TREA_ITEM_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="ITEM_OP_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="DAILY_FLAG" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="IS_TREA_ITEM_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="TREA_ITEM_NAME_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="TREA_ITEM_TYPE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="ITEM_OP_TYPE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="DAILY_FLAG_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-        </EntityType>
-        <EntityType Name="ITEM_CHARGE_UNIT_HIS">
-          <Key>
-            <PropertyRef Name="APLY_NO" />
-            <PropertyRef Name="CHARGE_UNIT_ID" />
-            <PropertyRef Name="EXEC_ACTION" />
-            <PropertyRef Name="ITEM_ID" />
-            <PropertyRef Name="CHARGE_DEPT" />
-            <PropertyRef Name="CHARGE_SECT" />
-            <PropertyRef Name="CHARGE_UID" />
-            <PropertyRef Name="IS_MAIL_DEPT_MGR" />
-            <PropertyRef Name="IS_MAIL_SECT_MGR" />
-            <PropertyRef Name="IS_DISABLED" />
-          </Key>
-          <Property Name="APLY_NO" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_UNIT_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_DEPT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_SECT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="IS_MAIL_DEPT_MGR" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="IS_MAIL_SECT_MGR" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CHARGE_UID_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
-          <Property Name="IS_MAIL_DEPT_MGR_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IS_MAIL_SECT_MGR_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Log">
           <Key>
@@ -1879,16 +1778,11 @@
           <EntitySet Name="CODE_ROLE_TREA_ITEM_HIS" EntityType="Self.CODE_ROLE_TREA_ITEM_HIS" />
           <EntitySet Name="CODE_USER_HIS" EntityType="Self.CODE_USER_HIS" />
           <EntitySet Name="DEP_CHK_ITEM" EntityType="Self.DEP_CHK_ITEM" />
-          <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="Self.DEP_CHK_ITEM_HIS" />
           <EntitySet Name="ITEM_CHARGE_UNIT" EntityType="Self.ITEM_CHARGE_UNIT" />
           <EntitySet Name="ITEM_OTHER" EntityType="Self.ITEM_OTHER" />
           <EntitySet Name="ITEM_REAL_ESTATE" EntityType="Self.ITEM_REAL_ESTATE" />
           <EntitySet Name="ITEM_SEAL" EntityType="Self.ITEM_SEAL" />
-          <EntitySet Name="MAIL_CONTENT" EntityType="Self.MAIL_CONTENT" />
-          <EntitySet Name="MAIL_CONTENT_HIS" EntityType="Self.MAIL_CONTENT_HIS" />
           <EntitySet Name="MAIL_RECEIVE" EntityType="Self.MAIL_RECEIVE" />
-          <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="Self.MAIL_RECEIVE_HIS" />
-          <EntitySet Name="MAIL_TIME_HIS" EntityType="Self.MAIL_TIME_HIS" />
           <EntitySet Name="PIA_EXEC_TYPE" EntityType="Self.PIA_EXEC_TYPE" />
           <EntitySet Name="PIA_LOG_MAIN" EntityType="Self.PIA_LOG_MAIN" />
           <EntitySet Name="PIA_TRACK_TYPE" EntityType="Self.PIA_TRACK_TYPE" />
@@ -1898,10 +1792,7 @@
           <EntitySet Name="TREA_APLY_REC" EntityType="Self.TREA_APLY_REC" />
           <EntitySet Name="TREA_APLY_TEMP" EntityType="Self.TREA_APLY_TEMP" />
           <EntitySet Name="TREA_EQUIP" EntityType="Self.TREA_EQUIP" />
-          <EntitySet Name="TREA_EQUIP_HIS" EntityType="Self.TREA_EQUIP_HIS" />
           <EntitySet Name="TREA_ITEM" EntityType="Self.TREA_ITEM" />
-          <EntitySet Name="TREA_ITEM_HIS" EntityType="Self.TREA_ITEM_HIS" />
-          <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="Self.ITEM_CHARGE_UNIT_HIS" />
           <EntitySet Name="Log" EntityType="Self.Log" />
           <AssociationSet Name="R_LOG_MAIN_EXEC_TYPE" Association="Self.R_LOG_MAIN_EXEC_TYPE">
             <End Role="PIA_EXEC_TYPE" EntitySet="PIA_EXEC_TYPE" />
@@ -1931,6 +1822,14 @@
           <EntitySet Name="OTHER_ITEM_APLY" EntityType="dbTreasuryModel.OTHER_ITEM_APLY" />
           <EntitySet Name="ITEM_DEP_ORDER_D" EntityType="dbTreasuryModel.ITEM_DEP_ORDER_D" />
           <EntitySet Name="BLANK_NOTE_APLY" EntityType="dbTreasuryModel.BLANK_NOTE_APLY" />
+          <EntitySet Name="MAIL_CONTENT" EntityType="dbTreasuryModel.MAIL_CONTENT" />
+          <EntitySet Name="MAIL_RECEIVE_HIS" EntityType="dbTreasuryModel.MAIL_RECEIVE_HIS" />
+          <EntitySet Name="DEP_CHK_ITEM_HIS" EntityType="dbTreasuryModel.DEP_CHK_ITEM_HIS" />
+          <EntitySet Name="MAIL_CONTENT_HIS" EntityType="dbTreasuryModel.MAIL_CONTENT_HIS" />
+          <EntitySet Name="MAIL_TIME_HIS" EntityType="dbTreasuryModel.MAIL_TIME_HIS" />
+          <EntitySet Name="TREA_EQUIP_HIS" EntityType="dbTreasuryModel.TREA_EQUIP_HIS" />
+          <EntitySet Name="TREA_ITEM_HIS" EntityType="dbTreasuryModel.TREA_ITEM_HIS" />
+          <EntitySet Name="ITEM_CHARGE_UNIT_HIS" EntityType="dbTreasuryModel.ITEM_CHARGE_UNIT_HIS" />
         </EntityContainer>
         <EntityType Name="CODE_USER">
           <Key>
@@ -2392,6 +2291,205 @@
           <Property Name="ITEM_BLANK_NOTE_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
           <Property Name="ITEM_BLANK_NOTE_FINAL_ITEM_ID" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
         </EntityType>
+        <EntityType Name="MAIL_CONTENT">
+          <Key>
+            <PropertyRef Name="MAIL_CONTENT_ID" />
+          </Key>
+          <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_SUBJECT" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MAIL_CONTENT1" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="DATA_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="MAIL_RECEIVE_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="MAIL_CONTENT_ID" />
+            <PropertyRef Name="FUNC_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="FUNC_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="DEP_CHK_ITEM_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="ACCESS_TYPE" />
+            <PropertyRef Name="ISORTBY" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ACCESS_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ISORTBY" Type="Int32" Nullable="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="DEP_CHK_ITEM_DESC" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ORDER" Type="Int32" Nullable="false" />
+          <Property Name="REPLACE" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="DEP_CHK_ITEM_DESC_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ORDER_B" Type="Int32" />
+          <Property Name="REPLACE_B" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="MAIL_CONTENT_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="MAIL_CONTENT_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_SUBJECT" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MAIL_CONTENT" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_SUBJECT_B" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="MAIL_CONTENT_B" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="true" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="MAIL_TIME_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="MAIL_TIME_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_TIME_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="FUNC_ID" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="SEND_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="INTERVAL_MIN" Type="Int32" />
+          <Property Name="TREA_OPEN_TIME" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_E" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_CONTENT_ID" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="FUNC_ID_B" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="SEND_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="INTERVAL_MIN_B" Type="Int32" />
+          <Property Name="TREA_OPEN_TIME_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_B_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_TIME_E_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="MAIL_CONTENT_ID_B" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="true" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="TREA_EQUIP_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="TREA_EQUIP_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="TREA_EQUIP_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="EQUIP_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="CONTROL_MODE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NORMAL_CNT" Type="Int32" />
+          <Property Name="RESERVE_CNT" Type="Int32" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CONTROL_MODE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NORMAL_CNT_B" Type="Int32" />
+          <Property Name="RESERVE_CNT_B" Type="Int32" />
+          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="TREA_ITEM_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="ITEM_ID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_DESC" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="IS_TREA_ITEM" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="TREA_ITEM_NAME" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="TREA_ITEM_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_OP_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="DAILY_FLAG" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="IS_TREA_ITEM_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="TREA_ITEM_NAME_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="TREA_ITEM_TYPE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_OP_TYPE_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="DAILY_FLAG_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO_B" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="true" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="ITEM_CHARGE_UNIT_HIS">
+          <Key>
+            <PropertyRef Name="APLY_NO" />
+            <PropertyRef Name="CHARGE_UNIT_ID" />
+            <PropertyRef Name="EXEC_ACTION" />
+            <PropertyRef Name="ITEM_ID" />
+            <PropertyRef Name="CHARGE_DEPT" />
+            <PropertyRef Name="CHARGE_SECT" />
+            <PropertyRef Name="CHARGE_UID" />
+            <PropertyRef Name="IS_MAIL_DEPT_MGR" />
+            <PropertyRef Name="IS_MAIL_SECT_MGR" />
+            <PropertyRef Name="IS_DISABLED" />
+            <PropertyRef Name="APPR_STATUS" />
+            <PropertyRef Name="APLY_DATE" />
+            <PropertyRef Name="APLY_UID" />
+          </Key>
+          <Property Name="APLY_NO" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_UNIT_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="EXEC_ACTION" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_DEPT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_SECT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="IS_MAIL_DEPT_MGR" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_MAIL_SECT_MGR" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CHARGE_UID_B" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="IS_MAIL_DEPT_MGR_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_MAIL_SECT_MGR_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DATE" Type="DateTime" Precision="3" />
+          <Property Name="APPR_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="true" />
+          <Property Name="APLY_DATE" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2549,6 +2647,8 @@
           <EntitySetMapping Name="DEP_CHK_ITEM">
             <EntityTypeMapping TypeName="dbTreasuryModel.DEP_CHK_ITEM">
               <MappingFragment StoreEntitySet="DEP_CHK_ITEM">
+                <ScalarProperty Name="REPLACE" ColumnName="REPLACE" />
+                <ScalarProperty Name="ITEM_ORDER" ColumnName="ITEM_ORDER" />
                 <ScalarProperty Name="ACCESS_TYPE" ColumnName="ACCESS_TYPE" />
                 <ScalarProperty Name="ISORTBY" ColumnName="ISORTBY" />
                 <ScalarProperty Name="DEP_CHK_ITEM_DESC" ColumnName="DEP_CHK_ITEM_DESC" />
@@ -2562,20 +2662,6 @@
                 <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
                 <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
                 <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DEP_CHK_ITEM_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.DEP_CHK_ITEM_HIS">
-              <MappingFragment StoreEntitySet="DEP_CHK_ITEM_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="ACCESS_TYPE" ColumnName="ACCESS_TYPE" />
-                <ScalarProperty Name="ISORTBY" ColumnName="ISORTBY" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="DEP_CHK_ITEM_DESC" ColumnName="DEP_CHK_ITEM_DESC" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="DEP_CHK_ITEM_DESC_B" ColumnName="DEP_CHK_ITEM_DESC_B" />
-                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2682,40 +2768,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="MAIL_CONTENT">
-            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_CONTENT">
-              <MappingFragment StoreEntitySet="MAIL_CONTENT">
-                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
-                <ScalarProperty Name="MAIL_SUBJECT" ColumnName="MAIL_SUBJECT" />
-                <ScalarProperty Name="MAIL_CONTENT1" ColumnName="MAIL_CONTENT" />
-                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
-                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
-                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
-                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
-                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
-                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
-                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
-                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="MAIL_CONTENT_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_CONTENT_HIS">
-              <MappingFragment StoreEntitySet="MAIL_CONTENT_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="MAIL_SUBJECT" ColumnName="MAIL_SUBJECT" />
-                <ScalarProperty Name="MAIL_CONTENT" ColumnName="MAIL_CONTENT" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="MAIL_SUBJECT_B" ColumnName="MAIL_SUBJECT_B" />
-                <ScalarProperty Name="MAIL_CONTENT_B" ColumnName="MAIL_CONTENT_B" />
-                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="MAIL_RECEIVE">
             <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_RECEIVE">
               <MappingFragment StoreEntitySet="MAIL_RECEIVE">
@@ -2730,41 +2782,6 @@
                 <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
                 <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
                 <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="MAIL_RECEIVE_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_RECEIVE_HIS">
-              <MappingFragment StoreEntitySet="MAIL_RECEIVE_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
-                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="MAIL_TIME_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_TIME_HIS">
-              <MappingFragment StoreEntitySet="MAIL_TIME_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="MAIL_TIME_ID" ColumnName="MAIL_TIME_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
-                <ScalarProperty Name="SEND_TIME" ColumnName="SEND_TIME" />
-                <ScalarProperty Name="INTERVAL_MIN" ColumnName="INTERVAL_MIN" />
-                <ScalarProperty Name="TREA_OPEN_TIME" ColumnName="TREA_OPEN_TIME" />
-                <ScalarProperty Name="EXEC_TIME_B" ColumnName="EXEC_TIME_B" />
-                <ScalarProperty Name="EXEC_TIME_E" ColumnName="EXEC_TIME_E" />
-                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
-                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
-                <ScalarProperty Name="FUNC_ID_B" ColumnName="FUNC_ID_B" />
-                <ScalarProperty Name="SEND_TIME_B" ColumnName="SEND_TIME_B" />
-                <ScalarProperty Name="INTERVAL_MIN_B" ColumnName="INTERVAL_MIN_B" />
-                <ScalarProperty Name="TREA_OPEN_TIME_B" ColumnName="TREA_OPEN_TIME_B" />
-                <ScalarProperty Name="EXEC_TIME_B_B" ColumnName="EXEC_TIME_B_B" />
-                <ScalarProperty Name="EXEC_TIME_E_B" ColumnName="EXEC_TIME_E_B" />
-                <ScalarProperty Name="MAIL_CONTENT_ID_B" ColumnName="MAIL_CONTENT_ID_B" />
-                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2920,25 +2937,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="TREA_EQUIP_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.TREA_EQUIP_HIS">
-              <MappingFragment StoreEntitySet="TREA_EQUIP_HIS">
-                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="TREA_EQUIP_ID" ColumnName="TREA_EQUIP_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="EQUIP_NAME" ColumnName="EQUIP_NAME" />
-                <ScalarProperty Name="CONTROL_MODE" ColumnName="CONTROL_MODE" />
-                <ScalarProperty Name="NORMAL_CNT" ColumnName="NORMAL_CNT" />
-                <ScalarProperty Name="RESERVE_CNT" ColumnName="RESERVE_CNT" />
-                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
-                <ScalarProperty Name="CONTROL_MODE_B" ColumnName="CONTROL_MODE_B" />
-                <ScalarProperty Name="NORMAL_CNT_B" ColumnName="NORMAL_CNT_B" />
-                <ScalarProperty Name="RESERVE_CNT_B" ColumnName="RESERVE_CNT_B" />
-                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="TREA_ITEM">
             <EntityTypeMapping TypeName="dbTreasuryModel.TREA_ITEM">
               <MappingFragment StoreEntitySet="TREA_ITEM">
@@ -2960,50 +2958,6 @@
                 <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
                 <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
                 <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TREA_ITEM_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.TREA_ITEM_HIS">
-              <MappingFragment StoreEntitySet="TREA_ITEM_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="ITEM_DESC" ColumnName="ITEM_DESC" />
-                <ScalarProperty Name="IS_TREA_ITEM" ColumnName="IS_TREA_ITEM" />
-                <ScalarProperty Name="TREA_ITEM_NAME" ColumnName="TREA_ITEM_NAME" />
-                <ScalarProperty Name="TREA_ITEM_TYPE" ColumnName="TREA_ITEM_TYPE" />
-                <ScalarProperty Name="ITEM_OP_TYPE" ColumnName="ITEM_OP_TYPE" />
-                <ScalarProperty Name="DAILY_FLAG" ColumnName="DAILY_FLAG" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
-                <ScalarProperty Name="IS_TREA_ITEM_B" ColumnName="IS_TREA_ITEM_B" />
-                <ScalarProperty Name="TREA_ITEM_NAME_B" ColumnName="TREA_ITEM_NAME_B" />
-                <ScalarProperty Name="TREA_ITEM_TYPE_B" ColumnName="TREA_ITEM_TYPE_B" />
-                <ScalarProperty Name="ITEM_OP_TYPE_B" ColumnName="ITEM_OP_TYPE_B" />
-                <ScalarProperty Name="DAILY_FLAG_B" ColumnName="DAILY_FLAG_B" />
-                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
-                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ITEM_CHARGE_UNIT_HIS">
-            <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_CHARGE_UNIT_HIS">
-              <MappingFragment StoreEntitySet="ITEM_CHARGE_UNIT_HIS">
-                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
-                <ScalarProperty Name="CHARGE_UNIT_ID" ColumnName="CHARGE_UNIT_ID" />
-                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
-                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
-                <ScalarProperty Name="CHARGE_DEPT" ColumnName="CHARGE_DEPT" />
-                <ScalarProperty Name="CHARGE_SECT" ColumnName="CHARGE_SECT" />
-                <ScalarProperty Name="CHARGE_UID" ColumnName="CHARGE_UID" />
-                <ScalarProperty Name="IS_MAIL_DEPT_MGR" ColumnName="IS_MAIL_DEPT_MGR" />
-                <ScalarProperty Name="IS_MAIL_SECT_MGR" ColumnName="IS_MAIL_SECT_MGR" />
-                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
-                <ScalarProperty Name="CHARGE_UID_B" ColumnName="CHARGE_UID_B" />
-                <ScalarProperty Name="IS_MAIL_DEPT_MGR_B" ColumnName="IS_MAIL_DEPT_MGR_B" />
-                <ScalarProperty Name="IS_MAIL_SECT_MGR_B" ColumnName="IS_MAIL_SECT_MGR_B" />
-                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -3501,6 +3455,193 @@
                 <ScalarProperty Name="CHECK_TYPE" ColumnName="CHECK_TYPE" />
                 <ScalarProperty Name="ISSUING_BANK" ColumnName="ISSUING_BANK" />
                 <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MAIL_CONTENT">
+            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_CONTENT">
+              <MappingFragment StoreEntitySet="MAIL_CONTENT">
+                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
+                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
+                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
+                <ScalarProperty Name="MAIL_CONTENT1" ColumnName="MAIL_CONTENT" />
+                <ScalarProperty Name="MAIL_SUBJECT" ColumnName="MAIL_SUBJECT" />
+                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MAIL_RECEIVE_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_RECEIVE_HIS">
+              <MappingFragment StoreEntitySet="MAIL_RECEIVE_HIS">
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
+                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DEP_CHK_ITEM_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.DEP_CHK_ITEM_HIS">
+              <MappingFragment StoreEntitySet="DEP_CHK_ITEM_HIS">
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="REPLACE_B" ColumnName="REPLACE_B" />
+                <ScalarProperty Name="ITEM_ORDER_B" ColumnName="ITEM_ORDER_B" />
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="DEP_CHK_ITEM_DESC_B" ColumnName="DEP_CHK_ITEM_DESC_B" />
+                <ScalarProperty Name="REPLACE" ColumnName="REPLACE" />
+                <ScalarProperty Name="ITEM_ORDER" ColumnName="ITEM_ORDER" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="DEP_CHK_ITEM_DESC" ColumnName="DEP_CHK_ITEM_DESC" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="ISORTBY" ColumnName="ISORTBY" />
+                <ScalarProperty Name="ACCESS_TYPE" ColumnName="ACCESS_TYPE" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MAIL_CONTENT_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_CONTENT_HIS">
+              <MappingFragment StoreEntitySet="MAIL_CONTENT_HIS">
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="MAIL_CONTENT_B" ColumnName="MAIL_CONTENT_B" />
+                <ScalarProperty Name="MAIL_SUBJECT_B" ColumnName="MAIL_SUBJECT_B" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="MAIL_CONTENT" ColumnName="MAIL_CONTENT" />
+                <ScalarProperty Name="MAIL_SUBJECT" ColumnName="MAIL_SUBJECT" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MAIL_TIME_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.MAIL_TIME_HIS">
+              <MappingFragment StoreEntitySet="MAIL_TIME_HIS">
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
+                <ScalarProperty Name="MAIL_CONTENT_ID_B" ColumnName="MAIL_CONTENT_ID_B" />
+                <ScalarProperty Name="EXEC_TIME_E_B" ColumnName="EXEC_TIME_E_B" />
+                <ScalarProperty Name="EXEC_TIME_B_B" ColumnName="EXEC_TIME_B_B" />
+                <ScalarProperty Name="TREA_OPEN_TIME_B" ColumnName="TREA_OPEN_TIME_B" />
+                <ScalarProperty Name="INTERVAL_MIN_B" ColumnName="INTERVAL_MIN_B" />
+                <ScalarProperty Name="SEND_TIME_B" ColumnName="SEND_TIME_B" />
+                <ScalarProperty Name="FUNC_ID_B" ColumnName="FUNC_ID_B" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="MAIL_CONTENT_ID" ColumnName="MAIL_CONTENT_ID" />
+                <ScalarProperty Name="EXEC_TIME_E" ColumnName="EXEC_TIME_E" />
+                <ScalarProperty Name="EXEC_TIME_B" ColumnName="EXEC_TIME_B" />
+                <ScalarProperty Name="TREA_OPEN_TIME" ColumnName="TREA_OPEN_TIME" />
+                <ScalarProperty Name="INTERVAL_MIN" ColumnName="INTERVAL_MIN" />
+                <ScalarProperty Name="SEND_TIME" ColumnName="SEND_TIME" />
+                <ScalarProperty Name="FUNC_ID" ColumnName="FUNC_ID" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="MAIL_TIME_ID" ColumnName="MAIL_TIME_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TREA_EQUIP_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.TREA_EQUIP_HIS">
+              <MappingFragment StoreEntitySet="TREA_EQUIP_HIS">
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
+                <ScalarProperty Name="RESERVE_CNT_B" ColumnName="RESERVE_CNT_B" />
+                <ScalarProperty Name="NORMAL_CNT_B" ColumnName="NORMAL_CNT_B" />
+                <ScalarProperty Name="CONTROL_MODE_B" ColumnName="CONTROL_MODE_B" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="RESERVE_CNT" ColumnName="RESERVE_CNT" />
+                <ScalarProperty Name="NORMAL_CNT" ColumnName="NORMAL_CNT" />
+                <ScalarProperty Name="CONTROL_MODE" ColumnName="CONTROL_MODE" />
+                <ScalarProperty Name="EQUIP_NAME" ColumnName="EQUIP_NAME" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="TREA_EQUIP_ID" ColumnName="TREA_EQUIP_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TREA_ITEM_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.TREA_ITEM_HIS">
+              <MappingFragment StoreEntitySet="TREA_ITEM_HIS">
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="MEMO_B" ColumnName="MEMO_B" />
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="DAILY_FLAG_B" ColumnName="DAILY_FLAG_B" />
+                <ScalarProperty Name="ITEM_OP_TYPE_B" ColumnName="ITEM_OP_TYPE_B" />
+                <ScalarProperty Name="TREA_ITEM_TYPE_B" ColumnName="TREA_ITEM_TYPE_B" />
+                <ScalarProperty Name="TREA_ITEM_NAME_B" ColumnName="TREA_ITEM_NAME_B" />
+                <ScalarProperty Name="IS_TREA_ITEM_B" ColumnName="IS_TREA_ITEM_B" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="DAILY_FLAG" ColumnName="DAILY_FLAG" />
+                <ScalarProperty Name="ITEM_OP_TYPE" ColumnName="ITEM_OP_TYPE" />
+                <ScalarProperty Name="TREA_ITEM_TYPE" ColumnName="TREA_ITEM_TYPE" />
+                <ScalarProperty Name="TREA_ITEM_NAME" ColumnName="TREA_ITEM_NAME" />
+                <ScalarProperty Name="IS_TREA_ITEM" ColumnName="IS_TREA_ITEM" />
+                <ScalarProperty Name="ITEM_DESC" ColumnName="ITEM_DESC" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ITEM_CHARGE_UNIT_HIS">
+            <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_CHARGE_UNIT_HIS">
+              <MappingFragment StoreEntitySet="ITEM_CHARGE_UNIT_HIS">
+                <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />
+                <ScalarProperty Name="APLY_DATE" ColumnName="APLY_DATE" />
+                <ScalarProperty Name="APPR_STATUS" ColumnName="APPR_STATUS" />
+                <ScalarProperty Name="APPR_DATE" ColumnName="APPR_DATE" />
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="IS_MAIL_SECT_MGR_B" ColumnName="IS_MAIL_SECT_MGR_B" />
+                <ScalarProperty Name="IS_MAIL_DEPT_MGR_B" ColumnName="IS_MAIL_DEPT_MGR_B" />
+                <ScalarProperty Name="CHARGE_UID_B" ColumnName="CHARGE_UID_B" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="IS_MAIL_SECT_MGR" ColumnName="IS_MAIL_SECT_MGR" />
+                <ScalarProperty Name="IS_MAIL_DEPT_MGR" ColumnName="IS_MAIL_DEPT_MGR" />
+                <ScalarProperty Name="CHARGE_UID" ColumnName="CHARGE_UID" />
+                <ScalarProperty Name="CHARGE_SECT" ColumnName="CHARGE_SECT" />
+                <ScalarProperty Name="CHARGE_DEPT" ColumnName="CHARGE_DEPT" />
+                <ScalarProperty Name="ITEM_ID" ColumnName="ITEM_ID" />
+                <ScalarProperty Name="EXEC_ACTION" ColumnName="EXEC_ACTION" />
+                <ScalarProperty Name="CHARGE_UNIT_ID" ColumnName="CHARGE_UNIT_ID" />
                 <ScalarProperty Name="APLY_NO" ColumnName="APLY_NO" />
               </MappingFragment>
             </EntityTypeMapping>

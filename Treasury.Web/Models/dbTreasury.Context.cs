@@ -37,16 +37,11 @@ namespace Treasury.Web.Models
         public virtual DbSet<CODE_ROLE_TREA_ITEM_HIS> CODE_ROLE_TREA_ITEM_HIS { get; set; }
         public virtual DbSet<CODE_USER_HIS> CODE_USER_HIS { get; set; }
         public virtual DbSet<DEP_CHK_ITEM> DEP_CHK_ITEM { get; set; }
-        public virtual DbSet<DEP_CHK_ITEM_HIS> DEP_CHK_ITEM_HIS { get; set; }
         public virtual DbSet<ITEM_CHARGE_UNIT> ITEM_CHARGE_UNIT { get; set; }
         public virtual DbSet<ITEM_OTHER> ITEM_OTHER { get; set; }
         public virtual DbSet<ITEM_REAL_ESTATE> ITEM_REAL_ESTATE { get; set; }
         public virtual DbSet<ITEM_SEAL> ITEM_SEAL { get; set; }
-        public virtual DbSet<MAIL_CONTENT> MAIL_CONTENT { get; set; }
-        public virtual DbSet<MAIL_CONTENT_HIS> MAIL_CONTENT_HIS { get; set; }
         public virtual DbSet<MAIL_RECEIVE> MAIL_RECEIVE { get; set; }
-        public virtual DbSet<MAIL_RECEIVE_HIS> MAIL_RECEIVE_HIS { get; set; }
-        public virtual DbSet<MAIL_TIME_HIS> MAIL_TIME_HIS { get; set; }
         public virtual DbSet<PIA_EXEC_TYPE> PIA_EXEC_TYPE { get; set; }
         public virtual DbSet<PIA_LOG_MAIN> PIA_LOG_MAIN { get; set; }
         public virtual DbSet<PIA_TRACK_TYPE> PIA_TRACK_TYPE { get; set; }
@@ -56,10 +51,7 @@ namespace Treasury.Web.Models
         public virtual DbSet<TREA_APLY_REC> TREA_APLY_REC { get; set; }
         public virtual DbSet<TREA_APLY_TEMP> TREA_APLY_TEMP { get; set; }
         public virtual DbSet<TREA_EQUIP> TREA_EQUIP { get; set; }
-        public virtual DbSet<TREA_EQUIP_HIS> TREA_EQUIP_HIS { get; set; }
         public virtual DbSet<TREA_ITEM> TREA_ITEM { get; set; }
-        public virtual DbSet<TREA_ITEM_HIS> TREA_ITEM_HIS { get; set; }
-        public virtual DbSet<ITEM_CHARGE_UNIT_HIS> ITEM_CHARGE_UNIT_HIS { get; set; }
         public virtual DbSet<Log> Log { get; set; }
         public virtual DbSet<CODE_USER> CODE_USER { get; set; }
         public virtual DbSet<CODE_USER_ROLE> CODE_USER_ROLE { get; set; }
@@ -81,5 +73,13 @@ namespace Treasury.Web.Models
         public virtual DbSet<OTHER_ITEM_APLY> OTHER_ITEM_APLY { get; set; }
         public virtual DbSet<ITEM_DEP_ORDER_D> ITEM_DEP_ORDER_D { get; set; }
         public virtual DbSet<BLANK_NOTE_APLY> BLANK_NOTE_APLY { get; set; }
+        public virtual DbSet<MAIL_CONTENT> MAIL_CONTENT { get; set; }
+        public virtual DbSet<MAIL_RECEIVE_HIS> MAIL_RECEIVE_HIS { get; set; }
+        public virtual DbSet<DEP_CHK_ITEM_HIS> DEP_CHK_ITEM_HIS { get; set; }
+        public virtual DbSet<MAIL_CONTENT_HIS> MAIL_CONTENT_HIS { get; set; }
+        public virtual DbSet<MAIL_TIME_HIS> MAIL_TIME_HIS { get; set; }
+        public virtual DbSet<TREA_EQUIP_HIS> TREA_EQUIP_HIS { get; set; }
+        public virtual DbSet<TREA_ITEM_HIS> TREA_ITEM_HIS { get; set; }
+        public virtual DbSet<ITEM_CHARGE_UNIT_HIS> ITEM_CHARGE_UNIT_HIS { get; set; }
     }
 }

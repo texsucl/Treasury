@@ -27,5 +27,7 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> APPR_DT { get; set; }
         public string FREEZE_UID { get; set; }
         public Nullable<System.DateTime> FREEZE_DT { get; set; }
+        public int ITEM_ORDER { get; set; }
+        public string REPLACE { get; set; }
     }
 }
