@@ -9,6 +9,7 @@ using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
 using Treasury.Web.Enum;
+using Treasury.Web.Controllers;
 
 namespace Treasury.Web.Service.Actual
 {
@@ -598,6 +599,7 @@ namespace Treasury.Web.Service.Actual
                     {
                         return result;
                     }
+                    _TREA_APLY_REC.LAST_UPDATE_UID = AccountController.CurrentUserId;
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = _status;
                     logStr += _TREA_APLY_REC.modelToString(logStr);
@@ -719,7 +721,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = aplyStatus;
-                    _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
+                    //_TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
                     // 申請單位
                     if (aplyStatus == Ref.AccessProjectFormStatus.B01.ToString())
                     {
@@ -828,7 +830,7 @@ namespace Treasury.Web.Service.Actual
 
                     _TREA_APLY_REC.LAST_UPDATE_DT = dt;
                     _TREA_APLY_REC.APLY_STATUS = aplyStatus;
-                    _TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
+                    //_TREA_APLY_REC.LAST_UPDATE_UID = searchData.vCreateUid;
                     // 保管科單位
                     if (aplyStatus == Ref.AccessProjectFormStatus.A06.ToString())
                     {
@@ -920,6 +922,7 @@ namespace Treasury.Web.Service.Actual
                     }
                     updateData.ACCESS_REASON = data.vAccessReason;
                     updateData.EXPECTED_ACCESS_DATE = TypeTransfer.stringToDateTimeN(data.vExpectedAccessDate);
+                    updateData.LAST_UPDATE_UID = AccountController.CurrentUserId; 
                     updateData.LAST_UPDATE_DT = DateTime.Now;
                     try
                     {

@@ -28,10 +28,11 @@ namespace Treasury.Web.Models
         public string IS_MAIL_DEPT_MGR_B { get; set; }
         public string IS_MAIL_SECT_MGR_B { get; set; }
         public string IS_DISABLED_B { get; set; }
-        public System.DateTime APPR_DATE { get; set; }
+        public Nullable<System.DateTime> APPR_DATE { get; set; }
         public string APPR_STATUS { get; set; }
         public System.DateTime APLY_DATE { get; set; }
         public string APLY_UID { get; set; }
         public string APPR_UID { get; set; }
+        public string APPR_DESC { get; set; }
     }
 }
