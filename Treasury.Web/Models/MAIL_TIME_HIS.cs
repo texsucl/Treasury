@@ -33,10 +33,13 @@ namespace Treasury.Web.Models
         public string EXEC_TIME_E_B { get; set; }
         public string MAIL_CONTENT_ID_B { get; set; }
         public string MEMO_B { get; set; }
-        public System.DateTime APPR_DATE { get; set; }
+        public Nullable<System.DateTime> APPR_DATE { get; set; }
         public string APPR_STATUS { get; set; }
         public System.DateTime APLY_DATE { get; set; }
         public string APLY_UID { get; set; }
         public string APPR_UID { get; set; }
+        public string APPR_DESC { get; set; }
+        public string IS_DISABLED { get; set; }
+        public string IS_DISABLED_B { get; set; }
     }
 }
