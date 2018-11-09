@@ -290,10 +290,11 @@
     <Property Name="ITEM_ORDER_B" Type="int" />
     <Property Name="REPLACE_B" Type="nvarchar" MaxLength="20" />
     <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
-    <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="INVENTORY_CHG_APLY">
     <Key>
@@ -413,10 +414,10 @@
       <PropertyRef Name="IS_MAIL_DEPT_MGR" />
       <PropertyRef Name="IS_MAIL_SECT_MGR" />
       <PropertyRef Name="IS_DISABLED" />
-      <PropertyRef Name="APPR_DATE" />
       <PropertyRef Name="APPR_STATUS" />
       <PropertyRef Name="APLY_DATE" />
       <PropertyRef Name="APLY_UID" />
+      <PropertyRef Name="APPR_DATE" />
       <PropertyRef Name="APPR_UID" />
     </Key>
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
@@ -433,11 +434,12 @@
     <Property Name="IS_MAIL_DEPT_MGR_B" Type="varchar" MaxLength="1" />
     <Property Name="IS_MAIL_SECT_MGR_B" Type="varchar" MaxLength="1" />
     <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" Nullable="false" />
     <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
     <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="ITEM_DEP_ORDER_D">
     <Key>
@@ -770,11 +772,12 @@
     <Property Name="MAIL_SUBJECT_B" Type="nvarchar" MaxLength="50" />
     <Property Name="MAIL_CONTENT_B" Type="nvarchar" MaxLength="100" />
     <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" />
     <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
-    <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="MAIL_RECEIVE">
     <Key>
@@ -802,7 +805,7 @@
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="MAIL_CONTENT_ID" Type="varchar" MaxLength="2" Nullable="false" />
     <Property Name="FUNC_ID" Type="varchar" MaxLength="10" Nullable="false" />
-    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" />
   </EntityType>
   <EntityType Name="MAIL_TIME">
     <Key>
@@ -855,11 +858,12 @@
     <Property Name="EXEC_TIME_E_B" Type="varchar" MaxLength="5" />
     <Property Name="MAIL_CONTENT_ID_B" Type="varchar" MaxLength="2" />
     <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" />
     <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
-    <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="OTHER_ITEM_APLY">
     <Key>
@@ -1049,10 +1053,11 @@
     <Property Name="RESERVE_CNT_B" Type="int" />
     <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
     <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
-    <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="TREA_ITEM">
     <Key>
@@ -1100,11 +1105,12 @@
     <Property Name="DAILY_FLAG_B" Type="varchar" MaxLength="1" />
     <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
     <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
-    <Property Name="APPR_DATE" Type="date" Nullable="false" />
+    <Property Name="APPR_DATE" Type="datetime" />
     <Property Name="APPR_STATUS" Type="nvarchar" MaxLength="1" Nullable="false" />
-    <Property Name="APLY_DATE" Type="date" Nullable="false" />
+    <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
     <Property Name="APLY_UID" Type="varchar" MaxLength="5" Nullable="false" />
-    <Property Name="APPR_UID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DESC" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="TREA_OPEN_REC">
     <Key>
@@ -1241,7 +1247,8 @@
     [ITEM_CHARGE_UNIT_HIS].[APPR_STATUS] AS [APPR_STATUS], 
     [ITEM_CHARGE_UNIT_HIS].[APLY_DATE] AS [APLY_DATE], 
     [ITEM_CHARGE_UNIT_HIS].[APLY_UID] AS [APLY_UID], 
-    [ITEM_CHARGE_UNIT_HIS].[APPR_UID] AS [APPR_UID]
+    [ITEM_CHARGE_UNIT_HIS].[APPR_UID] AS [APPR_UID], 
+    [ITEM_CHARGE_UNIT_HIS].[APPR_DESC] AS [APPR_DESC]
     FROM [dbo].[ITEM_CHARGE_UNIT_HIS] AS [ITEM_CHARGE_UNIT_HIS]</DefiningQuery>
     </EntitySet>
     <EntitySet Name="Log" EntityType="Self.Log" store:Type="Tables" store:Schema="dbo">

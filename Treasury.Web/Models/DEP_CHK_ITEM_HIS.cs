@@ -27,9 +27,10 @@ namespace Treasury.Web.Models
         public Nullable<int> ITEM_ORDER_B { get; set; }
         public string REPLACE_B { get; set; }
         public string APPR_STATUS { get; set; }
-        public System.DateTime APPR_DATE { get; set; }
+        public Nullable<System.DateTime> APPR_DATE { get; set; }
         public System.DateTime APLY_DATE { get; set; }
         public string APLY_UID { get; set; }
         public string APPR_UID { get; set; }
+        public string APPR_DESC { get; set; }
     }
 }

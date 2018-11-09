@@ -33,5 +33,6 @@ namespace Treasury.Web.Models
         public System.DateTime APLY_DATE { get; set; }
         public string APLY_UID { get; set; }
         public string APPR_UID { get; set; }
+        public string APPR_DESC { get; set; }
     }
 }

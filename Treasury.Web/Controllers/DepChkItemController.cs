@@ -38,7 +38,14 @@ namespace Treasury.Web.Controllers
         public ActionResult Index()
         {
             ViewBag.opScope = GetopScope("~/TreasuryMaintain/");
-            ViewBag.dIs_Disabled = new SelectList(new Service.Actual.Common().GetSysCode("IS_DISABLED", true), "Value", "Text");
+            ViewBag.dIs_Disabled_Search = new SelectList(new Service.Actual.Common().GetSysCode("IS_DISABLED", true), "Value", "Text");
+            ViewBag.dIs_Disabled = new SelectList(new Service.Actual.Common().GetSysCode("IS_DISABLED"), "Value", "Text");
+
+            List<SelectOption> Access_Type = new List<SelectOption>();
+            Access_Type.Add(new SelectOption() { Text = "存入", Value = "P" });
+            Access_Type.Add(new SelectOption() { Text = "取出", Value = "G" });
+            ViewBag.dAccess_Type = new SelectList(Access_Type, "Value", "Text");
+
             return View();
         }
 
@@ -67,6 +74,29 @@ namespace Treasury.Web.Controllers
             }
 
             return Json(result);
+        }
+
+        /// <summary>
+        /// jqgrid cache data
+        /// </summary>
+        /// <param name="jdata"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetCacheData(jqGridParam jdata, string type)
+        {
+            switch (type)
+            {
+                case "P":
+                    if (Cache.IsSet(CacheList.DepChkItem_P_SearchDataList))
+                        return Json(jdata.modelToJqgridResult(((List<DepChkItemViewModel>)Cache.Get(CacheList.DepChkItem_P_SearchDataList)).OrderBy(x => x.vItem_Order).ToList()));
+                    break;
+                case "G":
+                    if (Cache.IsSet(CacheList.DepChkItem_G_SearchDataList))
+                        return Json(jdata.modelToJqgridResult(((List<DepChkItemViewModel>)Cache.Get(CacheList.DepChkItem_G_SearchDataList)).OrderBy(x => x.vItem_Order).ToList()));
+                    break;
+            }
+            return null;
         }
 
     }
