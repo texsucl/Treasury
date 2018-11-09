@@ -141,7 +141,7 @@ namespace Treasury.Web.Service.Actual
                         TE => TE.TREA_EQUIP_ID,
                         (TES, TE) => new TreasuryMaintainChangeRecordViewModel
                         {
-                            vFreeze_Dt = TE.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                            vAply_Date = TES.APLY_DATE.ToString("yyyy/MM/dd"),
                             vAply_No = TES.APLY_NO,
                             vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TE.FREEZE_UID)?.EMP_NAME.Trim(),
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TES.EXEC_ACTION)?.CODE_VALUE.Trim(),
@@ -170,7 +170,7 @@ namespace Treasury.Web.Service.Actual
                         TE => TE.TREA_EQUIP_ID,
                         (TES, TE) => new TreasuryMaintainChangeRecordViewModel
                         {
-                            vFreeze_Dt = TE.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                            vAply_Date = TES.APLY_DATE.ToString("yyyy/MM/dd"),
                             vAply_No = TES.APLY_NO,
                             vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TE.FREEZE_UID)?.EMP_NAME.Trim(),
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TES.EXEC_ACTION)?.CODE_VALUE.Trim(),
@@ -307,7 +307,8 @@ namespace Treasury.Web.Service.Actual
                                         NORMAL_CNT = item.vNormal_Cnt,
                                         RESERVE_CNT = item.vReserve_Cnt,
                                         MEMO = item.vMemo,
-                                        APPR_STATUS = "1"//表單申請
+                                        APPR_STATUS = "1",//表單申請
+                                        APLY_DATE = dt
                                     };
                                     db.TREA_EQUIP_HIS.Add(_TEH);
                                     logStr += "|";
@@ -329,7 +330,8 @@ namespace Treasury.Web.Service.Actual
                                         CONTROL_MODE_B = _TE_Data.CONTROL_MODE,
                                         NORMAL_CNT_B = _TE_Data.NORMAL_CNT,
                                         RESERVE_CNT_B = _TE_Data.RESERVE_CNT,
-                                        MEMO_B = _TE_Data.MEMO
+                                        MEMO_B = _TE_Data.MEMO,
+                                        APLY_DATE = dt
                                     };
                                     db.TREA_EQUIP_HIS.Add(_TEH);
                                     logStr += "|";
@@ -400,9 +402,49 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> TinReject(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId, string desc)
         {
-            foreach (var itemID in aplyNos)
+            foreach (var aplyNo in aplyNos)
             {
+                var _TreaEquipHisList = db.TREA_EQUIP_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if(_TreaEquipHisList.Any())
+                {
+                    foreach(var TreaEquipHis in _TreaEquipHisList)
+                    {
+                        //金庫設備設定檔
+                        var _TreaEquip = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
+                        if (_TreaEquip != null)
+                        {
+                            _TreaEquip.DATA_STATUS = "1";//可異動
+                            _TreaEquip.APPR_UID = userId;
+                            _TreaEquip.APPR_DT = dt;
 
+                            logStr += _TreaEquip.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+
+                        //金庫設備異動檔
+                        var _TreaEquipHis = db.TREA_EQUIP_HIS.FirstOrDefault(x => x.APLY_NO == TreaEquipHis.APLY_NO && x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
+                        if(_TreaEquipHis!=null)
+                        {
+                            _TreaEquipHis.APPR_STATUS = "3";//退回
+                            _TreaEquipHis.APPR_DATE = dt;
+                            _TreaEquipHis.APPR_UID = userId;
+                            _TreaEquipHis.APPR_DESC = desc;
+
+                            logStr += _TreaEquipHis.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
             }
             return new Tuple<bool, string>(true, logStr);
         }
@@ -418,9 +460,57 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> TinApproved(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId)
         {
-            foreach (var itemID in aplyNos)
+            foreach (var aplyNo in aplyNos)
             {
+                var _TreaEquipHisList = db.TREA_EQUIP_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if (_TreaEquipHisList.Any())
+                {
+                    foreach (var TreaEquipHis in _TreaEquipHisList)
+                    {
+                        //金庫設備設定檔
+                        var _TreaEquip = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
+                        if(_TreaEquip!=null)
+                        {
+                            _TreaEquip.DATA_STATUS = "1";//可異動
+                            _TreaEquip.CONTROL_MODE = TreaEquipHis.CONTROL_MODE;
+                            _TreaEquip.NORMAL_CNT = TreaEquipHis.NORMAL_CNT;
+                            _TreaEquip.RESERVE_CNT = TreaEquipHis.RESERVE_CNT;
+                            _TreaEquip.MEMO = TreaEquipHis.MEMO;
+                            //判斷是否刪除
+                            if (TreaEquipHis.EXEC_ACTION == "D")
+                            {
+                                _TreaEquip.IS_DISABLED = "Y";
+                            }
+                            _TreaEquip.APPR_UID = userId;
+                            _TreaEquip.APPR_DT = dt;
 
+                            logStr += _TreaEquip.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+
+                        //金庫設備異動檔
+                        var _TreaEquipHis = db.TREA_EQUIP_HIS.FirstOrDefault(x => x.APLY_NO == TreaEquipHis.APLY_NO && x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
+                        if (_TreaEquipHis != null)
+                        {
+                            _TreaEquipHis.APPR_STATUS = "2";//覆核完成
+                            _TreaEquipHis.APPR_DATE = dt;
+                            _TreaEquipHis.APPR_UID = userId;
+
+                            logStr = _TreaEquipHis.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
             }
             return new Tuple<bool, string>(true, logStr);
         }

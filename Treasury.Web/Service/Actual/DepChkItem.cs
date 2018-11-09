@@ -37,6 +37,31 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var emps = GetEmps();
+                var _Dep_Chk_Item_HisList = db.DEP_CHK_ITEM_HIS.AsNoTracking()
+                    .Where(x => x.APPR_STATUS == "1").ToList();
+                var _Exec_Action = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
+                var _Data_Status_Name = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == "DATA_STATUS").ToList();
+
+                result.AddRange(db.DEP_CHK_ITEM.AsNoTracking()
+                    .Where(x => x.IS_DISABLED == searchData.vIs_Disabled, searchData.vIs_Disabled != "All")
+                    .AsEnumerable()
+                    .Select((x) => new DepChkItemViewModel()
+                    {
+                        vAccess_Type = x.ACCESS_TYPE,
+                        vIsortby = x.ISORTBY,
+                        vExec_Action = _Dep_Chk_Item_HisList.FirstOrDefault(y => y.ACCESS_TYPE == x.ACCESS_TYPE && y.ISORTBY == x.ISORTBY)?.EXEC_ACTION?.Trim(),
+                        vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == _Dep_Chk_Item_HisList.FirstOrDefault(z => z.ACCESS_TYPE == x.ACCESS_TYPE && z.ISORTBY == x.ISORTBY)?.EXEC_ACTION?.Trim())?.CODE_VALUE?.Trim(),
+                        vDep_Chk_Item_Desc = x.DEP_CHK_ITEM_DESC,
+                        vIs_Disabled = x.IS_DISABLED,
+                        vReplace = x.REPLACE,
+                        vData_Status = x.DATA_STATUS,
+                        vData_Status_Name = _Data_Status_Name.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE?.Trim(),
+                        vLast_Update_Dt = x.LAST_UPDATE_DT,
+                        vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
+                        vAply_No = _Dep_Chk_Item_HisList.FirstOrDefault(y => y.ACCESS_TYPE == x.ACCESS_TYPE && y.ISORTBY == x.ISORTBY)?.APLY_NO?.Trim()
+                    }).ToList());
             }
 
             return result;
@@ -100,7 +125,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> TinReject(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId, string desc)
         {
-            foreach (var itemID in aplyNos)
+            foreach (var aplyNo in aplyNos)
             {
 
             }
@@ -118,7 +143,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> TinApproved(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId)
         {
-            foreach (var itemID in aplyNos)
+            foreach (var aplyNo in aplyNos)
             {
 
             }

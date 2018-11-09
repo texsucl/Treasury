@@ -18,7 +18,7 @@ namespace Treasury.Web.ViewModels
         /// 資料順序
         /// </summary>
         [Description("資料順序")]
-        public string vIsortby { get; set; }
+        public int vIsortby { get; set; }
 
         /// <summary>
         /// 執行功能
@@ -45,10 +45,16 @@ namespace Treasury.Web.ViewModels
         public string vIs_Disabled { get; set; }
 
         /// <summary>
-        /// 停用註記名稱
+        /// 項目順序
         /// </summary>
-        [Description("停用註記名稱")]
-        public string vIs_Disabled_Name { get; set; }
+        [Description("項目順序")]
+        public string vItem_Order { get; set; }
+
+        /// <summary>
+        /// 取代變數
+        /// </summary>
+        [Description("取代變數")]
+        public string vReplace { get; set; }
 
         /// <summary>
         /// 資料狀態

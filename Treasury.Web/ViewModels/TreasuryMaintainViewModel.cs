@@ -108,10 +108,10 @@ namespace Treasury.Web.ViewModels
     public class TreasuryMaintainChangeRecordViewModel : ITinItem
     {
         /// <summary>
-        /// 異動日期
+        /// 申請日期
         /// </summary>
-        [Description("異動日期")]
-        public string vFreeze_Dt { get; set; }
+        [Description("申請日期")]
+        public string vAply_Date { get; set; }
 
         /// <summary>
         /// 工作單號
