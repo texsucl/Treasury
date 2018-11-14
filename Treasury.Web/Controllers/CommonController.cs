@@ -288,10 +288,22 @@ namespace Treasury.Web.Controllers
 
 
                 #region 寄信
+                //存許項目
+                string vitemIdName = extensionParms.FirstOrDefault(x => x.key == "vJobProject")?.value;
+                //庫存日期
+                string aplyDt = parms.FirstOrDefault(x => x.key == "APLY_DT_From")?.value;
+
+                MAIL_TIME MT = new MAIL_TIME();
+                MAIL_CONTENT MC = new MAIL_CONTENT();
+
                 List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
                 List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
+                    //季追蹤庫存表 抓5
+                    MT = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.MAIL_TIME_ID == "5" && x.IS_DISABLED != "Y");
+                    var _MAIL_CONTENT_ID = MT?.MAIL_CONTENT_ID;
+                    MC = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID && x.IS_DISABLED != "Y");
                     using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
                     {
                         //存許項目
@@ -300,7 +312,7 @@ namespace Treasury.Web.Controllers
                         string vdept = parms.FirstOrDefault(x => x.key == "CHARGE_DEPT_ID")?.value;
                         //權責科別
                         string vsect = parms.FirstOrDefault(x => x.key == "CHARGE_SECT_ID")?.value;
-                   
+
                         var _VW_OA_DEPT = dbINTRA.VW_OA_DEPT.AsNoTracking();
                         var _V_EMPLY2 = dbINTRA.V_EMPLY2.AsNoTracking();
 
@@ -343,14 +355,20 @@ namespace Treasury.Web.Controllers
                         });
                     }
                 }
-                    Dictionary<string, Stream> attachment = new Dictionary<string, Stream>();
+                Dictionary<string, Stream> attachment = new Dictionary<string, Stream>();
 
                 attachment.Add(string.Format("{0}.pdf",_DisplayName), new MemoryStream(renderedBytes));
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendLine(
-$@"請參考附件
-");
+                string str = MC?.MAIL_CONTENT1 ?? string.Empty;
+
+                str = str.Replace("@_DATE_", aplyDt);
+                str = str.Replace("@_ITEM_", vitemIdName);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(str);
+//                    sb.AppendLine(
+//$@"請參考附件
+//");
                     try
                     {
                         var sms = new SendMail.SendMailSelf();
@@ -362,7 +380,7 @@ $@"請參考附件
                             new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                            _mailTo,
                             _ccTo,
-                            "金庫物品庫存表",
+                            MT?.FUNC_ID ?? "金庫物品庫存表",
                             sb.ToString(),
                             false,
                             attachment

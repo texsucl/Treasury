@@ -1,0 +1,104 @@
+﻿<div id="TMTCR">
+    <form id="TMTCR_Form_Search">
+        <table>
+            <tr>
+                <td>
+                    <label>程式名稱 : </label>
+                </td>
+                <td>
+                    <input type="text" id="tFunc_ID" name="tFunc_ID" />
+                </td>
+                <td>
+                    <label>覆核狀態 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("dAppr_Status", (SelectList)ViewBag.dAppr_Status)
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="button" class="btn btn-primary" id="TMTCR_ChangeRecordSearch" value="查詢" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="TMTCR_OpenChangeRecordSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TMTCR_OpenChangeRecordSearchDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMTCR_Url = {};
+        TMTCR_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "TreasuryMailTime")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var openChangeRecordSearchDetailId = 'TMTCR_OpenChangeRecordSearchDetail';
+        //#endregion 參數設定
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMTCR_ChangeRecordSearch':
+                    $('#' + id).on('click', function () { TMTCR_ChangeRecordSearch(); });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        function TMTCR_ChangeRecordSearch() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null,
+                    data: TreasuryMailTimeSearchViewModel(
+                        $('#tFunc_ID').val(),
+                        $('#dAppr_Status').val())
+                }),
+                dataType: 'html',
+                url: TMTCR_Url.openChangeRecordView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#' + openChangeRecordSearchDetailId).children().remove();
+                    $('#' + openChangeRecordSearchDetailId).html(vdata);
+                    openDialog('發送時間異動紀錄', 1320, 'TMTCR_OpenChangeRecordSearchDialog');
+                }
+            })
+        }
+
+        function openDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        //#region 異動紀錄查詢畫面  ViewModel
+        function TreasuryMailTimeSearchViewModel(
+            vFunc_ID,
+            vAPPR_STATUS
+            ) {
+            var obj = {};
+            obj['vFunc_ID'] = vFunc_ID;
+            obj['vAPPR_STATUS'] = vAPPR_STATUS;
+            return obj;
+        }
+        //#endregion
+    });
+</script>

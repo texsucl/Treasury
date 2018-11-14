@@ -32,7 +32,8 @@ namespace Treasury.Web.Scheduler
                 #region 8.2 金庫確認作業提醒
                 try
                 {
-                    _mt = db.MAIL_TIME.AsEnumerable().FirstOrDefault(x => x.FUNC_ID == "0000000016" && x.IS_DISABLED == "N" && DateTime.Parse(x.EXEC_TIME_B + ":00") <= DateTime.Parse(dtnstr + ":00") && DateTime.Parse(x.EXEC_TIME_E + ":00") >= DateTime.Parse(dtnstr + ":00"));
+                    //金庫開庫流程提醒通知 抓3
+                    _mt = db.MAIL_TIME.AsEnumerable().FirstOrDefault(x => x.MAIL_TIME_ID == "3" && x.IS_DISABLED == "N" && DateTime.Parse(x.EXEC_TIME_B + ":00") <= DateTime.Parse(dtnstr + ":00") && DateTime.Parse(x.EXEC_TIME_E + ":00") >= DateTime.Parse(dtnstr + ":00"));
                     if (_mt != null)
                     {
                         var _INTERVAL_MIN = _mt.INTERVAL_MIN;
@@ -59,7 +60,7 @@ namespace Treasury.Web.Scheduler
                                 Extension.NlogSet($"執行 更新SCHEDULER_STATUS 為 N !!");
                                 var _mt2 = db.MAIL_TIME
                                         .Where(x =>
-                                        x.FUNC_ID == "0000000016")
+                                        x.MAIL_TIME_ID == "3")
                                         .ToList();
                                 if (_mt2.Any())
                                 {
@@ -94,13 +95,14 @@ namespace Treasury.Web.Scheduler
                 #region 8.1 每日例行出入庫mail通知作業
                 try
                 {
+                    //例行開庫通知 抓1,2
+                    var _MAIL_TIME_ID = new List<string>() { "1", "2" };
                     _MT = db.MAIL_TIME.FirstOrDefault(
                     x => x.SEND_TIME != null &&
                     x.SEND_TIME == dtnstr &&
                     x.IS_DISABLED != "Y" &&
                     x.SCHEDULER_STATUS != "Y" &&
-                    x.SEND_TIME != "00:00" &&
-                    x.INTERVAL_MIN == 0);
+                    _MAIL_TIME_ID.Contains(x.MAIL_TIME_ID));
                     //var _Mail_Time_ID = _MT.MAIL_TIME_ID;
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().AsEnumerable()
                         .FirstOrDefault(x =>
@@ -117,7 +119,7 @@ namespace Treasury.Web.Scheduler
                             db.SaveChanges();
                             Extension.NlogSet($"MAIL_TIME 有找到例行性排程設定檔案");
                             Extension.NlogSet($"DateTime : {dtn}");
-                            Routine(db, dtnstr, dtn);
+                            Routine(db, dtnstr, dtn, _MT.MAIL_TIME_ID);
                         }
                         catch (Exception ex)
                         {
@@ -130,7 +132,7 @@ namespace Treasury.Web.Scheduler
                                     .Where(x =>
                                     x.SEND_TIME != null &&
                                     x.SEND_TIME == dtnstr &&
-                                    x.MAIL_CONTENT_ID == "01").ToList();
+                                    _MAIL_TIME_ID.Contains(x.MAIL_TIME_ID)).ToList();
                             if (_MT2.Any())
                             {
                                 Extension.NlogSet($"更新SCHEDULER_STATUS 為 N  !!");
@@ -167,7 +169,7 @@ namespace Treasury.Web.Scheduler
             Extension.NlogSet("[Execute]執行結束!!");
         }
 
-        public void Routine(TreasuryDBEntities db, string dateTime, DateTime _dtn)
+        public void Routine(TreasuryDBEntities db, string dateTime, DateTime _dtn,string MAIL_TIME_ID)
         {
             var _split = dateTime.Split(':');
             var hh = _split[0];
@@ -177,6 +179,7 @@ namespace Treasury.Web.Scheduler
             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
             var _Mail_Time = db.MAIL_TIME.ToList()
                 .FirstOrDefault(x =>
+                x.MAIL_TIME_ID == MAIL_TIME_ID &&
                 x.SEND_TIME != null &&
                 x.SEND_TIME == dateTime &&
                 x.IS_DISABLED != "Y" &&
@@ -248,12 +251,21 @@ namespace Treasury.Web.Scheduler
                     db.TREA_APLY_TEMP.RemoveRange(db.TREA_APLY_TEMP);
                     #endregion
 
+                    var _MAIL_CONTENT = db.MAIL_CONTENT.AsNoTracking()
+                        .First(x => x.MAIL_CONTENT_ID == _Mail_Time.MAIL_CONTENT_ID);
+
+                    var str = _MAIL_CONTENT.MAIL_CONTENT1;
+
+                    str = str.Replace("@_TREA_OPEN_TIME_", _Mail_Time.TREA_OPEN_TIME);
+                    str = str.Replace("@_EXEC_TIME_E_", _Mail_Time.EXEC_TIME_E);
+
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendLine(
-$@"您好,
-通知今日金庫開關庫時間為:{_Mail_Time.TREA_OPEN_TIME}，請準時至金庫門口集合。
-為配合金庫大門之啟閉，請有權人在:{_Mail_Time.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
-");
+                    sb.AppendLine(str);
+//                    sb.AppendLine(
+//$@"您好,
+//通知今日金庫開關庫時間為:{_Mail_Time.TREA_OPEN_TIME}，請準時至金庫門口集合。
+//為配合金庫大門之啟閉，請有權人在:{_Mail_Time.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
+//");
                     int num = 1;
 
                     #region 將例行作業項目寫入【申請單紀錄暫存檔】
@@ -285,7 +297,7 @@ $@"您好,
                             new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                             new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
                             null,
-                            "金庫每日例行開庫通知",
+                            _Mail_Time?.FUNC_ID ?? "金庫每日例行開庫通知",
                             sb.ToString()
                             );
 
@@ -356,7 +368,7 @@ $@"您好,
 
                 var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == _TREA_OPEN_REC.TREA_REGISTER_ID);
 
-                var _Mail_Time = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.FUNC_ID == "0000000016" && x.IS_DISABLED == "N");
+                var _Mail_Time = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.MAIL_TIME_ID == "3" && x.IS_DISABLED == "N");
                 if (_Mail_Time != null)
                 {
                     var _MAIL_CONTENT = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _Mail_Time.MAIL_CONTENT_ID && x.IS_DISABLED == "N");
@@ -388,49 +400,61 @@ $@"您好,
 
                         StringBuilder sb = new StringBuilder();
 
+                        string str = _MAIL_CONTENT.MAIL_CONTENT1;
+                        str = str.Replace("@_TREA_REGISTER_ID_", _TREA_OPEN_REC.TREA_REGISTER_ID);
+                        var status = string.Empty;
+
                         switch (_TREA_OPEN_REC.REGI_STATUS)
                         {
                             case "C02":
                                 if (_TREA_OPEN_REC.APPR_STATUS == "3")
                                 {
-                                    sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫申請作業】，請儘速完成，謝謝");
+                                    status = "【指定開庫申請作業】";
+//                                    sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫申請作業】，請儘速完成，謝謝");
                                 }
                                 else if (_TREA_OPEN_REC.APPR_STATUS == "1")
                                 {
-                                    sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫覆核作業】，請儘速完成，謝謝");
+                                    status = "【指定開庫覆核作業】";
+//                                    sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫覆核作業】，請儘速完成，謝謝");
                                 }
                                 else if (_TREA_OPEN_REC.APPR_STATUS == "2")
                                 {
                                     if (_TREA_APLY_REC == null)
                                     {
-                                        sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【入庫人員確認作業】，請儘速完成，謝謝");
+                                        status = "【入庫人員確認作業】";
+//                                        sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【入庫人員確認作業】，請儘速完成，謝謝");
                                     }
                                     else
                                     {
-                                        sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫前)】，請儘速完成，謝謝");
+                                        status = "【金庫登記簿執行作業(開庫前)】";
+//                                        sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫前)】，請儘速完成，謝謝");
                                     }
                                 }
                                 break;
                             case "D01":
-                                sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫後)】，請儘速完成，謝謝");
+                                status = "【金庫登記簿執行作業(開庫後)】";
+//                                sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫後)】，請儘速完成，謝謝");
                                 break;
                             case "D02":
                             case "D04":
-                                sb.AppendLine(
-$@"您好, 
-尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿覆核作業】，請儘速完成，謝謝");
+                                status = "【金庫登記簿覆核作業】";
+//                                sb.AppendLine(
+//$@"您好, 
+//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿覆核作業】，請儘速完成，謝謝");
                                 break;
                         }
+
+                        str = str.Replace("@_STATUS_", status);
 
                         //                        sb.AppendLine(
                         //$@"您好, 
@@ -450,7 +474,7 @@ $@"您好,
                                 new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                                 new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
                                 null,
-                                "出入庫時間提醒通知",
+                                 _Mail_Time?.FUNC_ID ?? "出入庫時間提醒通知",
                                 sb.ToString()
                                 );
                         }

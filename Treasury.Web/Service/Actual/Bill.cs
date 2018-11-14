@@ -224,9 +224,13 @@ namespace Treasury.Web.Service.Actual
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
                             vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
                             vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
                             vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vBill_Issuing_Bank = x.ISSUING_BANK,
                             vBill_Issuing_Bank_AFT = x.ISSUING_BANK_AFT,
                             vBill_Check_Type = x.CHECK_TYPE,
@@ -268,9 +272,13 @@ namespace Treasury.Web.Service.Actual
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
                             vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
                             vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
                             vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vBill_Issuing_Bank = x.ISSUING_BANK,
                             vBill_Issuing_Bank_AFT = x.ISSUING_BANK_AFT,
                             vBill_Check_Type = x.CHECK_TYPE,
@@ -287,6 +295,7 @@ namespace Treasury.Web.Service.Actual
                 result.ForEach(x =>
                 {
                     x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
             }
             return result;
@@ -824,6 +833,66 @@ namespace Treasury.Web.Service.Actual
                     _Bill.CHECK_NO_B_AFT = null;
                     _Bill.CHECK_NO_E = GetNewValue(_Bill.CHECK_NO_E, _Bill.CHECK_NO_E_AFT);
                     _Bill.CHECK_NO_E_AFT = null;
+                    _Bill.LAST_UPDATE_DT = dt;
+                    logStr = _Bill.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Bill = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Bill != null)
+                {
+                    _Bill.INVENTORY_STATUS = "1"; //在庫
+                    _Bill.CHARGE_DEPT_AFT = null;
+                    _Bill.CHARGE_SECT_AFT = null;
+                    _Bill.LAST_UPDATE_DT = dt;
+                    logStr = _Bill.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Bill = db.ITEM_BLANK_NOTE.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Bill != null)
+                {
+                    _Bill.INVENTORY_STATUS = "1"; //在庫
+                    _Bill.CHARGE_DEPT = _Bill.CHARGE_DEPT_AFT;
+                    _Bill.CHARGE_DEPT_AFT = null;
+                    _Bill.CHARGE_SECT = _Bill.CHARGE_SECT_AFT;
+                    _Bill.CHARGE_SECT_AFT = null;
                     _Bill.LAST_UPDATE_DT = dt;
                     logStr = _Bill.modelToString(logStr);
                 }

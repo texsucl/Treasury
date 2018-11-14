@@ -6,6 +6,15 @@ namespace Treasury.Web.ViewModels
 {
     public class TreasuryMailContentUpdateViewModel : ITinItem
     {
+        public TreasuryMailContentUpdateViewModel()
+        {
+            vMAIL_CONTENT_ID = string.Empty;
+            vIS_DISABLED = string.Empty;
+            vMAIL_SUBJECT = string.Empty;
+            vMAIL_CONTENT = string.Empty;
+            subData = new List<TreasuryMailReceivelViewModel>();
+        }
+
         /// <summary>
         /// 內文編號
         /// </summary>

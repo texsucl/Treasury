@@ -1,0 +1,175 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div id="TCRV">
+    <div style="height:30px">
+        <i class="fa fa-exclamation-circle title" style="font-size:24px;bottom:auto;"
+           alt="@Ref.MessageType.Mail_Content_Message.GetDescription()"></i>
+    </div>
+    <div id="TMC_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    <div id="TMC_OpenChangeRecordDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TMC_OpenChangeRecordDetail"></div>
+    </div>
+    <div style="text-align:center;">
+        <input type="button" id="TMC_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMCC_Url = {};
+        TMCC_Url.getData = '@Url.Action("GetCacheData", "TreasuryMailContent")';
+        TMCC_Url.ReceiveView = '@Url.Action("Receive", "TreasuryMailContent")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var isGroupHeaders = true;//合併欄位
+        //#endregion 參數設定
+
+        //#region 初始動作
+        TMC_ChangeRecord_TempGrid();
+        //#endregion 初始動作
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMC_ChangeRecord_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog($(this));
+                        });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        @*function formatterIs_Disabled(cellvalue, options, rdata) {
+            switch (cellvalue) {
+                @{
+                    foreach (var item in ((SelectList)ViewBag.dIs_Disabled))
+                    {
+                        <text>
+                            case '@item.Value':
+                                return '@item.Text';
+                        </text>
+                    }
+                }
+                default:
+            return '';
+            }
+        }*@
+
+        //#region jqgrid
+        function TMC_ChangeRecord_CompleteFun(listId) {
+            if (isGroupHeaders) {
+                jQuery("#" + listId).jqGrid('setGroupHeaders', {
+                    useColSpanStyle: true,
+                    groupHeaders: [
+                      { startColumnName: 'vMAIL_SUBJECT_B', numberOfColumns: 2, titleText: '發送主旨' },
+                      { startColumnName: 'vMAIL_CONTENT_B', numberOfColumns: 2, titleText: '發送內文' },
+                      { startColumnName: 'vIS_DISABLED_B', numberOfColumns: 2, titleText: '停用註記' },
+                    ]
+                });
+                isGroupHeaders = false;
+            }
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+
+                //開啟對應功能明細
+                $(this).find('td').find('a.DialogFunc_ID').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        OpenReceive($("#" + listId).getRowData(i + 1).APLY_NO);
+                    });
+                });
+            });
+        }
+
+        function OpenReceive(APLY_NO) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    Mail_ID: null,
+                    Aply_No: APLY_NO,
+                    Act_Flag: 'N'
+                }),
+                dataType: 'html',
+                url: TMCC_Url.ReceiveView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#TMC_OpenChangeRecordDetail').children().remove();
+                    $('#TMC_OpenChangeRecordDetail').html(vdata);
+                    openDetailDialog('對應功能', 490, 'TMC_OpenChangeRecordDialog');
+                 
+                }
+            })
+        }
+
+        function openDetailDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    customerUtility.closeDialog($(this));
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        function formatterOpenReceive(cellvalue, options, rdata) {
+            if (cellvalue == 'Y') {
+                return "<a href='#' class='openDialog DialogFunc_ID' style='text-decoration:underline;' return:false; id='" + options.gid + "Func_ID" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+            }
+            else {
+                return cellvalue;
+            }
+        }
+
+        function TMC_ChangeRecord_TempGrid() {
+            var colNameArray = ['異動人員', '異動日期',
+                '修改前', '修改後',
+                '修改前', '修改後',
+                '修改前', '修改後',
+                '對應功能明細', '覆核結果', '覆核意見','申請單單號'];
+            var colModelArray = [];
+            colModelArray.push({ name: "APLY_UID", index: "APLY_UID", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "APLY_DT", index: "APLY_DT", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vMAIL_SUBJECT_B", index: "vMAIL_SUBJECT_B", width: 150, sortable: false });
+            colModelArray.push({ name: "vMAIL_SUBJECT", index: "vMAIL_SUBJECT", width: 150, sortable: false });
+            colModelArray.push({ name: "vMAIL_CONTENT_B", index: "vMAIL_CONTENT_B", width: 400, sortable: false });
+            colModelArray.push({ name: "vMAIL_CONTENT", index: "vMAIL_CONTENT", width: 400, sortable: false });
+            colModelArray.push({ name: "vIS_DISABLED_B", index: "vIS_DISABLED_B", width: 60, sortable: false, align: 'center'});
+            colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 60, sortable: false, align: 'center' });
+            colModelArray.push({ name: "FunFlag", index: "FunFlag", width: 100, sortable: false, formatter: formatterOpenReceive, align: 'center' });
+            colModelArray.push({ name: "vAPPR_STATUS", index: "vAPPR_STATUS", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPPR_DESC", index: "vAPPR_DESC", width: 120, sortable: false });
+            colModelArray.push({ name: "APLY_NO", index: "APLY_NO", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'TMC_ChangeRecord_jqgridDiv',
+                'TMC_ChangeRecord_TempList',
+                'TMC_ChangeRecord_TempPeger',
+                TMCC_Url.getData,
+                {
+                    type: 'ChangeRecord'
+                },
+                colNameArray,
+                colModelArray,
+                '發送內文設定異動紀錄',
+                jqgridCustom.getPage('TMC_ChangeRecord_jqgridDiv'),
+                TMC_ChangeRecord_CompleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+    });
+</script>

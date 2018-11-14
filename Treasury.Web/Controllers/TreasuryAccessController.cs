@@ -277,12 +277,20 @@ namespace Treasury.Web.Controllers
                 Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
                 Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data);
                 //var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
-                var selectOptions = TreasuryAccess.TreasuryAccessDetail(AccountController.CurrentUserId, AccountController.CustodianFlag, data.vAplyUnit);
+                var selectOptions = TreasuryAccess.TreasuryAccessDetail(data.vCreateUid_Id, 
+                    data.vCreateUnit_Id == (Properties.Settings.Default["CustodianFlag"]?.ToString()),
+                    //AccountController.CustodianFlag,
+                    data.vAplyUnit);
                 List<SelectOption> selectOptionsAppr = new List<SelectOption>();
                 //if (!AccountController.CustodianFlag)
                 selectOptionsAppr = TreasuryAccess.ChangeUnit(data.vAplyUnit);
                 //else
                 //    selectOptionsAppr = selectOptions.Item3;
+                //item1 = 申請單資料
+                //item2 = 是否為保管科
+                //item3 = 申請科別
+                //item4 = 申請人
+                //item5 = 是否有權限可以修改申請單
                 result.Datas  = new Tuple<TreasuryAccessViewModel,bool, List<SelectOption>, List<SelectOption> , bool>(data, AccountController.CustodianFlag, selectOptions.Item2, selectOptionsAppr , _dActType);
             }
             return Json(result);

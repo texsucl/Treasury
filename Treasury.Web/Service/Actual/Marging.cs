@@ -163,10 +163,14 @@ namespace Treasury.Web.Service.Actual
                             vBook_No_AFT = x.BOOK_NO_AFT,
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_DEPT = x.CHARGE_DEPT,
-                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
-                            vCHARGE_SECT = x.CHARGE_SECT,
-                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vMargin_Dep_Type = x.MARGIN_DEP_TYPE,
                             vMargin_Dep_Type_AFT = x.MARGIN_DEP_TYPE_AFT,
                             vTrad_Partners = x.TRAD_PARTNERS,
@@ -212,10 +216,14 @@ namespace Treasury.Web.Service.Actual
                             vBook_No_AFT = x.BOOK_NO_AFT,
                             vAply_Uid = x.APLY_UID,
                             vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_DEPT = x.CHARGE_DEPT,
-                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
-                            vCHARGE_SECT = x.CHARGE_SECT,
-                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vMargin_Dep_Type = x.MARGIN_DEP_TYPE,
                             vMargin_Dep_Type_AFT = x.MARGIN_DEP_TYPE_AFT,
                             vTrad_Partners = x.TRAD_PARTNERS,
@@ -234,7 +242,8 @@ namespace Treasury.Web.Service.Actual
                 }
                 result.ForEach(x =>
                 {
-                    x.vCharge_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
             }
             return result;
@@ -677,33 +686,6 @@ namespace Treasury.Web.Service.Actual
         {
             return Process(db, aply_No, logStr, dt, access_Type, false);
         }
-        #endregion
-
-        #region privation function
-        /// <summary>
-        /// 存出保證金資料轉畫面資料
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="_Inventory_types"></param>
-        /// <returns></returns>
-        private IEnumerable<MargingpViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types)
-        {
-            return data.Select(x => new MargingpViewModel()
-            {
-                vItem_PK = x.ITEM_ID,   //網頁PK
-                vItem_Id = x.ITEM_ID, //歸檔編號
-                vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vTrad_Partners = x.TRAD_PARTNERS, //交易對象
-                vMargin_Dep_Type = x.MARGIN_DEP_TYPE,   //存出保證金類別
-                vAmount = x.AMOUNT, //金額
-                vWorkplace_Code = x.WORKPLACE_CODE, //職場代號
-                vDescription = x.DESCRIPTION,   //說明
-                vMemo = x.MEMO, //備註
-                vBook_No = x.BOOK_NO,   //冊號
-                vTakeoutFlag = false, //取出註記
-                vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
-            });
-        }
 
         /// <summary>
         /// 庫存異動資料-申請覆核
@@ -859,7 +841,6 @@ namespace Treasury.Web.Service.Actual
             return new Tuple<bool, string>(true, logStr);
         }
 
-
         /// <summary>
         /// 申請刪除 & 作廢 存出保證金資料庫要處理的事件
         /// </summary>
@@ -870,7 +851,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="accessType"></param>
         /// <param name="deleFlag"></param>
         /// <returns></returns>
-        public Tuple<bool, string> Process(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt,string accessType, bool deleFlag)
+        public Tuple<bool, string> Process(TreasuryDBEntities db, string aply_No, string logStr, DateTime dt, string accessType, bool deleFlag)
         {
             var _changeFlag = false;
 
@@ -940,6 +921,94 @@ namespace Treasury.Web.Service.Actual
             {
                 return new Tuple<bool, string>(true, logStr);
             }
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Marging = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Marging != null)
+                {
+                    _Marging.INVENTORY_STATUS = "1"; //在庫
+                    _Marging.CHARGE_DEPT_AFT = null;
+                    _Marging.CHARGE_SECT_AFT = null;
+                    _Marging.LAST_UPDATE_DT = dt;
+                    logStr = _Marging.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _Marging = db.ITEM_REFUNDABLE_DEP.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_Marging != null)
+                {
+                    _Marging.INVENTORY_STATUS = "1"; //在庫
+                    _Marging.CHARGE_DEPT = _Marging.CHARGE_DEPT_AFT;
+                    _Marging.CHARGE_DEPT_AFT = null;
+                    _Marging.CHARGE_SECT = _Marging.CHARGE_SECT_AFT;
+                    _Marging.CHARGE_SECT_AFT = null;
+                    _Marging.LAST_UPDATE_DT = dt;
+                    logStr = _Marging.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        #endregion
+
+        #region privation function
+        /// <summary>
+        /// 存出保證金資料轉畫面資料
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="_Inventory_types"></param>
+        /// <returns></returns>
+        private IEnumerable<MargingpViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types)
+        {
+            return data.Select(x => new MargingpViewModel()
+            {
+                vItem_PK = x.ITEM_ID,   //網頁PK
+                vItem_Id = x.ITEM_ID, //歸檔編號
+                vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
+                vTrad_Partners = x.TRAD_PARTNERS, //交易對象
+                vMargin_Dep_Type = x.MARGIN_DEP_TYPE,   //存出保證金類別
+                vAmount = x.AMOUNT, //金額
+                vWorkplace_Code = x.WORKPLACE_CODE, //職場代號
+                vDescription = x.DESCRIPTION,   //說明
+                vMemo = x.MEMO, //備註
+                vBook_No = x.BOOK_NO,   //冊號
+                vTakeoutFlag = false, //取出註記
+                vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
+            });
         }
         #endregion
     }

@@ -1,0 +1,665 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-發送時間維護作業";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TMT_Form_Search">
+                    <table>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="TMT_Search" value="查詢" />
+                                <input type="button" class="btn btn-primary" id="TMT_ChangeRecord_Search" value="開啟異動紀錄查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div id="TMT_OpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="TMT_OpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div id="TMT_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div id="TMT_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="text-align:center;" class="TMT_Act">
+            <input type="button" id="TMT_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="TMT_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="TMT_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="TMT_Dialog" style="display:none">
+        <form id="TMT_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>程式編號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="TMT_InsertType" id="tFUNC_ID" name="tFUNC_ID" />
+                        <input type="hidden" id="hMAIL_TIME_ID" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>發送時間 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tSend_Time" name="tSend_Time" class="timepicker TMT_InsertType" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>間隔時間 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="tInterval_Min" name="tInterval_Min"  class="TMT_InsertType"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>時間(起) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="timepicker TMT_InsertType" id="tExec_Time_B" name="tExec_Time_B" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>時間(迄) : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="timepicker TMT_InsertType" id="tExec_Time_E" name="tExec_Time_E" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>開庫時間 : </label>
+                    </td>
+                    <td>
+                        <input type="text" class="timepicker TMT_InsertType" id="tTrea_Open_Time" name="tTrea_Open_Time" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>內文編號 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dMAIL_ID", (SelectList)ViewBag.dMAIL_ID)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>停用註記 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dIs_Disabled", (SelectList)ViewBag.dIs_Disabled)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea class="TMT_InsertType" id="tMemo" name="tMemo" style="width:207px"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @*<input type="button" id="TMT_InsertTemp" value="新增" class="btn btn-primary" />*@
+                        <input type="button" id="TMT_UpdateTemp" value="修改" class="btn btn-primary" />
+                        @*<input type="button" id="TMT_DeleteTemp" value="刪除" class="btn btn-primary" />*@
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="TMT_CancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="TMT_OpenChangeRecordDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TMT_OpenChangeRecordDetail"></div>
+    </div>
+</div>
+<script>
+    $(function () {
+        //#region url設定
+        var TMT_Url = {};
+        TMT_Url.search = '@Url.Action("SearchData", "TreasuryMailTime")';
+        TMT_Url.openChangeRecord = '@Url.Action("ChangeRecord", "TreasuryMailTime")';
+        TMT_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "TreasuryMailTime")';
+        TMT_Url.getData = '@Url.Action("GetCacheData", "TreasuryMailTime")';
+        TMT_Url.UpdateTempData = '@Url.Action("UpdateTempData", "TreasuryMailTime")';
+        TMT_Url.ResetTempData = '@Url.Action("ResetTempData", "TreasuryMailTime")';
+        TMT_Url.CancelTempData = '@Url.Action("CancelTempData", "TreasuryMailTime")';
+        TMT_Url.ApplyTempData = '@Url.Action("ApplyTempData", "TreasuryMailTime")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var TMT_Form_Search_Id = 'TMT_Form_Search'; //formId
+
+        var TMT_FormId = 'TMT_DialogForm'; //formId
+        var TMT_MAIL_TIME_ID = 'hMAIL_TIME_ID'; //金庫設備編號Id
+        var TMT_FUNC_ID = 'tFUNC_ID'; //程式名稱Id
+        var TMT_Send_Time = 'tSend_Time'; //發送時間Id
+        var TMT_Interval_Min = 'tInterval_Min'; //間隔時間Id
+        var TMT_Exec_Time_B = 'tExec_Time_B'; //時間(起)Id
+        var TMT_Exec_Time_E = 'tExec_Time_E'; //時間(迄)Id
+        var TMT_Trea_Open_Time = 'tTrea_Open_Time'; //開庫時間Id
+        var TMT_MAIL_ID = 'dMAIL_ID'; //內文編號Id
+        var TMT_Memo = 'tMemo'; //備註Id
+        var TMT_Is_Disabled = 'dIs_Disabled'; //停用註記Id
+
+        var TMT_ConfirmFlag = false; //離開時提醒訊息
+
+        var openSearchDetailId = 'TMT_OpenSearchDetail';
+        var openChangeRecordDetailId = 'TMT_OpenChangeRecordDetail';
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 初始動作
+            setTMT_Verified();
+            setTimepicker();
+            //#endregion 初始動作
+            //#region 註冊verified
+            function setTMT_Verified() {
+                verified.required(TMT_FormId, TMT_FUNC_ID, message.required('程式名稱')); //程式名稱為必填
+                verified.positiveInt(TMT_FormId, TMT_Interval_Min); //間隔時間 僅能輸入數字(正)
+                verified.time(TMT_FormId, TMT_Send_Time);//發送時間 時間格式
+                verified.time(TMT_FormId, TMT_Exec_Time_B);//時間(起) 時間格式
+                verified.time(TMT_FormId, TMT_Exec_Time_E);//時間(迄) 時間格式
+                verified.time(TMT_FormId, TMT_Trea_Open_Time);//開庫時間 時間格式
+            }
+            //region 設定Timepicker
+            function setTimepicker() {
+                $('.timepicker').timepicker({
+                    timeFormat: 'H:i',
+                    step: 1,
+                    minTime: '0:00',
+                    maxTime: '23:00',
+                    //defaultTime: '8:00',
+                    scrollDefault: 'now',
+                    startTime: '08:00',
+                    dynamic: false,
+                    dropdown: true,
+                    scrollbar: true
+                });
+            }
+            //#endregion
+            //#endregion 註冊verified
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+           
+                switch (id) {
+                    case 'TMT_Search':
+                        $('#' + id).on('click', function () { TMT_Search(); });
+                        break;
+                    case 'TMT_ChangeRecord_Search':
+                        $('#' + id).on('click', function () { TMT_ChangeRecord_Search(); });
+                        break;
+                    case 'TMT_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TMT_InsertFun(); });
+                        break;
+                    case 'TMT_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TMT_ApplyFun(); });
+                        break;
+                    case 'TMT_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (TMT_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            TMT_CancelFun();
+                        });
+                        break;
+                    case 'TMT_Back':
+                    case 'TMT_CancelTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                            function () {
+                                if (id == 'TMT_Back' &&
+                                    TMT_ConfirmFlag &&
+                                    !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                    return false;
+                                }
+                                customerUtility.closeDialog(this);
+                            });
+                        break;
+                    case 'TMT_UpdateTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { TMT_UpdateTempFun(); });
+                        break;
+                }
+            });
+
+
+            //#region dialog
+            function dialogOpen(type, rowid) {
+                $('#' + TMT_FormId).validate().resetForm();
+                var dialogId = 'TMT_Dialog';
+                var listId = 'TMT_TempList';
+                var TMT_InsertClass = 'TMT_InsertType';
+                var title = customerUtility.getDialogType(type);;
+                $('#' + dialogId).dialog({
+                    position: { my: "top+30%", at: "center top", of: window },
+                    title: title + '發送時間',
+                    width: 'auto',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#TMT_InsertTemp,#TMT_UpdateTemp,#TMT_DeleteTemp').hide();
+                if (type == '@Ref.ActionType.Edit.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#TMT_UpdateTemp').show();
+                    $('.' + TMT_InsertClass).prop('disabled', false);
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('.' + TMT_InsertClass).prop('disabled', true);
+                }
+                $('#' + dialogId).dialog('open');
+            }
+
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    //set value
+                    $('#' + TMT_MAIL_TIME_ID).val(data.vMAIL_TIME_ID);
+                    $('#' + TMT_FUNC_ID).val(data.vFUNC_ID);
+                    $('#' + TMT_Send_Time).val(data.vSEND_TIME);
+                    $('#' + TMT_Interval_Min).val(data.vINTERVAL_MIN);
+                    $('#' + TMT_Exec_Time_B).val(data.vEXEC_TIME_B);
+                    $('#' + TMT_Exec_Time_E).val(data.vEXEC_TIME_E);
+                    $('#' + TMT_Trea_Open_Time).val(data.vTREA_OPEN_TIME);
+                    $('#' + TMT_MAIL_ID).val(data.vMAIL_CONTENT_ID);
+                    $('#' + TMT_Memo).val(data.vMEMO);
+                    $('#' + TMT_Is_Disabled).val(data.vIS_DISABLED);
+                }
+            }
+            //#endregion dialog
+
+            //#region jqgrid
+
+            function formatterAct(cellvalue, options, rdata) {
+                if (rdata.vDATA_STATUS == '2')
+                    return '';
+                var str = '';
+                str += '<div class="btn-group">';
+                str += '<a title="修改" class="btn actionEditIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="BILL' + options.gid + 'Edit' + options.rowId + '" return:false;="">';
+                str += '<i class="fa fa-pencil-square-o fa-lg"></i></a>';
+                str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="BILL' + options.gid + 'View' + options.rowId + '" return:false;="">';
+                str += '<i class="fa fa-search fa-lg"></i></a>';
+                if(rdata.vDATA_STATUS == '3')
+                {
+                    str += '<a title="重設" class="btn actionRepeat" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="BILL' + options.gid + 'Repeat' + options.rowId + '" return:false;="">';
+                    str += '<i class="fa fa-repeat fa-lg"></i></a>';
+                }
+                str += '</div>';
+                return str;
+            }
+
+            function formatterStatus(cellvalue, options, rdata) {
+                if (rdata.vDATA_STATUS == '2') {
+                    return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+                }
+                else {
+                    return cellvalue;
+                }
+            }
+
+            function formatterFuncId(cellvalue, options, rdata) {
+                if (rdata.vDATA_STATUS != '2') {
+                    return "<a href='#' class='openDialog actionEditIcon' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + rdata.vFUNC_ID + "' title='" + rdata.vFUNC_ID + "' '>" + rdata.vFUNC_ID + "</a>";
+                }
+                else {
+                    return rdata.vFUNC_ID;
+                }
+            }
+
+            function TMT_CompleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var id = tr.find($.validator.format('td[aria-describedby$={0}_vMAIL_TIME_ID]', listId)).text();
+                    var aplyNo = tr.find($.validator.format('td[aria-describedby$={0}_vAplyNo]', listId)).text();
+                    //修改
+                    $(this).find('td').find('a.actionEditIcon').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            dialogOpen('@Ref.ActionType.Edit.ToString()', i + 1);
+                        });
+                    });
+                    //檢視
+                    $(this).find('td').find('a.actionViewIcon').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            dialogOpen('@Ref.ActionType.View.ToString()', i + 1);
+                        });
+                    });
+                    //重設
+                    $(this).find('td').find('a.actionRepeat').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            ResetTempData(id);
+                        });
+                    });
+                    //凍結中檢視
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            OpenAply_NoFun(aplyNo,id);
+                        });
+                    });
+                });
+            }
+
+            function OpenAply_NoFun(aplyNo,id) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo : aplyNo,
+                        data : TreasuryMailTimeSearchViewModel(id)
+                    }),
+                    dataType: 'html',
+                    url: TMT_Url.openChangeRecordView,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + openChangeRecordDetailId).html(data);
+                        openDetailDialog('發送時間異動紀錄', 1320, 'TMT_OpenChangeRecordDialog');
+                    }
+                })
+            }
+
+            function openDetailDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        customerUtility.closeDialog(this);
+                        $('#' + openChangeRecordDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            function TMT_TempGrid() {
+                var colNameArray = [
+                    //'動作',
+                    '執行功能', '發送時間', '功能名稱', '間隔時間',
+                    '時間(起)', '時間(迄)', '開庫時間', '內文編號',
+                    '備註', '停用註記', '資料狀態', '資料凍結人員',
+                    '異動人員', '異動日期', '功能名稱',
+                    '停用註記' ,'資料狀態', '發送時間定義編號', '異動申請單號'];
+                var colModelArray = [];
+                //colModelArray.push({ name: "act", index: "act", width: 100, sortable: false, formatter: formatterAct});
+                colModelArray.push({ name: "vAction", index: "vAction", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vSEND_TIME", index: "vSEND_TIME", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vFUNC_IDShow", index: "vFUNC_IDShow", width: 250, align: 'left', sortable: false, formatter: formatterFuncId });
+                colModelArray.push({ name: "vINTERVAL_MIN", index: "vINTERVAL_MIN", width: 100, sortable: false, align: 'center'});
+                colModelArray.push({ name: "vEXEC_TIME_B", index: "vEXEC_TIME_B", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vEXEC_TIME_E", index: "vEXEC_TIME_E", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTREA_OPEN_TIME", index: "vTREA_OPEN_TIME", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMAIL_CONTENT_ID", index: "vMAIL_CONTENT_ID", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vMEMO", index: "vMEMO", width: 100, sortable: false });
+                colModelArray.push({ name: "vIS_DISABLED_NAME", index: "vIS_DISABLED_NAME", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDATA_STATUS_NAME", index: "vDATA_STATUS_NAME", width: 100, sortable: false, align: 'center', formatter: formatterStatus });
+                colModelArray.push({ name: "vFREEZE_UID_Name", index: "vFREEZE_UID_Name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vLAST_UPDATE_UID_Name", index: "vLAST_UPDATE_UID_Name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vLAST_UPDATE_DT_Show", index: "vLAST_UPDATE_DT_Show", width: 100, sortable: false, align: 'center' });
+                
+                colModelArray.push({ name: "vFUNC_ID", index: "vFUNC_ID", hidden: true });
+                colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", hidden: true });
+                colModelArray.push({ name: "vDATA_STATUS", index: "vDATA_STATUS", hidden: true });
+                colModelArray.push({ name: "vMAIL_TIME_ID", index: "vMAIL_TIME_ID", hidden: true });
+                colModelArray.push({ name: "vAplyNo", index: "vAplyNo", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'TMT_jqgridDiv',
+                    'TMT_TempList',
+                    'TMT_TempPeger',
+                    TMT_Url.getData,
+                    {
+                        type: 'Index'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '發送時間維護作業',
+                    jqgridCustom.getPage('TMT_jqgridDiv'),
+                    TMT_CompleteFun,
+                    true
+                    );
+            }
+            //#endregion jqgrid
+
+            function TMT_Search() {
+                var dialogId = 'TMT_SearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 1320,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });             
+                $.ajax({
+                    type: 'POST',
+                    url: TMT_Url.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        TMT_TempGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+            }
+
+            function TMT_ChangeRecord_Search() {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    url: TMT_Url.openChangeRecord,
+                    contentType: 'application/json',
+                    success: function (vdata, textStatus, jqXHR) {
+                        $('#' + openSearchDetailId).children().remove();
+                        $('#' + openSearchDetailId).html(vdata);
+                        openChangeRecordDialog('金庫設備異動紀錄', 1320, 'TMT_OpenSearchDialog');
+                    }
+                })
+            }
+
+            function openChangeRecordDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        customerUtility.closeDialog(this);
+                        $('#' + openSearchDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            //申請覆核
+            function TMT_ApplyFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: TMT_Url.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#TMT_Apply'));
+                    }
+                })
+            }
+
+            //取消申請
+            function TMT_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: TMT_Url.CancelTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    TMT_TempGrid();
+                })
+            }
+
+            //修改資料
+            function TMT_UpdateTempFun() {
+                if ($('#' + TMT_Exec_Time_B).val() != '') {
+                    if ($('#' + TMT_Exec_Time_B).val() >= $('#' + TMT_Exec_Time_E).val())
+                    {
+                        customerUtility.alert('時間(迄)必須 > 時間(起)', 'w');
+                        return false;
+                    }
+                }
+                if ($('#' + TMT_FormId).valid()) {
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: TreasuryMailTimeViewModel(
+                                $('#' + TMT_MAIL_TIME_ID).val(),
+                                $('#' + TMT_Send_Time).val(),
+                                $('#' + TMT_FUNC_ID).val(),
+                                $('#' + TMT_Interval_Min).val(),
+                                $('#' + TMT_Exec_Time_B).val(),
+                                $('#' + TMT_Exec_Time_E).val(),
+                                $('#' + TMT_Trea_Open_Time).val(),
+                                $('#' + TMT_MAIL_ID).val(),
+                                $('#' + TMT_Memo).val(),
+                                $('#' + TMT_Is_Disabled).val()
+                                )
+                        }),
+                        dataType: "json",
+                        url: TMT_Url.UpdateTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        customerUtility.alertAuto(result);
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#TMT_UpdateTemp'));
+                            TMT_TempGrid();
+                            TMT_ConfirmFlag = true;
+                        }
+                    })
+                }
+            }
+
+            //復原資料
+            function ResetTempData(Id) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: TreasuryMailTimeViewModel(Id)
+                    }),
+                    dataType: "json",
+                    url: TMT_Url.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        TMT_TempGrid();
+                        TMT_ConfirmFlag = result.Datas;
+                    }
+                })               
+            }
+
+            function TreasuryMailTimeViewModel(
+                vMAIL_TIME_ID,
+                vSEND_TIME,
+                vFUNC_ID,
+                vINTERVAL_MIN,
+                vEXEC_TIME_B,
+                vEXEC_TIME_E,
+                vTREA_OPEN_TIME,
+                vMAIL_CONTENT_ID,
+                vMEMO,
+                vIS_DISABLED
+                ) {
+                var obj = {};
+                obj['vMAIL_TIME_ID'] = vMAIL_TIME_ID;
+                obj['vSEND_TIME'] = vSEND_TIME;
+                obj['vFUNC_ID'] = vFUNC_ID;
+                obj['vINTERVAL_MIN'] = vINTERVAL_MIN;
+                obj['vEXEC_TIME_B'] = vEXEC_TIME_B;
+                obj['vEXEC_TIME_E'] = vEXEC_TIME_E;
+                obj['vTREA_OPEN_TIME'] = vTREA_OPEN_TIME;
+                obj['vMAIL_CONTENT_ID'] = vMAIL_CONTENT_ID;
+                obj['vMEMO'] = vMEMO;
+                obj['vIS_DISABLED'] = vIS_DISABLED;
+                return obj;
+            }
+
+            //#region 異動紀錄查詢畫面  ViewModel
+            function TreasuryMailTimeSearchViewModel(
+                vMAIL_TIME_ID,
+                vFunc_ID,
+                vAPPR_STATUS,
+                vAplyNo
+                ) {
+                var obj = {};
+                obj['vMAIL_TIME_ID'] = vMAIL_TIME_ID;
+                obj['vFunc_ID'] = vFunc_ID;
+                obj['vAPPR_STATUS'] = vAPPR_STATUS;
+                obj['vAplyNo'] = vAplyNo;
+                return obj;
+            }
+            //#endregion
+
+        }
+    });
+</script>

@@ -1,0 +1,160 @@
+﻿<div>
+    <form id="IM_Form_Search_ChangeRecord">
+        <table>
+            <tr>
+                <td>
+                    <label>入庫作業類型 :&ensp;</label>
+                </td>
+                <td>
+                    @Html.DropDownList("dItem_Op_Type_ChangeRecord", (SelectList)ViewBag.dITEM_OP_TYPE)
+                </td>
+                <td>
+                    <label>工作單號 :&ensp;</label>
+                </td>
+                <td>
+                    <input type="text" id="tAply_No" name="tAply_No" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>存取項目 :&ensp;</label>
+                </td>
+                <td>
+                    @*@Html.DropDownList("dTrea_IItem_ChangeRecord")*@
+                    <select id="dTrea_IItem_ChangeRecord"></select>
+                </td>
+                <td>
+                    <label>覆核狀態 :&ensp;</label>
+                </td>
+                <td>
+                    @Html.DropDownList("dAppr_Status", (SelectList)ViewBag.dAppr_Status)
+                </td>
+                <td>
+                    <label>異動人員 :&ensp;</label>
+                </td>
+                <td>
+                    <input type="text" id="tLast_Update_Uid" name="tLast_Update_Uid" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6" align="center">
+                    <input type="button" class="btn btn-primary" id="IM_ChangeRecordSearch" value="查詢" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="OpenChangeRecordSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenChangeRecordSearchDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var IM_Url = {};
+        IM_Url.OpTypeChange = '@Url.Action("OpTypeChange", "ItemMaintain")';
+        IM_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "ItemMaintain")';
+        //#endregion url設定
+        //#region 參數設定
+        var IM_Form_Search_ChangeRecord = 'IM_Form_Search_ChangeRecord'; //formId
+        var IM_Item_Op_Type_ChangeRecord = 'dItem_Op_Type_ChangeRecord' //入庫作業類型
+        var IM_Aply_No = 'tAply_No'; //工作單號
+        var IM_Trea_IItem_ChangeRecord = 'dTrea_IItem_ChangeRecord'; //存取項目
+        var IM_Appr_Status = 'dAppr_Status'; //覆核狀態Id
+        var IM_Last_Update_Uid = 'tLast_Update_Uid'; //異動人員Id
+        var openChangeRecordSearchDetailId = 'OpenChangeRecordSearchDetail';
+        //#endregion 參數設定
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'IM_ChangeRecordSearch':
+                    $('#' + id).on('click', function () { IM_ChangeRecordSearch(); });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+        OpTypeSehlectedChange();
+        //#region 入庫作業類型changeg事件
+        $('#' + IM_Item_Op_Type_ChangeRecord).change(function () {
+            OpTypeSehlectedChange();
+        });
+
+        function OpTypeSehlectedChange() {
+            var vOp_Type = $('#' + IM_Item_Op_Type_ChangeRecord).val(); //入庫作業類型
+
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    vTREA_OP_TYPE: vOp_Type
+                }),
+                url: IM_Url.OpTypeChange,
+                contentType: 'application/json',
+            }).done(function (result) {
+                $('#' + IM_Trea_IItem_ChangeRecord).find('option').remove();
+                customerUtility.addoption('dTrea_IItem_ChangeRecord', result);
+            });
+        }
+        //#endregion 入庫作業類型changeg事件
+        function IM_ChangeRecordSearch() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null,
+                    ITEM_ID: null,
+                    data: TreasuryInOutChangeRecordSearchViewModel(
+                        $('#' + IM_Item_Op_Type_ChangeRecord).val(),
+                        $('#' + IM_Trea_IItem_ChangeRecord).val(),
+                        $('#' + IM_Aply_No).val(),
+                        $('#' + IM_Appr_Status).val(),
+                        $('#' + IM_Last_Update_Uid).val()
+                        )
+                }),
+                dataType: 'html',
+                url: IM_Url.openChangeRecordView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#' + openChangeRecordSearchDetailId).children().remove();
+                    $('#' + openChangeRecordSearchDetailId).html(vdata);
+                    openDialog('金庫設備異動紀錄', 1250, 'OpenChangeRecordSearchDialog');
+                }
+            });
+        };
+        function openDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '查詢結果';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        //#region 異動紀錄查詢畫面  ViewModel
+        function TreasuryInOutChangeRecordSearchViewModel(
+            vItem_Op_Type,
+            vTrea_IItem,
+            vAply_No,
+            vAppr_Status,
+            vLast_Update_Uid
+            ) {
+            var obj = {};
+            obj['vItem_Op_Type'] = vItem_Op_Type;
+            obj['vTrea_IItem'] = vTrea_IItem;
+            obj['vAply_No'] = vAply_No;
+            obj['vAppr_Status'] = vAppr_Status;
+            obj['vLast_Update_Uid'] = vLast_Update_Uid;
+            return obj;
+        }
+        //#endregion
+    });
+</script>
