@@ -48,7 +48,7 @@ namespace Treasury.Web.ViewModels
         /// 項目順序
         /// </summary>
         [Description("項目順序")]
-        public string vItem_Order { get; set; }
+        public int vItem_Order { get; set; }
 
         /// <summary>
         /// 取代變數
@@ -89,7 +89,89 @@ namespace Treasury.Web.ViewModels
 
     public class DepChkItemChangeRecordViewModel : ITinItem
     {
+        /// <summary>
+        /// 異動日期
+        /// </summary>
+        [Description("異動日期")]
+        public string vAply_Date { get; set; }
 
+        /// <summary>
+        /// 工作單號
+        /// </summary>
+        [Description("工作單號")]
+        public string vAply_No { get; set; }
+
+        /// <summary>
+        /// 異動人員
+        /// </summary>
+        [Description("異動人員")]
+        public string vAply_Uid_Name { get; set; }
+
+        /// <summary>
+        /// 執行功能
+        /// </summary>
+        [Description("執行功能")]
+        public string vExec_Action_Name { get; set; }
+
+        /// <summary>
+        /// 檢核項目說明
+        /// </summary>
+        [Description("檢核項目說明")]
+        public string vDep_Chk_Item_Desc { get; set; }
+
+        /// <summary>
+        /// 檢核項目說明(修改前)
+        /// </summary>
+        [Description("檢核項目說明(修改前)")]
+        public string vDep_Chk_Item_Desc_B { get; set; }
+
+        /// <summary>
+        /// 停用註記名稱
+        /// </summary>
+        [Description("停用註記名稱")]
+        public string vIs_Disabled_Name { get; set; }
+
+        /// <summary>
+        /// 停用註記名稱(修改前)
+        /// </summary>
+        [Description("停用註記名稱(修改前)")]
+        public string vIs_Disabled_B_Name { get; set; }
+
+        /// <summary>
+        /// 項目順序
+        /// </summary>
+        [Description("項目順序")]
+        public int vItem_Order { get; set; }
+
+        /// <summary>
+        /// 項目順序(修改前)
+        /// </summary>
+        [Description("項目順序(修改前)")]
+        public int? vItem_Order_B { get; set; }
+
+        /// <summary>
+        /// 取代變數
+        /// </summary>
+        [Description("取代變數")]
+        public string vReplace { get; set; }
+
+        /// <summary>
+        /// 取代變數(修改前)
+        /// </summary>
+        [Description("取代變數(修改前)")]
+        public string vReplace_B { get; set; }
+
+        /// <summary>
+        /// 覆核狀態
+        /// </summary>
+        [Description("覆核狀態")]
+        public string vAppr_Status_Name { get; set; }
+
+        /// <summary>
+        /// 覆核意見
+        /// </summary>
+        [Description("覆核意見")]
+        public string vAppr_Desc { get; set; }
     }
 
     public class DepChkItemSearchViewModel : ITinItem
@@ -119,6 +201,6 @@ namespace Treasury.Web.ViewModels
         /// 資料順序
         /// </summary>
         [Description("資料順序")]
-        public string vIsortby { get; set; }
+        public int vIsortby { get; set; }
     }
 }

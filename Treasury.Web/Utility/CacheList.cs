@@ -344,6 +344,16 @@
         /// 定存檢核表項目-取出查詢結果
         /// </summary>
         public static string DepChkItem_G_SearchDataList { get; private set; }
+
+        /// <summary>
+        /// 定存檢核表項目異動紀錄查詢結果
+        /// </summary>
+        public static string DepChkItemChangeRecordSearchDataList { get; private set; }
+
+        /// <summary>
+        /// 定存檢核表項目排序查詢結果
+        /// </summary>
+        public static string DepChkItemOrderSearchDataList { get; private set; }
         #endregion Cache資料
 
 
@@ -416,6 +426,8 @@
             DepChkItemSearchData = "DepChkItemSearchData";
             DepChkItem_P_SearchDataList = "DepChkItem_P_SearchDataList";
             DepChkItem_G_SearchDataList = "DepChkItem_G_SearchDataList";
+            DepChkItemChangeRecordSearchDataList = "DepChkItemChangeRecordSearchDataList";
+            DepChkItemOrderSearchDataList = "DepChkItemOrderSearchDataList";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
             #endregion Cache資料
