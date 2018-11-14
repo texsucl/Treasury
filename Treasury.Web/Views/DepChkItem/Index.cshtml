@@ -109,6 +109,12 @@
             </table>
         </form>
     </div>
+    <div id="OpenDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenDetail"></div>
+    </div>
+    <div id="OpenOrderDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenOrderDetail"></div>
+    </div>
 </div>
 
 <script>
@@ -123,6 +129,7 @@
         DCI_Url.ResetTempData = '@Url.Action("ResetTempData", "DepChkItem")';
         DCI_Url.ApplyTempData = '@Url.Action("ApplyTempData", "DepChkItem")';
         DCI_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "DepChkItem")';
+        DCI_Url.openOrderView = '@Url.Action("OrderView", "DepChkItem")';
         //#endregion url設定
 
         //#region 參數設定
@@ -136,7 +143,12 @@
         var DCI_Replace = 'tReplace'; //取代變數Id
         var DCI_Is_Disabled = 'dIs_Disabled'; //停用狀態Id
 
+        var DCI_Access_Type = 'dAccess_Type'; //交易別Id
+
         var DCI_ConfirmFlag = false; //離開時提醒訊息
+
+        var OpenDetailId = 'OpenDetail';
+        var OpenOrderDetailId = 'OpenOrderDetail';
         //#endregion 參數設定
 
         var opScope = '@Html.Raw(ViewBag.opScope)';
@@ -221,6 +233,9 @@
                         $('#' + id).off('click');
                         $('#' + id).on('click', function () { DCI_DeleteTempFun(); });
                         break;
+                    case 'DCI_Order_Search':
+                        $('#' + id).on('click', function () { DCI_Order_Search(); });
+                        break;
                 }
             });
             //#endregion 註冊事件
@@ -270,7 +285,6 @@
                 if ($('#' + DCI_Is_Disabled + ' option').length > 0) {
                     $('#' + DCI_Is_Disabled).val($($('#' + DCI_Is_Disabled + ' option')[0]).val())
                 }
-                $('#' + DCI_Access_Type).val('');
                 $('#' + DCI_Isortby).val('');
                 $('#' + DCI_Dep_Chk_Item_Desc).val('');
                 $('#' + DCI_Replace).val('');
@@ -301,7 +315,7 @@
                 str += '<a title="檢視" class="btn actionViewIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="DCI' + options.gid + 'View' + options.rowId + '" return:false;="">';
                 str += '<i class="fa fa-search fa-lg"></i></a>';
                 str += '<a title="刪除" class="btn actionDeleIcon" style="padding-right:4px;padding-left:4px;padding-bottom:0px;padding-top:0px;" href="#" id="DCI' + options.gid + 'Dele' + options.rowId + '" return:false;="">';
-                str += '<i class="fa fa-repeat fa-lg"></i></a>';
+                str += '<i class="fa fa-trash fa-lg"></i></a>';
                 str += '</div>';
                 return str;
             }
@@ -386,14 +400,15 @@
                     type: 'POST',
                     data: JSON.stringify({
                         AplyNo: data.vAply_No,
-                        data: TreasuryInOutChangeRecordSearchViewModel(data.vTrea_Equip_Id)
+                        data: TreasuryInOutChangeRecordSearchViewModel(data.vAccess_Type,
+                        data.vIsortby)
                     }),
                     dataType: 'html',
-                    url: TM_Url.openChangeRecordView,
+                    url: DCI_Url.openChangeRecordView,
                     contentType: 'application/json',
                     success: function (data, textStatus, jqXHR) {
-                        $('#' + openChangeRecordDetailId).html(data);
-                        openDetailDialog('定存檢核表項目設定異動紀錄', 1250, 'OpenChangeRecordDialog');
+                        $('#' + OpenDetailId).html(data);
+                        openDetailDialog('定存檢核表項目設定異動紀錄', 1250, 'OpenDialog');
                     }
                 })
             }
@@ -412,7 +427,7 @@
                     maxHeight: 600,
                     closeText: '取消',
                     close: function () {
-                        $('#' + openChangeRecordDetailId).children().remove();
+                        $('#' + OpenDetailId).children().remove();
                     }
                 });
                 $('#' + dialogId).dialog('open');
@@ -501,11 +516,174 @@
                 $('#' + dialogId).dialog('open');
             }
 
+            function DCI_Order_Search()
+            {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        Access_Type: $('#' + DCI_Access_Type).val()
+                    }),
+                    dataType: 'html',
+                    url: DCI_Url.openOrderView,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + OpenOrderDetailId).html(data);
+                        openOrderDetailDialog('定存檢核表項目設定排序', 1250, 'OpenOrderDialog');
+                    }
+                })
+            }
+
+            function openOrderDetailDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + OpenOrderDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
             //開啟定存檢核表項目新增頁面
             function DCI_InsertFun(Access_Type)
             {
                 $('#' + DCI_Access_Type).val(Access_Type);
                 dialogOpen('@Ref.ActionType.Add.ToString()', null, null);
+            }
+
+            //申請覆核
+            function DCI_ApplyFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: DCI_Url.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#DCI_Apply'));
+                    }
+                })
+            }
+
+            //取消申請
+            function DCI_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: DCI_Url.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetInsertDialog();
+                    DCI_TempGrid('P');
+                    DCI_TempGrid('G');
+                    DCI_ConfirmFlag = false;
+                })
+            }
+
+            //新增定存檢核表項目暫存資料
+            function DCI_InsertTempFun()
+            {
+                if ($('#' + DCI_FormId).valid()) {
+                    //取代變數檢核
+                    if (CheckReplace())
+                    {
+                        var _CheckReplace = '@@_' + $('#' + DCI_Replace).val().trim() + '_';
+                        customerUtility.alert('檢核項目說明未設定取代變數：' + _CheckReplace, 'w');
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: DCI_ViewModel(
+                                $('#' + DCI_Access_Type).val().trim(),
+                                created.uuid(),
+                                $('#' + DCI_Dep_Chk_Item_Desc).val().trim(),
+                                $('#' + DCI_Replace).val().trim(),
+                                $('#' + DCI_Is_Disabled).val().trim())
+                        }),
+                        dataType: "json",
+                        url: DCI_Url.InsertTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        customerUtility.alertAuto(result);
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#DCI_InsertTemp'));
+                            DCI_TempGrid('P');
+                            DCI_TempGrid('G');
+                            DCI_ConfirmFlag = true;
+                        }
+                    })
+                }
+            }
+
+            //修改定存檢核表項目暫存資料
+            function DCI_UpdateTempFun()
+            {
+                if ($('#' + DCI_FormId).valid()) {
+                    //取代變數檢核
+                    if (CheckReplace()) {
+                        var _CheckReplace = '@@_' + $('#' + DCI_Replace).val().trim() + '_';
+                        customerUtility.alert('檢核項目說明未設定取代變數：' + _CheckReplace, 'w');
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: DCI_ViewModel(
+                                $('#' + DCI_Access_Type).val().trim(),
+                                $('#' + DCI_Isortby).val().trim(),
+                                $('#' + DCI_Dep_Chk_Item_Desc).val().trim(),
+                                $('#' + DCI_Replace).val().trim(),
+                                $('#' + DCI_Is_Disabled).val().trim())
+                        }),
+                        dataType: "json",
+                        url: DCI_Url.UpdateTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        customerUtility.alertAuto(result);
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#DCI_UpdateTemp'));
+                            DCI_TempGrid('P');
+                            DCI_TempGrid('G');
+                            DCI_ConfirmFlag = true;
+                        }
+                    })
+                }
+            }
+
+            //刪除定存檢核表項目暫存資料
+            function DCI_DeleteTempFun()
+            {
+                if ($('#' + DCI_FormId).valid()) {
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: DCI_ViewModel(
+                                $('#' + DCI_Access_Type).val().trim(),
+                                $('#' + DCI_Isortby).val().trim())
+                        }),
+                        dataType: "json",
+                        url: DCI_Url.DeleteTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        customerUtility.alertAuto(result);
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#DCI_DeleteTemp'));
+                            DCI_TempGrid('P');
+                            DCI_TempGrid('G');
+                        }
+                    })
+                }
             }
 
             function GetAccessTypeData(Access_Type) {
@@ -533,6 +711,43 @@
 
                 return obj;
             }
+
+            //取代變數檢核
+            function CheckReplace()
+            {
+                if ($('#' + DCI_Replace).val().trim() == "") {
+                    return false;
+                }
+                else {
+                    var _Dep_Chk_Item_Desc = $('#' + DCI_Dep_Chk_Item_Desc).val().trim();
+                    var _CheckReplace = '@@_' + $('#' + DCI_Replace).val().trim() + '_';
+                    if(_Dep_Chk_Item_Desc.match(_CheckReplace)!=null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            function DCI_ViewModel(
+                vAccess_Type,
+                vIsortby,
+                vDep_Chk_Item_Desc,
+                vReplace,
+                vIs_Disabled
+                ) {
+                    var obj = {};
+                    obj['vAccess_Type'] = vAccess_Type;
+                    obj['vIsortby'] = vIsortby;
+                    obj['vDep_Chk_Item_Desc'] = vDep_Chk_Item_Desc;
+                    obj['vReplace'] = vReplace;
+                    obj['vIs_Disabled'] = vIs_Disabled;
+                    return obj;
+                }
+
             //#region 查詢畫面  ViewModel
             function TreasuryInOutSearchViewModel(
                 vIs_Disabled

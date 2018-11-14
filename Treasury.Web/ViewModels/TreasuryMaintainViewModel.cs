@@ -108,9 +108,9 @@ namespace Treasury.Web.ViewModels
     public class TreasuryMaintainChangeRecordViewModel : ITinItem
     {
         /// <summary>
-        /// 申請日期
+        /// 異動日期
         /// </summary>
-        [Description("申請日期")]
+        [Description("異動日期")]
         public string vAply_Date { get; set; }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Treasury.Web.ViewModels
         /// 異動人員
         /// </summary>
         [Description("異動人員")]
-        public string vFreeze_Uid_Name { get; set; }
+        public string vAply_Uid_Name { get; set; }
 
         /// <summary>
         /// 執行功能
@@ -146,7 +146,7 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 控管模式名稱
         /// </summary>
-        [Description("控管模式")]
+        [Description("控管模式名稱")]
         public string vControl_Mode_Name { get; set; }
 
         /// <summary>
@@ -196,6 +196,12 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("覆核狀態")]
         public string vAppr_Status_Name { get; set; }
+
+        /// <summary>
+        /// 覆核意見
+        /// </summary>
+        [Description("覆核意見")]
+        public string vAppr_Desc { get; set; }
     }
 
     public class TreasuryMaintainSearchViewModel : ITinItem
