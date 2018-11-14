@@ -115,8 +115,8 @@ namespace Treasury.Web.Controllers
                     ((List<CDCSealViewModel>)Cache.Get(CacheList.CDCSEALData))
                     .OrderBy(x => x.vPUT_Date) //入庫日期
                     .ThenBy(x => x.vAPLY_UID) //存入申請人
-                    .ThenBy(x => x.vCHARGE_DEPT) //權責部門
-                    .ThenBy(x => x.vCHARGE_SECT) //權責科別
+                    .ThenBy(x => x.vCharge_Dept) //權責部門
+                    .ThenBy(x => x.vCharge_Sect) //權責科別
                     .ThenBy(x => x.vSeal_Desc) //印章內容
                     .ToList()
                     ));

@@ -1,0 +1,549 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@{
+    ViewBag.Title = "金庫進出管理作業-資料庫異動覆核作業";
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="CDC_Form">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>申請單號 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="tAply_No" />
+                            </td>
+                            <td>
+                                <label>申請人 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="tCreate_Uid" />
+                            </td>
+                            <td>
+                                <label>申請日期 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="tCreate_Date" />
+                            </td>
+                        </tr>
+                        <tr style="text-align:center">
+                            <td colspan="6">
+                                <input type="button" class="btn btn-primary" id="CDC_ApprI_Search" value="查詢" />
+                                @Html.Hidden("h_Appr_CREATE_User", (string)ViewBag.hCREATE_User)
+                                @Html.Hidden("h_Appr_Aply_No")
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div id="CDC_ApprSearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div id="CDC_ApprjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div class="CDC_ApprClass" style="text-align:center">
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="CDC_Appr_I_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="CDC_Appr_I_Reject" value="駁回" />
+            <input type="button" class="btn btn-primary" id="CDC_Appr_I_Back" value="回上一頁">
+        </div>
+    </div>
+    <div id="CDC_ApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="CDC_ApprOpenSearchDetail"></div>
+        <div style="text-align:center" class="CDC_ApprAct">
+            <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="CDC_Appr_V_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="CDC_Appr_V_Reject" value="駁回" />
+            <input type="button" class="btn btn-primary" id="CDC_Appr_V_Back" value="回上一頁">
+        </div>
+    </div>
+    <div id="CDC_ApprDescDialog" style="display:none" role="dialog">
+        <table>
+            <tr>
+                <td>
+                    <textarea id="CDC_ApprDesc" maxlength="50" style="width:98%;display:none"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="CDC_Appr_Y_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                    <input type="button" id="CDC_Appr_N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var CDC_Appr_Url = {};
+        CDC_Appr_Url.openBILL = '@Url.Action("CDCView", "Bill")';
+        CDC_Appr_Url.openESTATE = '@Url.Action("CDCView", "Estate")';
+        CDC_Appr_Url.openSEAL = '@Url.Action("CDCView", "Seal")';
+        CDC_Appr_Url.openSTOCK = '@Url.Action("CDCView", "Stock")';
+        CDC_Appr_Url.openCA = '@Url.Action("CDCView", "CA")';
+        CDC_Appr_Url.openMARGING = '@Url.Action("CDCView", "Marging")';
+        CDC_Appr_Url.openMARGINP = '@Url.Action("CDCView", "Marginp")';
+        CDC_Appr_Url.openDEPOSIT = '@Url.Action("CDCView", "Deposit")';
+        CDC_Appr_Url.openItemImp = '@Url.Action("CDCView", "ItemImp")';
+        CDC_Appr_Url.search = '@Url.Action("SearchAppr", "CDC")';
+        CDC_Appr_Url.getData = '@Url.Action("GetCacheData", "CDC")';
+        CDC_Appr_Url.Appr = '@Url.Action("Appraisal", "CDC")';
+        CDC_Appr_Url.Reject = '@Url.Action("Reject", "CDC")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var OpenSearchDetailId = 'CDC_ApprOpenSearchDetail';
+        var CDC_FormId = 'CDC_Form'; //formId
+        var CDC_Aply_No = 'tAply_No'; //申請單號Id
+        var CDC_Create_Uid = 'tCreate_Uid'; //申請人Id
+        var CDC_Create_Date = 'tCreate_Date'; //申請日期Id
+        var hAply_No = 'h_Appr_Aply_No';
+
+        //#endregion 參數設定
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else
+        {
+            //#region 初始設定
+            created.createDatepicker(CDC_Create_Date, null);
+            //#endregion 初始設定
+
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'CDC_ApprI_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { SearchFun(); });
+                        break;
+                    case 'CDC_Appr_I_Appr':
+                    case 'CDC_Appr_V_Appr':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApprovedFun(); });
+                        break;
+                    case 'CDC_Appr_I_Reject':
+                    case 'CDC_Appr_V_Reject':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { RejectFun(); });
+                        break;
+                    case 'CDC_Appr_Y_Reject':
+                        $('#' + id).on('click', function () { Y_RejectFun(); });
+                        break;
+                    case 'CDC_Appr_N_Reject':
+                    case 'CDC_Appr_I_Back':
+                    case 'CDC_Appr_V_Back':
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                        break;
+                }
+            });
+
+            //#endregion 註冊事件
+        }
+
+        //#region jqgrid
+        function formatterCheck(cellvalue, options, rdata) {
+            var str = '';
+            if (rdata.vApprFlag) {
+                str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox CDC_Appr customerCheck'></div>";
+            }
+            return str;
+        }
+
+        function formatterAply_No(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
+        function UnformatterAply_No(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function CDC_ApprGridCompeleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //申請單號
+                $(this).find('td').find('a.DialogAply_No').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        CDC_OpenAply_NoFun(listId, i + 1);
+                    });
+                });
+            });
+        }
+
+        function CDC_OpenAply_NoFun(listId, rowid) {
+            var data = $("#" + listId).getRowData(rowid);
+            var itemId = data.vItem_Id;
+            var apprFlag = data.vCheckFlag.length > 0;
+            var itemData = GetItemData(itemId);
+            if (itemData.url != null) {
+                $('#' + hAply_No).val(data.vAply_No);
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAply_No,
+                        data: CDCSearchViewModel(),
+                        type: 3 //資料庫異動覆核作業
+                    }),
+                    dataType: 'html',
+                    url: itemData.url,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + OpenSearchDetailId).html(data);
+                        openCDC_Dialog(itemData.title, itemData.openDialogWidth, 'CDC_ApprOpenSearchDialog');
+                        if (apprFlag) {
+                            $('.CDC_ApprAct').show();
+                        }
+                    }
+                })
+            }
+        }
+
+        function GetItemData(item) {
+            item = item || '';
+            var _reportTitle = '資料庫異動申請單';
+            var obj = {};
+            obj.url = null; //開啟資料庫異動的頁面 url
+            obj.title = null; //開啟資料庫異動的頁面 Title
+            obj.openDialogWidth = '860px'; //開啟資料庫異動的頁面 寬度
+            obj.reportTitle = _reportTitle; //報表Title
+            obj.reportType = null; //報表類型
+
+            switch (item) {
+                case '@Ref.TreaItemType.D1012.ToString()':
+                    obj.url = CDC_Appr_Url.openBILL;
+                    obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
+                    obj.reportType = 'BILL';
+                    obj.openDialogWidth = 1115;
+                    break;
+                case '@Ref.TreaItemType.D1014.ToString()':
+                    obj.url = CDC_Appr_Url.openESTATE;
+                    obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1008.ToString()':
+                    obj.url = CDC_Appr_Url.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1009.ToString()':
+                    obj.url = CDC_Appr_Url.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1010.ToString()':
+                    obj.url = CDC_Appr_Url.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1011.ToString()':
+                    obj.url = CDC_Appr_Url.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1015.ToString()':
+                    obj.url = CDC_Appr_Url.openSTOCK;
+                    obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                    obj.openDialogWidth = 1000;
+                    obj.reportType = 'STOCK';
+                    break;
+                case '@Ref.TreaItemType.D1024.ToString()':
+                    obj.url = CDC_Appr_Url.openCA;
+                    obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                    obj.openDialogWidth = 1100;
+                    obj.reportType = 'CA';
+                    break;
+                case '@Ref.TreaItemType.D1017.ToString()':
+                    obj.url = CDC_Appr_Url.openMARGINP;
+                    obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'MARGINP';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.url = CDC_Appr_Url.openMARGING;
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1018.ToString()':
+                    obj.url = CDC_Appr_Url.openItemImp;
+                    obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'ITEMIMP';
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.url = CDC_Appr_Url.openDEPOSIT;
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'DEPOSIT';
+                    break;
+            }
+            return obj;
+        }
+
+        function openCDC_Dialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '明細';
+            var dialogId = dialogId;
+            $('.CDC_ApprAct').hide();
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    $('#h_Appr_Aply_No').val('');
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        function CDC_ApprGrid()
+        {
+            var colNameArray = [' ', '存取項目', '申請日期', '申請單號', '申請人', '存取項目ID', '覆核權限'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vCheckFlag", index: "vCheckFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck });
+            colModelArray.push({ name: "vItem_Desc", index: "vItem_Desc", width: 150, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_Dt", index: "vAply_Dt", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 130, sortable: false, align: 'center', formatter: formatterAply_No, unformat: UnformatterAply_No });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vItem_Id", index: "vItem_Id", hidden: true });
+            colModelArray.push({ name: "vApprFlag", index: "vApprFlag", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'CDC_ApprjqgridDiv',
+                'CDC_ApprList',
+                'CDC_ApprPeger',
+                CDC_Appr_Url.getData,
+                {
+                    type: 'Appr'
+                },
+                colNameArray,
+                colModelArray,
+                '待覆核文件',
+                jqgridCustom.getPage('CDC_ApprjqgridDiv'),
+                CDC_ApprGridCompeleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+
+        //查詢
+        function SearchFun()
+        {
+            var dialogId = 'CDC_ApprSearchDetail';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '查詢畫面',
+                width: 600,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    searchModel: CDCApprSearchViewModel(
+                     $('#' + CDC_Aply_No).val(),
+                     $('#' + CDC_Create_Uid).val(),
+                     $('#' + CDC_Create_Date).val(),
+                     $('#h_Appr_CREATE_User').val()
+                     )
+                }),
+                url: CDC_Appr_Url.search,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#' + dialogId).dialog('open');
+                    CDC_ApprGrid();
+                }
+                else {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+            });
+        }
+
+        //#region 核准
+        function ApprovedFun() {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.CDC_Appr:checked').length > 0) {
+                    $('.CDC_Appr:checked').each(
+                        function () {
+                            var listId = 'CDC_ApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAply_No]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?")) {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNos: aplyNos
+                        }),
+                        url: CDC_Appr_Url.Appr,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            if (openflag) {
+                                customerUtility.closeDialog($('#CDC_Appr_V_Appr'));
+                            }
+                            CDC_ApprGrid();
+                        }
+                        customerUtility.alertAuto(result);
+                    });
+                }
+            }
+            else {
+                customerUtility.alert('無選擇核准項目', 'w');
+            }
+        }
+        //#endregion
+
+        //#region 駁回
+        function RejectFun() {
+            var flag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.CDC_Appr:checked').length > 0) {
+                    flag = true;
+                }
+            }
+            else {
+                flag = true;
+            }
+            if (!flag) {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'CDC_ApprDescDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#CDC_ApprDesc').val('');
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+
+        //#region 駁回確認
+        function Y_RejectFun() {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.CDC_Appr:checked').length > 0) {
+                    $('.CDC_Appr:checked').each(
+                        function () {
+                            var listId = 'CDC_ApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAply_No]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNos: aplyNos,
+                        apprDesc: $('#CDC_ApprDesc').val().trim()
+                    }),
+                    url: CDC_Appr_Url.Reject,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#CDC_Appr_Y_Reject'));
+                        if (openflag) {
+                            customerUtility.closeDialog($('#CDC_Appr_V_Appr'));
+                        }
+                        CDC_ApprGrid();
+                    }
+                    customerUtility.alertAuto(result);
+                });
+            }
+            else {
+                customerUtility.alert('無選擇駁回項目', 'w');
+            }
+        }
+        //#endregion
+
+        function CDCApprSearchViewModel(
+            vAply_No,
+            vAply_Uid,
+            vAply_Dt,
+            vCreateUid
+            ) {
+            var obj = {};
+            obj['vAply_No'] = vAply_No;
+            obj['vAply_Uid'] = vAply_Uid;
+            obj['vAply_Dt'] = vAply_Dt;
+            obj['vCreateUid'] = vCreateUid;
+            return obj;
+        }
+
+        //#region 異動資料庫作業查詢畫面  ViewModel
+        function CDCSearchViewModel()
+        {
+            var obj = {};
+            obj['vTreasuryIO'] = "N";
+            obj['vJobProject'] = "";
+            obj['vAPLY_DT_From'] = "";
+            obj['vAPLY_DT_To'] = "";
+            obj['vAPLY_ODT_From'] = "";
+            obj['vAPLY_ODT_To'] = "";
+            obj['vBookNo'] = "";
+            obj['vEstate_Form_No'] = "";
+            obj['vName'] = "";
+            obj['vCommit_Date'] = "";
+            obj['vExpiry_Date'] = "";
+            obj['vTRAD_Partners'] = "";
+            obj['vItem_No'] = "";
+            obj['vItem_Book_No'] = "";
+            obj['vMargin_Dep_Type'] = "";
+            return obj;
+        }
+    });
+</script>

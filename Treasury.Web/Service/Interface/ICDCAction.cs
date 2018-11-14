@@ -54,6 +54,26 @@ namespace Treasury.Web.Service.Interface
         /// <returns></returns>
         Tuple<bool,string> CDCApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt);
 
+        /// <summary>
+        /// 庫存權責異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        Tuple<bool, string> CDCChargeReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt);
+
+        /// <summary>
+        /// 庫存權責異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        Tuple<bool, string> CDCChargeApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt);
+
         #endregion
 
     }

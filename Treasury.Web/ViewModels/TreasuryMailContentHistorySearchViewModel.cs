@@ -18,16 +18,10 @@ namespace Treasury.Web.ViewModels
         public string vAPPR_STATUS { get; set; }
 
         /// <summary>
-        /// 申請單單號
-        /// </summary>
-        [Description("申請單單號")]
-        public string vAPLY_NO { get; set; }
-
-        /// <summary>
         /// 申請日期
         /// </summary>
         [Description("申請日期")]
-        public string vAppr_Date { get; set; }
+        public string vAply_Date { get; set; }
 
         /// <summary>
         /// 使用者ID

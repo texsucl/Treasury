@@ -26,7 +26,7 @@ using Treasury.WebUtility;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class TreasuryMailTime : Common
+    public class TreasuryMailTime : Common , ITreasuryMailTime
     {
         #region GetData
 
@@ -39,9 +39,6 @@ namespace Treasury.Web.Service.Actual
         {
             var searchData = (TreasuryMailTimeSearchViewModel)searchModel;
             List<TreasuryMailTimeViewModel> result = new List<TreasuryMailTimeViewModel>();
-
-            if (searchData == null)
-                return result;
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -58,17 +55,19 @@ namespace Treasury.Web.Service.Actual
                 result.AddRange(db.MAIL_TIME.AsNoTracking()
                     .AsEnumerable()
                     .Select((x) => new TreasuryMailTimeViewModel()
-                    {
+                    {                        
                         vSEND_TIME = x.SEND_TIME,
                         vFUNC_ID = x.FUNC_ID,
                         vINTERVAL_MIN = x.INTERVAL_MIN?.ToString(),
                         vMAIL_CONTENT_ID = x.MAIL_CONTENT_ID,
                         vEXEC_TIME_B = x.EXEC_TIME_B,
                         vEXEC_TIME_E = x.EXEC_TIME_E,
-                        vDATA_STATUS = _DATA_STATUS.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE,
-                        vAplyNo = x.DATA_STATUS != "1" ? his.FirstOrDefault(y => y.MAIL_CONTENT_ID == x.MAIL_CONTENT_ID)?.APLY_NO : "",
+                        vDATA_STATUS = x.DATA_STATUS,
+                        vDATA_STATUS_NAME = _DATA_STATUS.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE,
+                        vAplyNo = x.DATA_STATUS != "1" ? his.FirstOrDefault(y => y.MAIL_TIME_ID == x.MAIL_TIME_ID)?.APLY_NO : "",
                         vMEMO = x.MEMO,
                         vIS_DISABLED = x.IS_DISABLED,
+                        vIS_DISABLED_NAME = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE,
                         vTREA_OPEN_TIME = x.TREA_OPEN_TIME,
                         vFREEZE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
                         vLAST_UPDATE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.LAST_UPDATE_UID)?.EMP_NAME?.Trim(),
@@ -91,8 +90,8 @@ namespace Treasury.Web.Service.Actual
             var searchData = (TreasuryMailTimeSearchViewModel)searchModel;
             List<TreasuryMailTimeHistoryViewModel> result = new List<TreasuryMailTimeHistoryViewModel>();
 
-            if (searchData == null)
-                return result;
+            //if (searchData == null)
+            //    return result;
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -106,18 +105,28 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
                 var _Appr_Status = _sysCodes
                     .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
-
+                var _Is_Disabled = db.SYS_CODE.AsNoTracking()
+                 .Where(x => x.CODE_TYPE == "IS_DISABLED").ToList();
 
                 result = db.MAIL_TIME_HIS.AsNoTracking()
-                    .Where(x => x.MAIL_TIME_ID == searchData.vMAIL_TIME_ID, !searchData.vMAIL_TIME_ID.IsNullOrWhiteSpace())
-                    .Where(x => x.APLY_NO == searchData.vAplyNo, !searchData.vAplyNo.IsNullOrWhiteSpace())
-                    .Where(x => x.APPR_STATUS == searchData.vAPPR_STATUS, searchData.vAPPR_STATUS != "All")
+                    .Where(x => x.FUNC_ID == searchData.vFunc_ID ||
+                    x.FUNC_ID_B == searchData.vFunc_ID, searchData !=null &&
+                    !searchData.vFunc_ID.IsNullOrWhiteSpace())
+                    .Where(x => x.MAIL_TIME_ID == searchData.vMAIL_TIME_ID,
+                    searchData != null && 
+                    !searchData.vMAIL_TIME_ID.IsNullOrWhiteSpace())
+                    .Where(x => x.APPR_STATUS == searchData.vAPPR_STATUS, 
+                    searchData != null && 
+                    !searchData.vAPPR_STATUS.IsNullOrWhiteSpace() &&
+                    searchData.vAPPR_STATUS != "All")
+                    .Where(x => x.APLY_NO == aply_No, !aply_No.IsNullOrWhiteSpace())
                     .AsEnumerable()
                     .Select(x => new TreasuryMailTimeHistoryViewModel()
                     {
-                        vAPLY_DATE = TypeTransfer.dateTimeNToString(x.APPR_DATE),
+                        vAPLY_DATE = TypeTransfer.dateTimeNToString(x.APLY_DATE),
                         vAPLY_NO = x.APLY_NO,
                         vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
+                        Act = _EXEC_ACTION.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE,
                         vSEND_TIME = x.SEND_TIME,
                         vSEND_TIME_B = x.SEND_TIME_B,
                         vFUNC_ID = x.FUNC_ID,
@@ -134,8 +143,8 @@ namespace Treasury.Web.Service.Actual
                         vMAIL_CONTENT_ID_B = x.MAIL_CONTENT_ID_B,
                         vMEMO = x.MEMO,
                         vMEMO_B = x.MEMO_B,
-                        vIS_DISABLED = x.IS_DISABLED,
-                        vIS_DISABLED_B = x.IS_DISABLED_B,
+                        vIS_DISABLED = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE,
+                        vIS_DISABLED_B = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED_B)?.CODE_VALUE,
                         vAPPR_STATUS = _Appr_Status.FirstOrDefault(y=>y.CODE == x.APPR_STATUS)?.CODE_VALUE,
                         vAPPR_DESC = x.APPR_DESC
                     }).ToList();
@@ -164,7 +173,7 @@ namespace Treasury.Web.Service.Actual
                 if (saveData != null)
                 {
                     var datas = (List<TreasuryMailTimeViewModel>)saveData;
-                    if(datas.Any())
+                    if(datas.Any(x=>x.updateFlag))
                     {
                         using (TreasuryDBEntities db = new TreasuryDBEntities())
                         {
@@ -176,9 +185,9 @@ namespace Treasury.Web.Service.Actual
                             String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
                             string _Aply_No = $@"G3{qPreCode}{sysSeqDao.qrySeqNo("G3", qPreCode).ToString().PadLeft(3, '0')}"; //申請單號 G3+系統日期YYYMMDD(民國年)+3碼流水號
 
-                            foreach (var data in datas)
+                            foreach (var data in datas.Where(x=>x.updateFlag))
                             {
-                                var _MT = db.MAIL_TIME.AsNoTracking().First(x => x.MAIL_TIME_ID == data.vMAIL_TIME_ID);
+                                var _MT = db.MAIL_TIME.First(x => x.MAIL_TIME_ID == data.vMAIL_TIME_ID);
 
                                 if (_MT.DATA_STATUS != "1")
                                 {
@@ -213,7 +222,7 @@ namespace Treasury.Web.Service.Actual
                                     MEMO = data.vMEMO,
                                     MEMO_B = _MT.MEMO,
                                     IS_DISABLED = data.vIS_DISABLED,
-                                    IS_DISABLED_B = data.vIS_DISABLED,
+                                    IS_DISABLED_B = _MT.IS_DISABLED,
                                     APLY_UID = searchData.userId,
                                     APLY_DATE = dt,
                                     APPR_STATUS = "1", //表單申請

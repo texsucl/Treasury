@@ -66,16 +66,22 @@ namespace Treasury.Web.ViewModels
         public string vIS_DISABLED { get; set; }
 
         /// <summary>
+        /// 停用註記(中文)
+        /// </summary>
+        [Description("停用註記(中文)")]
+        public string vIS_DISABLED_NAME { get; set; }
+
+        /// <summary>
         /// 資料狀態
         /// </summary>
         [Description("資料狀態")]
         public string vDATA_STATUS { get; set; }
 
         /// <summary>
-        /// 申請單單號
+        /// 資料狀態(中文)
         /// </summary>
-        [Description("申請單單號")]
-        public string vAplyNo { get; set; }
+        [Description("資料狀態(中文)")]
+        public string vDATA_STATUS_NAME { get; set; }
 
         /// <summary>
         /// 資料凍結人員
@@ -100,6 +106,18 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("發送時間定義編號")]
         public string vMAIL_TIME_ID {get;set;}
+
+        /// <summary>
+        /// 申請單單號
+        /// </summary>
+        [Description("申請單單號")]
+        public string vAplyNo { get; set; }
+
+        /// <summary>
+        /// 修改判定
+        /// </summary>
+        [Description("修改判定")]
+        public bool updateFlag { get; set; }
 
         /// <summary>
         /// 最後異動時間 

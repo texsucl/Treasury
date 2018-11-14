@@ -60,10 +60,22 @@ namespace Treasury.Web.ViewModels
         public string vCharge_Dept { get; set; }
 
         /// <summary>
+        /// 權責部門ID_異動後
+        /// </summary>
+        [Description("權責部門ID_異動後")]
+        public string vCharge_Dept_AFT { get; set; }
+
+        /// <summary>
         /// 權責部門
         /// </summary>
         [Description("權責部門")]
         public string vCharge_Dept_Name { get; set; }
+
+        /// <summary>
+        /// 權責部門_異動後
+        /// </summary>
+        [Description("權責部門_異動後")]
+        public string vCharge_Dept_Name_AFT { get; set; }
 
         /// <summary>
         /// 權責科別ID
@@ -72,16 +84,34 @@ namespace Treasury.Web.ViewModels
         public string vCharge_Sect { get; set; }
 
         /// <summary>
+        /// 權責科別ID_異動後
+        /// </summary>
+        [Description("權責科別ID_異動後")]
+        public string vCharge_Sect_AFT { get; set; }
+
+        /// <summary>
         /// 權責科別
         /// </summary>
         [Description("權責科別")]
         public string vCharge_Sect_Name { get; set; }
 
         /// <summary>
+        /// 權責科別_異動後
+        /// </summary>
+        [Description("權責科別_異動後")]
+        public string vCharge_Sect_Name_AFT { get; set; }
+
+        /// <summary>
         /// 權責單位
         /// </summary>
         [Description("權責單位")]
         public string vCharge_Name { get; set; }
+
+        /// <summary>
+        /// 權責單位_異動後
+        /// </summary>
+        [Description("權責單位_異動後")]
+        public string vCharge_Name_AFT { get; set; }
 
         /// <summary>
         /// 存取項目冊號資料檔-冊號

@@ -1,0 +1,110 @@
+﻿<div id="TMTCRV">
+    <div id="TMTCRV_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    <div style="text-align:center;">
+        <input type="button" id="TMTCRV_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMTCRV_Url = {};
+        TMTCRV_Url.getData = '@Url.Action("GetCacheData", "TreasuryMailTime")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var isGroupHeaders = true;//合併欄位
+        //#endregion 參數設定
+
+        //#region 初始動作
+        TMTCRV_ChangeRecord_TempGrid();
+        //#endregion 初始動作
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMTCRV_ChangeRecord_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        //#region jqgrid
+        function TMTCRV_ChangeRecord_CompleteFun(listId) {
+            if (isGroupHeaders) {
+                jQuery("#" + listId).jqGrid('setGroupHeaders', {
+                    useColSpanStyle: true,
+                    groupHeaders: [
+                      { startColumnName: 'vFUNC_ID_B', numberOfColumns: 2, titleText: '程式名稱' },
+                      { startColumnName: 'vSEND_TIME_B', numberOfColumns: 2, titleText: '發送時間' },
+                      { startColumnName: 'vINTERVAL_MIN_B', numberOfColumns: 2, titleText: '間隔時間' },
+                      { startColumnName: 'vEXEC_TIME_B_B', numberOfColumns: 2, titleText: '時間(起)' },
+                      { startColumnName: 'vEXEC_TIME_E_B', numberOfColumns: 2, titleText: '時間(迄)' },
+                      { startColumnName: 'vTREA_OPEN_TIME_B', numberOfColumns: 2, titleText: '開庫時間' },
+                      { startColumnName: 'vMAIL_CONTENT_ID_B', numberOfColumns: 2, titleText: '內文編號' },
+                      { startColumnName: 'vMEMO_B', numberOfColumns: 2, titleText: '備註' },
+                      { startColumnName: 'vIS_DISABLED_B', numberOfColumns: 2, titleText: '停用註記' }
+                    ]
+                });
+                isGroupHeaders = false;
+            }
+        }
+
+        function TMTCRV_ChangeRecord_TempGrid() {
+            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行', '修改前', '修改後', 
+                '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+                '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+                '覆核狀態', '覆核意見'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vAPLY_DATE", index: "vAPLY_DATE", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPLY_NO", index: "vAPLY_NO", width: 120, sortable: false });
+            colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 80, sortable: false });
+            colModelArray.push({ name: "Act", index: "Act", width: 60, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vFUNC_ID_B", index: "vFUNC_ID_B", width: 150, sortable: false});
+            colModelArray.push({ name: "vFUNC_ID", index: "vFUNC_ID", width: 150, sortable: false });
+            colModelArray.push({ name: "vSEND_TIME_B", index: "vSEND_TIME_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vSEND_TIME", index: "vSEND_TIME", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vINTERVAL_MIN_B", index: "vINTERVAL_MIN_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vINTERVAL_MIN", index: "vINTERVAL_MIN", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vEXEC_TIME_B_B", index: "vEXEC_TIME_B_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vEXEC_TIME_B", index: "vEXEC_TIME_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vEXEC_TIME_E_B", index: "vEXEC_TIME_E_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vEXEC_TIME_E", index: "vEXEC_TIME_E", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vTREA_OPEN_TIME_B", index: "vTREA_OPEN_TIME_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vTREA_OPEN_TIME", index: "vTREA_OPEN_TIME", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vMAIL_CONTENT_ID_B", index: "vMAIL_CONTENT_ID_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vMAIL_CONTENT_ID", index: "vMAIL_CONTENT_ID", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vMEMO_B", index: "vMEMO_B", width: 350, sortable: false});
+            colModelArray.push({ name: "vMEMO", index: "vMEMO", width: 350, sortable: false});
+            colModelArray.push({ name: "vIS_DISABLED_B", index: "vIS_DISABLED_B", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 100, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vAPPR_STATUS", index: "vAPPR_STATUS", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPPR_DESC", index: "vAPPR_DESC", width: 150, sortable: false });
+            jqgridCustom.createJqgridByCache(
+                'TMTCRV_ChangeRecord_jqgridDiv',
+                'TMTCRV_ChangeRecord_TempList',
+                'TMTCRV_ChangeRecord_TempPeger',
+                TMTCRV_Url.getData,
+                {
+                    type: 'ChangeRecord'
+                },
+                colNameArray,
+                colModelArray,
+                '發送時間異動紀錄',
+                jqgridCustom.getPage('TMTCRV_ChangeRecord_jqgridDiv'),
+                TMTCRV_ChangeRecord_CompleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+    });
+</script>

@@ -507,18 +507,29 @@ namespace Treasury.Web.Service.Actual
                     {
                         db.SaveChanges();
 
+                        MAIL_TIME MT = new MAIL_TIME();
+                        MAIL_CONTENT MC = new MAIL_CONTENT();
+                        //通知表單申請人及保管科人員已完成物品存入,取出 抓4
+                        MT = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.MAIL_TIME_ID == "4" && x.IS_DISABLED != "Y");
+                        var _MAIL_CONTENT_ID = MT?.MAIL_CONTENT_ID;
+                        MC = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID && x.IS_DISABLED != "Y");
                         #region 寄信
-                        foreach(var NoUid in approvedList)
+
+                        string str = MC.MAIL_CONTENT1;
+
+                        foreach (var NoUid in approvedList)
                         {
                             var aplyNo = NoUid.Split(';')[0];
                             var aplyUid = NoUid.Split(';')[1];
                             StringBuilder sb = new StringBuilder();
-                            sb.AppendLine(
-                                $@"您好，通知您
-申請單號 {aplyNo}已完成出入庫相關作業!
-1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
-2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
-                                );
+                            str = str.Replace("@_APLYNO_", aplyNo);
+                            sb.AppendLine(str);
+//                            sb.AppendLine(
+//                                $@"您好，通知您
+//申請單號 {aplyNo}已完成出入庫相關作業!
+//1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
+//2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
+//                                );
 
                             try
                             {
@@ -531,7 +542,7 @@ namespace Treasury.Web.Service.Actual
                                    new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                                    new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
                                    null,
-                                   "存取作業確認通知",
+                                   MT?.FUNC_ID ?? "存取作業確認通知",
                                    sb.ToString()
                                    );
                             }

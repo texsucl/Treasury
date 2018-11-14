@@ -1,0 +1,786 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-金庫存取項目維護作業";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="Item_Form">
+                    <table>
+                        <tr>
+                            <td align="right">
+                                <label>入庫作業類型 :&ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dITEM_OP_TYPE", (SelectList)ViewBag.dITEM_OP_TYPE)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label>每日進出 :&ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dISDO_PERDAY", (SelectList)ViewBag.dISDO_PERDAY)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label>停用/啟用 :&ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dIS_DISABLED", (SelectList)ViewBag.dIS_DISABLED)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="Item_Search" value="查詢" />
+                                <input type="button" class="btn btn-primary" id="Item_Record_Search" value="開啟異動紀錄查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div id="OpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="OpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div id="IM_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="IM_Insert" value="新增存入明細" class="btn btn-primary" />
+        </div>
+        <div id="IM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="text-align:center;" class="IM_Act">
+            <input type="button" id="IM_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="IM_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="IM_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="IM_Dialog" style="display:none;">
+        <form id="IM_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>入庫作業類型 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dITEM_OP_TYPE_MOD", (SelectList)ViewBag.dITEM_OP_TYPE_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>存取項目 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="dTREA_ITEM_MOD" name="dTREA_ITEM_MOD" class="IM_InsertType" />
+                        <input type="hidden" id="hTrea_Item_Id" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>連結資料庫 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dIS_TREA_ITEM_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>資料庫類別 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dTREA_ITEM_TYPE_MOD", (SelectList)ViewBag.dTREA_ITEM_TYPE_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>資料庫名稱 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dTREA_ITEM_NAME_MOD", (SelectList)ViewBag.dTREA_ITEM_NAME_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>每日進出 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dISDO_PERDAY_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>停用註記 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dIS_DISABLED_MOD", (SelectList)ViewBag.dIS_DISABLED_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="tMemo" name="tMemo" class="IM_InsertType"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="IM_InsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="IM_UpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="IM_DeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="IM_CancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="OpenChangeRecordDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenChangeRecordDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.search = '@Url.Action("SearchData", "ItemMaintain")';
+        UrlFor.getData = '@Url.Action("GetCacheData", "ItemMaintain")';
+        UrlFor.Check_Item_Name = '@Url.Action("Check_Item_Name", "ItemMaintain")';
+        UrlFor.InsertTempData = '@Url.Action("InsertTempData", "ItemMaintain")';
+        UrlFor.DeleteTempData = '@Url.Action("DeleteTempData", "ItemMaintain")';
+        UrlFor.UpdateTempData = '@Url.Action("UpdateTempData", "ItemMaintain")';
+        UrlFor.ApplyTempData = '@Url.Action("ApplyTempData", "ItemMaintain")';
+        UrlFor.ResetTempData = '@Url.Action("ResetTempData", "ItemMaintain")';
+        UrlFor.openChangeRecord = '@Url.Action("ChangeRecord", "ItemMaintain")';
+        UrlFor.openChangeRecordView = '@Url.Action("ChangeRecordView", "ItemMaintain")';
+        //#endregion
+        //region 參數設定
+        var Form_Item_Op_Type_Id = 'dITEM_OP_TYPE'; //入庫作業類型(查詢)
+        var Form_IsDo_Perday_Id = 'dISDO_PERDAY'; //每日進出(查詢)
+        var Form_Is_Disabled_Id = 'dIS_DISABLED'; //停用/啟用(查詢)
+
+        var IM_FormId = 'IM_DialogForm'; //formId
+        var Op_Type_Mod_Id = 'dITEM_OP_TYPE_MOD'; //入庫作業類型(CRUD)
+        var ItemId_Mod_id = 'hTrea_Item_Id'; //存取項目編號(CRUD)
+        var Item_Mod_Id = 'dTREA_ITEM_MOD'; //存取項目(CRUD)
+        var Is_Item_Mod_Id = 'dIS_TREA_ITEM_MOD'; //連結資料庫(CRUD)
+        var Type_Mod_Id = 'dTREA_ITEM_TYPE_MOD'; //資料庫類別(CRUD)
+        var Name_Mod_Id = 'dTREA_ITEM_NAME_MOD'; //資料庫名稱(CRUD)
+        var IsDo_Perday_Mod_Id = 'dISDO_PERDAY_MOD'; //每日進出(CRUD)
+        var Is_Disabled_Mod_Id = 'dIS_DISABLED_MOD'; //停用註記(CRUD)
+        var tMemo_Id = 'tMemo'; //備註(CRUD)
+
+        var IM_ConfirmFlag = false; //離開時提醒訊息
+
+        var openSearchDetailId = 'OpenSearchDetail';
+        var openChangeRecordDetailId = 'OpenChangeRecordDetail';
+        //#endregion
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 初始動作
+            setIM_Verified();
+            //#endregion
+            //#region 註冊verified
+            function setIM_Verified() {
+                verified.required(IM_FormId, Item_Mod_Id, message.required('存取項目')); //存取項目為必填
+            }
+            //#endregion
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'Item_Search':
+                        $('#' + id).on('click', function () { Item_Search(); });
+                        break;
+                    case 'Item_Record_Search':
+                        $('#' + id).on('click', function () { Item_Record_Search(); });
+                        break;
+                    case 'IM_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_InsertFun(); });
+                        break;
+                    case 'IM_InsertTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_InsertTempFun(); });
+                        break;
+                    case 'IM_UpdateTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_UpdateTempFun(); });
+                        break;
+                    case 'IM_DeleteTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_DeleteTempFun(); });
+                        break;
+                    case 'IM_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_ApplyFun(); });
+                        break;
+                    case 'IM_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (IM_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            IM_CancelFun();
+                        });
+                        break;
+                    case 'IM_Back':
+                    case 'IM_CancelTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                                        function () {
+                                            if (id == 'IM_Back' &&
+                                                IM_ConfirmFlag &&
+                                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                                    return false;
+                                                 }
+                                        customerUtility.closeDialog(this);
+                                        });
+                        break;
+                }
+            });
+            //#endregion
+            //#region 查詢
+            function Item_Search() {
+                var dialogId = 'IM_SearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 1100,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: ItemSearchViewModel(
+                            $('#' + Form_Item_Op_Type_Id).val(),
+                            $('#' + Form_IsDo_Perday_Id).val(),
+                            $('#' + Form_Is_Disabled_Id).val())
+                    }),
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        IM_TempGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+            }
+            //#endregion
+            //查詢異動紀錄
+            function Item_Record_Search() {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    url: UrlFor.openChangeRecord,
+                    contentType: 'application/json',
+                    success: function (vdata, textStatus, jqXHR) {
+                        $('#' + openSearchDetailId).children().remove();
+                        $('#' + openSearchDetailId).html(vdata);
+                        openChangeRecordDialog('金庫設備異動紀錄', 1250, 'OpenSearchDialog');
+                    }
+                })
+            }
+
+            function openChangeRecordDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openSearchDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+            //申請覆核
+            function IM_ApplyFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#IM_Apply'));
+                    }
+                });
+            }
+            //#endregion
+            //新增金庫存取項目暫存資料
+            function IM_InsertTempFun() {
+                if ($('#' + IM_FormId).valid()) {
+                    //檢核存取項目名稱
+                    if (Check_Item_Name()) {
+                        customerUtility.alert('存取項目名稱不可重覆', 'w');
+                        return false;
+                    }
+                    var vOp_Type = $('#' + Op_Type_Mod_Id).val().trim(); //入庫作業類型
+                    var vItem_Desc = $('#' + Item_Mod_Id).val().trim(); //存取項目(CRUD)
+                    var vIs_Item = $('#' + Is_Item_Mod_Id).val().trim(); //連結資料庫(CRUD)
+                    var vType = $('#' + Type_Mod_Id).val().trim(); //資料庫類別(CRUD)
+                    var vName = $('#' + Name_Mod_Id).val().trim(); //資料庫名稱(CRUD)
+                    var vIsDo_Perday = $('#' + IsDo_Perday_Mod_Id).val().trim(); //每日進出(CRUD)
+                    var vIs_Disabled = $('#' + Is_Disabled_Mod_Id).val().trim(); //停用註記(CRUD)
+                    var vMemo = $('#' + tMemo_Id).val().trim(); //備註(CRUD)
+                    if (vOp_Type == '2' || vOp_Type == '3') {
+                        if (vIs_Item != "Y") {
+                            customerUtility.alert('必須連結資料庫', 'w');
+                            return false;
+                        }
+                        if (vType == '') {
+                            customerUtility.alert('必須選擇資料庫類別', 'w');
+                            return false;
+                        }
+                        if (vType == 'SEAL' && vName == '') {
+                            customerUtility.alert('必須選擇資料庫名稱', 'w');
+                            return false;
+                        }
+                    }
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: IM_ViewModel(
+                                'a' + created.uuid(),
+                                vOp_Type,
+                                vItem_Desc,
+                                vIs_Item,
+                                vType,
+                                vName,
+                                vIsDo_Perday,
+                                vIs_Disabled,
+                                vMemo
+                                )
+                        }),
+                        dataType: "json",
+                        url: UrlFor.InsertTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#IM_InsertTemp'));
+                            IM_TempGrid();
+                            IM_ConfirmFlag = true;
+                        }
+                    });
+                }
+            }
+            //#endregion
+            //修改金庫存取項目暫存資料
+            function IM_UpdateTempFun() {
+                if ($('#' + IM_FormId).valid()) {
+                    var vItem_Id = $('#' + ItemId_Mod_id).val().trim(); // 存取項目編號
+                    var vOp_Type = $('#' + Op_Type_Mod_Id).val().trim(); //入庫作業類型
+                    var vItem_Desc = $('#' + Item_Mod_Id).val().trim(); //存取項目
+                    var vIs_Item = $('#' + Is_Item_Mod_Id).val().trim(); //連結資料庫
+                    var vType = $('#' + Type_Mod_Id).val().trim(); //資料庫類別
+                    var vName = $('#' + Name_Mod_Id).val().trim(); //資料庫名稱
+                    var vIsDo_Perday = $('#' + IsDo_Perday_Mod_Id).val().trim(); //每日進出
+                    var vIs_Disabled = $('#' + Is_Disabled_Mod_Id).val().trim(); //停用註記
+                    var vMemo = $('#' + tMemo_Id).val().trim(); //備註
+                    if (vOp_Type == '2' || vOp_Type == '3') {
+                        if (vIs_Item != "Y") {
+                            customerUtility.alert('必須連結資料庫', 'w');
+                            return false;
+                        }
+                        if (vType == '' || vType == null) {
+                            customerUtility.alert('必須選擇資料庫類別', 'w');
+                            return false;
+                        }
+                        if (vType == 'SEAL' && (vName == '' || vName == null)) {
+                            customerUtility.alert('必須選擇資料庫名稱', 'w');
+                            return false;
+                        }
+                    }
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                model: IM_ViewModel(
+                                vItem_Id,
+                                vOp_Type,
+                                vItem_Desc,
+                                vIs_Item,
+                                vType,
+                                vName,
+                                vIsDo_Perday,
+                                vIs_Disabled,
+                                vMemo
+                                )
+                            }),
+                            dataType: "json",
+                            url: UrlFor.UpdateTempData,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            customerUtility.alertAuto(result);
+                            if (result.RETURN_FLAG) {
+                                customerUtility.closeDialog($('#IM_UpdateTemp'));
+                                IM_TempGrid();
+                                IM_ConfirmFlag = true;
+                            }
+                        });
+
+                }
+            }
+            //#endregion
+            //刪除金庫存取項目暫存資料
+            function IM_DeleteTempFun() {
+                if ($('#' + IM_FormId).valid()) {
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            model: IM_ViewModel(
+                                $('#' + ItemId_Mod_id).val().trim())
+                        }),
+                        dataType: "json",
+                        url: UrlFor.DeleteTempData,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        customerUtility.alertAuto(result);
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#IM_DeleteTemp'));
+                            IM_TempGrid();
+                            IM_ConfirmFlag = result.Datas;
+                        }
+                    });
+                }
+            }
+            //#endregion
+            //取修申請
+            function IM_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetInsertDialog();
+                    IM_TempGrid();
+                });
+            }
+            //#endregion
+            //檢核存取項目名稱
+            function Check_Item_Name() {
+                var _Check_Item_Name;
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    data: JSON.stringify({
+                        vItem_Name: $('#' + Item_Mod_Id).val().trim()
+                    }),
+                    dataType: "json",
+                    url: UrlFor.Check_Item_Name,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        _Check_Item_Name = true;
+                    }
+                    else {
+                        _Check_Item_Name = false;
+                    }
+                });
+                return _Check_Item_Name;
+            }
+            //#endregion
+            function formattervvDATA_STATUS_VALUE(cellvalue, options, rdata) {
+                if (rdata.vDATA_STATUS == 2) {
+                    return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+                }
+                else {
+                    return cellvalue;
+                }
+            }
+            function UnformattervvDATA_STATUS_VALUE(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+            //查詢Grid
+            function IM_TempGrid() {
+                var colNameArray = ['動作', '執行功能', '入庫作業類型', '存取項目', '連結資料庫', '資料庫類別', '資料庫名稱', '每日進出', '停用註記', '備註', '資料狀態', '資料凍結人員', '資料庫類別編號', '資料庫代碼', '資料狀態代碼', '異動申請單號', '存取項目編號', '執行功能代號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
+                colModelArray.push({ name: "vEXEC_ACTION_VALUE", index: "vEXEC_ACTION_VALUE", width: 80, sortable: false });
+                colModelArray.push({ name: "vITEM_OP_TYPE", index: "vITEM_OP_TYPE", width: 50, sortable: false });
+                colModelArray.push({ name: "vITEM_DESC", index: "vITEM_DESC", width: 95, sortable: false });
+                colModelArray.push({ name: "vIS_TREA_ITEM", index: "vIS_TREA_ITEM", width: 95, sortable: false });
+                colModelArray.push({ name: "vTREA_ITEM_TYPE_VALUE", index: "vTREA_ITEM_TYPE_VALUE", width: 95, sortable: false });
+                colModelArray.push({ name: "vTREA_ITEM_NAME_VALUE", index: "vTREA_ITEM_NAME_VALUE", width: 95, sortable: false });
+                colModelArray.push({ name: "vISDO_PERDAY", index: "vISDO_PERDAY", width: 80, sortable: false });
+                colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 80, sortable: false });
+                colModelArray.push({ name: "vMEMO", index: "vMEMO", width: 100, sortable: false });
+                colModelArray.push({ name: "vDATA_STATUS_VALUE", index: "vDATA_STATUS_VALUE", width: 80, sortable: false, align: 'center', formatter: formattervvDATA_STATUS_VALUE, unformat: UnformattervvDATA_STATUS_VALUE });
+                colModelArray.push({ name: "vFREEZE_NAME", index: "vFREEZE_NAME", width: 100, sortable: false });
+                colModelArray.push({ name: "vTREA_ITEM_TYPE", index: "vTREA_ITEM_TYPE", hidden: true });
+                colModelArray.push({ name: "vTREA_ITEM_NAME", index: "vTREA_ITEM_NAME", hidden: true });
+                colModelArray.push({ name: "vDATA_STATUS", index: "vDATA_STATUS", hidden: true });
+                colModelArray.push({ name: "vAply_No", index: "vAply_No", hidden: true });
+                colModelArray.push({ name: "vITEM_ID", index: "vITEM_ID", hidden: true });
+                colModelArray.push({ name: "vEXEC_ACTION", index: "vEXEC_ACTION", hidden: true });
+                jqgridCustom.createJqgridByCache(
+    'IM_jqgridDiv',
+    'IM_TempList',
+    'IM_TempPeger',
+    UrlFor.getData,
+    {
+        type: 'Search'
+    },
+    colNameArray,
+    colModelArray,
+    '金庫存取項目維護作業',
+    jqgridCustom.getPage('IM_jqgridDiv'),
+    IM_CompleteFun,
+    true
+    );
+            }
+            //#endregion
+            //#region jqgrid 事件
+            function IM_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'IM_Temp', tempActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_vDATA_STATUS]', listId)).text();
+                    var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_vEXEC_ACTION]', listId)).text();
+                    if (status != '1' || Is_Disabled == "Y") {
+                        $(this).find('.actionEditIcon').hide();
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+                    if (exec_action != 'A') {
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+
+                    //異動申請單號
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+                });
+            };
+
+            var tempActFun = {};
+            tempActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            tempActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            tempActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+
+            //開啟金庫存取項目新增頁面
+            function IM_InsertFun() {
+                dialogOpen('@Ref.ActionType.Add.ToString()', null);     
+            }
+            //#endregion
+            function OpenAply_NoFun(listId, rowid) {
+                var data = $('#' + listId).getRowData(rowid);
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAply_No,
+                        ITEM_ID: data.vITEM_ID,
+                        data: TreasuryInOutChangeRecordSearchViewModel()
+                    }),
+                    dataType: 'html',
+                    url: UrlFor.openChangeRecordView,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + openChangeRecordDetailId).html(data);
+                        openDetailDialog('金庫存取項目異動紀錄', 1250, 'OpenChangeRecordDialog');
+                    }
+                });
+            }
+
+            function openDetailDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openChangeRecordDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //#region dialog
+            function dialogOpen(type, rowid) {
+                $('#' + IM_FormId).validate().resetForm();
+                var dialogId = 'IM_Dialog';
+                var listId = 'IM_TempList';
+                var IM_InsertClass = 'IM_InsertType';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+30%", at: "center top", of: window },
+                    title: title + '金庫存取項目',
+                    width: 'auto',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                ResetInsertDialog();
+                $('#IM_InsertTemp,#IM_UpdateTemp,#IM_DeleteTemp').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {
+                    $('#IM_InsertTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', false);
+                }
+                else if (type == '@Ref.ActionType.Edit.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#IM_UpdateTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', false);
+                    $('#' + Item_Mod_Id).prop('disabled', true);
+                    $('#' + Op_Type_Mod_Id).prop('disabled', true);
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#IM_DeleteTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', true);
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('.' + IM_InsertClass).prop('disabled', true);
+                }
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    //set value
+                    $('#' + ItemId_Mod_id).val(data.vITEM_ID); //存取項目編號
+                    $('#' + Op_Type_Mod_Id).val(data.vITEM_OP_TYPE); //入庫作業類型
+                    $('#' + Item_Mod_Id).val(data.vITEM_DESC); //存取項目
+                    $('#' + Is_Item_Mod_Id).val(data.vIS_TREA_ITEM); //連結資料庫
+                    var tt = data.vTREA_ITEM_TYPE;
+                    var nn = data.vTREA_ITEM_NAME;
+                    if (data.vTREA_ITEM_TYPE == null || data.vTREA_ITEM_TYPE == '') {
+                        $('#' + Type_Mod_Id).val($($('#' + Type_Mod_Id + ' option')[0]).val());
+                    }
+                    else {
+                        $('#' + Type_Mod_Id).val(data.vTREA_ITEM_TYPE); //資料庫類別
+                    }
+                    if (data.vTREA_ITEM_NAME == null || data.vTREA_ITEM_NAME == '') {
+                        $('#' + Name_Mod_Id).val($($('#' + Name_Mod_Id + ' option')[0]).val());
+                    }
+                    else{
+                        $('#' + Name_Mod_Id).val(data.vTREA_ITEM_NAME); //資料庫名稱
+                    }
+                    $('#' + IsDo_Perday_Mod_Id).val(data.vISDO_PERDAY); //每日進出
+                    $('#' + Is_Disabled_Mod_Id).val(data.vIS_DISABLED); //停用註記
+                    $('#' + tMemo_Id).val(data.vMEMO); //備註(CRUD)
+                }
+            }
+            //#region 重設輸入項目
+            function ResetInsertDialog() {
+                if ($('#' + Op_Type_Mod_Id + ' option').length > 0) {
+                    $('#' + Op_Type_Mod_Id).val($($('#' + Op_Type_Mod_Id + ' option')[0]).val());
+                }
+                $('#' + Item_Mod_Id).val('');
+                if ($('#' + Is_Item_Mod_Id + ' option').length > 0) {
+                    $('#' + Is_Item_Mod_Id).val($($('#' + Is_Item_Mod_Id + ' option')[0]).val());
+                }
+                if ($('#' + Type_Mod_Id + ' option').length > 0) {
+                    $('#' + Type_Mod_Id).val($($('#' + Type_Mod_Id + ' option')[0]).val());
+                }
+                if ($('#' + Name_Mod_Id + ' option').length > 0) {
+                    $('#' + Name_Mod_Id).val($($('#' + Name_Mod_Id + ' option')[0]).val());
+                }
+                if ($('#' + IsDo_Perday_Mod_Id + ' option').length > 0) {
+                    $('#' + IsDo_Perday_Mod_Id).val($($('#' + IsDo_Perday_Mod_Id + ' option')[0]).val());
+                }
+                if ($('#' + Is_Disabled_Mod_Id + ' option').length > 0) {
+                    $('#' + Is_Disabled_Mod_Id).val($($('#' + Is_Disabled_Mod_Id + ' option')[0]).val());
+                }
+                $('#' + tMemo_Id).val('');
+            }
+            //#endregion
+            //#region 查詢畫面  ViewModel
+            function ItemSearchViewModel(vITEM_OP_TYPE, vISDO_PERDAY, vIS_DISABLED) {
+                var obj = {};
+                obj['vITEM_OP_TYPE'] = vITEM_OP_TYPE;
+                obj['vISDO_PERDAY'] = vISDO_PERDAY;
+                obj['vIS_DISABLED'] = vIS_DISABLED;
+                return obj;
+            }
+            //#endregion
+            //#region Insert ViewModel
+            function IM_ViewModel(vTrea_Item_Id, vOp_Type, vItem_Desc, vIs_Item, vType, vName, vIsDo_Perday, vIs_Disabled, vMemo) {
+                var obj = {};
+                obj['vTrea_Item_Id'] = vTrea_Item_Id;
+                obj['vOp_Type'] = vOp_Type;
+                obj['vItem_Desc'] = vItem_Desc;
+                obj['vIs_Item'] = vIs_Item;
+                obj['vType'] = vType;
+                obj['vName'] = vName;
+                obj['vIsDo_Perday'] = vIsDo_Perday;
+                obj['vIs_Disabled'] = vIs_Disabled;
+                obj['vMemo'] = vMemo;
+                return obj;
+            }
+            //#endregion
+            //#region 異動紀錄查詢畫面  ViewModel
+            function TreasuryInOutChangeRecordSearchViewModel() {
+                var obj = {};
+                obj['vItem_Op_Type'] = "All";
+                obj['vTrea_IItem'] = "All";  
+                obj['vAply_No'] = null;
+                obj['vAppr_Status'] = "All";
+                obj['vLast_Update_Uid'] = null;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

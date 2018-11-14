@@ -79,6 +79,8 @@ namespace Treasury.Web.Service.Actual
 
                         item = _TREA_ITEM
                             .Where(x => x.ITEM_OP_TYPE == whichType)
+                            .Where(x => x.IS_DISABLED == "N") //可使用
+                            .Where(x => x.DATA_STATUS == "1") //可異動
                             .Where(x => itemId.Contains(x.ITEM_ID))
                             .Select(x => new SelectOption()
                             {
@@ -192,6 +194,8 @@ namespace Treasury.Web.Service.Actual
 
                     var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
                     vItem = db.TREA_ITEM.AsNoTracking()
+                        .Where(x => x.IS_DISABLED == "N") //可使用
+                        .Where(x => x.DATA_STATUS == "1") //可異動
                         .Where(x => x.ITEM_OP_TYPE == OpTypeId)
                         .Where(x => ItemIdList.Contains(x.ITEM_ID))
                         .Where(x => !RowItemIdList.Contains(x.ITEM_ID))

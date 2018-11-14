@@ -10,6 +10,7 @@
     message.rate = '不符合利率格式(99.9999)';
     message.englishNumber = '僅可輸入英文字母和數字';
     message.date = "不符合日期格式 (yyyy/mm/dd)";
+    message.time = "不符合時間格式 (HH:MM)";
     message.maxlength = function (value) {
         return "不能超過" + value + "字元!";
     }

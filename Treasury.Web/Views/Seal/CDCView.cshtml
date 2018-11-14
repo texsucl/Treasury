@@ -48,7 +48,7 @@
                         <label>權責單位 : </label>
                     </td>
                     <td>
-                        <label id="vCHARGE_Name"></label>
+                        <label id="vCharge_Name"></label>
                     </td>
                 </tr>
                 <tr>
@@ -111,7 +111,7 @@
         var vGet_DateId = 'vGet_Date';//取出日期Id
         var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
-        var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
+        var vCharge_NameId = 'vCharge_Name'; //權責單位(label)
         var tCDCSEAL_DESCId = 'tCDCSEAL_DESC'; //印章內容Id(text)
         var sCDCSEAL_DESCId = 'sCDCSEAL_DESC'; //印章內容Id(span)
         var tCDCSEAL_MemoId = 'tCDCSEAL_MEMO'; //備註Id(texarea)
@@ -217,6 +217,15 @@
                 return '<span class="red">' + rdata.vMemo_AFT + '</span>';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function formatterAct(cellvalue, options, rdata) {
             var str = '';
             str += '<div class="btn-group">';
@@ -239,8 +248,8 @@
                 '權責單位',
                 //'權責部門', '權責科別',
                 '印章內容', '備註',
-                '印章內容異動前', '備註異動前',
-                '印章內容異動後', '備註異動後',
+                '印章內容異動前', '備註異動前', '權責單位異動前',
+                '印章內容異動後', '備註異動後', '權責單位異動後',
                 '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
@@ -251,15 +260,19 @@
                 colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
             }
             colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 90, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false });
-            //colModelArray.push({ name: "vCHARGE_DEPT_Name", index: "vCHARGE_DEPT_Name", width: 90, sortable: false });
-            //colModelArray.push({ name: "vCHARGE_SECT_Name", index: "vCHARGE_SECT_Name", width: 90, sortable: false });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+
             colModelArray.push({ name: "vSeal_Desc_Show", index: "vSeal_Desc_Show", width: 100, sortable: false, formatter: formattervSeal_Desc });
             colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, sortable: false, formatter: formattervMemo });
+
             colModelArray.push({ name: "vSeal_Desc", index: "vSeal_Desc", hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
+
             colModelArray.push({ name: "vSeal_Desc_AFT", index: "vSeal_Desc_AFT",  hidden: true });
-            colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT",  hidden: true });
+            colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT", hidden: true });
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
+
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
             jqgridCustom.createJqgridByCache(
@@ -380,7 +393,7 @@
             $('#' + vGet_DateId).text('');
             $('#' + vGet_Uid_NameId).text('');
             $('#' + vAPLY_UID_NameId).text('');
-            $('#' + vCHARGE_NameId).text('');
+            $('#' + vCharge_NameId).text('');
             $('#' + tCDCSEAL_DESCId).val('');
             $('#' + sCDCSEAL_DESCId).text('');
             $('#' + tCDCSEAL_MemoId).val('');
@@ -401,7 +414,7 @@
                     $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
                 }
                 $('#' + vAPLY_UID_NameId).text(data.vAPLY_UID_Name);
-                $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
+                $('#' + vCharge_NameId).text(data.vCharge_Name);
                 $('#' + tCDCSEAL_DESCId).val(data.vSeal_Desc);
                 $('#' + sCDCSEAL_DESCId).text(data.vSeal_Desc_AFT);
                 $('#' + tCDCSEAL_MemoId).val(data.vMemo);

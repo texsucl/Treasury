@@ -339,7 +339,9 @@
     <Compile Include="Controllers\ConfirmStorageController.cs" />
     <Compile Include="Controllers\DepChkItemController.cs" />
     <Compile Include="Controllers\DepositController.cs" />
+    <Compile Include="Controllers\ItemChargeUnitController.cs" />
     <Compile Include="Controllers\ItemImpController.cs" />
+    <Compile Include="Controllers\ItemMaintainController.cs" />
     <Compile Include="Controllers\MargingController.cs" />
     <Compile Include="Controllers\MarginpController .cs" />
     <Compile Include="Controllers\SealController.cs" />
@@ -353,6 +355,8 @@
     <Compile Include="Controllers\TreasuryAccessController.cs" />
     <Compile Include="Controllers\TreasuryAccessCustodyController.cs" />
     <Compile Include="Controllers\TreasuryKeyCheckController.cs" />
+    <Compile Include="Controllers\TreasuryMailTimeController.cs" />
+    <Compile Include="Controllers\TreasuryMailContentController.cs" />
     <Compile Include="Controllers\TreasuryMaintainController.cs" />
     <Compile Include="Controllers\TreasuryRegisterSearchReportController.cs" />
     <Compile Include="Controllers\TreasuryRegistrationController.cs" />
@@ -403,6 +407,7 @@
     <Compile Include="Enum\DailyRoutineType.cs" />
     <Compile Include="Enum\SysCodeType.cs" />
     <Compile Include="Enum\OpenPartialViewType.cs" />
+    <Compile Include="Enum\DefinitionType.cs" />
     <Compile Include="Enum\TreaItemType.cs" />
     <Compile Include="Enum\Nlog.cs" />
     <Compile Include="Global.asax.cs">
@@ -681,11 +686,13 @@
     <Compile Include="Scheduler\DailyRoutineJob.cs" />
     <Compile Include="Service\Actual\ConfirmStorage.cs" />
     <Compile Include="Service\Actual\DepChkItem.cs" />
+    <Compile Include="Service\Actual\ItemChargeUnit.cs" />
     <Compile Include="Service\Actual\ItemImp.cs" />
     <Compile Include="Service\Actual\Common.cs" />
     <Compile Include="Service\Actual\DefaultCacheProvider.cs" />
     <Compile Include="Service\Actual\Bill.cs" />
     <Compile Include="Service\Actual\Deposit.cs" />
+    <Compile Include="Service\Actual\ItemMaintain.cs" />
     <Compile Include="Service\Actual\Marging.cs" />
     <Compile Include="Service\Actual\Marginp.cs" />
     <Compile Include="Service\Actual\SampleFactory.cs" />
@@ -716,10 +723,12 @@
     <Compile Include="Service\Interface\ICDCAction.cs" />
     <Compile Include="Service\Interface\IConfirmStorage.cs" />
     <Compile Include="Service\Interface\IDepChkItem.cs" />
+    <Compile Include="Service\Interface\IItemChargeUnit.cs" />
     <Compile Include="Service\Interface\IItemImp.cs" />
     <Compile Include="Service\Interface\ICacheProvider.cs" />
     <Compile Include="Service\Interface\ICA.cs" />
     <Compile Include="Service\Interface\IDeposit.cs" />
+    <Compile Include="Service\Interface\IItemMaintain.cs" />
     <Compile Include="Service\Interface\IMarging.cs" />
     <Compile Include="Service\Interface\IMarginp.cs" />
     <Compile Include="Service\Interface\ISeal.cs" />
@@ -731,6 +740,8 @@
     <Compile Include="Service\Interface\ITreasuryAccess.cs" />
     <Compile Include="Service\Interface\ITreasuryAccessCustody.cs" />
     <Compile Include="Service\Interface\ITreasuryKeyCheck.cs" />
+    <Compile Include="Service\Interface\ITreasuryMailTime.cs" />
+    <Compile Include="Service\Interface\ITreasuryMailContent.cs" />
     <Compile Include="Service\Interface\ITreasuryMaintain.cs" />
     <Compile Include="Service\Interface\ITreasuryRegisterSearchReport.cs" />
     <Compile Include="Service\Interface\ITreasuryRegistration.cs" />
@@ -755,6 +766,17 @@
     <Compile Include="ViewModels\AuthReviewUserModel.cs" />
     <Compile Include="ViewModels\AuthRptModel.cs" />
     <Compile Include="ViewModels\BeforeOpenTreasuryViewModel.cs" />
+    <Compile Include="ViewModels\CDCChargeViewModel.cs" />
+    <Compile Include="ViewModels\ItemChargeUnitChangeRecordSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\ItemChargeUnitChangeRecordSearchViewModel.cs" />
+    <Compile Include="ViewModels\ItemChargeUnitInsertViewModel.cs" />
+    <Compile Include="ViewModels\ItemChargeUnitSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\ItemChargeUnitSearchViewModel.cs" />
+    <Compile Include="ViewModels\ItemMaintainChangeRecordSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\ItemMaintainChangeRecordSearchViewModel.cs" />
+    <Compile Include="ViewModels\ItemMaintainInsertViewModel.cs" />
+    <Compile Include="ViewModels\ItemMaintainSearchDetailViewModel.cs" />
+    <Compile Include="ViewModels\ItemMaintainSearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentHistorySearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentSearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentUpdateViewModel.cs" />
@@ -1348,8 +1370,23 @@
     <Content Include="Views\TreasuryAccessCustody\Appr.cshtml" />
     <Content Include="Views\TreasuryAccessCustody\Index.cshtml" />
     <Content Include="Views\DepChkItem\Index.cshtml" />
-    <Content Include="Views\DepChkItem\ChangeRecordView.cshtml" />
-    <Content Include="Views\DepChkItem\OrderView.cshtml" />
+    <Content Include="Views\TreasuryMailContent\Detail.cshtml" />
+    <Content Include="Views\TreasuryMailContent\ChangeRecordView.cshtml" />
+    <Content Include="Views\TreasuryMailContent\Index.cshtml" />
+    <Content Include="Views\TreasuryMailTime\ChangeRecord.cshtml" />
+    <Content Include="Views\TreasuryMailTime\ChangeRecordView.cshtml" />
+    <Content Include="Views\TreasuryMailTime\Index.cshtml" />
+    <Content Include="Views\TreasuryMailContent\Receive.cshtml" />
+    <Content Include="Views\TreasuryMailContent\ChangeRecord.cshtml" />
+    <Content Include="Views\TreasuryDefinition\Index.cshtml" />
+    <Content Include="Views\CDC\ChargeIndex.cshtml" />
+    <Content Include="Views\CDC\ChargeAppr.cshtml" />
+    <Content Include="Views\ItemChargeUnit\ChangeRecord.cshtml" />
+    <Content Include="Views\ItemChargeUnit\ChangeRecordView.cshtml" />
+    <Content Include="Views\ItemChargeUnit\Index.cshtml" />
+    <Content Include="Views\ItemMaintain\ChangeRecord.cshtml" />
+    <Content Include="Views\ItemMaintain\ChangeRecordView.cshtml" />
+    <Content Include="Views\ItemMaintain\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
