@@ -78,6 +78,12 @@ namespace Treasury.Web.ViewModels
         public string vLAST_UPDATE_UID_Name { get; set; }
 
         /// <summary>
+        /// 最後異動日期
+        /// </summary>
+        [Description("最後異動日期")]
+        public string vLAST_UPDATE_DATE { get; set; }
+
+        /// <summary>
         /// 最後異動時間 
         /// </summary>
         [Description("最後異動時間")]

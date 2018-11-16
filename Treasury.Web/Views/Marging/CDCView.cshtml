@@ -368,6 +368,15 @@
                 return '<span class="red">' + rdata.vBook_No_AFT + '</span>';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function formatterAct(cellvalue, options, rdata) {
             var str = '';
             str += '<div class="btn-group">';
@@ -388,8 +397,8 @@
             }
             colNameArray = colNameArray.concat(['冊號', '存入申請人', '權責單位',
                 '類別', '交易對象', '歸檔編號', '金額', '職場代號', '說明', '備註',
-                '類別異動前', '交易對象異動前', '金額異動前', '職場代號異動前', '說明異動前', '備註異動前', '冊號異動前',
-                '類別異動後', '交易對象異動後', '金額異動後', '職場代號異動後', '說明異動後', '備註異動後', '冊號異動後',
+                '類別異動前', '交易對象異動前', '金額異動前', '職場代號異動前', '說明異動前', '備註異動前', '冊號異動前', '權責單位異動前',
+                '類別異動後', '交易對象異動後', '金額異動後', '職場代號異動後', '說明異動後', '備註異動後', '冊號異動後', '權責單位異動後',
                 '網頁PK', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
@@ -401,7 +410,7 @@
             }
             colModelArray.push({ name: "vBook_No_Show", index: "vBook_No_Show", width: 50, align: 'center', sortable: false, align: 'center', formatter: formattervBook_No });
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 170, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vCharge_Name_Show", index: "vCharge_Name_Show", width: 170, sortable: false, align: 'center', formatter: formattervCharge_Name });
 
             colModelArray.push({ name: "vMargin_Dep_Type_Show", index: "vMargin_Dep_Type_Show", width: 70, align: 'center', sortable: false, formatter: formattervMargin_Dep_Type, unformatter: unformattervMargin_Dep_Type });
             colModelArray.push({ name: "vTrad_Partners_Show", index: "vTrad_Partners_Show", width: 100, align: 'center', sortable: false, formatter: formattervTrad_Partners });
@@ -418,6 +427,7 @@
             colModelArray.push({ name: "vDescription", index: "vDescription" ,hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
             colModelArray.push({ name: "vBook_No", index: "vBook_No", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
 
             colModelArray.push({ name: "vMargin_Dep_Type_AFT", index: "vMargin_Dep_Type_AFT", hidden: true });
             colModelArray.push({ name: "vTrad_Partners_AFT", index: "vTrad_Partners_AFT", hidden: true });
@@ -426,6 +436,7 @@
             colModelArray.push({ name: "vDescription_AFT", index: "vDescription_AFT", hidden: true });
             colModelArray.push({ name: "vMemo_AFT", index: "vMemo_AFT", hidden: true });
             colModelArray.push({ name: "vBook_No_AFT", index: "vBook_No_AFT", hidden: true });
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
 
             colModelArray.push({ name: "vItem_PK", index: "vItem_PK", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });

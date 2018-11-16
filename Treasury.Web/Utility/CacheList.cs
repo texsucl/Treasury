@@ -241,14 +241,29 @@
         public static string CDCSearchViewModel { get; private set; }
 
         /// <summary>
+        /// 資料庫權限異動畫面(查詢條件)
+        /// </summary>
+        public static string CDCChargeSearchViewModel { get; private set; }
+
+        /// <summary>
         /// 資料庫異動覆核畫面(查詢條件)
         /// </summary>
         public static string CDCApprSearchData { get; private set; }
 
         /// <summary>
+        /// 資料庫權限異動覆核畫面(查詢條件)
+        /// </summary>
+        public static string CDCChargeApprSearchData { get; private set; }
+
+        /// <summary>
         /// 資料庫異動覆核畫面(資料)
         /// </summary>
         public static string CDCApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動覆核畫面(資料)
+        /// </summary>
+        public static string CDCChargeApprSearchDetailViewData { get; private set; }
 
         /// <summary>
         /// 資料庫異動印章畫面
@@ -316,6 +331,51 @@
         public static string CDCDepositDataD_All { get; private set; }
 
         /// <summary>
+        /// 資料庫權限異動印章畫面
+        /// </summary>
+        public static string CDCChargeSEALData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動空白票據畫面
+        /// </summary>
+        public static string CDCChargeBILLData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動電子憑證畫面
+        /// </summary>
+        public static string CDCChargeCAData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動存出保證金畫面
+        /// </summary>
+        public static string CDCChargeMargingData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動重要物品畫面
+        /// </summary>
+        public static string CDCChargeItemImpData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動存入保證金畫面
+        /// </summary>
+        public static string CDCChargeMarginpData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動不動產權狀畫面
+        /// </summary>
+        public static string CDCChargeEstateData { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動股票畫面批號頁
+        /// </summary>
+        public static string CDCChargeStockDataM { get; private set; }
+
+        /// <summary>
+        /// 資料庫權限異動定期存單畫面(主檔)
+        /// </summary>
+        public static string CDCChargeDepositDataM { get; private set; }
+
+        /// <summary>
         /// 金庫設備維護作業查詢畫面
         /// </summary>
         public static string TreasuryMaintainSearchData { get; private set; }
@@ -345,6 +405,7 @@
         /// </summary>
         public static string DepChkItem_G_SearchDataList { get; private set; }
 
+
         /// <summary>
         /// 定存檢核表項目異動紀錄查詢結果
         /// </summary>
@@ -354,9 +415,76 @@
         /// 定存檢核表項目排序查詢結果
         /// </summary>
         public static string DepChkItemOrderSearchDataList { get; private set; }
+
+
+        /// <summary>
+        /// mail發送內文設定檔維護作業 主畫面查詢條件
+        /// </summary>
+        public static string TreasuryMailContentSearchData { get; set; }
+
+        /// <summary>
+        /// mail發送內文設定檔維護作業 主畫面資料
+        /// </summary>
+        public static string TreasuryMailContentData { get; set; }
+
+        /// <summary>
+        /// mail發送內文設定檔維護作業 明細資料
+        /// </summary>
+        public static string TreasuryMailContentDetailData { get; set; }
+
+        /// <summary>
+        /// mail發送對象設定檔 資料
+        /// </summary>
+        public static string TreasuryMailContentReceiveData { get; set; }
+
+        /// <summary>
+        /// mail發送內文設定檔 異動紀錄查詢結果
+        /// </summary>
+        public static string TreasuryMailContentChangeRecordData { get; set; }
+
+        /// <summary>
+        /// mail發送時間定義檔維護作業 主畫面資料
+        /// </summary>
+        public static string TreasuryMailTimeData { get; set; }
+
+        /// <summary>
+        /// mail發送時間定義檔維護作業 明細資料
+        /// </summary>
+        public static string TreasuryMailTimeDetailData { get; set; }
+
+        /// <summary>
+        /// mail發送時間定義檔維護作業 異動紀錄查詢結果
+        /// </summary>
+        public static string TreasuryMailTimeChangeRecordData { get; set; }
+
+        /// <summary>
+        /// 金庫存取項目維護作業查詢條件
+        /// </summary>
+        public static string ItemMaintainSearchData { get; private set; }
+
+        /// <summary>
+        /// 金庫存取項目維護作業查詢結果
+        /// </summary>
+        public static string ItemMaintainSearchDetailViewData { get; private set; }
+        /// <summary>
+        /// 金庫存取項目維護作業異動查詢結果
+        /// </summary>
+        public static string ItemMaintainChangeRecordSearchDetailViewData { get; private set; }
+        
+        /// <summary>
+        /// 保管資料發送維護作業查詢條件
+        /// </summary>
+        public static string ItemChargeUnitSearchData { get; private set; }
+        /// <summary>
+        /// 保管資料發送維護作業查詢結果
+        /// </summary>
+        public static string ItemChargeUnitSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 保管資料發送維護作業異動查詢結果
+        /// </summary>
+        public static string ItemChargeUnitChangeRecordSearchDetailViewData { get; private set; }
         #endregion Cache資料
-
-
         static CacheList()
         {
             #region Cache資料
@@ -405,8 +533,11 @@
             DepositData_D = "DepositData_D";
             DepositData_D_All = "DepositData_D_All";
             CDCSearchViewModel = "CDCSearchViewModel";
+            CDCChargeSearchViewModel = "CDCChargeSearchViewModel";
             CDCApprSearchData = "CDCApprSearchData";
+            CDCChargeApprSearchData = "CDCChargeApprSearchData";
             CDCApprSearchDetailViewData = "CDCApprSearchDetailViewData";
+            CDCChargeApprSearchDetailViewData = "CDCChargeApprSearchDetailViewData";
             CDCSEALData = "CDCSEALData";
             CDCBILLData = "CDCBILLData";
             CDCBILLAllData = "CDCBILLAllData";
@@ -420,6 +551,15 @@
             CDCDepositDataM = "CDCDepositDataM";
             CDCDepositDataD = "CDCDepositDataD";
             CDCDepositDataD_All = "CDCDepositDataD_All";
+            CDCChargeSEALData = "CDCSEALData";
+            CDCChargeBILLData = "CDCBILLData";
+            CDCChargeCAData = "CDCCAData";
+            CDCChargeMargingData = "CDCMargingData";
+            CDCChargeItemImpData = "CDCItemImpData";
+            CDCChargeMarginpData = "CDCMarginpData";
+            CDCChargeEstateData = "CDCEstateData";
+            CDCChargeStockDataM = "CDCStockDataM";
+            CDCChargeDepositDataM = "CDCDepositDataM";
             TreasuryMaintainSearchData = "TreasuryMaintainSearchData";
             TreasuryMaintainSearchDataList = "TreasuryMaintainSearchDataList";
             TreasuryMaintainChangeRecordSearchDataList = "TreasuryMaintainChangeRecordSearchDataList";
@@ -428,8 +568,21 @@
             DepChkItem_G_SearchDataList = "DepChkItem_G_SearchDataList";
             DepChkItemChangeRecordSearchDataList = "DepChkItemChangeRecordSearchDataList";
             DepChkItemOrderSearchDataList = "DepChkItemOrderSearchDataList";
+            ItemMaintainSearchData = "ItemMaintainSearchData";
+            ItemMaintainSearchDetailViewData = "ItemMaintainSearchDetailViewData";
+            ItemMaintainChangeRecordSearchDetailViewData = "ItemMaintainChangeRecordSearchDetailViewData";
+            ItemChargeUnitSearchData = "ItemChargeUnitSearchData";
+            ItemChargeUnitSearchDetailViewData = "ItemChargeUnitSearchDetailViewData";
+            ItemChargeUnitChangeRecordSearchDetailViewData = "ItemChargeUnitChangeRecordSearchDetailViewData";
             TreasuryRegisterSearchReportM = "TreasuryRegisterSearchReportM";
             TreasuryRegisterSearchReportD = "TreasuryRegisterSearchReportD";
+            TreasuryMailContentSearchData = "TreasuryMailContentSearchData";
+            TreasuryMailContentData = "TreasuryMailContentData";
+            TreasuryMailContentDetailData = "TreasuryMailContentDetailData";
+            TreasuryMailContentReceiveData = "TreasuryMailContentReceiveData";
+            TreasuryMailTimeData = "TreasuryMailTimeData";
+            TreasuryMailTimeDetailData = "TreasuryMailTimeDetailData";
+            TreasuryMailTimeChangeRecordData = "TreasuryMailTimeChangeRecordData";
             #endregion Cache資料
 
         }

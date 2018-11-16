@@ -243,6 +243,24 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("冊號為保管科必要欄位")]
             book_No_Error,
+
+            /// <summary>
+            /// Mail內文設定替換規則
+            /// </summary>
+            [Description(@"替換規則
+每日例行性排程:
+1. @_TREA_OPEN_TIME_ => (開關庫時間) 
+2. @_EXEC_TIME_E_ => (系統(迄)時間)
+流程檢核排程:
+1. @_TREA_REGISTER_ID_ => (金庫開庫申請單單號)
+2. @_STATUS_ => (流程階段)
+出入庫流程完成通知:
+1. @_APLYNO_ => (申請單單號)
+季報表通知
+1. @_DATE_ => (在庫日期)
+2. @_ITEM_ => (查詢項目)
+")]
+            Mail_Content_Message,
         }
     }
 

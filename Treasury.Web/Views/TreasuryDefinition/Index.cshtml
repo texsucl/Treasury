@@ -1,0 +1,668 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@{
+    ViewBag.Title = "金庫定義檔查詢作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+}
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TAForm">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>申請日期:</label>
+                            </td>
+                            <td>
+                                <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                            </td>
+                            <td>
+                                <label>單號:</label>
+                            </td>
+                            <td>
+                                <input type="text" id="APLY_NO" />
+                            </td>
+                        </tr>
+                        <tr style="text-align:center">
+                            <td colspan="4">
+                                <input type="button" class="btn btn-primary" id="TAApprI_Search" value="查詢" />
+                                @Html.Hidden("h_Appr_CREATE_Dep", (string)ViewBag.hCREATE_Dep)
+                                @Html.Hidden("h_Appr_CREATE_User", (string)ViewBag.hCREATE_User)
+                                @Html.Hidden("h_Appr_Aply_No")
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div id="TAApprSearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div id="TAApprjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div class="TAApprClass" style="text-align:center">
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="TAAppr_I_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="TAAppr_I_Reject" value="駁回" />
+            <input type="button" class="btn btn-primary" id="TAAppr_I_Back" value="回上一頁">
+        </div>
+    </div>
+    <div id="TAApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TAApprOpenSearchDetail"></div>
+        <div style="text-align:center" class="TAApprAct">
+            <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="TAAppr_V_Appr" value="核准" />
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="TAAppr_V_Reject" value="駁回" />
+            <input type="button" class="btn btn-primary" id="TAAppr_V_Back" value="回上一頁">
+        </div>
+    </div>
+    <div id="TAApprDescDialog" style="display:none" role="dialog">
+        <table>
+            <tr>
+                <td>
+                    <textarea id="TAApprDesc" maxlength="50" style="width:98%"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="TAAppr_Y_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                    <input type="button" id="TAAppr_N_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+
+        //#region url設定
+        var TAApprurl = {};
+
+        TAApprurl.search = '@Url.Action("SearchAppr", "TreasuryAccess")';
+        TAApprurl.getData = '@Url.Action("GetCacheData", "TreasuryAccess")';
+        TAApprurl.Appr = '@Url.Action("Appraisal", "TreasuryAccess")';
+        TAApprurl.Reject = '@Url.Action("Reject", "TreasuryAccess")';
+        TAApprurl.getByAplyNo = '@Url.Action("GetByAplyNo", "TreasuryAccess")';
+
+        var openSearchDetailId = 'TAApprOpenSearchDetail';
+        var TAFormId = 'TAForm';
+        var hAply_No = 'h_Appr_Aply_No';
+
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            //#region 初始設定
+
+            created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TAApprI_Search':
+                        $('#' + id).on('click', function () { TAApprSearch(); });
+                        break;
+                    case 'TAAppr_I_Appr':
+                    case 'TAAppr_V_Appr':
+                        $('#' + id).on('click', function () { TAApprApproved(); });
+                        break;
+                    case 'TAAppr_I_Reject':
+                    case 'TAAppr_V_Reject':
+                        $('#' + id).on('click', function () { TAApprReject(); });
+                        break;
+                    case 'TAAppr_Y_Reject':
+                        $('#' + id).on('click', function () { TAApprRejectY(); });
+                        break;
+                    case 'TAAppr_N_Reject':
+                    case 'TAAppr_I_Back':
+                    case 'TAAppr_V_Back':
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                        break;
+                }
+            });
+            //#endregion
+
+        }
+
+        //#region 初始設定
+        function reset() {
+            resetTAInsertDeatil();
+        }
+        //#endregion
+
+        //#region 核准
+        function TAApprApproved()
+        {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    $('.TAApprCs:checked').each(
+                        function () {
+                            var listId = 'TAApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?"))
+                {
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNos: aplyNos
+                        }),
+                        url: TAApprurl.Appr,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            if (openflag)
+                            {
+                                customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                            }
+                            TAApprGrid();
+                        }
+                        customerUtility.alertAuto(result);
+                    });
+                }
+            }
+            else {
+                customerUtility.alert('無選擇核准項目', 'w');
+            }
+        }
+        //#endregion
+
+        //#region 駁回
+        function TAApprReject()
+        {
+            var flag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    flag = true;
+                }
+            }
+            else {
+                flag = true;
+            }
+            if (!flag)
+            {
+                customerUtility.alert('無選擇駁回項目', 'w');
+                return false;
+            }
+            var dialogId = 'TAApprDescDialog';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '駁回意見',
+                width: 500,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+            $('#TAApprDesc').val('');
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+
+        //#region 駁回確認
+        function TAApprRejectY()
+        {
+            var aplyNos = [];
+            var openflag = false;
+            if ($('#' + hAply_No).val() == '') {
+                if ($('.TAApprCs:checked').length > 0) {
+                    $('.TAApprCs:checked').each(
+                        function () {
+                            var listId = 'TAApprList';
+                            var aply_No = $(this).parents('tr:first').find($.validator.format('td[aria-describedby$={0}_vAPLY_NO]', listId)).text();
+                            aplyNos.push(aply_No);
+                        }
+                    );
+                }
+            }
+            else {
+                aplyNos.push($('#' + hAply_No).val());
+                openflag = true;
+            }
+            if (aplyNos.length > 0) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNos : aplyNos,
+                        apprDesc: $('#TAApprDesc').val().trim()
+                    }),
+                    url: TAApprurl.Reject,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#TAAppr_Y_Reject'));
+                        if (openflag)
+                        {
+                            customerUtility.closeDialog($('#TAAppr_V_Appr'));
+                        }
+                        TAApprGrid();
+                    }
+                    customerUtility.alertAuto(result);
+                });
+            }
+            else {
+                customerUtility.alert('無選擇駁回項目', 'w');
+            }
+        }
+        //#endregion
+
+        //#region 查詢畫面查詢
+        function TAApprSearch() {
+            var dialogId = 'TAApprSearchDetail';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: '查詢畫面',
+                width: 1050,
+                autoOpen: false,
+                maxHeight: 700,
+                resizable: false,
+                closeText: '取消'
+            });
+
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    searchModel: TreasuryAccessApprSearchViewModel(
+                     $('#APLY_DT_From').val(),
+                     $('#APLY_DT_To').val(),
+                     $('#APLY_NO').val(),
+                     $('#h_Appr_CREATE_User').val(),
+                     $('#h_Appr_CREATE_Dep').val()
+                     )
+                }),
+                url: TAApprurl.search,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#' + dialogId).dialog('open');
+                    TAApprGrid();
+                }
+                else {
+                    customerUtility.alert(result.DESCRIPTION, 'w');
+                }
+            });
+        }
+        //#endregion
+
+        //#region 重設新增畫面
+        function resetTAInsertDeatil() {
+            $('#' + openInsertDetailId).children().remove();
+            //$('#TAI_Insert').show();
+        }
+        //#endregion
+
+        //#region formate 樣式
+
+        function formatterCheck(cellvalue, options, rdata) {
+            var str = '';
+            if (rdata.vAPPRFlag) {
+                str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                    options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox TAApprCs customerCheck'></div>";
+            }
+            return str;
+        }
+
+        function formatterAPLYNO(cellvalue, options, rdata) {
+                return "<a href='#' class='openDialog DialogAPLYNO' style='text-decoration:underline;' return:false; id='" + options.gid + "APLYNO" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+        }
+
+        function UnformatterAPLYNO(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        //#endregion
+
+        //#region 查詢表單
+        function TAApprGrid() {
+            var colNameArray = [' ',
+                '存取項目', '申請日期', '申請單號',
+                '申請單位', '申請人', '入庫原因',
+                '存取項目ID', '覆核權限'];
+            var colModelArray = [
+                { name: "vCheckFlag", index: "vCheckFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck },
+                { name: "vItemDec", index: "vItemDec", width: 150, sortable: false, align: 'center' },
+                { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center' },
+                { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
+                { name: "vAPLY_UNIT", index: "vAPLY_UNIT", width: 180, sortable: false, align: 'left' },
+                { name: "vAPLY_UID_NAME", index: "vAPLY_UID_NAME", width: 70, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 270, sortable: false, align: 'left' },
+                { name: "vItem", index: "vItem", hidden: true },
+                { name: "vAPPRFlag", index: "vAPPRFlag", hidden: true },
+            ];
+            jqgridCustom.createJqgridByCache(
+                'TAApprjqgridDiv',
+                'TAApprList',
+                'TAApprPeger',
+                TAApprurl.getData,
+                {
+                    type: 'Appr'
+                },
+                colNameArray,
+                colModelArray,
+                '代處理文件',
+                jqgridCustom.getPage('TAApprjqgridDiv'),
+                TAApprGridCompeleteFun,
+                true
+                );
+        }
+
+        //#endregion
+
+        //#region 註冊 開啟申請單號 事件
+        function TAApprGridCompeleteFun(listId) {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //申請單號
+                $(this).find('td').find('a.DialogAPLYNO').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        TAOpenAPLYNOFun(listId, i + 1);
+                    });
+                });
+            });
+        }
+        //#endregion
+
+        //#region 開啟申請單號
+        function TAOpenAPLYNOFun(listId, rowid) {
+            var data = $("#" + listId).getRowData(rowid);
+            var itemId = data.vItem;
+            var apprFlag = data.vCheckFlag.length > 0;
+            var itemData = GetItemDataByDefault(itemId);
+            if (itemData.url != null) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAPLY_NO,
+                        data: null,
+                    }),
+                    url: TAApprurl.getByAplyNo,
+                    contentType: 'application/json',
+                })
+                .done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        var aplyNoData = result.Datas.Item1;
+                        var actFlag = result.Datas.Item2;
+                        $('#h_Appr_Aply_No').val(data.vAPLY_NO);
+                        $.ajax({
+                            type: 'POST',
+                            data: JSON.stringify({
+                                AplyNo: data.vAPLY_NO,
+                                data: null,
+                                type: 1 //金庫物品存取覆核作業
+                            }),
+                            dataType: 'html',
+                            url: itemData.url,
+                            contentType: 'application/json',
+                            success: function (data, textStatus, jqXHR) {
+                                $('#' + openSearchDetailId).html(GetAplyNoDetail() + data);
+                                $('#TAVMApprvAplyNo').text(aplyNoData.vAplyNo);
+                                $('#TAVMApprvItem').text(aplyNoData.vItem)
+                                $('#TAVMApprvAplyUnit').text(aplyNoData.vAplyUnit);
+                                $('#TAVMApprvAplyUid').text(aplyNoData.vAplyUid);
+                                $('#TAVMApprvChargeUnit').text(aplyNoData.vAplyUnit);
+                                $('#TAVMApprvAccessType').text(aplyNoData.vAccessType);
+                                $('#TAVMApprvExpectedAccessDate').text(aplyNoData.vExpectedAccessDate);
+                                $('#TAVMApprvCreateDt').text(aplyNoData.vCreateDt);
+                                $('#TAVMApprvCreateUnit').text(aplyNoData.vCreateUnit);
+                                $('#TAVMApprvCreateUid').text(aplyNoData.vCreateUid);
+                                $('#TAVMApprvAccessReason').val(aplyNoData.vAccessReason);
+                                openTADialog(itemData.title, itemData.openDialogWidth, 'TAApprOpenSearchDialog');
+                                if (apprFlag) {
+                                    $('.TAApprAct').show();
+                                }
+                            }
+                        })
+                    }
+                });
+            }
+        }
+        //#endregion
+
+        //#region 新增事件(打開Dialog)
+        function openTADialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '明細';
+            var dialogId = dialogId;
+            $('.TAApprAct').hide();
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    $('#h_Appr_Aply_No').val('');
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+        //#endregion
+
+        @*//#region 申請項目設定檔案
+        function GetItemData(item) {
+            item = item || '';
+            var _reportTitle = '金庫物品存取申請單';
+            var obj = {};
+            obj.url = null; //開啟金庫物品的頁面 url
+            obj.title = null; //開啟金庫物品的頁面 Title
+            obj.openDialogWidth = '860px'; //開啟金庫物品的頁面 寬度
+            obj.reportTitle = _reportTitle; //報表Title
+            obj.reportType = null; //報表類型
+
+            switch (item) {
+                case '@Ref.TreaItemType.D1012.ToString()':
+                    obj.url = TAApprurl.openBILL;
+                    obj.title = '@Ref.TreaItemType.D1012.GetDescription()';
+                    obj.reportType = 'BILL';
+                    break;
+                case '@Ref.TreaItemType.D1014.ToString()':
+                    obj.url = TAApprurl.openESTATE;
+                    obj.title = '@Ref.TreaItemType.D1014.GetDescription()';
+                    obj.reportType = 'ESTATE';
+                    break;
+                case '@Ref.TreaItemType.D1008.ToString()':
+                    obj.url = TAApprurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1008.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1009.ToString()':
+                    obj.url = TAApprurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1009.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1010.ToString()':
+                    obj.url = TAApprurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1010.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1011.ToString()':
+                    obj.url = TAApprurl.openSEAL;
+                    obj.title = '@Ref.TreaItemType.D1011.GetDescription()';
+                    obj.reportType = 'SEAL';
+                    break;
+                case '@Ref.TreaItemType.D1015.ToString()':
+                    obj.url = TAApprurl.openSTOCK;
+                    obj.title = '@Ref.TreaItemType.D1015.GetDescription()';
+                    obj.openDialogWidth = 1000;
+                    obj.reportType = 'STOCK';
+                    break;
+                case '@Ref.TreaItemType.D1024.ToString()':
+                    obj.url = TAApprurl.openCA;
+                    obj.title = '@Ref.TreaItemType.D1024.GetDescription()';
+                    obj.reportType = 'CA';
+                    break;
+                case '@Ref.TreaItemType.D1017.ToString()':
+                    obj.url = TAApprurl.openMARGINP;
+                    obj.title = '@Ref.TreaItemType.D1017.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'MARGINP';
+                    break;
+                case '@Ref.TreaItemType.D1016.ToString()':
+                    obj.url = TAApprurl.openMARGING;
+                    obj.title = '@Ref.TreaItemType.D1016.GetDescription()';
+                    obj.openDialogWidth = 900;
+                    obj.reportType = 'MARGING';
+                    break;
+                case '@Ref.TreaItemType.D1018.ToString()':
+                    obj.url = TAApprurl.openItemImp;
+                    obj.title = '@Ref.TreaItemType.D1018.GetDescription()';
+                    obj.openDialogWidth = 1040;
+                    obj.reportType = 'ITEMIMP';
+                    break;
+                case '@Ref.TreaItemType.D1013.ToString()':
+                    obj.url = TAApprurl.openDEPOSIT;
+                    obj.title = '@Ref.TreaItemType.D1013.GetDescription()';
+                    obj.openDialogWidth = 1325;
+                    obj.reportType = 'DEPOSIT';
+                    break;
+            }
+            return obj;
+        }
+        //#endregion*@
+
+
+        function TreasuryAccessApprSearchViewModel(
+            vAPLY_DT_S,
+            vAPLY_DT_E,
+            vAPLY_NO,
+            vCreateUid,
+            vCreateUnit
+            ) {
+            var obj = {};
+            obj['vAPLY_DT_S'] = vAPLY_DT_S;
+            obj['vAPLY_DT_E'] = vAPLY_DT_E;
+            obj['vAPLY_NO'] = vAPLY_NO;
+            obj['vCreateUid'] = vCreateUid;
+            obj['vCreateUnit'] = vCreateUnit;
+            return obj;
+        }
+
+        //#region 申請單號基本資料(點選單號時使用)
+        function GetAplyNoDetail() {
+            var str = '';
+            str += '<div  class="aplyNoDetail" style="border-bottom:1px solid #000;margin-bottom:10px;">';
+            str += '<table style="width:95%" >';
+            str += '<tr>';
+            str += '<td style="width:150px">';
+            str += '<label>申請單號 : </label>';
+            str += '</td>';
+            str += '<td style="width:250px">';
+            str += '<label id="TAVMApprvAplyNo"></label>';
+            str += '</td>';
+            str += '<td style="width:150px">';
+            str += '<label>存取申請項目 : </label>';
+            str += '</td>';
+            str += '<td style="width:250px">';
+            str += '<label id="TAVMApprvItem"></label>';
+            str += '</td>';
+            str += '</tr>';
+            str += '<tr>';
+            str += '<td>';
+            str += '<label>申請單位 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvAplyUnit"></label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label>申請人 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvAplyUid"></label>';
+            str += '</td>';
+            str += '</tr>';
+            str += '<tr>';
+            str += '<td>';
+            str += '<label>權責部門 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvChargeUnit"></label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label>申請作業 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvAccessType"></label>';
+            str += '</td>';
+            str += '</tr>';
+            str += '<tr>';
+            str += '<td>';
+            str += '<label>預計存取日期 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvExpectedAccessDate"></label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label>填表日期 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvCreateDt"></label>';
+            str += '</td>';
+            str += '</tr>';
+            str += '<tr>';
+            str += '<td>';
+            str += ' <label>填表單位 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvCreateUnit"></label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label>填表人 : </label>';
+            str += '</td>';
+            str += '<td>';
+            str += '<label id="TAVMApprvCreateUid"></label>';
+            str += '</td>';
+            str += '</tr>';
+            str += '<tr>';
+            str += '<td>';
+            str += '<label>申請原因 : </label>';
+            str += '</td>';
+            str += '<td colspan="3">';
+            str += '<textarea id="TAVMApprvAccessReason" style="width:100%" disabled></textarea>';
+            str += '</td>';
+            str += '</tr>';
+            str += '</table>';
+            str += '</div>';
+            return str;
+        }
+        //#endregion
+    });
+</script>
+
+

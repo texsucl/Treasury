@@ -197,10 +197,14 @@ namespace Treasury.Web.Service.Actual
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAPLY_UID = x.APLY_UID,
                             vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_DEPT = x.CHARGE_DEPT,
-                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
-                            vCHARGE_SECT = x.CHARGE_SECT,
-                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vCA_Use = x.CA_USE,
                             vCA_Use_AFT = x.CA_USE_AFT,
                             vCA_Desc = x.CA_DESC,
@@ -242,10 +246,14 @@ namespace Treasury.Web.Service.Actual
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAPLY_UID = x.APLY_UID,
                             vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_DEPT = x.CHARGE_DEPT,
-                            vCHARGE_DEPT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
-                            vCHARGE_SECT = x.CHARGE_SECT,
-                            vCHARGE_SECT_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept = x.CHARGE_DEPT,
+                            vCharge_Dept_AFT = x.CHARGE_DEPT_AFT,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
+                            vCharge_Dept_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT_AFT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect = x.CHARGE_SECT,
+                            vCharge_Sect_AFT = x.CHARGE_SECT_AFT,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
+                            vCharge_Sect_Name_AFT = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT_AFT)?.DPT_NAME?.Trim(),
                             vCA_Use = x.CA_USE,
                             vCA_Use_AFT = x.CA_USE_AFT,
                             vCA_Desc = x.CA_DESC,
@@ -261,7 +269,8 @@ namespace Treasury.Web.Service.Actual
                 }
                 result.ForEach(x =>
                 {
-                    x.vCHARGE_Name = !x.vCHARGE_SECT_Name.IsNullOrWhiteSpace() ? x.vCHARGE_SECT_Name : x.vCHARGE_DEPT_Name;
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
             }
             return result;
@@ -781,6 +790,66 @@ namespace Treasury.Web.Service.Actual
                     _CA.CA_NUMBER_AFT = null;
                     _CA.MEMO = GetNewValue(_CA.MEMO, _CA.MEMO_AFT);
                     _CA.MEMO_AFT = null;
+                    _CA.LAST_UPDATE_DT = dt;
+                    logStr = _CA.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-駁回
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">駁回的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeReject(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_CA != null)
+                {
+                    _CA.INVENTORY_STATUS = "1"; //在庫
+                    _CA.CHARGE_DEPT_AFT = null;
+                    _CA.CHARGE_SECT_AFT = null;
+                    _CA.LAST_UPDATE_DT = dt;
+                    logStr = _CA.modelToString(logStr);
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 庫存權責異動資料-覆核
+        /// </summary>
+        /// <param name="db">Entities</param>
+        /// <param name="itemIDs">覆核的申請單號</param>
+        /// <param name="logStr">log</param>
+        /// <param name="dt">執行時間</param>
+        /// <returns></returns>
+        public Tuple<bool, string> CDCChargeApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt)
+        {
+            foreach (var itemID in itemIDs)
+            {
+                var _CA = db.ITEM_CA.FirstOrDefault(x => x.ITEM_ID == itemID);
+                if (_CA != null)
+                {
+                    _CA.INVENTORY_STATUS = "1"; //在庫
+                    _CA.CHARGE_DEPT = _CA.CHARGE_DEPT_AFT;
+                    _CA.CHARGE_DEPT_AFT = null;
+                    _CA.CHARGE_SECT = _CA.CHARGE_SECT_AFT;
+                    _CA.CHARGE_SECT_AFT = null;
                     _CA.LAST_UPDATE_DT = dt;
                     logStr = _CA.modelToString(logStr);
                 }

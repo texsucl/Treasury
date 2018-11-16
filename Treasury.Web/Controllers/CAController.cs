@@ -100,8 +100,8 @@ namespace Treasury.Web.Controllers
                     ((List<CDCCAViewModel>)Cache.Get(CacheList.CDCCAData))
                     .OrderBy(x => x.vPUT_Date) //入庫日期
                     .ThenBy(x => x.vAPLY_UID) //存入申請人
-                    .ThenBy(x => x.vCHARGE_DEPT) //權責部門
-                    .ThenBy(x => x.vCHARGE_SECT) //權責科別
+                    .ThenBy(x => x.vCharge_Dept) //權責部門
+                    .ThenBy(x => x.vCharge_Sect) //權責科別
                     .ThenBy(x => x.vCA_Use) //用途
                     .ThenBy(x => x.vCA_Desc) //類別
                     .ThenBy(x => x.vCA_Bank) //銀行

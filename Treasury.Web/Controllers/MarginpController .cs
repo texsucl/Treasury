@@ -101,8 +101,8 @@ namespace Treasury.Web.Controllers
                     ((List<CDCMarginpViewModel>)Cache.Get(CacheList.CDCMarginpData))
                     .OrderBy(x => x.vPut_Date) //入庫日期
                     .ThenBy(x => x.vAply_Uid) //存入申請人
-                    .ThenBy(x => x.vCHARGE_DEPT) //權責部門
-                    .ThenBy(x => x.vCHARGE_SECT) //權責科別
+                    .ThenBy(x => x.vCharge_Dept) //權責部門
+                    .ThenBy(x => x.vCharge_Sect) //權責科別
                     .ThenBy(x => x.vMargin_Take_Of_Type) //類別
                     .ThenBy(x => x.vTrad_Partners) //交易對象
                                                    //.ThenBy(x => x.vTrad_Partners) //號碼?

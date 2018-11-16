@@ -39,6 +39,8 @@ namespace Treasury.Web.Service.Actual
                     //作業類型1
                     var _data1 = db.TREA_ITEM.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == "1")
+                        .Where(x => x.IS_DISABLED == "N") //可使用
+                        .Where(x => x.DATA_STATUS == "1") //可異動
                         .OrderBy(x => x.ITEM_ID);
                     result1.AddRange(_data1.AsEnumerable()
                         .Select(x => new CheckBoxListInfo()
@@ -51,6 +53,8 @@ namespace Treasury.Web.Service.Actual
                     //作業類型2
                     var _data2 = db.TREA_ITEM.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == "2")
+                        .Where(x => x.IS_DISABLED == "N") //可使用
+                        .Where(x => x.DATA_STATUS == "1") //可異動
                         .OrderBy(x => x.ITEM_ID);
                     result2.AddRange(_data2.AsEnumerable()
                         .Select(x => new CheckBoxListInfo()
@@ -63,6 +67,8 @@ namespace Treasury.Web.Service.Actual
                     //作業類型3
                     var _data3 = db.TREA_ITEM.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == "3")
+                        .Where(x => x.IS_DISABLED == "N") //可使用
+                        .Where(x => x.DATA_STATUS == "1") //可異動
                         .OrderBy(x => x.ITEM_ID);
                     result3.AddRange(_data3.AsEnumerable()
                         .Select(x => new CheckBoxListInfo()
@@ -75,6 +81,8 @@ namespace Treasury.Web.Service.Actual
                     //作業類型4
                     var _data4 = db.TREA_ITEM.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == "4")
+                        .Where(x => x.IS_DISABLED == "N") //可使用
+                        .Where(x => x.DATA_STATUS == "1") //可異動
                         .OrderBy(x => x.ITEM_ID);
                     result4.AddRange(_data4.AsEnumerable()
                         .Select(x => new CheckBoxListInfo()

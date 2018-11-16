@@ -6,6 +6,12 @@ namespace Treasury.Web.ViewModels
     public class TreasuryMailTimeSearchViewModel : ITinItem
     {
         /// <summary>
+        /// 程式名稱
+        /// </summary>
+        [Description("程式名稱")]
+        public string vFunc_ID { get; set; }
+
+        /// <summary>
         /// 覆核狀態
         /// </summary>
         [Description("覆核狀態")]

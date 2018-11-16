@@ -1,0 +1,763 @@
+﻿@{
+    ViewBag.Title = "金庫進出管理作業-保管資料發送維護作業";
+    var opScope = ViewBag.opScope;
+}
+@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="Item_Form">
+                    <table>
+                        <tr>
+                            <td align="right">
+                                <label>資料庫名稱 :&ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dTREA_ITEM_NAME", (SelectList)ViewBag.dTREA_ITEM)
+                            </td>
+                            <td align="right">
+                                <label>權責部門 :&ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dCHARGE_DEPT", (SelectList)ViewBag.dCHARGE_DEPT)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <label>權責科別 :&ensp;</label>
+                            </td>
+                            <td>
+                                <select id="dCHARGE_SECT"></select>
+                            </td>
+                            <td align="right">
+                                <label>經辦 :&ensp;</label>
+                            </td>
+                            <td>
+                                <select id="dCHARGE_UID"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="Item_Search" value="查詢" />
+                                <input type="button" class="btn btn-primary" id="Item_Record_Search" value="開啟異動紀錄查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div id="OpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+                    <div id="OpenSearchDetail"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div id="IM_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="IM_Insert" value="新增存入明細" class="btn btn-primary" />
+        </div>
+        <div id="IM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div style="text-align:center;" class="IM_Act">
+            <input type="button" id="IM_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="IM_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="IM_Back" value="回上一頁" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="IM_Dialog" style="display:none;">
+        <form id="IM_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>資料庫名稱 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dTREA_ITEM_NAME_MOD", (SelectList)ViewBag.dTREA_ITEM_MOD, new { @class = "IM_InsertType" })
+                        <input type="hidden" id="hCHARGE_UNIT" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責部門 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dCHARGE_DEPT_MOD", (SelectList)ViewBag.dCHARGE_DEPT_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>權責科別 :&ensp;</label>
+                    </td>
+                    <td>
+                        <select id="dCHARGE_SECT_MOD" class="IM_InsertType"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Mail 部主管 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dMAIL_DEPT_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Mail 科主管 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dMAIL_SECT_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>經辦 :&ensp;</label>
+                    </td>
+                    <td>
+                        <select id="dCHARGE_UID_MOD" class="IM_InsertType"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="IM_InsertTemp" value="新增" class="btn btn-primary" />
+                        <input type="button" id="IM_UpdateTemp" value="修改" class="btn btn-primary" />
+                        <input type="button" id="IM_DeleteTemp" value="刪除" class="btn btn-primary" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="IM_CancelTemp" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="OpenChangeRecordDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenChangeRecordDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Change = '@Url.Action("Change", "ItemChargeUnit")';
+        UrlFor.search = '@Url.Action("SearchData", "ItemChargeUnit")';
+        UrlFor.getData = '@Url.Action("GetCacheData", "ItemChargeUnit")';
+        UrlFor.InsertTempData = '@Url.Action("InsertTempData", "ItemChargeUnit")';
+        UrlFor.UpdateTempData = '@Url.Action("UpdateTempData", "ItemChargeUnit")';
+        UrlFor.DeleteTempData = '@Url.Action("DeleteTempData", "ItemChargeUnit")';
+        UrlFor.ApplyTempData = '@Url.Action("ApplyTempData", "ItemChargeUnit")';
+        UrlFor.ResetTempData = '@Url.Action("ResetTempData", "ItemChargeUnit")';
+        UrlFor.openChangeRecord = '@Url.Action("ChangeRecord", "ItemChargeUnit")';
+        UrlFor.openChangeRecordView = '@Url.Action("ChangeRecordView", "ItemChargeUnit")';
+        //#endregion
+        //region 參數設定
+        var Item_Name_Id = 'dTREA_ITEM_NAME' //資料庫名稱
+        var Charge_Dept_Id = 'dCHARGE_DEPT'; //權責部門
+        var Charge_Sect_Id = 'dCHARGE_SECT'; //權責科別
+        var Charge_Uid_Id = 'dCHARGE_UID'; //經辦
+
+        var IM_FormId = 'IM_DialogForm'; //formId
+        var NAME_MOD_Id = 'dTREA_ITEM_NAME_MOD'; //資料庫名稱(CRUD)
+        var DEPT_MOD_Id = 'dCHARGE_DEPT_MOD'; //權責部門(CRUD)
+        var SECT_MOD_Id = 'dCHARGE_SECT_MOD'; //權責科別(CRUD)
+        var MAIL_DEPT_MOD_Id = 'dMAIL_DEPT_MOD'; //Mail 部主管(CRUD)
+        var MAIL_SECTD_MOD_Id = 'dMAIL_SECT_MOD'; //Mail 科主管(CRUD)
+        var CHARGE_UID_MOD_Id = 'dCHARGE_UID_MOD'; //經辦(CRUD)
+        var CHARGE_UNIT_MOD_Id = 'hCHARGE_UNIT'; //保管單位存取項目編號(CRUD)
+
+        var IM_ConfirmFlag = false; //離開時提醒訊息
+
+        var openSearchDetailId = 'OpenSearchDetail';
+        var openChangeRecordDetailId = 'OpenChangeRecordDetail';
+        //#endregion
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'Item_Search':
+                        $('#' + id).on('click', function () { Item_Search(); });
+                        break;
+                    case 'Item_Record_Search':
+                        $('#' + id).on('click', function () { Item_Record_Search(); });
+                        break;
+                    case 'IM_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_InsertFun(); });
+                        break;
+                    case 'IM_InsertTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_InsertTempFun(); });
+                        break;
+                    case 'IM_UpdateTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_UpdateTempFun(); });
+                        break;
+                    case 'IM_DeleteTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_DeleteTempFun(); });
+                        break;
+                    case 'IM_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { IM_ApplyFun(); });
+                        break;
+                    case 'IM_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (IM_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            IM_CancelFun();
+                        });
+                        break;
+                    case 'IM_Back':
+                    case 'IM_CancelTemp':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                                        function () {
+                                            if (id == 'IM_Back' &&
+                                                IM_ConfirmFlag &&
+                                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                                return false;
+                                            }
+                                            customerUtility.closeDialog(this);
+                                        });
+                        break;
+                }
+            });
+            $('#' + Charge_Dept_Id).change(function () {
+                var _Dept = $('#' + Charge_Dept_Id).val();
+                listChange(_Dept, null);
+            });
+            $('#' + Charge_Sect_Id).change(function () {
+                var _Dept = $('#' + Charge_Dept_Id).val();
+                var _Sect = $('#' + Charge_Sect_Id).val();
+                listChange(_Dept, _Sect);
+            });
+            $('#' + DEPT_MOD_Id).change(function () {
+                var _Dept_MOD = $('#' + DEPT_MOD_Id).val();
+                MODListChange(_Dept_MOD, null);
+            });
+            $('#' + SECT_MOD_Id).change(function () {
+                var _Dept_MOD = $('#' + DEPT_MOD_Id).val();
+                var _SECT_MOD = $('#' + SECT_MOD_Id).val();
+                MODListChange(_Dept_MOD, _SECT_MOD);
+            });
+            //#endregion
+            //#region 初始動作
+            $('#' + Charge_Dept_Id).trigger("change");
+            //#endregion
+            //#region SelectedChange
+            function listChange(_Dept, _Sect) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        Charge_Dept: _Dept,
+                        Charge_Sect: _Sect,
+                    }),
+                    url: UrlFor.Change,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    $('#' + Charge_Sect_Id).find('option').remove();
+                    $('#' + Charge_Uid_Id).find('option').remove();
+                    customerUtility.addoption('dCHARGE_SECT', result.Item1);
+                    customerUtility.addoption('dCHARGE_UID', result.Item2);
+
+                    if (_Sect != null)
+                        $('#' + Charge_Sect_Id).val(_Sect);
+                    else
+                        $('#' + Charge_Sect_Id).val($($('#' + Charge_Sect_Id + ' option')[0]).val());
+                });
+            }
+            //#endregion
+            //#region SelectedChange
+            function MODListChange(_Dept_MOD, _SECT_MOD) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        Charge_Dept: _Dept_MOD,
+                        Charge_Sect: _SECT_MOD,
+                    }),
+                    url: UrlFor.Change,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    $('#' + SECT_MOD_Id).find('option').remove();
+                    $('#' + CHARGE_UID_MOD_Id).find('option').remove();
+                    customerUtility.addoption('dCHARGE_SECT_MOD', result.Item1);
+                    customerUtility.addoption('dCHARGE_UID_MOD', result.Item2);
+                    $('#' + SECT_MOD_Id).find('[value="All"]').remove();
+                    $('#' + CHARGE_UID_MOD_Id).find('[value="All"]').remove();
+                });
+            }
+            //#endregion
+            //取修申請
+            function IM_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ResetTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetInsertDialog();
+                    IM_TempGrid();
+                });
+            }
+            //#endregion
+            //查詢異動紀錄
+            function Item_Record_Search() {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'html',
+                    url: UrlFor.openChangeRecord,
+                    contentType: 'application/json',
+                    success: function (vdata, textStatus, jqXHR) {
+                        $('#' + openSearchDetailId).children().remove();
+                        $('#' + openSearchDetailId).html(vdata);
+                        openChangeRecordDialog('保管資料發送維護異動紀錄', 1250, 'OpenSearchDialog');
+                    }
+                })
+            }
+            //#endregion
+            function openChangeRecordDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openSearchDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //申請覆核
+            function IM_ApplyFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ApplyTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#IM_Apply'));
+                    }
+                });
+            }
+            //#endregion  
+            //#region 查詢
+            function Item_Search() {
+                var dialogId = 'IM_SearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 1100,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+                if($('#' + Charge_Sect_Id).val() == null){
+                    customerUtility.alert('請選擇權責科別', 'w');
+                    return false;
+                }
+                if($('#' + Charge_Uid_Id).val() == null){
+                    customerUtility.alert('請選擇經辦', 'w');
+                    return false;
+                }
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: ItemSearchViewModel(
+                            $('#' + Item_Name_Id).val(),
+                            $('#' + Charge_Dept_Id).val(),
+                            $('#' + Charge_Sect_Id).val(),
+                            $('#' + Charge_Uid_Id).val()),
+                    }),
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        IM_TempGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+            }
+            //#endregion
+            //新增保管資料發送維護作業
+            function IM_InsertTempFun() {
+                if ($('#' + SECT_MOD_Id).val() == null) {
+                    customerUtility.alert('必須選擇權責科別', 'w');
+                    return false;
+                }
+                if ($('#' + CHARGE_UID_MOD_Id).val() == null) {
+                    customerUtility.alert('必須選擇經辦人員', 'w');
+                    return false;
+                }
+                var vTREA_ITEM = $('#' + NAME_MOD_Id).val().trim(); //資料庫名稱(CRUD)
+                var vTREA_ITEM_VALUE = $('#' + NAME_MOD_Id).find(":selected").text().trim(); //資料庫名稱(CRUD)
+                var vCHARGE_DEPT = $('#' + DEPT_MOD_Id).val().trim(); //權責部門(CRUD)
+                var vCHARGE_SECT = $('#' + SECT_MOD_Id).val().trim(); //權責科別(CRUD)
+                var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val().trim(); //Mail 部主管(CRUD)
+                var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val().trim(); //Mail 科主管(CRUD)
+                var vCHARGE_UID = $('#' + CHARGE_UID_MOD_Id).val().trim(); //經辦(CRUD)
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: IM_ViewModel(
+                            'a' + created.uuid(),
+                            vTREA_ITEM,
+                            vTREA_ITEM_VALUE,
+                            vCHARGE_DEPT,
+                            vCHARGE_SECT,
+                            vMAIL_DEPT,
+                            vMAIL_SECT,
+                            vCHARGE_UID
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#IM_DeleteTemp'));
+                        IM_TempGrid();
+                        IM_ConfirmFlag = result.Datas;
+                    }
+                });
+            }
+            //#endregion
+            //修改保管資料發送維護作業
+            function IM_UpdateTempFun() {
+                var vCHARGE_UNIT_ID = $('#' + CHARGE_UNIT_MOD_Id).val().trim(); //資料庫名稱(CRUD)
+                var vTREA_ITEM = $('#' + NAME_MOD_Id).val().trim(); //資料庫名稱(CRUD)
+                var vTREA_ITEM_VALUE = $('#' + NAME_MOD_Id).find(":selected").text().trim(); //資料庫名稱(CRUD)
+                var vCHARGE_DEPT = $('#' + DEPT_MOD_Id).val().trim(); //權責部門(CRUD)
+                var vCHARGE_SECT = $('#' + SECT_MOD_Id).val().trim(); //權責科別(CRUD)
+                var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val().trim(); //Mail 部主管(CRUD)
+                var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val().trim(); //Mail 科主管(CRUD)
+                var vCHARGE_UID = $('#' + CHARGE_UID_MOD_Id).val().trim(); //經辦(CRUD)
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: IM_ViewModel(
+                            vCHARGE_UNIT_ID,
+                            vTREA_ITEM,
+                            vTREA_ITEM_VALUE,
+                            vCHARGE_DEPT,
+                            vCHARGE_SECT,
+                            vMAIL_DEPT,
+                            vMAIL_SECT,
+                            vCHARGE_UID
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    customerUtility.closeDialog($('#IM_UpdateTemp'));
+                    IM_TempGrid();
+                    IM_ConfirmFlag = true;
+                });
+            }
+            //#endregion
+            //刪除保管資料發送維護作業
+            function IM_DeleteTempFun() {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: IM_ViewModel(
+                            $('#' + CHARGE_UNIT_MOD_Id).val().trim())
+                    }),
+                    dataType: "json",
+                    url: UrlFor.DeleteTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#IM_DeleteTemp'));
+                        IM_TempGrid();
+                        IM_ConfirmFlag = result.Datas;
+                    }
+                });
+            }
+            //#endregion
+            function formattervvDATA_STATUS_VALUE(cellvalue, options, rdata) {
+                if (rdata.vDATA_STATUS == 2) {
+                    return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+                }
+                else {
+                    return cellvalue;
+                }
+            }
+            function UnformattervvDATA_STATUS_VALUE(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+            //查詢Grid
+            function IM_TempGrid() {
+                var colNameArray = ['動作', '執行功能', '資料庫名稱', '權責部門', '權責科別', 'Mail 部主管', 'Mail 科主管', '經辦', '資料狀態', '資料凍結人員',
+                    '執行功能代號', '資料庫代碼', '權責部門代碼', '權責科別代碼', '經辦編號', '資料狀態代碼', '停用註記', '保管單位存取項目編號', '異動申請單號']
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
+                colModelArray.push({ name: "vEXEC_ACTION_VALUE", index: "vEXEC_ACTION_VALUE", width: 80, sortable: false });
+                colModelArray.push({ name: "vTREA_ITEM_NAME_VALUE", index: "vTREA_ITEM_NAME_VALUE", width: 95, sortable: false });
+                colModelArray.push({ name: "vCHARGE_DEPT_VALUE", index: "vCHARGE_DEPT_VALUE", width: 80, sortable: false });
+                colModelArray.push({ name: "vCHARGE_SECT_VALUE", index: "vCHARGE_SECT_VALUE", width: 80, sortable: false });
+                colModelArray.push({ name: "vIS_MAIL_DEPT_MGR", index: "vIS_MAIL_DEPT_MGR", width: 95, sortable: false });
+                colModelArray.push({ name: "vIS_MAIL_SECT_MGR", index: "vIS_MAIL_SECT_MGR", width: 95, sortable: false });
+                colModelArray.push({ name: "vCHARGE_NAME", index: "vCHARGE_NAME", width: 80, sortable: false });
+                colModelArray.push({ name: "vDATA_STATUS_VALUE", index: "vDATA_STATUS_VALUE", width: 80, sortable: false, align: 'center', formatter: formattervvDATA_STATUS_VALUE, unformat: UnformattervvDATA_STATUS_VALUE });
+                colModelArray.push({ name: "vFREEZE_NAME", index: "vFREEZE_NAME", width: 100, sortable: false });
+
+                colModelArray.push({ name: "vEXEC_ACTION", index: "vEXEC_ACTION", hidden: true });
+                colModelArray.push({ name: "vTREA_ITEM_NAME", index: "vTREA_ITEM_NAME", hidden: true });
+                colModelArray.push({ name: "vCHARGE_DEPT", index: "vCHARGE_DEPT", hidden: true });
+                colModelArray.push({ name: "vCHARGE_SECT", index: "vCHARGE_SECT", hidden: true });
+                colModelArray.push({ name: "vCHARGE_UID", index: "vCHARGE_UID", hidden: true });
+                colModelArray.push({ name: "vDATA_STATUS", index: "vDATA_STATUS", hidden: true });
+                colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", hidden: true });
+                colModelArray.push({ name: "vCHARGE_UNIT_ID", index: "vCHARGE_UNIT_ID", hidden: true });
+                colModelArray.push({ name: "vAPLY_NO", index: "vAPLY_NO", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'IM_jqgridDiv',
+                    'IM_TempList',
+                    'IM_TempPeger',
+                    UrlFor.getData,
+                    {
+                        type: 'Search'
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '保管資料發送維護作業',
+                    jqgridCustom.getPage('IM_jqgridDiv'),
+                    IM_CompleteFun,
+                    true
+                    );
+            }
+            //#endregion
+            //#region jqgrid 事件
+            function IM_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'IM_Temp', tempActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_vDATA_STATUS]', listId)).text();
+                    var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_vEXEC_ACTION]', listId)).text();
+                    if (status != '1' || Is_Disabled == "Y") {
+                        $(this).find('.actionEditIcon').hide();
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+
+                    //異動申請單號
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+                });
+            }
+
+            var tempActFun = {};
+            tempActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            tempActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            tempActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+            //開啟金庫存取項目新增頁面
+            function IM_InsertFun() {
+                dialogOpen('@Ref.ActionType.Add.ToString()', null);
+            }
+            //#endregion
+            function OpenAply_NoFun(listId, rowid) {
+                var data = $('#' + listId).getRowData(rowid);
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: data.vAPLY_NO,
+                        ChargeUnitId: data.vCHARGE_UNIT_ID,
+                        data: TreasuryInOutChangeRecordSearchViewModel()
+                    }),
+                    dataType: 'html',
+                    url: UrlFor.openChangeRecordView,
+                    contentType: 'application/json',
+                    success: function (data, textStatus, jqXHR) {
+                        $('#' + openChangeRecordDetailId).html(data);
+                        openDetailDialog('保管資料發送維護異動紀錄', 1250, 'OpenChangeRecordDialog');
+                    }
+                });
+            }
+            function openDetailDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '查詢結果';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + openChangeRecordDetailId).children().remove();
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //#region dialog
+            function dialogOpen(type, rowid) {
+                $('#' + IM_FormId).validate().resetForm();
+                var dialogId = 'IM_Dialog';
+                var listId = 'IM_TempList';
+                var IM_InsertClass = 'IM_InsertType';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+30%", at: "center top", of: window },
+                    title: title + '保管資料發送維護',
+                    width: 'auto',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                ResetInsertDialog();
+                $('#IM_InsertTemp,#IM_UpdateTemp,#IM_DeleteTemp').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {
+                    $('#' + DEPT_MOD_Id).trigger("change");
+                    $('#IM_InsertTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', false);
+                }
+                else if (type == '@Ref.ActionType.Edit.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#IM_UpdateTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', false);
+                    $('#' + NAME_MOD_Id).prop('disabled', true);
+                    $('#' + DEPT_MOD_Id).prop('disabled', true);
+                    $('#' + SECT_MOD_Id).prop('disabled', true);
+                    $('#' + CHARGE_UID_MOD_Id).prop('disabled', true);
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#IM_DeleteTemp').show();
+                    $('.' + IM_InsertClass).prop('disabled', true);
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('.' + IM_InsertClass).prop('disabled', true);
+                }
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#' + CHARGE_UNIT_MOD_Id).val(data.vCHARGE_UNIT_ID); //保管單位存取項目編號
+                    $('#' + NAME_MOD_Id).append($('<option></option>').val(data.vTREA_ITEM_NAME).html(data.vTREA_ITEM_NAME_VALUE));
+                    $('#' + DEPT_MOD_Id).append($('<option></option>').val(data.vCHARGE_DEPT).html(data.vCHARGE_DEPT_VALUE));
+                    $('#' + SECT_MOD_Id).append($('<option></option>').val(data.vCHARGE_DEPT).html(data.vCHARGE_SECT_VALUE));
+                    $('#' + CHARGE_UID_MOD_Id).append($('<option></option>').val(data.vCHARGE_UID).html(data.vCHARGE_NAME));
+                    var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val(data.vIS_MAIL_DEPT_MGR); //Mail 部主管(CRUD)
+                    var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val(data.vIS_MAIL_SECT_MGR); //Mail 科主管(CRUD)
+                }
+            }
+            //#region 重設輸入項目
+            function ResetInsertDialog() {
+                if ($('#' + NAME_MOD_Id + ' option').length > 0) {
+                    $('#' + NAME_MOD_Id).val($($('#' + NAME_MOD_Id + ' option')[0]).val());
+                }
+                if ($('#' + DEPT_MOD_Id + ' option').length > 0) {
+                    $('#' + DEPT_MOD_Id).val($($('#' + DEPT_MOD_Id + ' option')[0]).val());
+                }
+                if ($('#' + SECT_MOD_Id + ' option').length > 0) {
+                    $('#' + SECT_MOD_Id).find('option').remove();
+                }
+                if ($('#' + MAIL_DEPT_MOD_Id + ' option').length > 0) {
+                    $('#' + MAIL_DEPT_MOD_Id).val($($('#' + MAIL_DEPT_MOD_Id + ' option')[0]).val());
+                }
+                if ($('#' + MAIL_SECTD_MOD_Id + ' option').length > 0) {
+                    $('#' + MAIL_SECTD_MOD_Id).val($($('#' + MAIL_SECTD_MOD_Id + ' option')[0]).val());
+                }
+                if ($('#' + CHARGE_UID_MOD_Id + ' option').length > 0) {
+                    $('#' + CHARGE_UID_MOD_Id).find('option').remove();
+                }
+            }
+            //#region 查詢畫面  ViewModel
+            function ItemSearchViewModel(vTREA_ITEM_NAME, vCHARGE_DEPT, vCHARGE_SECT, vCHARGE_UID) {
+                var obj = {};
+                obj['vTREA_ITEM_NAME'] = vTREA_ITEM_NAME;
+                obj['vCHARGE_DEPT'] = vCHARGE_DEPT;
+                obj['vCHARGE_SECT'] = vCHARGE_SECT;
+                obj['vCHARGE_UID'] = vCHARGE_UID;
+                return obj;
+            }
+            //#endregion
+            //#region Insert ViewModel
+            function IM_ViewModel(vCHARGE_UNIT_ID, vTREA_ITEM, vTREA_ITEM_VALUE, vCHARGE_DEPT, vCHARGE_SECT, vMAIL_DEPT, vMAIL_SECT, vCHARGE_UID) {
+                var obj = {};
+
+                obj['vCHARGE_UNIT_ID'] = vCHARGE_UNIT_ID;
+                obj['vTREA_ITEM_NAME'] = vTREA_ITEM;
+                obj['vTREA_ITEM_NAME_VALUE'] = vTREA_ITEM_VALUE;
+                obj['vCHARGE_DEPT'] = vCHARGE_DEPT;
+                obj['vCHARGE_SECT'] = vCHARGE_SECT;
+                obj['vIS_MAIL_DEPT_MGR'] = vMAIL_DEPT;
+                obj['vIS_MAIL_SECT_MGR'] = vMAIL_SECT;
+                obj['vCHARGE_UID'] = vCHARGE_UID;
+                return obj;
+            }
+            //#endregion
+            //#region 異動紀錄查詢畫面  ViewModel
+            function TreasuryInOutChangeRecordSearchViewModel() {
+                var obj = {};
+                obj['vTREA_ITEM_NAME'] = "All";
+                obj['vCHARGE_DEPT'] = "All";
+                obj['vCHARGE_SECT'] = "All";
+                obj['vCHARGE_UID'] = "All";
+                obj['vAply_No'] = null;
+                obj['vAppr_Status'] = "All";
+                obj['vLast_Update_Uid'] = null;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

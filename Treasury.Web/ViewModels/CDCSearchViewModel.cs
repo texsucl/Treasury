@@ -101,5 +101,9 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("新增人員")]
         public string vCreate_Uid { get; set; }
+
+        public string CHARGE_DEPT_AFT { get; set; }
+
+        public string CHARGE_SECT_AFT { get; set; }
     }
 }

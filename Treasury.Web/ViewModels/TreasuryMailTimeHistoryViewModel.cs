@@ -24,6 +24,12 @@ namespace Treasury.Web.ViewModels
         public string vAPLY_UID_Name { get; set; }
 
         /// <summary>
+        /// 執行
+        /// </summary>
+        [Description("執行")]
+        public string Act{get;set;}
+
+        /// <summary>
         /// 發送時間
         /// </summary>
         [Description("發送時間")]

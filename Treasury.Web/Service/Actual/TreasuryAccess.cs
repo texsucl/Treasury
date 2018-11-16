@@ -443,6 +443,8 @@ namespace Treasury.Web.Service.Actual
                     var _createEmp = emps.FirstOrDefault(x => x.USR_ID == data.CREATE_UID);
                     result.vCreateUnit = depts.FirstOrDefault(y => y.DPT_CD.Trim() == _createEmp?.DPT_CD?.Trim())?.DPT_NAME;
                     result.vCreateUid = _createEmp?.EMP_NAME;
+                    result.vCreateUnit_Id = data.CREATE_UNIT;
+                    result.vCreateUid_Id = data.CREATE_UID;
                     result.vAccessReason = data.ACCESS_REASON;
                     result.vLastUpdateTime = data.LAST_UPDATE_DT;
                 }

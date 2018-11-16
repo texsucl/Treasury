@@ -18,6 +18,12 @@ namespace Treasury.Web.ViewModels
         public string vIS_DISABLED { get; set; }
 
         /// <summary>
+        /// 申請單單號
+        /// </summary>
+        [Description("申請單單號")]
+        public string vAPLY_NO { get; set; }
+
+        /// <summary>
         /// 使用者ID
         /// </summary>
         [Description("使用者ID")]

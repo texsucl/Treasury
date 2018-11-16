@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
@@ -26,7 +27,7 @@ using Treasury.WebUtility;
 /// 
 namespace Treasury.Web.Service.Actual
 {
-    public class TreasuryMailContent : Common
+    public class TreasuryMailContent : Common , ITreasuryMailContent
     {
         #region GetData
 
@@ -35,7 +36,7 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="allFlag"></param>
         /// <returns></returns>
-        public List<SelectOption> Get_MAIL_ID(bool allFlag = true)
+        public List<SelectOption> Get_MAIL_ID(bool allFlag = true,bool disabledFlag = false)
         {
             List<SelectOption> result = new List<SelectOption>();
             if (allFlag)
@@ -43,7 +44,8 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 result.AddRange(db.MAIL_CONTENT.AsNoTracking()
-                    .Select(x => x.MAIL_CONTENT_ID).AsEnumerable()
+                    .Where(x => x.IS_DISABLED != "Y", disabledFlag)
+                    .Select(x => x.MAIL_CONTENT_ID)
                     .Select(x => new SelectOption() { Text = x, Value = x }));
             }
 
@@ -85,14 +87,15 @@ namespace Treasury.Web.Service.Actual
                         vMAIL_SUBJECT = x.MAIL_SUBJECT,
                         vMAIL_CONTENT = x.MAIL_CONTENT1,
                         vIS_DISABLED = x.IS_DISABLED,
-                        vIS_DISABLED_D = _Is_Disabled.FirstOrDefault(y=>y.CODE == x.IS_DISABLED)?.CODE_VALUE,
+                        vIS_DISABLED_D = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE,
                         vStatus = x.DATA_STATUS,
-                        vStatus_D = _DATA_STATUS.FirstOrDefault(y=>y.CODE == x.DATA_STATUS)?.CODE_VALUE,
-                        vAPLY_NO = x.DATA_STATUS != "1" ? his.FirstOrDefault(y=>y.MAIL_CONTENT_ID == x.MAIL_CONTENT_ID)?.APLY_NO : "",
+                        vStatus_D = _DATA_STATUS.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE,
+                        vAPLY_NO = x.DATA_STATUS != "1" ? his.FirstOrDefault(y => y.MAIL_CONTENT_ID == x.MAIL_CONTENT_ID)?.APLY_NO : "",
                         vFREEZE_UID = x.FREEZE_UID,
                         vFREEZE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
                         vLAST_UPDATE_UID = x.LAST_UPDATE_UID,
                         vLAST_UPDATE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.LAST_UPDATE_UID)?.EMP_NAME?.Trim(),
+                        vLAST_UPDATE_DATE = x.LAST_UPDATE_DT.dateTimeToStr(),
                         vLAST_UPDATE_DT = x.LAST_UPDATE_DT
                     }).OrderBy(x=>x.vMAIL_CONTENT_ID).ToList());
             }
@@ -103,9 +106,8 @@ namespace Treasury.Web.Service.Actual
         /// 查詢資料By內文編號
         /// </summary>
         /// <param name="MAIL_CONTENT_ID"></param>
-        /// <param name="aply_No"></param>
         /// <returns></returns>
-        public ITinItem GetUpdateData(string MAIL_CONTENT_ID,string aply_No = null)
+        public ITinItem GetUpdateData(string MAIL_CONTENT_ID)
         {
             TreasuryMailContentUpdateViewModel result = new TreasuryMailContentUpdateViewModel();
 
@@ -131,16 +133,75 @@ namespace Treasury.Web.Service.Actual
                     result.vMAIL_SUBJECT = data.MAIL_SUBJECT;
                     result.vMAIL_CONTENT = data.MAIL_CONTENT1;
                     result.vLAST_UPDATE_DT = data.LAST_UPDATE_DT;
-                    result.subData = db.MAIL_RECEIVE.AsNoTracking()
-                        .Where(x => x.MAIL_CONTENT_ID == data.MAIL_CONTENT_ID)
+                    result.subData = GetReceiveData(data.MAIL_CONTENT_ID);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 查詢新增的功能編號
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectOption> GetFUNC_ID(List<string> func_Ids)
+        {
+            var result = new List<SelectOption>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                result = db.CODE_FUNC.AsNoTracking()
+                       .Where(x => !string.IsNullOrEmpty(x.FUNC_URL))
+                       .Where(x => x.IS_DISABLED != "Y")
+                       .Where(x => !func_Ids.Contains(x.FUNC_ID))
+                       .AsEnumerable()
+                       .Select(x => new SelectOption()
+                       {
+                           Value = x.FUNC_ID,
+                           Text = x.FUNC_NAME
+                       }).ToList() ;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 查詢 mail發送對象設定檔
+        /// </summary>
+        /// <param name="MAIL_CONTENT_ID"></param>
+        /// <param name="aply_No"></param>
+        /// <returns></returns>
+        public List<TreasuryMailReceivelViewModel> GetReceiveData(string MAIL_CONTENT_ID, string aply_No = null)
+        {
+            var result = new List<TreasuryMailReceivelViewModel>();
+
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _CODE_FUNC = db.CODE_FUNC.AsNoTracking().ToList();
+                if (MAIL_CONTENT_ID.IsNullOrWhiteSpace())
+                {
+                    var _DATA_STATUS = db.SYS_CODE.AsNoTracking()
+                    .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
+
+                    result = db.MAIL_RECEIVE_HIS.AsNoTracking()
+                        .Where(x => x.APLY_NO == aply_No)
+                        .AsEnumerable()
+                        .Select(x => new TreasuryMailReceivelViewModel()
+                        {
+                            FUNC_ID = x.FUNC_ID,
+                            FUNC_ID_Name = _CODE_FUNC.FirstOrDefault(y => y.FUNC_ID == x.FUNC_ID)?.FUNC_NAME,
+                            vStatus = x.EXEC_ACTION,
+                            vStatus_D = _DATA_STATUS.FirstOrDefault(y=>y.CODE == x.EXEC_ACTION)?.CODE_VALUE,
+                        }).ToList();
+                }
+                else
+                {             
+                    result = db.MAIL_RECEIVE.AsNoTracking()
+                        .Where(x => x.MAIL_CONTENT_ID == MAIL_CONTENT_ID)
                         .Where(x => x.DATA_STATUS == "1")
                         .AsEnumerable()
                         .Select(x => new TreasuryMailReceivelViewModel()
                         {
                             FUNC_ID = x.FUNC_ID,
-                            FUNC_ID_Name = _CODE_FUNC.FirstOrDefault(y=>y.FUNC_ID == x.FUNC_ID)?.FUNC_NAME,
-                            //vStatus = x.DATA_STATUS,
-                            //vStatus_D = _DATA_STATUS.FirstOrDefault(y=>y.CODE == x.DATA_STATUS)?.CODE_VALUE,                          
+                            FUNC_ID_Name = _CODE_FUNC.FirstOrDefault(y => y.FUNC_ID == x.FUNC_ID)?.FUNC_NAME,                      
                         }).ToList();
                 }
             }
@@ -159,8 +220,8 @@ namespace Treasury.Web.Service.Actual
             var searchData = (TreasuryMailContentHistorySearchViewModel)searchModel;
             List<TreasuryMailContentHistoryViewModel> result = new List<TreasuryMailContentHistoryViewModel>();
 
-            if (searchData == null)
-                return result;
+            //if (searchData == null)
+            //    return result;
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
@@ -170,31 +231,48 @@ namespace Treasury.Web.Service.Actual
 
                 var _sysCodes = db.SYS_CODE.AsNoTracking().ToList();
 
-                var _EXEC_ACTION = db.SYS_CODE.AsNoTracking()
+                var _EXEC_ACTION = _sysCodes
                     .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
+                var _Is_Disabled = _sysCodes
+                    .Where(x => x.CODE_TYPE == "IS_DISABLED").ToList();
                 var _Appr_Status = _sysCodes
                     .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
 
+                DateTime? _AplyDate = null;
+                if (searchData != null)
+                    _AplyDate = TypeTransfer.stringToDateTimeN(searchData.vAply_Date);
+
                 var his = db.MAIL_RECEIVE_HIS.AsNoTracking()
-                    .Where(x => x.MAIL_CONTENT_ID == searchData.vMAIL_CONTENT_ID).ToList();
+                    .Where(x => x.MAIL_CONTENT_ID == searchData.vMAIL_CONTENT_ID, 
+                    searchData != null && 
+                    !searchData.vMAIL_CONTENT_ID.IsNullOrWhiteSpace() &&
+                    searchData.vMAIL_CONTENT_ID != "All")
+                    .Where(x => x.APLY_NO == aply_No, !aply_No.IsNullOrWhiteSpace())
+                    .ToList();
 
                 result = db.MAIL_CONTENT_HIS.AsNoTracking()
-                    .Where(x => x.MAIL_CONTENT_ID == searchData.vMAIL_CONTENT_ID)
-                    .Where(x => x.APLY_NO == searchData.vAPLY_NO, !searchData.vAPLY_NO.IsNullOrWhiteSpace())
+                    .Where(x => x.MAIL_CONTENT_ID == searchData.vMAIL_CONTENT_ID, 
+                    searchData != null &&
+                    !searchData.vMAIL_CONTENT_ID.IsNullOrWhiteSpace() &&
+                    searchData.vMAIL_CONTENT_ID != "All")
+                    .Where(x => x.APPR_STATUS == searchData.vAPPR_STATUS, searchData != null && !searchData.vAPPR_STATUS.IsNullOrWhiteSpace() && searchData.vAPPR_STATUS != "All" )
+                    .Where(x => DbFunctions.TruncateTime(x.APLY_DATE) == _AplyDate, _AplyDate != null)
+                    .Where(x => x.APLY_NO == aply_No, !aply_No.IsNullOrWhiteSpace())
                     .AsEnumerable()
                     .Select(x => new TreasuryMailContentHistoryViewModel()
                     {
                         APLY_NO = x.APLY_NO,
-                        APLY_DT = TypeTransfer.dateTimeToString(x.APLY_DATE),
+                        APLY_DT = TypeTransfer.dateTimeToString(x.APLY_DATE,false),
                         APLY_UID = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
-                        vIS_DISABLED = x.IS_DISABLED,
-                        vIS_DISABLED_AFT = x.IS_DISABLED_B,
+                        vIS_DISABLED_B = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED_B)?.CODE_VALUE,
+                        vIS_DISABLED = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE,
+                        vMAIL_CONTENT_B = x.MAIL_CONTENT_B,
                         vMAIL_CONTENT = x.MAIL_CONTENT,
-                        vMAIL_CONTENT_AFT = x.MAIL_CONTENT_B,
+                        vMAIL_SUBJECT_B = x.MAIL_SUBJECT_B,
                         vMAIL_SUBJECT = x.MAIL_SUBJECT,
-                        vMAIL_SUBJECT_AFT = x.MAIL_SUBJECT_B,
                         vAPPR_DESC = x.APPR_DESC,
                         vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE,
+                        FunFlag = his.Any(y => y.APLY_NO == x.APLY_NO && x.MAIL_CONTENT_ID == y.MAIL_CONTENT_ID) ? "Y" : "N",
                         subData = his.Where(y => y.APLY_NO == x.APLY_NO && x.MAIL_CONTENT_ID == y.MAIL_CONTENT_ID)
                                   .AsEnumerable()
                                   .Select(z => new TreasuryMailReceivelViewModel() {
@@ -203,7 +281,7 @@ namespace Treasury.Web.Service.Actual
                                       vStatus = z.EXEC_ACTION,
                                       vStatus_D = _EXEC_ACTION.FirstOrDefault(y => y.CODE == z.EXEC_ACTION)?.CODE_VALUE,
                                   }).ToList()
-                    }).ToList();
+                    }).OrderBy(x=>x.APLY_NO).ToList();
             }
 
             return result;
@@ -241,7 +319,7 @@ namespace Treasury.Web.Service.Actual
                          
                             var _MAIL_CONTENT_ID = string.Empty;
                             MAIL_CONTENT _MC = null;
-                            if (data.vMAIL_CONTENT_ID != null) //現有資料修改
+                            if (!data.vMAIL_CONTENT_ID.IsNullOrWhiteSpace()) //現有資料修改
                             {
                                 _MAIL_CONTENT_ID = data.vMAIL_CONTENT_ID;
                                 _MC = db.MAIL_CONTENT.First(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID);
@@ -258,7 +336,7 @@ namespace Treasury.Web.Service.Actual
                             }
                             else
                             {
-                                //_MAIL_CONTENT_ID = $@"D4{sysSeqDao.qrySeqNo("D4", string.Empty).ToString().PadLeft(2, '0')}";
+                                //目前只加入異動檔
                             }
 
                             string _Aply_No  = $@"G4{qPreCode}{sysSeqDao.qrySeqNo("G4", qPreCode).ToString().PadLeft(3, '0')}"; //申請單號 G4+系統日期YYYMMDD(民國年)+3碼流水號
@@ -314,7 +392,7 @@ namespace Treasury.Web.Service.Actual
                                     log.CCONTENT = logStr;
                                     LogDao.Insert(log, data.UserID);
                                     #endregion
-
+                                    result.Datas = GetSearchData(searchModel);
                                     result.RETURN_FLAG = true;
                                     result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_Aply_No}");
                                 }
