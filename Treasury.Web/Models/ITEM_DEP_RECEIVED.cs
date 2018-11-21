@@ -48,5 +48,16 @@ namespace Treasury.Web.Models
         public string BOOK_NO_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string TRAD_PARTNERS_ACCESS { get; set; }
+        public string MARGIN_TAKE_OF_TYPE_ACCESS { get; set; }
+        public string MARGIN_ITEM_ACCESS { get; set; }
+        public Nullable<decimal> AMOUNT_ACCESS { get; set; }
+        public string MARGIN_ITEM_ISSUER_ACCESS { get; set; }
+        public string PLEDGE_ITEM_NO_ACCESS { get; set; }
+        public Nullable<System.DateTime> EFFECTIVE_DATE_B_ACCESS { get; set; }
+        public Nullable<System.DateTime> EFFECTIVE_DATE_E_ACCESS { get; set; }
+        public string DESCRIPTION_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
+        public string BOOK_NO_ACCESS { get; set; }
     }
 }

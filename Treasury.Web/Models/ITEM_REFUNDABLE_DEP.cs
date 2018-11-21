@@ -40,5 +40,12 @@ namespace Treasury.Web.Models
         public string BOOK_NO_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string TRAD_PARTNERS_ACCESS { get; set; }
+        public string MARGIN_DEP_TYPE_ACCESS { get; set; }
+        public Nullable<decimal> AMOUNT_ACCESS { get; set; }
+        public string WORKPLACE_CODE_ACCESS { get; set; }
+        public string DESCRIPTION_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
+        public string BOOK_NO_ACCESS { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace Treasury.Web.Models
     
     public partial class DEP_CHK_ITEM_HIS
     {
+        public int HIS_ID { get; set; }
         public string APLY_NO { get; set; }
         public string ACCESS_TYPE { get; set; }
         public int ISORTBY { get; set; }

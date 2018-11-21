@@ -31,5 +31,8 @@ namespace Treasury.Web.Models
         public string MEMO_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string SEAL_DESC_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
+        public Nullable<System.DateTime> PUT_DATE_ACCESS { get; set; }
     }
 }

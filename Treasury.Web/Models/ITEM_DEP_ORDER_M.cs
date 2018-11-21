@@ -53,5 +53,18 @@ namespace Treasury.Web.Models
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
         public string GET_MSG { get; set; }
+        public string CURRENCY_ACCESS { get; set; }
+        public string TRAD_PARTNERS_ACCESS { get; set; }
+        public Nullable<System.DateTime> COMMIT_DATE_ACCESS { get; set; }
+        public Nullable<System.DateTime> EXPIRY_DATE_ACCESS { get; set; }
+        public string INTEREST_RATE_TYPE_ACCESS { get; set; }
+        public Nullable<decimal> INTEREST_RATE_ACCESS { get; set; }
+        public string DEP_TYPE_ACCESS { get; set; }
+        public Nullable<decimal> TOTAL_DENOMINATION_ACCESS { get; set; }
+        public string DEP_SET_QUALITY_ACCESS { get; set; }
+        public string AUTO_TRANS_ACCESS { get; set; }
+        public Nullable<System.DateTime> TRANS_EXPIRY_DATE_ACCESS { get; set; }
+        public Nullable<int> TRANS_TMS_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
     }
 }

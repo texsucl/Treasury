@@ -37,5 +37,10 @@ namespace Treasury.Web.Models
         public string CHECK_NO_E_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string ISSUING_BANK_ACCESS { get; set; }
+        public string CHECK_TYPE_ACCESS { get; set; }
+        public string CHECK_NO_TRACK_ACCESS { get; set; }
+        public string CHECK_NO_B_ACCESS { get; set; }
+        public string CHECK_NO_E_ACCESS { get; set; }
     }
 }

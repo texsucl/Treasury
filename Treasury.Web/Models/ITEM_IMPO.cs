@@ -40,5 +40,11 @@ namespace Treasury.Web.Models
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
         public string ITEM_ID_FROM { get; set; }
+        public string ITEM_NAME_ACCESS { get; set; }
+        public Nullable<int> QUANTITY_ACCESS { get; set; }
+        public Nullable<decimal> AMOUNT_ACCESS { get; set; }
+        public Nullable<System.DateTime> EXPECTED_ACCESS_DATE_ACCESS { get; set; }
+        public string DESCRIPTION_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
     }
 }
