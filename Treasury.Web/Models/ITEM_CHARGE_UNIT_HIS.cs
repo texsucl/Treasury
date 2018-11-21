@@ -14,6 +14,7 @@ namespace Treasury.Web.Models
     
     public partial class ITEM_CHARGE_UNIT_HIS
     {
+        public int HIS_ID { get; set; }
         public string APLY_NO { get; set; }
         public string CHARGE_UNIT_ID { get; set; }
         public string EXEC_ACTION { get; set; }
