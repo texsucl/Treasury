@@ -20,8 +20,10 @@ namespace Treasury.Web.Service.Interface
         /// </summary>
         /// <param name="searchModel">異動畫面查詢ViwModel</param>
         /// <param name="APLY_NO">資料庫異動申請單紀錄檔 申請單號</param>
+        /// <param name="charge_Dept">權責部門</param>
+        /// <param name="charge_Sect">權責科別</param>
         /// <returns></returns>
-        IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel,string aply_No = null);
+        IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel,string aply_No = null,string charge_Dept = null,string charge_Sect = null);
         #endregion
 
         #region Save

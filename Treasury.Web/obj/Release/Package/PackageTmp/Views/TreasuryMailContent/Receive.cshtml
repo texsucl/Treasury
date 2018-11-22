@@ -1,0 +1,208 @@
+﻿<div> 
+    <input type="button" id="TMC_R_Insert" value="新增功能明細" class="btn btn-primary" style="margin-bottom:10px; display:none"/>
+    <div id="TMC_R_jqgridDiv" class="jqd" style="padding-bottom:5px;">
+    </div>
+    <div id="TreasuryMailContentReceiveDialog" style="display:none"  class="myDialog">
+        <div>
+            <table>
+                <tr>
+                    <td>
+                        <label>功能 : </label>
+                    </td>
+                    <td>
+                        <select id="FuncID"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" id="TMC_R_Save" value="新增" class="btn btn-primary" />
+                        <input type="button" id="TMC_R_Cancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMC_R_Url = {};
+        TMC_R_Url.getData = '@Url.Action("GetCacheData", "TreasuryMailContent")';
+        TMC_R_Url.GetInsertData = '@Url.Action("InsertFuncIDData", "TreasuryMailContent")';
+        TMC_R_Url.Insert = '@Url.Action("InsertReceivelData", "TreasuryMailContent")';
+        TMC_R_Url.Delete = '@Url.Action("DeleteReceivelData", "TreasuryMailContent")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var Act_Flag = '@ViewBag.Act_Flag';
+        //#endregion 參數設定
+
+        if (Act_Flag == 'Y')
+            $('#TMC_R_Insert').show();
+
+        TMC_R_TempGrid();
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMC_R_Insert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        TMC_R_Insert();
+                    });
+                    break;
+                case 'TMC_R_Save':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        TMC_R_Save();
+                    });
+                    break;
+                case 'TMC_R_Cancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        function TMC_R_Insert() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: TMC_R_Url.GetInsertData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.addoption('FuncID', result);
+                openDialog('新增功能明細', 400, 'TreasuryMailContentReceiveDialog');
+            })
+        }
+
+        function TMC_R_Save()
+        {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify({
+                    model: TreasuryMailReceivelViewModel(
+                        $('#FuncID').val(),
+                        'A',
+                        $('#FuncID option:selected').text()
+                        )
+                }),
+                url: TMC_R_Url.Insert,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    customerUtility.closeDialog($('#TMC_R_Save'));
+                    TMC_R_TempGrid();
+                }
+            })
+        }
+
+        function TMC_R_TempGrid()
+        {
+            var colNameArray = ['執行動作', '功能代碼', '功能名稱'];
+            if (Act_Flag == 'Y')
+            {
+                colNameArray = ['動作', '執行動作', '功能代碼', '功能名稱'];
+            }
+            var colModelArray = [];
+            if (Act_Flag == 'Y')
+            {
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+            }           
+            colModelArray.push({ name: "vStatus_D", index: "vStatus_D", width: 100, align: 'center', sortable: false });
+            colModelArray.push({ name: "FUNC_ID", index: "FUNC_ID", width: 100, align: 'center', sortable: false });
+            colModelArray.push({ name: "FUNC_ID_Name", index: "FUNC_ID_Name", width: 200, align: 'center', sortable: false });
+            jqgridCustom.createJqgridByCache(
+                'TMC_R_jqgridDiv',
+                'TMC_R_TempList',
+                'TMC_R_TempPeger',
+                TMC_R_Url.getData,
+                {
+                    type: 'Receive'
+                },
+                colNameArray,
+                colModelArray,
+                '對應功能明細',
+                jqgridCustom.getPage('TMC_R_jqgridDiv'),
+                TMC_R_CompleteFun,
+                true
+                );
+        }
+
+        function TMC_R_CompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'TMC_R_Temp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                var tr = $(this);
+                $(this).find('.actionEditIcon').hide();
+                $(this).find('.actionViewIcon').hide();
+                tr.find($.validator.format('td[aria-describedby$={0}_vStatus_D]', listId)).css('color', 'red');
+            });
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) { };
+        tempActFun.Dele = function (i) {
+            var data = $("#" + 'TMC_R_TempList').getRowData(i);
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify({
+                    model: TreasuryMailReceivelViewModel(
+                        data.FUNC_ID,
+                        'D'
+                        )
+                }),
+                url: TMC_R_Url.Delete,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    TMC_R_TempGrid();
+                }
+            })
+        };
+        tempActFun.View = function (i) { };
+
+        function openDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                    customerUtility.closeDialog($(this));
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        //#region 異動紀錄查詢畫面  ViewModel
+        function TreasuryMailReceivelViewModel(
+            FUNC_ID,
+            vStatus,
+            FUNC_ID_Name
+            ) {
+            var obj = {};
+            obj['FUNC_ID'] = FUNC_ID;
+            obj['vStatus'] = vStatus;
+            obj['FUNC_ID_Name'] = FUNC_ID_Name;
+            return obj;
+        }
+        //#endregion
+    });
+</script>

@@ -19,6 +19,7 @@ namespace Treasury.Web.Report.Data
         protected List<string> INVENTORY_STATUSs = new List<string>()
         {
            ((int)AccessInventoryType._1).ToString() , //在庫
+           ((int)AccessInventoryType._4).ToString() , //預約取出
            ((int)AccessInventoryType._8).ToString() , //資料庫異動中
         };
 

@@ -67,7 +67,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var emps = GetEmps();
                 var _Trea_Equip_HisList = db.TREA_EQUIP_HIS.AsNoTracking()
-                    .Where(x => x.APPR_STATUS == "1").ToList();
+                    .Where(x => x.APPR_STATUS == "1").Where(x => x.APPR_DATE == null).ToList();
                 var _Exec_Action = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
                 var _Is_Disabled = db.SYS_CODE.AsNoTracking()
@@ -143,7 +143,7 @@ namespace Treasury.Web.Service.Actual
                         {
                             vAply_Date = TEH.APLY_DATE.ToString("yyyy/MM/dd"),
                             vAply_No = TEH.APLY_NO,
-                            vAply_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim(),
+                            vAply_Uid_Name = !TEH.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TEH.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vEquip_Name = TEH.EQUIP_NAME,
                             vIs_Disabled = _Is_Disabled.FirstOrDefault(x => x.CODE == TE.IS_DISABLED)?.CODE_VALUE.Trim(),
@@ -172,7 +172,7 @@ namespace Treasury.Web.Service.Actual
                         {
                             vAply_Date = TEH.APLY_DATE.ToString("yyyy/MM/dd"),
                             vAply_No = TEH.APLY_NO,
-                            vAply_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim(),
+                            vAply_Uid_Name = !TEH.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TEH.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vEquip_Name = TEH.EQUIP_NAME,
                             vIs_Disabled = _Is_Disabled.FirstOrDefault(x => x.CODE == TE.IS_DISABLED)?.CODE_VALUE.Trim(),
@@ -234,28 +234,29 @@ namespace Treasury.Web.Service.Actual
                                 switch (item.vExec_Action)
                                 {
                                     case "A"://新增
-                                        _Trea_Equip_Id = sysSeqDao.qrySeqNo("D2", string.Empty).ToString().PadLeft(3, '0');
-                                        _Trea_Equip_Id = $@"D2{_Trea_Equip_Id}";
-                                        _TE = new TREA_EQUIP()
-                                        {
-                                            TREA_EQUIP_ID = _Trea_Equip_Id,
-                                            EQUIP_NAME = item.vEquip_Name,
-                                            CONTROL_MODE = item.vControl_Mode,
-                                            NORMAL_CNT = item.vNormal_Cnt,
-                                            RESERVE_CNT = item.vReserve_Cnt,
-                                            MEMO = item.vMemo,
-                                            IS_DISABLED = "N",
-                                            DATA_STATUS = "2",//凍結中
-                                            CREATE_UID = searchData.vLast_Update_Uid,
-                                            CREATE_DT = dt,
-                                            LAST_UPDATE_UID = searchData.vLast_Update_Uid,
-                                            LAST_UPDATE_DT = dt,
-                                            FREEZE_UID = searchData.vLast_Update_Uid,
-                                            FREEZE_DT = dt
-                                        };
-                                        db.TREA_EQUIP.Add(_TE);
-                                        logStr += "|";
-                                        logStr += _TE.modelToString();
+                                        _Trea_Equip_Id = "";
+                                        //_Trea_Equip_Id = sysSeqDao.qrySeqNo("D2", string.Empty).ToString().PadLeft(3, '0');
+                                        //_Trea_Equip_Id = $@"D2{_Trea_Equip_Id}";
+                                        //_TE = new TREA_EQUIP()
+                                        //{
+                                        //    TREA_EQUIP_ID = _Trea_Equip_Id,
+                                        //    EQUIP_NAME = item.vEquip_Name,
+                                        //    CONTROL_MODE = item.vControl_Mode,
+                                        //    NORMAL_CNT = item.vNormal_Cnt,
+                                        //    RESERVE_CNT = item.vReserve_Cnt,
+                                        //    MEMO = item.vMemo,
+                                        //    IS_DISABLED = "N",
+                                        //    DATA_STATUS = "2",//凍結中
+                                        //    CREATE_UID = searchData.vLast_Update_Uid,
+                                        //    CREATE_DT = dt,
+                                        //    LAST_UPDATE_UID = searchData.vLast_Update_Uid,
+                                        //    LAST_UPDATE_DT = dt,
+                                        //    FREEZE_UID = searchData.vLast_Update_Uid,
+                                        //    FREEZE_DT = dt
+                                        //};
+                                        //db.TREA_EQUIP.Add(_TE);
+                                        //logStr += "|";
+                                        //logStr += _TE.modelToString();
                                         break;
                                     case "U"://修改
                                         _TE = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == item.vTrea_Equip_Id);
@@ -463,6 +464,7 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public Tuple<bool, string> TinApproved(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId)
         {
+            SysSeqDao sysSeqDao = new SysSeqDao();
             foreach (var aplyNo in aplyNos)
             {
                 var _TreaEquipHisList = db.TREA_EQUIP_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
@@ -470,6 +472,7 @@ namespace Treasury.Web.Service.Actual
                 {
                     foreach (var TreaEquipHis in _TreaEquipHisList)
                     {
+                        var _Trea_Equip_Id = string.Empty;
                         //金庫設備設定檔
                         var _TreaEquip = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
                         if(_TreaEquip!=null)
@@ -479,6 +482,8 @@ namespace Treasury.Web.Service.Actual
                             _TreaEquip.NORMAL_CNT = TreaEquipHis.NORMAL_CNT;
                             _TreaEquip.RESERVE_CNT = TreaEquipHis.RESERVE_CNT;
                             _TreaEquip.MEMO = TreaEquipHis.MEMO;
+                            _TreaEquip.FREEZE_DT = null;
+                            _TreaEquip.FREEZE_UID = null;
                             //判斷是否刪除
                             if (TreaEquipHis.EXEC_ACTION == "D")
                             {
@@ -491,13 +496,37 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            return new Tuple<bool, string>(false, logStr);
+                            _Trea_Equip_Id = $@"D2{sysSeqDao.qrySeqNo("D2", string.Empty).ToString().PadLeft(3, '0')}";
+                            //新增至TREA_EQUIP
+                            var _TE = new TREA_EQUIP()
+                            {
+                                TREA_EQUIP_ID = _Trea_Equip_Id,
+                                EQUIP_NAME = TreaEquipHis.EQUIP_NAME,
+                                CONTROL_MODE = TreaEquipHis.CONTROL_MODE,
+                                NORMAL_CNT = TreaEquipHis.NORMAL_CNT,
+                                RESERVE_CNT = TreaEquipHis.RESERVE_CNT,
+                                MEMO = TreaEquipHis.MEMO,
+                                IS_DISABLED = "N",
+                                DATA_STATUS = "1",//可異動
+                                CREATE_UID = TreaEquipHis.APLY_UID,
+                                CREATE_DT = dt,
+                                LAST_UPDATE_UID = TreaEquipHis.APLY_UID,
+                                LAST_UPDATE_DT = dt,
+                                APPR_UID = userId,
+                                APPR_DT = dt
+                            };
+                            logStr += _TE.modelToString();
+                            db.TREA_EQUIP.Add(_TE);
                         }
 
                         //金庫設備異動檔
-                        var _TreaEquipHis = db.TREA_EQUIP_HIS.FirstOrDefault(x => x.APLY_NO == TreaEquipHis.APLY_NO && x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
+                        var _TreaEquipHis = db.TREA_EQUIP_HIS.FirstOrDefault(x => x.APLY_NO == TreaEquipHis.APLY_NO && x.HIS_ID == TreaEquipHis.HIS_ID);
                         if (_TreaEquipHis != null)
                         {
+                            if (_TreaEquipHis.TREA_EQUIP_ID.IsNullOrWhiteSpace())
+                            {
+                                _TreaEquipHis.TREA_EQUIP_ID = _Trea_Equip_Id;
+                            }
                             _TreaEquipHis.APPR_STATUS = "2";//覆核完成
                             _TreaEquipHis.APPR_DATE = dt;
                             _TreaEquipHis.APPR_UID = userId;

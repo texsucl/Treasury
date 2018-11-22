@@ -102,7 +102,11 @@ namespace Treasury.Web.Controllers
                     Cache.Set(CacheList.AfterOpenTreasuryUnconfirmedDetailViewData, datas.Datas);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = datas.DESCRIPTION;
-                }    
+                }
+                else
+                {
+                    result.DESCRIPTION = datas.DESCRIPTION;
+                }  
             }
             return Json(result);
         }
@@ -338,12 +342,23 @@ namespace Treasury.Web.Controllers
         /// </summary>
         /// <param name="AccessType"></param>
         /// <returns></returns>
-        public JsonResult GetActualAccessType(string AccessType)
+        public JsonResult GetActualAccessType(string AccessType, string SEAL_ID)
         {
             var empty = new SelectOption() { Text = " ", Value = " " };
-            var result = AftereOpenTreasury.GetActualAccessTypeOption();
+            var result = AftereOpenTreasury.GetActualAccessTypeOption(SEAL_ID);
             result.Remove(result.FirstOrDefault(x => x.Value == AccessType));
             result.Insert(0, empty);
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetConfrimedT(string registerID)
+        {
+            var result = AftereOpenTreasury.GetConfrimedTime(registerID);
             return Json(result);
         }
 

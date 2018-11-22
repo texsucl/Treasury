@@ -1042,6 +1042,15 @@
                 return '<span class="red">' + rdata.vTrans_Tms_Aft + '</span>';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function CDC_Deposit_M_TempCompleteFun(listId) {
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                 var tr = $(this);
@@ -1100,8 +1109,8 @@
             }
             colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數',
-                '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前',
-                '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後',
+                '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前', '權責單位異動前',
+                '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後', '權責單位異動後',
                 '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
@@ -1112,7 +1121,7 @@
                 colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
             }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+            colModelArray.push({ name: "vCharge_Name_Show", index: "vCharge_Name_Show", width: 200, sortable: false, align: 'center', formatter: formattervCharge_Name });
 
             colModelArray.push({ name: "vCurrency_Show", index: "vCurrency_Show", width: 70, sortable: false, align: 'center', formatter: formattervCurrency, unformatter: unformattervDeposit });
             colModelArray.push({ name: "vTrad_Partners_Show", index: "vTrad_Partners_Show", width: 150, sortable: false, align: 'center', formatter: formattervTrad_Partners, unformatter: unformattervDeposit });
@@ -1141,6 +1150,7 @@
             colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
             colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
 
             colModelArray.push({ name: "vCurrency_Aft", index: "vCurrency_Aft", hidden: true });
             colModelArray.push({ name: "vTrad_Partners_Aft", index: "vTrad_Partners_Aft", hidden: true });
@@ -1155,6 +1165,7 @@
             colModelArray.push({ name: "vTrans_Expiry_Date_Aft", index: "vTrans_Expiry_Date_Aft", hidden: true });
             colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
             colModelArray.push({ name: "vTrans_Tms_Aft", index: "vTrans_Tms_Aft", hidden: true });
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
 
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });

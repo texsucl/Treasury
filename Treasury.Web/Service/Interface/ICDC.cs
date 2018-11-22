@@ -5,12 +5,29 @@ using System.Text;
 using System.Threading.Tasks;
 using Treasury.Web.ViewModels;
 using Treasury.WebUtility;
+using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Service.Interface
 {
     public interface ICDC
     {
         #region Get
+
+        /// <summary>
+        /// 保管單位設定檔 查詢部門
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        List<SelectOption> GetChargeDept(string type);
+
+        /// <summary>
+        /// 保管單位設定檔 查詢科別
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="dept"></param>
+        /// <returns></returns>
+        List<SelectOption> GetChargeSect(string type, string dept);
+
         /// <summary>
         /// 
         /// </summary>
@@ -29,6 +46,21 @@ namespace Treasury.Web.Service.Interface
         /// <param name="data"></param>
         /// <returns></returns>
         List<CDCApprSearchDetailViewModel> GetChargeApprSearchDetail(CDCApprSearchViewModel data);
+
+        /// <summary>
+        /// 權責調整查詢
+        /// </summary>
+        /// <returns></returns>
+        CDCChargeViewModel GetChargeData();
+
+        /// <summary>
+        /// 權責單位查詢細項資料
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="charge_Dept"></param>
+        /// <param name="charge_Sect"></param>
+        /// <returns></returns>
+        CDCChargeViewModel GetChargeDetailData(TreaItemType type, string charge_Dept, string charge_Sect);
         #endregion
 
         #region Save
@@ -55,7 +87,7 @@ namespace Treasury.Web.Service.Interface
         /// <param name="searchData"></param>
         /// <param name="viewModels"></param>
         /// <returns></returns>
-        MSGReturnModel<List<CDCApprSearchDetailViewModel>> ChargeReject(CDCApprSearchViewModel searchData, List<CDCApprSearchDetailViewModel> viewModels);
+        MSGReturnModel<List<CDCApprSearchDetailViewModel>> ChargeReject(CDCApprSearchViewModel searchData, List<CDCApprSearchDetailViewModel> viewModels, string apprDesc);
 
         /// <summary>
         /// 覆核畫面覆核

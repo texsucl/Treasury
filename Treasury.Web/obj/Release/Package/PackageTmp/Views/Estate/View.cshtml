@@ -17,15 +17,15 @@
                     <label>冊號 : </label>
                 </td>
                 <td style="width:300px">
-                    <label id="lESTATE_BOOK_NO" class="ESTATE_View Estate_P" style="display:none" ></label>
-                    @Html.DropDownList("dESTATE_BOOK_NO", (SelectList)ViewBag.ESTATE_Book_No, new { @class = "Estate_G", @style= "width:207px;display:none" })
+                    <label id="lESTATE_BOOK_NO" class="ESTATE_View Estate_P" style="display:none"></label>
+                    @Html.DropDownList("dESTATE_BOOK_NO", (SelectList)ViewBag.ESTATE_Book_No, new { @class = "Estate_G", @style = "width:207px;display:none" })
                 </td>
                 <td style="width:100px">
                     <label>大樓名稱 : </label>
                 </td>
                 <td style="width:300px">
                     @*<label id="lESTATE_BUILDING_NAME" class="ESTATE_View" style="display:none"></label>*@
-                    <input type="text" id="tESTATE_BUILDING_NAME" class="Estate_P Estate_New ESTATE_View" style="display:none" disabled/>
+                    <input type="text" id="tESTATE_BUILDING_NAME" class="Estate_P Estate_New ESTATE_View" style="display:none" disabled />
                     @Html.DropDownList("dESTATE_BUILDING_NAME", (SelectList)ViewBag.ESTATE_Building_Name, new { @class = "Estate_Db Estate_G", @style = "width:207px;display:none" })
                 </td>
             </tr>
@@ -35,30 +35,49 @@
                 </td>
                 <td>
                     @*<label id="lESTATE_LOCATED" class="ESTATE_View Estate_G" ></label>*@
-                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_LOCATED" name="tESTATE_LOCATED" disabled/>
+                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_LOCATED" name="tESTATE_LOCATED" disabled />
                 </td>
                 <td>
                     <label>備註 : </label>
                 </td>
                 <td>
                     @*<label id="lESTATE_MEMO" class="ESTATE_View Estate_G"></label>*@
-                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_MEMO" name="tESTATE_MEMO" disabled/>
+                    <input type="text" class="Estate_P ESTATE_View Estate_G" id="tESTATE_MEMO" name="tESTATE_MEMO" disabled />
                 </td>
             </tr>
         </table>
-        <div style="padding-bottom:5px;">
-            <input type="button" id="ESTATEInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
-            <input type="button" id="ESTATECheckItemBook" value="檢核大樓名稱" class="btn btn-primary" style="display:none;">
-        </div>
-        <div id="ESTATEjqgridDiv" class="jqd" style="padding-bottom:5px;">
-
-        </div>
-        <div style="text-align:center;display:none;" class="ESTATE_Act">
-            <input type="button" id="ESTATEApply" value="申請覆核" class="btn btn-primary TAApplyClass" />
-            <input type="button" id="ESTATECancel" value="取消申請" class="btn btn-primary" />
-            <input type="button" id="ESTATEBack" value="回上一頁" class="btn btn-primary" />
-        </div>
     </form>
+    <div style="padding-bottom:5px;">
+        <table>
+            <tr>
+                <td>
+                    <input type="button" id="ESTATEInsert" value="新增存入明細" class="btn btn-primary" style="display:none" />
+                </td>
+                <td>
+                    <input type="button" id="ESTATECheckItemBook" value="檢核大樓名稱" class="btn btn-primary" style="display:none;">
+                </td>
+                <td id="uploadTd" style="display:none;">
+                    @using (Ajax.BeginForm("Estate_Upload", "Estate",
+                        new AjaxOptions { HttpMethod = "POST" },
+                        new { enctype = "multipart/form-data", @id = "form0" }))
+                    {
+                        <input type="file" id="file" name="file" class="filestyle" data-buttonName="btn-primary" data-buttonText="轉檔檔案" />
+                    }
+                </td>
+                <td>
+                    <input type="button" class="btn btn-primary" style="margin-right:10px;display:none;" value="資料上傳" id="fileSubmit" />
+                </td>
+            </tr>
+        </table>           
+    </div>
+    <div id="ESTATEjqgridDiv" class="jqd" style="padding-bottom:5px;">
+    
+    </div>
+    <div style="text-align:center;display:none;" class="ESTATE_Act">
+        <input type="button" id="ESTATEApply" value="申請覆核" class="btn btn-primary TAApplyClass" />
+        <input type="button" id="ESTATECancel" value="取消申請" class="btn btn-primary" />
+        <input type="button" id="ESTATEBack" value="回上一頁" class="btn btn-primary" />
+    </div>  
     <div id="ESTATEDialog" style="display:none">
         <form id="ESTATEDialogForm">
             <table>
@@ -141,7 +160,7 @@
 
 <script>
     $(function () {
-        
+
         //#region url設定
         var ESTATEurl = {};
         ESTATEurl.Insert = '@Url.Action("InsertView", "Estate")';
@@ -216,6 +235,8 @@
             $('.Estate_P').show();
             $('#ESTATEInsert').show();
             $('#ESTATECheckItemBook').show();
+            $('#uploadTd').show();
+            $('#fileSubmit').show();
             $('#' + ESTATE_Building_NameTId).prop('disabled', false);
             $('#' + ESTATE_LocatedTId).prop('disabled', false);
             $("#" + ESTATE_MemoTId).attr("Disabled", false);
@@ -249,6 +270,13 @@
                     $('#' + ESTATE_MemoTId).val(data.MEMO);
                 }
             })
+        }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#ESTATEInsert').hide();
+            $('#uploadTd').hide();
+            $('#fileSubmit').hide();
         }
 
         //#endregion
@@ -431,8 +459,50 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click', function () { ESTATECheckItemBookFun(); });
                     break;
+                case 'fileSubmit':
+                    $('#' + id).off('click');
+                    $("#" + id).on('click', function () { fileSubmitFunction() });
+                    break;
             }
         });
+
+        //#region fileSubmitFunction (把檔案上傳到指定資料夾)
+        function fileSubmitFunction() {
+            clearJqgrid();
+            var dataString;
+            var action = $("#form0").attr("action");
+            if ($("#form0").attr("enctype") == "multipart/form-data") {
+                dataString = new FormData();
+                dataString.append("UploadedFile", $("#file").get(0).files[0]);
+            }
+            else {
+                // regular form, do your own thing if you need it
+            }
+
+            var type = $('input[name=ExcelType]:checked').val();
+            if (type == 'BookNo')
+                action = url.bookNo;
+            //clearJqgrid();
+            $.ajax({
+                type: "POST",
+                url: action,
+                data: dataString,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        ESTATETempGrid();
+                        ESTATEConfirmFlag = true;
+                    }
+                },
+                error: function (result) {
+                    customerUtility.alert('格式錯誤', 'e');
+                }
+            });
+        }
+        //#endregion fileSubmitFunction
 
         function ESTATECheckItemBookFun() {
             var _Building_Name = $('#' + ESTATE_Building_NameTId).val().trim();
@@ -681,6 +751,11 @@
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
         }
 
         var tempActFun = {};
@@ -718,24 +793,28 @@
             });
             $('#ESTATEInsertTemp,#ESTATEUpdateTemp,#ESTATEDeleteTemp').hide();
             if (type == '@Ref.ActionType.Add.ToString()') {
+                $('#' + ESTATE_DateTId).next().prop('disabled', false);
                 ResetInsertDialog();
                 $('#ESTATEInsertTemp').show();
                 title = '@Ref.ActionType.Add.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
+                $('#' + ESTATE_DateTId).next().prop('disabled', true);
                 dialogSetData(listId, rowid);
                 $('#ESTATEDeleteTemp').show();
                 title = '@Ref.ActionType.Dele.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', true);
             }
             else if (type == '@Ref.ActionType.Edit.ToString()') {
+                $('#' + ESTATE_DateTId).next().prop('disabled', false);
                 dialogSetData(listId, rowid);
                 $('#ESTATEUpdateTemp').show();
                 title = '@Ref.ActionType.Edit.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', false);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
+                $('#' + ESTATE_DateTId).next().prop('disabled', true);
                 dialogSetData(listId, rowid);
                 title = '@Ref.ActionType.View.GetDescription()';
                 $('.' + ESTATEInsertClass).prop('disabled', true);
@@ -874,7 +953,7 @@
                             strs.push($(this).parents(':first').prev().children().text().split(':')[0].trim()+'不得為空');
                             _checkFlag = false;
                         }
-                        else 
+                        else
                         {
                             $.each(checkEstate_Date($(this).attr('id')), function () {
                                 strs.push(this);
@@ -929,7 +1008,7 @@
             if (!_checkFlag)
             {
                 customerUtility.alert(strs.join(',</br>'), 'w');
-            }         
+            }
             return _checkFlag
         }
 
@@ -940,11 +1019,11 @@
             {
                 var date = $('#' + ESTATE_DateTId).val().trim();
                 if (!verified.isDate(date)) {
-                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');                   
+                    arr.push('發狀日不符合西元日期格式(yyyy/mm/dd)');
                 }
                 else if (Number(date) > Number(created.getOnlyDateStr(true, false, false))) {
                     arr.push('發狀日需 ≦ 系統日');
-                }                
+                }
             }
             return arr;
         }

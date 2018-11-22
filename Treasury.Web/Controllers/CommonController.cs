@@ -200,7 +200,7 @@ namespace Treasury.Web.Controllers
             MSGReturnModel<string> result = new MSGReturnModel<string>();
             result.RETURN_FLAG = false;
 
-            FileRelated.createFile(Server.MapPath("~/Temp/"));
+            Treasury.WebUtility.FileRelated.createFile(Server.MapPath("~/Temp/"));
             try
             {
                 var fileLocation = Server.MapPath("~/Temp/");

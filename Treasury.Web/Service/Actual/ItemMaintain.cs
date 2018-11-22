@@ -29,10 +29,6 @@ namespace Treasury.Web.Service.Actual
 {
     public class ItemMaintain : Common, IItemMaintain
     {
-        public ItemMaintain()
-        {
-
-        }
 
         /// <summary>
         /// 
@@ -57,11 +53,6 @@ namespace Treasury.Web.Service.Actual
             return _Check_Item_Name;
         }
 
-        //public List<ItemMaintainSearchDetailViewModel> GetSearchData(ItemMaintainSearchViewModel searchData)
-        //{
-
-        //}
-
         public IEnumerable<ITinItem> GetChangeRecordSearchData(ITinItem searchModel, string aply_No = null)
         {
             var searchData = (ItemMaintainChangeRecordSearchViewModel)searchModel;
@@ -75,68 +66,127 @@ namespace Treasury.Web.Service.Actual
                 var _Appr_Status = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
 
+
                 if (aply_No.IsNullOrWhiteSpace())
                 {
+                    var _TREA_ITEM = db.TREA_ITEM.AsNoTracking()
+                        .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
                     result = db.TREA_ITEM_HIS.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == searchData.vItem_Op_Type, searchData.vItem_Op_Type != "All")
                         .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != "All")
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
                         .AsEnumerable()
-                        .Join(db.TREA_ITEM.AsNoTracking()
-                        .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null)
-                        .AsEnumerable(),
-                        TIH => TIH.ITEM_ID,
-                        TI => TI.ITEM_ID,
-                        (TIH, TI) => new ItemMaintainChangeRecordSearchDetailViewModel
-                        {
-                            vFreeze_Dt = TI.FREEZE_DT?.ToString("yyyy/MM/dd"),
-                            vAply_No = TIH.APLY_NO,
-                            vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TI.FREEZE_UID)?.EMP_NAME.Trim(),
-                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TIH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                            vIS_TREA_ITEM = TIH.IS_TREA_ITEM,
-                            vIS_TREA_ITEM_B = TIH.IS_TREA_ITEM_B,
-                            vDAILY_FLAG = TIH.DAILY_FLAG,
-                            vDAILY_FLAG_B = TIH.DAILY_FLAG_B,
-                            vTREA_ITEM_NAME = TIH.TREA_ITEM_NAME,
-                            vTREA_ITEM_NAME_B = TIH.TREA_ITEM_NAME_B,
-                            vIS_DISABLED = TIH.IS_DISABLED,
-                            vIS_DISABLED_B = TIH.IS_DISABLED_B,
-                            vMEMO = TIH.MEMO,
-                            vMEMO_B = TIH.MEMO_B,
-                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == TIH.APPR_STATUS)?.CODE_VALUE.Trim(),
-                            vAPPR_DESC = TIH.APPR_DESC,
+                        .Select(x => new ItemMaintainChangeRecordSearchDetailViewModel{
+                            //vFreeze_Dt = x.EXEC_ACTION != "A" ? _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd"): null,
+                            vFreeze_Dt = x.APLY_DATE.ToString("yyyy/MM/dd"),
+                            vAply_No = x.APLY_NO,
+                            //vFreeze_Uid_Name = x.EXEC_ACTION != "A" ? emps.FirstOrDefault(y => y.USR_ID == _TREA_ITEM.FirstOrDefault(z => z.ITEM_ID == x.ITEM_ID)?.FREEZE_UID)?.EMP_NAME.Trim(): null,
+                            vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME.Trim() : null,
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vIS_TREA_ITEM = x.IS_TREA_ITEM,
+                            vIS_TREA_ITEM_B = x.IS_TREA_ITEM_B,
+                            vDAILY_FLAG = x.DAILY_FLAG,
+                            vDAILY_FLAG_B = x.DAILY_FLAG_B,
+                            vTREA_ITEM_NAME = x.TREA_ITEM_NAME,
+                            vTREA_ITEM_NAME_B = x.TREA_ITEM_NAME_B,
+                            vIS_DISABLED = x.IS_DISABLED,
+                            vIS_DISABLED_B = x.IS_DISABLED_B,
+                            vMEMO = x.MEMO,
+                            vMEMO_B = x.MEMO_B,
+                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
+                            vAPPR_DESC = x.APPR_DESC,
                         }).ToList();
+
+
+                    //result = db.TREA_ITEM_HIS.AsNoTracking()
+                    //    .Where(x => x.ITEM_OP_TYPE == searchData.vItem_Op_Type, searchData.vItem_Op_Type != "All")
+                    //    .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != "All")
+                    //    .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
+                    //    .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
+                    //    .AsEnumerable()
+                    //    .Join(db.TREA_ITEM.AsNoTracking()
+                    //    .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null)
+                    //    .AsEnumerable(),
+                    //    TIH => TIH.ITEM_ID,
+                    //    TI => TI.ITEM_ID,
+                    //    (TIH, TI) => new ItemMaintainChangeRecordSearchDetailViewModel
+                    //    {
+                    //        vFreeze_Dt = TI.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                    //        vAply_No = TIH.APLY_NO,
+                    //        vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TI.FREEZE_UID)?.EMP_NAME.Trim(),
+                    //        vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TIH.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                    //        vIS_TREA_ITEM = TIH.IS_TREA_ITEM,
+                    //        vIS_TREA_ITEM_B = TIH.IS_TREA_ITEM_B,
+                    //        vDAILY_FLAG = TIH.DAILY_FLAG,
+                    //        vDAILY_FLAG_B = TIH.DAILY_FLAG_B,
+                    //        vTREA_ITEM_NAME = TIH.TREA_ITEM_NAME,
+                    //        vTREA_ITEM_NAME_B = TIH.TREA_ITEM_NAME_B,
+                    //        vIS_DISABLED = TIH.IS_DISABLED,
+                    //        vIS_DISABLED_B = TIH.IS_DISABLED_B,
+                    //        vMEMO = TIH.MEMO,
+                    //        vMEMO_B = TIH.MEMO_B,
+                    //        vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == TIH.APPR_STATUS)?.CODE_VALUE.Trim(),
+                    //        vAPPR_DESC = TIH.APPR_DESC,
+                    //    }).ToList();
                 }
                 else
                 {
+                    var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().ToList();
                     result = db.TREA_ITEM_HIS.AsNoTracking()
                         .Where(x => x.APLY_NO == aply_No)
+                        .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != null)
                         .AsEnumerable()
-                        .Join(db.TREA_ITEM.AsNoTracking()
-                        .AsEnumerable(),
-                        TIH => TIH.ITEM_ID,
-                        TI => TI.ITEM_ID,
-                         (TIH, TI) => new ItemMaintainChangeRecordSearchDetailViewModel
-                         {
-                             vFreeze_Dt = TI.FREEZE_DT?.ToString("yyyy/MM/dd"),
-                             vAply_No = TIH.APLY_NO,
-                             vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TI.FREEZE_UID)?.EMP_NAME.Trim(),
-                             vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TIH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                             vIS_TREA_ITEM = TIH.IS_TREA_ITEM,
-                             vIS_TREA_ITEM_B = TIH.IS_TREA_ITEM_B,
-                             vDAILY_FLAG = TIH.DAILY_FLAG,
-                             vDAILY_FLAG_B = TIH.DAILY_FLAG_B,
-                             vTREA_ITEM_NAME = TIH.TREA_ITEM_NAME,
-                             vTREA_ITEM_NAME_B = TIH.TREA_ITEM_NAME_B,
-                             vIS_DISABLED = TIH.IS_DISABLED,
-                             vIS_DISABLED_B = TIH.IS_DISABLED_B,
-                             vMEMO = TIH.MEMO,
-                             vMEMO_B = TIH.MEMO_B,
-                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == TIH.APPR_STATUS)?.CODE_VALUE.Trim(),
-                             vAPPR_DESC = TIH.APPR_DESC,
-                             vITEM_ID = TIH.ITEM_ID
-                         }).ToList();
+                        .Select(x => new ItemMaintainChangeRecordSearchDetailViewModel
+                        {
+                            //vFreeze_Dt = x.EXEC_ACTION != "A" ? _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            vFreeze_Dt = x.APLY_DATE.ToString("yyyy/MM/dd"),
+                            vAply_No = x.APLY_NO,
+                            //vFreeze_Uid_Name = x.EXEC_ACTION != "A" ? emps.FirstOrDefault(y => y.USR_ID == _TREA_ITEM.FirstOrDefault(z => z.ITEM_ID == x.ITEM_ID)?.FREEZE_UID)?.EMP_NAME.Trim() : null,
+                            vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME.Trim() : null,
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vIS_TREA_ITEM = x.IS_TREA_ITEM,
+                            vIS_TREA_ITEM_B = x.IS_TREA_ITEM_B,
+                            vDAILY_FLAG = x.DAILY_FLAG,
+                            vDAILY_FLAG_B = x.DAILY_FLAG_B,
+                            vTREA_ITEM_NAME = x.TREA_ITEM_NAME,
+                            vTREA_ITEM_NAME_B = x.TREA_ITEM_NAME_B,
+                            vIS_DISABLED = x.IS_DISABLED,
+                            vIS_DISABLED_B = x.IS_DISABLED_B,
+                            vMEMO = x.MEMO,
+                            vMEMO_B = x.MEMO_B,
+                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
+                            vAPPR_DESC = x.APPR_DESC,
+                        }).ToList();
+
+                    //result = db.TREA_ITEM_HIS.AsNoTracking()
+                    //    .Where(x => x.APLY_NO == aply_No)
+                    //    .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != null)
+                    //    .AsEnumerable()
+                    //    .Join(db.TREA_ITEM.AsNoTracking()
+                    //    .AsEnumerable(),
+                    //    TIH => TIH.ITEM_ID,
+                    //    TI => TI.ITEM_ID,
+                    //     (TIH, TI) => new ItemMaintainChangeRecordSearchDetailViewModel
+                    //     {
+                    //         vFreeze_Dt = TI.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                    //         vAply_No = TIH.APLY_NO,
+                    //         vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == TI.FREEZE_UID)?.EMP_NAME.Trim(),
+                    //         vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TIH.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                    //         vIS_TREA_ITEM = TIH.IS_TREA_ITEM,
+                    //         vIS_TREA_ITEM_B = TIH.IS_TREA_ITEM_B,
+                    //         vDAILY_FLAG = TIH.DAILY_FLAG,
+                    //         vDAILY_FLAG_B = TIH.DAILY_FLAG_B,
+                    //         vTREA_ITEM_NAME = TIH.TREA_ITEM_NAME,
+                    //         vTREA_ITEM_NAME_B = TIH.TREA_ITEM_NAME_B,
+                    //         vIS_DISABLED = TIH.IS_DISABLED,
+                    //         vIS_DISABLED_B = TIH.IS_DISABLED_B,
+                    //         vMEMO = TIH.MEMO,
+                    //         vMEMO_B = TIH.MEMO_B,
+                    //         vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == TIH.APPR_STATUS)?.CODE_VALUE.Trim(),
+                    //         vAPPR_DESC = TIH.APPR_DESC,
+                    //         vITEM_ID = TIH.ITEM_ID
+                    //     }).ToList();
                 }
             }
             return result;
@@ -156,7 +206,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var emps = GetEmps();
                 var _SYS_CODE = db.SYS_CODE.AsNoTracking();
-                var _TREA_ITEM_HIS = db.TREA_ITEM_HIS.AsNoTracking();
+                var _TREA_ITEM_HIS = db.TREA_ITEM_HIS.AsNoTracking().Where(x => x.APPR_DATE == null).ToList();
 
                 result.AddRange(db.TREA_ITEM.AsNoTracking()
                     .Where(x => x.ITEM_OP_TYPE == searchData.vITEM_OP_TYPE, searchData.vITEM_OP_TYPE != "All")
@@ -240,9 +290,9 @@ namespace Treasury.Web.Service.Actual
                         {
                             //取得流水號
                             SysSeqDao sysSeqDao = new SysSeqDao();
-                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                            string _Aply_No = string.Empty;
+                            String qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];  
                             var cId = sysSeqDao.qrySeqNo("G1", qPreCode).ToString().PadLeft(3, '0');
+                            string _Aply_No = string.Empty;
                             _Aply_No = $@"G1{qPreCode}{cId}"; //申請單號 G1+系統日期YYYMMDD(民國年)+3碼流水號
                             string logStr = string.Empty; //log
 
@@ -255,30 +305,31 @@ namespace Treasury.Web.Service.Actual
                                 switch (item.vEXEC_ACTION)
                                 {
                                     case "A"://新增
-                                        _Trea_Item_Id = sysSeqDao.qrySeqNo("D1", string.Empty).ToString().PadLeft(3, '0');
-                                        _Trea_Item_Id = $@"D1{_Trea_Item_Id}";
-                                        _TI = new TREA_ITEM()
-                                        {
-                                            ITEM_ID = _Trea_Item_Id,
-                                            ITEM_DESC = item.vITEM_DESC,
-                                            IS_TREA_ITEM = item.vIS_TREA_ITEM,
-                                            TREA_ITEM_NAME = item.vTREA_ITEM_NAME,
-                                            TREA_ITEM_TYPE = item.vTREA_ITEM_TYPE,
-                                            ITEM_OP_TYPE = item.vITEM_OP_TYPE,
-                                            DAILY_FLAG = item.vISDO_PERDAY,
-                                            IS_DISABLED = item.vIS_DISABLED,
-                                            MEMO = item.vMEMO,
-                                            DATA_STATUS = "2",//凍結中
-                                            CREATE_DT = dt,
-                                            CREATE_UID = searchData.vCUSER_ID,
-                                            LAST_UPDATE_DT =dt,
-                                            LAST_UPDATE_UID = searchData.vCUSER_ID,
-                                            FREEZE_UID = searchData.vCUSER_ID,
-                                            FREEZE_DT = dt
-                                        };
-                                        db.TREA_ITEM.Add(_TI);
-                                        logStr += "|";
-                                        logStr += _TI.modelToString();
+                                        _Trea_Item_Id = "";
+                                        //_Trea_Item_Id = sysSeqDao.qrySeqNo("D1", string.Empty).ToString().PadLeft(3, '0');
+                                        //_Trea_Item_Id = $@"D1{_Trea_Item_Id}";
+                                        //_TI = new TREA_ITEM()
+                                        //{
+                                        //    ITEM_ID = _Trea_Item_Id,
+                                        //    ITEM_DESC = item.vITEM_DESC,
+                                        //    IS_TREA_ITEM = item.vIS_TREA_ITEM,
+                                        //    TREA_ITEM_NAME = item.vTREA_ITEM_NAME,
+                                        //    TREA_ITEM_TYPE = item.vTREA_ITEM_TYPE,
+                                        //    ITEM_OP_TYPE = item.vITEM_OP_TYPE,
+                                        //    DAILY_FLAG = item.vISDO_PERDAY,
+                                        //    IS_DISABLED = item.vIS_DISABLED,
+                                        //    MEMO = item.vMEMO,
+                                        //    DATA_STATUS = "2",//凍結中
+                                        //    CREATE_DT = dt,
+                                        //    CREATE_UID = searchData.vCUSER_ID,
+                                        //    LAST_UPDATE_DT =dt,
+                                        //    LAST_UPDATE_UID = searchData.vCUSER_ID,
+                                        //    FREEZE_UID = searchData.vCUSER_ID,
+                                        //    FREEZE_DT = dt
+                                        //};
+                                        //db.TREA_ITEM.Add(_TI);
+                                        //logStr += "|";
+                                        //logStr += _TI.modelToString();
                                         break;
                                     case "U"://修改
                                         _TI = db.TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == item.vITEM_ID);
@@ -421,12 +472,143 @@ namespace Treasury.Web.Service.Actual
 
         public Tuple<bool, string> TinApproved(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId)
         {
-            throw new NotImplementedException();
+            SysSeqDao sysSeqDao = new SysSeqDao();
+            foreach (var aplyNo in aplyNos)
+            {
+                var _TREA_ITEM_HISList = db.TREA_ITEM_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if (_TREA_ITEM_HISList.Any())
+                {
+                    foreach (var TreaItemHis in _TREA_ITEM_HISList)
+                    {
+                        var _TREA_ITEM_ID = string.Empty;
+                        //金庫存取作業設定檔
+                        var _Treaitem = db.TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == TreaItemHis.ITEM_ID);
+
+                        if (_Treaitem != null)
+                        {
+                            _Treaitem.DATA_STATUS = "1";//可異動
+                            _Treaitem.IS_TREA_ITEM = TreaItemHis.IS_TREA_ITEM;
+                            _Treaitem.TREA_ITEM_NAME = TreaItemHis.TREA_ITEM_NAME;
+                            _Treaitem.TREA_ITEM_TYPE = TreaItemHis.TREA_ITEM_TYPE;
+                            _Treaitem.ITEM_OP_TYPE = TreaItemHis.ITEM_OP_TYPE;
+                            _Treaitem.DAILY_FLAG = TreaItemHis.DAILY_FLAG;
+                            _Treaitem.IS_DISABLED = TreaItemHis.IS_DISABLED;
+                            _Treaitem.MEMO = TreaItemHis.MEMO;
+                            _Treaitem.FREEZE_DT = null;
+                            _Treaitem.FREEZE_UID = null;
+
+                            //判斷是否刪除
+                            if (TreaItemHis.EXEC_ACTION == "D")
+                            {
+                                _Treaitem.IS_DISABLED = "Y";
+                            }
+                            _Treaitem.APPR_UID = userId;
+                            _Treaitem.APPR_DT = dt;
+                            logStr += _Treaitem.modelToString(logStr);
+                        }
+                        else
+                        {
+                            _TREA_ITEM_ID = $@"D1{sysSeqDao.qrySeqNo("D1", string.Empty).ToString().PadLeft(3, '0')}";
+                            //新增至TREA_ITEM
+                            var TI = new TREA_ITEM()
+                            {
+                                ITEM_ID = _TREA_ITEM_ID,
+                                ITEM_DESC = TreaItemHis.ITEM_DESC,
+                                IS_TREA_ITEM = TreaItemHis.IS_TREA_ITEM,
+                                TREA_ITEM_NAME = TreaItemHis.TREA_ITEM_NAME,
+                                TREA_ITEM_TYPE = TreaItemHis.TREA_ITEM_TYPE,
+                                ITEM_OP_TYPE = TreaItemHis.ITEM_OP_TYPE,
+                                DAILY_FLAG = TreaItemHis.DAILY_FLAG,
+                                IS_DISABLED = TreaItemHis.IS_DISABLED,
+                                MEMO = TreaItemHis.MEMO,
+                                DATA_STATUS = "1", //可異動
+                                CREATE_UID = TreaItemHis.APLY_UID,
+                                CREATE_DT = dt,
+                                LAST_UPDATE_UID = TreaItemHis.APLY_UID,
+                                LAST_UPDATE_DT = dt,
+                                APPR_UID = userId,
+                                APPR_DT = dt
+                        };
+                            logStr += TI.modelToString(logStr);
+                            db.TREA_ITEM.Add(TI);
+                        }
+
+                        //金庫存取作業異動檔
+                        var _TREA_ITEM_His = db.TREA_ITEM_HIS.FirstOrDefault(x => x.APLY_NO == TreaItemHis.APLY_NO && x.HIS_ID == TreaItemHis.HIS_ID);
+                        if (_TREA_ITEM_His != null)
+                        {
+                            if(TreaItemHis.ITEM_ID.IsNullOrWhiteSpace())
+                            {
+                                _TREA_ITEM_His.ITEM_ID = _TREA_ITEM_ID;
+                            }
+                            _TREA_ITEM_His.APPR_STATUS = "2";//覆核完成
+                            _TREA_ITEM_His.APPR_DATE = dt;
+                            _TREA_ITEM_His.APPR_UID = userId;
+
+                            logStr = _TREA_ITEM_His.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
 
         public Tuple<bool, string> TinReject(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId, string desc)
         {
-            throw new NotImplementedException();
+            foreach (var aplyNo in aplyNos)
+            {
+                var _TREA_ITEM_HISList = db.TREA_ITEM_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if (_TREA_ITEM_HISList.Any())
+                {
+                    foreach (var TreaItemHis in _TREA_ITEM_HISList)
+                    {
+                        //金庫存取作業設定檔
+                        var _Treaitem = db.TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == TreaItemHis.ITEM_ID);
+                        if(_Treaitem != null)
+                        {
+                            _Treaitem.DATA_STATUS = "1";//可異動
+                            _Treaitem.APPR_UID = userId;
+                            _Treaitem.APPR_DT = dt;
+                            _Treaitem.FREEZE_DT = null;
+                            _Treaitem.FREEZE_UID = null;
+
+                            logStr += _Treaitem.modelToString(logStr);
+                        }
+                        else
+                        {
+                            //return new Tuple<bool, string>(false, logStr);
+                        }
+                        //金庫存取作業異動檔
+                        var _TREA_ITEM_His = db.TREA_ITEM_HIS.FirstOrDefault(x => x.APLY_NO == TreaItemHis.APLY_NO && x.HIS_ID == TreaItemHis.HIS_ID);
+                        if (_TREA_ITEM_His != null)
+                        {
+                            _TREA_ITEM_His.APPR_STATUS = "3";//退回
+                            _TREA_ITEM_His.APPR_DATE = dt;
+                            _TREA_ITEM_His.APPR_UID = userId;
+                            _TREA_ITEM_His.APPR_DESC = desc;
+
+                            logStr += _TREA_ITEM_His.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
     }
 }

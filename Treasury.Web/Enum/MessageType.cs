@@ -245,6 +245,12 @@ namespace Treasury.Web.Enum
             book_No_Error,
 
             /// <summary>
+            /// excel檔案驗證失敗
+            /// </summary>
+            [Description("excel檔案驗證失敗")]
+            excel_Validate,
+
+            /// <summary>
             /// Mail內文設定替換規則
             /// </summary>
             [Description(@"替換規則

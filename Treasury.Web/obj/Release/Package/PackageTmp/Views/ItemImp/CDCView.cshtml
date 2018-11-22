@@ -56,7 +56,7 @@
                         <label>權責單位 : </label>
                     </td>
                     <td>
-                        <label id="vCHARGE_Name" name="vCHARGE_Name"></label>
+                        <label id="vCharge_Name" name="vCharge_Name"></label>
                     </td>
                 </tr>
                 <tr>
@@ -164,7 +164,7 @@
         var vGet_Uid_NameId = 'vGet_Uid_Name';//取出申請人Id
         var vlItem_Id = 'vlItem_Id'; //歸檔編號(label)
         var vAPLY_UID_NameId = 'vAPLY_UID_Name'; //存入申請人(label)
-        var vCHARGE_NameId = 'vCHARGE_Name'; //權責單位(label)
+        var vCharge_NameId = 'vCharge_Name'; //權責單位(label)
         var tCDCItemImp_NameId = 'tCDCItemImp_Name'; //物品名稱Id(text)
         var sCDCItemImp_NameId = 'sCDCItemImp_Name'; //物品名稱Id(span)
         var tItemImp_QuantityId = 'tItemImp_Quantity'; //取出數量(text)
@@ -307,6 +307,15 @@
                 return rdata.vItemImp_MEMO || '';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function formatterAct(cellvalue, options, rdata) {
             var str = '';
             str += '<div class="btn-group">';
@@ -333,8 +342,8 @@
                 colNameArray.push('剩餘數量');
             }
             colNameArray = colNameArray.concat(['金額', '預計提取日期', '說明', '備註',
-                '物品名稱異動前', '數量異動前', '金額異動前', '預計提取日期異動前', '說明異動前', '備註異動前',
-                '物品名稱異動後', '數量異動後', '金額異動後', '預計提取日期異動後', '說明異動後', '備註異動後',
+                '物品名稱異動前', '數量異動前', '金額異動前', '預計提取日期異動前', '說明異動前', '備註異動前', '權責單位異動前',
+                '物品名稱異動後', '數量異動後', '金額異動後', '預計提取日期異動後', '說明異動後', '備註異動後', '權責單位異動後',
                 '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
@@ -346,7 +355,7 @@
             }
             colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, sortable: false, align: 'center' });
             colModelArray.push({ name: "vAPLY_UID_Name", index: "vAPLY_UID_Name", width: 80, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCHARGE_Name", index: "vCHARGE_Name", width: 200, sortable: false, align: 'center' });           
+            colModelArray.push({ name: "vCharge_Name_Show", index: "vCharge_Name_Show", width: 200, sortable: false, align: 'center', formatter: formattervCharge_Name });
             colModelArray.push({ name: "vItemImp_Name_Show", index: "vItemImp_Name_Show", width: 100, align: 'center', sortable: false, formatter: formattervItemImp_Name });
             if (GetFlag) {
                 colModelArray.push({ name: "vItemImp_Quantity", index: "vItemImp_Quantity", width: 100, align: 'right', sortable: false, formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
@@ -365,6 +374,7 @@
             colModelArray.push({ name: "vItemImp_Expected_Date", index: "vItemImp_Expected_Date", hidden: true });
             colModelArray.push({ name: "vItemImp_Description", index: "vItemImp_Description", hidden: true });
             colModelArray.push({ name: "vItemImp_MEMO", index: "vItemImp_MEMO", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
 
             colModelArray.push({ name: "vItemImp_Name_AFT", index: "vItemImp_Name_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_Remaining_AFT", index: "vItemImp_Remaining_AFT", hidden: true });
@@ -372,7 +382,8 @@
             colModelArray.push({ name: "vItemImp_Expected_Date_AFT", index: "vItemImp_Expected_Date_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_Description_AFT", index: "vItemImp_Description_AFT", hidden: true });
             colModelArray.push({ name: "vItemImp_MEMO_AFT", index: "vItemImp_MEMO_AFT", hidden: true });
-           
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
+
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", width: 90, sortable: false, hidden: true });
             jqgridCustom.createJqgridByCache(
@@ -499,7 +510,7 @@
             $('#' + vGet_Uid_NameId).text('');
             $('#' + vlItem_Id).text('');
             $('#' + vAPLY_UID_NameId).text('');
-            $('#' + vCHARGE_NameId).text('');
+            $('#' + vCharge_NameId).text('');
             $('#' + tCDCItemImp_NameId).val('');
             $('#' + sCDCItemImp_NameId).text('');
             $('#' + tCDCItemImp_RemainingId).val('');
@@ -526,7 +537,7 @@
                 $('#' + vPUT_DateId).text(data.vPUT_Date);
                 $('#' + vlItem_Id).text(data.vlItem_Id);
                 $('#' + vAPLY_UID_NameId).text(data.vAPLY_UID_Name);
-                $('#' + vCHARGE_NameId).text(data.vCHARGE_Name);
+                $('#' + vCharge_NameId).text(data.vCharge_Name);
                 $('#' + tCDCItemImp_NameId).val(data.vItemImp_Name);
                 $('#' + sCDCItemImp_NameId).text(data.vItemImp_Name_AFT);
                 if(GetFlag)

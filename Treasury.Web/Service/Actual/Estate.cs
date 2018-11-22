@@ -236,6 +236,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
                     .AsEnumerable(), _Inventory_types));
             }
+            result = result.OrderBy(x => x.vItemId).ToList();
             return result;
         }
 
@@ -245,7 +246,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchModel">CDC 查詢畫面條件</param>
         /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
         /// <returns></returns>
-        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null, string charge_Dept = null, string charge_Sect = null)
         {
             List<CDCEstateViewModel> result = new List<CDCEstateViewModel>();
 
@@ -278,6 +279,8 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_To.Value, GET_DATE_To != null)
                         .Where(x => x.GROUP_NO == Group_No, searchModel.vBookNo != null)
                         .Where(x => x.ESTATE_FORM_NO == _Estate_Form_No_Name, searchModel.vEstate_Form_No != "All")
+                        .Where(x => x.CHARGE_DEPT == charge_Dept, !charge_Dept.IsNullOrWhiteSpace())
+                        .Where(x => x.CHARGE_SECT == charge_Sect, !charge_Sect.IsNullOrWhiteSpace())
                         .AsEnumerable()
                         .Select((x) => new CDCEstateViewModel()
                         {
@@ -376,7 +379,7 @@ namespace Treasury.Web.Service.Actual
                 result.ForEach(x =>
                 {
                     x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
-                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name_AFT : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
             }
 
@@ -542,7 +545,7 @@ namespace Treasury.Web.Service.Actual
                                         if (item.vStatus == Ref.AccessInventoryType._3.GetDescription())
                                         {
                                             var _IRE = new ITEM_REAL_ESTATE();
-                                            if (item.vItemId.StartsWith(item_Seq))
+                                            if (item.vItemId.StartsWith(item_Seq) && item.vItemId.Length == 10)
                                             {
                                                 _IRE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == item.vItemId);
                                                 if (_IRE.LAST_UPDATE_DT > item.vLast_Update_Time)
@@ -552,7 +555,7 @@ namespace Treasury.Web.Service.Actual
                                                 }
                                                 _IRE.GROUP_NO = groupUp; //群組編號
                                                 _IRE.ESTATE_FORM_NO = item.vEstate_From_No; //狀別
-                                                _IRE.ESTATE_DATE = item.vEstate_Date.TaiwanDateToDate(); //發狀日
+                                                _IRE.ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date); //發狀日
                                                 _IRE.OWNERSHIP_CERT_NO = item.vOwnership_Cert_No; //字號
                                                 _IRE.LAND_BUILDING_NO = item.vLand_Building_No; // 地/建號
                                                 _IRE.HOUSE_NO = item.vHouse_No; //門牌號
@@ -573,7 +576,7 @@ namespace Treasury.Web.Service.Actual
                                                     INVENTORY_STATUS = "3", //預約存入
                                                     GROUP_NO = groupUp, //群組編號
                                                     ESTATE_FORM_NO = item.vEstate_From_No, //狀別
-                                                    ESTATE_DATE = item.vEstate_Date.TaiwanDateToDate(), //發狀日
+                                                    ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date), //發狀日
                                                     OWNERSHIP_CERT_NO = item.vOwnership_Cert_No, //字號
                                                     LAND_BUILDING_NO = item.vLand_Building_No, // 地/建號
                                                     HOUSE_NO = item.vHouse_No, //門牌號
@@ -747,7 +750,7 @@ namespace Treasury.Web.Service.Actual
                                                 INVENTORY_STATUS = "3", //預約存入
                                                 GROUP_NO = groupUp, //群組編號
                                                 ESTATE_FORM_NO = item.vEstate_From_No, //狀別
-                                                ESTATE_DATE = item.vEstate_Date.TaiwanDateToDate(), //發狀日
+                                                ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date), //發狀日
                                                 OWNERSHIP_CERT_NO = item.vOwnership_Cert_No, //字號
                                                 LAND_BUILDING_NO = item.vLand_Building_No, // 地/建號
                                                 HOUSE_NO = item.vHouse_No, //門牌號
@@ -1224,7 +1227,7 @@ namespace Treasury.Web.Service.Actual
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vGroupNo = x.GROUP_NO.ToString(), //群組編號
                 vEstate_From_No = x.ESTATE_FORM_NO, //狀別
-                vEstate_Date = x.ESTATE_DATE.DateToTaiwanDate(), //發狀日
+                vEstate_Date = TypeTransfer.dateTimeToString(x.ESTATE_DATE,false), //發狀日
                 vOwnership_Cert_No = x.OWNERSHIP_CERT_NO, //字號
                 vLand_Building_No = x.LAND_BUILDING_NO, //地/建號
                 vHouse_No = x.HOUSE_NO, //門牌號

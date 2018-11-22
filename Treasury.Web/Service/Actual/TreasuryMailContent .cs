@@ -473,12 +473,12 @@ namespace Treasury.Web.Service.Actual
                 var MCH = db.MAIL_CONTENT_HIS.First(x => x.APLY_NO == aplyNo);
                 MCH.APPR_UID = userId;
                 MCH.APPR_DATE = dt;
-                MCH.APPR_STATUS = "2"; //覆核完成
-                logStr += MCH.modelToString(logStr);
+                MCH.APPR_STATUS = "2"; //覆核完成               
                 var _MAIL_CONTENT_ID = string.Empty;
                 List<MAIL_RECEIVE> MRS = new List<MAIL_RECEIVE>();
                 if (!MCH.MAIL_CONTENT_ID.IsNullOrWhiteSpace())
                 {
+                    logStr += MCH.modelToString(logStr);
                     var MC = db.MAIL_CONTENT.First(x => x.MAIL_CONTENT_ID == MCH.MAIL_CONTENT_ID);
                     MC.FREEZE_DT = null;
                     MC.FREEZE_UID = null;
@@ -495,7 +495,9 @@ namespace Treasury.Web.Service.Actual
                 else
                 {
                     SysSeqDao sysSeqDao = new SysSeqDao();
-                    _MAIL_CONTENT_ID = $@"D4{sysSeqDao.qrySeqNo("D4", string.Empty).ToString().PadLeft(2, '0')}";
+                    _MAIL_CONTENT_ID = $@"{sysSeqDao.qrySeqNo("D4", string.Empty).ToString().PadLeft(2, '0')}";
+                    MCH.MAIL_CONTENT_ID = _MAIL_CONTENT_ID;
+                    logStr += MCH.modelToString(logStr);
                     var MC = new MAIL_CONTENT()
                     {
                         MAIL_CONTENT_ID = _MAIL_CONTENT_ID,
@@ -510,6 +512,7 @@ namespace Treasury.Web.Service.Actual
                         APPR_DT = dt,
                         DATA_STATUS = "1" //可異動
                     };
+                    db.MAIL_CONTENT.Add(MC);
                     logStr += MC.modelToString(logStr);
                 }
                 foreach (var subitem in db.MAIL_RECEIVE_HIS

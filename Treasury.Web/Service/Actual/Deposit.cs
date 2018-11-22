@@ -531,7 +531,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchModel">CDC 查詢畫面條件</param>
         /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
         /// <returns></returns>
-        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null, string charge_Dept = null, string charge_Sect = null)
         {
             List<CDCDepositViewModel> result = new List<CDCDepositViewModel>();
             List<CDCDeposit_M> CDC_MasterDataList = new List<CDCDeposit_M>();
@@ -560,6 +560,8 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.COMMIT_DATE == Commit_Date, searchModel.vCommit_Date != null)
                         .Where(x => x.EXPIRY_DATE == Expiry_Date, searchModel.vExpiry_Date != null)
                         .Where(x => x.TRAD_PARTNERS == searchModel.vTRAD_Partners, searchModel.vTRAD_Partners != "All")
+                        .Where(x => x.CHARGE_DEPT == charge_Dept, !charge_Dept.IsNullOrWhiteSpace())
+                        .Where(x => x.CHARGE_SECT == charge_Sect, !charge_Sect.IsNullOrWhiteSpace())
                         .AsEnumerable()
                         .Select((x) => new CDCDeposit_M()
                         {
@@ -673,7 +675,7 @@ namespace Treasury.Web.Service.Actual
                 CDC_MasterDataList.ForEach(x =>
                 {
                     x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
-                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name_AFT : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
 
                 #region 取得明細資料

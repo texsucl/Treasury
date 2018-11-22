@@ -445,7 +445,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchModel">CDC 查詢畫面條件</param>
         /// <param name="aply_No">資料庫異動申請單紀錄檔  INVENTORY_CHG_APLY 單號</param>
         /// <returns></returns>
-        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null)
+        public IEnumerable<ICDCItem> GetCDCSearchData(CDCSearchViewModel searchModel, string aply_No = null, string charge_Dept = null, string charge_Sect = null)
         {
             List<CDCStockViewModel> result = new List<CDCStockViewModel>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -474,6 +474,8 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
                         .Where(x => x.GROUP_NO == Group_No, searchModel.vName != null)
+                        .Where(x => x.CHARGE_DEPT == charge_Dept, !charge_Dept.IsNullOrWhiteSpace())
+                        .Where(x => x.CHARGE_SECT == charge_Sect, !charge_Sect.IsNullOrWhiteSpace())
                         .AsEnumerable().Distinct(new ItemStockComparer())
                         .Select((x) => new CDCStockViewModel()
                         {
@@ -491,7 +493,37 @@ namespace Treasury.Web.Service.Actual
                             vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
                             vTrea_Batch_No = x.TREA_BATCH_NO,
                             vNumber_Of_Shares_Total = GetCDCNumberOfSharesTotal(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No),
-                            vNumber_Of_Shares_Total_Aft = GetCDCNumberOfSharesTotal_Aft(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No)
+                            vNumber_Of_Shares_Total_Aft = GetCDCNumberOfSharesTotal_Aft(searchModel, x.GROUP_NO, x.TREA_BATCH_NO, aply_No),
+                            //CDC 權責異動查詢
+                            vItemId = x.ITEM_ID,
+                            vStatus = x.INVENTORY_STATUS,
+                            vPut_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vGet_Date = x.GET_DATE?.dateTimeToStr(),
+                            vAply_Uid = x.APLY_UID,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vStock_Type = x.STOCK_TYPE,
+                            vStock_Type_Aft = x.STOCK_TYPE_AFT,
+                            vStock_No_Preamble = x.STOCK_NO_PREAMBLE,
+                            vStock_No_Preamble_Aft = x.STOCK_NO_PREAMBLE_AFT,
+                            vStock_No_B = x.STOCK_NO_B,
+                            vStock_No_B_Aft = x.STOCK_NO_B_AFT,
+                            vStock_No_E = x.STOCK_NO_E,
+                            vStock_No_E_Aft = x.STOCK_NO_E_AFT,
+                            vStock_Cnt = x.STOCK_CNT,
+                            vStock_Cnt_Aft = x.STOCK_CNT_AFT,
+                            vAmount_Per_Share = x.AMOUNT_PER_SHARE,
+                            vAmount_Per_Share_Aft = x.AMOUNT_PER_SHARE_AFT,
+                            vSingle_Number_Of_Shares = x.SINGLE_NUMBER_OF_SHARES,
+                            vSingle_Number_Of_Shares_Aft = x.SINGLE_NUMBER_OF_SHARES_AFT,
+                            vDenomination = x.DENOMINATION,
+                            vDenomination_Aft = x.DENOMINATION_AFT,
+                            vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,
+                            vDenominationTotal_Aft = GetDenominationTotal_Aft(x.STOCK_CNT, x.STOCK_CNT_AFT, x.DENOMINATION, x.DENOMINATION_AFT),
+                            vNumberOfShares = x.NUMBER_OF_SHARES,
+                            vNumberOfShares_Aft = x.NUMBER_OF_SHARES_AFT,
+                            vMemo = x.MEMO,
+                            vMemo_Aft = x.MEMO_AFT,
+                            vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                 }
                 else
@@ -524,7 +556,7 @@ namespace Treasury.Web.Service.Actual
                 result.ForEach(x =>
                 {
                     x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
-                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name_AFT : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
                 });
             }
 

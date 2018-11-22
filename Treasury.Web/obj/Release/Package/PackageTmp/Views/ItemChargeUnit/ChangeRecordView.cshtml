@@ -1,0 +1,120 @@
+﻿<div>
+    <div id="IM_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    <div style="text-align:center;">
+        <input type="button" id="IM_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
+        @*<input type="button" id="IM_ChangeRecord_Cancel" value="取消申請" class="btn btn-primary" disabled="disabled"/>*@
+        @Html.Hidden("hAply_NO", (string)ViewBag.hAplyNo)
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var IM_Url = {};
+        IM_Url.getData = '@Url.Action("GetCacheData", "ItemChargeUnit")';
+        @*IM_Url.ResetTempData = '@Url.Action("ResetTempData", "ItemChargeUnit")';*@
+        //#endregion url設定
+        //#region 參數設定
+        var isGroupHeaders = true;//合併欄位
+        //#endregion 參數設定
+        //#region 初始動作
+        //if ($('#hAply_NO').val() == "") {
+        //    $('#IM_ChangeRecord_Cancel').prop('disabled', true).hide();
+        //}
+        //else {
+        //    $('#IM_ChangeRecord_Cancel').prop('disabled', false).show();
+        //}
+
+        IM_ChangeRecord_TempGrid();
+        //#endregion 初始動作
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'IM_ChangeRecord_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+                //case 'IM_ChangeRecord_Cancel':
+                //    $('#' + id).off('click');
+                //    $('#' + id).on('click', IM_CancelFun());
+                //    break;
+            }
+        });
+        //#endregion 註冊事件
+        ////取修申請
+        //function IM_CancelFun() {
+        //    $.ajax({
+        //        type: "POST",
+        //        data: JSON.stringify({
+        //            AplyNo: $('#hAply_NO').val(),
+        //        }),
+        //        dataType: "json",
+        //        url: IM_Url.ResetTempData,
+        //        contentType: 'application/json',
+        //    }).done(function (result) {
+        //        ResetInsertDialog();
+        //        IM_TempGrid();
+        //    });
+        //}
+        ////#endregion
+        //jqgrid
+        function IM_ChangeRecord_TempGrid() {
+            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行',
+            '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+            '覆核狀態', '覆核意見'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vFreeze_Dt", index: "vFreeze_Dt", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 120, sortable: false });
+            colModelArray.push({ name: "vFreeze_Uid_Name", index: "vFreeze_Uid_Name", width: 70, sortable: false });
+            colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 45, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vCHARGE_UID_B", index: "vCHARGE_UID_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vCHARGE_UID", index: "vCHARGE_UID", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_MAIL_DEPT_MGR_B", index: "vIS_MAIL_DEPT_MGR_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_MAIL_DEPT_MGR", index: "vIS_MAIL_DEPT_MGR", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_MAIL_SECT_MGR_B", index: "vIS_MAIL_SECT_MGR_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_MAIL_SECT_MGR", index: "vIS_MAIL_SECT_MGR", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_DISABLED_B", index: "vIS_DISABLED_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 70, sortable: false });
+
+            colModelArray.push({ name: "vAPPR_STATUS", index: "vAPPR_STATUS", width: 75, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPPR_DESC", index: "vAPPR_DESC", width: 90, sortable: false, align: 'center' });
+            jqgridCustom.createJqgridByCache(
+            'IM_ChangeRecord_jqgridDiv',
+            'IM_ChangeRecord_TempList',
+            'IM_ChangeRecord_TempPeger',
+            IM_Url.getData,
+                {
+                    type: 'RecordSearch'
+                },
+                colNameArray,
+                colModelArray,
+                '保管資料發送維護異動紀錄',
+                jqgridCustom.getPage('IM_ChangeRecord_jqgridDiv'),
+                IM_ChangeRecord_CompleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+        function IM_ChangeRecord_CompleteFun(listId) {
+            if (isGroupHeaders) {
+                jQuery('#' + listId).jqGrid('setGroupHeaders', {
+                    useColSpanStyle: true,
+                    groupHeaders: [
+                        { startColumnName: 'vCHARGE_UID_B', numberOfColumns: 2, titleText: '經辦' },
+                        { startColumnName: 'vIS_MAIL_DEPT_MGR_B', numberOfColumns: 2, titleText: 'mail部主管' },
+                        { startColumnName: 'vIS_MAIL_SECT_MGR_B', numberOfColumns: 2, titleText: 'mail科主管' },
+                        { startColumnName: 'vIS_DISABLED_B', numberOfColumns: 2, titleText: '停用註記' },
+                    ]
+                });
+                isGroupHeaders = false;
+            }
+        }
+    });
+</script>
+

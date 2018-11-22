@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using Treasury.Web.Enum;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
-using Treasury.WebBO;
 using Treasury.WebDaos;
 using Treasury.WebUtility;
-using Treasury.Web.Enum;
 using static Treasury.Web.Enum.Ref;
-using System.Transactions;
-using System.Text;
 
 namespace Treasury.Web.Service.Actual
 {
@@ -257,16 +254,136 @@ namespace Treasury.Web.Service.Actual
 
             #region 放資料
             result.ChargeData = ChargeData;
-            result.BillData = _Bill;
-            result.CaData = _CA;
-            result.DepositData = _Deposit;
-            result.EstateData = _Estate;
-            result.ItemImpData = _ItemImp;
-            result.MargingData = _Marging;
-            result.MarginpData = _Marginp;
-            result.SealData = _Seal;
-            result.StockData = _Stock;
+            //result.BillData = _Bill;
+            //result.CaData = _CA;
+            //result.DepositData = _Deposit;
+            //result.EstateData = _Estate;
+            //result.ItemImpData = _ItemImp;
+            //result.MargingData = _Marging;
+            //result.MarginpData = _Marginp;
+            //result.SealData = _Seal;
+            //result.StockData = _Stock;
             #endregion
+            return result;
+        }
+
+        /// <summary>
+        /// 權責單位查詢細項資料
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="charge_Dept"></param>
+        /// <param name="charge_Sect"></param>
+        /// <returns></returns>
+        public CDCChargeViewModel GetChargeDetailData(TreaItemType type, string charge_Dept, string charge_Sect )
+        {
+            CDCChargeViewModel result = new CDCChargeViewModel();
+            var searchModel = new CDCSearchViewModel() { vTreasuryIO = "Y"};
+            switch (type)
+            {
+                #region 空白票據
+                case TreaItemType.D1012:
+                    result.BillData = (List<CDCBillViewModel>)(new Bill().GetCDCSearchData(searchModel,null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 電子憑證
+                case TreaItemType.D1024:
+                    result.CaData = (List<CDCCAViewModel>)(new CA().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 定期存單
+                case TreaItemType.D1013:
+                    result.DepositData = ((List<CDCDepositViewModel>)(new Deposit().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect))).First();
+                    break;
+                #endregion
+                #region 不動產權狀
+                case TreaItemType.D1014:
+                    result.EstateData = (List<CDCEstateViewModel>)(new Estate().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 重要物品
+                case TreaItemType.D1018:
+                    result.ItemImpData = (List<CDCItemImpViewModel>)(new ItemImp().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 存出保證金
+                case TreaItemType.D1016:
+                    result.MargingData = (List<CDCMargingViewModel>)(new Marging().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 存入保證金
+                case TreaItemType.D1017:
+                    result.MarginpData = (List<CDCMarginpViewModel>)(new Marginp().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 印章
+                case TreaItemType.D1008:
+                case TreaItemType.D1009:
+                case TreaItemType.D1010:
+                case TreaItemType.D1011:
+                    searchModel.vJobProject = type.ToString();
+                    result.SealData = (List<CDCSealViewModel>)(new Seal().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+                #region 股票
+                case TreaItemType.D1015:
+                    result.StockData = (List<CDCStockViewModel>)(new Stock().GetCDCSearchData(searchModel, null, charge_Dept, charge_Sect));
+                    break;
+                #endregion
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 保管單位設定檔 查詢部門
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public List<SelectOption> GetChargeDept(string type)
+        {
+            List<SelectOption> result = new List<SelectOption>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var depts = GetDepts();
+                result.AddRange(db.ITEM_CHARGE_UNIT.AsNoTracking()
+                    .Where(x => x.ITEM_ID == type)
+                    .Where(x => x.IS_DISABLED == "N")
+                    .Select(x => x.CHARGE_DEPT)
+                    .Distinct()
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Value = x,
+                        Text = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x)?.DPT_NAME
+                    }));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 保管單位設定檔 查詢科別
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="dept"></param>
+        /// <returns></returns>
+        public List<SelectOption> GetChargeSect(string type, string dept)
+        {
+            List<SelectOption> result = new List<SelectOption>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var depts = GetDepts();
+                result.AddRange(db.ITEM_CHARGE_UNIT.AsNoTracking()
+                    .Where(x => x.ITEM_ID == type)
+                    .Where(x => x.CHARGE_DEPT == dept,!dept.IsNullOrWhiteSpace())
+                    .Where(x => x.IS_DISABLED == "N")
+                    .Select(x => x.CHARGE_SECT)
+                    .Distinct()
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Value = x,
+                        Text = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x)?.DPT_NAME
+                    }));
+            }
             return result;
         }
 
@@ -322,6 +439,10 @@ namespace Treasury.Web.Service.Actual
                                     {
                                         APLY_NO = _data.Item1,
                                         ITEM_ID = _Bill.ITEM_ID,
+                                        CHECK_TYPE = string.Empty,
+                                        CHECK_NO_TRACK = string.Empty,
+                                        CHECK_NO_B = string.Empty,
+                                        CHECK_NO_E = string.Empty,
                                     };
                                     db.BLANK_NOTE_APLY.Add(_BNA);
                                     logStr = _BNA.modelToString(logStr);
@@ -403,7 +524,7 @@ namespace Treasury.Web.Service.Actual
                                     var _OIA = new OTHER_ITEM_APLY()
                                     {
                                         APLY_NO = _data.Item1,
-                                        ITEM_ID = _IDOM.ITEM_ID
+                                        ITEM_ID = _IDOM.ITEM_ID,
                                     };
 
                                     db.OTHER_ITEM_APLY.Add(_OIA);
@@ -682,17 +803,32 @@ namespace Treasury.Web.Service.Actual
                     }
                     else if(chargeFlag)
                     {
-                        db.SaveChanges();
-                        #region LOG
-                        //新增LOG
-                        Log log = new Log();
-                        log.CFUNCTION = "申請覆核-資料庫權責異動";
-                        log.CACTION = "A";
-                        log.CCONTENT = logStr;
-                        LogDao.Insert(log, searchModel.vCreate_Uid);
-                        #endregion
-                        result.RETURN_FLAG = true;
-                        result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{aplyNo}");
+                        var validateMessage = db.GetValidationErrors().getValidateString();
+                        if (validateMessage.Any())
+                        {
+                            result.DESCRIPTION = validateMessage;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                db.SaveChanges();
+                                #region LOG
+                                //新增LOG
+                                Log log = new Log();
+                                log.CFUNCTION = "申請覆核-資料庫權責異動";
+                                log.CACTION = "A";
+                                log.CCONTENT = logStr;
+                                LogDao.Insert(log, searchModel.vCreate_Uid);
+                                #endregion
+                                result.RETURN_FLAG = true;
+                                result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"申請單號:{aplyNo}");
+                            }
+                            catch (DbUpdateException ex)
+                            {
+                                result.DESCRIPTION = ex.exceptionMessage();
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -833,7 +969,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchData"></param>
         /// <param name="viewModels"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<CDCApprSearchDetailViewModel>> ChargeReject(CDCApprSearchViewModel searchData, List<CDCApprSearchDetailViewModel> viewModels)
+        public MSGReturnModel<List<CDCApprSearchDetailViewModel>> ChargeReject(CDCApprSearchViewModel searchData, List<CDCApprSearchDetailViewModel> viewModels, string apprDesc)
         {
             var result = new MSGReturnModel<List<CDCApprSearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -880,8 +1016,17 @@ namespace Treasury.Web.Service.Actual
 
                     #region 對應資料檔-駁回
                     //其它存取項目申請資料檔找對應物品編號(ITEM_ID)
-                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                    List<string> itemIds = new List<string>();
+                    if (_INVENTORY_CHG_APLY.ITEM_ID != Ref.TreaItemType.D1012.ToString())
+                    {
+                        itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }
+                    else
+                    {
+                        itemIds = db.BLANK_NOTE_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }
                     var sampleFactory = new SampleFactory();
                     var getCDCAction = sampleFactory.GetCDCAction(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _INVENTORY_CHG_APLY.ITEM_ID));
                     if (getCDCAction != null)
@@ -1109,9 +1254,17 @@ namespace Treasury.Web.Service.Actual
                     #endregion
 
                     #region 對應資料檔-駁回
-                    //其它存取項目申請資料檔找對應物品編號(ITEM_ID)
-                    var itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
+                    List<string> itemIds = new List<string>();
+                    if (_INVENTORY_CHG_APLY.ITEM_ID != Ref.TreaItemType.D1012.ToString())
+                    {
+                        itemIds = db.OTHER_ITEM_APLY.AsNoTracking()
                         .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }
+                    else
+                    {
+                        itemIds = db.BLANK_NOTE_APLY.AsNoTracking()
+                        .Where(x => x.APLY_NO == _INVENTORY_CHG_APLY.APLY_NO).Select(x => x.ITEM_ID).ToList();
+                    }
                     var sampleFactory = new SampleFactory();
                     var getCDCAction = sampleFactory.GetCDCAction(EnumUtil.GetValues<Ref.TreaItemType>().First(x => x.ToString() == _INVENTORY_CHG_APLY.ITEM_ID));
                     if (getCDCAction != null)

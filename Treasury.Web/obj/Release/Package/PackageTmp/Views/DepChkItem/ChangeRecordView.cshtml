@@ -1,0 +1,94 @@
+﻿<div>
+    <div id="DCI_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    <div style="text-align:center;">
+        <input type="button" id="DCI_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var DCI_Url = {};
+        DCI_Url.getData = '@Url.Action("GetCacheData", "DepChkItem")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var isGroupHeaders = true;//合併欄位
+        //#endregion 參數設定
+
+        //#region 初始動作
+        DCI_ChangeRecord_TempGrid();
+        //#endregion 初始動作
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'DCI_ChangeRecord_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        //#region jqgrid
+        function DCI_ChangeRecord_CompleteFun(listId) {
+            if (isGroupHeaders) {
+                jQuery("#" + listId).jqGrid('setGroupHeaders', {
+                    useColSpanStyle: true,
+                    groupHeaders: [
+                      { startColumnName: 'vDep_Chk_Item_Desc_B', numberOfColumns: 2, titleText: '檢核項目說明' },
+                      { startColumnName: 'vIs_Disabled_B_Name', numberOfColumns: 2, titleText: '停用註記' },
+                      { startColumnName: 'vItem_Order_B', numberOfColumns: 2, titleText: '項目順序' },
+                    { startColumnName: 'vReplace_B', numberOfColumns: 2, titleText: '取代變數' }
+                    ]
+                });
+                isGroupHeaders = false;
+            }
+        }
+
+        function DCI_ChangeRecord_TempGrid() {
+            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行',
+                '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+                '覆核狀態', '覆核意見'];
+                var colModelArray = [];
+            colModelArray.push({ name: "vAply_Date", index: "vAply_Date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 120, sortable: false });
+            colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 80, sortable: false });
+            colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 60, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vDep_Chk_Item_Desc_B", index: "vDep_Chk_Item_Desc_B", width: 100, sortable: false });
+            colModelArray.push({ name: "vDep_Chk_Item_Desc", index: "vDep_Chk_Item_Desc", width: 100, sortable: false });
+            colModelArray.push({ name: "vIs_Disabled_B_Name", index: "vIs_Disabled_B_Name", width: 70, sortable: false });
+            colModelArray.push({ name: "vIs_Disabled_Name", index: "vIs_Disabled_Name", width: 70, sortable: false });
+            colModelArray.push({ name: "vItem_Order_B", index: "vItem_Order_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vItem_Order", index: "vItem_Order", width: 70, sortable: false });
+            colModelArray.push({ name: "vReplace_B", index: "vReplace_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vReplace", index: "vReplace", width: 70, sortable: false });
+
+            colModelArray.push({ name: "vAppr_Status_Name", index: "vAppr_Status_Name", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAppr_Desc", index: "vAppr_Desc", width: 100, sortable: false, align: 'center' });
+            jqgridCustom.createJqgridByCache(
+                'DCI_ChangeRecord_jqgridDiv',
+                'DCI_ChangeRecord_TempList',
+                'DCI_ChangeRecord_TempPeger',
+                DCI_Url.getData,
+                {
+                    type: 'O'
+                },
+                colNameArray,
+                colModelArray,
+                '定存檢核表項目異動紀錄',
+                jqgridCustom.getPage('DCI_ChangeRecord_jqgridDiv'),
+                DCI_ChangeRecord_CompleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+    });
+</script>

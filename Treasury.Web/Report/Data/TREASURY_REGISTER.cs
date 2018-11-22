@@ -74,7 +74,7 @@ namespace Treasury.Web.Report.Data
 
                 }
 
-                ReportDataList = ReportDataList.OrderByDescending(x => x.ACCESS_NAME).ThenBy(x => x.APLY_NO).ToList();
+                ReportDataList = ReportDataList.OrderBy(x => x.ITEM_OP_TYPE).ThenBy(x => x.ITEM_ID).ToList();
 
                 if (temp)
                     ReportDataList.AddRange(new List<Report_Treasury_Register>() {
@@ -117,12 +117,14 @@ namespace Treasury.Web.Report.Data
         {
             return data.Select(x => new Report_Treasury_Register()
             {
+                ITEM_ID = x.ITEM_ID,
+                ITEM_OP_TYPE = _Item_Desc.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE, // 作業類型
                 ITEM_DESC = _Item_Desc.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC,   //存取項目
                 SEAL_DESC = _Seal_Desc.FirstOrDefault(y => y.vAply_No == x.APLY_NO)?.vSeal_Desc,   //印章內容
                 ACCESS_TYPE = _Access_Type.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE_VALUE,   //代碼,作業別
                 APLY_NO = _Item_Desc.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE == "3" ? x.APLY_NO : "",    //申請單號
                 ACCESS_REASON = x.ACCESS_REASON,   //入庫原因
-                ACCESS_NAME = x.CONFIRM_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.CONFIRM_UID)?.EMP_NAME,    //入庫人員
+                ACCESS_NAME = !x.CONFIRM_UID.IsNullOrWhiteSpace() ? x.CONFIRM_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.CONFIRM_UID)?.EMP_NAME : null,    //入庫人員
                 ACTUAL_ACCESS_TYPE = _Access_Type.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE,    //實際作業別
                 ACTUAL_ACCESS_NAME = string.IsNullOrEmpty(x.ACTUAL_ACCESS_UID) ? null : x.ACTUAL_ACCESS_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.ACTUAL_ACCESS_UID)?.EMP_NAME    //實際入庫人員
             });

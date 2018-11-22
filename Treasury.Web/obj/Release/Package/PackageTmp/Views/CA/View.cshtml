@@ -123,6 +123,13 @@
         if (typeFlag && CA_Act_Type) {
             $('#CAInsert').show();
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex')
+        {
+            $('#CAInsert').hide();
+        }
+
         //#endregion
 
         function clearJqgrid(gridDivId) {
@@ -169,10 +176,10 @@
                             if (id == 'CABack' &&
                                 CAConfirmFlag &&
                                 !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
-                            return false;
-                        }
-                        customerUtility.closeDialog(this);
-                    });
+                                return false;
+                            }
+                            customerUtility.closeDialog(this);
+                        });
                     break;
                 case 'CAInsertTemp':
                     $('#' + id).off('click');
@@ -235,8 +242,8 @@
                     foreach (var item in ((SelectList)ViewBag.CAUse))
                     {
                     <text>
-                    case '@item.Value':
-                        return '@item.Text';
+                case '@item.Value':
+                    return '@item.Text';
                     </text>
                     }
                 }
@@ -251,14 +258,14 @@
                     foreach (var item in ((SelectList)ViewBag.CAUse))
                     {
                         <text>
-                        case '@item.Text':
-                        return '@item.Value';
-                        </text>
+                case '@item.Text':
+                    return '@item.Value';
+                    </text>
                     }
                 }
                 default:
-        return '';
-        }
+                    return '';
+            }
         }
 
         function formatterCA_Desc(cellvalue, options, rdata) {
@@ -267,32 +274,32 @@
                     foreach (var item in ((SelectList)ViewBag.CADesc))
                     {
                         <text>
-                        case '@item.Value':
-                              return '@item.Text';
-                        </text>
+                case '@item.Value':
+                    return '@item.Text';
+                    </text>
                     }
                 }
                 default:
-                   return '';
+                    return '';
             }
             return '';
         }
 
         function UnformatterCA_Desc(cellvalue, options, rdata) {
             switch (cellvalue) {
-               @{
+                @{
                     foreach (var item in ((SelectList)ViewBag.CADesc))
                     {
                         <text>
-                        case '@item.Text':
-                        return '@item.Value';
-                        </text>
+                case '@item.Text':
+                    return '@item.Value';
+                    </text>
                     }
                 }
                 default:
-            return '';
+                    return '';
             }
-        return '';
+            return '';
         }
 
         function CATempGrid() {
@@ -403,6 +410,11 @@
             if (!CA_Act_Type) { //申請狀態
                 $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     $(this).find('.actionDeleIcon').hide();
                 });
             }
