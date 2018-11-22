@@ -46,5 +46,13 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("異動人員")]
         public string vLast_Update_Uid { get; set; }
+
+        /// <summary>
+        /// 保管單位存取項目編號
+        /// </summary>
+        [Description("保管單位存取項目編號")]
+        public string vCHARGE_UNIT_ID { get; set; }
+
+        
     }
 }

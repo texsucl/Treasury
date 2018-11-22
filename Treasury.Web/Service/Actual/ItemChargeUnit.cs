@@ -121,8 +121,12 @@ namespace Treasury.Web.Service.Actual
                 var _Appr_Status = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
 
+
+
                 if (aply_No.IsNullOrWhiteSpace())
                 {
+                    var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking()
+                        .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
                     result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
                         .Where(x => x.ITEM_ID == searchData.vTREA_ITEM_NAME, searchData.vTREA_ITEM_NAME != "All")
                         .Where(x => x.CHARGE_DEPT == searchData.vCHARGE_DEPT, searchData.vCHARGE_DEPT != "All")
@@ -130,58 +134,106 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
                         .AsEnumerable()
-                        .Join(db.ITEM_CHARGE_UNIT.AsNoTracking()
-                        .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null)
-                        .AsEnumerable(),
-                        ICUH => ICUH.ITEM_ID,
-                        ICU => ICU.ITEM_ID,
-                        (ICUH, ICU) => new ItemChargeUnitChangeRecordSearchDetailViewModel
-                        {
-                            vFreeze_Dt = ICU.FREEZE_DT?.ToString("yyyy/MM/dd"),
-                            vAply_No = ICUH.APLY_NO,
-                            vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == ICU.FREEZE_UID)?.EMP_NAME?.Trim(),
-                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == ICUH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                            vCHARGE_UID = emps.FirstOrDefault(x => x.USR_ID == ICUH.CHARGE_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_UID_B = ICUH.CHARGE_UID_B,
-                            vIS_MAIL_DEPT_MGR = ICUH.IS_MAIL_DEPT_MGR,
-                            vIS_MAIL_DEPT_MGR_B = ICUH.IS_MAIL_DEPT_MGR_B,
-                            vIS_MAIL_SECT_MGR = ICUH.IS_MAIL_SECT_MGR,
-                            vIS_MAIL_SECT_MGR_B = ICUH.IS_MAIL_SECT_MGR_B,
-                            vIS_DISABLED = ICUH.IS_DISABLED,
-                            vIS_DISABLED_B = ICUH.IS_DISABLED_B,
-                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == ICUH.APPR_STATUS)?.CODE_VALUE.Trim(),
-                            vAPPR_DESC = ICUH.APPR_DESC
-                        }
-                        ).ToList();
+                        .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
+                            vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            vAply_No = x.APLY_NO,
+                            vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
+                            vCHARGE_UID_B = x.CHARGE_UID_B,
+                            vIS_MAIL_DEPT_MGR = x.IS_MAIL_DEPT_MGR,
+                            vIS_MAIL_DEPT_MGR_B = x.IS_MAIL_DEPT_MGR_B,
+                            vIS_MAIL_SECT_MGR = x.IS_MAIL_SECT_MGR,
+                            vIS_MAIL_SECT_MGR_B = x.IS_MAIL_SECT_MGR_B,
+                            vIS_DISABLED = x.IS_DISABLED,
+                            vIS_DISABLED_B = x.IS_DISABLED_B,
+                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
+                            vAPPR_DESC = x.APPR_DESC
+                        }).ToList();
+
+                    //result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
+                    //    .Where(x => x.ITEM_ID == searchData.vTREA_ITEM_NAME, searchData.vTREA_ITEM_NAME != "All")
+                    //    .Where(x => x.CHARGE_DEPT == searchData.vCHARGE_DEPT, searchData.vCHARGE_DEPT != "All")
+                    //    .Where(x => x.CHARGE_SECT == searchData.vCHARGE_SECT, searchData.vCHARGE_SECT != "All")
+                    //    .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
+                    //    .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
+                    //    .AsEnumerable()
+                    //    .Join(db.ITEM_CHARGE_UNIT.AsNoTracking()
+                    //    .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null)
+                    //    .AsEnumerable(),
+                    //    ICUH => ICUH.ITEM_ID,
+                    //    ICU => ICU.ITEM_ID,
+                    //    (ICUH, ICU) => new ItemChargeUnitChangeRecordSearchDetailViewModel
+                    //    {
+                    //        vFreeze_Dt = ICU.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                    //        vAply_No = ICUH.APLY_NO,
+                    //        vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == ICU.FREEZE_UID)?.EMP_NAME?.Trim(),
+                    //        vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == ICUH.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                    //        vCHARGE_UID = emps.FirstOrDefault(x => x.USR_ID == ICUH.CHARGE_UID)?.EMP_NAME?.Trim(),
+                    //        vCHARGE_UID_B = ICUH.CHARGE_UID_B,
+                    //        vIS_MAIL_DEPT_MGR = ICUH.IS_MAIL_DEPT_MGR,
+                    //        vIS_MAIL_DEPT_MGR_B = ICUH.IS_MAIL_DEPT_MGR_B,
+                    //        vIS_MAIL_SECT_MGR = ICUH.IS_MAIL_SECT_MGR,
+                    //        vIS_MAIL_SECT_MGR_B = ICUH.IS_MAIL_SECT_MGR_B,
+                    //        vIS_DISABLED = ICUH.IS_DISABLED,
+                    //        vIS_DISABLED_B = ICUH.IS_DISABLED_B,
+                    //        vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == ICUH.APPR_STATUS)?.CODE_VALUE.Trim(),
+                    //        vAPPR_DESC = ICUH.APPR_DESC
+                    //    }
+                    //    ).ToList();
                 }
                 else
                 {
+                    var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking().ToList();
                     result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
                         .Where(x => x.APLY_NO == aply_No)
+                        .Where(x => x.CHARGE_UNIT_ID == searchData.vCHARGE_UNIT_ID, searchData.vCHARGE_UNIT_ID != null)
                         .AsEnumerable()
-                        .Join(db.ITEM_CHARGE_UNIT.AsNoTracking()
-                        .AsEnumerable(),
-                        ICUH => ICUH.ITEM_ID,
-                        ICU => ICU.ITEM_ID,
-                        (ICUH, ICU) => new ItemChargeUnitChangeRecordSearchDetailViewModel
-                        {
-                            vFreeze_Dt = ICU.FREEZE_DT?.ToString("yyyy/MM/dd"),
-                            vAply_No = ICUH.APLY_NO,
-                            vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == ICU.FREEZE_UID)?.EMP_NAME?.Trim(),
-                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == ICUH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                            vCHARGE_UID = emps.FirstOrDefault(x => x.USR_ID == ICUH.CHARGE_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_UID_B = ICUH.CHARGE_UID_B,
-                            vIS_MAIL_DEPT_MGR = ICUH.IS_MAIL_DEPT_MGR,
-                            vIS_MAIL_DEPT_MGR_B = ICUH.IS_MAIL_DEPT_MGR_B,
-                            vIS_MAIL_SECT_MGR = ICUH.IS_MAIL_SECT_MGR,
-                            vIS_MAIL_SECT_MGR_B = ICUH.IS_MAIL_SECT_MGR_B,
-                            vIS_DISABLED = ICUH.IS_DISABLED,
-                            vIS_DISABLED_B = ICUH.IS_DISABLED_B,
-                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == ICUH.APPR_STATUS)?.CODE_VALUE.Trim(),
-                            vAPPR_DESC = ICUH.APPR_DESC,
-                            vCHARGE_UNIT_ID = ICUH.CHARGE_UNIT_ID
-                        }
-                        ).ToList();
+                        .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
+                            vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            vAply_No = x.APLY_NO,
+                            vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
+                            vCHARGE_UID_B = x.CHARGE_UID_B,
+                            vIS_MAIL_DEPT_MGR = x.IS_MAIL_DEPT_MGR,
+                            vIS_MAIL_DEPT_MGR_B = x.IS_MAIL_DEPT_MGR_B,
+                            vIS_MAIL_SECT_MGR = x.IS_MAIL_SECT_MGR,
+                            vIS_MAIL_SECT_MGR_B = x.IS_MAIL_SECT_MGR_B,
+                            vIS_DISABLED = x.IS_DISABLED,
+                            vIS_DISABLED_B = x.IS_DISABLED_B,
+                            vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
+                            vAPPR_DESC = x.APPR_DESC,
+                            vCHARGE_UNIT_ID = x.CHARGE_UNIT_ID
+                        }).ToList();
+
+                    //result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
+                    //    .Where(x => x.APLY_NO == aply_No)
+                    //    .Where(x => x.CHARGE_UNIT_ID == searchData.vCHARGE_UNIT_ID, searchData.vCHARGE_UNIT_ID != null)
+                    //    .AsEnumerable()
+                    //    .Join(db.ITEM_CHARGE_UNIT.AsNoTracking()
+                    //    .AsEnumerable(),
+                    //    ICUH => ICUH.ITEM_ID,
+                    //    ICU => ICU.ITEM_ID,
+                    //    (ICUH, ICU) => new ItemChargeUnitChangeRecordSearchDetailViewModel
+                    //    {
+                    //        vFreeze_Dt = ICU.FREEZE_DT?.ToString("yyyy/MM/dd"),
+                    //        vAply_No = ICUH.APLY_NO,
+                    //        vFreeze_Uid_Name = emps.FirstOrDefault(x => x.USR_ID == ICU.FREEZE_UID)?.EMP_NAME?.Trim(),
+                    //        vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == ICUH.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                    //        vCHARGE_UID = emps.FirstOrDefault(x => x.USR_ID == ICUH.CHARGE_UID)?.EMP_NAME?.Trim(),
+                    //        vCHARGE_UID_B = ICUH.CHARGE_UID_B,
+                    //        vIS_MAIL_DEPT_MGR = ICUH.IS_MAIL_DEPT_MGR,
+                    //        vIS_MAIL_DEPT_MGR_B = ICUH.IS_MAIL_DEPT_MGR_B,
+                    //        vIS_MAIL_SECT_MGR = ICUH.IS_MAIL_SECT_MGR,
+                    //        vIS_MAIL_SECT_MGR_B = ICUH.IS_MAIL_SECT_MGR_B,
+                    //        vIS_DISABLED = ICUH.IS_DISABLED,
+                    //        vIS_DISABLED_B = ICUH.IS_DISABLED_B,
+                    //        vAPPR_STATUS = _Appr_Status.FirstOrDefault(x => x.CODE == ICUH.APPR_STATUS)?.CODE_VALUE.Trim(),
+                    //        vAPPR_DESC = ICUH.APPR_DESC,
+                    //        vCHARGE_UNIT_ID = ICUH.CHARGE_UNIT_ID
+                    //    }
+                    //    ).ToList();
                 }
             }
             return result;
@@ -201,7 +253,7 @@ namespace Treasury.Web.Service.Actual
                 var emps = GetEmps();
                 var depts = GetDepts();
                 var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking();
-                var _ITEM_CHARGE_UNIT_HIS = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking();
+                var _ITEM_CHARGE_UNIT_HIS = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking().Where(x => x.APPR_DATE == null).ToList();
                 var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
                 var _SYS_CODE = db.SYS_CODE.AsNoTracking();
 
@@ -340,29 +392,30 @@ namespace Treasury.Web.Service.Actual
                                 switch (item.vEXEC_ACTION)
                                 {
                                     case "A"://新增
-                                        _CHARGE_UNIT_ID = sysSeqDao.qrySeqNo("D5", string.Empty).ToString().PadLeft(3, '0');
-                                        _CHARGE_UNIT_ID = $@"D5{_CHARGE_UNIT_ID}";
-                                        _ICU = new ITEM_CHARGE_UNIT()
-                                        {
-                                            CHARGE_UNIT_ID = _CHARGE_UNIT_ID,
-                                            ITEM_ID = item.vTREA_ITEM_NAME,
-                                            CHARGE_DEPT = item.vCHARGE_DEPT,
-                                            CHARGE_SECT = item.vCHARGE_SECT,
-                                            CHARGE_UID = item.vCHARGE_UID,
-                                            IS_MAIL_DEPT_MGR = item.vIS_MAIL_DEPT_MGR,
-                                            IS_MAIL_SECT_MGR = item.vIS_MAIL_SECT_MGR,
-                                            IS_DISABLED = "N",
-                                            DATA_STATUS = "2",//凍結中
-                                            CREATE_DT = dt,
-                                            CREATE_UID = searchData.vCUSER_ID,
-                                            LAST_UPDATE_DT = dt,
-                                            LAST_UPDATE_UID = searchData.vCUSER_ID,
-                                            FREEZE_UID = searchData.vCUSER_ID,
-                                            FREEZE_DT = dt
-                                        };
-                                        db.ITEM_CHARGE_UNIT.Add(_ICU);
-                                        logStr += "|";
-                                        logStr += _ICU.modelToString();
+                                        _CHARGE_UNIT_ID = "";
+                                        //_CHARGE_UNIT_ID = sysSeqDao.qrySeqNo("D5", string.Empty).ToString().PadLeft(3, '0');
+                                        //_CHARGE_UNIT_ID = $@"D5{_CHARGE_UNIT_ID}";
+                                        //_ICU = new ITEM_CHARGE_UNIT()
+                                        //{
+                                        //    CHARGE_UNIT_ID = _CHARGE_UNIT_ID,
+                                        //    ITEM_ID = item.vTREA_ITEM_NAME,
+                                        //    CHARGE_DEPT = item.vCHARGE_DEPT,
+                                        //    CHARGE_SECT = item.vCHARGE_SECT,
+                                        //    CHARGE_UID = item.vCHARGE_UID,
+                                        //    IS_MAIL_DEPT_MGR = item.vIS_MAIL_DEPT_MGR,
+                                        //    IS_MAIL_SECT_MGR = item.vIS_MAIL_SECT_MGR,
+                                        //    IS_DISABLED = "N",
+                                        //    DATA_STATUS = "2",//凍結中
+                                        //    CREATE_DT = dt,
+                                        //    CREATE_UID = searchData.vCUSER_ID,
+                                        //    LAST_UPDATE_DT = dt,
+                                        //    LAST_UPDATE_UID = searchData.vCUSER_ID,
+                                        //    FREEZE_UID = searchData.vCUSER_ID,
+                                        //    FREEZE_DT = dt
+                                        //};
+                                        //db.ITEM_CHARGE_UNIT.Add(_ICU);
+                                        //logStr += "|";
+                                        //logStr += _ICU.modelToString();
                                         break;
                                     case "U"://修改
                                         _ICU = db.ITEM_CHARGE_UNIT.FirstOrDefault(x => x.CHARGE_UNIT_ID == item.vCHARGE_UNIT_ID);
@@ -416,10 +469,6 @@ namespace Treasury.Web.Service.Actual
                                         IS_MAIL_DEPT_MGR = item.vIS_MAIL_DEPT_MGR,
                                         IS_MAIL_SECT_MGR = item.vIS_MAIL_SECT_MGR,
                                         IS_DISABLED = "N",
-                                        //CHARGE_UID_B = _ICU_Data.CHARGE_UID,
-                                        //IS_MAIL_DEPT_MGR_B = _ICU_Data.IS_MAIL_DEPT_MGR,
-                                        //IS_MAIL_SECT_MGR_B = _ICU_Data.IS_MAIL_SECT_MGR,
-                                        //IS_DISABLED_B = "N",
                                         APLY_DATE = dt,
                                         APLY_UID = searchData.vCUSER_ID,
                                         APPR_STATUS = "1" //表單申請
@@ -502,12 +551,138 @@ namespace Treasury.Web.Service.Actual
 
         public Tuple<bool, string> TinApproved(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId)
         {
-            throw new NotImplementedException();
+            SysSeqDao sysSeqDao = new SysSeqDao();
+            foreach (var aplyNo in aplyNos)
+            {
+                var _ITEM_CHARGE_UNIT_HISList = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if (_ITEM_CHARGE_UNIT_HISList.Any())
+                {
+                    foreach (var ItemChargeUnitHis in _ITEM_CHARGE_UNIT_HISList)
+                    {
+                        var _CHARGE_UNIT_ID = string.Empty;
+                        //保管單位設定檔
+                        var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.FirstOrDefault(x => x.CHARGE_UNIT_ID == ItemChargeUnitHis.CHARGE_UNIT_ID);
+
+                        if (_ITEM_CHARGE_UNIT != null)
+                        {
+                            _ITEM_CHARGE_UNIT.DATA_STATUS = "1";//可異動
+                            _ITEM_CHARGE_UNIT.CHARGE_UID = ItemChargeUnitHis.CHARGE_UID;
+                            _ITEM_CHARGE_UNIT.IS_MAIL_DEPT_MGR = ItemChargeUnitHis.IS_MAIL_DEPT_MGR;
+                            _ITEM_CHARGE_UNIT.IS_MAIL_SECT_MGR = ItemChargeUnitHis.IS_MAIL_SECT_MGR;
+
+                            _ITEM_CHARGE_UNIT.FREEZE_DT = null;
+                            _ITEM_CHARGE_UNIT.FREEZE_UID = null;
+                            //判斷是否刪除
+                            if (ItemChargeUnitHis.EXEC_ACTION == "D")
+                            {
+                                _ITEM_CHARGE_UNIT.IS_DISABLED = "Y";
+                            }
+                            _ITEM_CHARGE_UNIT.APPR_UID = userId;
+                            _ITEM_CHARGE_UNIT.APPR_DT = dt;
+                            logStr += _ITEM_CHARGE_UNIT.modelToString(logStr);
+                        }
+                        else
+                        {
+                            _CHARGE_UNIT_ID = $@"D5{sysSeqDao.qrySeqNo("D5", string.Empty).ToString().PadLeft(3, '0')}";
+                            //新增至ITEM_CHARGE_UNIT
+                            var ICU = new ITEM_CHARGE_UNIT()
+                            {
+                                CHARGE_UNIT_ID = _CHARGE_UNIT_ID,
+                                ITEM_ID = ItemChargeUnitHis.ITEM_ID,
+                                CHARGE_DEPT = ItemChargeUnitHis.CHARGE_DEPT,
+                                CHARGE_SECT = ItemChargeUnitHis.CHARGE_SECT,
+                                CHARGE_UID = ItemChargeUnitHis.CHARGE_UID,
+                                IS_MAIL_DEPT_MGR = ItemChargeUnitHis.IS_MAIL_DEPT_MGR,
+                                IS_MAIL_SECT_MGR = ItemChargeUnitHis.IS_MAIL_SECT_MGR,
+                                IS_DISABLED = ItemChargeUnitHis.IS_DISABLED,
+                                DATA_STATUS = "1", //可異動
+                                CREATE_UID = ItemChargeUnitHis.APLY_UID,
+                                CREATE_DT = dt,
+                                LAST_UPDATE_UID = ItemChargeUnitHis.APLY_UID,
+                                LAST_UPDATE_DT = dt,
+                                APPR_UID = userId,
+                                APPR_DT = dt
+                            };
+                            logStr += ICU.modelToString(logStr);
+                            db.ITEM_CHARGE_UNIT.Add(ICU);
+                        }
+
+                        //保管單位設定異動檔
+                        var _ITEM_CHARGE_UNIT_His = db.ITEM_CHARGE_UNIT_HIS.FirstOrDefault(x => x.APLY_NO == ItemChargeUnitHis.APLY_NO && x.HIS_ID == ItemChargeUnitHis.HIS_ID);
+                        if (_ITEM_CHARGE_UNIT_His != null)
+                        {
+                            if (_ITEM_CHARGE_UNIT_His.CHARGE_UNIT_ID.IsNullOrWhiteSpace())
+                            {
+                                _ITEM_CHARGE_UNIT_His.CHARGE_UNIT_ID = _CHARGE_UNIT_ID;
+                            }
+                            _ITEM_CHARGE_UNIT_His.APPR_STATUS = "2";//覆核完成
+                            _ITEM_CHARGE_UNIT_His.APPR_DATE = dt;
+                            _ITEM_CHARGE_UNIT_His.APPR_UID = userId;
+                            logStr = _ITEM_CHARGE_UNIT_His.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
 
         public Tuple<bool, string> TinReject(TreasuryDBEntities db, List<string> aplyNos, string logStr, DateTime dt, string userId, string desc)
         {
-            throw new NotImplementedException();
+            foreach (var aplyNo in aplyNos)
+            {
+                var _ITEM_CHARGE_UNIT_HISList = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
+                if (_ITEM_CHARGE_UNIT_HISList.Any())
+                {
+                    foreach (var ItemChargeUnitHis in _ITEM_CHARGE_UNIT_HISList)
+                    {
+                        //保管單位設定檔
+                        var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.FirstOrDefault(x => x.CHARGE_UNIT_ID == ItemChargeUnitHis.CHARGE_UNIT_ID);
+
+                        if (_ITEM_CHARGE_UNIT != null)
+                        {
+                            _ITEM_CHARGE_UNIT.DATA_STATUS = "1";//可異動
+                            _ITEM_CHARGE_UNIT.APPR_UID = userId;
+                            _ITEM_CHARGE_UNIT.APPR_DT = dt;
+                            _ITEM_CHARGE_UNIT.FREEZE_DT = null;
+                            _ITEM_CHARGE_UNIT.FREEZE_UID = null;
+
+                            logStr += _ITEM_CHARGE_UNIT.modelToString(logStr);
+                        }
+                        else
+                        {
+                            //return new Tuple<bool, string>(false, logStr);
+                        }
+
+                        //保管單位設定異動檔
+                        var _ITEM_CHARGE_UNIT_His = db.ITEM_CHARGE_UNIT_HIS.FirstOrDefault(x => x.APLY_NO == ItemChargeUnitHis.APLY_NO && x.HIS_ID == ItemChargeUnitHis.HIS_ID);
+                        if (_ITEM_CHARGE_UNIT_His != null)
+                        {
+                            _ITEM_CHARGE_UNIT_His.APPR_STATUS = "3";//退回
+                            _ITEM_CHARGE_UNIT_His.APPR_DATE = dt;
+                            _ITEM_CHARGE_UNIT_His.APPR_UID = userId;
+                            _ITEM_CHARGE_UNIT_His.APPR_DESC = desc;
+                            logStr += _ITEM_CHARGE_UNIT_His.modelToString(logStr);
+                        }
+                        else
+                        {
+                            return new Tuple<bool, string>(false, logStr);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, logStr);
+                }
+            }
+            return new Tuple<bool, string>(true, logStr);
         }
     }
 }

@@ -201,6 +201,7 @@ namespace Treasury.Web.Service.Actual
                     vSealItem = _ITEM_SEAL
                                 .Where(x => _neededItemId.Contains(x.TREA_ITEM_NAME))
                                 .Where(x => !removeSealList.Contains(x.ITEM_ID))
+                                .Where(x => x.INVENTORY_STATUS != "8")
                                 .AsEnumerable()
                                 .Select(x => new SelectOption()
                                 {
@@ -303,21 +304,63 @@ namespace Treasury.Web.Service.Actual
             return result;
         }
 
-        public List<SelectOption> GetActualAccessTypeOption()
+        public List<SelectOption> GetActualAccessTypeOption(string SEAL_ID = null)
         {
             List<SelectOption> result = new List<SelectOption>();
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                result = db.SYS_CODE.AsNoTracking()
+                var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == SEAL_ID);
+                if(_ITEM_SEAL != null)
+                {
+                    result = db.SYS_CODE.AsNoTracking()
                             .Where(x => x.CODE_TYPE == "ACCESS_TYPE")
                             .AsEnumerable()
-                            .ToList()
-                            .OrderBy(x => x.ISORTBY)
                             .Select(x => new SelectOption()
                             {
-                                 Value = x.CODE,
-                                 Text = x.CODE_VALUE
+                                Value = x.CODE,
+                                Text = x.CODE_VALUE
                             }).ToList();
+
+                    switch (_ITEM_SEAL.INVENTORY_STATUS)
+                    {
+                        case "1":   //在庫
+                            result = result.Where(x => x.Value == "B").ToList();
+                            break;
+                        case "2":   //已被取出
+                            break;
+                        case "3":   //預約存入
+                            break;
+                        case "4":   //預約取出
+                            break;
+                        case "5":   //預約取出，計庫存
+                            result = result.Where(x => x.Value == "G" || x.Value == "S").ToList();
+                            break;
+                        case "6":   //已被取出，計庫存
+                            break;
+                        case "7":   //已取消
+                            break;
+                        case "8":
+                            break;
+                        case "9":   //預約存入，計庫存
+                            result = result.Where(x => x.Value == "P" || x.Value == "A").ToList();
+                            break;
+                        case "10":  //全部取出
+                            break;
+                            
+                    }
+                }
+                else
+                {
+                    result = db.SYS_CODE.AsNoTracking()
+                            .Where(x => x.CODE_TYPE == "ACCESS_TYPE")
+                            .AsEnumerable()
+                            .Select(x => new SelectOption()
+                            {
+                                Value = x.CODE,
+                                Text = x.CODE_VALUE
+                            }).ToList();
+                }
+               
             }
             return result;
         }
@@ -656,7 +699,7 @@ namespace Treasury.Web.Service.Actual
                     APLY_FROM = "M",
                     TREA_REGISTER_ID = InsertModel.vTREA_REGISTER_ID,
                     ITEM_ID = InsertModel.vITEM_ID,
-                    ACCESS_TYPE = InsertModel.vACCESS_TYPE_CODE,
+                    //ACCESS_TYPE = InsertModel.vACCESS_TYPE_CODE,
                     ACCESS_REASON = InsertModel.vACCESS_REASON,
                     APLY_STATUS = status,
                     ACTUAL_ACCESS_UID = !InsertModel.ACTUAL_ACCESS_UID.IsNullOrWhiteSpace() ? InsertModel.ACTUAL_ACCESS_UID : null,
@@ -1144,7 +1187,7 @@ namespace Treasury.Web.Service.Actual
             {
                 return result;
             }
-            if(InsertModel.Any(x => x.vACTUAL_ACCESS_NAME == null))
+            if(InsertModel.Where(x => x.IsTakeout).Any(x => x.vACTUAL_ACCESS_NAME == null))
             {
                 result.DESCRIPTION = "有單號未輸入實際入庫人員";
                 return result;
@@ -1215,6 +1258,20 @@ namespace Treasury.Web.Service.Actual
                 }
             }
             return result;
+        }
+
+        public Tuple<string, string> GetConfrimedTime(string RegisterNo)
+        {
+            if (!RegisterNo.IsNullOrWhiteSpace())
+            {
+                using (TreasuryDBEntities db = new TreasuryDBEntities())
+                {
+                    var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().First(x => x.TREA_REGISTER_ID == RegisterNo);
+
+                    return new Tuple<string, string>(_TREA_OPEN_REC.ACTUAL_PUT_TIME?.ToString("hh:mm"), _TREA_OPEN_REC.ACTUAL_GET_TIME?.ToString("hh:mm"));
+                }
+            }
+            return null;
         }
     }
 }

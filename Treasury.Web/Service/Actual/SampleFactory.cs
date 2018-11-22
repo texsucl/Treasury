@@ -79,5 +79,30 @@ namespace Treasury.Web.Service.Actual
             }
             return null;
         }
+
+        /// <summary>
+        /// 回傳 類型
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public ITinAction GetTDAAction(DefinitionType itemId)
+        {
+            switch (itemId)
+            {
+                case DefinitionType.TREA_ITEM:
+                    return new ItemMaintain();
+                case DefinitionType.TREA_EQUIP:
+                    return new TreasuryMaintain();
+                case DefinitionType.MAIL_CONTENT:
+                    return new TreasuryMailContent();
+                case DefinitionType.MAIL_TIME:
+                    return new TreasuryMailTime();
+                case DefinitionType.ITEM_CHARGE_UNIT:
+                    return new ItemChargeUnit();
+                case DefinitionType.DEP_CHK_ITEM:
+                    return new DepChkItem();
+            }
+            return null;
+        }
     }
 }

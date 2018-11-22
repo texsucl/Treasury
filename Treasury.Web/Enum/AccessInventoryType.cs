@@ -57,6 +57,12 @@ namespace Treasury.Web.Enum
             /// </summary>
             [Description("資料庫異動中")]
             _8 = 8,
+
+            /// <summary>
+            /// 預約存入，計庫存
+            /// </summary>
+            [Description("預約存入，計庫存")]
+            _9 = 9,
         }
     }
 

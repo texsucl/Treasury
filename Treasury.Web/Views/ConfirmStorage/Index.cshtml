@@ -248,6 +248,29 @@
                 }
             });
             //#endregion
+            //IS_CHECKED Changeg事件
+            $('#IS_CHECKED').change(function () {
+                if ($(this).is(":checked")) {
+                    if (confirm("變更為查詢已確認資料?")) {
+                        
+                        $('#SearchjqgridDiv').empty();
+                    }
+                    else {
+                        $(this).prop('checked', false);
+                        return false;
+                    }
+                }
+                else {
+                    if (confirm("變更為查詢未確認資料?")) {
+                        $('#ACSearchjqgridDiv').empty();
+                    }
+                    else {
+                        $(this).prop('checked', true);
+                        return false;
+                    }
+                }
+            });
+            //#endregion
             //作業類型SelectedChange事件 (1,2,3,4)
             $('#ItemOpType').change(function () {
                 var opTypeId = this.value;
@@ -342,6 +365,9 @@
                         $('#AccessItemTd').children().remove();
                         $('#AccessItemTd').append('<select id="AccessItem" name="AccessItem"></select>');
                         customerUtility.addoption('AccessItem', result.Item2);
+                        if ($('input[name="IS_CHECKED"]').is(':checked')) {
+                            $('#AccessItem').hide();
+                        }
                     }
                     else {
                         $('.ShowOrNot').hide();
@@ -379,6 +405,23 @@
         //region 入庫確認
         function formConfirm() {
             var txtConform = "";
+            var listId = 'SearchList';
+            var needToCheck = false;
+            var _cTxt = [];
+            if (!$('input[name="IS_CHECKED"]').is(':checked')) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var opType = tr.find($.validator.format('td[aria-describedby$={0}_vITeM_OP_TYPE]', listId)).text();
+                    var itemDesc = tr.find($.validator.format('td[aria-describedby$={0}_vITEM]', listId)).text();
+                    var sealItem = tr.find($.validator.format('td[aria-describedby$={0}_vSEAL_ITEM]', listId)).text();
+                    var checkValue = tr.find($.validator.format('td[aria-describedby$={0}_vITEM_ID]', listId)).find('input:checkbox:first').is(':checked');
+                    if (opType == '2' && checkValue == false) {
+                        _cTxt.push(itemDesc + ": " + sealItem);
+                        needToCheck = true;
+                    }
+                });
+            }
+
             if ($('input[name="IS_CHECKED"]').is(':checked')) {
                 txtConform = '是否異動已確認?';
             } else {
@@ -413,6 +456,15 @@
                         customerUtility.alert("無選擇項目", 'w');
                         return false;
                     }
+                    if (needToCheck) {
+                        if (confirm("提醒 " + _cTxt.join(', ') + " 尚未回存金庫")) {
+
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+
                     $.ajax({
                         type: 'POST',
                         data: JSON.stringify({
@@ -751,12 +803,12 @@
         function SearchStorageGrid() {
             var colTitleArray = ['動作', '確認', '作業類型', '存取項目', '作業別', '印章內容', '申請單號', '入庫原因', '作業別CODE', '印鑑物品編號', 'h申請單號', 'ID', 'h確認人員', 'h確認人員姓名', 'h存取項目', 'hitemId']
             var colModelArray = [
-                { name: "act", index: "act", width: 100, sortable: false, align: 'center' },
-                { name: "vITEM_ID", index: "vITEM_ID", width: 70, sortable: false, align: 'center', formatter: formatterCheck },
+                { name: "act", index: "act", width: 75, sortable: false, align: 'center' },
+                { name: "vITEM_ID", index: "vITEM_ID", width: 60, sortable: false, align: 'center', formatter: formatterCheck },
                 { name: "vITeM_OP_TYPE", index: "vITeM_OP_TYPE", width: 70, sortable: false, align: 'center' },
-                { name: "vITEM", index: "vITEM", width: 95, sortable: false, align: 'center' },
-                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 70, sortable: false, align: 'center' },
-                { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 70, sortable: false, align: 'center' },
+                { name: "vITEM", index: "vITEM", width: 100, sortable: false, align: 'center' },
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 60, sortable: false, align: 'center' },
+                { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 175, sortable: false, align: 'center' },
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
                 { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 175, sortable: false, align: 'center' },
                 { name: "vACCESS_TYPE_CODE", index: "vACCESS_TYPE_CODE", hidden: true },
@@ -895,6 +947,7 @@
             $('#_hvSEAL_ITEM_ID').val(data.vSEAL_ITEM_ID);
             $('#huuid').val('');
             $('#huuid').val(data.uuid);
+            $('#AccessItem').show();
             if ($('#ItemOpType option').length > 0) {
                 $('#ItemOpType').val($($('#ItemOpType option')[0]).val()).change();
             }
@@ -947,6 +1000,9 @@
                         $('#AccessItemTd').append('<select id="AccessItem" name="AccessItem"></select>');
                         customerUtility.addoption('AccessItem', result.Item2);
                         $('#AccessItem').val(data.vSEAL_ITEM_ID);
+                        if ($('input[name="IS_CHECKED"]').is(':checked')) {
+                            $('#AccessItem').hide();
+                        }
                     }
                     else {
                         $('.ShowOrNot').hide();

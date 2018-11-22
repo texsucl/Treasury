@@ -158,10 +158,15 @@ namespace Treasury.Web.Service.Actual
             {
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
+                    //存取項目表
+                    var _TREA_ITEM_AsNo = db.TREA_ITEM.AsNoTracking().ToList();
+
+                    //申請單紀錄檔已入庫確認
                     var _TREA_APLY_REC = db.TREA_APLY_REC.AsNoTracking()
                         .Where(x => x.TREA_REGISTER_ID == RegisterId)
                         .Where(x => x.APLY_STATUS == "C02");
 
+                    //申請單暫存檔是否有其他業務
                     var _TREA_APLY_TEMP_ITEM_ID = db.TREA_APLY_TEMP.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == "D1023")?.ITEM_ID;
                     if(_TREA_APLY_TEMP_ITEM_ID != null)
                     {
@@ -170,10 +175,11 @@ namespace Treasury.Web.Service.Actual
                                RowItemIdList.Add(_TREA_APLY_TEMP_ITEM_ID);
                     }
 
+                    //申請單紀錄檔已入庫確認根據下方條件需要排除
                     _TREA_APLY_REC.ToList().ForEach(x => {
-                        if (x.ITEM_ID != "D1023" && !RowItemIdList.Contains(x.ITEM_ID))
+                        if (x.ITEM_ID != "D1023" && !RowItemIdList.Contains(x.ITEM_ID) && _TREA_ITEM_AsNo.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE != "2")  //非其他業務、不在排除的List中、非作業類型是 2 時
                             RowItemIdList.Add(x.ITEM_ID);
-                        else if(x.ITEM_ID == "D1023" && x.APLY_UID == cUserId && !RowItemIdList.Contains(x.ITEM_ID))
+                        else if(x.ITEM_ID == "D1023" && x.APLY_UID == cUserId && !RowItemIdList.Contains(x.ITEM_ID)) //是其他業務、申請人為登入者、不在排除的List中
                             RowItemIdList.Add(x.ITEM_ID);
 
                         var _TREA_ITEM_ForSealRemove = db.TREA_ITEM.AsNoTracking()
@@ -490,10 +496,10 @@ namespace Treasury.Web.Service.Actual
                         //vAPLY_NO = _ITeM_OP_TYPE == "3" ? x.APLY_NO : null,
                         vAPLY_NO = x.APLY_NO,
                         vTREA_REGISTER_ID = x.TREA_REGISTER_ID,
-                        vACCESS_TYPE = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE_VALUE : null,
-                        vACCESS_TYPE_CODE = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE : null,
-                        vSEAL_ITEM_ID = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.ITEM_ID : null,
-                        vSEAL_ITEM = x.APLY_STATUS == "C02" && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.SEAL_DESC : null,
+                        vACCESS_TYPE = (x.APLY_STATUS == "C01" || x.APLY_STATUS == "C02") && _ITeM_OP_TYPE == "2" ? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE_VALUE : null,
+                        vACCESS_TYPE_CODE = (x.APLY_STATUS == "C01" || x.APLY_STATUS == "C02") && _ITeM_OP_TYPE == "2" ? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE : null,
+                        vSEAL_ITEM_ID = (x.APLY_STATUS == "C01" || x.APLY_STATUS == "C02") && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.ITEM_ID : null,
+                        vSEAL_ITEM = (x.APLY_STATUS == "C01" || x.APLY_STATUS == "C02") && _ITeM_OP_TYPE == "2" ? _ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == _OTHER_ITEM_APLY.FirstOrDefault(z => z.APLY_NO == x.APLY_NO).ITEM_ID)?.SEAL_DESC : null,
                         //vSEAL_ITEM_OPTION = _ITeM_OP_TYPE == "2" ? _SEAL_ITEM.Select(y => new SelectOption() { Value = y.SEAL_DESC, Text = y.APLY_DEPT }).ToList() : null,
                         vCONFIRM_UID = GetUserInfo(x.CONFIRM_UID)?.EMP_Name,
                         vCONFIRM_DT = x.CONFIRM_DT?.ToString("yyyy/MM/dd HH:mm"),
@@ -642,7 +648,7 @@ namespace Treasury.Web.Service.Actual
                     #region 申請單紀錄檔
                     var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == APLY_NO);
 
-                    _TREA_APLY_REC.ACCESS_TYPE = data.vACCESS_TYPE;
+                    _TREA_APLY_REC.ACCESS_TYPE = data.vACCESS_TYPE_CODE;
                     _TREA_APLY_REC.ACCESS_REASON = data.vACCESS_REASON;
                     //_TREA_APLY_REC.CONFIRM_UID = data.vCurrentUid;
                     //_TREA_APLY_REC.CONFIRM_DT = DateTime.Now;

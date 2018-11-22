@@ -357,6 +357,7 @@ namespace Treasury.Web.Service.Actual
 
                 var _data = db.TREA_APLY_REC.AsNoTracking()
                     .Where(x => data.vItem.Contains(x.ITEM_ID)) //項目
+                    .Where(x => data.vAplyUnit.Contains(x.APLY_UNIT) , data.vCustodianFlag && data.vAplyUnit.Count == 1) //保管科還是要單獨查詢申請單位
                     .Where(x => data.vAplyUnit.Contains(x.APLY_UNIT) , !data.vCustodianFlag) //非保管科要加入申請單位條件 (20181105調整)
                     .Where(x => x.APLY_DT >= _vAPLY_DT_S, _vAPLY_DT_S != null) //申請日期(起)
                     .Where(x => x.APLY_DT <= _vAPLY_DT_E, _vAPLY_DT_E != null) //申請日期(迄)

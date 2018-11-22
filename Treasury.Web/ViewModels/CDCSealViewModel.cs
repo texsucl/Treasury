@@ -28,13 +28,13 @@ namespace Treasury.Web.ViewModels
         public string vStatus { get; set; }
 
         /// <summary>
-        /// 資料庫名稱
+        /// 入庫日期
         /// </summary>
         [Description("入庫日期")]
         public string vPUT_Date { get; set; }
 
         /// <summary>
-        /// 入庫日期
+        /// 取出日期
         /// </summary>
         [Description("取出日期")]
         public string vGet_Date { get; set; }

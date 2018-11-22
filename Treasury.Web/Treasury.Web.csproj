@@ -351,7 +351,9 @@
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\SpecifiedTimeTreaController.cs" />
     <Compile Include="Controllers\StockController.cs" />
+    <Compile Include="Controllers\TreaDefinitionApprController.cs" />
     <Compile Include="Controllers\TREAReviewWorkController.cs" />
+    <Compile Include="Controllers\FileUploadController.cs" />
     <Compile Include="Controllers\TreasuryAccessController.cs" />
     <Compile Include="Controllers\TreasuryAccessCustodyController.cs" />
     <Compile Include="Controllers\TreasuryKeyCheckController.cs" />
@@ -405,6 +407,7 @@
     <Compile Include="Enum\MessageType.cs" />
     <Compile Include="Enum\ActionType.cs" />
     <Compile Include="Enum\DailyRoutineType.cs" />
+    <Compile Include="Enum\ExcelName.cs" />
     <Compile Include="Enum\SysCodeType.cs" />
     <Compile Include="Enum\OpenPartialViewType.cs" />
     <Compile Include="Enum\DefinitionType.cs" />
@@ -417,6 +420,8 @@
     <Compile Include="Handler\TokenHandler.cs" />
     <Compile Include="Infrastructure\BaseController.cs" />
     <Compile Include="BO\StringUtil.cs" />
+    <Compile Include="Infrastructure\CommucationAttribute.cs" />
+    <Compile Include="Infrastructure\ValidateFiles.cs" />
     <Compile Include="Models\APLY_REC_HIS.cs">
       <DependentUpon>dbTreasury.tt</DependentUpon>
     </Compile>
@@ -697,12 +702,14 @@
     <Compile Include="Service\Actual\Marginp.cs" />
     <Compile Include="Service\Actual\SampleFactory.cs" />
     <Compile Include="Service\Actual\CA.cs" />
+    <Compile Include="Service\Actual\FileService.cs" />
     <Compile Include="Service\Actual\Seal.cs" />
     <Compile Include="Service\Actual\Estate.cs" />
     <Compile Include="Service\Actual\INTRA.cs" />
     <Compile Include="Service\Actual\SpecifiedTimeTreasury.cs" />
     <Compile Include="Service\Actual\SqlServerTypes\Loader.cs" />
     <Compile Include="Service\Actual\Stock.cs" />
+    <Compile Include="Service\Actual\TreaDefinitionAppr.cs" />
     <Compile Include="Service\Actual\TREAReviewWork.cs" />
     <Compile Include="Service\Actual\TreasuryAccess.cs" />
     <Compile Include="Service\Actual\TreasuryAccessCustody.cs" />
@@ -723,6 +730,7 @@
     <Compile Include="Service\Interface\ICDCAction.cs" />
     <Compile Include="Service\Interface\IConfirmStorage.cs" />
     <Compile Include="Service\Interface\IDepChkItem.cs" />
+    <Compile Include="Service\Interface\IFileService.cs" />
     <Compile Include="Service\Interface\IItemChargeUnit.cs" />
     <Compile Include="Service\Interface\IItemImp.cs" />
     <Compile Include="Service\Interface\ICacheProvider.cs" />
@@ -736,6 +744,7 @@
     <Compile Include="Service\Interface\ISpecifiedTimeTreasury.cs" />
     <Compile Include="Service\Interface\IStock.cs" />
     <Compile Include="Service\Interface\ITinAction.cs" />
+    <Compile Include="Service\Interface\ITreaDefinitionAppr.cs" />
     <Compile Include="Service\Interface\ITREAReviewWork.cs" />
     <Compile Include="Service\Interface\ITreasuryAccess.cs" />
     <Compile Include="Service\Interface\ITreasuryAccessCustody.cs" />
@@ -748,6 +757,8 @@
     <Compile Include="Service\Interface\ITreasuryReport.cs" />
     <Compile Include="Utility\CacheList.cs" />
     <Compile Include="Utility\Extension.cs" />
+    <Compile Include="Utility\FactoryRegistry.cs" />
+    <Compile Include="Utility\FileRelated.cs" />
     <Compile Include="Utility\Jqgrid.cs" />
     <Compile Include="Utility\jqGridParam.cs" />
     <Compile Include="Utility\MSGReturnModel.cs" />
@@ -767,6 +778,8 @@
     <Compile Include="ViewModels\AuthRptModel.cs" />
     <Compile Include="ViewModels\BeforeOpenTreasuryViewModel.cs" />
     <Compile Include="ViewModels\CDCChargeViewModel.cs" />
+    <Compile Include="ViewModels\FileEstateModel.cs" />
+    <Compile Include="ViewModels\FileItemBookEstateModel.cs" />
     <Compile Include="ViewModels\ItemChargeUnitChangeRecordSearchDetailViewModel.cs" />
     <Compile Include="ViewModels\ItemChargeUnitChangeRecordSearchViewModel.cs" />
     <Compile Include="ViewModels\ItemChargeUnitInsertViewModel.cs" />
@@ -777,6 +790,8 @@
     <Compile Include="ViewModels\ItemMaintainInsertViewModel.cs" />
     <Compile Include="ViewModels\ItemMaintainSearchDetailViewModel.cs" />
     <Compile Include="ViewModels\ItemMaintainSearchViewModel.cs" />
+    <Compile Include="ViewModels\IFileModel.cs" />
+    <Compile Include="ViewModels\TDAApprSearchDetailViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentHistorySearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentSearchViewModel.cs" />
     <Compile Include="ViewModels\TreasuryMailContentUpdateViewModel.cs" />
@@ -1387,6 +1402,9 @@
     <Content Include="Views\ItemMaintain\ChangeRecord.cshtml" />
     <Content Include="Views\ItemMaintain\ChangeRecordView.cshtml" />
     <Content Include="Views\ItemMaintain\Index.cshtml" />
+    <Content Include="Views\TreaDefinitionAppr\Index.cshtml" />
+    <Content Include="Views\TreaDefinitionAppr\Search.cshtml" />
+    <Content Include="Views\FileUpload\EstateUpload.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

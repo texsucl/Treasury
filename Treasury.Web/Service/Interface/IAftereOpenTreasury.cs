@@ -36,7 +36,9 @@ namespace Treasury.Web.Service.Interface
         /// 產生實際作業別下拉選單
         /// </summary>
         /// <returns></returns>
-        List<SelectOption> GetActualAccessTypeOption();
+        List<SelectOption> GetActualAccessTypeOption(string SEAL_ID);
+
+        Tuple<string, string> GetConfrimedTime(string RegisterNo);
 
         /// <summary>
         /// 查詢未確認表單資料

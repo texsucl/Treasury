@@ -857,6 +857,15 @@
                 return '<span class="red">' + customerUtility.addCommas(rdata.vNumberOfShares_Aft) + '</span>';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function formattervMemo(cellvalue, options, rdata) {
             if (rdata.vMemo_Aft == null)
                 return rdata.vMemo || '';
@@ -873,8 +882,8 @@
             }
             colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '股票類型', '序號前置碼', '序號(起)', '序號(迄)', '張數', '每股金額', '單張股數', '單張面額', '面額小計', '股數小計', '備註說明',
-                '股票類型異動前', '序號前置碼異動前', '序號(起)異動前', '序號(迄)異動前', '張數異動前', '每股金額異動前', '單張股數異動前', '單張面額異動前', '面額小計異動前', '股數小計異動前', '備註說明異動前',
-                '股票類型異動後', '序號前置碼異動後', '序號(起)異動後', '序號(迄)異動後', '張數異動後', '每股金額異動後', '單張股數異動後', '單張面額異動後', '面額小計異動後', '股數小計異動後', '備註說明異動後',
+                '股票類型異動前', '序號前置碼異動前', '序號(起)異動前', '序號(迄)異動前', '張數異動前', '每股金額異動前', '單張股數異動前', '單張面額異動前', '面額小計異動前', '股數小計異動前', '備註說明異動前', '權責單位異動前',
+                '股票類型異動後', '序號前置碼異動後', '序號(起)異動後', '序號(迄)異動後', '張數異動後', '每股金額異動後', '單張股數異動後', '單張面額異動後', '面額小計異動後', '股數小計異動後', '備註說明異動後', '權責單位異動後',
                 '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterActD });
@@ -885,7 +894,7 @@
                 colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
             }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+            colModelArray.push({ name: "vCharge_Name_Show", index: "vCharge_Name_Show", width: 200, sortable: false, align: 'center', formatter: formattervCharge_Name });
 
             colModelArray.push({ name: "vStock_Type_Show", index: "vStock_Type_Show", width: 90, sortable: false, align: 'center', formatter: formattervStock_Type, unformatter: unformattervStock });
             colModelArray.push({ name: "vStock_No_Preamble_Show", index: "vStock_No_Preamble_Show", width: 90, sortable: false, align: 'center', formatter: formattervStock_No_Preamble });
@@ -910,6 +919,7 @@
             colModelArray.push({ name: "vDenominationTotal", index: "vDenominationTotal", hidden: true });
             colModelArray.push({ name: "vNumberOfShares", index: "vNumberOfShares", hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
 
             colModelArray.push({ name: "vStock_Type_Aft", index: "vStock_Type_Aft", hidden: true });
             colModelArray.push({ name: "vStock_No_Preamble_Aft", index: "vStock_No_Preamble_Aft", hidden: true });
@@ -922,6 +932,7 @@
             colModelArray.push({ name: "vDenominationTotal_Aft", index: "vDenominationTotal_Aft", hidden: true });
             colModelArray.push({ name: "vNumberOfShares_Aft", index: "vNumberOfShares_Aft", hidden: true });
             colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
 
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });

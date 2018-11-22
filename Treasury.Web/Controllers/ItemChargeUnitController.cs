@@ -7,10 +7,13 @@ using Treasury.Web.Enum;
 using Treasury.Web.Service.Actual;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
+using Treasury.WebActionFilter;
 using Treasury.WebUtility;
 
 namespace Treasury.Web.Controllers
 {
+    [Authorize]
+    [CheckSessionFilterAttribute]
     public class ItemChargeUnitController : CommonController
     {
         // GET: ItemChargeUnit
@@ -106,21 +109,13 @@ namespace Treasury.Web.Controllers
             return PartialView();
         }
 
-        public ActionResult ChangeRecordView(string AplyNo, string ChargeUnitId, ItemChargeUnitChangeRecordSearchViewModel data)
+        public ActionResult ChangeRecordView(string AplyNo, ItemChargeUnitChangeRecordSearchViewModel data)
         {
             List<ItemChargeUnitChangeRecordSearchDetailViewModel> result = new List<ItemChargeUnitChangeRecordSearchDetailViewModel>();
             var _data = (List<ItemChargeUnitChangeRecordSearchDetailViewModel>)ItemChargeUnit.GetChangeRecordSearchData(data, AplyNo);
-            if(AplyNo != null)
-            {
-                result.Add(_data.FirstOrDefault(x => x.vCHARGE_UNIT_ID == ChargeUnitId));
-                Cache.Invalidate(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData);
-                Cache.Set(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData, result);
-            }
-            else
-            {
-                Cache.Invalidate(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData);
-                Cache.Set(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData, _data);
-            }
+            Cache.Invalidate(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData);
+            Cache.Set(CacheList.ItemChargeUnitChangeRecordSearchDetailViewData, _data);
+
             ViewBag.hAplyNo = AplyNo;
             return PartialView();
         }

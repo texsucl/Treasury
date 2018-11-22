@@ -491,6 +491,15 @@
                 return '<span class="red">' + rdata.vMemo_Aft + '</span>';
         }
 
+        function formattervCharge_Name(cellvalue, options, rdata) {
+            if (rdata.vCharge_Name_AFT != null) {
+                return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
+            }
+            else {
+                return rdata.vCharge_Name;
+            }
+        }
+
         function CDC_EstateTempCompleteFun(listId) {
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                 var tr = $(this);
@@ -549,8 +558,8 @@
             colNameArray = colNameArray.concat(['存入申請人', '權責單位',
                 '冊號', '群組編號', '大樓名稱', '坐落', '備註',
                 '狀別', '發狀日', '字號', '地號/建號', '門牌號', '流水號/編號', '備註',
-                '狀別異動前', '發狀日異動前', '字號異動前', '地/建號異動前', '門牌號異動前', '流水號/編號異動前', '備註異動前',
-                '狀別異動後', '發狀日異動後', '字號異動後', '地/建號異動後', '門牌號異動後', '流水號/編號異動後', '備註異動後',
+                '狀別異動前', '發狀日異動前', '字號異動前', '地/建號異動前', '門牌號異動前', '流水號/編號異動前', '備註異動前', '權責單位異動前',
+                '狀別異動後', '發狀日異動後', '字號異動後', '地/建號異動後', '門牌號異動後', '流水號/編號異動後', '備註異動後', '權責單位異動後',
                 '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
@@ -561,7 +570,7 @@
                 colModelArray.push({ name: "vGet_Uid_Name", index: "vGet_Uid_Name", width: 100, align: 'center', sortable: false });
             }
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false });
+            colModelArray.push({ name: "vCharge_Name_Show", index: "vCharge_Name_Show", width: 200, sortable: false, align: 'center', formatter: formattervCharge_Name });
 
             colModelArray.push({ name: "vIB_Book_No_Name", index: "vIB_Book_No_Name", width: 200, sortable: false, align: 'center', formatter: formattervIB_Book_No_Name, unformatter: unformattervEstate });
             colModelArray.push({ name: "vIB_Book_No", index: "vIB_Book_No", hidden: true });
@@ -584,6 +593,7 @@
             colModelArray.push({ name: "vHouse_No", index: "vHouse_No", hidden: true });
             colModelArray.push({ name: "vEstate_Seq", index: "vEstate_Seq", hidden: true });
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
+            colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
 
             colModelArray.push({ name: "vEstate_Form_No_Aft", index: "vEstate_Form_No_Aft", hidden: true });
             colModelArray.push({ name: "vEstate_Date_Aft", index: "vEstate_Date_Aft", hidden: true });
@@ -592,6 +602,7 @@
             colModelArray.push({ name: "vHouse_No_Aft", index: "vHouse_No_Aft", hidden: true });
             colModelArray.push({ name: "vEstate_Seq_Aft", index: "vEstate_Seq_Aft", hidden: true });
             colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
+            colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
 
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });

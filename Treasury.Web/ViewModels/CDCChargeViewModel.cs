@@ -10,6 +10,10 @@ namespace Treasury.Web.ViewModels
     /// </summary>
     public class CDCChargeViewModel
     {
+        public CDCChargeViewModel() {
+            DepositData = new CDCDepositViewModel();
+        }
+
         /// <summary>
         /// 權責單位
         /// </summary>

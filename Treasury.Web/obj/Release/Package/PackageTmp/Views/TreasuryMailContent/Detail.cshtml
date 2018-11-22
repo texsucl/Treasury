@@ -1,0 +1,177 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@model Treasury.Web.ViewModels.TreasuryMailContentUpdateViewModel
+<div id="TMCD">
+    <form id="TMC_D_Form">
+        <table>
+            <tr>
+                <td>
+                    <label>內文編號 : </label>
+                </td>
+                <td>
+                    <label id="TMC_D_vMAIL_CONTENT_ID">@Model.vMAIL_CONTENT_ID</label>                
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>停用註記 : </label>
+                </td>
+                <td>
+                    <div class="checkbox checkbox-info">
+                        <input id="TMC_D_vIS_DISABLED" name="TMC_D_vIS_DISABLED" type="checkbox" value="IS_DISABLED">
+                        <label> </label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>發送主旨 : </label>
+                </td>
+                <td>
+                    @Html.TextArea("TMC_D_vMAIL_SUBJECT", Model.vMAIL_SUBJECT, new {  @style = "width:300px;" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>發送內文 : </label>
+                    <br/><i class="fa fa-exclamation-circle title" style="font-size:24px;bottom:auto;"
+                       alt="@Ref.MessageType.Mail_Content_Message.GetDescription()"></i>
+                </td>
+                <td>
+                    @Html.TextArea("TMC_D_vMAIL_CONTENT", Model.vMAIL_CONTENT, new { @style = "width:300px;height:150px;" })
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="button" id="TMC_D_Apply" value="申請覆核" class="btn btn-primary" />
+                    <input type="button" id="TMC_D_Back" value="回上一頁" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="TMC_D_OpenChangeRecordSearchDetail"></div>
+    @*<div id="OpenChangeRecordSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+       
+    </div>*@
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMC_D_Url = {};
+        TMC_D_Url.ReceiveView = '@Url.Action("Receive", "TreasuryMailContent")';
+        TMC_D_Url.apply = '@Url.Action("ApplyTempData", "TreasuryMailContent")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var TMC_D_Form_Id = 'TMC_D_Form'; //formI
+        var TMC_D_vMAIL_CONTENT_ID_ID = "TMC_D_vMAIL_CONTENT_ID"; //內文編號Id
+        var TMC_D_vIS_DISABLED_ID = 'TMC_D_vIS_DISABLED'; //停用註記Id
+        var TMC_D_vMAIL_SUBJECT_ID = 'TMC_D_vMAIL_SUBJECT'; //發送主旨Id
+        var TMC_D_vMAIL_CONTENT_ID = 'TMC_D_vMAIL_CONTENT'; //發送內文Id
+        var TMC_D_OpenChangeRecordSearchDetail_ID = 'TMC_D_OpenChangeRecordSearchDetail'; //對應功能
+        var _vIS_DISABLED = '@Model.vIS_DISABLED';
+
+        $('#'+TMC_D_vIS_DISABLED_ID).prop('checked',_vIS_DISABLED == "Y");
+
+        //#endregion 參數設定
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMC_D_Apply':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { TMC_D_Apply(); });
+                    break;
+                case 'TMC_D_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        if (confirm('如欲調整請申請覆核,是否回上一頁?'))
+                           customerUtility.closeDialog(this);
+                    });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        setVerified();
+        TMC_D_ReceiveLoad();
+
+        //#region 註冊verified
+        function setVerified() {
+            verified.required(TMC_D_Form_Id, TMC_D_vMAIL_SUBJECT_ID, message.required('發送主旨')); //發送主旨為必填
+            verified.required(TMC_D_Form_Id, TMC_D_vMAIL_CONTENT_ID, message.required('發送內文')); //發送內文為必填
+        }
+        //#endregion 註冊verified
+
+        
+
+        function TMC_D_Apply()
+        {
+            $('#' + TMC_D_Form_Id).validate().resetForm();
+            if ($('#' + TMC_D_Form_Id).valid())
+            {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: TMC_D_Url.apply,
+                    data: JSON.stringify({
+                        model: TreasuryMailContentUpdateViewModel(
+                            $('#' + TMC_D_vIS_DISABLED_ID).prop('checked') == true ? 'Y' : 'N',
+                            $('#' + TMC_D_vMAIL_SUBJECT_ID).val(),
+                            $('#' + TMC_D_vMAIL_CONTENT_ID).val()
+                            )
+                    }),
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#TMC_D_Apply'));
+                    }
+                })
+            }
+        }
+
+        function TMC_D_ReceiveLoad() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    Mail_ID: $('#' + TMC_D_vMAIL_CONTENT_ID_ID).text(),
+                    Aply_No:null,
+                    Act_Flag:'Y'
+                }),
+                dataType: 'html',
+                url: TMC_D_Url.ReceiveView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#' + TMC_D_OpenChangeRecordSearchDetail_ID).children().remove();
+                    $('#' + TMC_D_OpenChangeRecordSearchDetail_ID).html(vdata);
+                }
+            })
+        }
+
+        //#region 異動紀錄查詢 ViewModel
+        function TreasuryMailContentHistorySearchViewModel(
+            vMAIL_CONTENT_ID
+            ) {
+            var obj = {};
+            obj['vMAIL_CONTENT_ID'] = vMAIL_CONTENT_ID;
+            return obj;
+        }
+        //#endregion
+
+        function TreasuryMailContentUpdateViewModel(
+            vIS_DISABLED,
+            vMAIL_SUBJECT,
+            vMAIL_CONTENT
+            ){
+            var obj = {};
+            obj['vIS_DISABLED'] = vIS_DISABLED;
+            obj['vMAIL_SUBJECT'] = vMAIL_SUBJECT;
+            obj['vMAIL_CONTENT'] = vMAIL_CONTENT;
+            return obj;
+        }
+    });
+</script>

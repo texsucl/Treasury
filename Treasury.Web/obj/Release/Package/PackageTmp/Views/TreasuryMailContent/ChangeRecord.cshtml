@@ -1,0 +1,106 @@
+﻿<div id="TCR">
+    <form id="TMCR_Form_Search">
+        <table>
+            <tr>
+                <td>
+                    <label>內文編號 : </label>
+                </td>
+                <td colspan="3">
+                    @Html.DropDownList("TMCR_dMAIL_ID", (SelectList)ViewBag.dMAIL_ID)
+                </td>
+                @*<td>
+                    <label>工作單號 : </label>
+                </td>
+                <td>
+                    <input type="text" id="tAply_No" name="tAply_No" />
+                </td>*@
+            </tr>
+            <tr>
+                <td>
+                    <label>覆核結果 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("TMCR_dAppr_Status", (SelectList)ViewBag.dAppr_Status)
+                </td>
+                <td>
+                    <label>異動日期 : </label>
+                </td>
+                <td>
+                    <input type="text" id="TMCR_tAply_date" name="tAply_date" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="button" class="btn btn-primary" id="TMCR_ChangeRecordSearch" value="查詢" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="OpenChangeRecordSearchDiv">
+        <div id="OpenChangeRecordSearchDetail"></div>
+    </div> 
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TMCR_Url = {};
+        TMCR_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "TreasuryMailContent")';
+        //#endregion url設定
+
+        //#region 註冊事件
+
+        var _Mail_ID = '@ViewBag.vMail_ID';
+        _Mail_ID = _Mail_ID || '';
+        if (_Mail_ID != '')
+            $('#TMCR_dMAIL_ID').val(_Mail_ID);
+        created.createDatepicker('TMCR_tAply_date', null);
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TMCR_ChangeRecordSearch':
+                    $('#' + id).on('click', function () { TMCR_ChangeRecordSearch(); });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        TMCR_ChangeRecordSearch();
+
+        function TMCR_ChangeRecordSearch() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null,
+                    data: TreasuryMailContentHistorySearchViewModel(
+                        $('#TMCR_dMAIL_ID').val(),
+                        $('#TMCR_dAppr_Status').val(),
+                        $('#TMCR_tAply_date').val())
+                }),
+                dataType: 'html',
+                url: TMCR_Url.openChangeRecordView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#OpenChangeRecordSearchDiv').children().remove();
+                    $('#OpenChangeRecordSearchDiv').append('<div id="OpenChangeRecordSearchDetail"></div>');
+                    $('#OpenChangeRecordSearchDetail').html(vdata);
+                }
+            })
+        }
+
+        //#region 異動紀錄查詢畫面  ViewModel
+        function TreasuryMailContentHistorySearchViewModel(
+            vMAIL_CONTENT_ID,
+            vAPPR_STATUS,
+            vAply_Date
+            ) {
+            var obj = {};
+            obj['vMAIL_CONTENT_ID'] = vMAIL_CONTENT_ID;
+            obj['vAPPR_STATUS'] = vAPPR_STATUS;
+            obj['vAply_Date'] = vAply_Date;
+            return obj;
+        }
+        //#endregion
+    });
+</script>
