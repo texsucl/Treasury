@@ -41,5 +41,12 @@ namespace Treasury.Web.Models
         public string MEMO_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string ESTATE_FORM_NO_ACCESS { get; set; }
+        public Nullable<System.DateTime> ESTATE_DATE_ACCESS { get; set; }
+        public string OWNERSHIP_CERT_NO_ACCESS { get; set; }
+        public string LAND_BUILDING_NO_ACCESS { get; set; }
+        public string HOUSE_NO_ACCESS { get; set; }
+        public string ESTATE_SEQ_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
     }
 }

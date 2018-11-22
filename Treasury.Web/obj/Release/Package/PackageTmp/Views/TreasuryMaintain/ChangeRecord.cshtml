@@ -1,0 +1,141 @@
+﻿<div>
+    <form id="TM_Form_Search">
+        <table>
+            <tr>
+                <td>
+                    <label>控管模式 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("dControl_Mode_Search_ChangeRecord", (SelectList)ViewBag.dControl_Mode_Search)
+                </td>
+                <td>
+                    <label>工作單號 : </label>
+                </td>
+                <td>
+                    <input type="text" id="tAply_No" name="tAply_No" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>覆核狀態 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("dAppr_Status", (SelectList)ViewBag.dAppr_Status)
+                </td>
+                <td>
+                    <label>異動人員 : </label>
+                </td>
+                <td>
+                    <input type="text" id="tLast_Update_Uid" name="tLast_Update_Uid" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>停用註記 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("dIs_Disabled_ChangeRecord", (SelectList)ViewBag.dIs_Disabled)
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="button" class="btn btn-primary" id="TM_ChangeRecordSearch" value="查詢" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="OpenChangeRecordSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="OpenChangeRecordSearchDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TM_Url = {};
+        TM_Url.openChangeRecordView = '@Url.Action("ChangeRecordView", "TreasuryMaintain")';
+        //#endregion url設定
+
+        //#region 參數設定
+        var TM_Form_Search_Id = 'TM_Form_Search'; //formId
+        var TM_Control_Mode_Search_ChangeRecord = 'dControl_Mode_Search_ChangeRecord'; //控管模式Id
+        var TM_Aply_No = 'tAply_No'; //工作單號Id
+        var TM_Appr_Status = 'dAppr_Status'; //覆核狀態Id
+        var TM_Last_Update_Uid = 'tLast_Update_Uid'; //異動人員Id
+        var TM_Is_Disabled_ChangeRecord = 'dIs_Disabled_ChangeRecord'; //停用註記Id
+        var openChangeRecordSearchDetailId = 'OpenChangeRecordSearchDetail';
+        //#endregion 參數設定
+
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'TM_ChangeRecordSearch':
+                    $('#' + id).on('click', function () { TM_ChangeRecordSearch(); });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+
+        function TM_ChangeRecordSearch() {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AplyNo: null,
+                    data: TreasuryInOutChangeRecordSearchViewModel(
+                        $('#' + TM_Control_Mode_Search_ChangeRecord).val(),
+                        $('#' + TM_Aply_No).val(),
+                        $('#' + TM_Appr_Status).val(),
+                        $('#' + TM_Last_Update_Uid).val(),
+                        $('#' + TM_Is_Disabled_ChangeRecord).val())
+                }),
+                dataType: 'html',
+                url: TM_Url.openChangeRecordView,
+                contentType: 'application/json',
+                success: function (vdata, textStatus, jqXHR) {
+                    $('#' + openChangeRecordSearchDetailId).children().remove();
+                    $('#' + openChangeRecordSearchDetailId).html(vdata);
+                    openDialog('金庫設備異動紀錄', 1250, 'OpenChangeRecordSearchDialog');
+                }
+            })
+        }
+
+        function openDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            title += '查詢結果';
+            var dialogId = dialogId;
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 600,
+                closeText: '取消',
+                close: function () {
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        //#region 異動紀錄查詢畫面  ViewModel
+        function TreasuryInOutChangeRecordSearchViewModel(
+            vControl_Mode,
+            vAply_No,
+            vAppr_Status,
+            vLast_Update_Uid,
+            vIs_Disabled
+            ) {
+            var obj = {};
+            obj['vControl_Mode'] = vControl_Mode;
+            obj['vAply_No'] = vAply_No;
+            obj['vAppr_Status'] = vAppr_Status;
+            obj['vLast_Update_Uid'] = vLast_Update_Uid;
+            obj['vIs_Disabled'] = vIs_Disabled;
+            return obj;
+        }
+        //#endregion
+    });
+</script>

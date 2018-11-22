@@ -297,22 +297,24 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var aplyNo in aplyNos)
             {
-                var MTH = db.MAIL_TIME_HIS.First(x => x.APLY_NO == aplyNo);
-                MTH.APPR_UID = userId;
-                MTH.APPR_DATE = dt;
-                MTH.APPR_STATUS = "3"; //退回
-                if (!desc.IsNullOrWhiteSpace())
-                    MTH.APPR_DESC = desc;
-                logStr += MTH.modelToString(logStr);
-                if (!MTH.MAIL_TIME_ID.IsNullOrWhiteSpace())
+                foreach (var MTH in db.MAIL_TIME_HIS.Where(x => x.APLY_NO == aplyNo))
                 {
-                    var MT = db.MAIL_TIME.First(x => x.MAIL_TIME_ID == MTH.MAIL_TIME_ID);
-                    MT.FREEZE_DT = null;
-                    MT.FREEZE_UID = null;
-                    MT.APPR_UID = userId;
-                    MT.APPR_DT = dt;
-                    MT.DATA_STATUS = "1"; //可異動
-                    logStr += MT.modelToString(logStr);
+                    MTH.APPR_UID = userId;
+                    MTH.APPR_DATE = dt;
+                    MTH.APPR_STATUS = "3"; //退回
+                    if (!desc.IsNullOrWhiteSpace())
+                        MTH.APPR_DESC = desc;
+                    logStr += MTH.modelToString(logStr);
+                    if (!MTH.MAIL_TIME_ID.IsNullOrWhiteSpace())
+                    {
+                        var MT = db.MAIL_TIME.First(x => x.MAIL_TIME_ID == MTH.MAIL_TIME_ID);
+                        MT.FREEZE_DT = null;
+                        MT.FREEZE_UID = null;
+                        MT.APPR_UID = userId;
+                        MT.APPR_DT = dt;
+                        MT.DATA_STATUS = "1"; //可異動
+                        logStr += MT.modelToString(logStr);
+                    }
                 }
             }
             return new Tuple<bool, string>(true, logStr);
@@ -331,29 +333,32 @@ namespace Treasury.Web.Service.Actual
         {
             foreach (var aplyNo in aplyNos)
             {
-                var MTH = db.MAIL_TIME_HIS.First(x => x.APLY_NO == aplyNo);
-                MTH.APPR_UID = userId;
-                MTH.APPR_DATE = dt;
-                MTH.APPR_STATUS = "2"; //覆核完成
-                logStr += MTH.modelToString(logStr);
-                var _MAIL_CONTENT_ID = string.Empty;
+                foreach (var MTH in db.MAIL_TIME_HIS.Where(x => x.APLY_NO == aplyNo))
+                {
+                    MTH.APPR_UID = userId;
+                    MTH.APPR_DATE = dt;
+                    MTH.APPR_STATUS = "2"; //覆核完成
+                    logStr += MTH.modelToString(logStr);
+                    var _MAIL_CONTENT_ID = string.Empty;
 
-                var MT = db.MAIL_TIME.First(x => x.MAIL_CONTENT_ID == MTH.MAIL_TIME_ID);
-                MT.FREEZE_DT = null;
-                MT.FREEZE_UID = null;
-                MT.APPR_UID = userId;
-                MT.APPR_DT = dt;
-                MT.DATA_STATUS = "1"; //可異動
-                MT.FUNC_ID = MTH.FUNC_ID;
-                MT.SEND_TIME = MTH.SEND_TIME;
-                MT.INTERVAL_MIN =MTH.INTERVAL_MIN;
-                MT.TREA_OPEN_TIME = MTH.TREA_OPEN_TIME;
-                MT.EXEC_TIME_B = MTH.EXEC_TIME_B;
-                MT.EXEC_TIME_E = MTH.EXEC_TIME_E;
-                MT.MAIL_CONTENT_ID = MTH.MAIL_CONTENT_ID;
-                MT.MEMO = MTH.MEMO;
-                MT.IS_DISABLED = MTH.IS_DISABLED;
-                logStr += MT.modelToString(logStr);
+                    var MT = db.MAIL_TIME.First(x => x.MAIL_TIME_ID == MTH.MAIL_TIME_ID);
+                    MT.FREEZE_DT = null;
+                    MT.FREEZE_UID = null;
+                    MT.APPR_UID = userId;
+                    MT.APPR_DT = dt;
+                    MT.DATA_STATUS = "1"; //可異動
+                    MT.FUNC_ID = MTH.FUNC_ID;
+                    MT.SEND_TIME = MTH.SEND_TIME;
+                    MT.INTERVAL_MIN = MTH.INTERVAL_MIN;
+                    MT.TREA_OPEN_TIME = MTH.TREA_OPEN_TIME;
+                    MT.EXEC_TIME_B = MTH.EXEC_TIME_B;
+                    MT.EXEC_TIME_E = MTH.EXEC_TIME_E;
+                    MT.MAIL_CONTENT_ID = MTH.MAIL_CONTENT_ID;
+                    MT.MEMO = MTH.MEMO;
+                    MT.IS_DISABLED = MTH.IS_DISABLED;
+                    logStr += MT.modelToString(logStr);
+                }
+
             }
             return new Tuple<bool, string>(true, logStr);
         }

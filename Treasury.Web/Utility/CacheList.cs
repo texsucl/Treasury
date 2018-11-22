@@ -236,6 +236,21 @@
         public static string DepositData_D_All { get; private set; }
 
         /// <summary>
+        /// 定義檔覆核作業覆核畫面(查詢條件)
+        /// </summary>
+        public static string TDAApprSearchData { get; private set; }
+
+        /// <summary>
+        /// 定義檔覆核作業覆核畫面(查詢結果)
+        /// </summary>
+        public static string TDAApprSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// 定義檔查詢畫面(查詢結果)
+        /// </summary>
+        public static string TDASearchDetailViewData { get; private set; }
+
+        /// <summary>
         /// 資料庫異動畫面(查詢條件)
         /// </summary>
         public static string CDCSearchViewModel { get; private set; }
@@ -484,6 +499,17 @@
         /// 保管資料發送維護作業異動查詢結果
         /// </summary>
         public static string ItemChargeUnitChangeRecordSearchDetailViewData { get; private set; }
+
+        /// <summary>
+        /// BookNo Excel 上傳temp 資料
+        /// </summary>
+        public static string BookNoExcelfileData { get; private set; }
+
+        /// <summary>
+        /// Estate Excel 上傳temp 資料
+        /// </summary>
+        public static string EstateExcelfileData { get; private set; }
+
         #endregion Cache資料
         static CacheList()
         {
@@ -532,6 +558,9 @@
             DepositData_Y = "DepositData_Y";
             DepositData_D = "DepositData_D";
             DepositData_D_All = "DepositData_D_All";
+            TDAApprSearchData = "TDAApprSearchData";
+            TDAApprSearchDetailViewData = "TDAApprSearchDetailViewData";
+            TDASearchDetailViewData = "TDASearchDetailViewData";
             CDCSearchViewModel = "CDCSearchViewModel";
             CDCChargeSearchViewModel = "CDCChargeSearchViewModel";
             CDCApprSearchData = "CDCApprSearchData";
@@ -583,6 +612,8 @@
             TreasuryMailTimeData = "TreasuryMailTimeData";
             TreasuryMailTimeDetailData = "TreasuryMailTimeDetailData";
             TreasuryMailTimeChangeRecordData = "TreasuryMailTimeChangeRecordData";
+            BookNoExcelfileData = "BookNoExcelfileData";
+            EstateExcelfileData = "EstateExcelfileData";
             #endregion Cache資料
 
         }

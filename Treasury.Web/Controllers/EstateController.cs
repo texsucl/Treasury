@@ -8,6 +8,8 @@ using Treasury.Web.ViewModels;
 using Treasury.WebActionFilter;
 using Treasury.WebUtility;
 using Treasury.Web.Enum;
+using System.IO;
+using System;
 
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫物品存取申請作業 不動產權狀
@@ -239,10 +241,10 @@ namespace Treasury.Web.Controllers
                 var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
                 var tempData2 = tempData.Where(x => x.vItemId != model.vItemId).ToList();
                 bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
-                    tempData2.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData2.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData2.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim() , !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
-                    tempData2.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim() , !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
+                    tempData2.Where(x => x.vOwnership_Cert_No != null).Where(x => x.vOwnership_Cert_No?.Trim() == model.vOwnership_Cert_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vLand_Building_No != null).Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vHouse_No != null).Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim() , !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
+                    tempData2.Where(x => x.vEstate_Seq != null).Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim() , !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
                 model.vStatus = Ref.AccessInventoryType._3.GetDescription();
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.ESTATEData);
@@ -273,10 +275,10 @@ namespace Treasury.Web.Controllers
                 {
                     var tempData2 = tempData.Where(x => x.vItemId != updateTempData.vItemId).ToList();
                     bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
-                        tempData2.Where(x => x.vOwnership_Cert_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vOwnership_Cert_No.IsNullOrWhiteSpace()).Any() ||
-                        tempData2.Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim(), !model.vLand_Building_No.IsNullOrWhiteSpace()).Any() ||
-                        tempData2.Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim(), !model.vHouse_No.IsNullOrWhiteSpace()).Any() ||
-                        tempData2.Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim(), !model.vEstate_Seq.IsNullOrWhiteSpace()).Any();
+                        ((!model.vOwnership_Cert_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vOwnership_Cert_No != null).Where(x => x.vOwnership_Cert_No?.Trim() == model.vOwnership_Cert_No?.Trim()).Any()) ||
+                        ((!model.vLand_Building_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vLand_Building_No != null).Where(x => x.vLand_Building_No?.Trim() == model.vLand_Building_No?.Trim()).Any()) ||
+                        ((!model.vHouse_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vHouse_No != null).Where(x => x.vHouse_No?.Trim() == model.vHouse_No?.Trim()).Any()) ||
+                        ((!model.vEstate_Seq.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vEstate_Seq != null).Where(x => x.vEstate_Seq?.Trim() == model.vEstate_Seq?.Trim()).Any());
                     updateTempData.vEstate_From_No = model.vEstate_From_No;
                     updateTempData.vEstate_Date = model.vEstate_Date;
                     updateTempData.vOwnership_Cert_No = model.vOwnership_Cert_No;
@@ -394,7 +396,9 @@ namespace Treasury.Web.Controllers
         {
             if (Cache.IsSet(CacheList.ESTATEData))
                 return Json(jdata.modelToJqgridResult(
-                    ((List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData)).OrderBy(x => x.vItemId).ToList()));
+                    ((List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData))
+                    //.OrderBy(x => x.vItemId).ToList()
+                    ));
             return null;
         }
 
@@ -565,6 +569,144 @@ namespace Treasury.Web.Controllers
             else
             {
                 result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+
+        /// <summary>
+        /// 選擇檔案後點選資料上傳觸發(不動產)
+        /// </summary>
+        /// <param name="FileModel"></param>
+        /// <returns>MSGReturnModel</returns>
+        [HttpPost]
+        public JsonResult Estate_Upload()
+        {
+            MSGReturnModel<JsonResult> result = new MSGReturnModel<JsonResult>();
+            try
+            {
+                #region 前端無傳送檔案進來
+
+
+                if (!Request.Files.AllKeys.Any())
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.upload_Not_Find.GetDescription();
+                    return Json(result);
+                }
+
+                var FileModel = Request.Files["UploadedFile"];
+                //string type = Request.Form["type"];
+
+                #endregion 前端無傳送檔案進來
+
+                #region 前端檔案大小不符或不為Excel檔案(驗證)
+
+                //ModelState
+                if (!ModelState.IsValid)
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.excel_Validate.GetDescription();
+                    return Json(result);
+                }
+
+                #endregion 前端檔案大小不符或不為Excel檔案(驗證)
+
+                #region 上傳檔案
+
+                string pathType = Path.GetExtension(FileModel.FileName)
+                                       .Substring(1); //上傳的檔案類型
+
+                var fileName = string.Format("{0}.{1}",
+                    Ref.ExcelName.Estate.GetDescription(),
+                    pathType); //固定轉成此名稱
+
+                //Cache.Invalidate(CacheList.A59ExcelName); //清除 Cache
+                //Cache.Set(CacheList.A59ExcelName, fileName); //把資料存到 Cache
+
+                #region 檢查是否有FileUploads資料夾,如果沒有就新增 並加入 excel 檔案
+
+                string projectFile = Server.MapPath("~/" + SetFile.FileUploads); //專案資料夾
+                string path = Path.Combine(projectFile, fileName);
+
+                FileRelated.createFile(projectFile); //檢查是否有FileUploads資料夾,如果沒有就新增
+
+                //呼叫上傳檔案 function
+                result = FileRelated.FileUpLoadinPath<JsonResult>(path, FileModel);
+                if (!result.RETURN_FLAG)
+                    return Json(result);
+
+                #endregion 檢查是否有FileUploads資料夾,如果沒有就新增 並加入 excel 檔案
+
+                #region 讀取Excel資料 使用ExcelDataReader 並且組成 json
+
+                var stream = FileModel.InputStream;
+                List<FileEstateModel> dataModel = new List<FileEstateModel>();
+                var Estateresult = new FileService().getExcel(pathType, path, Ref.ExcelName.Estate);
+                if (Estateresult.Item1.IsNullOrWhiteSpace())
+                    dataModel = Estateresult.Item2.Cast<FileEstateModel>().ToList();
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Estateresult.Item1;
+                    return Json(result);
+                }
+                if (dataModel.Count > 0)
+                {
+                    if (Cache.IsSet(CacheList.ESTATEData))
+                    {
+                        var tempData = (List<EstateDetailViewModel>)Cache.Get(CacheList.ESTATEData);
+                        dataModel.ForEach(x =>
+                        {
+                            tempData.Add(new EstateDetailViewModel()
+                            {
+                                vItemId = Guid.NewGuid().ToString(),
+                                vEstate_From_No = x.ESTATE_FORM_NO,
+                                vEstate_Date = TypeTransfer.dateTimeNToString(TypeTransfer.stringToADDateTimeN(x.ESTATE_DATE)),
+                                vEstate_Seq = x.ESTATE_SEQ,
+                                vHouse_No = x.HOUSE_NO,
+                                vLand_Building_No = x.LAND_BUILDING_NO,
+                                vMemo = x.MEMO,
+                                vOwnership_Cert_No = x.OWNERSHIP_CERT_NO,
+                                vStatus = Ref.AccessInventoryType._3.GetDescription()
+                            });
+                        });
+                        Cache.Invalidate(CacheList.ESTATEData);
+                        Cache.Set(CacheList.ESTATEData, tempData);
+                        List<string> sames = new List<string>();
+                        tempData.ForEach(y =>
+                        {
+                            var tempData2 = tempData.Where(x => x.vItemId != y.vItemId).ToList();
+                            bool sameFlag = //位(字號;地/建號;門牌號;流水號/編號等欄位)建置相同值時,系統提醒建相同資料的訊息(但不影響資料的建置)
+                                ((!y.vOwnership_Cert_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vOwnership_Cert_No != null).Where(x => x.vOwnership_Cert_No?.Trim() == y.vOwnership_Cert_No?.Trim()).Any()) ||
+                                ((!y.vLand_Building_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vLand_Building_No != null).Where(x => x.vLand_Building_No?.Trim() == y.vLand_Building_No?.Trim()).Any()) ||
+                                ((!y.vHouse_No.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vHouse_No != null).Where(x => x.vHouse_No?.Trim() == y.vHouse_No?.Trim()).Any()) ||
+                                ((!y.vEstate_Seq.IsNullOrWhiteSpace()) && tempData2.Where(x => x.vEstate_Seq != null).Where(x => x.vEstate_Seq?.Trim() == y.vEstate_Seq?.Trim()).Any());
+                            if (sameFlag)
+                            {
+                                sames.Add($@"字號:{y.vOwnership_Cert_No},地/建號:{y.vLand_Building_No},門牌號:{y.vHouse_No},流水號/編號:{y.vEstate_Seq}");
+                            }
+                        });
+                        result.RETURN_FLAG = true;
+                        result.DESCRIPTION = Ref.MessageType.upload_Success.GetDescription();
+                        if (sames.Any())
+                            result.DESCRIPTION = Ref.MessageType.upload_Success.GetDescription(null, "<br/>以下資料欄位驗證有重複<br/>" + string.Join("<br/>", sames));
+                    }                   
+                }
+                else
+                {
+                    result.RETURN_FLAG = false;
+                    result.DESCRIPTION = Ref.MessageType.data_Not_Compare.GetDescription();
+                }
+
+                #endregion 讀取Excel資料 使用ExcelDataReader 並且組成 json
+
+                #endregion 上傳檔案
+            }
+            catch (Exception ex)
+            {
+                result.RETURN_FLAG = false;
+                result.DESCRIPTION = ex.Message;
             }
             return Json(result);
         }

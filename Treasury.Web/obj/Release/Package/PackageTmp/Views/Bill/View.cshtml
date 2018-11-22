@@ -194,6 +194,12 @@
         {
             $('#BILLInsert').hide();
         }
+
+        var OPVT = '@ViewBag.OPVT';
+        if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+            $('#BILLInsert').hide();
+        }
+
         //#endregion
 
         //#region url設定
@@ -701,6 +707,11 @@
 
         function BILLTempCompleteFun(listId) {
             jqgridCustom.randerAction(listId, 'BILLTemp', tempActFun);
+            if (OPVT == '@Ref.OpenPartialViewType.CustodyIndex') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                });
+            }
         }
 
         var tempActFun = {};

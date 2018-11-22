@@ -94,6 +94,12 @@ namespace Treasury.Web.Report.Data
 
         protected class Report_Treasury_Register
         {
+            [Description("作業類型")]
+            public string ITEM_OP_TYPE { get; set; }
+
+            [Description("存取項目ID")]
+            public string ITEM_ID { get; set; }
+
             [Description("存取項目")]
             public string ITEM_DESC { get; set; }
 

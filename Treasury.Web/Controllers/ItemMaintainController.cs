@@ -7,10 +7,13 @@ using Treasury.Web.Enum;
 using Treasury.Web.Service.Actual;
 using Treasury.Web.Service.Interface;
 using Treasury.Web.ViewModels;
+using Treasury.WebActionFilter;
 using Treasury.WebUtility;
 
 namespace Treasury.Web.Controllers
 {
+    [Authorize]
+    [CheckSessionFilterAttribute]
     public class ItemMaintainController : CommonController
     {
         // GET: ItemMaintain
@@ -98,22 +101,12 @@ namespace Treasury.Web.Controllers
             return Json(result);
         }
 
-        public ActionResult ChangeRecordView(string AplyNo, string ITEM_ID, ItemMaintainChangeRecordSearchViewModel data)
+        public ActionResult ChangeRecordView(string AplyNo, ItemMaintainChangeRecordSearchViewModel data)
         {
             List<ItemMaintainChangeRecordSearchDetailViewModel> result = new List<ItemMaintainChangeRecordSearchDetailViewModel>();
             var _data = (List<ItemMaintainChangeRecordSearchDetailViewModel>)ItemMaintain.GetChangeRecordSearchData(data, AplyNo);
-            if(AplyNo != null)
-            {
-                result.Add(_data.FirstOrDefault(x => x.vITEM_ID == ITEM_ID));
-                Cache.Invalidate(CacheList.ItemMaintainChangeRecordSearchDetailViewData);
-                Cache.Set(CacheList.ItemMaintainChangeRecordSearchDetailViewData, result);
-            }
-            else
-            {
-                Cache.Invalidate(CacheList.ItemMaintainChangeRecordSearchDetailViewData);
-                Cache.Set(CacheList.ItemMaintainChangeRecordSearchDetailViewData, _data);
-            }
-            
+            Cache.Invalidate(CacheList.ItemMaintainChangeRecordSearchDetailViewData);
+            Cache.Set(CacheList.ItemMaintainChangeRecordSearchDetailViewData, _data);
             return PartialView();
         }
 

@@ -1,0 +1,303 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@{
+    ViewBag.Title = "金庫進出管理作業-定義檔覆核作業";
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="TDA_Form">
+                    <table>
+                        <tr>
+                            <td >
+                                <label>定義檔維護項目 : &ensp;</label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("dOption", (SelectList)ViewBag.dOption)
+                            </td>
+                            <td>
+                                <label>工作單號 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="aplyNo"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>申請日期 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="APLY_DT_From" name="APLY_DT_From" />
+                                <label> ~&ensp;</label>
+                                <input type="text" id="APLY_DT_To" name="APLY_DT_To" />
+                            </td>
+                            <td>
+                                <label>申請人 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="vaplyId" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <input type="button" class="btn btn-primary" id="TDA_ApprI_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }   
+        </div>
+    </div>
+    <div id="TDA_ApprSearchDetail" style="display:none" role="dialog" class="myDialog">
+        <div id="TDA_ApprjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        <div class="TDA_ApprClass" style="text-align:center">
+            <input type="button" class="btn btn-primary" id="TDA_Appr_I_Back" value="回上一頁">
+        </div>
+    </div>
+    <div id="TDA_ApprOpenSearchDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div id="TDA_ApprOpenSearchDetail"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var TDA_Appr_Url = {};
+        TDA_Appr_Url.search = '@Url.Action("Search", "TreaDefinitionAppr")';
+        TDA_Appr_Url.getData = '@Url.Action("GetCacheData", "TreaDefinitionAppr")';
+        TDA_Appr_Url.openTREA_ITEM = '@Url.Action("ChangeRecordView", "ItemMaintain")';
+        TDA_Appr_Url.openTREA_EQUIP = '@Url.Action("ChangeRecordView", "TreasuryMaintain")';
+        TDA_Appr_Url.openMAIL_CONTENT = '@Url.Action("ChangeRecordView", "TreasuryMailContent")';
+        TDA_Appr_Url.openMAIL_TIME = '@Url.Action("ChangeRecordView", "TreasuryMailTime")';
+        TDA_Appr_Url.openITEM_CHARGE_UNIT = '@Url.Action("ChangeRecordView", "ItemChargeUnit")';
+        TDA_Appr_Url.openDEP_CHK_ITEM = '@Url.Action("ChangeRecordView", "DepChkItem")';
+        //#endregion url設定
+        //#region 參數設定
+        var OpenSearchDetailId = 'TDA_ApprOpenSearchDetail';
+        var TDA_FormId = 'TDA_Form'; //formId
+        var Option_Id = 'dOption';
+        var hAply_No = 'h_Appr_Aply_No';
+        var hTDA_Id = 'h_Appr_TDA_Id';
+        //#endregion 參數設定
+        var opScope = '@Html.Raw(ViewBag.opScope)';  
+
+        if (opScope == "" || opScope == "0") {        
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+        else {
+            //#region 初始設定
+            created.createDatepickerRange('APLY_DT_From', 'APLY_DT_To');
+            //#endregion 初始設定
+            //#region 註冊事件
+            //按鈕
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'TDA_ApprI_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { SearchFun(); });
+                        break;
+                    case 'TDA_Appr_I_Back':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); });
+                        break;
+                }
+            });
+            //#endregion 註冊事件
+
+            //#region jqgrid
+            function formatterAply_No(cellvalue, options, rdata) {
+                return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+            }
+            function UnformatterAply_No(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+            function TDA_ApprGridCompeleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    //申請單號
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            TDA_OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+                });
+            }
+            function TDA_OpenAply_NoFun(listId, rowid) {
+                var data = $("#" + listId).getRowData(rowid);
+                var TDA_Id = data.vTDA_Id; //'定義檔維護項目代號'
+                var TDAData = GetTDAData(TDA_Id);
+                if (TDAData.url != null) {
+                    $('#' + hAply_No).val(data.vAply_No);
+                    $('#' + hTDA_Id).val(data.vTDA_Id);
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNo: data.vAply_No,
+                        }),
+                        dataType: 'html',
+                        url: TDAData.url,
+                        contentType: 'application/json',
+                        success: function (data, textStatus, jqXHR) {
+                            $('#' + OpenSearchDetailId).html(data);
+                            openTDA_Dialog(TDAData.title, TDAData.openDialogWidth, 'TDA_ApprOpenSearchDialog');
+                        }
+                    })
+                }
+            }
+            function openTDA_Dialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '明細';
+                var dialogId = dialogId;
+                $('.TDA_ApprAct').hide();
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#h_Appr_Aply_No').val('');
+                        $('#h_Appr_TDA_Id').val('');
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+            }
+
+            function GetTDAData(item) {
+                item = item || '';
+                var _reportTitle = '資料庫異動申請單';
+                var obj = {};
+                obj.url = null; //開啟資料庫異動的頁面 url
+                obj.title = null; //開啟資料庫異動的頁面 Title
+                obj.openDialogWidth = 1300; //開啟資料庫異動的頁面 寬度
+                obj.reportTitle = _reportTitle; //報表Title
+                obj.reportType = null; //報表類型
+
+                switch (item) {
+                    case '@Ref.DefinitionType.TREA_ITEM.ToString()':
+                        obj.url = TDA_Appr_Url.openTREA_ITEM;
+                        obj.title = '@Ref.DefinitionType.TREA_ITEM.GetDescription()';
+                        obj.reportType = 'TREA_ITEM';
+                        break;
+                    case '@Ref.DefinitionType.TREA_EQUIP.ToString()':
+                        obj.url = TDA_Appr_Url.openTREA_EQUIP;
+                        obj.title = '@Ref.DefinitionType.TREA_EQUIP.GetDescription()';
+                        obj.reportType = 'TREA_EQUIP';
+                        break;
+                    case '@Ref.DefinitionType.MAIL_CONTENT.ToString()':
+                        obj.url = TDA_Appr_Url.openMAIL_CONTENT;
+                        obj.title = '@Ref.DefinitionType.MAIL_CONTENT.GetDescription()';
+                        obj.reportType = 'MAIL_CONTENT';
+                        break;
+                    case '@Ref.DefinitionType.MAIL_TIME.ToString()':
+                        obj.url = TDA_Appr_Url.openMAIL_TIME;
+                        obj.title = '@Ref.DefinitionType.MAIL_TIME.GetDescription()';
+                        obj.reportType = 'MAIL_TIME';
+                        break;
+                    case '@Ref.DefinitionType.ITEM_CHARGE_UNIT.ToString()':
+                        obj.url = TDA_Appr_Url.openITEM_CHARGE_UNIT;
+                        obj.title = '@Ref.DefinitionType.ITEM_CHARGE_UNIT.GetDescription()';
+                        obj.reportType = 'ITEM_CHARGE_UNIT';
+                        break;
+                    case '@Ref.DefinitionType.DEP_CHK_ITEM.ToString()':
+                        obj.url = TDA_Appr_Url.openDEP_CHK_ITEM;
+                        obj.title = '@Ref.DefinitionType.DEP_CHK_ITEM.GetDescription()';
+                        obj.reportType = 'DEP_CHK_ITEM';
+                        break;
+                }
+                return obj;
+            }
+            function TDA_ApprGrid() {
+                var colNameArray = ['工作單號', '定義檔維護項目', '申請日期', '申請人', '處理狀態', '定義檔維護項目代號', '覆核權限'];
+                var colModelArray = [];
+                colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 130, sortable: false, align: 'center', formatter: formatterAply_No, unformat: UnformatterAply_No });
+                colModelArray.push({ name: "vTDA_Desc", index: "vTDA_Desc", width: 190, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAply_Dt", index: "vAply_Dt", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 70, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vAppr_Status", index: "vAppr_Status", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTDA_Id", index: "vTDA_Id", hidden: true });
+                colModelArray.push({ name: "vApprFlag", index: "vApprFlag", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'TDA_ApprjqgridDiv',
+                    'TDA_ApprList',
+                    'TDA_ApprPeger',
+                     TDA_Appr_Url.getData,
+                     {
+                         type: 'Search'
+                     },
+                     colNameArray,
+                     colModelArray,
+                     '查詢結果',
+                     jqgridCustom.getPage('TDA_ApprjqgridDiv'),
+                     TDA_ApprGridCompeleteFun,
+                     true
+                    )
+            }
+            //查詢
+            function SearchFun() {
+                var dialogId = 'TDA_ApprSearchDetail';
+                $('#' + dialogId).dialog({
+                    position: { my: "top", at: "center top", of: window },
+                    title: '查詢畫面',
+                    width: 700,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: CDCApprSearchViewModel(
+                            $('#' + Option_Id).val(),
+                            $('#aplyNo').val(),
+                            $('#APLY_DT_From').val(),
+                            $('#APLY_DT_To').val(),
+                            $('#vaplyId').val()
+                            )
+
+                    }),
+                    url: TDA_Appr_Url.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + dialogId).dialog('open');
+                        TDA_ApprGrid();
+                    }
+                    else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+            }
+
+            function CDCApprSearchViewModel(vTDA_Id, vAplyNo, vAPLY_DT_S, vAPLY_DT_E, vAPLY_ID) {
+                var obj = {};
+                obj['vTDA_Id'] = vTDA_Id;
+                obj['vAplyNo'] = vAplyNo;
+                obj['vAPLY_DT_S'] = vAPLY_DT_S;
+                obj['vAPLY_DT_E'] = vAPLY_DT_E;
+                obj['vAPLY_ID'] = vAPLY_ID;
+                return obj;
+            }
+        }
+    });
+</script>

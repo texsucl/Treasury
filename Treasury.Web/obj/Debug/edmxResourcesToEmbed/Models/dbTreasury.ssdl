@@ -273,10 +273,9 @@
   </EntityType>
   <EntityType Name="DEP_CHK_ITEM_HIS">
     <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="ACCESS_TYPE" />
-      <PropertyRef Name="ISORTBY" />
+      <PropertyRef Name="HIS_ID" />
     </Key>
+    <Property Name="HIS_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="ACCESS_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="ISORTBY" Type="int" Nullable="false" />
@@ -338,6 +337,11 @@
     <Property Name="CHECK_NO_E_AFT" Type="varchar" MaxLength="8" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="ISSUING_BANK_ACCESS" Type="nvarchar" MaxLength="10" />
+    <Property Name="CHECK_TYPE_ACCESS" Type="varchar" MaxLength="2" />
+    <Property Name="CHECK_NO_TRACK_ACCESS" Type="nvarchar" MaxLength="4" />
+    <Property Name="CHECK_NO_B_ACCESS" Type="varchar" MaxLength="8" />
+    <Property Name="CHECK_NO_E_ACCESS" Type="varchar" MaxLength="8" />
   </EntityType>
   <EntityType Name="ITEM_BOOK">
     <Key>
@@ -377,6 +381,11 @@
     <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="CA_USE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="CA_DESC_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="BANK_ACCESS" Type="nvarchar" MaxLength="8" />
+    <Property Name="CA_NUMBER_ACCESS" Type="varchar" MaxLength="13" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT">
     <Key>
@@ -402,9 +411,9 @@
   </EntityType>
   <EntityType Name="ITEM_CHARGE_UNIT_HIS">
     <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="CHARGE_UNIT_ID" />
+      <PropertyRef Name="HIS_ID" />
     </Key>
+    <Property Name="HIS_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="CHARGE_UNIT_ID" Type="varchar" MaxLength="5" Nullable="false" />
     <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
@@ -447,6 +456,13 @@
     <Property Name="DEP_CNT_AFT" Type="int" />
     <Property Name="DENOMINATION_AFT" Type="decimal" Precision="18" Scale="0" />
     <Property Name="SUBTOTAL_DENOMINATION_AFT" Type="decimal" Precision="18" Scale="0" />
+    <Property Name="DEP_NO_PREAMBLE_ACCESS" Type="varchar" MaxLength="3" />
+    <Property Name="DEP_NO_B_ACCESS" Type="varchar" MaxLength="10" />
+    <Property Name="DEP_NO_E_ACCESS" Type="varchar" MaxLength="10" />
+    <Property Name="DEP_NO_TAIL_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="DEP_CNT_ACCESS" Type="int" />
+    <Property Name="DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="SUBTOTAL_DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="2" />
   </EntityType>
   <EntityType Name="ITEM_DEP_ORDER_M">
     <Key>
@@ -491,6 +507,19 @@
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="GET_MSG" Type="nvarchar" MaxLength="200" />
+    <Property Name="CURRENCY_ACCESS" Type="varchar" MaxLength="3" />
+    <Property Name="TRAD_PARTNERS_ACCESS" Type="nvarchar" MaxLength="30" />
+    <Property Name="COMMIT_DATE_ACCESS" Type="date" />
+    <Property Name="EXPIRY_DATE_ACCESS" Type="date" />
+    <Property Name="INTEREST_RATE_TYPE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="INTEREST_RATE_ACCESS" Type="decimal" Precision="5" Scale="2" />
+    <Property Name="DEP_TYPE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="TOTAL_DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="DEP_SET_QUALITY_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="AUTO_TRANS_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="TRANS_EXPIRY_DATE_ACCESS" Type="date" />
+    <Property Name="TRANS_TMS_ACCESS" Type="int" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <EntityType Name="ITEM_DEP_RECEIVED">
     <Key>
@@ -530,6 +559,17 @@
     <Property Name="BOOK_NO_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="TRAD_PARTNERS_ACCESS" Type="nvarchar" MaxLength="30" />
+    <Property Name="MARGIN_TAKE_OF_TYPE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="MARGIN_ITEM_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="AMOUNT_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="MARGIN_ITEM_ISSUER_ACCESS" Type="nvarchar" MaxLength="10" />
+    <Property Name="PLEDGE_ITEM_NO_ACCESS" Type="varchar" MaxLength="16" />
+    <Property Name="EFFECTIVE_DATE_B_ACCESS" Type="date" />
+    <Property Name="EFFECTIVE_DATE_E_ACCESS" Type="date" />
+    <Property Name="DESCRIPTION_ACCESS" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
+    <Property Name="BOOK_NO_ACCESS" Type="varchar" MaxLength="5" />
   </EntityType>
   <EntityType Name="ITEM_IMPO">
     <Key>
@@ -561,6 +601,12 @@
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="ITEM_ID_FROM" Type="varchar" MaxLength="10" />
+    <Property Name="ITEM_NAME_ACCESS" Type="nvarchar" MaxLength="30" />
+    <Property Name="QUANTITY_ACCESS" Type="int" />
+    <Property Name="AMOUNT_ACCESS" Type="decimal" Precision="18" Scale="0" />
+    <Property Name="EXPECTED_ACCESS_DATE_ACCESS" Type="date" />
+    <Property Name="DESCRIPTION_ACCESS" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <EntityType Name="ITEM_OTHER">
     <Key>
@@ -616,6 +662,13 @@
     <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="ESTATE_FORM_NO_ACCESS" Type="nvarchar" MaxLength="8" />
+    <Property Name="ESTATE_DATE_ACCESS" Type="date" />
+    <Property Name="OWNERSHIP_CERT_NO_ACCESS" Type="nvarchar" MaxLength="16" />
+    <Property Name="LAND_BUILDING_NO_ACCESS" Type="nvarchar" MaxLength="10" />
+    <Property Name="HOUSE_NO_ACCESS" Type="nvarchar" MaxLength="30" />
+    <Property Name="ESTATE_SEQ_ACCESS" Type="nvarchar" MaxLength="16" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <EntityType Name="ITEM_REFUNDABLE_DEP">
     <Key>
@@ -647,6 +700,13 @@
     <Property Name="BOOK_NO_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="TRAD_PARTNERS_ACCESS" Type="nvarchar" MaxLength="30" />
+    <Property Name="MARGIN_DEP_TYPE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="AMOUNT_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="WORKPLACE_CODE_ACCESS" Type="nvarchar" MaxLength="7" />
+    <Property Name="DESCRIPTION_ACCESS" Type="nvarchar" MaxLength="100" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
+    <Property Name="BOOK_NO_ACCESS" Type="varchar" MaxLength="5" />
   </EntityType>
   <EntityType Name="ITEM_SEAL">
     <Key>
@@ -669,6 +729,9 @@
     <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="SEAL_DESC_ACCESS" Type="nvarchar" MaxLength="20" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
+    <Property Name="PUT_DATE_ACCESS" Type="datetime" />
   </EntityType>
   <EntityType Name="ITEM_STOCK">
     <Key>
@@ -708,6 +771,14 @@
     <Property Name="MEMO_AFT" Type="nvarchar" MaxLength="200" />
     <Property Name="CHARGE_DEPT_AFT" Type="varchar" MaxLength="5" />
     <Property Name="CHARGE_SECT_AFT" Type="varchar" MaxLength="5" />
+    <Property Name="STOCK_TYPE_ACCESS" Type="varchar" MaxLength="1" />
+    <Property Name="STOCK_NO_PREAMBLE_ACCESS" Type="nvarchar" MaxLength="7" />
+    <Property Name="STOCK_NO_B_ACCESS" Type="nvarchar" MaxLength="8" />
+    <Property Name="STOCK_NO_E_ACCESS" Type="nvarchar" MaxLength="8" />
+    <Property Name="STOCK_CNT_ACCESS" Type="int" />
+    <Property Name="DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="NUMBER_OF_SHARES_ACCESS" Type="decimal" Precision="18" Scale="2" />
+    <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
   </EntityType>
   <!--產生期間發現錯誤:
 警告 6002: 資料表/檢視 'dbTreasury.dbo.Log' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
@@ -1026,9 +1097,9 @@
   </EntityType>
   <EntityType Name="TREA_EQUIP_HIS">
     <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="TREA_EQUIP_ID" />
+      <PropertyRef Name="HIS_ID" />
     </Key>
+    <Property Name="HIS_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="TREA_EQUIP_ID" Type="varchar" MaxLength="5" Nullable="false" />
     <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
@@ -1060,7 +1131,7 @@
     <Property Name="ITEM_OP_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="DAILY_FLAG" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
-    <Property Name="MEMO" Type="nvarchar" MaxLength="200" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
     <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
     <Property Name="CREATE_DT" Type="datetime" />
@@ -1073,9 +1144,9 @@
   </EntityType>
   <EntityType Name="TREA_ITEM_HIS">
     <Key>
-      <PropertyRef Name="APLY_NO" />
-      <PropertyRef Name="ITEM_ID" />
+      <PropertyRef Name="HIS_ID" />
     </Key>
+    <Property Name="HIS_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="APLY_NO" Type="varchar" MaxLength="12" Nullable="false" />
     <Property Name="ITEM_ID" Type="varchar" MaxLength="5" Nullable="false" />
     <Property Name="EXEC_ACTION" Type="varchar" MaxLength="1" Nullable="false" />
@@ -1088,8 +1159,8 @@
     <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" Nullable="false" />
     <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
     <Property Name="IS_TREA_ITEM_B" Type="varchar" MaxLength="1" />
-    <Property Name="TREA_ITEM_NAME_B" Type="varchar" MaxLength="1" />
-    <Property Name="TREA_ITEM_TYPE_B" Type="varchar" MaxLength="1" />
+    <Property Name="TREA_ITEM_NAME_B" Type="nvarchar" MaxLength="20" />
+    <Property Name="TREA_ITEM_TYPE_B" Type="varchar" MaxLength="20" />
     <Property Name="ITEM_OP_TYPE_B" Type="varchar" MaxLength="1" />
     <Property Name="DAILY_FLAG_B" Type="varchar" MaxLength="1" />
     <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />

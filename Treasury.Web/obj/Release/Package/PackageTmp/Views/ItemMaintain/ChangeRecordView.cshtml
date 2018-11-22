@@ -1,0 +1,91 @@
+﻿<div>
+    <div id="IM_ChangeRecord_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    <div style="text-align:center;">
+        <input type="button" id="IM_ChangeRecord_Back" value="回上一頁" class="btn btn-primary" />
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //#region url設定
+        var IM_Url = {};
+        IM_Url.getData = '@Url.Action("GetCacheData", "ItemMaintain")';
+        //#endregion url設定
+        //#region 參數設定
+        var isGroupHeaders = true;//合併欄位
+        //#endregion 參數設定
+        //#region 初始動作
+        IM_ChangeRecord_TempGrid();
+        //#endregion 初始動作
+        //#region 註冊事件
+        //按鈕
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'IM_ChangeRecord_Back':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                    break;
+            }
+        });
+        //#endregion 註冊事件
+        function IM_ChangeRecord_TempGrid() {
+            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行',
+            '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+            '覆核狀態', '覆核意見'];
+            var colModelArray = [];
+            colModelArray.push({ name: "vFreeze_Dt", index: "vFreeze_Dt", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 120, sortable: false });
+            colModelArray.push({ name: "vFreeze_Uid_Name", index: "vFreeze_Uid_Name", width: 70, sortable: false });
+            colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 45, sortable: false, align: 'center' });
+
+            colModelArray.push({ name: "vIS_TREA_ITEM_B", index: "vIS_TREA_ITEM_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_TREA_ITEM", index: "vIS_TREA_ITEM", width: 70, sortable: false });
+            colModelArray.push({ name: "vDAILY_FLAG_B", index: "vDAILY_FLAG_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vDAILY_FLAG", index: "vDAILY_FLAG", width: 70, sortable: false });
+            colModelArray.push({ name: "vTREA_ITEM_NAME_B", index: "vTREA_ITEM_NAME_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vTREA_ITEM_NAME", index: "vTREA_ITEM_NAME", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_DISABLED_B", index: "vIS_DISABLED_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 70, sortable: false });
+            colModelArray.push({ name: "vMEMO_B", index: "vMEMO_B", width: 70, sortable: false });
+            colModelArray.push({ name: "vMEMO", index: "vMEMO", width: 70, sortable: false });
+
+            colModelArray.push({ name: "vAPPR_STATUS", index: "vAPPR_STATUS", width: 75, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vAPPR_DESC", index: "vAPPR_DESC", width: 75, sortable: false, align: 'center' });
+            jqgridCustom.createJqgridByCache(
+            'IM_ChangeRecord_jqgridDiv',
+            'IM_ChangeRecord_TempList',
+            'IM_ChangeRecord_TempPeger',
+            IM_Url.getData,
+                {
+                    type: 'RecordSearch'
+                },
+                colNameArray,
+                colModelArray,
+                '金庫存取項目異動紀錄',
+                jqgridCustom.getPage('IM_ChangeRecord_jqgridDiv'),
+                IM_ChangeRecord_CompleteFun,
+                true
+                );
+        }
+        //#endregion jqgrid
+        function IM_ChangeRecord_CompleteFun(listId) {
+            if (isGroupHeaders) {
+                jQuery('#' + listId).jqGrid('setGroupHeaders', {
+                    useColSpanStyle: true,
+                    groupHeaders: [
+                        { startColumnName: 'vIS_TREA_ITEM_B', numberOfColumns: 2, titleText: '連結資料庫' },
+                        { startColumnName: 'vDAILY_FLAG_B', numberOfColumns: 2, titleText: '每日進出' },
+                        { startColumnName: 'vTREA_ITEM_NAME_B', numberOfColumns: 2, titleText: '資料庫名稱' },
+                        { startColumnName: 'vIS_DISABLED_B', numberOfColumns: 2, titleText: '停用註記' },
+                        { startColumnName: 'vMEMO_B', numberOfColumns: 2, titleText: '備註' }
+                    ]
+                });
+                isGroupHeaders = false;
+            }
+        }
+    });
+</script>

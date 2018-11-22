@@ -48,5 +48,13 @@ namespace Treasury.Web.Models
         public string MEMO_AFT { get; set; }
         public string CHARGE_DEPT_AFT { get; set; }
         public string CHARGE_SECT_AFT { get; set; }
+        public string STOCK_TYPE_ACCESS { get; set; }
+        public string STOCK_NO_PREAMBLE_ACCESS { get; set; }
+        public string STOCK_NO_B_ACCESS { get; set; }
+        public string STOCK_NO_E_ACCESS { get; set; }
+        public Nullable<int> STOCK_CNT_ACCESS { get; set; }
+        public Nullable<decimal> DENOMINATION_ACCESS { get; set; }
+        public Nullable<decimal> NUMBER_OF_SHARES_ACCESS { get; set; }
+        public string MEMO_ACCESS { get; set; }
     }
 }

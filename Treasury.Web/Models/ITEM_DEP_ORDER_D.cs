@@ -30,5 +30,12 @@ namespace Treasury.Web.Models
         public Nullable<int> DEP_CNT_AFT { get; set; }
         public Nullable<decimal> DENOMINATION_AFT { get; set; }
         public Nullable<decimal> SUBTOTAL_DENOMINATION_AFT { get; set; }
+        public string DEP_NO_PREAMBLE_ACCESS { get; set; }
+        public string DEP_NO_B_ACCESS { get; set; }
+        public string DEP_NO_E_ACCESS { get; set; }
+        public string DEP_NO_TAIL_ACCESS { get; set; }
+        public Nullable<int> DEP_CNT_ACCESS { get; set; }
+        public Nullable<decimal> DENOMINATION_ACCESS { get; set; }
+        public Nullable<decimal> SUBTOTAL_DENOMINATION_ACCESS { get; set; }
     }
 }

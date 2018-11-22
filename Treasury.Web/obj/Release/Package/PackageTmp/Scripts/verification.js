@@ -7,6 +7,7 @@
     var englishUpperFormat;
     var englishNumberFormat;
     var rateFormat;
+    var timeFormat;
 
     dateFormat = /^((?!0000)[0-9]{4}[/|-]((0[1-9]|1[0-2])[/|-](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/|-](29|30)|(0[13578]|1[02])[/|-]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/|-]02[/|-]29)$/;
     englishFormat = /^[a-zA-Z]+$/;
@@ -15,6 +16,7 @@
     englishNumberFormat = /^[a-zA-Z0-9]+$/;
     priceFormate = /^([0-9]{1,})+(.[0-9]{1,})?$/;
     rateFormat = /^([0-9]{1,2})?(\.[0-9]{1,4})?$/;
+    timeFormat = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
 
     window.verified = verified;
     window.created = created;
@@ -132,7 +134,7 @@
     }
 
     verified.rate = function (formid, elementid, msg) {
-        msg = msg || message.english;
+        msg = msg || message.rate;
         $("#" + formid).validate({
             errorPlacement: function (error, element) {
                 errorPlacementfun(error, element);
@@ -148,6 +150,24 @@
         //#endregion
         $('#' + elementid).rules('add', {
             rateFormat: true,
+        })
+    }
+
+    verified.time = function (formid, elementid, msg) {
+        msg = msg || message.time;
+        $("#" + formid).validate({
+            errorPlacement: function (error, element) {
+                errorPlacementfun(error, element);
+            }
+        })
+        //#region 客製化驗證
+        $.validator.addMethod("timeFormat",
+        function (value, element, arg) {
+            return verified.isTime(value);
+        }, message.time);
+        //#endregion
+        $('#' + elementid).rules('add', {
+            timeFormat: true,
         })
     }
 
@@ -458,6 +478,13 @@
     verified.isRate = function (value) {
         value = value || '';
         return rateFormat.test(value);
+    }
+
+    verified.isTime = function (value) {
+        value = value || '';
+        if (value == '')
+            return true;
+        return timeFormat.test(value);
     }
 
     verified.isPositiveInt = function (value) {
