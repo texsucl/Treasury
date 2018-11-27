@@ -343,7 +343,116 @@
             setDenomination_Total();
         });
 
+        $('#' + CDC_StockStock_Type).on('change', function () {
+            $('#' + CDC_StockStock_Total).attr("Disabled", false);
+            $('#' + CDC_StockNumber_Of_Shares).attr("Disabled", false);
+            switch ($(this).val()) {
+                case "S":
+                    Type_S();
+                    break;
+                case "P":
+                    Type_P();
+                    $('#tStock_Total').val('1');
+                    break;
+                case "C":
+                    Type_C();
+                    break;
+            }
+        });
+
         //#endregion 註冊事件
+
+        //股票類型
+        function Type_S() {
+            $("#dStock_Type").attr("Disabled", false);
+            $("#tStock_No_Preamble").attr("Disabled", false);
+            $("#tStock_No_B").attr("Disabled", false);
+            $("#tStock_No_E").attr("Disabled", false);
+            $("#tAmount_Per_Share").attr("Disabled", false);
+            $("#tSingle_Number_Of_Shares").attr("Disabled", false);
+            $("#tNumber_Of_Shares").attr("Disabled", false);
+            $("#tMemo").attr("Disabled", false);
+            switch ($("#lIB_Area").text()) {
+                case "國內"://國內
+                    $('#tStock_Total').val('');
+                    $("#tStock_Total").attr("Disabled", true);
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
+                    break;
+                case "國外"://國外
+                    $("#tStock_Total").attr("Disabled", false);
+                    break;
+            }
+        }
+
+        //股權(持股)憑證
+        function Type_P() {
+            $("#dStock_Type").attr("Disabled", false);
+            $("#tStock_Total").attr("Disabled", false);
+            $("#tNumber_Of_Shares").attr("Disabled", false);
+            $("#tMemo").attr("Disabled", false);
+            $('#tStock_Total').val('');
+            switch ($("#lIB_Area").text()) {
+                case "國內"://國內
+                    $("#tStock_No_Preamble").val('');
+                    $("#tStock_No_Preamble").attr("Disabled", true);
+                    $("#tStock_No_B").val('');
+                    $("#tStock_No_B").attr("Disabled", true);
+                    $("#tStock_No_E").val('');
+                    $("#tStock_No_E").attr("Disabled", true);
+                    $("#tAmount_Per_Share").val('');
+                    $("#tAmount_Per_Share").attr("Disabled", true);
+                    $("#tSingle_Number_Of_Shares").val('');
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
+                    $("#lDenomination").html('');
+                    $('#lDenomination_Total').html('');
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
+                    break;
+                case "國外"://國外
+                    $("#tStock_No_Preamble").attr("Disabled", false);
+                    $("#tStock_No_B").attr("Disabled", false);
+                    $("#tStock_No_E").attr("Disabled", false);
+                    $("#tAmount_Per_Share").attr("Disabled", false);
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
+                    break;
+            }
+
+        }
+
+        //其他類型
+        function Type_C() {
+            $("#dStock_Type").attr("Disabled", false);
+            $("#tStock_Total").attr("Disabled", false);
+            $("#tMemo").attr("Disabled", false);
+
+            switch ($("#lIB_Area").text()) {
+                case "國內"://國內
+                    $("#tStock_No_Preamble").val('');
+                    $("#tStock_No_Preamble").attr("Disabled", true);
+                    $("#tStock_No_B").val('');
+                    $("#tStock_No_B").attr("Disabled", true);
+                    $("#tStock_No_E").val('');
+                    $("#tStock_No_E").attr("Disabled", true);
+                    $("#tAmount_Per_Share").val('');
+                    $("#tAmount_Per_Share").attr("Disabled", true);
+                    $("#tSingle_Number_Of_Shares").val('');
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", true);
+                    $("#lDenomination").html('');
+                    $('#lDenomination_Total').html('');
+                    $("#tNumber_Of_Shares").val('');
+                    $("#tNumber_Of_Shares").attr("Disabled", true);
+                    break;
+                case "國外"://國外
+                    $("#tStock_No_Preamble").attr("Disabled", false);
+                    $("#tStock_No_B").attr("Disabled", false);
+                    $("#tStock_No_E").attr("Disabled", false);
+                    $("#tAmount_Per_Share").attr("Disabled", false);
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
+                    $("#tNumber_Of_Shares").attr("Disabled", false);
+                    break;
+            }
+        }
 
         //計算張數
         function setStock_Total() {
@@ -377,16 +486,16 @@
             if (!isNaN(_Stock_Total) && !isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//張數,每股金額及單張股數皆有值
             {
                 //計算單張面額
-                $('#' + CDC_StockDenomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + CDC_StockDenomination).html(customerUtility.addCommas(_Amount_Per_Share * _Single_Number_Of_Shares));
                 //計算面額小計
-                $('#' + CDC_StockDenomination_Total).html(_Stock_Total * _Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + CDC_StockDenomination_Total).html(customerUtility.addCommas(_Stock_Total * _Amount_Per_Share * _Single_Number_Of_Shares));
                 //計算股數小計
                 $('#' + CDC_StockNumber_Of_Shares).val(_Stock_Total * _Single_Number_Of_Shares);
             }
             else if (!isNaN(_Amount_Per_Share) && !isNaN(_Single_Number_Of_Shares))//每股金額及單張股數有值
             {
                 //計算單張面額
-                $('#' + CDC_StockDenomination).html(_Amount_Per_Share * _Single_Number_Of_Shares);
+                $('#' + CDC_StockDenomination).html(customerUtility.addCommas(_Amount_Per_Share * _Single_Number_Of_Shares));
 
                 $('#' + CDC_StockDenomination_Total).html('');
                 $('#' + CDC_StockNumber_Of_Shares).val('');
@@ -485,14 +594,15 @@
             });
             $('#CDC_StockUpdateTemp').hide();
             $('.GetClass').hide();
+            $('#' + CDC_StockDialog_D_Id).dialog('open');
             if (type == '@Ref.ActionType.Add.ToString()') {
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
             }
             else if (type == '@Ref.ActionType.Edit.ToString()') {
-                dialogSetDataD(listId, rowid);
                 $('#CDC_StockUpdateTemp').show();
                 $('.' + StockUpdateClass).prop('disabled', false);
+                dialogSetDataD(listId, rowid);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 if (GetFlag) {
@@ -501,7 +611,7 @@
                 dialogSetDataD(listId, rowid);
                 $('.' + StockUpdateClass).prop('disabled', true);
             }
-            $('#' + CDC_StockDialog_D_Id).dialog('open');
+            //$('#' + CDC_StockDialog_D_Id).dialog('open');
         }
 
         function ResetDialog() {
@@ -548,6 +658,8 @@
             ResetDialog();
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
+                $('#' + CDC_StockStock_Type).val(data.vStock_Type);
+                $('#' + CDC_StockStock_Type).change();
                 //set value
                 $('#' + CDC_StockPut_Date).text(data.vPut_Date);
                 if (GetFlag) {
@@ -555,9 +667,7 @@
                     $('#' + vGet_Uid_NameId).text(data.vGet_Uid_Name);
                 }
                 $('#' + CDC_StockAply_Uid_Name).text(data.vAply_Uid_Name);
-                $('#' + CDC_StockCharge_Name).text(data.vCharge_Name);
-
-                $('#' + CDC_StockStock_Type).val(data.vStock_Type);
+                $('#' + CDC_StockCharge_Name).text(data.vCharge_Name);            
                 $('#' + CDC_StockStock_Type_Aft).text(data.vStock_Type_Aft);
                 $('#' + CDC_StockStock_No_Preamble).val(data.vStock_No_Preamble);
                 $('#' + CDC_StockStock_No_Preamble_Aft).text(data.vStock_No_Preamble_Aft);
@@ -573,10 +683,10 @@
 
                 $('#' + CDC_StockSingle_Number_Of_Shares).val(data.vSingle_Number_Of_Shares);
                 $('#' + CDC_StockSingle_Number_Of_Shares_Aft).text(data.vSingle_Number_Of_Shares_Aft);
-                $('#' + CDC_StockDenomination).text(data.vDenomination);
-                $('#' + CDC_StockDenomination_Aft).text(data.vDenomination_Aft);
-                $('#' + CDC_StockDenomination_Total).text(data.vDenominationTotal);
-                $('#' + CDC_StockDenomination_Total_Aft).text(data.vDenominationTotal_Aft);
+                $('#' + CDC_StockDenomination).text(customerUtility.addCommas(data.vDenomination));
+                $('#' + CDC_StockDenomination_Aft).text(customerUtility.addCommas(data.vDenomination_Aft));
+                $('#' + CDC_StockDenomination_Total).text(customerUtility.addCommas(data.vDenominationTotal));
+                $('#' + CDC_StockDenomination_Total_Aft).text(customerUtility.addCommas(data.vDenominationTotal_Aft));
 
                 $('#' + CDC_StockNumber_Of_Shares).val(data.vNumberOfShares);
                 $('#' + CDC_StockNumber_Of_Shares_Aft).text(data.vNumberOfShares_Aft);
@@ -1030,8 +1140,8 @@
                             $('#' + CDC_StockStock_Total).val(),
                             $('#' + CDC_StockAmount_Per_Share).val(),
                             $('#' + CDC_StockSingle_Number_Of_Shares).val(),
-                            $('#' + CDC_StockDenomination).html(),
-                            $('#' + CDC_StockDenomination_Total).html(),
+                            customerUtility.removeCommas($('#' + CDC_StockDenomination).html()),
+                            customerUtility.removeCommas($('#' + CDC_StockDenomination_Total).html()),
                             $('#' + CDC_StockNumber_Of_Shares).val(),
                             $('#' + CDC_StockMemo).val())
                     }),
@@ -1062,17 +1172,17 @@
 
         //股票必填檢查
         function Check_S() {
-            if ($("#tStock_No_Preamble").val().trim() == "") {
+            if ($("#tStock_No_Preamble").val().trim() == "" || $("#tStock_No_Preamble").val().trim() == "null") {
                 customerUtility.alert('序號前置碼必填', 'w');
                 return false;
             }
 
-            if ($("#tStock_No_B").val().trim() == "") {
+            if ($("#tStock_No_B").val().trim() == "" || $("#tStock_No_B").val().trim() == "null") {
                 customerUtility.alert('序號(起)必填', 'w');
                 return false;
             }
 
-            if ($("#tStock_No_E").val().trim() == "") {
+            if ($("#tStock_No_E").val().trim() == "" || $("#tStock_No_E").val().trim() == "null") {
                 customerUtility.alert('序號(迄)必填', 'w');
                 return false;
             }
@@ -1084,12 +1194,12 @@
                 return false;
             }
 
-            if ($("#tStock_Total").val().trim() == "") {
+            if ($("#tStock_Total").val().trim() == "" || $("#tStock_Total").val().trim() == "null") {
                 customerUtility.alert('張數不可為空白', 'w');
                 return false;
             }
 
-            if ($("#tAmount_Per_Share").val().trim() == "") {
+            if ($("#tAmount_Per_Share").val().trim() == "" || $("#tAmount_Per_Share").val().trim() == "null") {
                 customerUtility.alert('每股金額必填', 'w');
                 return false;
             }
@@ -1098,12 +1208,12 @@
                 return false;
             }
 
-            if ($("#tSingle_Number_Of_Shares").val().trim() == "") {
+            if ($("#tSingle_Number_Of_Shares").val().trim() == "" || $("#tSingle_Number_Of_Shares").val().trim() == "null") {
                 customerUtility.alert('單張股數必填', 'w');
                 return false;
             }
 
-            if ($("#tNumber_Of_Shares").val().trim() == "") {
+            if ($("#tNumber_Of_Shares").val().trim() == "" || $("#tNumber_Of_Shares").val().trim() == "null") {
                 customerUtility.alert('股數小計必填', 'w');
                 return false;
             }
@@ -1113,13 +1223,18 @@
 
         //股權(持股)憑證必填檢查
         function Check_P() {
-            if ($("#tStock_Total").val().trim() == "") {
+            if ($("#tStock_Total").val().trim() == "" || $("#tStock_Total").val().trim() == "null") {
                 customerUtility.alert('張數必填', 'w');
                 return false;
             }
 
-            if ($("#tNumber_Of_Shares").val().trim() == "") {
+            if ($("#tNumber_Of_Shares").val().trim() == "" || $("#tNumber_Of_Shares").val().trim() == "null") {
                 customerUtility.alert('股數小計必填', 'w');
+                return false;
+            }
+
+            if ($("#tSingle_Number_Of_Shares").val().trim() == "" || $("#tSingle_Number_Of_Shares").val().trim() == "null") {
+                customerUtility.alert('單張股數必填', 'w');
                 return false;
             }
 
@@ -1128,12 +1243,12 @@
 
         //其他必填檢查
         function Check_C() {
-            if ($("#tStock_Total").val().trim() == "") {
+            if ($("#tStock_Total").val().trim() == "" || $("#tStock_Total").val().trim() == "null") {
                 customerUtility.alert('張數必填', 'w');
                 return false;
             }
 
-            if ($("#tMemo").val().trim() == "") {
+            if ($("#tMemo").val().trim() == "" || $("#tMemo").val().trim() == "null") {
                 customerUtility.alert('備註必填', 'w');
                 return false;
             }

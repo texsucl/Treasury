@@ -192,12 +192,20 @@ namespace Treasury.Web.Service.Actual
                         .AsEnumerable(), _emply, _Inventory_types));
                 }
 
+                //批號篩選
+                var _Trea_Batch_No_List = db.ITEM_STOCK.AsNoTracking()
+                    .Where(x => x.GROUP_NO == groupNo)
+                    .Where(x => x.INVENTORY_STATUS != "1")
+                    .Select(x => x.TREA_BATCH_NO).ToList();
+
+
                 result.AddRange(
                     getMainModel(db.ITEM_STOCK.AsNoTracking()
                     .Where(x => x.GROUP_NO == groupNo)
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部
                     .Where(x => x.INVENTORY_STATUS == "1") //庫存
+                    .Where(x => !_Trea_Batch_No_List.Contains(x.TREA_BATCH_NO))
                     .AsEnumerable(), _emply, _Inventory_types));
             }
 
@@ -257,11 +265,11 @@ namespace Treasury.Web.Service.Actual
                             vPut_Date = x.PUT_DATE?.dateTimeToStr(),
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
-                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
-                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
                             vCharge_Sect = x.CHARGE_SECT,
-                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
                             vStock_Type = x.STOCK_TYPE,
                             vStock_Type_Aft = x.STOCK_TYPE_AFT,
                             vStock_No_Preamble = x.STOCK_NO_PREAMBLE,
@@ -314,11 +322,11 @@ namespace Treasury.Web.Service.Actual
                             vPut_Date = x.PUT_DATE?.dateTimeToStr(),
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAply_Uid = x.APLY_UID,
-                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME,
+                            vAply_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
                             vCharge_Dept = x.CHARGE_DEPT,
-                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME,
+                            vCharge_Dept_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim(),
                             vCharge_Sect = x.CHARGE_SECT,
-                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME,
+                            vCharge_Sect_Name = depts.FirstOrDefault(y => y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim(),
                             vStock_Type = x.STOCK_TYPE,
                             vStock_Type_Aft = x.STOCK_TYPE_AFT,
                             vStock_No_Preamble = x.STOCK_NO_PREAMBLE,
@@ -344,6 +352,11 @@ namespace Treasury.Web.Service.Actual
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList();
                 }
+                result.ForEach(x =>
+                {
+                    x.vCharge_Name = !x.vCharge_Sect_Name.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name : x.vCharge_Dept_Name;
+                    x.vCharge_Name_AFT = !x.vCharge_Sect_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Sect_Name_AFT : (!x.vCharge_Dept_Name_AFT.IsNullOrWhiteSpace() ? x.vCharge_Dept_Name_AFT : null);
+                });
             }
 
             return result;
@@ -469,10 +482,10 @@ namespace Treasury.Web.Service.Actual
                     result.AddRange(db.ITEM_STOCK.AsNoTracking()
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
-                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
-                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
-                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
-                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_To.Value, GET_DATE_To != null)
                         .Where(x => x.GROUP_NO == Group_No, searchModel.vName != null)
                         .Where(x => x.CHARGE_DEPT == charge_Dept, !charge_Dept.IsNullOrWhiteSpace())
                         .Where(x => x.CHARGE_SECT == charge_Sect, !charge_Sect.IsNullOrWhiteSpace())

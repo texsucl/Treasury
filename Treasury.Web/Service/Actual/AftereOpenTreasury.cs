@@ -1080,8 +1080,8 @@ namespace Treasury.Web.Service.Actual
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
             string tempStatus = "";
-            string nonCustodyStatus = Ref.AccessProjectFormStatus.B03.ToString(); // 金庫人員退回保管科承辦人員
-            string custodyStatus = Ref.AccessProjectFormStatus.A04.ToString(); // 金庫人員退回保管科申請人
+            string nonCustodyStatus = Ref.AccessProjectFormStatus.B02.ToString(); // 保管科覆核中
+            string custodyStatus = Ref.AccessProjectFormStatus.A05.ToString(); // 表單重新申請
             string rejectStatue = Ref.AccessProjectFormStatus.E04.ToString(); // 金庫人員退回作業
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
@@ -1218,8 +1218,8 @@ namespace Treasury.Web.Service.Actual
 
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
-            string nonCustodyStatus = Ref.AccessProjectFormStatus.B03.ToString(); // 金庫人員退回保管科承辦人員
-            string custodyStatus = Ref.AccessProjectFormStatus.A04.ToString(); // 金庫人員退回保官科申請人
+            string nonCustodyStatus = Ref.AccessProjectFormStatus.B02.ToString(); // 保管科覆核中
+            string custodyStatus = Ref.AccessProjectFormStatus.A05.ToString(); // 表單重新申請
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {

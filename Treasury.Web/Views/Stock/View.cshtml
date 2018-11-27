@@ -422,6 +422,7 @@
                     break;
                 case "P":
                     Type_P();
+                    $('#tStock_Total').val('1');
                     break;
                 case "C":
                     Type_C();
@@ -540,6 +541,7 @@
             $("#tMemo").attr("Disabled", false);
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
+                    $('#tStock_Total').val('');
                     $("#tStock_Total").attr("Disabled", true);
                     $("#tNumber_Of_Shares").val('');
                     $("#tNumber_Of_Shares").attr("Disabled", true);
@@ -556,7 +558,7 @@
             $("#tStock_Total").attr("Disabled", false);
             //$("#tNumber_Of_Shares").attr("Disabled", false);
             $("#tMemo").attr("Disabled", false);
-
+            $('#tStock_Total').val('');
             switch ($("#dStock_Area_Type").val()) {
                 case "D"://國內
                     $("#tStock_No_Preamble").val('');
@@ -568,7 +570,7 @@
                     $("#tAmount_Per_Share").val('');
                     $("#tAmount_Per_Share").attr("Disabled", true);
                     $("#tSingle_Number_Of_Shares").val('');
-                    $("#tSingle_Number_Of_Shares").attr("Disabled", true);
+                    $("#tSingle_Number_Of_Shares").attr("Disabled", false);
                     $("#lDenomination").html('');
                     $('#lDenomination_Total').html('');
                     $("#tNumber_Of_Shares").val('');
@@ -582,6 +584,7 @@
                     $("#tSingle_Number_Of_Shares").attr("Disabled", false);
                     break;
             }
+            
         }
 
         //其他類型
@@ -1391,6 +1394,12 @@
             //update by mark 20181101
             if ($("#tMemo").val().trim() == "") {
                 customerUtility.alert('備註必填', 'w');
+                return false;
+            }
+
+            //update by mark 20181127
+            if ($("#tSingle_Number_Of_Shares").val().trim() == "") {
+                customerUtility.alert('單張股數必填', 'w');
                 return false;
             }
 

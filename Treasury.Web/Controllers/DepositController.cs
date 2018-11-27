@@ -113,7 +113,8 @@ namespace Treasury.Web.Controllers
         public JsonResult ApplyTempData()
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
-            result.RETURN_FLAG = false;  //預設失敗
+            //要為True 否則檢核會失敗
+            result.RETURN_FLAG = true;  //預設成功
 
             if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
@@ -169,6 +170,7 @@ namespace Treasury.Web.Controllers
                         string dataTime = DateTime.Now.Date.ToString("yyyy/MM/dd");
                         if (MasterDataList.Where(x => x.vTakeoutFlag && x.vExpiry_Date != dataTime).Any(x=>x.GetMsg.IsNullOrWhiteSpace()))
                         {
+                            result.RETURN_FLAG = false;
                             result.DESCRIPTION = "到期日不等於系統日,需要有取出原因";
                             return Json(result);
                         }

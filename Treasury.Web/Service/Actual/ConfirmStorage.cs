@@ -737,7 +737,6 @@ namespace Treasury.Web.Service.Actual
             {
                 //if (data.vITeM_OP_TYPE != "3")
                 //{
-
                 //    using (TreasuryDBEntities db = new TreasuryDBEntities())
                 //    {
                 //        var _TREA_APLY_TEMP = db.TREA_APLY_TEMP.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == data.vITEM_ID);
