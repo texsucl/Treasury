@@ -276,16 +276,11 @@ namespace Treasury.Web.Controllers
                 var data = TreasuryAccess.GetByAplyNo(AplyNo);
                 Cache.Invalidate(CacheList.TreasuryAccessSearchUpdateViewData);
                 Cache.Set(CacheList.TreasuryAccessSearchUpdateViewData, data);
-                //var temp = TreasuryAccess.GetTreasuryAccessViewModel(AplyNo);
                 var selectOptions = TreasuryAccess.TreasuryAccessDetail(data.vCreateUid_Id, 
                     data.vCreateUnit_Id == (Properties.Settings.Default["CustodianFlag"]?.ToString()),
-                    //AccountController.CustodianFlag,
                     data.vAplyUnit);
                 List<SelectOption> selectOptionsAppr = new List<SelectOption>();
-                //if (!AccountController.CustodianFlag)
                 selectOptionsAppr = TreasuryAccess.ChangeUnit(data.vAplyUnit);
-                //else
-                //    selectOptionsAppr = selectOptions.Item3;
                 //item1 = 申請單資料
                 //item2 = 是否為保管科
                 //item3 = 申請科別

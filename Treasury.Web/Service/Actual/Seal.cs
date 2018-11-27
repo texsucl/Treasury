@@ -62,7 +62,8 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types).ToList();
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
+                        result = GetDetailModel(details, _Inventory_types, _accessStatus).ToList();
                     }
                 }
             }
@@ -166,7 +167,7 @@ namespace Treasury.Web.Service.Actual
                             vItemId = x.ITEM_ID,
                             vTrea_Item_Name = x.TREA_ITEM_NAME,
                             vStatus = x.INVENTORY_STATUS,
-                            vPUT_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vPUT_Date = x.PUT_DATE_ACCESS?.dateTimeToStr(),
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAPLY_UID = x.APLY_UID,
                             vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
@@ -192,7 +193,9 @@ namespace Treasury.Web.Service.Actual
                             var uids = GetAplyUidName(itemIds);
                             result.ForEach(x =>
                             {
-                                x.vGet_Uid_Name = uids.FirstOrDefault(y => y.itemId == x.vItemId)?.getAplyUidName;
+                                x.vGet_Uid_Name = uids.Where(z => z.confirmDate != null)
+                                .OrderByDescending(z => z.confirmDate)
+                                .FirstOrDefault(y => y.itemId == x.vItemId)?.getAplyUidName;
                             });
                         }
                     }
@@ -208,7 +211,7 @@ namespace Treasury.Web.Service.Actual
                         {
                             vItemId = x.ITEM_ID,
                             vStatus = x.INVENTORY_STATUS,
-                            vPUT_Date = x.PUT_DATE?.dateTimeToStr(),
+                            vPUT_Date = x.PUT_DATE_ACCESS?.dateTimeToStr(),
                             vGet_Date = x.GET_DATE?.dateTimeToStr(),
                             vAPLY_UID = x.APLY_UID,
                             vAPLY_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim(),
@@ -815,14 +818,14 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<SealViewModel> GetDetailModel(IEnumerable<ITEM_SEAL> data,List<SYS_CODE> _Inventory_types)
+        private IEnumerable<SealViewModel> GetDetailModel(IEnumerable<ITEM_SEAL> data,List<SYS_CODE> _Inventory_types,bool accessStatus)
         {
             return data.Select(x => new SealViewModel()
             {
                 vItemId = x.ITEM_ID, //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vSeal_Desc = x.SEAL_DESC, //印章內容
-                vMemo = x.MEMO, //備註
+                vSeal_Desc = accessStatus ? x.SEAL_DESC_ACCESS : x.SEAL_DESC, //印章內容
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO, //備註
                 vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });

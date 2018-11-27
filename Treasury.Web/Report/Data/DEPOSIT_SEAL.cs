@@ -73,7 +73,7 @@ namespace Treasury.Web.Report.Data
                     ReportData = new DepositReportSealData()
                     {
                         ROW = TOTAL,   
-                        PUT_DATE = Sealdata.PUT_DATE.dateTimeToStr(),
+                        PUT_DATE = Sealdata.PUT_DATE_ACCESS.dateTimeToStr(),
                         CHARGE_DEPT = _CHARGE_DEPT,
                         CHARGE_SECT = _CHARGE_SECT,
                         SEAL_DESC = Sealdata.SEAL_DESC,

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Web;
 using Treasury.Web.Enum;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Interface;
@@ -14,7 +13,7 @@ using Treasury.WebUtility;
 /// <summary>
 /// 功能說明：金庫進出管理作業-金庫設備維護作業
 /// 初版作者：20181025 侯蔚鑫
-/// 修改歷程：20181025 侯蔚鑫 
+/// 修改歷程：20181025 侯蔚鑫
 ///           需求單號：
 ///           初版
 /// ==============================================
@@ -23,12 +22,13 @@ using Treasury.WebUtility;
 /// 修改內容：
 /// ==============================================
 /// </summary>
-/// 
+///
 namespace Treasury.Web.Service.Actual
 {
     public class TreasuryMaintain : Common, ITreasuryMaintain
     {
         #region GetData
+
         /// <summary>
         /// 檢核設備名稱
         /// </summary>
@@ -192,9 +192,11 @@ namespace Treasury.Web.Service.Actual
 
             return result;
         }
-        #endregion
+
+        #endregion GetData
 
         #region SaveData
+
         /// <summary>
         /// 金庫進出管理作業-申請覆核
         /// </summary>
@@ -213,7 +215,7 @@ namespace Treasury.Web.Service.Actual
                 if (saveData != null)
                 {
                     var datas = (List<TreasuryMaintainViewModel>)saveData;
-                    if(datas.Any())
+                    if (datas.Any())
                     {
                         using (TreasuryDBEntities db = new TreasuryDBEntities())
                         {
@@ -229,7 +231,9 @@ namespace Treasury.Web.Service.Actual
                             {
                                 var _Trea_Equip_Id = string.Empty;
                                 var _TE = new TREA_EQUIP();
+
                                 #region 金庫設備設定檔
+
                                 //判斷執行功能
                                 switch (item.vExec_Action)
                                 {
@@ -258,6 +262,7 @@ namespace Treasury.Web.Service.Actual
                                         //logStr += "|";
                                         //logStr += _TE.modelToString();
                                         break;
+
                                     case "U"://修改
                                         _TE = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == item.vTrea_Equip_Id);
                                         if (_TE.LAST_UPDATE_DT != null && _TE.LAST_UPDATE_DT > item.vLast_Update_Dt)
@@ -274,6 +279,7 @@ namespace Treasury.Web.Service.Actual
                                         logStr += "|";
                                         logStr += _TE.modelToString();
                                         break;
+
                                     case "D"://刪除
                                         _TE = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == item.vTrea_Equip_Id);
                                         if (_TE.LAST_UPDATE_DT != null && _TE.LAST_UPDATE_DT > item.vLast_Update_Dt)
@@ -290,12 +296,15 @@ namespace Treasury.Web.Service.Actual
                                         logStr += "|";
                                         logStr += _TE.modelToString();
                                         break;
+
                                     default:
                                         break;
                                 }
-                                #endregion
+
+                                #endregion 金庫設備設定檔
 
                                 #region 金庫設備異動檔
+
                                 var _TE_Data = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == item.vTrea_Equip_Id);
                                 if (_TE_Data == null)
                                 {
@@ -341,10 +350,12 @@ namespace Treasury.Web.Service.Actual
                                     logStr += "|";
                                     logStr += _TEH.modelToString();
                                 }
-                                #endregion
+
+                                #endregion 金庫設備異動檔
                             }
 
                             #region Save Db
+
                             var validateMessage = db.GetValidationErrors().getValidateString();
                             if (validateMessage.Any())
                             {
@@ -357,13 +368,15 @@ namespace Treasury.Web.Service.Actual
                                     db.SaveChanges();
 
                                     #region LOG
+
                                     //新增LOG
                                     Log log = new Log();
                                     log.CFUNCTION = "申請覆核-新增金庫設備";
                                     log.CACTION = "A";
                                     log.CCONTENT = logStr;
                                     LogDao.Insert(log, searchData.vLast_Update_Uid);
-                                    #endregion
+
+                                    #endregion LOG
 
                                     result.RETURN_FLAG = true;
                                     result.DESCRIPTION = Ref.MessageType.Apply_Audit_Success.GetDescription(null, $@"單號為{_Aply_No}");
@@ -373,7 +386,8 @@ namespace Treasury.Web.Service.Actual
                                     result.DESCRIPTION = ex.exceptionMessage();
                                 }
                             }
-                            #endregion
+
+                            #endregion Save Db
                         }
                     }
                     else
@@ -409,9 +423,9 @@ namespace Treasury.Web.Service.Actual
             foreach (var aplyNo in aplyNos)
             {
                 var _TreaEquipHisList = db.TREA_EQUIP_HIS.AsNoTracking().Where(x => x.APLY_NO == aplyNo).ToList();
-                if(_TreaEquipHisList.Any())
+                if (_TreaEquipHisList.Any())
                 {
-                    foreach(var TreaEquipHis in _TreaEquipHisList)
+                    foreach (var TreaEquipHis in _TreaEquipHisList)
                     {
                         //金庫設備設定檔
                         var _TreaEquip = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
@@ -430,7 +444,7 @@ namespace Treasury.Web.Service.Actual
 
                         //金庫設備異動檔
                         var _TreaEquipHis = db.TREA_EQUIP_HIS.FirstOrDefault(x => x.APLY_NO == TreaEquipHis.APLY_NO && x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
-                        if(_TreaEquipHis!=null)
+                        if (_TreaEquipHis != null)
                         {
                             _TreaEquipHis.APPR_STATUS = "3";//退回
                             _TreaEquipHis.APPR_DATE = dt;
@@ -475,7 +489,7 @@ namespace Treasury.Web.Service.Actual
                         var _Trea_Equip_Id = string.Empty;
                         //金庫設備設定檔
                         var _TreaEquip = db.TREA_EQUIP.FirstOrDefault(x => x.TREA_EQUIP_ID == TreaEquipHis.TREA_EQUIP_ID);
-                        if(_TreaEquip!=null)
+                        if (_TreaEquip != null)
                         {
                             _TreaEquip.DATA_STATUS = "1";//可異動
                             _TreaEquip.CONTROL_MODE = TreaEquipHis.CONTROL_MODE;
@@ -546,9 +560,7 @@ namespace Treasury.Web.Service.Actual
             }
             return new Tuple<bool, string>(true, logStr);
         }
-        #endregion
 
-        #region privation function
-        #endregion
+        #endregion SaveData
     }
 }
