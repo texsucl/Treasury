@@ -662,17 +662,36 @@
                 var actualAccType = $('#' + ActualAccessType).val();
                 var actualAccEmp = $('#' + ActualAccessEmps).val();
                 var insertReasonTxT = $('#' + InsertReason).val();
-                //if (actualAccEmp.trim() == '') {
-                //    customerUtility.alert("未輸入實際入庫人員!!", 'w');
-                //    return false;
-                //}
+                var registerID = $('#' + RegisterID).val();
+                var treaItem = data.vITEM_ID;
+                var opType = data.vITEM_OP_TYPE;
+                var accessTypeCode;
+                var SealItemId;
+                if (opType == "2") {
+                    //accessType = $('#AccessType option:selected').text();
+                    accessTypeCode = $('#' + AccessType).val();
+                    SealItemId = $('#' + SealItem).val();
+                }
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
                         APLYNO: data.hvAPLY_NO,
-                        ActualAccEmp: actualAccEmp,
-                        ActualAccType: actualAccType,
-                        InsertReason: insertReasonTxT
+                        InsertModel: InsertViewModel(
+                            registerID,
+                            opType,
+                            treaItem,
+                            insertReasonTxT,
+                            actualAccType,
+                            actualAccEmp,
+                            SealItemId,
+                            accessTypeCode
+                            ),
+
+                        //ActualAccEmp: actualAccEmp,
+                        //ActualAccType: actualAccType,
+                        //InsertReason: insertReasonTxT,
+                        //ItemId: itemId,
+                        //OpType: opType
                     }),
                     url: UrlFor.Update,
                     contentType: 'application/json'

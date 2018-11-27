@@ -389,18 +389,19 @@ namespace Treasury.Web.Service.Actual
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                         int vRowNum = 1;
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
                         foreach (var MasterData in _IDOM_DataList)
                         {
                             MasterDataList.AddRange(
                                 GetMasterModel(
                                 _IDOM_DataList.Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList()
-                                , true, _Inventory_types, vRowNum.ToString()).ToList()
+                                , true, _Inventory_types, vRowNum.ToString(), _accessStatus).ToList()
                                 );
 
                             DetailDataList.AddRange(
                                 GetDetailModel(
                                 _IDOD_DataList.Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList()
-                                , vRowNum.ToString()).ToList()
+                                , vRowNum.ToString(), _accessStatus).ToList()
                                 );
 
                             vRowNum++;
@@ -1554,27 +1555,28 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="vTakeoutFlag"></param>
         /// <param name="_Inventory_types"></param>
+        /// <param name="accessStatus"></param>
         /// <returns></returns>
-        private IEnumerable<Deposit_M> GetMasterModel(IEnumerable<ITEM_DEP_ORDER_M> data,Boolean vTakeoutFlag, List<SYS_CODE> _Inventory_types, string vRowNum = null)
+        private IEnumerable<Deposit_M> GetMasterModel(IEnumerable<ITEM_DEP_ORDER_M> data,Boolean vTakeoutFlag, List<SYS_CODE> _Inventory_types, string vRowNum = null, bool accessStatus = false)
         {
             return data.Select(x => new Deposit_M()
             {
                 vRowNum = string.IsNullOrEmpty(vRowNum) ? 0 : int.Parse(vRowNum),  //編號
                 vItem_Id = x.ITEM_ID,   //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,   //代碼.庫存狀態 
-                vCurrency = x.CURRENCY, //幣別
-                vTrad_Partners = x.TRAD_PARTNERS,   //交易對象
-                vCommit_Date = x.COMMIT_DATE.ToString("yyyy/MM/dd"),    //承作日期
-                vExpiry_Date = x.EXPIRY_DATE.ToString("yyyy/MM/dd"),    //到期日
-                vInterest_Rate_Type = x.INTEREST_RATE_TYPE, //計息方式
-                vInterest_Rate = x.INTEREST_RATE,   //利率%
-                vDep_Type = x.DEP_TYPE, //存單類型
-                vTotal_Denomination = x.TOTAL_DENOMINATION, //總面額
-                vDep_Set_Quality = x.DEP_SET_QUALITY,   //設質否
-                vAuto_Trans = x.AUTO_TRANS, //自動轉期
-                vTrans_Expiry_Date = DateTime.Parse(x.TRANS_EXPIRY_DATE.ToString()).ToString("yyyy/MM/dd"), //轉期後到期日
-                vTrans_Tms = x.TRANS_TMS,   //轉期次數
-                vMemo = x.MEMO, //備註
+                vCurrency = accessStatus ? x.CURRENCY_ACCESS : x.CURRENCY, //幣別
+                vTrad_Partners = accessStatus ? x.TRAD_PARTNERS_ACCESS : x.TRAD_PARTNERS,   //交易對象
+                vCommit_Date = accessStatus ? x.COMMIT_DATE_ACCESS?.ToString("yyyy/MM/dd") : x.COMMIT_DATE.ToString("yyyy/MM/dd"),    //承作日期
+                vExpiry_Date = accessStatus ? x.EXPIRY_DATE_ACCESS?.ToString("yyyy/MM/dd") : x.EXPIRY_DATE.ToString("yyyy/MM/dd"),    //到期日
+                vInterest_Rate_Type = accessStatus ? x.INTEREST_RATE_TYPE_ACCESS : x.INTEREST_RATE_TYPE, //計息方式
+                vInterest_Rate = accessStatus ? (x.INTEREST_RATE_ACCESS ?? 0M ): x.INTEREST_RATE,   //利率%
+                vDep_Type = accessStatus ? x.DEP_TYPE_ACCESS : x.DEP_TYPE, //存單類型
+                vTotal_Denomination = accessStatus ? (x.TOTAL_DENOMINATION_ACCESS ?? 0M ) : x.TOTAL_DENOMINATION, //總面額
+                vDep_Set_Quality = accessStatus ? x.DEP_SET_QUALITY_ACCESS : x.DEP_SET_QUALITY,   //設質否
+                vAuto_Trans = accessStatus ? x.AUTO_TRANS_ACCESS : x.AUTO_TRANS, //自動轉期
+                vTrans_Expiry_Date = accessStatus ? x.TRANS_EXPIRY_DATE_ACCESS?.ToString("yyyy/MM/dd") : x.TRANS_EXPIRY_DATE?.ToString("yyyy/MM/dd"), //轉期後到期日
+                vTrans_Tms = accessStatus ? x.TRANS_TMS_ACCESS : x.TRANS_TMS,   //轉期次數
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO, //備註
                 vTakeoutFlag = vTakeoutFlag,    //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT,    //最後修改時間
                 GetMsg = x.GET_MSG, //取出原因
@@ -1587,21 +1589,22 @@ namespace Treasury.Web.Service.Actual
         /// </summary>
         /// <param name="data"></param>
         /// <param name="vRowNum"></param>
+        /// <param name="accessStatus"></param>
         /// <returns></returns>
-        private IEnumerable<Deposit_D> GetDetailModel(IEnumerable<ITEM_DEP_ORDER_D> data, string vRowNum = null)
+        private IEnumerable<Deposit_D> GetDetailModel(IEnumerable<ITEM_DEP_ORDER_D> data, string vRowNum = null, bool accessStatus = false)
         {
             return data.Select(x => new Deposit_D()
             {
                 vRowNum = vRowNum,  //編號
                 vItem_Id = x.ITEM_ID,   //物品編號
                 vData_Seq = x.DATA_SEQ.ToString(),  //明細流水號
-                vDep_No_Preamble = x.DEP_NO_PREAMBLE,   //存單號碼前置碼
-                vDep_No_B = x.DEP_NO_B, //存單號碼(起)
-                vDep_No_E = x.DEP_NO_E, //存單號碼(迄)
-                vDep_No_Tail = x.DEP_NO_TAIL,   //存單號碼尾碼
-                vDep_Cnt = x.DEP_CNT,   //存單張數
-                vDenomination = x.DENOMINATION, //單張面額
-                vSubtotal_Denomination = x.SUBTOTAL_DENOMINATION    //面額小計
+                vDep_No_Preamble = accessStatus ? x.DEP_NO_PREAMBLE_ACCESS : x.DEP_NO_PREAMBLE,   //存單號碼前置碼
+                vDep_No_B = accessStatus ? x.DEP_NO_B_ACCESS : x.DEP_NO_B, //存單號碼(起)
+                vDep_No_E = accessStatus ? x.DEP_NO_E_ACCESS : x.DEP_NO_E, //存單號碼(迄)
+                vDep_No_Tail = accessStatus ? x.DEP_NO_TAIL_ACCESS : x.DEP_NO_TAIL,   //存單號碼尾碼
+                vDep_Cnt = accessStatus ? (x.DEP_CNT_ACCESS ?? 0 ): x.DEP_CNT,   //存單張數
+                vDenomination = accessStatus ? (x.DENOMINATION_ACCESS ?? 0M) : x.DENOMINATION, //單張面額
+                vSubtotal_Denomination = accessStatus ? (x.SUBTOTAL_DENOMINATION_ACCESS ?? 0M) : x.SUBTOTAL_DENOMINATION    //面額小計
             });
         }
 

@@ -184,8 +184,15 @@ namespace Treasury.Web.Service.Actual
                                         case "S":
                                         case "A":
                                         case "B":
+                                            if (_ITEM_SEAL.INVENTORY_STATUS == "3")
+                                            {
+                                                _ITEM_SEAL.SEAL_DESC_ACCESS = _ITEM_SEAL.SEAL_DESC;
+                                                _ITEM_SEAL.MEMO_ACCESS = _ITEM_SEAL.MEMO;
+                                                _ITEM_SEAL.PUT_DATE_ACCESS = _ITEM_SEAL.PUT_DATE;
+                                            }
+
                                             _ITEM_SEAL.INVENTORY_STATUS = "1";
-                                            _ITEM_SEAL.PUT_DATE = dt;
+                                            _ITEM_SEAL.PUT_DATE = dt;                             
                                             break;
                                         //取出
                                         case "G":
@@ -194,6 +201,7 @@ namespace Treasury.Web.Service.Actual
                                             break;
                                     }
                                     _ITEM_SEAL.LAST_UPDATE_DT = dt;
+                                    
                                     logStr += _ITEM_SEAL.modelToString(logStr);
                                 }
                             }
@@ -231,6 +239,11 @@ namespace Treasury.Web.Service.Actual
                                             CHARGE_SECT = y.APLY_UNIT,
                                             CREATE_DT = dt,
                                             PUT_DATE = dt,
+                                            CHECK_NO_B_ACCESS = x.CHECK_NO_B,
+                                            CHECK_NO_E_ACCESS = x.CHECK_NO_E,
+                                            CHECK_NO_TRACK_ACCESS = x.CHECK_NO_TRACK,
+                                            CHECK_TYPE_ACCESS = x.CHECK_TYPE,
+                                            ISSUING_BANK_ACCESS = x.ISSUING_BANK
                                         });
                                         logStr += ADD_ITEM_BLANK_NOTE.modelToString(logStr);
                                     });
@@ -286,6 +299,17 @@ namespace Treasury.Web.Service.Actual
                                     var _ITEM_REAL_ESTATE = db.ITEM_REAL_ESTATE.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if (_ITEM_REAL_ESTATE.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_REAL_ESTATE.ESTATE_DATE_ACCESS = _ITEM_REAL_ESTATE.ESTATE_DATE;
+                                            _ITEM_REAL_ESTATE.ESTATE_FORM_NO_ACCESS = _ITEM_REAL_ESTATE.ESTATE_FORM_NO;
+                                            _ITEM_REAL_ESTATE.ESTATE_SEQ_ACCESS = _ITEM_REAL_ESTATE.ESTATE_SEQ;
+                                            _ITEM_REAL_ESTATE.HOUSE_NO_ACCESS = _ITEM_REAL_ESTATE.HOUSE_NO;
+                                            _ITEM_REAL_ESTATE.LAND_BUILDING_NO_ACCESS = _ITEM_REAL_ESTATE.LAND_BUILDING_NO;
+                                            _ITEM_REAL_ESTATE.MEMO_ACCESS = _ITEM_REAL_ESTATE.MEMO;
+                                            _ITEM_REAL_ESTATE.OWNERSHIP_CERT_NO_ACCESS = _ITEM_REAL_ESTATE.OWNERSHIP_CERT_NO;
+                                        }
+
                                         _ITEM_REAL_ESTATE.INVENTORY_STATUS = "1";
                                         _ITEM_REAL_ESTATE.PUT_DATE = dt;
                                     }
@@ -306,8 +330,17 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if (_ITEM_CA.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_CA.BANK_ACCESS = _ITEM_CA.BANK;
+                                            _ITEM_CA.CA_DESC_ACCESS = _ITEM_CA.CA_DESC;
+                                            _ITEM_CA.CA_NUMBER_ACCESS = _ITEM_CA.CA_NUMBER;
+                                            _ITEM_CA.CA_USE_ACCESS = _ITEM_CA.CA_USE;
+                                            _ITEM_CA.MEMO_ACCESS = _ITEM_CA.MEMO;
+                                        }
                                         _ITEM_CA.INVENTORY_STATUS = "1";
                                         _ITEM_CA.PUT_DATE = dt;
+  
                                     }
                                     else if (y.ACTUAL_ACCESS_TYPE == "G")
                                     {
@@ -326,8 +359,25 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if (_ITEM_DEP_ORDER_M.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_DEP_ORDER_M.AUTO_TRANS_ACCESS = _ITEM_DEP_ORDER_M.AUTO_TRANS_ACCESS;
+                                            _ITEM_DEP_ORDER_M.COMMIT_DATE_ACCESS = _ITEM_DEP_ORDER_M.COMMIT_DATE;
+                                            _ITEM_DEP_ORDER_M.CURRENCY_ACCESS = _ITEM_DEP_ORDER_M.CURRENCY;
+                                            _ITEM_DEP_ORDER_M.DEP_SET_QUALITY_ACCESS = _ITEM_DEP_ORDER_M.DEP_SET_QUALITY;
+                                            _ITEM_DEP_ORDER_M.DEP_TYPE_ACCESS = _ITEM_DEP_ORDER_M.DEP_TYPE;
+                                            _ITEM_DEP_ORDER_M.EXPIRY_DATE_ACCESS = _ITEM_DEP_ORDER_M.EXPIRY_DATE;
+                                            _ITEM_DEP_ORDER_M.INTEREST_RATE_ACCESS = _ITEM_DEP_ORDER_M.INTEREST_RATE;
+                                            _ITEM_DEP_ORDER_M.INTEREST_RATE_TYPE_ACCESS = _ITEM_DEP_ORDER_M.INTEREST_RATE_TYPE;
+                                            _ITEM_DEP_ORDER_M.MEMO_ACCESS = _ITEM_DEP_ORDER_M.MEMO;
+                                            _ITEM_DEP_ORDER_M.TOTAL_DENOMINATION_ACCESS = _ITEM_DEP_ORDER_M.TOTAL_DENOMINATION;
+                                            _ITEM_DEP_ORDER_M.TRAD_PARTNERS_ACCESS = _ITEM_DEP_ORDER_M.TRAD_PARTNERS;
+                                            _ITEM_DEP_ORDER_M.TRANS_EXPIRY_DATE_ACCESS = _ITEM_DEP_ORDER_M.TRANS_EXPIRY_DATE;
+                                            _ITEM_DEP_ORDER_M.TRANS_TMS_ACCESS = _ITEM_DEP_ORDER_M.TRANS_TMS;
+                                        }
+
                                         _ITEM_DEP_ORDER_M.INVENTORY_STATUS = "1";
-                                        _ITEM_DEP_ORDER_M.PUT_DATE = dt;
+                                        _ITEM_DEP_ORDER_M.PUT_DATE = dt;    
                                     }
                                     else if (y.ACTUAL_ACCESS_TYPE == "G")
                                     {
@@ -349,6 +399,18 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if(_ITEM_STOCK.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_STOCK.DENOMINATION_ACCESS = _ITEM_STOCK.DENOMINATION;
+                                            _ITEM_STOCK.MEMO_ACCESS = _ITEM_STOCK.MEMO;
+                                            _ITEM_STOCK.NUMBER_OF_SHARES_ACCESS = _ITEM_STOCK.NUMBER_OF_SHARES;
+                                            _ITEM_STOCK.STOCK_CNT_ACCESS = _ITEM_STOCK.STOCK_CNT;
+                                            _ITEM_STOCK.STOCK_NO_B_ACCESS = _ITEM_STOCK.STOCK_NO_B;
+                                            _ITEM_STOCK.STOCK_NO_E_ACCESS = _ITEM_STOCK.STOCK_NO_E;
+                                            _ITEM_STOCK.STOCK_NO_PREAMBLE_ACCESS = _ITEM_STOCK.STOCK_NO_PREAMBLE;
+                                            _ITEM_STOCK.STOCK_TYPE_ACCESS = _ITEM_STOCK.STOCK_TYPE;
+                                        }
+
                                         _ITEM_STOCK.INVENTORY_STATUS = "1";
                                         _ITEM_STOCK.PUT_DATE = dt;
                                     }
@@ -368,6 +430,17 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if(_ITEM_REFUNDABLE_DEP.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_REFUNDABLE_DEP.AMOUNT_ACCESS = _ITEM_REFUNDABLE_DEP.AMOUNT;
+                                            _ITEM_REFUNDABLE_DEP.BOOK_NO_ACCESS = _ITEM_REFUNDABLE_DEP.BOOK_NO;
+                                            _ITEM_REFUNDABLE_DEP.DESCRIPTION_ACCESS = _ITEM_REFUNDABLE_DEP.DESCRIPTION;
+                                            _ITEM_REFUNDABLE_DEP.MARGIN_DEP_TYPE_ACCESS = _ITEM_REFUNDABLE_DEP.MARGIN_DEP_TYPE;
+                                            _ITEM_REFUNDABLE_DEP.MEMO_ACCESS = _ITEM_REFUNDABLE_DEP.MEMO;
+                                            _ITEM_REFUNDABLE_DEP.TRAD_PARTNERS_ACCESS = _ITEM_REFUNDABLE_DEP.TRAD_PARTNERS;
+                                            _ITEM_REFUNDABLE_DEP.WORKPLACE_CODE_ACCESS = _ITEM_REFUNDABLE_DEP.WORKPLACE_CODE;
+                                        }
+
                                         _ITEM_REFUNDABLE_DEP.INVENTORY_STATUS = "1";
                                         _ITEM_REFUNDABLE_DEP.PUT_DATE = dt;
                                     }
@@ -387,6 +460,21 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if(_ITEM_DEP_RECEIVED.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_DEP_RECEIVED.AMOUNT_ACCESS = _ITEM_DEP_RECEIVED.AMOUNT;
+                                            _ITEM_DEP_RECEIVED.BOOK_NO_ACCESS = _ITEM_DEP_RECEIVED.BOOK_NO;
+                                            _ITEM_DEP_RECEIVED.DESCRIPTION_ACCESS = _ITEM_DEP_RECEIVED.DESCRIPTION;
+                                            _ITEM_DEP_RECEIVED.EFFECTIVE_DATE_B_ACCESS = _ITEM_DEP_RECEIVED.EFFECTIVE_DATE_B;
+                                            _ITEM_DEP_RECEIVED.EFFECTIVE_DATE_E_ACCESS = _ITEM_DEP_RECEIVED.EFFECTIVE_DATE_E;
+                                            _ITEM_DEP_RECEIVED.MARGIN_ITEM_ACCESS = _ITEM_DEP_RECEIVED.MARGIN_ITEM;
+                                            _ITEM_DEP_RECEIVED.MARGIN_ITEM_ISSUER_ACCESS = _ITEM_DEP_RECEIVED.MARGIN_ITEM_ISSUER;
+                                            _ITEM_DEP_RECEIVED.MARGIN_TAKE_OF_TYPE_ACCESS = _ITEM_DEP_RECEIVED.MARGIN_TAKE_OF_TYPE;
+                                            _ITEM_DEP_RECEIVED.MEMO_ACCESS = _ITEM_DEP_RECEIVED.MEMO;
+                                            _ITEM_DEP_RECEIVED.PLEDGE_ITEM_NO_ACCESS = _ITEM_DEP_RECEIVED.PLEDGE_ITEM_NO;
+                                            _ITEM_DEP_RECEIVED.TRAD_PARTNERS_ACCESS = _ITEM_DEP_RECEIVED.TRAD_PARTNERS;
+                                        }
+
                                         _ITEM_DEP_RECEIVED.INVENTORY_STATUS = "1";
                                         _ITEM_DEP_RECEIVED.PUT_DATE = dt;
                                     }
@@ -408,6 +496,16 @@ namespace Treasury.Web.Service.Actual
 
                                     if (y.ACTUAL_ACCESS_TYPE == "P")
                                     {
+                                        if(_ITEM_IMPO.INVENTORY_STATUS == "3")
+                                        {
+                                            _ITEM_IMPO.AMOUNT_ACCESS = _ITEM_IMPO.AMOUNT;
+                                            _ITEM_IMPO.DESCRIPTION_ACCESS = _ITEM_IMPO.DESCRIPTION;
+                                            _ITEM_IMPO.EXPECTED_ACCESS_DATE_ACCESS = _ITEM_IMPO.EXPECTED_ACCESS_DATE;
+                                            _ITEM_IMPO.ITEM_NAME_ACCESS = _ITEM_IMPO.ITEM_NAME;
+                                            _ITEM_IMPO.MEMO_ACCESS = _ITEM_IMPO.MEMO;
+                                            _ITEM_IMPO.QUANTITY_ACCESS = _ITEM_IMPO.QUANTITY;
+                                        }
+
                                         _ITEM_IMPO.INVENTORY_STATUS = "1";
                                         _ITEM_IMPO.PUT_DATE = dt;
                                         _ITEM_IMPO.LAST_UPDATE_DT = dt;

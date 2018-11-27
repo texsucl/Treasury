@@ -147,12 +147,25 @@ namespace Treasury.Web.Controllers
             if (registerID != null && Cache.IsSet(CacheList.AfterOpenTreasurySearchDetailViewData))
             {
                 var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
-
+           
                 var forCheck = datas.FirstOrDefault(x => x.vTREA_REGISTER_ID == registerID);
-                if (forCheck != null)
+
+                //if (forCheck != null)
+                if (datas.All(x => x.vACTUAL_GET_TIME != null && x.vACTUAL_PUT_TIME != null))
                 {
                     result.Datas = forCheck;
                     result.RETURN_FLAG = true;
+                }
+                else
+                {
+                    if(datas.All(x => x.vAPLY_NO != null))
+                    {
+                        result.DESCRIPTION = "尚未輸入出入庫時間，請先登打出入庫時間!!";
+                    }
+                    else
+                    {
+                        result.DESCRIPTION = "有項目尚未入庫確認!!";
+                    }
                 }
             }
             return Json(result);
@@ -230,7 +243,8 @@ namespace Treasury.Web.Controllers
         /// <param name="ActualAccEmp"></param>
         /// <param name="ActualAccType"></param>
         /// <returns></returns>
-        public JsonResult Update(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason)
+       // public JsonResult Update(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason, string ItemId, string OpType)
+        public JsonResult Update(string APLYNO, AfterOpenTreasuryInsertViewModel InsertModel)
         {
             MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> result = new MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -239,7 +253,8 @@ namespace Treasury.Web.Controllers
             {
                 var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
                 var searchData = (AfterOpenTreasurySearchViewModel)Cache.Get(CacheList.AfterOpenTreasurySearchData);
-                result = AftereOpenTreasury.UpdateData(APLYNO, ActualAccEmp, ActualAccType, InsertReason, searchData, datas, AccountController.CurrentUserId);
+                //result = AftereOpenTreasury.UpdateData(APLYNO, ActualAccEmp, ActualAccType, InsertReason, searchData, datas, AccountController.CurrentUserId, ItemId, OpType);
+                result = AftereOpenTreasury.UpdateData(APLYNO, InsertModel, searchData, datas, AccountController.CurrentUserId);
                 if (result.RETURN_FLAG)
                 {
                     Cache.Invalidate(CacheList.AfterOpenTreasurySearchDetailViewData);

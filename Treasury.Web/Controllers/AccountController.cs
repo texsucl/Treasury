@@ -100,9 +100,10 @@ namespace Treasury.Web.Controllers
                     if (codeUser != null)
                     {
                         if ("N".Equals(codeUser.IS_DISABLED)) {
-                            
+
                             Session["UserID"] = loginModel.UserId;
-							//Session["AgentID"] = codeUser.CAGENTID;
+                            //Session["UserID"] = "A8272";
+                            //Session["AgentID"] = codeUser.CAGENTID;
 
                             //Session["UserName"] = "";
                             //Session["UserUnit"] = "";
@@ -117,6 +118,7 @@ namespace Treasury.Web.Controllers
                                     {
                                         Session["UserName"] = StringUtil.toString(emp.EMP_NAME);
                                         Session["UserUnit"] = StringUtil.toString(emp.DPT_CD);
+                                        //Session["UserUnit"] = "VE303";
                                     }
                                 }
                             }
@@ -231,6 +233,7 @@ namespace Treasury.Web.Controllers
                 //cookie2.Expires = DateTime.Now.AddYears(-1);
                 //Response.Cookies.Add(cookie2);
                 TempData["Logout"] = "true";
+                //Response.Cache.SetNoStore();
                 return RedirectToAction("Login");
             }
             catch (Exception e) {

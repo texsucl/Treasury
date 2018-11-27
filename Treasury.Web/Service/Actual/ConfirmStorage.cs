@@ -732,6 +732,7 @@ namespace Treasury.Web.Service.Actual
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.delete_Fail.GetDescription();
             string logStr = string.Empty;
+            DateTime dt = DateTime.Now;
             if (searchData.v_IS_CHECKED == null)
             {
                 //if (data.vITeM_OP_TYPE != "3")
@@ -820,11 +821,12 @@ namespace Treasury.Web.Service.Actual
                         var delete_TREA_APLY_REC = db.TREA_APLY_REC.Remove(TREA_APLY_REC);
                         logStr += delete_TREA_APLY_REC.modelToString(logStr);
                     }
-                    else if(data.vITeM_OP_TYPE == "2" || data.vITeM_OP_TYPE == "3")
+                    //else if(data.vITeM_OP_TYPE == "2" || data.vITeM_OP_TYPE == "3")
+                    else if (data.vITeM_OP_TYPE == "3")
                     {
-                        DateTime dt = DateTime.Now;
+
                         TREA_APLY_REC.TREA_REGISTER_ID = null;
-                        TREA_APLY_REC.APLY_STATUS = "C01";
+                        TREA_APLY_REC.APLY_STATUS = "C01";  
                         TREA_APLY_REC.CONFIRM_UID = null;
                         TREA_APLY_REC.CONFIRM_DT = null;
                         TREA_APLY_REC.LAST_UPDATE_UID = data.vCurrentUid;
@@ -837,6 +839,31 @@ namespace Treasury.Web.Service.Actual
                         {
                             APLY_NO = TREA_APLY_REC.APLY_NO,
                             APLY_STATUS = "C01",
+                            PROC_UID = data.vCurrentUid,
+                            PROC_DT = dt
+                        };
+                        logStr += ARH.modelToString(logStr);
+
+                        db.APLY_REC_HIS.Add(ARH);
+
+                        #endregion
+                    }
+                    else if(data.vITeM_OP_TYPE == "2")
+                    {
+                        TREA_APLY_REC.TREA_REGISTER_ID = null;
+                        TREA_APLY_REC.APLY_STATUS = "E02";  //申請人作廢
+                        TREA_APLY_REC.CONFIRM_UID = null;
+                        TREA_APLY_REC.CONFIRM_DT = null;
+                        TREA_APLY_REC.LAST_UPDATE_UID = data.vCurrentUid;
+                        TREA_APLY_REC.LAST_UPDATE_DT = dt;
+
+                        logStr += TREA_APLY_REC.modelToString(logStr);
+
+                        #region 申請單歷程檔
+                        var ARH = new APLY_REC_HIS()
+                        {
+                            APLY_NO = TREA_APLY_REC.APLY_NO,
+                            APLY_STATUS = "E02",  //申請人作廢
                             PROC_UID = data.vCurrentUid,
                             PROC_DT = dt
                         };

@@ -104,6 +104,7 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.CDCDepositDataD_All, _data[0].vDeposit_D);
             return PartialView();
         }
+       
         /// <summary>
         /// 覆核資料
         /// </summary>
@@ -112,7 +113,7 @@ namespace Treasury.Web.Controllers
         public JsonResult ApplyTempData()
         {
             MSGReturnModel<IEnumerable<ITreaItem>> result = new MSGReturnModel<IEnumerable<ITreaItem>>();
-            result.RETURN_FLAG = true;  //預設成功
+            result.RETURN_FLAG = false;  //預設失敗
 
             if (Cache.IsSet(CacheList.TreasuryAccessViewData))
             {
@@ -165,6 +166,13 @@ namespace Treasury.Web.Controllers
                     //檢查是否有覆核資籵
                     if (MasterDataList.Where(x => x.vTakeoutFlag == true).ToList().Count > 0)
                     {
+                        string dataTime = DateTime.Now.Date.ToString("yyyy/MM/dd");
+                        if (MasterDataList.Where(x => x.vTakeoutFlag && x.vExpiry_Date != dataTime).Any(x=>x.GetMsg.IsNullOrWhiteSpace()))
+                        {
+                            result.DESCRIPTION = "到期日不等於系統日,需要有取出原因";
+                            return Json(result);
+                        }
+
                         //檢查通過
                         if (result.RETURN_FLAG)
                         {
@@ -1313,6 +1321,30 @@ namespace Treasury.Web.Controllers
             else
             {
                 result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 設定取出原因
+        /// </summary>
+        /// <param name="ItemId"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult SetGetMsg(string ItemId,string msg) {
+            MSGReturnModel<bool> result = new MSGReturnModel<bool>();
+            if (Cache.IsSet(CacheList.DepositData_N))
+            {
+                var dbData = (List<Deposit_M>)Cache.Get(CacheList.DepositData_N);
+                var data = dbData.FirstOrDefault(x => x.vItem_Id == ItemId);
+                if (data != null)
+                    data.GetMsg = msg;
+                Cache.Invalidate(CacheList.DepositData_N);
+                Cache.Set(CacheList.DepositData_N, dbData);
+                result.RETURN_FLAG = true;
+                result.Datas = true;
+                result.DESCRIPTION = Ref.MessageType.update_Success.GetDescription();
             }
             return Json(result);
         }

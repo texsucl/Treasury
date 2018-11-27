@@ -345,8 +345,7 @@ namespace Treasury.Web.Service.Actual
                             result = result.Where(x => x.Value == "P" || x.Value == "A").ToList();
                             break;
                         case "10":  //全部取出
-                            break;
-                            
+                            break;      
                     }
                 }
                 else
@@ -360,7 +359,6 @@ namespace Treasury.Web.Service.Actual
                                 Text = x.CODE_VALUE
                             }).ToList();
                 }
-               
             }
             return result;
         }
@@ -450,6 +448,7 @@ namespace Treasury.Web.Service.Actual
                 var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
                 var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.AsNoTracking();
                 var _SYS_CODE = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "ACCESS_TYPE").ToList();
+                var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == searchData.vTREA_REGISTER_ID);
 
                 result = db.TREA_APLY_REC.AsNoTracking()
                     .Where(x => x.TREA_REGISTER_ID == searchData.vTREA_REGISTER_ID, !searchData.vTREA_REGISTER_ID.IsNullOrWhiteSpace()) //金庫登記簿單號
@@ -483,6 +482,24 @@ namespace Treasury.Web.Service.Actual
                         ACTUAL_ACCESS_NAME = x._APLY_REC.ACTUAL_ACCESS_UID != null ? GetUserInfo(x._APLY_REC.ACTUAL_ACCESS_UID)?.EMP_Name : null,
                         vLAST_UPDATE_DT = x._APLY_REC.LAST_UPDATE_DT
                     }).ToList();
+
+                if (_TREA_OPEN_REC.OPEN_TREA_TYPE == "1")
+                {
+                    List<string> ItemIDList = new List<string>();
+                    ItemIDList.AddRange(result.Select(x => x.vITEM_ID).ToList());
+
+                    var _TREA_APLY_TEMP = db.TREA_APLY_TEMP
+                        .Where(x => !ItemIDList.Contains(x.ITEM_ID))
+                        .AsEnumerable()
+                        .Select(x => new AfterOpenTreasurySearchDetailViewModel()
+                        {
+                            vITEM_ID = x.ITEM_ID,
+                            vTREA_REGISTER_ID = searchData.vTREA_REGISTER_ID,
+                            vITEM_OP_TYPE = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE,
+                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
+                        }).ToList();
+                    result.AddRange(_TREA_APLY_TEMP);
+                }
 
                 return result;
             }
@@ -585,7 +602,7 @@ namespace Treasury.Web.Service.Actual
             if (!viewModels.Any())
             {
                 return result;
-            }
+            }           
 
             DateTime dt = DateTime.Now;
             string logStr = string.Empty;
@@ -690,7 +707,7 @@ namespace Treasury.Web.Service.Actual
                 var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
                 string applyNO = $@"G6{qPreCode}{cId}";
 
-                var _APLY_UID = db.TREA_APLY_REC.AsNoTracking().AsEnumerable().FirstOrDefault(x => x.TREA_REGISTER_ID == InsertModel.vTREA_REGISTER_ID)?.APLY_UID;
+                //var _APLY_UID = db.TREA_APLY_REC.AsNoTracking().AsEnumerable().FirstOrDefault(x => x.TREA_REGISTER_ID == InsertModel.vTREA_REGISTER_ID)?.APLY_UID;
 
                 var TREA_APLY_REC = db.TREA_APLY_REC;
                 TREA_APLY_REC.Add(new TREA_APLY_REC()
@@ -813,7 +830,8 @@ namespace Treasury.Web.Service.Actual
         /// <param name="searchData"></param>
         /// <param name="cUserId"></param>
         /// <returns></returns>
-        public MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> UpdateData(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId)
+       // public MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> UpdateData(string APLYNO, string ActualAccEmp, string ActualAccType, string InsertReason, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId, string ItemId, string OpType)
+        public MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>> UpdateData(string APLYNO, AfterOpenTreasuryInsertViewModel InsertModel, AfterOpenTreasurySearchViewModel searchData, List<AfterOpenTreasurySearchDetailViewModel> viewModels, string cUserId)
         {
             var result = new MSGReturnModel<List<AfterOpenTreasurySearchDetailViewModel>>();
             result.RETURN_FLAG = false;
@@ -831,20 +849,112 @@ namespace Treasury.Web.Service.Actual
             {
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == APLYNO);
 
-                if (_TREA_APLY_REC.LAST_UPDATE_DT > viewModels.FirstOrDefault(x => x.hvAPLY_NO == APLYNO)?.vLAST_UPDATE_DT) //資料已被更新
+                if(_TREA_APLY_REC == null)
                 {
-                    result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{_TREA_APLY_REC.TREA_REGISTER_ID}");
-                    return result;
-                }
+                    var _TREA_OPEN_REC = db.TREA_OPEN_REC.FirstOrDefault(x => x.TREA_REGISTER_ID == searchData.vTREA_REGISTER_ID);
+                    if(_TREA_OPEN_REC.OPEN_TREA_TYPE == "1")
+                    {
+                        SysSeqDao sysSeqDao = new SysSeqDao();
+                        string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
+                        var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
+                        string applyNO = $@"G6{qPreCode}{cId}";
+                        string status = Ref.AccessProjectFormStatus.D01.ToString(); // 金庫登記簿檢核
 
-                if (!ActualAccEmp.IsNullOrWhiteSpace())
-                    _TREA_APLY_REC.ACTUAL_ACCESS_UID = ActualAccEmp;
-                if (!ActualAccType.IsNullOrWhiteSpace())
-                    _TREA_APLY_REC.ACTUAL_ACCESS_TYPE = ActualAccType;
-                _TREA_APLY_REC.ACCESS_REASON = InsertReason;
-                _TREA_APLY_REC.LAST_UPDATE_UID = cUserId;
-                _TREA_APLY_REC.LAST_UPDATE_DT = dt;
-                logStr += _TREA_APLY_REC.modelToString(logStr);
+                        var TREA_APLY_REC = db.TREA_APLY_REC;
+                        TREA_APLY_REC.Add(new TREA_APLY_REC()
+                        {
+                            APLY_NO = applyNO,
+                            APLY_FROM = "M",
+                            TREA_REGISTER_ID = InsertModel.vTREA_REGISTER_ID,
+                            ITEM_ID = InsertModel.vITEM_ID,
+                            ACCESS_REASON = InsertModel.vACCESS_REASON,
+                            APLY_STATUS = status,
+                            ACTUAL_ACCESS_UID = InsertModel.ACTUAL_ACCESS_UID,
+                            ACTUAL_ACCESS_TYPE = InsertModel.ACTUAL_ACCESS_TYPE,
+                            CREATE_UID = cUserId,
+                            CREATE_DT = dt,
+                            CREATE_UNIT = GetUserInfo(cUserId)?.DPT_ID
+
+                        });
+                        logStr += TREA_APLY_REC.modelToString(logStr);
+
+                        #region 申請單歷程檔
+                        var ARH = new APLY_REC_HIS()
+                        {
+                            APLY_NO = applyNO,
+                            APLY_STATUS = status,
+                            PROC_UID = cUserId,
+                            PROC_DT = dt
+                        };
+                        logStr += ARH.modelToString(logStr);
+                        #endregion
+
+                        #region 其它存取項目申請資料檔
+                        if (InsertModel.vITEM_OP_TYPE == "2")
+                        {
+                            var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY
+                                .Add(new OTHER_ITEM_APLY()
+                                {
+                                    APLY_NO = applyNO,
+                                    ITEM_ID = InsertModel.vSEAL_ITEM_ID
+                                });
+                            logStr += _OTHER_ITEM_APLY.modelToString(logStr);
+
+                            var _ITEM_SEAL = db.ITEM_SEAL.FirstOrDefault(y => y.ITEM_ID == InsertModel.vSEAL_ITEM_ID);
+                            var _INVENTORY_STATUS = string.Empty;
+
+                            switch (InsertModel.ACTUAL_ACCESS_TYPE)
+                            {
+                                //存入
+                                case "P":
+                                    _INVENTORY_STATUS = "9";
+                                    break;
+                                //取出
+                                case "G":
+                                    _INVENTORY_STATUS = "5";
+                                    break;
+                                //用印
+                                case "S":
+                                    _INVENTORY_STATUS = "5";
+                                    break;
+                                //存入用印
+                                case "A":
+                                    _INVENTORY_STATUS = "9";
+                                    break;
+                                //取出存入
+                                case "B":
+                                    _INVENTORY_STATUS = "1";
+                                    break;
+                            }
+                            _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
+                            logStr += _ITEM_SEAL.modelToString(logStr);
+                        }
+                        #endregion
+                    }
+                    else
+                    {
+                        result.DESCRIPTION = "查無單號";
+                        return result;
+                    }
+                }
+                else
+                {
+                    if (_TREA_APLY_REC.LAST_UPDATE_DT > viewModels.FirstOrDefault(x => x.hvAPLY_NO == APLYNO)?.vLAST_UPDATE_DT) //資料已被更新
+                    {
+                        result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{_TREA_APLY_REC.TREA_REGISTER_ID}");
+                        return result;
+                    }
+
+                    if (!InsertModel.ACTUAL_ACCESS_UID.IsNullOrWhiteSpace())
+                        _TREA_APLY_REC.ACTUAL_ACCESS_UID = InsertModel.ACTUAL_ACCESS_UID;
+                    if (!InsertModel.vACCESS_TYPE_CODE.IsNullOrWhiteSpace())
+                        _TREA_APLY_REC.ACTUAL_ACCESS_TYPE = InsertModel.vACCESS_TYPE_CODE;
+                    if(!InsertModel.vACCESS_REASON.IsNullOrWhiteSpace())
+                        _TREA_APLY_REC.ACCESS_REASON = InsertModel.vACCESS_REASON;
+                    _TREA_APLY_REC.LAST_UPDATE_UID = cUserId;
+                    _TREA_APLY_REC.LAST_UPDATE_DT = dt;
+                    logStr += _TREA_APLY_REC.modelToString(logStr);
+                }
 
                 var validateMessage = db.GetValidationErrors().getValidateString();
                 if (validateMessage.Any())
@@ -977,6 +1087,11 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(x => x.APLY_NO == APLYNO);
+                if (_TREA_APLY_REC == null)
+                {
+                    result.DESCRIPTION = "此項目尚未入庫確認，請先選擇【修改】執行確認";
+                    return result;
+                }
                 var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.FirstOrDefault(x => x.APLY_NO == _TREA_APLY_REC.APLY_NO);
                 var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == _TREA_APLY_REC.ITEM_ID);
 
