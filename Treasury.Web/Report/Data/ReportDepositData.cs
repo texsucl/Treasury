@@ -380,11 +380,23 @@ namespace Treasury.Web.Report.Data
             [Description("區域")]
             public string AREA { get; set; }
 
+            [Description("批次")]
+            public string BATCH_NO { get; set; }
+
+            [Description("序號前置碼")]
+            public string STOCK_NO_PREAMBLE { get; set; }
+
             [Description("序號(起)")]
             public string STOCK_NO_B { get; set; }
 
             [Description("序號(迄)")]
             public string STOCK_NO_E { get; set; }
+
+            [Description("每股金額")]
+            public decimal? AMOUNT_PER_SHARE { get; set; }
+
+            [Description("單張股數")]
+            public decimal? SINGLE_NUMBER_OF_SHARES { get; set; } 
 
             [Description("張數")]
             public int? STOCK_CNT { get; set; }
@@ -412,6 +424,9 @@ namespace Treasury.Web.Report.Data
         protected class DepositReportDEPOSIT_DEP_ORDER_M_Data
         {
             public string TYPE { get; set; }
+
+            [Description("存入日期")]
+            public string PUT_DATE { get; set; }
 
             [Description("承作日期")]
             public string COMMIT_DATE { get; set; }
@@ -470,6 +485,7 @@ namespace Treasury.Web.Report.Data
             public string CHARGE_DEPT_ID { get; set; }
 
             public string CHARGE_SECT_ID { get; set; }
+
         }
 
         protected class DepositReportITEMIMPData

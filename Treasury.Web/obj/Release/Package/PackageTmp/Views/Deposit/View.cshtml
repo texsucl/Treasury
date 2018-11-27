@@ -501,7 +501,7 @@
                     var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
                     var _Denomination = parseInt($('#' + DepositDenomination).val());
                     if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
-                        $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                        $('#' + DepositSubtotal_Denomination).html(customerUtility.addCommas(_DepositDep_Cnt * _Denomination));
                     }
                     else {
                         $('#' + DepositSubtotal_Denomination).html('');
@@ -524,7 +524,7 @@
                 var _DepositDep_Cnt = parseInt($('#' + DepositDep_Cnt).val());
                 var _Denomination = parseInt($('#' + DepositDenomination).val());
                 if (!isNaN(_DepositDep_Cnt) && !isNaN(_Denomination)) {
-                    $('#' + DepositSubtotal_Denomination).html(_DepositDep_Cnt * _Denomination);
+                    $('#' + DepositSubtotal_Denomination).html(customerUtility.addCommas(_DepositDep_Cnt * _Denomination));
                 }
                 else {
                     $('#' + DepositSubtotal_Denomination).html('');
@@ -797,7 +797,7 @@
                 $('#' + DepositInterest_Rate_Type).val(data.vInterest_Rate_Type.split('-')[0]);
                 $('#' + DepositInterest_Rate).val(data.vInterest_Rate);
                 $('#' + DepositDep_Type).val(data.vDep_Type.split('-')[0]);
-                $('#' + DepositTotal_Denomination).html(data.vTotal_Denomination);
+                $('#' + DepositTotal_Denomination).html(customerUtility.addCommas(data.vTotal_Denomination));
                 $('#' + DepositDep_Set_Quality).val(data.vDep_Set_Quality);
                 $('#' + DepositAuto_Trans).val(data.vAuto_Trans);
                 $('#' + DepositTrans_Expiry_Date).val(data.vTrans_Expiry_Date);
@@ -822,7 +822,7 @@
                 //$('#' + DepositDep_No_Tail).val(data.vDep_No_Tail);
                 $('#' + DepositDep_Cnt).val(data.vDep_Cnt);
                 $('#' + DepositDenomination).val(data.vDenomination);
-                $('#' + DepositSubtotal_Denomination).html(data.vSubtotal_Denomination);
+                $('#' + DepositSubtotal_Denomination).html(customerUtility.addCommas(data.vSubtotal_Denomination));
             }
         }
         //#endregion dialog
@@ -938,12 +938,12 @@
             $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                 $(this).find('.actionEditIcon').hide();
                 $(this).find('.actionDeleIcon').hide();
-                $(this).find('td').find('.DepositTakeOuts').each(function () {
-                    $(this).off('click');
-                    $(this).on('click', function () {
-                        takeout_Y(i + 1, $(this).prop('checked'));
-                    });
-                });
+                //$(this).find('td').find('.DepositTakeOuts').each(function () {
+                //    $(this).off('click');
+                //    $(this).on('click', function () {
+                //        takeout_Y(i + 1, $(this).prop('checked'));
+                //    });
+                //});
 
                 //庫存編號
                 $(this).find('td').find('a.DialogItem_Id').each(function () {
@@ -1138,35 +1138,42 @@
                     );
             }
             else { //取出
-                var colNameArray = ['取出', '動作', '庫存編號', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置', '自動轉期', '轉期後到期日', '備註', '轉期次數','取出原因', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)', '取出原因'];
+                var colNameArray = ['取出', '動作', '庫存編號', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置', '自動轉期', '轉期後到期日', '備註', '轉期次數','取出原因', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)', '取出註記'];
+                var colNameArray_Y = ['動作', '庫存編號', '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設置', '自動轉期', '轉期後到期日', '備註', '轉期次數', '取出原因', '承作日期(西元)', '到期日(西元)', '轉期後到期日(西元)', '取出註記'];
                 var colModelArray = [];
+                var colModelArray_Y = [];
                 if (!Deposit_Act_Type) {
                     colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", sortable: false, align: 'center', formatter: formatterTakeOut, hidden: true });
                     colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                    colModelArray_Y.push({ name: "act", index: "act", width: 90, sortable: false });
                 }
                 else {
                     colModelArray.push({ name: "vTakeoutFlag", index: "vTakeoutFlag", width: 45, sortable: false, align: 'center', formatter: formatterTakeOut });
                     colModelArray.push({ name: "act", index: "act", width: 65, sortable: false });
+                    colModelArray_Y.push({ name: "act", index: "act", width: 110, sortable: false });
                 }
-                colModelArray.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center', formatter: formatterItem_Id, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 50, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
-                colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
-                colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 50, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 70, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vMemo", index: "vMemo", width: 70, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 70, sortable: false, align: 'center' });
-                colModelArray.push({ name: "MsgFlag", index: "MsgFlag", width: 70, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
-                colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", hidden: true });
-                colModelArray.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
-                colModelArray.push({ name: "GetMsg", index: "GetMsg", hidden: true });
+                var colModelArray_Same = [];
+                colModelArray_Same.push({ name: "vItem_Id", index: "vItem_Id", width: 100, sortable: false, align: 'center', formatter: formatterItem_Id, unformat: DEPOSITunformatter });
+                colModelArray_Same.push({ name: "vCurrency", index: "vCurrency", width: 50, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 80, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vCommit_Date", index: "vCommit_Date", width: 100, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vExpiry_Date", index: "vExpiry_Date", width: 100, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 70, sortable: false, align: 'center', formatter: INTEREST_RATE_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray_Same.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 60, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vDep_Type", index: "vDep_Type", width: 70, sortable: false, align: 'center', formatter: DEP_TYPEformatterCheckType, unformat: DEPOSITunformatter });
+                colModelArray_Same.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                colModelArray_Same.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 50, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 70, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", width: 100, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vMemo", index: "vMemo", width: 70, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 70, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "GetMsg", index: "GetMsg", width: 70, sortable: false, align: 'center' });
+                colModelArray_Same.push({ name: "vCommit_Date", index: "vCommit_Date", hidden: true });
+                colModelArray_Same.push({ name: "vExpiry_Date", index: "vExpiry_Date", hidden: true });
+                colModelArray_Same.push({ name: "vTrans_Expiry_Date", index: "vTrans_Expiry_Date", hidden: true });
+                colModelArray_Same.push({ name: "MsgFlag", index: "MsgFlag", hidden: true });
+                $.merge(colModelArray, colModelArray_Same);
+                $.merge(colModelArray_Y, colModelArray_Same);
                 jqgridCustom.createJqgridByCache(
                     'DEPOSITjqgridDiv_N',
                     'DepositTempList_N',
@@ -1190,8 +1197,8 @@
                     {
                         type: 'Y'
                     },
-                    colNameArray,
-                    colModelArray,
+                    colNameArray_Y,
+                    colModelArray_Y,
                     '設置否=Y  到期明細',
                     jqgridCustom.getPage('DEPOSITjqgridDiv_Y'),
                     DepositTempTakeOutFun_Y,
@@ -1336,7 +1343,7 @@
                             $('#' + DepositInterest_Rate_Type).val().trim(),
                             $('#' + DepositInterest_Rate).val().trim(),
                             $('#' + DepositDep_Type).val().trim(),
-                            $('#' + DepositTotal_Denomination).html().trim(),
+                            customerUtility.removeCommas($('#' + DepositTotal_Denomination).html().trim()),
                             $('#' + DepositDep_Set_Quality).val().trim(),
                             $('#' + DepositAuto_Trans).val().trim(),
                             $('#' + DepositTrans_Expiry_Date).val().trim(),
@@ -1373,7 +1380,7 @@
                     return false;
                 }
                 //面額小計檢查
-                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt($('#' + DepositSubtotal_Denomination).html()) <= 0) {
+                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt(customerUtility.removeCommas($('#' + DepositSubtotal_Denomination).html())) <= 0) {
                     customerUtility.alert('面額小計不可為空或小於等於0', 'w');
                     return
                 }
@@ -1392,7 +1399,7 @@
                             null,
                             $('#' + DepositDep_Cnt).val().trim(),
                             $('#' + DepositDenomination).val().trim(),
-                            $('#' + DepositSubtotal_Denomination).html().trim())
+                            customerUtility.removeCommas($('#' + DepositSubtotal_Denomination).html().trim()))
                     }),
                     dataType: "json",
                     url: DepositUrl.InsertTempData_D,
@@ -1428,7 +1435,7 @@
                             $('#' + DepositInterest_Rate_Type).val().trim(),
                             $('#' + DepositInterest_Rate).val().trim(),
                             $('#' + DepositDep_Type).val().trim(),
-                            $('#' + DepositTotal_Denomination).html().trim(),
+                            customerUtility.removeCommas($('#' + DepositTotal_Denomination).html().trim()),
                             $('#' + DepositDep_Set_Quality).val().trim(),
                             $('#' + DepositAuto_Trans).val().trim(),
                             $('#' + DepositTrans_Expiry_Date).val().trim(),
@@ -1465,7 +1472,7 @@
                     return false;
                 }
                 //面額小計檢查
-                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt($('#' + DepositSubtotal_Denomination).html()) <= 0) {
+                if ($('#' + DepositSubtotal_Denomination).html() == "" || parseInt(customerUtility.removeCommas($('#' + DepositSubtotal_Denomination).html())) <= 0) {
                     customerUtility.alert('面額小計不可為空或小於等於0', 'w');
                     return
                 }
@@ -1484,7 +1491,7 @@
                             null,
                             $('#' + DepositDep_Cnt).val().trim(),
                             $('#' + DepositDenomination).val().trim(),
-                            $('#' + DepositSubtotal_Denomination).html().trim())
+                            customerUtility.removeCommas($('#' + DepositSubtotal_Denomination).html().trim()))
                     }),
                     dataType: "json",
                     url: DepositUrl.UpdateTempData_D,

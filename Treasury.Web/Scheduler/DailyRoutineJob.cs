@@ -37,7 +37,8 @@ namespace Treasury.Web.Scheduler
                     if (_mt != null)
                     {
                         var _INTERVAL_MIN = _mt.INTERVAL_MIN;
-                        if (dtn.Minute % _INTERVAL_MIN == 0)
+                        //if (dtn.Minute % _INTERVAL_MIN == 0)
+                        if (Convert.ToInt32(DateTime.Parse(dtnstr + ":00") - DateTime.Parse(_mt.EXEC_TIME_B + ":00")) % _INTERVAL_MIN == 0)
                         {
                             _mt.SCHEDULER_STATUS = "Y";
                             _mt.SCHEDULER_UPDATE_DT = dtn;
@@ -455,7 +456,7 @@ namespace Treasury.Web.Scheduler
                         }
 
                         str = str.Replace("@_STATUS_", status);
-
+                        sb.AppendLine(str);
                         //                        sb.AppendLine(
                         //$@"您好, 
                         //通知系統尚未登打金庫進 / 出入庫時間，請儘速完成，謝謝");

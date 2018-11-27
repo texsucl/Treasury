@@ -62,8 +62,11 @@ namespace Treasury.Web.Report.Data
                 types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null && x.CODE_TYPE == "STOCK_AREA").ToList();
                 book = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO.ToString() !=null).ToList();
                 
-                foreach(var STOCKdata in _IS.OrderBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.GROUP_NO).ThenBy(x=>x.STOCK_NO_PREAMBLE).ThenBy(x=>x.STOCK_NO_B)) 
+                foreach(var STOCKdata in _IS.OrderBy(x=>x.GROUP_NO).ThenBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.GROUP_NO).ThenBy(x=>x.STOCK_NO_PREAMBLE).ThenBy(x=>x.STOCK_NO_B)) 
                 {
+                    var _CHARGE_DEPT = getEmpName(depts, STOCKdata.CHARGE_DEPT);
+                    var _CHARGE_SECT = getEmpName(depts, STOCKdata.CHARGE_SECT).Replace(_CHARGE_DEPT, "")?.Trim();
+
                     ReportData = new DepositReportSTOCKData()
                     {
                         PUT_DATE = STOCKdata.PUT_DATE.dateTimeToStr(),
@@ -73,8 +76,12 @@ namespace Treasury.Web.Report.Data
                         DENOMINATION = STOCKdata.DENOMINATION,
                         NUMBER_OF_SHARES = STOCKdata.NUMBER_OF_SHARES,
                         AREA = types.FirstOrDefault(z=>z.CODE == getArea(book, STOCKdata.GROUP_NO.ToString()))?.CODE_VALUE,
-                        CHARGE_DEPT =getEmpName(depts,STOCKdata.CHARGE_DEPT),
-                        CHARGE_SECT= getEmpName(depts,STOCKdata.CHARGE_SECT),
+                        BATCH_NO = STOCKdata.TREA_BATCH_NO.ToString(),
+                        STOCK_NO_PREAMBLE = STOCKdata.STOCK_NO_PREAMBLE,
+                        AMOUNT_PER_SHARE = STOCKdata.AMOUNT_PER_SHARE,
+                        SINGLE_NUMBER_OF_SHARES = STOCKdata.SINGLE_NUMBER_OF_SHARES,
+                        CHARGE_DEPT = _CHARGE_DEPT,
+                        CHARGE_SECT = _CHARGE_SECT,
                         MEMO =STOCKdata.MEMO,
                         BOOK_NO = STOCKdata.GROUP_NO.ToString(),
                         NAME = getName(book,STOCKdata.GROUP_NO.ToString()),

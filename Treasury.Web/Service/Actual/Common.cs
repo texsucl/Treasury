@@ -212,7 +212,8 @@ namespace Treasury.Web.Service.Actual
                             item => new getUIDName
                             {
                                 itemId = item.x.ITEM_ID,
-                                getAplyUidName = emps.FirstOrDefault(y => y.USR_ID == item.y.APLY_UID)?.EMP_NAME?.Trim() 
+                                getAplyUidName = emps.FirstOrDefault(y => y.USR_ID == item.y.APLY_UID)?.EMP_NAME?.Trim(),
+                                confirmDate = item.y.CONFIRM_DT
                             }).ToList();
             }
         }
@@ -323,6 +324,8 @@ namespace Treasury.Web.Service.Actual
             public string itemId { get; set; }
 
             public string getAplyUidName { get; set; }
+
+            public DateTime? confirmDate { get; set; }
         }
     }
 }
