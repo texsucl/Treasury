@@ -26,6 +26,13 @@ namespace Treasury.Web.Service.Interface
         Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>> DialogSelectedChange(string ItemOpType, string TreaItem, string AccessType, List<AfterOpenTreasurySearchDetailViewModel> ViewDatas);
 
         /// <summary>
+        /// 修改時 作業類型 2 data.vSEAL_ITEM_ID 無值 必須查DB 帶出印章
+        /// </summary>
+        /// <param name="TreaItem"></param>
+        /// <returns></returns>
+        List<SelectOption> GetSealFun(string TreaItem, List<AfterOpenTreasurySearchDetailViewModel> ViewDatas);
+
+        /// <summary>
         /// 產生實際入庫人員選單
         /// </summary>
         /// <param name="treaItemId"></param>

@@ -146,7 +146,8 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
                         .Where(x => x.ITEM_ID == searchModel.vItem_No, !searchModel.vItem_No.IsNullOrWhiteSpace())
-                        .Where(x => x.BOOK_NO == searchModel.vBookNo, !searchModel.vBookNo.IsNullOrWhiteSpace())
+                        .Where(x => x.BOOK_NO == searchModel.vItem_Book_No, !searchModel.vItem_Book_No.IsNullOrWhiteSpace())
+                        //.Where(x => x.BOOK_NO == searchModel.vBookNo, !searchModel.vBookNo.IsNullOrWhiteSpace())
                         .Where(x => x.MARGIN_DEP_TYPE == searchModel.vMargin_Dep_Type, searchModel.vMargin_Dep_Type != "All")
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
@@ -275,7 +276,8 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types).ToList();
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
+                        result = GetDetailModel(details, _Inventory_types, _accessStatus).ToList();
                     }
                 }
             }
@@ -994,20 +996,20 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<MargingpViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types)
+        private IEnumerable<MargingpViewModel> GetDetailModel(IEnumerable<ITEM_REFUNDABLE_DEP> data, List<SYS_CODE> _Inventory_types, bool accessStatus)
         {
             return data.Select(x => new MargingpViewModel()
             {
                 vItem_PK = x.ITEM_ID,   //網頁PK
                 vItem_Id = x.ITEM_ID, //歸檔編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vTrad_Partners = x.TRAD_PARTNERS, //交易對象
-                vMargin_Dep_Type = x.MARGIN_DEP_TYPE,   //存出保證金類別
-                vAmount = x.AMOUNT, //金額
-                vWorkplace_Code = x.WORKPLACE_CODE, //職場代號
-                vDescription = x.DESCRIPTION,   //說明
-                vMemo = x.MEMO, //備註
-                vBook_No = x.BOOK_NO,   //冊號
+                vTrad_Partners = accessStatus ? x.TRAD_PARTNERS_ACCESS : x.TRAD_PARTNERS, //交易對象
+                vMargin_Dep_Type = accessStatus ? x.MARGIN_DEP_TYPE_ACCESS : x.MARGIN_DEP_TYPE,   //存出保證金類別
+                vAmount = accessStatus ? x.AMOUNT_ACCESS : x.AMOUNT, //金額
+                vWorkplace_Code = accessStatus ? x.WORKPLACE_CODE_ACCESS : x.WORKPLACE_CODE, //職場代號
+                vDescription = accessStatus ? x.DESCRIPTION_ACCESS : x.DESCRIPTION,   //說明
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO, //備註
+                vBook_No = accessStatus ? x.BOOK_NO_ACCESS : x.BOOK_NO,   //冊號
                 vTakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });

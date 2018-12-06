@@ -129,6 +129,9 @@ namespace Treasury.Web.Report.Data
             [Description("類型")]
             public string TYPE { get; set; }
 
+            [Description("物品編號")]
+            public string ITEM_ID { get; set; }
+
             [Description("幣別")]
             public string CURRENCY { get; set; }
 

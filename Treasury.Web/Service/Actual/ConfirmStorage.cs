@@ -1125,7 +1125,7 @@ namespace Treasury.Web.Service.Actual
                                                 break;
                                             //取出存入
                                             case "B":
-                                                _INVENTORY_STATUS = "1";
+                                                _INVENTORY_STATUS = "5";
                                                 break;
                                         }
                                         _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;

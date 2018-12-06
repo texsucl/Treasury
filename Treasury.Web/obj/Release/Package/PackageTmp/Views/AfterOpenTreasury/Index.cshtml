@@ -195,6 +195,7 @@
         UrlFor.GetActualAccessType = '@Url.Action("GetActualAccessType", "AfterOpenTreasury")';
         UrlFor.TakeOutData = '@Url.Action("TakeOutData", "AfterOpenTreasury")';
         UrlFor.GetConfrimedT = '@Url.Action("GetConfrimedT", "AfterOpenTreasury")';
+        UrlFor.GetSeal = '@Url.Action("GetSeal", "AfterOpenTreasury")';
         @*UrlFor.openBILL = '@Url.Action("View", "Bill")';
         UrlFor.openESTATE = '@Url.Action("View", "Estate")';
         UrlFor.openSEAL = '@Url.Action("View", "Seal")';
@@ -218,7 +219,6 @@
         var Print = 'Print';
         var Apply = 'Apply';
         var Insert = 'Insert';
-        var RegisterID = 'RegisterID';
         var DetailsDiv = 'DetailsDiv';
         var ItemOpType = 'ItemOpType';
         var AccessType = 'AccessType';
@@ -253,6 +253,9 @@
         }
         else {
             //初始畫面
+            if ($('#' + RegisterID).val() == null) {
+                $('#Search').prop('disabled', true);
+            }
             setTimepicker();
             GetConfrimedTime();
             //region datepicker
@@ -339,6 +342,9 @@
             var treaItem = $('#' + TreaItem).val();
             var accessType = $('#' + AccessType).val();
             listChange(opType, treaItem, accessType);
+        });
+        $('#SealItemTd').change(function () {
+            GetActualAccessTypeFun($('#' + SealItem).val(), null);
         });
         //#endregion
         //Dialog SelectedChange
@@ -537,7 +543,10 @@
                         }
                         else {
                             customerUtility.alert(result.DESCRIPTION, 's');
-                            SearchGrid();
+                            $('#SearchjqgridDiv').empty();
+                            $('#RegisterID').empty();
+                            $('#DetailsDiv').hide();
+                            //SearchGrid();
                         }
                     });
                 }
@@ -864,7 +873,7 @@
                 { name: "vSEAL_ITEM", index: "vSEAL_ITEM", width: 95, sortable: false, align: 'center' },
                 { name: "vACCESS_TYPE", index: "vACCESS_TYPE", width: 65, sortable: false, align: 'center' },
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
-                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 170, sortable: false, align: 'center' },
+                { name: "vACCESS_REASON", index: "vACCESS_REASON", width: 130, sortable: false, align: 'center' },
                 { name: "vCONFIRM_NAME", index: "vCONFIRM_NAME", width: 70, sortable: false, align: 'center' },
                 { name: "ACTUAL_ACCESS_NAME", index: "ACTUAL_ACCESS_NAME", width: 80, sortable: false, align: 'center' },
                 { name: "ACTUAL_ACCESS_TYPE", index: "ACTUAL_ACCESS_TYPE", width: 80, sortable: false, align: 'center' },
@@ -1068,8 +1077,6 @@
                 $('#' + ItemOpType).prop('disabled', true);
                 $('#' + TreaItem).prop('disabled', true);
                 $('#' + InsertReason).prop('disabled', true);
-                //$('#' + ActualAccessEmps).prop('disabled', false);
-                //$('#' + ActualAccessType).prop('disabled', true);
 
                 $('#' + TreaItem).empty();
                 $('#' + ItemOpType).val(data.vITEM_OP_TYPE);
@@ -1081,15 +1088,22 @@
                     $('#' + ActualAccessType).prop('disabled', true);
                 }
                 if (data.vITEM_OP_TYPE == "2") {
-                    //$('#' + AccessType).prop('disabled', true);
-
                     $('#' + AccessType).empty();
                     $('#' + SealItem).empty();
                     $('#' + AccessType).append($('<option></option>').val(data.vACCESS_TYPE_CODE).html(data.vACCESS_TYPE));
-                    $('#' + SealItem).append($('<option></option>').val(data.vSEAL_ITEM_ID).html(data.vSEAL_ITEM));
+
+                    if (data.vSEAL_ITEM_ID != ''){
+                        $('#' + SealItem).append($('<option></option>').val(data.vSEAL_ITEM_ID).html(data.vSEAL_ITEM));
+                        $('#' + SealItem).prop('disabled', true);
+                        GetActualAccessTypeFun(data.vSEAL_ITEM_ID, data.vACCESS_TYPE_CODE);
+                    }
+                    else {
+                        GetSEAL_ITEM_ID(data.vITEM_ID);
+                        $('#' + SealItem).prop('disabled', false);
+                    }
+                        
                     $('#' + CONFIRM_NAME_TR).hide();
                     $('#' + ActualAccessType).prop('disabled', false);
-                    $('#' + SealItem).prop('disabled', true);
                     $('.ShowOrNot').show();
                 }
                 else {
@@ -1122,18 +1136,6 @@
                     customerUtility.addoption('ActualAccessEmps', result);
                 });
 
-                $.ajax({
-                    type: 'POST',
-                    data: JSON.stringify({
-                        AccessType: data.vACCESS_TYPE_CODE,
-                        SEAL_ID : data.vSEAL_ITEM_ID
-                    }),
-                    url: UrlFor.GetActualAccessType,
-                    contentType: 'application/json'
-                }).done(function (result) {
-                    $('#' + ActualAccessType).find('option').remove();
-                    customerUtility.addoption('ActualAccessType', result);
-                });
                 $('#' + UpdateConfirm).off('click');
                 $('#' + UpdateConfirm).on('click', function () { UpdateFun(listId, rowid); });
             }
@@ -1329,6 +1331,38 @@
             $('#' + dialogId).dialog('open');
         }
 
+        //#endregion
+
+        function GetActualAccessTypeFun(SEAL_ID, ACCESS_TYPE_CODE) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    AccessType: ACCESS_TYPE_CODE,
+                    SEAL_ID: SEAL_ID
+                }),
+                url: UrlFor.GetActualAccessType,
+                contentType: 'application/json'
+            }).done(function (result) {
+                $('#' + ActualAccessType).find('option').remove();
+                customerUtility.addoption('ActualAccessType', result);
+            });
+        }
+
+        //region 修改時 作業類型 2 data.vSEAL_ITEM_ID 無值 必須查DB 帶出印章
+        function GetSEAL_ITEM_ID(treaItem) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    TreaItem: treaItem
+                }),
+                url: UrlFor.GetSeal,
+                contentType: 'application/json'
+            }).done(function (result) {
+                customerUtility.addoption('SealItem', result);
+
+                GetActualAccessTypeFun($('#' + SealItem).val(), null);
+            })
+        }
         //#endregion
         //region 查詢 ViewModel
         function SearchViewModel(vAOT_DT, vTREA_REGISTER_ID, vACTUAL_PUT_TIME, vACTUAL_GET_TIME) {

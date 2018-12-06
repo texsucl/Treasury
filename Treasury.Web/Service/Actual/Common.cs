@@ -317,6 +317,26 @@ namespace Treasury.Web.Service.Actual
             return new Tuple<string, string>(ICA.APLY_NO, logStr);
         }
 
+        public static TreasuryDBEntities AddToContext<T>(TreasuryDBEntities context,
+  T entity, int count, int commitCount, bool recreateContext) where T : class
+        {
+            context.Set<T>().Add(entity);
+
+            if (count % commitCount == 0)
+            {
+                context.SaveChanges();
+                if (recreateContext)
+                {
+                    context.Dispose();
+                    context = new TreasuryDBEntities();
+                    context.Configuration.AutoDetectChangesEnabled = false;
+                    context.Configuration.ValidateOnSaveEnabled = false;
+                }
+            }
+
+            return context;
+        }
+
         #endregion
 
         public class getUIDName

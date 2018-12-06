@@ -92,6 +92,23 @@ namespace Treasury.WebUtility
 
         #endregion String To Decimal
 
+        #region String To Decimal?
+
+        /// <summary>
+        /// string 轉 Decimal
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Nullable<decimal> stringToDecimalN(string value)
+        {
+            decimal d = 0;
+            if(decimal.TryParse(value, out d))
+                return d;
+            return null;
+        }
+
+        #endregion String To Decimal
+
         #region String To Double?
 
         /// <summary>

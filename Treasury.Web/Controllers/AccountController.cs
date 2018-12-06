@@ -103,6 +103,7 @@ namespace Treasury.Web.Controllers
 
                             Session["UserID"] = loginModel.UserId;
                             //Session["UserID"] = "A8272";
+
                             //Session["AgentID"] = codeUser.CAGENTID;
 
                             //Session["UserName"] = "";

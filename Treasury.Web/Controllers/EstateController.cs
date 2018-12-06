@@ -461,6 +461,26 @@ namespace Treasury.Web.Controllers
             {
                 var dbData = (List<CDCEstateViewModel>)Cache.Get(CacheList.CDCEstateData);
                 var updateTempData = dbData.FirstOrDefault(x => x.vItemId == model.vItemId);
+
+                //直接對DB改坐落及備註
+                var _vIB_Located_Aft = model.vIB_Located.CheckAFT(updateTempData.vIB_Located); //坐落
+                var _vIB_Memo_Aft = model.vIB_Memo.CheckAFT(updateTempData.vIB_Memo);  //備註
+                if (_vIB_Located_Aft.Item2 || _vIB_Memo_Aft.Item2)
+                {
+                    var datas = Estate.UpdateDBITEM_BOOK(model, updateTempData, AccountController.CurrentUserId);
+                    result.RETURN_FLAG = datas.RETURN_FLAG;
+                    result.DESCRIPTION = datas.DESCRIPTION;
+                    if (!datas.RETURN_FLAG)
+                    {   
+                        return Json(result);
+                    }
+                    else
+                    {
+                        updateTempData.vIB_Located = _vIB_Located_Aft.Item1;
+                        updateTempData.vIB_Memo = _vIB_Memo_Aft.Item1;
+                    }
+                }
+
                 if (updateTempData != null)
                 {
                     var _vEstate_Form_No_Aft = model.vEstate_Form_No.CheckAFT(updateTempData.vEstate_Form_No);

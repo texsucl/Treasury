@@ -75,7 +75,6 @@ namespace Treasury.Web.Service.Interface
         /// <param name="dt">執行時間</param>
         /// <returns></returns>
         Tuple<bool, string> CDCChargeApproved(TreasuryDBEntities db, List<string> itemIDs, string logStr, DateTime dt);
-
         #endregion
 
     }

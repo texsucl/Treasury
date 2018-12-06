@@ -8,6 +8,7 @@ using System.Web;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Actual;
 using Treasury.WebUtility;
+using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Report.Data
 {
@@ -35,6 +36,10 @@ namespace Treasury.Web.Report.Data
                 var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To).DateToLatestTime(); ;
               
                 int TOTAL= 0;
+                INVENTORY_STATUSs.AddRange(new List<string>() {
+                    ((int)AccessInventoryType._5).ToString(),    //預約取出，計庫存
+                    ((int)AccessInventoryType._6).ToString(),    //已被取出，計庫存
+                    ((int)AccessInventoryType._9).ToString() }); //預約存入，計庫存
                 var _II=  db.ITEM_IMPO.AsNoTracking()//判斷是否在庫
                     .Where(x => INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn)
                     .Where(x =>
@@ -71,12 +76,14 @@ namespace Treasury.Web.Report.Data
 
                     foreach (var item in ITEM_IMPOs)
                     {
+                        var _CHARGE_DEPT = getEmpName(depts, item.CHARGE_DEPT);
+                        var _CHARGE_SECT = getEmpName(depts, item.CHARGE_SECT).Replace(_CHARGE_DEPT, "")?.Trim();
                         ReportData = new DepositReportITEMIMPData()
                         {
                             ITEM_ID = item.ITEM_ID,
                             PUT_DATE = item.PUT_DATE.dateTimeToStr(),
-                            CHARGE_DEPT = getEmpName(depts, item.CHARGE_DEPT),
-                            CHARGE_SECT = getEmpName(depts, item.CHARGE_SECT),
+                            CHARGE_DEPT = _CHARGE_DEPT,
+                            CHARGE_SECT = _CHARGE_SECT,
                             ITEM_NAME = item.ITEM_NAME,
                             QUANTITY = GetQUANTITY(item, GetITEM_IMPOs),
                             AMOUNT = item.AMOUNT,

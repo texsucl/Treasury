@@ -62,6 +62,20 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 修改時 作業類型 2 data.vSEAL_ITEM_ID 無值 必須查DB 帶出印章
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetSeal(string TreaItem)
+        {
+            var datas = (List<AfterOpenTreasurySearchDetailViewModel>)Cache.Get(CacheList.AfterOpenTreasurySearchDetailViewData);
+            var result = AftereOpenTreasury.GetSealFun(TreaItem, datas);
+
+            return Json(result);
+        }
+
+        /// <summary>
         /// 查詢
         /// </summary>
         /// <returns></returns>

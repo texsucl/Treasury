@@ -28,24 +28,28 @@ namespace Treasury.Web.Enum
             /// <summary>
             /// 存入保證金
             /// </summary>
+            [Commucation(typeof(FileMarginpModel))]
             [Description("存入保證金")]
             Marginp,
 
             /// <summary>
             /// 存出保證金
             /// </summary>
+            [Commucation(typeof(FileMargingModel))]
             [Description("存出保證金")]
             Marging,
 
             /// <summary>
             /// 股票
             /// </summary>
+            [Commucation(typeof(FileStockModel))]
             [Description("股票")]
             Stock,
 
             /// <summary>
             /// 重要物品
             /// </summary>
+            [Commucation(typeof(FileItemImpModel))]
             [Description("重要物品")]
             Itemimp,
 

@@ -38,7 +38,7 @@ namespace Treasury.Web.Scheduler
                     {
                         var _INTERVAL_MIN = _mt.INTERVAL_MIN;
                         //if (dtn.Minute % _INTERVAL_MIN == 0)
-                        if (Convert.ToInt32(DateTime.Parse(dtnstr + ":00") - DateTime.Parse(_mt.EXEC_TIME_B + ":00")) % _INTERVAL_MIN == 0)
+                        if (int.Parse((DateTime.Parse(dtnstr + ":00") - DateTime.Parse(_mt.EXEC_TIME_B + ":00")).Minutes.ToString()) % _INTERVAL_MIN == 0)
                         {
                             _mt.SCHEDULER_STATUS = "Y";
                             _mt.SCHEDULER_UPDATE_DT = dtn;
