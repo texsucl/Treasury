@@ -45,8 +45,9 @@ namespace Treasury.Web.Controllers
         {
             ViewBag.opScope = GetopScope("~/TreasuryMaintain/");
             ViewBag.dControl_Mode_Search = new SelectList(new Service.Actual.Common().GetSysCode("CONTROL_MODE", true), "Value", "Text");
-            ViewBag.dIs_Disabled = new SelectList(new Service.Actual.Common().GetSysCode("YN_FLAG", true), "Value", "Text");
+            ViewBag.dIs_Disabled_Search = new SelectList(new Service.Actual.Common().GetSysCode("YN_FLAG", true), "Value", "Text");
             ViewBag.dControl_Mode = new SelectList(new Service.Actual.Common().GetSysCode("CONTROL_MODE"), "Value", "Text");
+            ViewBag.dIs_Disabled = new SelectList(new Service.Actual.Common().GetSysCode("YN_FLAG"), "Value", "Text");
             return View();
         }
 
@@ -186,8 +187,6 @@ namespace Treasury.Web.Controllers
                 model.vExec_Action_Name = "新增";
                 model.vData_Status = "1";
                 model.vData_Status_Name = "可異動";
-                model.vIs_Disabled = "N";
-                model.vIs_Disabled_Name = "否";
                 tempData.Add(model);
                 Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
                 Cache.Set(CacheList.TreasuryMaintainSearchDataList, tempData);
@@ -216,11 +215,13 @@ namespace Treasury.Web.Controllers
                 {
                     updateTempData.vExec_Action = (updateTempData.vExec_Action == "A") ? "A" : "U";
                     updateTempData.vExec_Action_Name = (updateTempData.vExec_Action == "A") ? "新增" : "修改";
+                    updateTempData.vEquip_Name = model.vEquip_Name;
                     updateTempData.vControl_Mode = model.vControl_Mode;
                     updateTempData.vNormal_Cnt = model.vNormal_Cnt;
                     updateTempData.vReserve_Cnt = model.vReserve_Cnt;
                     updateTempData.vSum_Cnt = model.vSum_Cnt;
                     updateTempData.vMemo = model.vMemo;
+                    updateTempData.vIs_Disabled = model.vIs_Disabled;
                     Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
                     Cache.Set(CacheList.TreasuryMaintainSearchDataList, tempData);
                     result.RETURN_FLAG = true;
@@ -252,21 +253,12 @@ namespace Treasury.Web.Controllers
                 var deleteTempData = tempData.FirstOrDefault(x => x.vTrea_Equip_Id == model.vTrea_Equip_Id);
                 if (deleteTempData != null)
                 {
-                    //判斷是否新增資料
-                    if (deleteTempData.vExec_Action == "A")
-                    {
-                        tempData.Remove(deleteTempData);
-                    }
-                    else
-                    {
-                        deleteTempData.vExec_Action = "D";
-                        deleteTempData.vExec_Action_Name = "刪除";
-                    }
+                    tempData.Remove(deleteTempData);
                     Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
                     Cache.Set(CacheList.TreasuryMaintainSearchDataList, tempData);
                     result.RETURN_FLAG = true;
                     result.DESCRIPTION = Ref.MessageType.delete_Success.GetDescription();
-                    result.Datas = tempData.Where(x => x.vExec_Action != null).Any();
+                    result.Datas = tempData.Where(x => x.vData_Status == "1" && x.vExec_Action != null).Any();
                 }
                 else
                 {

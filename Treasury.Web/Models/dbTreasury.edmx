@@ -781,9 +781,11 @@
           <Property Name="STOCK_NO_B_ACCESS" Type="nvarchar" MaxLength="8" />
           <Property Name="STOCK_NO_E_ACCESS" Type="nvarchar" MaxLength="8" />
           <Property Name="STOCK_CNT_ACCESS" Type="int" />
-          <Property Name="DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="2" />
-          <Property Name="NUMBER_OF_SHARES_ACCESS" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="DENOMINATION_ACCESS" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="NUMBER_OF_SHARES_ACCESS" Type="decimal" Precision="18" Scale="0" />
           <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
+          <Property Name="AMOUNT_PER_SHARE_ACCESS" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="SINGLE_NUMBER_OF_SHARES_ACCESS" Type="decimal" Precision="18" Scale="0" />
         </EntityType>
         <!--產生期間發現錯誤:
 警告 6002: 資料表/檢視 'dbTreasury.dbo.Log' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
@@ -1113,10 +1115,13 @@
           <Property Name="NORMAL_CNT" Type="int" />
           <Property Name="RESERVE_CNT" Type="int" />
           <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+          <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+          <Property Name="EQUIP_NAME_B" Type="nvarchar" MaxLength="30" />
           <Property Name="CONTROL_MODE_B" Type="varchar" MaxLength="1" />
           <Property Name="NORMAL_CNT_B" Type="int" />
           <Property Name="RESERVE_CNT_B" Type="int" />
           <Property Name="MEMO_B" Type="nvarchar" MaxLength="200" />
+          <Property Name="IS_DISABLED_B" Type="varchar" MaxLength="1" />
           <Property Name="APPR_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="APPR_DATE" Type="datetime" />
           <Property Name="APLY_DATE" Type="datetime" Nullable="false" />
@@ -2223,9 +2228,11 @@
           <Property Name="STOCK_NO_B_ACCESS" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
           <Property Name="STOCK_NO_E_ACCESS" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
           <Property Name="STOCK_CNT_ACCESS" Type="Int32" />
-          <Property Name="DENOMINATION_ACCESS" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="NUMBER_OF_SHARES_ACCESS" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="DENOMINATION_ACCESS" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="NUMBER_OF_SHARES_ACCESS" Type="Decimal" Precision="18" Scale="0" />
           <Property Name="MEMO_ACCESS" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="AMOUNT_PER_SHARE_ACCESS" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="SINGLE_NUMBER_OF_SHARES_ACCESS" Type="Decimal" Precision="18" Scale="0" />
         </EntityType>
         <EntityType Name="TREA_OPEN_REC">
           <Key>
@@ -2588,6 +2595,9 @@
           <Property Name="APLY_UID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="APPR_DESC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED_B" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="EQUIP_NAME_B" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -3407,6 +3417,8 @@
           <EntitySetMapping Name="ITEM_STOCK">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_STOCK">
               <MappingFragment StoreEntitySet="ITEM_STOCK">
+                <ScalarProperty Name="SINGLE_NUMBER_OF_SHARES_ACCESS" ColumnName="SINGLE_NUMBER_OF_SHARES_ACCESS" />
+                <ScalarProperty Name="AMOUNT_PER_SHARE_ACCESS" ColumnName="AMOUNT_PER_SHARE_ACCESS" />
                 <ScalarProperty Name="MEMO_ACCESS" ColumnName="MEMO_ACCESS" />
                 <ScalarProperty Name="NUMBER_OF_SHARES_ACCESS" ColumnName="NUMBER_OF_SHARES_ACCESS" />
                 <ScalarProperty Name="DENOMINATION_ACCESS" ColumnName="DENOMINATION_ACCESS" />
@@ -3801,6 +3813,9 @@
           <EntitySetMapping Name="TREA_EQUIP_HIS">
             <EntityTypeMapping TypeName="dbTreasuryModel.TREA_EQUIP_HIS">
               <MappingFragment StoreEntitySet="TREA_EQUIP_HIS">
+                <ScalarProperty Name="EQUIP_NAME_B" ColumnName="EQUIP_NAME_B" />
+                <ScalarProperty Name="IS_DISABLED_B" ColumnName="IS_DISABLED_B" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
                 <ScalarProperty Name="APPR_DESC" ColumnName="APPR_DESC" />
                 <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
                 <ScalarProperty Name="APLY_UID" ColumnName="APLY_UID" />

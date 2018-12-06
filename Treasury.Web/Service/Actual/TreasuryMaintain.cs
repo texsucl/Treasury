@@ -70,8 +70,6 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.APPR_STATUS == "1").Where(x => x.APPR_DATE == null).ToList();
                 var _Exec_Action = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
-                var _Is_Disabled = db.SYS_CODE.AsNoTracking()
-                    .Where(x => x.CODE_TYPE == "YN_FLAG").ToList();
                 var _Data_Status_Name = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "DATA_STATUS").ToList();
 
@@ -91,7 +89,6 @@ namespace Treasury.Web.Service.Actual
                         vSum_Cnt = x.NORMAL_CNT + x.RESERVE_CNT,
                         vMemo = x.MEMO,
                         vIs_Disabled = x.IS_DISABLED,
-                        vIs_Disabled_Name = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE?.Trim(),
                         vData_Status = x.DATA_STATUS,
                         vData_Status_Name = _Data_Status_Name.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE?.Trim(),
                         vLast_Update_Dt = x.LAST_UPDATE_DT,
@@ -133,29 +130,27 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
                         .Where(x => x.APLY_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null)
-                        .AsEnumerable()
-                        .Join(db.TREA_EQUIP.AsNoTracking()
                         .Where(x => x.IS_DISABLED == searchData.vIs_Disabled, searchData.vIs_Disabled != "All")
-                        .AsEnumerable(),
-                        TEH => TEH.TREA_EQUIP_ID,
-                        TE => TE.TREA_EQUIP_ID,
-                        (TEH, TE) => new TreasuryMaintainChangeRecordViewModel
+                        .AsEnumerable()
+                        .Select((x) => new TreasuryMaintainChangeRecordViewModel
                         {
-                            vAply_Date = TEH.APLY_DATE.ToString("yyyy/MM/dd"),
-                            vAply_No = TEH.APLY_NO,
-                            vAply_Uid_Name = !TEH.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim() : null,
-                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TEH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                            vEquip_Name = TEH.EQUIP_NAME,
-                            vIs_Disabled = _Is_Disabled.FirstOrDefault(x => x.CODE == TE.IS_DISABLED)?.CODE_VALUE.Trim(),
-                            vControl_Mode_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TEH.CONTROL_MODE)?.CODE_VALUE.Trim(),
-                            vControl_Mode_B_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TEH.CONTROL_MODE_B)?.CODE_VALUE.Trim(),
-                            vNormal_Cnt = TEH.NORMAL_CNT,
-                            vNormal_Cnt_B = TEH.NORMAL_CNT_B,
-                            vReserve_Cnt = TEH.RESERVE_CNT,
-                            vReserve_Cnt_B = TEH.RESERVE_CNT_B,
-                            vMemo = TEH.MEMO,
-                            vMemo_B = TEH.MEMO_B,
-                            vAppr_Status_Name = _Appr_Status.FirstOrDefault(x => x.CODE == TEH.APPR_STATUS)?.CODE_VALUE.Trim()
+                            vAply_Date = x.APLY_DATE.ToString("yyyy/MM/dd"),
+                            vAply_No = x.APLY_NO,
+                            vAply_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME.Trim() : null,
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vEquip_Name = x.EQUIP_NAME,
+                            vEquip_Name_B = x.EQUIP_NAME_B,
+                            vControl_Mode_Name = _Control_Mode.FirstOrDefault(y => y.CODE == x.CONTROL_MODE)?.CODE_VALUE.Trim(),
+                            vControl_Mode_B_Name = _Control_Mode.FirstOrDefault(y => y.CODE == x.CONTROL_MODE_B)?.CODE_VALUE.Trim(),
+                            vNormal_Cnt = x.NORMAL_CNT,
+                            vNormal_Cnt_B = x.NORMAL_CNT_B,
+                            vReserve_Cnt = x.RESERVE_CNT,
+                            vReserve_Cnt_B = x.RESERVE_CNT_B,
+                            vMemo = x.MEMO,
+                            vMemo_B = x.MEMO_B,
+                            vIs_Disabled = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE.Trim(),
+                            vIs_Disabled_B = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED_B)?.CODE_VALUE.Trim(),
+                            vAppr_Status_Name = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim()
                         }).ToList();
                 }
                 else
@@ -164,28 +159,25 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.APLY_NO == aply_No)
                         .Where(x => x.TREA_EQUIP_ID == searchData.vTrea_Equip_Id, searchData.vTrea_Equip_Id != null)
                         .AsEnumerable()
-                        .Join(db.TREA_EQUIP.AsNoTracking()
-                        .AsEnumerable(),
-                        TEH => TEH.TREA_EQUIP_ID,
-                        TE => TE.TREA_EQUIP_ID,
-                        (TEH, TE) => new TreasuryMaintainChangeRecordViewModel
+                        .Select((x) => new TreasuryMaintainChangeRecordViewModel
                         {
-                            vAply_Date = TEH.APLY_DATE.ToString("yyyy/MM/dd"),
-                            vAply_No = TEH.APLY_NO,
-                            vAply_Uid_Name = !TEH.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(x => x.USR_ID == TEH.APLY_UID)?.EMP_NAME.Trim() : null,
-                            vExec_Action_Name = _Exec_Action.FirstOrDefault(x => x.CODE == TEH.EXEC_ACTION)?.CODE_VALUE.Trim(),
-                            vEquip_Name = TEH.EQUIP_NAME,
-                            vIs_Disabled = _Is_Disabled.FirstOrDefault(x => x.CODE == TE.IS_DISABLED)?.CODE_VALUE.Trim(),
-                            vControl_Mode_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TEH.CONTROL_MODE)?.CODE_VALUE.Trim(),
-                            vControl_Mode_B_Name = _Control_Mode.FirstOrDefault(x => x.CODE == TEH.CONTROL_MODE_B)?.CODE_VALUE.Trim(),
-                            vNormal_Cnt = TEH.NORMAL_CNT,
-                            vNormal_Cnt_B = TEH.NORMAL_CNT_B,
-                            vReserve_Cnt = TEH.RESERVE_CNT,
-                            vReserve_Cnt_B = TEH.RESERVE_CNT_B,
-                            vMemo = TEH.MEMO,
-                            vMemo_B = TEH.MEMO_B,
-                            vAppr_Status_Name = _Appr_Status.FirstOrDefault(x => x.CODE == TEH.APPR_STATUS)?.CODE_VALUE.Trim(),
-                            vAppr_Desc = TEH.APPR_DESC
+                            vAply_Date = x.APLY_DATE.ToString("yyyy/MM/dd"),
+                            vAply_No = x.APLY_NO,
+                            vAply_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME.Trim() : null,
+                            vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
+                            vEquip_Name = x.EQUIP_NAME,
+                            vEquip_Name_B = x.EQUIP_NAME_B,
+                            vControl_Mode_Name = _Control_Mode.FirstOrDefault(y => y.CODE == x.CONTROL_MODE)?.CODE_VALUE.Trim(),
+                            vControl_Mode_B_Name = _Control_Mode.FirstOrDefault(y => y.CODE == x.CONTROL_MODE_B)?.CODE_VALUE.Trim(),
+                            vNormal_Cnt = x.NORMAL_CNT,
+                            vNormal_Cnt_B = x.NORMAL_CNT_B,
+                            vReserve_Cnt = x.RESERVE_CNT,
+                            vReserve_Cnt_B = x.RESERVE_CNT_B,
+                            vMemo = x.MEMO,
+                            vMemo_B = x.MEMO_B,
+                            vIs_Disabled = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE.Trim(),
+                            vIs_Disabled_B = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED_B)?.CODE_VALUE.Trim(),
+                            vAppr_Status_Name = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim()
                         }).ToList();
                 }
             }
@@ -318,6 +310,7 @@ namespace Treasury.Web.Service.Actual
                                         NORMAL_CNT = item.vNormal_Cnt,
                                         RESERVE_CNT = item.vReserve_Cnt,
                                         MEMO = item.vMemo,
+                                        IS_DISABLED = item.vIs_Disabled,
                                         APPR_STATUS = "1",//表單申請
                                         APLY_UID = searchData.vLast_Update_Uid,
                                         APLY_DATE = dt
@@ -338,11 +331,14 @@ namespace Treasury.Web.Service.Actual
                                         NORMAL_CNT = item.vNormal_Cnt,
                                         RESERVE_CNT = item.vReserve_Cnt,
                                         MEMO = item.vMemo,
+                                        IS_DISABLED = item.vIs_Disabled,
                                         APPR_STATUS = "1",//表單申請
+                                        EQUIP_NAME_B = _TE_Data.EQUIP_NAME,
                                         CONTROL_MODE_B = _TE_Data.CONTROL_MODE,
                                         NORMAL_CNT_B = _TE_Data.NORMAL_CNT,
                                         RESERVE_CNT_B = _TE_Data.RESERVE_CNT,
                                         MEMO_B = _TE_Data.MEMO,
+                                        IS_DISABLED_B = _TE_Data.IS_DISABLED,
                                         APLY_UID = searchData.vLast_Update_Uid,
                                         APLY_DATE = dt
                                     };
@@ -434,6 +430,8 @@ namespace Treasury.Web.Service.Actual
                             _TreaEquip.DATA_STATUS = "1";//可異動
                             _TreaEquip.APPR_UID = userId;
                             _TreaEquip.APPR_DT = dt;
+                            _TreaEquip.FREEZE_UID = null;
+                            _TreaEquip.FREEZE_DT = null;
 
                             logStr += _TreaEquip.modelToString(logStr);
                         }
@@ -492,17 +490,14 @@ namespace Treasury.Web.Service.Actual
                         if (_TreaEquip != null)
                         {
                             _TreaEquip.DATA_STATUS = "1";//可異動
+                            _TreaEquip.EQUIP_NAME = TreaEquipHis.EQUIP_NAME;
                             _TreaEquip.CONTROL_MODE = TreaEquipHis.CONTROL_MODE;
                             _TreaEquip.NORMAL_CNT = TreaEquipHis.NORMAL_CNT;
                             _TreaEquip.RESERVE_CNT = TreaEquipHis.RESERVE_CNT;
                             _TreaEquip.MEMO = TreaEquipHis.MEMO;
+                            _TreaEquip.IS_DISABLED = TreaEquipHis.IS_DISABLED;
                             _TreaEquip.FREEZE_DT = null;
                             _TreaEquip.FREEZE_UID = null;
-                            //判斷是否刪除
-                            if (TreaEquipHis.EXEC_ACTION == "D")
-                            {
-                                _TreaEquip.IS_DISABLED = "Y";
-                            }
                             _TreaEquip.APPR_UID = userId;
                             _TreaEquip.APPR_DT = dt;
 
@@ -520,7 +515,7 @@ namespace Treasury.Web.Service.Actual
                                 NORMAL_CNT = TreaEquipHis.NORMAL_CNT,
                                 RESERVE_CNT = TreaEquipHis.RESERVE_CNT,
                                 MEMO = TreaEquipHis.MEMO,
-                                IS_DISABLED = "N",
+                                IS_DISABLED = TreaEquipHis.IS_DISABLED,
                                 DATA_STATUS = "1",//可異動
                                 CREATE_UID = TreaEquipHis.APLY_UID,
                                 CREATE_DT = dt,

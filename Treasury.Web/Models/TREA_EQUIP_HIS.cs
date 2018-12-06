@@ -33,5 +33,8 @@ namespace Treasury.Web.Models
         public string APLY_UID { get; set; }
         public string APPR_UID { get; set; }
         public string APPR_DESC { get; set; }
+        public string IS_DISABLED { get; set; }
+        public string IS_DISABLED_B { get; set; }
+        public string EQUIP_NAME_B { get; set; }
     }
 }

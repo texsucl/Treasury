@@ -69,12 +69,6 @@ namespace Treasury.Web.ViewModels
         public string vIs_Disabled { get; set; }
 
         /// <summary>
-        /// 停用註記名稱
-        /// </summary>
-        [Description("停用註記名稱")]
-        public string vIs_Disabled_Name { get; set; }
-
-        /// <summary>
         /// 資料狀態
         /// </summary>
         [Description("資料狀態")]
@@ -138,10 +132,10 @@ namespace Treasury.Web.ViewModels
         public string vEquip_Name { get; set; }
 
         /// <summary>
-        /// 停用註記
+        /// 設備名稱(修改前)
         /// </summary>
-        [Description("停用註記")]
-        public string vIs_Disabled { get; set; }
+        [Description("設備名稱(修改前)")]
+        public string vEquip_Name_B { get; set; }
 
         /// <summary>
         /// 控管模式名稱
@@ -190,6 +184,18 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("備註(修改前)")]
         public string vMemo_B { get; set; }
+
+        /// <summary>
+        /// 停用註記
+        /// </summary>
+        [Description("停用註記")]
+        public string vIs_Disabled { get; set; }
+
+        /// <summary>
+        /// 停用註記(修改前)
+        /// </summary>
+        [Description("停用註記(修改前)")]
+        public string vIs_Disabled_B { get; set; }
 
         /// <summary>
         /// 覆核狀態
