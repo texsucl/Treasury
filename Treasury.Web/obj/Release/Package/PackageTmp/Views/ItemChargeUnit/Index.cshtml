@@ -57,7 +57,7 @@
     </div>
     <div id="IM_SearchDetail" style="display:none" role="dialog" class="myDialog">
         <div style="padding-bottom:5px;">
-            <input type="button" id="IM_Insert" value="新增存入明細" class="btn btn-primary" />
+            <input type="button" id="IM_Insert" value="新增發送單位" class="btn btn-primary" />
         </div>
         <div id="IM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
         <div style="text-align:center;" class="IM_Act">
@@ -301,6 +301,9 @@
                     customerUtility.addoption('dCHARGE_UID_MOD', result.Item2);
                     $('#' + SECT_MOD_Id).find('[value="All"]').remove();
                     $('#' + CHARGE_UID_MOD_Id).find('[value="All"]').remove();
+                    if (_SECT_MOD != null) {
+                        $('#' + SECT_MOD_Id).val(_SECT_MOD);
+                    }
                 });
             }
             //#endregion
@@ -371,7 +374,7 @@
                 var dialogId = 'IM_SearchDetail';
                 $('#' + dialogId).dialog({
                     position: { my: "top", at: "center top", of: window },
-                    title: '查詢畫面',
+                    title: '查詢畫面-保管資料發送維護作業',
                     width: 1100,
                     autoOpen: false,
                     maxHeight: 700,
@@ -690,9 +693,11 @@
                 if (rowid > 0) {
                     var data = $("#" + listId).getRowData(rowid);
                     $('#' + CHARGE_UNIT_MOD_Id).val(data.vCHARGE_UNIT_ID); //保管單位存取項目編號
-                    $('#' + NAME_MOD_Id).append($('<option></option>').val(data.vTREA_ITEM_NAME).html(data.vTREA_ITEM_NAME_VALUE));
-                    $('#' + DEPT_MOD_Id).append($('<option></option>').val(data.vCHARGE_DEPT).html(data.vCHARGE_DEPT_VALUE));
-                    $('#' + SECT_MOD_Id).append($('<option></option>').val(data.vCHARGE_DEPT).html(data.vCHARGE_SECT_VALUE));
+                    //$('#' + NAME_MOD_Id).append($('<option></option>').val(data.vTREA_ITEM_NAME).html(data.vTREA_ITEM_NAME_VALUE));
+                    //$('#' + DEPT_MOD_Id).append($('<option></option>').val(data.vCHARGE_DEPT).html(data.vCHARGE_DEPT_VALUE));
+                    $('#' + NAME_MOD_Id).val(data.vTREA_ITEM_NAME);
+                    $('#' + DEPT_MOD_Id).val(data.vCHARGE_DEPT);
+                    $('#' + SECT_MOD_Id).append($('<option></option>').val(data.vCHARGE_SECT).html(data.vCHARGE_SECT_VALUE));
                     $('#' + CHARGE_UID_MOD_Id).append($('<option></option>').val(data.vCHARGE_UID).html(data.vCHARGE_NAME));
                     var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val(data.vIS_MAIL_DEPT_MGR); //Mail 部主管(CRUD)
                     var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val(data.vIS_MAIL_SECT_MGR); //Mail 科主管(CRUD)

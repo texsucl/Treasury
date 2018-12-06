@@ -7,6 +7,7 @@ using System.Web;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Actual;
 using Treasury.WebUtility;
+using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Report.Data
 {
@@ -35,6 +36,10 @@ namespace Treasury.Web.Report.Data
                 var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To).DateToLatestTime();
 
                 int TOTAL= 0;
+                INVENTORY_STATUSs.AddRange(new List<string>() {
+                    ((int)AccessInventoryType._5).ToString(),    //預約取出，計庫存
+                    ((int)AccessInventoryType._6).ToString(),    //已被取出，計庫存
+                    ((int)AccessInventoryType._9).ToString() }); //預約存入，計庫存
                 var _IRE = db.ITEM_REAL_ESTATE.AsNoTracking().ToList();
 
                 _IRE=  db.ITEM_REAL_ESTATE.AsNoTracking()//判斷是否在庫
@@ -64,6 +69,8 @@ namespace Treasury.Web.Report.Data
                 foreach(var ESTATEdata in _IRE.OrderBy(x=>x.GROUP_NO).ThenBy(x=>x.PUT_DATE).ThenBy(x=>x.ESTATE_FORM_NO).ThenBy(x=>x.ESTATE_DATE).ThenBy(x=>x.OWNERSHIP_CERT_NO)) 
                 {
                     TOTAL ++;
+                    var _CHARGE_DEPT = getEmpName(depts, ESTATEdata.CHARGE_DEPT);
+                    var _CHARGE_SECT = getEmpName(depts, ESTATEdata.CHARGE_SECT).Replace(_CHARGE_DEPT, "")?.Trim();
                     ReportData = new DepositReportESTATEData()
                     {
                         ROW = TOTAL,
@@ -77,8 +84,8 @@ namespace Treasury.Web.Report.Data
                         BOOK_NO_DETAIL = ESTATEdata.GROUP_NO.ToString(),
                         BUILDING_NAME = getBuildName(book,ESTATEdata.GROUP_NO.ToString()),
                         LOCATED = getBuildName(book,ESTATEdata.GROUP_NO.ToString()),
-                        CHARGE_DEPT =getEmpName(depts,ESTATEdata.CHARGE_DEPT),
-                        CHARGE_SECT= getEmpName(depts,ESTATEdata.CHARGE_SECT),
+                        CHARGE_DEPT = _CHARGE_DEPT,
+                        CHARGE_SECT= _CHARGE_SECT,
                         CHARGE_DEPT_ID = ESTATEdata.CHARGE_DEPT,
                         CHARGE_SECT_ID = ESTATEdata.CHARGE_SECT,
                         MEMO =ESTATEdata.MEMO,

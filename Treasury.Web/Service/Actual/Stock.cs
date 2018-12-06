@@ -400,7 +400,8 @@ namespace Treasury.Web.Service.Actual
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                         if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString())//存入
                         {
-                            result.vDetail = getdetailModel(details, _Inventory_types).ToList();
+                            bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString());
+                            result.vDetail = getdetailModel(details, _Inventory_types, _accessStatus).ToList();
                         }
                         else if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString()) //取出
                         {
@@ -1349,24 +1350,24 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<StockDetailViewModel> getdetailModel(IEnumerable<ITEM_STOCK> data, List<SYS_CODE> _Inventory_types)
+        private IEnumerable<StockDetailViewModel> getdetailModel(IEnumerable<ITEM_STOCK> data, List<SYS_CODE> _Inventory_types, bool accessStatus = false)
         {
             return data.Select(x => new StockDetailViewModel()
             {
                 vItemId = x.ITEM_ID,  //物品單號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vTreaBatchNo = x.TREA_BATCH_NO,   //入庫批號
-                vStockType = x.STOCK_TYPE,    //類型
-                vStockNoPreamble = x.STOCK_NO_PREAMBLE,   //序號前置碼
-                vStockNoB = x.STOCK_NO_B,  //序號(起)
-                vStockNoE = x.STOCK_NO_E,  //序號(迄)
-                vStockTotal = x.STOCK_CNT,    //張數
-                vAmount_Per_Share = x.AMOUNT_PER_SHARE,   //每股金額
-                vSingle_Number_Of_Shares = x.SINGLE_NUMBER_OF_SHARES, //單張股數
-                vDenomination = x.DENOMINATION,   //單張面額
-                vDenominationTotal = x.STOCK_CNT * x.DENOMINATION,  //面額小計
-                vNumberOfShares = x.NUMBER_OF_SHARES,   //股數小計
-                vMemo = x.MEMO,  //備註說明
+                vStockType = accessStatus ? x.STOCK_TYPE_ACCESS : x.STOCK_TYPE,    //類型
+                vStockNoPreamble = accessStatus ? x.STOCK_NO_PREAMBLE_ACCESS : x.STOCK_NO_PREAMBLE,   //序號前置碼
+                vStockNoB = accessStatus ? x.STOCK_NO_B_ACCESS : x.STOCK_NO_B,  //序號(起)
+                vStockNoE = accessStatus ? x.STOCK_NO_E_ACCESS : x.STOCK_NO_E,  //序號(迄)
+                vStockTotal = accessStatus ? x.STOCK_CNT_ACCESS : x.STOCK_CNT,    //張數
+                vAmount_Per_Share = accessStatus ? x.AMOUNT_PER_SHARE_ACCESS : x.AMOUNT_PER_SHARE,   //每股金額
+                vSingle_Number_Of_Shares = accessStatus ? x.SINGLE_NUMBER_OF_SHARES_ACCESS : x.SINGLE_NUMBER_OF_SHARES, //單張股數
+                vDenomination = accessStatus ? x.DENOMINATION_ACCESS : x.DENOMINATION,   //單張面額
+                vDenominationTotal = accessStatus ? (x.STOCK_CNT_ACCESS * x.DENOMINATION_ACCESS ) : (x.STOCK_CNT * x.DENOMINATION),  //面額小計
+                vNumberOfShares = accessStatus ? x.NUMBER_OF_SHARES_ACCESS : x.NUMBER_OF_SHARES,   //股數小計
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO,  //備註說明
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
         }

@@ -123,7 +123,7 @@ namespace Treasury.Web.Service.Actual
 
 
 
-                if (aply_No.IsNullOrWhiteSpace())
+                if (searchData.vCHARGE_UNIT_ID.IsNullOrWhiteSpace())
                 {
                     var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking()
                         .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
@@ -135,9 +135,11 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
                         .AsEnumerable()
                         .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
-                            vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            //vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            vFreeze_Dt = x.APLY_DATE != null ? x.APLY_DATE.ToString("yyyy/MM/dd") : null,
                             vAply_No = x.APLY_NO,
-                            vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            //vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_UID_B = x.CHARGE_UID_B,
@@ -186,13 +188,15 @@ namespace Treasury.Web.Service.Actual
                 {
                     var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking().ToList();
                     result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
-                        .Where(x => x.APLY_NO == aply_No)
+                        //.Where(x => x.APLY_NO == aply_No)
                         .Where(x => x.CHARGE_UNIT_ID == searchData.vCHARGE_UNIT_ID, searchData.vCHARGE_UNIT_ID != null)
                         .AsEnumerable()
                         .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
-                            vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            //vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,
+                            vFreeze_Dt = x.APLY_DATE != null ? x.APLY_DATE.ToString("yyyy/MM/dd") : null,
                             vAply_No = x.APLY_NO,
-                            vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            //vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == _ITEM_CHARGE_UNIT.FirstOrDefault(z => z.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_UID)?.EMP_NAME?.Trim(),
+                            vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
                             vCHARGE_UID_B = x.CHARGE_UID_B,
@@ -263,7 +267,7 @@ namespace Treasury.Web.Service.Actual
                     .Where(x => x.CHARGE_UID == searchData.vCHARGE_UID, searchData.vCHARGE_UID != "All")
                     .AsEnumerable()
                     .Join(_TREA_ITEM
-                    .Where(x => x.TREA_ITEM_NAME == searchData.vTREA_ITEM_NAME, searchData.vTREA_ITEM_NAME != "All")
+                    .Where(x => x.ITEM_ID == searchData.vTREA_ITEM_NAME, searchData.vTREA_ITEM_NAME != "All")
                     //.Where(x => x.DAILY_FLAG == "N") //每日進出 = N
                     .AsEnumerable(),
                     ICU => ICU.ITEM_ID,

@@ -98,7 +98,8 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types).ToList();
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
+                        result = GetDetailModel(details, _Inventory_types, _accessStatus).ToList();
                     }
                 }
             }
@@ -873,17 +874,17 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<CAViewModel> GetDetailModel(IEnumerable<ITEM_CA> data,List<SYS_CODE> _Inventory_types)
+        private IEnumerable<CAViewModel> GetDetailModel(IEnumerable<ITEM_CA> data,List<SYS_CODE> _Inventory_types, bool accessStatus)
         {
             return data.Select(x => new CAViewModel()
             {
                 vItemId = x.ITEM_ID, //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vCA_Desc = x.CA_DESC, //電子憑證品項
-                vCA_Use = x.CA_USE, //電子憑證用途
-                vBank = x.BANK, //銀行/廠商
-                vCA_Number = x.CA_NUMBER, //電子憑證號碼
-                vMemo = x.MEMO, //備註
+                vCA_Desc = accessStatus ? x.CA_DESC_ACCESS : x.CA_DESC, //電子憑證品項
+                vCA_Use = accessStatus ? x.CA_USE_ACCESS : x.CA_USE, //電子憑證用途
+                vBank = accessStatus ? x.BANK_ACCESS : x.BANK, //銀行/廠商
+                vCA_Number = accessStatus ? x.CA_NUMBER_ACCESS : x.CA_NUMBER, //電子憑證號碼
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO, //備註
                 vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });

@@ -133,7 +133,7 @@ namespace Treasury.Web.Service.Actual
                     logStr += _TREA_OPEN_REC.modelToString(logStr);
                     //approvedList.Add(item.hvTREA_REGISTER_ID);
 
-                    var _TREA_APLY_REC = db.TREA_APLY_REC.Where(y => y.TREA_REGISTER_ID == item.hvTREA_REGISTER_ID)
+                    var _TREA_APLY_REC = db.TREA_APLY_REC.Where(y => y.TREA_REGISTER_ID == item.hvTREA_REGISTER_ID && y.APLY_STATUS =="D02")
                         .Where(y => y.APLY_STATUS == "D02")
                         .ToList();
                     _TREA_APLY_REC.ForEach(y => {
@@ -184,7 +184,7 @@ namespace Treasury.Web.Service.Actual
                                         case "S":
                                         case "A":
                                         case "B":
-                                            if (_ITEM_SEAL.INVENTORY_STATUS == "3")
+                                            if (_ITEM_SEAL.INVENTORY_STATUS == "3" && _ITEM_SEAL.SEAL_DESC_ACCESS == null)
                                             {
                                                 _ITEM_SEAL.SEAL_DESC_ACCESS = _ITEM_SEAL.SEAL_DESC;
                                                 _ITEM_SEAL.MEMO_ACCESS = _ITEM_SEAL.MEMO;
@@ -361,6 +361,17 @@ namespace Treasury.Web.Service.Actual
                                     {
                                         if (_ITEM_DEP_ORDER_M.INVENTORY_STATUS == "3")
                                         {
+                                            var _ITEM_DEP_ORDER_D = db.ITEM_DEP_ORDER_D.FirstOrDefault(x => x.ITEM_ID == z.ITEM_ID);
+                                            _ITEM_DEP_ORDER_D.DENOMINATION_ACCESS = _ITEM_DEP_ORDER_D.DENOMINATION;
+                                            _ITEM_DEP_ORDER_D.DEP_CNT_ACCESS = _ITEM_DEP_ORDER_D.DEP_CNT;
+                                            _ITEM_DEP_ORDER_D.DEP_NO_B_ACCESS = _ITEM_DEP_ORDER_D.DEP_NO_B;
+                                            _ITEM_DEP_ORDER_D.DEP_NO_E_ACCESS = _ITEM_DEP_ORDER_D.DEP_NO_E;
+                                            _ITEM_DEP_ORDER_D.DEP_NO_PREAMBLE_ACCESS = _ITEM_DEP_ORDER_D.DEP_NO_PREAMBLE;
+                                            _ITEM_DEP_ORDER_D.DEP_NO_TAIL_ACCESS = _ITEM_DEP_ORDER_D.DEP_NO_TAIL;
+                                            _ITEM_DEP_ORDER_D.SUBTOTAL_DENOMINATION_ACCESS = _ITEM_DEP_ORDER_D.SUBTOTAL_DENOMINATION;
+
+                                            logStr += _ITEM_DEP_ORDER_M.modelToString(logStr);
+
                                             _ITEM_DEP_ORDER_M.AUTO_TRANS_ACCESS = _ITEM_DEP_ORDER_M.AUTO_TRANS_ACCESS;
                                             _ITEM_DEP_ORDER_M.COMMIT_DATE_ACCESS = _ITEM_DEP_ORDER_M.COMMIT_DATE;
                                             _ITEM_DEP_ORDER_M.CURRENCY_ACCESS = _ITEM_DEP_ORDER_M.CURRENCY;
@@ -409,6 +420,8 @@ namespace Treasury.Web.Service.Actual
                                             _ITEM_STOCK.STOCK_NO_E_ACCESS = _ITEM_STOCK.STOCK_NO_E;
                                             _ITEM_STOCK.STOCK_NO_PREAMBLE_ACCESS = _ITEM_STOCK.STOCK_NO_PREAMBLE;
                                             _ITEM_STOCK.STOCK_TYPE_ACCESS = _ITEM_STOCK.STOCK_TYPE;
+                                            _ITEM_STOCK.AMOUNT_PER_SHARE_ACCESS = _ITEM_STOCK.AMOUNT_PER_SHARE;
+                                            _ITEM_STOCK.SINGLE_NUMBER_OF_SHARES_ACCESS = _ITEM_STOCK.SINGLE_NUMBER_OF_SHARES;
                                         }
 
                                         _ITEM_STOCK.INVENTORY_STATUS = "1";
@@ -589,7 +602,7 @@ namespace Treasury.Web.Service.Actual
                         logStr += ARH.modelToString(logStr);
                         db.APLY_REC_HIS.Add(ARH);
                         #endregion
-                        aplyNoUid = string.Format("{0};{1}", y.APLY_NO, y.APLY_UID);
+                        aplyNoUid = string.Format("{0};{1};{2}", y.APLY_NO, y.APLY_UID, vITEM_OP_TYPE);
                         approvedList.Add(aplyNoUid);
 
                     });
@@ -615,38 +628,42 @@ namespace Treasury.Web.Service.Actual
 
                         string str = MC.MAIL_CONTENT1;
 
-                        foreach (var NoUid in approvedList)
+                        foreach (var NoUidType in approvedList)
                         {
-                            var aplyNo = NoUid.Split(';')[0];
-                            var aplyUid = NoUid.Split(';')[1];
-                            StringBuilder sb = new StringBuilder();
-                            str = str.Replace("@_APLYNO_", aplyNo);
-                            sb.AppendLine(str);
-//                            sb.AppendLine(
-//                                $@"您好，通知您
-//申請單號 {aplyNo}已完成出入庫相關作業!
-//1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
-//2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
-//                                );
+                            var aplyNo = NoUidType.Split(';')[0];
+                            var aplyUid = NoUidType.Split(';')[1];
+                            var itemOpType = NoUidType.Split(';')[2];
+                            if(itemOpType == "3")
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                str = str.Replace("@_APLYNO_", aplyNo);
+                                sb.AppendLine(str);
+                                //                            sb.AppendLine(
+                                //                                $@"您好，通知您
+                                //申請單號 {aplyNo}已完成出入庫相關作業!
+                                //1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
+                                //2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
+                                //                                );
 
-                            try
-                            {
-                                var sms = new SendMail.SendMailSelf();
-                                sms.smtpPort = 25;
-                                sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
-                                sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
-                                sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
-                                sms.Mail_Send(
-                                   new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
-                                   new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
-                                   null,
-                                   MT?.FUNC_ID ?? "存取作業確認通知",
-                                   sb.ToString()
-                                   );
-                            }
-                            catch (Exception ex)
-                            {
-                                result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                                try
+                                {
+                                    var sms = new SendMail.SendMailSelf();
+                                    sms.smtpPort = 25;
+                                    sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                                    sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                                    sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                                    sms.Mail_Send(
+                                       new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                                       new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
+                                       null,
+                                       MT?.FUNC_ID ?? "存取作業確認通知",
+                                       sb.ToString()
+                                       );
+                                }
+                                catch (Exception ex)
+                                {
+                                    result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                                }
                             }
                         }
 

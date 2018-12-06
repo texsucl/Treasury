@@ -7,6 +7,7 @@ using System.Web;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Actual;
 using Treasury.WebUtility;
+using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Report.Data
 {
@@ -33,7 +34,10 @@ namespace Treasury.Web.Report.Data
                 var _APLY_ODT_From = TypeTransfer.stringToDateTimeN(APLY_ODT_From);
                 var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To).DateToLatestTime();
                 int TOTAL= 0;
-
+                INVENTORY_STATUSs.AddRange(new List<string>() {
+                    ((int)AccessInventoryType._5).ToString(),    //預約取出，計庫存
+                    ((int)AccessInventoryType._6).ToString(),    //已被取出，計庫存
+                    ((int)AccessInventoryType._9).ToString() }); //預約存入，計庫存
                 var _IC=  db.ITEM_CA.AsNoTracking()//判斷是否在庫
                     .Where(x=> INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn )
                     .Where(x=>
@@ -59,12 +63,14 @@ namespace Treasury.Web.Report.Data
                 foreach(var CAdata in _IC.OrderBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.CA_USE).ThenBy(x=>x.CA_DESC).ThenBy(x=>x.BANK).ThenBy(x=>x.CA_NUMBER)) 
                 {
                     TOTAL ++;
+                    var _CHARGE_DEPT = getEmpName(depts, CAdata.CHARGE_DEPT);
+                    var _CHARGE_SECT = getEmpName(depts, CAdata.CHARGE_SECT).Replace(_CHARGE_DEPT, "")?.Trim();
                     ReportData = new DepositReportCAData()
                     {
                         ROW = TOTAL,
                         PUT_DATE = CAdata.PUT_DATE.dateTimeToStr(),
-                        CHARGE_DEPT =getEmpName(depts,CAdata.CHARGE_DEPT),
-                        CHARGE_SECT= getEmpName(depts,CAdata.CHARGE_SECT),
+                        CHARGE_DEPT = _CHARGE_DEPT,
+                        CHARGE_SECT= _CHARGE_SECT,
                         CA_DESC = getCAdesc(types,CAdata.CA_DESC),
                         CA_USE = getCAuse(types,CAdata.CA_USE),
                         BANK =CAdata.BANK,

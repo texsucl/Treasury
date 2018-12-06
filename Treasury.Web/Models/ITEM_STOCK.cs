@@ -56,5 +56,7 @@ namespace Treasury.Web.Models
         public Nullable<decimal> DENOMINATION_ACCESS { get; set; }
         public Nullable<decimal> NUMBER_OF_SHARES_ACCESS { get; set; }
         public string MEMO_ACCESS { get; set; }
+        public Nullable<decimal> AMOUNT_PER_SHARE_ACCESS { get; set; }
+        public Nullable<decimal> SINGLE_NUMBER_OF_SHARES_ACCESS { get; set; }
     }
 }

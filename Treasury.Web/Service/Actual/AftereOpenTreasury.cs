@@ -128,6 +128,33 @@ namespace Treasury.Web.Service.Actual
             return new Tuple<List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>, List<SelectOption>>(reisterId, itemOpType, accessType, sealItem, treaItem, actualAccessEmps);
         }
 
+        public List<SelectOption> GetSealFun(string TreaItem, List<AfterOpenTreasurySearchDetailViewModel> ViewDatas)
+        {
+            List<SelectOption> vSealItem = new List<SelectOption>();
+            List<string> removeSealList = new List<string>();
+            using (TreasuryDBEntities db = new TreasuryDBEntities())
+            {
+                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
+                var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
+
+                var _TREA_ITEM_NAME = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == TreaItem)?.TREA_ITEM_NAME;
+                var _neededItemId = _TREA_ITEM.Where(x => x.TREA_ITEM_NAME == _TREA_ITEM_NAME).Select(x => x.ITEM_ID).ToList();
+                removeSealList.AddRange(ViewDatas.Where(x => x.vITEM_OP_TYPE == "2").Select(x => x.vSEAL_ITEM_ID));
+                vSealItem = _ITEM_SEAL
+                                .Where(x => _neededItemId.Contains(x.TREA_ITEM_NAME))
+                                .Where(x => !removeSealList.Contains(x.ITEM_ID))
+                                //.Where(x => x.INVENTORY_STATUS != "8")
+                                .Where(x => x.INVENTORY_STATUS == "1" || x.INVENTORY_STATUS == "6")
+                                .AsEnumerable()
+                                .Select(x => new SelectOption()
+                                {
+                                    Value = x.ITEM_ID,
+                                    Text = x.SEAL_DESC
+                                }).ToList();
+            }
+            return vSealItem;
+        }
+
         /// <summary>
         /// Dialog Selected Change 事件
         /// </summary>
@@ -192,7 +219,7 @@ namespace Treasury.Web.Service.Actual
                 }
 
                 actualAccessEmps = GetActualUserOption(tItemId, ViewDatas);
-                actualAccessType = GetActualAccessTypeOption();
+                
                 if (ItemOpType == "2" || _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == tItemId)?.ITEM_OP_TYPE == "2")
                 {
                     var _TREA_ITEM_NAME = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == tItemId)?.TREA_ITEM_NAME;
@@ -201,13 +228,17 @@ namespace Treasury.Web.Service.Actual
                     vSealItem = _ITEM_SEAL
                                 .Where(x => _neededItemId.Contains(x.TREA_ITEM_NAME))
                                 .Where(x => !removeSealList.Contains(x.ITEM_ID))
-                                .Where(x => x.INVENTORY_STATUS != "8")
+                                //.Where(x => x.INVENTORY_STATUS != "8")
+                                .Where(x => x.INVENTORY_STATUS == "1" || x.INVENTORY_STATUS == "6")
                                 .AsEnumerable()
                                 .Select(x => new SelectOption()
                                 {
                                     Value = x.ITEM_ID,
                                     Text = x.SEAL_DESC
                                 }).ToList();
+                    //actualAccessType = GetActualAccessTypeOption();
+                    actualAccessType = GetActualAccessTypeOption(vSealItem.FirstOrDefault()?.Value);
+
                     //根據存取項目顯示印章內容
                     //if (!AccessType.IsNullOrWhiteSpace())
                     //{
@@ -324,18 +355,20 @@ namespace Treasury.Web.Service.Actual
                     switch (_ITEM_SEAL.INVENTORY_STATUS)
                     {
                         case "1":   //在庫
-                            result = result.Where(x => x.Value == "B").ToList();
+                            result = result.Where(x => x.Value == "G" || x.Value == "S" || x.Value == "B").ToList();
                             break;
                         case "2":   //已被取出
+                            result = result.Where(x => x.Value == "P" || x.Value == "A").ToList();
                             break;
                         case "3":   //預約存入
                             break;
                         case "4":   //預約取出
                             break;
                         case "5":   //預約取出，計庫存
-                            result = result.Where(x => x.Value == "G" || x.Value == "S").ToList();
+                            result = result.Where(x => x.Value == "G" || x.Value == "S" || x.Value == "B").ToList();
                             break;
                         case "6":   //已被取出，計庫存
+                            result = result.Where(x => x.Value == "P" || x.Value == "A").ToList();
                             break;
                         case "7":   //已取消
                             break;
@@ -496,7 +529,8 @@ namespace Treasury.Web.Service.Actual
                             vITEM_ID = x.ITEM_ID,
                             vTREA_REGISTER_ID = searchData.vTREA_REGISTER_ID,
                             vITEM_OP_TYPE = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE,
-                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
+                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC,
+                            vSEAL_ITEM_ID = ""
                         }).ToList();
                     result.AddRange(_TREA_APLY_TEMP);
                 }
@@ -778,7 +812,7 @@ namespace Treasury.Web.Service.Actual
                             break;
                         //取出存入
                         case "B":
-                            _INVENTORY_STATUS = "1";
+                            _INVENTORY_STATUS = "5";
                             break;
                     }
                     _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
@@ -887,6 +921,7 @@ namespace Treasury.Web.Service.Actual
                             PROC_DT = dt
                         };
                         logStr += ARH.modelToString(logStr);
+                        db.APLY_REC_HIS.Add(ARH);
                         #endregion
 
                         #region 其它存取項目申請資料檔
@@ -923,7 +958,7 @@ namespace Treasury.Web.Service.Actual
                                     break;
                                 //取出存入
                                 case "B":
-                                    _INVENTORY_STATUS = "1";
+                                    _INVENTORY_STATUS = "5";
                                     break;
                             }
                             _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
@@ -1314,12 +1349,21 @@ namespace Treasury.Web.Service.Actual
                     .ForEach(x =>
                     {
                         var _TREA_APLY_REC = db.TREA_APLY_REC.FirstOrDefault(y => y.APLY_NO == x.hvAPLY_NO);
+
+                        if (_TREA_APLY_REC.LAST_UPDATE_DT > x.vLAST_UPDATE_DT) //資料已被更新
+                        {
+                            result.DESCRIPTION = Ref.MessageType.already_Change.GetDescription(null, $"單號:{_TREA_APLY_REC.APLY_NO}");
+                            return;
+                        }
+
                         _TREA_APLY_REC.APLY_STATUS = status;
                         _TREA_APLY_REC.TREA_REGISTER_ID = RegisterID;
                         //_TREA_APLY_REC.CONFIRM_UID = cUserId;
                         //_TREA_APLY_REC.CONFIRM_DT = dt;
                         _TREA_APLY_REC.LAST_UPDATE_UID = cUserId;
                         _TREA_APLY_REC.LAST_UPDATE_DT = dt;
+
+                        logStr += _TREA_APLY_REC.modelToString(logStr);
 
                         #region 申請單歷程檔
                         var ARH = new APLY_REC_HIS()
@@ -1383,7 +1427,7 @@ namespace Treasury.Web.Service.Actual
                 {
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().First(x => x.TREA_REGISTER_ID == RegisterNo);
 
-                    return new Tuple<string, string>(_TREA_OPEN_REC.ACTUAL_PUT_TIME?.ToString("hh:mm"), _TREA_OPEN_REC.ACTUAL_GET_TIME?.ToString("hh:mm"));
+                    return new Tuple<string, string>(_TREA_OPEN_REC.ACTUAL_PUT_TIME?.ToString("HH:mm"), _TREA_OPEN_REC.ACTUAL_GET_TIME?.ToString("HH:mm"));
                 }
             }
             return null;

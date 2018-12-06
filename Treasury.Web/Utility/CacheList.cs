@@ -501,14 +501,9 @@
         public static string ItemChargeUnitChangeRecordSearchDetailViewData { get; private set; }
 
         /// <summary>
-        /// BookNo Excel 上傳temp 資料
+        /// Excel 上傳temp 資料
         /// </summary>
-        public static string BookNoExcelfileData { get; private set; }
-
-        /// <summary>
-        /// Estate Excel 上傳temp 資料
-        /// </summary>
-        public static string EstateExcelfileData { get; private set; }
+        public static string ExcelfileData { get; private set; }
 
         #endregion Cache資料
         static CacheList()
@@ -612,8 +607,7 @@
             TreasuryMailTimeData = "TreasuryMailTimeData";
             TreasuryMailTimeDetailData = "TreasuryMailTimeDetailData";
             TreasuryMailTimeChangeRecordData = "TreasuryMailTimeChangeRecordData";
-            BookNoExcelfileData = "BookNoExcelfileData";
-            EstateExcelfileData = "EstateExcelfileData";
+            ExcelfileData = "ExcelfileData";
             #endregion Cache資料
 
         }

@@ -325,6 +325,7 @@ namespace Treasury.WebUtility
                 while (sh.GetRow(i) != null)
                 {
                     var cls = FactoryRegistry.GetInstance(name);
+                    bool addFlag = false;
                     // write row value
                     for (int j = 0; j < sh.GetRow(i).LastCellNum; j++)
                     {
@@ -353,15 +354,20 @@ namespace Treasury.WebUtility
                             {
                                 case CellType.Numeric:
                                     p.SetValue(cls, value.NumericCellValue.ToString());
+                                    addFlag = true;
                                     break;
                                 case CellType.String:
+                                    var _value = value.StringCellValue;
+                                    if(!_value.IsNullOrWhiteSpace())
+                                        addFlag = true;
                                     p.SetValue(cls, value.StringCellValue);
                                     break;
                             }
                         }                    
                     }
                     i++;
-                    results.Add(cls);
+                    if(addFlag)
+                        results.Add(cls);
                 }
              
             }         

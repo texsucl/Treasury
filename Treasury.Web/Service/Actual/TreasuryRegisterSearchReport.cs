@@ -125,9 +125,9 @@ namespace Treasury.Web.Service.Actual
                 vAccess_Type = _Access_Type.FirstOrDefault(y => y.CODE == x.ACCESS_TYPE)?.CODE_VALUE,   //作業別
                 vAply_No = _Item_Desc.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_OP_TYPE == "3" ? x.APLY_NO : "",    //申請單號
                 vAccess_Reason = x.ACCESS_REASON,   //入庫原因
-                vConfirm = x.CONFIRM_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.CONFIRM_UID)?.EMP_NAME,    //入庫人員
-                vActual_Access_Type=string.IsNullOrEmpty(x.ACTUAL_ACCESS_TYPE)?null: _Access_Type.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE,   //實際作業別
-                vActual_Access_Uid=string.IsNullOrEmpty(x.ACTUAL_ACCESS_UID)?null:x.ACTUAL_ACCESS_UID+"-"+_Confirm.FirstOrDefault(y=>y.USR_ID==x.ACTUAL_ACCESS_UID)?.EMP_NAME   //實際入庫人員
+                vConfirm = !x.CONFIRM_UID.IsNullOrWhiteSpace() ? x.CONFIRM_UID + "-" + _Confirm.FirstOrDefault(y => y.USR_ID == x.CONFIRM_UID)?.EMP_NAME : null,    //入庫人員
+                vActual_Access_Type= string.IsNullOrEmpty(x.ACTUAL_ACCESS_TYPE)? null : x.ACTUAL_ACCESS_TYPE != x.ACCESS_TYPE ? _Access_Type.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE : null,   //實際作業別
+                vActual_Access_Uid= string.IsNullOrEmpty(x.ACTUAL_ACCESS_UID)? null :x.ACTUAL_ACCESS_UID+"-"+_Confirm.FirstOrDefault(y=>y.USR_ID==x.ACTUAL_ACCESS_UID)?.EMP_NAME   //實際入庫人員
             });
         }
         #endregion

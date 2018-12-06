@@ -176,7 +176,9 @@ namespace Treasury.Web.Service.Actual
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
                         if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString())//存入
                         {
-                            result.vDetail = GetDetailModel(details, _Inventory_types).ToList();
+                            bool _accessStatus = _TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString();//申請單號內的內容要惟持原始申請內容,不要因資料查詢異動作業-主畫面有異動資料而異動
+
+                            result.vDetail = GetDetailModel(details, _Inventory_types, false, _accessStatus).ToList();
                         }
                         else if (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.G.ToString()) //取出
                         {
@@ -1219,23 +1221,119 @@ namespace Treasury.Web.Service.Actual
         /// <param name="_Inventory_types"></param>
         /// <param name="takeoutFlag"></param>
         /// <returns></returns>
-        private IEnumerable<EstateDetailViewModel> GetDetailModel(IEnumerable<ITEM_REAL_ESTATE> data, List<SYS_CODE> _Inventory_types, bool takeoutFlag = false)
+        private IEnumerable<EstateDetailViewModel> GetDetailModel(IEnumerable<ITEM_REAL_ESTATE> data, List<SYS_CODE> _Inventory_types, bool takeoutFlag = false, bool accessStatus = false)
         {
             return data.Select(x => new EstateDetailViewModel()
             {
                 vItemId = x.ITEM_ID, //物品編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vGroupNo = x.GROUP_NO.ToString(), //群組編號
-                vEstate_From_No = x.ESTATE_FORM_NO, //狀別
-                vEstate_Date = TypeTransfer.dateTimeToString(x.ESTATE_DATE,false), //發狀日
-                vOwnership_Cert_No = x.OWNERSHIP_CERT_NO, //字號
-                vLand_Building_No = x.LAND_BUILDING_NO, //地/建號
-                vHouse_No = x.HOUSE_NO, //門牌號
-                vEstate_Seq = x.ESTATE_SEQ, //流水號/編號
-                vMemo = x.MEMO, //備註
+                vEstate_From_No = accessStatus? x.ESTATE_FORM_NO_ACCESS : x.ESTATE_FORM_NO, //狀別
+                vEstate_Date = accessStatus? x.ESTATE_DATE_ACCESS?.ToString("yyyy/MM/dd") : TypeTransfer.dateTimeToString(x.ESTATE_DATE,false), //發狀日
+                vOwnership_Cert_No = accessStatus? x.OWNERSHIP_CERT_NO_ACCESS : x.OWNERSHIP_CERT_NO, //字號
+                vLand_Building_No = accessStatus? x.LAND_BUILDING_NO_ACCESS : x.LAND_BUILDING_NO, //地/建號
+                vHouse_No = accessStatus? x.HOUSE_NO_ACCESS : x.HOUSE_NO, //門牌號
+                vEstate_Seq = accessStatus? x.ESTATE_SEQ_ACCESS : x.ESTATE_SEQ, //流水號/編號
+                vMemo = accessStatus? x.MEMO_ACCESS : x.MEMO, //備註
                 vtakeoutFlag = (x.INVENTORY_STATUS == "4"), //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
+        }
+
+        /// <summary>
+        /// 修改 "坐落" & "備註"
+        /// </summary>
+        /// <param name="updateData"></param>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
+        public MSGReturnModel<string> UpdateDBITEM_BOOK(CDCEstateViewModel updateData, CDCEstateViewModel viewModel, string cUserId)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+            result.RETURN_FLAG = false;
+            result.DESCRIPTION = "修改存取項目冊號資料檔-坐落、備註失敗";
+            string logStr = string.Empty;
+            if (viewModel != null)
+            {
+                using (TreasuryDBEntities db = new TreasuryDBEntities())
+                {
+                    var _APLY_NO = db.OTHER_ITEM_APLY.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == viewModel.vItemId)?.APLY_NO;
+                    if(_APLY_NO != null)
+                    {
+                        var _ITEM_ID = db.TREA_APLY_REC.AsNoTracking().FirstOrDefault(x => x.APLY_NO == _APLY_NO)?.ITEM_ID;
+                        if(_ITEM_ID != null)
+                        {
+                            var _TREA_ITEM_TYPE = db.TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == _ITEM_ID)?.TREA_ITEM_TYPE;
+                            if (_TREA_ITEM_TYPE != null && _TREA_ITEM_TYPE == "ESTATE")
+                            {
+                                var groupUp = TypeTransfer.stringToInt(viewModel.vIB_Book_No);
+                                var _ItemBooks = db.ITEM_BOOK.Where(x => x.GROUP_NO == groupUp && x.ITEM_ID == _ITEM_ID).ToList();
+                                foreach (var pro in updateData.GetType().GetProperties())
+                                {
+
+                                    if ((pro.Name == "vIB_Located" || pro.Name == "vIB_Memo"))
+                                    {
+                                        string _col_Name = string.Empty;
+                                        if (pro.Name == "vIB_Located")
+                                        {
+                                            _col_Name = "LOCATED";
+                                        }
+                                        else if (pro.Name == "vIB_Memo")
+                                        {
+                                            _col_Name = "MEMO";
+                                        }
+                                        var _chang = _ItemBooks.FirstOrDefault(x => x.COL == _col_Name);
+                                        if (_chang != null)
+                                        {
+                                            _chang.COL_VALUE = pro.GetValue(updateData)?.ToString()?.Trim();
+                                            logStr += _chang.modelToString(logStr);
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            result.DESCRIPTION = "無對應存取項目";
+                        }
+                    }
+                    else
+                    {
+                        result.DESCRIPTION = "無對應申請單號";
+                    }
+
+                    var validateMessage = db.GetValidationErrors().getValidateString();
+                    if (validateMessage.Any())
+                    {
+                        result.DESCRIPTION = validateMessage;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            db.SaveChanges();
+
+                            #region LOG
+                            //新增LOG
+                            Log log = new Log();
+                            log.CFUNCTION = "CDC不動產-修改坐落、備註";
+                            log.CACTION = "U";
+                            log.CCONTENT = logStr;
+                            LogDao.Insert(log, cUserId);
+                            #endregion
+
+                            result.RETURN_FLAG = true;
+                            result.DESCRIPTION = "修改存取項目冊號資料檔-坐落、備註成功";
+
+                        }
+                        catch (DbUpdateException ex)
+                        {
+                            result.DESCRIPTION = ex.exceptionMessage();
+                        }
+                    }
+                }
+            }
+            return result;
         }
 
         #endregion
