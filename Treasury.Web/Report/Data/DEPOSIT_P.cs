@@ -58,11 +58,14 @@ namespace Treasury.Web.Report.Data
                             var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
                                 .Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList();
 
+                            List<DepositReportData> addDatas = new List<DepositReportData>();
+
                             foreach(var DetailData in _IDOD_DataList)
                             {
                                 ReportData = new DepositReportData()
                                 {
                                     TYPE = "Data-N",
+                                    ITEM_ID = DetailData.ITEM_ID,
                                     EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE,false),
                                     TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                     DEP_TYPE = MasterData.DEP_TYPE,
@@ -72,22 +75,30 @@ namespace Treasury.Web.Report.Data
                                     DENOMINATION = DetailData.DENOMINATION,
                                 };
 
-                                ReportDataList.Add(ReportData);
+                                addDatas.Add(ReportData);
+
+                                //ReportDataList.Add(ReportData);
 
                                 TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
                                 TOTAL_DEP_CNT += DetailData.DEP_CNT;
                             }
 
-                            ReportData = new DepositReportData()
+                            addDatas.ForEach(x =>
                             {
-                                TYPE = "Data-N",
-                                EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
-                                DEP_TYPE = MasterData.DEP_TYPE,
-                                TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
-                                TOTAL_DENOMINATION = TOTAL_DENOMINATION
-                            };
+                                x.TOTAL_DENOMINATION = TOTAL_DENOMINATION;
+                            });
 
-                            ReportDataList.Add(ReportData);
+                            //ReportData = new DepositReportData()
+                            //{
+                            //    TYPE = "Data-N",
+                            //    EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
+                            //    DEP_TYPE = MasterData.DEP_TYPE,
+                            //    TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                            //    TOTAL_DENOMINATION = TOTAL_DENOMINATION
+                            //};
+
+                            //ReportDataList.Add(ReportData);
+                            ReportDataList.AddRange(addDatas);
                         }
 
                         //設值否=Y
@@ -104,11 +115,14 @@ namespace Treasury.Web.Report.Data
                             var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
                                 .Where(x => x.ITEM_ID == MasterData.ITEM_ID).ToList();
 
+                            List<DepositReportData> addDatas = new List<DepositReportData>();
+
                             foreach (var DetailData in _IDOD_DataList)
                             {
                                 ReportData = new DepositReportData()
                                 {
                                     TYPE = "Data-Y",
+                                    ITEM_ID = DetailData.ITEM_ID,
                                     EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
                                     TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
                                     DEP_TYPE = MasterData.DEP_TYPE,
@@ -118,21 +132,30 @@ namespace Treasury.Web.Report.Data
                                     DENOMINATION = DetailData.DENOMINATION,
                                 };
 
-                                ReportDataList.Add(ReportData);
+                                addDatas.Add(ReportData);
+
+                                //ReportDataList.Add(ReportData);
 
                                 TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
                             }
 
-                            ReportData = new DepositReportData()
+                            addDatas.ForEach(x =>
                             {
-                                TYPE = "Data-Y",
-                                EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
-                                DEP_TYPE = MasterData.DEP_TYPE,
-                                TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
-                                TOTAL_DENOMINATION = TOTAL_DENOMINATION
-                            };
+                                x.TOTAL_DENOMINATION = TOTAL_DENOMINATION;
+                            });
 
-                            ReportDataList.Add(ReportData);
+                            ReportDataList.AddRange(addDatas);
+
+                            //ReportData = new DepositReportData()
+                            //{
+                            //    TYPE = "Data-Y",
+                            //    EXPIRY_DATE = TypeTransfer.dateTimeToString(MasterData.EXPIRY_DATE, false),
+                            //    DEP_TYPE = MasterData.DEP_TYPE,
+                            //    TRAD_PARTNERS = MasterData.TRAD_PARTNERS,
+                            //    TOTAL_DENOMINATION = TOTAL_DENOMINATION
+                            //};
+
+                            //ReportDataList.Add(ReportData);
                         }
                     }
                 }

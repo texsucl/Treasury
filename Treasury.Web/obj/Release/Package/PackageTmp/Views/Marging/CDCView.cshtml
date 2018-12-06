@@ -66,7 +66,7 @@
                         <label>類別 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dMarging_Dep_Type", (SelectList)ViewBag.dMarging_Dep_Type, new { @class = "CDCMargingUpdateType" })
+                        @Html.DropDownList("dMarging_Dep_Type", (SelectList)ViewBag.dMarging_Dep_Type, new { disabled = "disabled" @*@class = "CDCMargingUpdateType"*@ })
                         <span class="red" style="padding-left:20px" id="sCDCMargin_Dep_Type"></span>
                     </td>
                     <td>
@@ -196,6 +196,7 @@
         //#endregion 參數設定
 
         //#region 初始動作
+        //$('#dMarging_Dep_Type').prop('disabled', true); //類別Id(dropdownlist) disabled
         CDCMargingDbGrid();
         setCDCMargingVerified();
         //#endregion 初始動作
@@ -205,7 +206,7 @@
             verified.required(CDCMargingFormId, tCDCTrad_PartnersId, message.required('交易對象')); //交易對象為必填
             verified.required(CDCMargingFormId, tCDCAmountId, message.required('金額')); //金額為必填
             verified.price(CDCMargingFormId, tCDCAmountId); //金額 僅能輸入數字(正)
-            verified.price(CDCMargingFormId, vBook_NoId); // 僅能輸入數字(正)
+            verified.number(CDCMargingFormId, vBook_NoId); // 僅能輸入數字(正)
             verified.required(CDCMargingFormId, vBook_NoId, message.required('冊號')); //冊號為必填
         }
         //#endregion 註冊verified

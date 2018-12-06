@@ -1,0 +1,366 @@
+﻿@using Treasury.Web.Enum;
+@using Treasury.WebUtility;
+@{
+    ViewBag.Title = "上傳檔案作業";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="EstateUploadForm">
+                <table>
+                    <tr>
+                        <td>
+                            <input type="button" id="SearchUser" class="btn btn-primary" value="查詢UserId" />
+                        </td>
+                        <td>
+                            <label>使用者名字 : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="userName" name="userName"/>
+                        </td>
+                        <td style="padding-left:30px;width:100px">
+                            <label>User資料 : </label>
+                        </td>
+                        <td style="width:200px">
+                            @Html.DropDownList("User_Info", new SelectList(new List<SelectOption>() { }, "Value", "Text"))
+                        </td>
+                    </tr>
+                </table>
+                </form>
+                <table>
+                     <tr>
+                         <td style="padding-top:10px" colspan="2">
+                             @using (Ajax.BeginForm("File_Upload", "FileUpload",
+                                new AjaxOptions { HttpMethod = "POST" },
+                                new { enctype = "multipart/form-data", @id = "form0" }))
+                             {
+                                 <input type="file" id="file" name="file" class="filestyle" data-buttonName="btn-primary" data-buttonText="轉檔檔案" />
+                             }
+                         </td>
+                         <td  colspan="2">
+                             @Html.RadioButton("ExcelType", Ref.ExcelName.Marginp.ToString(), new { @checked = true }) @Ref.ExcelName.Marginp.GetDescription()
+                             @Html.RadioButton("ExcelType", Ref.ExcelName.Marging.ToString()) @Ref.ExcelName.Marging.GetDescription()
+                             @Html.RadioButton("ExcelType", Ref.ExcelName.Stock.ToString()) @Ref.ExcelName.Stock.GetDescription()
+                             @Html.RadioButton("ExcelType", Ref.ExcelName.Itemimp.ToString()) @Ref.ExcelName.Itemimp.GetDescription()
+                         </td>
+                         <td style="padding-top:10px" >
+                             <input type="button" class="btn btn-primary" style="margin-right:10px" value="資料上傳" id="fileSubmit" />
+                             <input type="button" class="btn btn-primary" value="轉檔" id="btnTransfer" disabled />
+                         </td>
+                     </tr>
+                     <tr>
+                         <td colspan="5">
+                             <i class="fa fa-exclamation-circle title" style="font-size:24px;"
+                                alt="說明：
+"></i>
+                         </td>
+                     </tr>
+                 </table>          
+            }
+        </div>
+    </div>
+    <div class="viewDetail">
+        <div id="jqgridDiv" class="jqd" style="overflow:auto">
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+
+        //#region url設定
+        var url = {};
+        url.searchUserId = '@Url.Action("Search", "FileUpload")';
+        url.transfer = '@Url.Action("Transfer", "FileUpload")';
+        url.getExcelData = '@Url.Action("GetCacheData", "FileUpload")';
+
+        var FormId = 'EstateUploadForm';
+        var FileType = '';
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            //#region 初始設定
+
+            verified.required(FormId, 'userName', message.required('使用者名字')); //使用者名字為必填
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'SearchUser':
+                        $('#' + id).on('click', function() { Search(); });
+                        break;
+                    case 'fileSubmit':
+                        $("#" + id).on('click', function () { fileSubmitFunction() });
+                        break;
+                    case 'btnTransfer':
+                        $("#" + id).click(transfer);
+                        break;
+                }
+            })
+
+            $('input[name=ExcelType]').on('change', function () {
+                clearJqgrid();  
+                $('#btnTransfer').prop('disabled',true);
+                FileType = $(this).val();
+            });
+            FileType = $('input[name=ExcelType]:checked').val();
+            //#endregion
+
+            //#region 資料上傳(Excel 資料寫入 local sql)
+            function transfer() {
+                $.ajax({
+                    type: "POST",
+                    url: url.transfer,
+                    data: JSON.stringify({
+                        type: FileType
+                    }),
+                    contentType: 'application/json'
+                })
+                .done(function (result) {
+                    customerUtility.alertAuto(result);
+                })
+            }
+            //#endregion 資料上傳(Excel 資料寫入 local sql)
+
+            //#region fileSubmitFunction (把檔案上傳到指定資料夾)
+            function fileSubmitFunction() {
+                clearJqgrid();
+                var dataString;
+                var action = $("#form0").attr("action");
+                if ($("#form0").attr("enctype") == "multipart/form-data") {
+                    dataString = new FormData();
+                    dataString.append("UploadedFile", $("#file").get(0).files[0]);
+                    dataString.append("type", FileType);
+                }
+                else {
+                    // regular form, do your own thing if you need it
+                }                
+                //clearJqgrid();
+                $.ajax({
+                    type: "POST",
+                    url: action,
+                    data: dataString,
+                    dataType: "json",
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result.RETURN_FLAG) {
+                            //if(type == 'BookNo')
+                            //{
+                            //    BookNoGird();
+                            //}
+                            //else
+                            //{
+                            //    EstateGird();
+                            //}         
+                            createJqgrid(FileType);
+                            $('#btnTransfer').prop('disabled', false);
+                        }
+                        else {
+                            customerUtility.alert(result.DESCRIPTION, 'w');
+                        }
+                    },
+                    error: function (result) {
+                        customerUtility.alert('格式錯誤', 'e');
+                    }
+                });
+            }
+            //#endregion fileSubmitFunction
+        }
+
+        //#region 查詢畫面查詢
+        function Search() {
+            $('#'+ FormId).validate().resetForm();
+            if ($('#' + FormId).valid()) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        userName: $('#userName').val()
+                    }),
+                    url: url.searchUserId,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        customerUtility.addoption('User_Info',result.Datas);
+                    }
+                });
+            }
+
+        }
+        //#endregion
+
+        function clearJqgrid() {
+            $('#jqgridDiv').children().remove();
+        }
+
+        function createJqgrid(type)
+        {
+            var colNameArray = [];
+            var colModelArray = [];
+            switch(type)
+            {
+                case 'Marginp':
+                    colNameArray = ['歸檔編號','交易對象','存入保證金類別','保證物品','金額','物品發行人','質押標的號碼','有效區間(起)','有效區間(迄)',
+                        '說明','備註','冊號','存入日期時間','申請人','申請人員'];
+                    colModelArray.push({ name: "ITEM_ID", index: "ITEM_ID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "TRAD_PARTNERS", index: "TRAD_PARTNERS", width: 200, sortable: false});
+                    colModelArray.push({ name: "MARGIN_TAKE_OF_TYPE", index: "MARGIN_TAKE_OF_TYPE", width: 120, sortable: false,align:'center'});
+                    colModelArray.push({ name: "MARGIN_ITEM", index: "MARGIN_ITEM", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "AMOUNT", index: "AMOUNT", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "MARGIN_ITEM_ISSUER", index: "MARGIN_ITEM_ISSUER", width: 150, sortable: false });
+                    colModelArray.push({ name: "PLEDGE_ITEM_NO", index: "PLEDGE_ITEM_NO", width: 150, sortable: false});
+                    colModelArray.push({ name: "EFFECTIVE_DATE_B", index: "EFFECTIVE_DATE_B", width: 100, sortable: false,align:'center'});
+                    colModelArray.push({ name: "EFFECTIVE_DATE_E", index: "EFFECTIVE_DATE_E", width: 100, sortable: false,align:'center' });
+                    colModelArray.push({ name: "DESCRIPTION", index: "DESCRIPTION", width: 100, sortable: false });
+                    colModelArray.push({ name: "MEMO", index: "MEMO", width: 100, sortable: false });
+                    colModelArray.push({ name: "BOOK_NO", index: "BOOK_NO", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "PUT_DATE", index: "PUT_DATE", width: 100, sortable: false,align:'center' });
+                    colModelArray.push({ name: "APLY_UID", index: "APLY_UID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "APLY_SHOW", index: "APLY_SHOW", width: 300, sortable: false });
+                    break;
+                case 'Marging':
+                    colNameArray = ['歸檔編號','交易對象','存出保證金類別',
+                        '金額','職場代號','說明',
+                        '備註','冊號','存入日期時間','申請人','申請人員'];
+                    colModelArray.push({ name: "ITEM_ID", index: "ITEM_ID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "TRAD_PARTNERS", index: "TRAD_PARTNERS", width: 200, sortable: false});
+                    colModelArray.push({ name: "MARGIN_DEP_TYPE", index: "MARGIN_DEP_TYPE", width: 120, sortable: false,align:'center'});
+                    colModelArray.push({ name: "AMOUNT", index: "AMOUNT", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "WORKPLACE_CODE", index: "WORKPLACE_CODE", width: 150, sortable: false });
+                    colModelArray.push({ name: "DESCRIPTION", index: "DESCRIPTION", width: 150, sortable: false});
+                    colModelArray.push({ name: "MEMO", index: "MEMO", width: 150, sortable: false });
+                    colModelArray.push({ name: "BOOK_NO", index: "BOOK_NO", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "PUT_DATE", index: "PUT_DATE", width: 100, sortable: false,align:'center' });
+                    colModelArray.push({ name: "APLY_UID", index: "APLY_UID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "APLY_SHOW", index: "APLY_SHOW", width: 300, sortable: false });
+                    break;
+                case 'Itemimp':
+                    colNameArray = ['歸檔編號','物品名稱','數量','金額','預計存取日期',
+                        '說明','備註','存入日期時間','申請人','申請人員'];
+                    colModelArray.push({ name: "ITEM_ID", index: "ITEM_ID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "ITEM_NAME", index: "ITEM_NAME", width: 200, sortable: false});
+                    colModelArray.push({ name: "QUANTITY", index: "QUANTITY", width: 120, sortable: false,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "AMOUNT", index: "AMOUNT", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "EXPECTED_ACCESS_DATE", index: "EXPECTED_ACCESS_DATE", width: 150, sortable: false,align:'center' });
+                    colModelArray.push({ name: "DESCRIPTION", index: "DESCRIPTION", width: 150, sortable: false });
+                    colModelArray.push({ name: "MEMO", index: "MEMO", width: 150, sortable: false });
+                    colModelArray.push({ name: "PUT_DATE", index: "PUT_DATE", width: 100, sortable: false,align:'center' });
+                    colModelArray.push({ name: "APLY_UID", index: "APLY_UID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "APLY_SHOW", index: "APLY_SHOW", width: 300, sortable: false });
+                    break;
+                case 'Stock':
+                    colNameArray = ['物品編號','股票名稱','入庫批號','股票類型',
+                        '股票序號前置代碼','股票序號(起)','股票序號(迄)',
+                        '股票張數','每股金額','單張股數','面額小計',
+                        '股數小計','備註','存入日期時間','申請人','申請人員'];
+                    colModelArray.push({ name: "ITEM_ID", index: "ITEM_ID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "STOCK_NAME", index: "STOCK_NAME", width: 200, sortable: false});
+                    colModelArray.push({ name: "TREA_BATCH_NO", index: "TREA_BATCH_NO", width: 120, sortable: false,align:'center'});
+                    colModelArray.push({ name: "STOCK_TYPE", index: "STOCK_TYPE", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "STOCK_NO_PREAMBLE", index: "STOCK_NO_PREAMBLE", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "STOCK_NO_B", index: "STOCK_NO_B", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "STOCK_NO_E", index: "STOCK_NO_E", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "STOCK_CNT", index: "STOCK_CNT", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "AMOUNT_PER_SHARE", index: "AMOUNT_PER_SHARE", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "SINGLE_NUMBER_OF_SHARES", index: "SINGLE_NUMBER_OF_SHARES", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "DENOMINATION", index: "DENOMINATION", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "NUMBER_OF_SHARES", index: "NUMBER_OF_SHARES", width: 100, sortable: false ,align:'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
+                    colModelArray.push({ name: "MEMO", index: "MEMO", width: 100, sortable: false });
+                    colModelArray.push({ name: "PUT_DATE", index: "PUT_DATE", width: 100, sortable: false,align:'center' });
+                    colModelArray.push({ name: "APLY_UID", index: "APLY_UID", width: 100, sortable: false ,align:'center'});
+                    colModelArray.push({ name: "APLY_SHOW", index: "APLY_SHOW", width: 300, sortable: false });
+                    break;
+            }
+            jqgridCustom.createJqgridByCache(
+                'jqgridDiv',
+                'jqgridList',
+                'jqgridPeger',
+                url.getExcelData,
+                {
+                    type: type
+                },
+                colNameArray,
+                colModelArray,
+                '上傳資料',
+                jqgridCustom.getPage('jqgridDiv'),
+                null,
+                true
+                );
+        }
+
+        //#region 查詢表單
+        function BookNoGird() {
+            var colNameArray =  @Html.Raw(Json.Encode(ViewBag.jqgridBookNOColNames));
+            var colModelArray = @Html.Raw(Json.Encode(ViewBag.jqgridBookNoColModel));
+            jqgridCustom.createJqgridByCache(
+                'jqgridDiv',
+                'jqgridList',
+                'jqgridPeger',
+                url.getExcelData,
+                {
+                    type: 'BookNo'
+                },
+                colNameArray,
+                colModelArray,
+                '上傳資料',
+                jqgridCustom.getPage('jqgridDiv'),
+                null,
+                true
+                );
+        }
+
+        //#endregion
+        //#region 查詢表單
+        function EstateGird() {
+            var colNameArray =  @Html.Raw(Json.Encode(ViewBag.jqgridEstateColNames));
+            var colModelArray = @Html.Raw(Json.Encode(ViewBag.jqgridEstateColModel));
+            jqgridCustom.createJqgridByCache(
+                'jqgridDiv',
+                'jqgridList',
+                'jqgridPeger',
+                url.getExcelData,
+                {
+                    type: 'Estate'
+                },
+                colNameArray,
+                colModelArray,
+                '上傳資料',
+                jqgridCustom.getPage('jqgridDiv'),
+                null,
+                true
+                );
+        }
+
+        //#endregion
+    });
+</script>
+
+

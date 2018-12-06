@@ -47,6 +47,7 @@ namespace Treasury.Web.Controllers
             ViewBag.CustodyFlag = _CustodyFlag;
             ViewBag.opScope = GetopScope("~/TreasuryRegistration/");
             var viewModel = TreasuryRegistration.GetItemId();
+            viewModel.vOpenTreaType.Insert(0, All);
             return View(viewModel);
         }
     }

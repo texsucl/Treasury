@@ -732,21 +732,22 @@ namespace Treasury.Web.Service.Actual
                             _Bill.CHECK_NO_E_AFT = model.vBill_Check_No_E_AFT;
                             _Bill.LAST_UPDATE_DT = dt;
 
-                            logStr = _Bill.modelToString(logStr);
+                            logStr += _Bill.modelToString(logStr);
 
                             var _BNA = new BLANK_NOTE_APLY()
                             {
                                 APLY_NO = _data.Item1,
                                 ITEM_ID = _Bill.ITEM_ID,
-                                CHECK_TYPE = string.Empty,
-                                CHECK_NO_TRACK = string.Empty,
-                                CHECK_NO_B = string.Empty,
-                                CHECK_NO_E = string.Empty
+                                ISSUING_BANK = model.vBill_Issuing_Bank_AFT,
+                                CHECK_TYPE = model.vBill_Check_Type_AFT.IsNullOrEmpty() ? string.Empty : model.vBill_Check_Type_AFT,
+                                CHECK_NO_TRACK = model.vBill_Check_No_Track_AFT.IsNullOrEmpty() ? string.Empty : model.vBill_Check_No_Track_AFT,
+                                CHECK_NO_B = model.vBill_Check_No_B_AFT.IsNullOrEmpty() ? string.Empty : model.vBill_Check_No_B_AFT,
+                                CHECK_NO_E = model.vBill_Check_No_E_AFT.IsNullOrEmpty() ? string.Empty : model.vBill_Check_No_E_AFT
                             };
 
                             db.BLANK_NOTE_APLY.Add(_BNA);
 
-                            logStr = _BNA.modelToString(logStr);
+                            logStr += _BNA.modelToString(logStr);
                         }
                     }
                     else
@@ -799,7 +800,7 @@ namespace Treasury.Web.Service.Actual
                     _Bill.CHECK_NO_B_AFT = null;
                     _Bill.CHECK_NO_E_AFT = null;
                     _Bill.LAST_UPDATE_DT = dt;
-                    logStr = _Bill.modelToString(logStr);
+                    logStr += _Bill.modelToString(logStr);
                 }
                 else
                 {
@@ -836,7 +837,7 @@ namespace Treasury.Web.Service.Actual
                     _Bill.CHECK_NO_E = GetNewValue(_Bill.CHECK_NO_E, _Bill.CHECK_NO_E_AFT);
                     _Bill.CHECK_NO_E_AFT = null;
                     _Bill.LAST_UPDATE_DT = dt;
-                    logStr = _Bill.modelToString(logStr);
+                    logStr += _Bill.modelToString(logStr);
                 }
                 else
                 {
@@ -865,7 +866,7 @@ namespace Treasury.Web.Service.Actual
                     _Bill.CHARGE_DEPT_AFT = null;
                     _Bill.CHARGE_SECT_AFT = null;
                     _Bill.LAST_UPDATE_DT = dt;
-                    logStr = _Bill.modelToString(logStr);
+                    logStr += _Bill.modelToString(logStr);
                 }
                 else
                 {
@@ -896,7 +897,7 @@ namespace Treasury.Web.Service.Actual
                     _Bill.CHARGE_SECT = _Bill.CHARGE_SECT_AFT;
                     _Bill.CHARGE_SECT_AFT = null;
                     _Bill.LAST_UPDATE_DT = dt;
-                    logStr = _Bill.modelToString(logStr);
+                    logStr += _Bill.modelToString(logStr);
                 }
                 else
                 {

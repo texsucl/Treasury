@@ -66,7 +66,7 @@
                         <label>類別 : </label>
                     </td>
                     <td>
-                        @Html.DropDownList("dMargin_Take_Of_Type", (SelectList)ViewBag.dMargin_Take_Of_Type, new { @class = "CDCMarginpUpdateType" })
+                        @Html.DropDownList("dMargin_Take_Of_Type", (SelectList)ViewBag.dMargin_Take_Of_Type, new { disabled = "disabled" @*@class = "CDCMarginpUpdateType"*@ })
                         <span class="red" style="padding-left:20px" id="sCDCMargin_Take_Of_Type"></span>
                     </td>
                 </tr>
@@ -253,7 +253,7 @@
             verified.required(CDCMarginpFormId, tCDCTrad_PartnersId, message.required('交易對象')); //交易對象為必填
             verified.required(CDCMarginpFormId, tCDCAmountId, message.required('金額')); //金額為必填
             verified.required(CDCMarginpFormId, vBook_NoId, message.required('冊號')); //冊號為必填
-            verified.price(CDCMarginpFormId, vBook_NoId); // 僅能輸入數字(正)
+            verified.number(CDCMarginpFormId, vBook_NoId); // 僅能輸入數字(正)
             verified.price(CDCMarginpFormId, tCDCAmountId); //金額驗證
             verified.required(CDCMarginpFormId, dMargin_ItemId, message.required('物品名稱')); //物品名稱為必填
             verified.required(CDCMarginpFormId, tCDCMargin_Item_IssuerId, message.required('物品發行人')); //物品發行人為必填
@@ -673,12 +673,12 @@
             }
             else if (type == '@Ref.ActionType.Dele.ToString()') {
             }
-            else if (type == '@Ref.ActionType.Edit.ToString()') {           
+            else if (type == '@Ref.ActionType.Edit.ToString()') {      
+                $('.' + MarginpUpdateClass).prop('disabled', false);
                 dialogSetData(listId, rowid);
                 $('#CDCMarginpUpdateTemp').show();
-                $('.' + MarginpUpdateClass).prop('disabled', false);
                 $('#' + tCDCEffective_Date_BId).next().prop('disabled', false);
-                $('#' + tCDCEffective_Date_EId).next().prop('disabled', false);
+                $('#' + tCDCEffective_Date_EId).next().prop('disabled', true);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 if (GetFlag) {

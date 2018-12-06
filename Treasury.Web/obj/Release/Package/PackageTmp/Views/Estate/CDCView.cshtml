@@ -67,13 +67,14 @@
                         <label>坐落 : </label>
                     </td>
                     <td>
-                        <label id="lIB_Located" name="lIB_Located"></label>
+                        @*<label id="lIB_Located" name="lIB_Located"></label>*@
+                        <input type="text" id="tIB_Located" name="tIB_Located"/>
                     </td>
                     <td>
                         <label>備註 : </label>
                     </td>
                     <td>
-                        <textarea id="tIB_Memo" style="width:207px" maxlength="200" disabled="disabled"></textarea>
+                        <textarea id="tIB_Memo" style="width:207px" maxlength="200"></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -175,7 +176,7 @@
         var CDC_EstateCharge_Name = 'lCharge_Name';//權責單位Id
         var CDC_EstateIB_Book_No = 'lIB_Book_No';//冊號Id
         var CDC_EstateIB_Building_Name = 'lIB_Building_Name';//大樓名稱Id
-        var CDC_EstateIB_Located = 'lIB_Located';//坐落Id
+        var CDC_EstateIB_Located = 'tIB_Located';//坐落Id
         var CDC_EstateIB_Memo = 'tIB_Memo';//備註Id
 
         var CDC_Estate_Form_No = 'dEstate_From_No';//狀別Id
@@ -296,8 +297,7 @@
             $('#' + CDC_EstateCharge_Name).text('');
             $('#' + CDC_EstateIB_Book_No).text('');
             $('#' + CDC_EstateIB_Building_Name).text('');
-            $('#' + CDC_EstateIB_Located).text('');
-            $('#' + CDC_EstateIB_Memo).val('');
+            $('#' + CDC_EstateIB_Located).val('');
             $('#' + CDC_EstateIB_Memo).val('');
 
             if ($('#' + CDC_Estate_Form_No + ' option').length > 0) {
@@ -335,7 +335,7 @@
                 $('#' + CDC_EstateCharge_Name).text(data.vCharge_Name);
                 $('#' + CDC_EstateIB_Book_No).text(data.vIB_Book_No);
                 $('#' + CDC_EstateIB_Building_Name).text(data.vIB_Building_Name);
-                $('#' + CDC_EstateIB_Located).text(data.vIB_Located);
+                $('#' + CDC_EstateIB_Located).val(data.vIB_Located);
                 $('#' + CDC_EstateIB_Memo).val(data.vIB_Memo);
 
                 $('#' + CDC_Estate_Form_No).val(data.vEstate_Form_No);
@@ -655,7 +655,9 @@
                         $('#' + CDC_Land_Building_No).val(),
                         $('#' + CDC_House_No).val(),
                         $('#' + CDC_Estate_Seq).val(),
-                        $('#' + CDC_Memo).val())
+                        $('#' + CDC_Memo).val(),
+                        $('#' + CDC_EstateIB_Located).val(),
+                        $('#' + CDC_EstateIB_Memo).val())
                 }),
                 dataType: "json",
                 url: CDC_EstateUrl.UpdateDbData,
@@ -759,7 +761,9 @@
             vLand_Building_No,
             vHouse_No,
             vEstate_Seq,
-            vMemo
+            vMemo,
+            vIB_Located,
+            vIB_Memo
             ) {
             var obj = {};
             obj['vItemId'] = vItemId;
@@ -770,6 +774,8 @@
             obj['vHouse_No'] = vHouse_No;
             obj['vEstate_Seq'] = vEstate_Seq;
             obj['vMemo'] = vMemo;
+            obj['vIB_Located'] = vIB_Located;
+            obj['vIB_Memo'] = vIB_Memo;
             return obj;
         }
         //#endregion function

@@ -29,5 +29,13 @@ namespace Treasury.Web.Service.Interface
         /// <param name="userName"></param>
         /// <returns></returns>
         List<SelectOption> SearchUserID(string userName);
+
+        /// <summary>
+        /// Excel資料存到DB
+        /// </summary>
+        /// <param name="datas"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        MSGReturnModel<string> saveData(IEnumerable<IFileModel> datas, ExcelName type);
     }
 }

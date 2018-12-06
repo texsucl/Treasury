@@ -7,6 +7,7 @@ using System.Web;
 using Treasury.Web.Models;
 using Treasury.Web.Service.Actual;
 using Treasury.WebUtility;
+using static Treasury.Web.Enum.Ref;
 
 namespace Treasury.Web.Report.Data
 {
@@ -32,7 +33,12 @@ namespace Treasury.Web.Report.Data
                 var dtn = DateTime.Now.Date;
                 var _APLY_ODT_From = TypeTransfer.stringToDateTimeN(APLY_ODT_From);
                 var _APLY_ODT_To = TypeTransfer.stringToDateTimeN(APLY_ODT_To).DateToLatestTime();
-                
+
+                INVENTORY_STATUSs.AddRange(new List<string>() {
+                    ((int)AccessInventoryType._5).ToString(),    //預約取出，計庫存
+                    ((int)AccessInventoryType._6).ToString(),    //已被取出，計庫存
+                    ((int)AccessInventoryType._9).ToString() }); //預約存入，計庫存
+
                 var _IRD=  db.ITEM_REFUNDABLE_DEP.AsNoTracking()//判斷是否在庫
                     .Where(x => INVENTORY_STATUSs.Contains(x.INVENTORY_STATUS), _APLY_DT_Date == dtn)
                     .Where(x =>
@@ -59,14 +65,16 @@ namespace Treasury.Web.Report.Data
                              
                 foreach(var Stockdata in _IRD.OrderBy(x => x.MARGIN_DEP_TYPE).ThenBy(x => x.ITEM_ID).ThenBy(x => x.BOOK_NO).ThenBy(x => x.PUT_DATE).ThenBy(x => x.CHARGE_DEPT).ThenBy(x => x.CHARGE_SECT)) 
                 {
+                    var _CHARGE_DEPT = getEmpName(depts, Stockdata.CHARGE_DEPT);
+                    var _CHARGE_SECT = !_CHARGE_DEPT.IsNullOrWhiteSpace() ? getEmpName(depts, Stockdata.CHARGE_SECT)?.Replace(_CHARGE_DEPT, "")?.Trim() : null;
                     ReportData = new DepositReportMargingData()   
                     {
                         MARGIN_DEP_TYPE = getMDTtype( types,Stockdata.MARGIN_DEP_TYPE),
                         ITEM_ID =Stockdata.ITEM_ID,
                         BOOK_NO =Stockdata.BOOK_NO,
                         PUT_DATE =Stockdata.PUT_DATE.dateTimeToStr(),
-                        CHARGE_DEPT =getEmpName(depts,Stockdata.CHARGE_DEPT),
-                        CHARGE_SECT= getEmpName(depts,Stockdata.CHARGE_SECT),
+                        CHARGE_DEPT = _CHARGE_DEPT,
+                        CHARGE_SECT= !_CHARGE_SECT.IsNullOrWhiteSpace() ? _CHARGE_SECT : null,
                         TRAD_PARTNERS = Stockdata.TRAD_PARTNERS,
                         AMOUNT = Stockdata.AMOUNT,
                         WORKPLACE_CODE =Stockdata.WORKPLACE_CODE,

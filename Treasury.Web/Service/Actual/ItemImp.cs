@@ -64,7 +64,8 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types, OTHER_ITEM_APLYs).ToList();
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
+                        result = GetDetailModel(details, _Inventory_types, OTHER_ITEM_APLYs, _accessStatus).ToList();
                         result.ForEach(x =>
                         {
                             x.vtakeoutFlag = x.vItemImp_G_Quantity == null ? false :
@@ -174,6 +175,7 @@ namespace Treasury.Web.Service.Actual
                     result.AddRange(db.ITEM_IMPO.AsNoTracking()
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
+                        .Where(x => x.ITEM_ID == searchModel.vItem_No, !searchModel.vItem_No.IsNullOrWhiteSpace())
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
                         .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_From.Value, GET_DATE_From != null)
@@ -929,7 +931,7 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<ItemImpViewModel> GetDetailModel(IEnumerable<ITEM_IMPO> data,List<SYS_CODE> _Inventory_types,List<OTHER_ITEM_APLY> OIAs)
+        private IEnumerable<ItemImpViewModel> GetDetailModel(IEnumerable<ITEM_IMPO> data,List<SYS_CODE> _Inventory_types,List<OTHER_ITEM_APLY> OIAs, bool accessStatus)
         {
             return data.Select(x => new ItemImpViewModel()
             {
@@ -937,14 +939,14 @@ namespace Treasury.Web.Service.Actual
                 vItemImp_Remaining = x.REMAINING, //剩餘數量
                 vItemId = x.ITEM_ID, //歸檔編號
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vItemImp_Name = x.ITEM_NAME, //重要物品名稱
+                vItemImp_Name = accessStatus ? x.ITEM_NAME_ACCESS : x.ITEM_NAME, //重要物品名稱
                 vItemImp_G_Quantity = OIAs.FirstOrDefault(y => x.ITEM_ID == y.ITEM_ID)?.Memo_I, // 取出數量
-                vItemImp_Quantity = x.QUANTITY, //重要物品數量
-                vItemImp_Amount = x.AMOUNT, //重要物品金額
+                vItemImp_Quantity = accessStatus ? x.QUANTITY_ACCESS.HasValue ? x.QUANTITY_ACCESS.Value : -1 : x.QUANTITY, //重要物品數量
+                vItemImp_Amount = accessStatus? x.AMOUNT_ACCESS : x.AMOUNT, //重要物品金額
                 //vItemImp_Expected_Date_1 = x.EXPECTED_ACCESS_DATE == null ? null : x.EXPECTED_ACCESS_DATE.Value.DateToTaiwanDate(9),
-                vItemImp_Expected_Date = TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
-                vDescription = x.DESCRIPTION,//說明
-                vMemo = x.MEMO, //備註
+                vItemImp_Expected_Date = accessStatus ? TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE_ACCESS) : TypeTransfer.dateTimeNToString(x.EXPECTED_ACCESS_DATE), //重要物品預計提取日期
+                vDescription = accessStatus ? x.DESCRIPTION_ACCESS : x.DESCRIPTION,//說明
+                vMemo = accessStatus? x.MEMO_ACCESS : x.MEMO, //備註
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });
         }

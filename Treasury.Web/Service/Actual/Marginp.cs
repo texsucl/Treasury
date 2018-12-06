@@ -98,7 +98,8 @@ namespace Treasury.Web.Service.Actual
                     {
                         var _code_type = Ref.SysCodeType.INVENTORY_TYPE.ToString(); //庫存狀態
                         var _Inventory_types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == _code_type).ToList();
-                        result = GetDetailModel(details, _Inventory_types).ToList();
+                        bool _accessStatus = (_TAR.APLY_STATUS == Ref.AccessProjectFormStatus.E01.ToString()) && (_TAR.ACCESS_TYPE == Ref.AccessProjectTradeType.P.ToString());
+                        result = GetDetailModel(details, _Inventory_types, _accessStatus).ToList();
                     }
                 }
             }
@@ -201,7 +202,8 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
                         .Where(x => x.ITEM_ID == searchModel.vItem_No, !searchModel.vItem_No.IsNullOrWhiteSpace())
-                        .Where(x => x.BOOK_NO == searchModel.vBookNo, !searchModel.vBookNo.IsNullOrWhiteSpace())
+                        .Where(x => x.BOOK_NO == searchModel.vItem_Book_No, !searchModel.vItem_Book_No.IsNullOrWhiteSpace())
+                        //.Where(x => x.BOOK_NO == searchModel.vBookNo, !searchModel.vBookNo.IsNullOrWhiteSpace())
                         .Where(x => x.MARGIN_TAKE_OF_TYPE == searchModel.vMargin_Dep_Type, searchModel.vMargin_Dep_Type != "All")
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
                         .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
@@ -998,25 +1000,25 @@ namespace Treasury.Web.Service.Actual
         /// <param name="data"></param>
         /// <param name="_Inventory_types"></param>
         /// <returns></returns>
-        private IEnumerable<MarginpViewModel> GetDetailModel(IEnumerable<ITEM_DEP_RECEIVED> data,List<SYS_CODE> _Inventory_types)
+        private IEnumerable<MarginpViewModel> GetDetailModel(IEnumerable<ITEM_DEP_RECEIVED> data,List<SYS_CODE> _Inventory_types, bool accessStatus)
         {
             return data.Select(x => new MarginpViewModel()
             {
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
-                vMarginp_Take_Of_Type = x.MARGIN_TAKE_OF_TYPE,//類別
-                vMarginp_Trad_Partners = x.TRAD_PARTNERS,//交易對象
+                vMarginp_Take_Of_Type = accessStatus ? x.MARGIN_TAKE_OF_TYPE_ACCESS : x.MARGIN_TAKE_OF_TYPE,//類別
+                vMarginp_Trad_Partners = accessStatus ? x.TRAD_PARTNERS_ACCESS : x.TRAD_PARTNERS,//交易對象
                 vItemId = x.ITEM_ID,//歸檔編號
-                vMarginp_Amount = TypeTransfer.decimalNToString(x.AMOUNT),//金額
-                vMarginp_Item = x.MARGIN_ITEM, // 物品名稱
-                vMarginp_Item_Issuer = x.MARGIN_ITEM_ISSUER,// 物品發行人
-                vMarginp_Pledge_Item_No = x.PLEDGE_ITEM_NO,//質押標的號碼
-                vMarginp_Effective_Date_B = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),//有效期間(起)
+                vMarginp_Amount = accessStatus ? TypeTransfer.decimalNToString(x.AMOUNT_ACCESS) : TypeTransfer.decimalNToString(x.AMOUNT),//金額
+                vMarginp_Item = accessStatus ? x.MARGIN_ITEM_ACCESS : x.MARGIN_ITEM, // 物品名稱
+                vMarginp_Item_Issuer = accessStatus ? x.MARGIN_ITEM_ISSUER_ACCESS : x.MARGIN_ITEM_ISSUER,// 物品發行人
+                vMarginp_Pledge_Item_No = accessStatus ? x.PLEDGE_ITEM_NO_ACCESS : x.PLEDGE_ITEM_NO,//質押標的號碼
+                vMarginp_Effective_Date_B = accessStatus ? x.EFFECTIVE_DATE_B_ACCESS?.ToString("yyyy/MM/dd") : TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_B),//有效期間(起)
                 //vMarginp_Effective_Date_B = x.EFFECTIVE_DATE_B == null ? null : x.EFFECTIVE_DATE_B.Value.DateToTaiwanDate(9),
-                vMarginp_Effective_Date_E = TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),//有效期間(迄) 
+                vMarginp_Effective_Date_E = accessStatus ? x.EFFECTIVE_DATE_E_ACCESS?.ToString("yyyy/MM/dd") : TypeTransfer.dateTimeNToString(x.EFFECTIVE_DATE_E),//有效期間(迄) 
                 //vMarginp_Effective_Date_E = x.EFFECTIVE_DATE_E == null ? null : x.EFFECTIVE_DATE_E.Value.DateToTaiwanDate(9),
-                vDescription =x.DESCRIPTION,//說明
-                vMemo = x.MEMO,//備註
-                vMarginp_Book_No = x.BOOK_NO,//冊號 
+                vDescription = accessStatus ? x.DESCRIPTION_ACCESS : x.DESCRIPTION,//說明
+                vMemo = accessStatus ? x.MEMO_ACCESS : x.MEMO,//備註
+                vMarginp_Book_No = accessStatus ? x.BOOK_NO_ACCESS : x.BOOK_NO,//冊號 
                 vtakeoutFlag = false, //取出註記
                 vLast_Update_Time = x.LAST_UPDATE_DT //最後修改時間
             });

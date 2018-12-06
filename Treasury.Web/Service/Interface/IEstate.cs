@@ -64,5 +64,13 @@ namespace Treasury.Web.Service.Interface
         /// <param name="building_Name">大樓名稱</param>
         /// <returns></returns>
         MSGReturnModel<string> GetCheckItemBook(string building_Name);
+
+        /// <summary>
+        /// 修改 "坐落" & "備註"
+        /// </summary>
+        /// <param name="updateData"></param>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
+        MSGReturnModel<string> UpdateDBITEM_BOOK(CDCEstateViewModel updateData, CDCEstateViewModel viewModel, string cUserId);
     }
 }
