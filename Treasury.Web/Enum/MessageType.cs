@@ -267,6 +267,14 @@ namespace Treasury.Web.Enum
 2. @_ITEM_ => (查詢項目)
 ")]
             Mail_Content_Message,
+
+            /// <summary>
+            /// 取代變數說明
+            /// </summary>
+            [Description(@"取代變數
+            @_a_:
+            ")]
+            Replace_Desc,
         }
     }
 
