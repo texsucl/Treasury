@@ -272,7 +272,8 @@ namespace Treasury.Web.Enum
             /// 取代變數說明
             /// </summary>
             [Description(@"取代變數
-            @_a_:
+            P1：新作存單
+            G1：到期存單
             ")]
             Replace_Desc,
         }

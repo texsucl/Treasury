@@ -226,17 +226,17 @@ namespace Treasury.Web.Service.Actual
                                 switch (item.vExec_Action)
                                 {
                                     case "A"://新增
-                                        ////判斷交易別
-                                        //if (item.vAccess_Type == "P")
-                                        //{
-                                        //    _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
-                                        //    _Item_Order = GetItem_Order("P");
-                                        //}
-                                        //else if (item.vAccess_Type == "G")
-                                        //{
-                                        //    _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
-                                        //    _Item_Order = GetItem_Order("G");
-                                        //}
+                                        //判斷交易別
+                                        if (item.vAccess_Type == "P")
+                                        {
+                                            _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
+                                            _Item_Order = GetItem_Order("P");
+                                        }
+                                        else if (item.vAccess_Type == "G")
+                                        {
+                                            _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
+                                            _Item_Order = GetItem_Order("G");
+                                        }
                                         //_DCI = new DEP_CHK_ITEM()
                                         //{
                                         //    ACCESS_TYPE=item.vAccess_Type,
@@ -565,8 +565,8 @@ namespace Treasury.Web.Service.Actual
                 {
                     foreach (var DepChkItemHis in _DepChkItemHisList)
                     {
-                        var _Isortby = 0;
-                        var _Item_Order = 0;
+                        //var _Isortby = 0;
+                        //var _Item_Order = 0;
                         //定存檢核表項目設定檔
                         var _DepChkItem = db.DEP_CHK_ITEM.FirstOrDefault(x => x.ACCESS_TYPE == DepChkItemHis.ACCESS_TYPE && x.ISORTBY == DepChkItemHis.ISORTBY);
                         if (_DepChkItem != null)
@@ -583,24 +583,24 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            //判斷交易別
-                            if (DepChkItemHis.ACCESS_TYPE == "P")
-                            {
-                                _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
-                                _Item_Order = GetItem_Order("P");
-                            }
-                            else if (DepChkItemHis.ACCESS_TYPE == "G")
-                            {
-                                _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
-                                _Item_Order = GetItem_Order("G");
-                            }
+                            ////判斷交易別
+                            //if (DepChkItemHis.ACCESS_TYPE == "P")
+                            //{
+                            //    _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
+                            //    _Item_Order = GetItem_Order("P");
+                            //}
+                            //else if (DepChkItemHis.ACCESS_TYPE == "G")
+                            //{
+                            //    _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
+                            //    _Item_Order = GetItem_Order("G");
+                            //}
                             var _DCI = new DEP_CHK_ITEM()
                             {
                                 ACCESS_TYPE = DepChkItemHis.ACCESS_TYPE,
-                                ISORTBY = _Isortby,
+                                ISORTBY = DepChkItemHis.ISORTBY,
                                 DEP_CHK_ITEM_DESC = DepChkItemHis.DEP_CHK_ITEM_DESC,
                                 IS_DISABLED = DepChkItemHis.IS_DISABLED,
-                                ITEM_ORDER = _Item_Order,
+                                ITEM_ORDER = DepChkItemHis.ITEM_ORDER,
                                 REPLACE = DepChkItemHis.REPLACE,
                                 DATA_STATUS = "1", //可異動
                                 CREATE_UID = DepChkItemHis.APLY_UID,
