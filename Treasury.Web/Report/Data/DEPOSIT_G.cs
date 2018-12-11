@@ -153,20 +153,28 @@ namespace Treasury.Web.Report.Data
                 var _Dep_Chk_Item = db.DEP_CHK_ITEM.AsNoTracking()
                 .Where(x => x.ACCESS_TYPE == "G")
                 .Where(x => x.IS_DISABLED == "N")
-                .OrderBy(x => x.ISORTBY).ToList();
+                .OrderBy(x => x.ITEM_ORDER).ToList();
 
                 foreach (var item in _Dep_Chk_Item)
                 {
                     string DEP_CHK_ITEM_DESC = string.Empty;
 
-                    //是否為項次5 確認當日交易已全數交割完成，到期存單共@2張
-                    if (item.ISORTBY == 5)
+                    //判斷是否有取代變數
+                    if(string.IsNullOrEmpty(item.REPLACE))
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@2", TOTAL_DEP_CNT.ToString().formateThousand());
+                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
                     }
                     else
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
+                        switch(item.REPLACE)
+                        {
+                            case "G1":
+                                DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@_G1_", TOTAL_DEP_CNT.ToString().formateThousand());
+                                break;
+                            default:
+                                DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
+                                break;
+                        }
                     }
 
                     ReportData = new DepositReportData()

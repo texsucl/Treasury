@@ -164,26 +164,35 @@ namespace Treasury.Web.Report.Data
                 var _Dep_Chk_Item = db.DEP_CHK_ITEM.AsNoTracking()
                     .Where(x => x.ACCESS_TYPE == "P")
                     .Where(x => x.IS_DISABLED == "N")
-                    .OrderBy(x => x.ISORTBY).ToList();
+                    .OrderBy(x => x.ITEM_ORDER).ToList();
 
                 foreach(var item in _Dep_Chk_Item)
                 {
                     string DEP_CHK_ITEM_DESC = string.Empty;
 
-                    //是否項次1
-                    if (item.ISORTBY==1)
+                    //判斷是否有取代變數
+                    if(string.IsNullOrEmpty(item.REPLACE))
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@1", TOTAL_DEP_CNT.ToString().formateThousand());
+                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
                     }
                     else
                     {
-                        DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
+                        //依取代變數替換內容
+                        switch(item.REPLACE)
+                        {
+                            case "P1":
+                                DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC.Replace("@_P1_", TOTAL_DEP_CNT.ToString().formateThousand());
+                                break;
+                            default:
+                                DEP_CHK_ITEM_DESC = item.DEP_CHK_ITEM_DESC;
+                                break;
+                        }
                     }
 
                     ReportData = new DepositReportData()
                     {
                         TYPE = "Item",
-                        ISORTBY = item.ISORTBY.ToString(),
+                        ISORTBY = item.ITEM_ORDER.ToString(),
                         DEP_CHK_ITEM_DESC = DEP_CHK_ITEM_DESC
                     };
 
