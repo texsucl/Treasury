@@ -131,6 +131,26 @@ namespace Treasury.WebUtility
                 });
             }
 
+            if (!jdata.sidx.IsNullOrWhiteSpace())
+            {
+                var _p = typeof(T).GetProperty(jdata.sidx);
+                if (_p == null)
+                {
+                    _p = typeof(T).GetProperty(jdata.sidx.Substring(0, (jdata.sidx.LastIndexOf('_') == -1 ? jdata.sidx.Length : jdata.sidx.LastIndexOf('_'))));
+                }
+                if (_p != null)
+                {
+                    if ("asc".Equals(jdata.sord))
+                    {
+                        data = data.OrderBy(x => _p.GetValue(x, null)).ToList();
+                    }
+                    else
+                    {
+                        data = data.OrderByDescending(x => _p.GetValue(x, null)).ToList();
+                    }
+                }
+            }
+
             var datas = data.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             return new
@@ -138,15 +158,7 @@ namespace Treasury.WebUtility
                 total = totalPages,
                 page = pageIndex,
                 records = count,
-                rows =
-                 !jdata.sidx.IsNullOrWhiteSpace() ?
-                 (
-                     "asc".Equals(jdata.sord) ?
-                     datas.OrderBy(x => typeof(T).GetProperty(jdata.sidx).GetValue(x, null))
-                     :
-                     datas.OrderByDescending(x => typeof(T).GetProperty(jdata.sidx).GetValue(x, null))
-                 ) :
-                datas
+                rows = datas
             };
         }
     }

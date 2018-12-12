@@ -42,6 +42,7 @@ CASE WHEN temp.Memo_I is not null
 END AS QUANTITY, --數量
 AMOUNT, --金額
 DESCRIPTION --說明
+FROM
 ITEM_IMPO AS II
 JOIN temp 
 on II.ITEM_ID = temp.ITEM_ID

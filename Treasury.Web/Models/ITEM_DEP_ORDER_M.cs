@@ -66,5 +66,8 @@ namespace Treasury.Web.Models
         public Nullable<System.DateTime> TRANS_EXPIRY_DATE_ACCESS { get; set; }
         public Nullable<int> TRANS_TMS_ACCESS { get; set; }
         public string MEMO_ACCESS { get; set; }
+        public Nullable<int> ALREADY_TRANS_TMS { get; set; }
+        public Nullable<int> ALREADY_TRANS_TMS_AFT { get; set; }
+        public string TRANS_Flag { get; set; }
     }
 }

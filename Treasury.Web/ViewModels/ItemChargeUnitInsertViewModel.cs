@@ -54,5 +54,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("mail科主管")]
         public string vIS_MAIL_SECT_MGR { get; set; }
+
+        /// <summary>
+        /// 停用註記
+        /// </summary>
+        [Description("停用註記")]
+        public string vIs_Disabled { get; set; }
     }
 }

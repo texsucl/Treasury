@@ -21,7 +21,7 @@
                             </td>
                             <td>
                                 <label>停用註記 : </label>
-                                @Html.DropDownList("dIs_Disabled", (SelectList)ViewBag.dIs_Disabled)
+                                @Html.DropDownList("dIs_Disabled_Search", (SelectList)ViewBag.dIs_Disabled_Search)
                             </td>
                         </tr>
                         <tr>
@@ -103,6 +103,14 @@
                 </tr>
                 <tr>
                     <td>
+                        <label>停用註記 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dIs_Disabled", (SelectList)ViewBag.dIs_Disabled, new { @class = "TM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <input type="button" id="TM_InsertTemp" value="新增" class="btn btn-primary" />
                         <input type="button" id="TM_UpdateTemp" value="修改" class="btn btn-primary" />
                         <input type="button" id="TM_DeleteTemp" value="刪除" class="btn btn-primary" />
@@ -138,12 +146,13 @@
         //#region 參數設定
         var TM_Form_Search_Id = 'TM_Form_Search'; //formId
         var TM_Control_Mode_Search = 'dControl_Mode_Search'; //控管模式Id
-        var TM_Is_Disabled = 'dIs_Disabled'; //停用註記Id
+        var TM_Is_Disabled_Search = 'dIs_Disabled_Search'; //停用註記Id
 
         var TM_FormId = 'TM_DialogForm'; //formId
         var TM_Trea_Equip_Id = 'hTrea_Equip_Id'; //金庫設備編號Id
         var TM_Equip_Name = 'tEquip_Name'; //設備名稱Id
         var TM_Control_Mode = 'dControl_Mode'; //控管模式Id
+        var TM_Is_Disabled = 'dIs_Disabled'; //停用註記Id
         var TM_Normal_Cnt = 'tNormal_Cnt'; //常用數量Id
         var TM_Reserve_Cnt = 'tReserve_Cnt'; //備份數量Id
         var TM_Sum_Cnt = 'lSum_Cnt'; //總數量Id
@@ -270,6 +279,8 @@
                 if (type == '@Ref.ActionType.Add.ToString()') {
                     ResetInsertDialog();
                     $('#TM_InsertTemp').show();
+                    $('#' + TM_Normal_Cnt).val('1');
+                    $('#' + TM_Reserve_Cnt).val('0');
                     $('.' + TM_InsertClass).prop('disabled', false);
                 }
                 else if (type == '@Ref.ActionType.Dele.ToString()') {
@@ -281,7 +292,6 @@
                     dialogSetData(listId, rowid);
                     $('#TM_UpdateTemp').show();
                     $('.' + TM_InsertClass).prop('disabled', false);
-                    $('#' + TM_Equip_Name).prop('disabled', true);
                 }
                 else if (type == '@Ref.ActionType.View.ToString()') {
                     dialogSetData(listId, rowid);
@@ -316,6 +326,7 @@
                     $('#' + TM_Reserve_Cnt).val(data.vReserve_Cnt);
                     $('#' + TM_Sum_Cnt).html(data.vSum_Cnt);
                     $('#' + TM_Memo).val(data.vMemo);
+                    $('#' + TM_Is_Disabled).val(data.vIs_Disabled)
                 }
             }
             //#endregion dialog
@@ -352,6 +363,24 @@
                 return rdata.vControl_Mode;
             }
 
+            function formattervIs_Disabled(cellvalue, options, rdata) {
+                switch (rdata.vIs_Disabled) {
+                    @{
+                        foreach (var item in ((SelectList)ViewBag.dIs_Disabled))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                        </text>
+                        }
+                    }
+                }
+            }
+
+            function unformattervIs_Disabled(cellvalue, options, rdata) {
+                return rdata.vIs_Disabled;
+            }
+
             function formattervData_Status_Name(cellvalue, options, rdata) {
                 if (rdata.vData_Status == 2) {
                     return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
@@ -370,12 +399,15 @@
                 $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
                     var tr = $(this);
                     var status = tr.find($.validator.format('td[aria-describedby$={0}_vData_Status]', listId)).text();
-                    var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIs_Disabled]', listId)).text();
-                    if (status != '1' || Is_Disabled == "Y") {
+                    var Exec_Action = tr.find($.validator.format('td[aria-describedby$={0}_vExec_Action]', listId)).text();
+                    if (status != '1') {
                         $(this).find('.actionEditIcon').hide();
                         $(this).find('.actionDeleIcon').hide();
                     }
 
+                    if (Exec_Action != 'A') {
+                        $(this).find('.actionDeleIcon').hide();
+                    }
                     //異動申請單號
                     $(this).find('td').find('a.DialogAply_No').each(function () {
                         $(this).off('click');
@@ -438,7 +470,7 @@
             }
 
             function TM_TempGrid() {
-                var colNameArray = ['動作', '執行功能', '設備名稱', '控管模式', '常用數量', '備份數量', '總數量', '備註', '停用註記', '資料狀態', '資料凍結人員', '金庫設備編號', '控管模式值', '停用註記值', '資料狀態值', '異動申請單號'];
+                var colNameArray = ['動作', '執行功能', '設備名稱', '控管模式', '常用數量', '備份數量', '總數量', '備註', '停用註記', '資料狀態', '資料凍結人員', '執行功能值', '金庫設備編號', '控管模式值', '停用註記值', '資料狀態值', '異動申請單號'];
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
                 colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 100, sortable: false });
@@ -448,10 +480,11 @@
                 colModelArray.push({ name: "vReserve_Cnt", index: "vReserve_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vSum_Cnt", index: "vSum_Cnt", width: 80, sortable: false, align: 'right', formatter: customerUtility.addCommas, unformat: customerUtility.removeCommas });
                 colModelArray.push({ name: "vMemo", index: "vMemo", width: 100, sortable: false });
-                colModelArray.push({ name: "vIs_Disabled_Name", index: "vIs_Disabled_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vIs_Disabled_Show", index: "vIs_Disabled_Show", width: 100, align: 'center', sortable: false, formatter: formattervIs_Disabled, unformatter: unformattervIs_Disabled });
 
                 colModelArray.push({ name: "vData_Status_Name", index: "vData_Status_Name", width: 100, sortable: false, align: 'center', formatter: formattervData_Status_Name, unformat: UnformattervData_Status_Name });
                 colModelArray.push({ name: "vFreeze_Uid_Name", index: "vFreeze_Uid_Name", width: 100, sortable: false });
+                colModelArray.push({ name: "vExec_Action", index: "vExec_Action", hidden: true });
                 colModelArray.push({ name: "vTrea_Equip_Id", index: "vTrea_Equip_Id", hidden: true });
                 colModelArray.push({ name: "vControl_Mode", index: "vControl_Mode", hidden: true });
                 colModelArray.push({ name: "vIs_Disabled", index: "vIs_Disabled", hidden: true });
@@ -492,7 +525,7 @@
                     data: JSON.stringify({
                         searchModel: TreasuryInOutSearchViewModel(
                             $('#' + TM_Control_Mode_Search).val(),
-                            $('#' + TM_Is_Disabled).val())
+                            $('#' + TM_Is_Disabled_Search).val())
                     }),
                     url: TM_Url.search,
                     contentType: 'application/json',
@@ -595,7 +628,8 @@
                                 $('#' + TM_Normal_Cnt).val().trim(),
                                 $('#' + TM_Reserve_Cnt).val().trim(),
                                 $('#' + TM_Sum_Cnt).html().trim(),
-                                $('#' + TM_Memo).val().trim())
+                                $('#' + TM_Memo).val().trim(),
+                                $('#' + TM_Is_Disabled).val().trim())
                         }),
                         dataType: "json",
                         url: TM_Url.InsertTempData,
@@ -624,7 +658,8 @@
                                 $('#' + TM_Normal_Cnt).val().trim(),
                                 $('#' + TM_Reserve_Cnt).val().trim(),
                                 $('#' + TM_Sum_Cnt).html().trim(),
-                                $('#' + TM_Memo).val().trim())
+                                $('#' + TM_Memo).val().trim(),
+                                $('#' + TM_Is_Disabled).val().trim())
                         }),
                         dataType: "json",
                         url: TM_Url.UpdateTempData,
@@ -694,7 +729,8 @@
                 vNormal_Cnt,
                 vReserve_Cnt,
                 vSum_Cnt,
-                vMemo
+                vMemo,
+                vIs_Disabled
                 ) {
                 var obj = {};
                 obj['vTrea_Equip_Id'] = vTrea_Equip_Id;
@@ -704,6 +740,7 @@
                 obj['vReserve_Cnt'] = vReserve_Cnt;
                 obj['vSum_Cnt'] = vSum_Cnt;
                 obj['vMemo'] = vMemo;
+                obj['vIs_Disabled'] = vIs_Disabled;
                 return obj;
             }
 

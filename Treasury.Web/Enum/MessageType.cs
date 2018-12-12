@@ -251,6 +251,18 @@ namespace Treasury.Web.Enum
             excel_Validate,
 
             /// <summary>
+            /// 存單於2018/12/10到期,敬請確認是否展期?
+            /// </summary>
+            [Description("存單於 @Time 到期,敬請確認是否展期?")]
+            auto_Trans,
+
+            /// <summary>
+            /// 存單已到展期次數,無法繼續展期,此筆存單記錄將轉至金庫內=N
+            /// </summary>
+            [Description("存單已到展期次數,無法繼續展期,此筆存單記錄將轉至金庫內=N")]
+            already_Max_Trans,
+
+            /// <summary>
             /// Mail內文設定替換規則
             /// </summary>
             [Description(@"替換規則
@@ -267,14 +279,6 @@ namespace Treasury.Web.Enum
 2. @_ITEM_ => (查詢項目)
 ")]
             Mail_Content_Message,
-
-            /// <summary>
-            /// 取代變數說明
-            /// </summary>
-            [Description(@"取代變數
-            @_a_:
-            ")]
-            Replace_Desc,
         }
     }
 

@@ -478,6 +478,10 @@
         return $('#' + id).find('.ui-pg-input').val() || '1' ;
     }
 
+    jqgridCustom.getRowNum = function (id) {
+        return $('#' + id).find('.ui-pg-selbox').val() || defaultrowNum;
+    }
+
     jqgridCustom.hideFrozenTitle =
     function () {
         $('.ui-jqgrid-view > .frozen-div').find('.ui-jqgrid-resize').hide()

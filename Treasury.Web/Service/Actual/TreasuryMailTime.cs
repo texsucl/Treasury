@@ -69,7 +69,7 @@ namespace Treasury.Web.Service.Actual
                         vIS_DISABLED = x.IS_DISABLED,
                         vIS_DISABLED_NAME = _Is_Disabled.FirstOrDefault(y => y.CODE == x.IS_DISABLED)?.CODE_VALUE,
                         vTREA_OPEN_TIME = x.TREA_OPEN_TIME,
-                        vFREEZE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
+                        vFREEZE_UID_Name = emps.FirstOrDefault(y => y.USR_ID != null && y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
                         vLAST_UPDATE_UID_Name = emps.FirstOrDefault(y => y.USR_ID == x.LAST_UPDATE_UID)?.EMP_NAME?.Trim(),
                         vLAST_UPDATE_DT_Show = TypeTransfer.dateTimeNToString(x.LAST_UPDATE_DT),
                         vMAIL_TIME_ID = x.MAIL_TIME_ID,

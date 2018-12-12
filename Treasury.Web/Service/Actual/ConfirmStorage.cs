@@ -228,13 +228,6 @@ namespace Treasury.Web.Service.Actual
                                 .Where(x => x.TREA_ITEM_NAME == itemName)
                                 .Select(x => x.ITEM_ID).ToList());
                     }
-
-
-                    //var whitchItem = vItem.FirstOrDefault()?.Value;
-                    //var itemName = _TREA_ITEM.FirstOrDefault(x => x.ITEM_ID == whitchItem)?.TREA_ITEM_NAME;
-                    //var whichitemName = _TREA_ITEM
-                    //            .Where(x => x.TREA_ITEM_NAME == itemName)
-                    //            .Select(x => x.ITEM_ID).ToList();
                     
                     if (AccessType == "P")
                     {
@@ -528,11 +521,6 @@ namespace Treasury.Web.Service.Actual
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
                     DateTime now = DateTime.Now;
-                    //SysSeqDao sysSeqDao = new SysSeqDao();
-                    //string qPreCode = DateUtil.getCurChtDateTime().Split(' ')[0];
-                    //var cId = sysSeqDao.qrySeqNo("G6", qPreCode).ToString().PadLeft(3, '0');
-                    //string applyNO = $@"G6{qPreCode}{cId}";
-                    //string applyStatus = "C01";
                     string logStr = string.Empty;
 
                     #region 申請單暫存檔
@@ -931,6 +919,21 @@ namespace Treasury.Web.Service.Actual
                 string applyStatus = "C02";
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
+                    var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == register_ID);
+                    if (_TREA_OPEN_REC.APPR_STATUS != "C01")
+                    {
+                        result.DESCRIPTION = "此金庫登記簿單號已入庫確認，無法執行";
+                        return result;
+                    }
+
+                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":00";
+                    var _endTimeDT = DateTime.Parse(_endTime);
+                    if (_endTimeDT > now)
+                    {
+                        result.DESCRIPTION = "已超過開庫時間(迄)，無法執行";
+                        return result;
+                    }
+
                     data.ForEach(x => {
                         var vItemId = x.Split(';')[0];
                         var vOpType = x.Split(';')[1];
@@ -1006,16 +1009,29 @@ namespace Treasury.Web.Service.Actual
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == register_ID);
+
+                    if (_TREA_OPEN_REC.APPR_STATUS != "C01")
+                    {
+                        result.DESCRIPTION = "此金庫登記簿單號已入庫確認，無法執行";
+
+                        return result;
+                    }
+
+                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":00";
+                    var _endTimeDT = DateTime.Parse(_endTime);
+                    if (_endTimeDT > now)
+                    {
+                        result.DESCRIPTION = "已超過開庫時間(迄)，無法執行";
+                        return result;
+                    }
+
                     data.ForEach(x =>
                     {
                         var vItemId = x.Split(';')[0];
                         var vOpType = x.Split(';')[1];
                         var vAply = x.Split(';')[2];
                         var vuuid = x.Split(';')[3];
-                        //var rowdata = viewData.Where(y => y.vITEM_ID == vItemId)
-                        //.Where(y => y.vITeM_OP_TYPE == vOpType)
-                        //.Where(y => y.vAPLY_NO == vAply, !vAply.IsNullOrWhiteSpace())
-                        //.FirstOrDefault();
+
                         var rowdata = viewData.FirstOrDefault(y => y.uuid == vuuid);
 
                         if (_flag && vOpType == "2" && (
@@ -1131,13 +1147,6 @@ namespace Treasury.Web.Service.Actual
                                         _ITEM_SEAL.INVENTORY_STATUS = _INVENTORY_STATUS;
                                         logStr += _ITEM_SEAL.modelToString(logStr);
                                     }
-                                    //不刪除temp 檔
-                                    //var _deleteData = db.TREA_APLY_TEMP.FirstOrDefault(y => y.ITEM_ID == rowdata.vITEM_ID);
-                                    //if (_deleteData != null)
-                                    //{
-                                    //    db.TREA_APLY_TEMP.Remove(_deleteData);
-                                    //    logStr += _deleteData.modelToString(logStr);
-                                    //}
                                 }
                             }
                         }
@@ -1185,7 +1194,6 @@ namespace Treasury.Web.Service.Actual
             return null;
         }
     
-
         /// <summary>
         /// 
         /// </summary>

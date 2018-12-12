@@ -97,8 +97,9 @@ namespace Treasury.Web.Service.Actual
             var emps = new List<V_EMPLY2>();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
             {
-                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().Where(x => x.USR_ID != null).ToList();
             }
+
             return emps;
         }
 
