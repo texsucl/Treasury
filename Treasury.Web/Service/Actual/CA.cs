@@ -119,7 +119,7 @@ namespace Treasury.Web.Service.Actual
             {
                 var dept = intra.getDept(vAplyUnit); //抓取單位
                 if (!vAplyUnit.IsNullOrWhiteSpace())
-                {
+                {                 
                     result = db.ITEM_CA.AsNoTracking()
                     .Where(x => x.CHARGE_DEPT == dept.UP_DPT_CD.Trim() && x.CHARGE_SECT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "04") //單位為科
                     .Where(x => x.CHARGE_DEPT == dept.DPT_CD.Trim(), !dept.Dpt_type.IsNullOrWhiteSpace() && dept.Dpt_type.Trim() == "03") //單位為部

@@ -581,6 +581,13 @@ namespace Treasury.WebUtility
             return new Tuple<Decimal?, bool>(value, true);
         }
 
+        public static Tuple<int?, bool> CheckAFT(this int? value, int? oldpar)
+        {
+            if (oldpar == value)
+                return new Tuple<int?, bool>(null, false);
+            return new Tuple<int?, bool>(value, true);
+        }
+
         public static string formateThousand(this string value)
         {
             decimal d = 0;

@@ -114,7 +114,7 @@ namespace Treasury.Web.Report.Data
 
                     #region 排序一 庫存日=承作日期時,庫存日當日承作的定期存單排在最上面 再依到期日先後/登打順序排列
 
-                    foreach (var item in group.Where(x => x.DEP_SET_QUALITY == "N" && x.PUT_DATE == x.COMMIT_DATE)
+                    foreach (var item in group.Where(x => x.DEP_SET_QUALITY == "N" && x.PUT_DATE == x.COMMIT_DATE && x.COMMIT_DATE == APLY_DT_From)
                         .OrderBy(x => x.PUT_DATE == dtnStr).ThenBy(x => x.EXPIRY_DATE).ThenBy(x => x.ITEMID))
                     {
                         var _setData = setData(_ITEM_DEP_ORDER_D, item);
@@ -136,8 +136,8 @@ namespace Treasury.Web.Report.Data
 
                     #region 排序二 其他的定期存單列示在中間區塊 再依到期日/承作日/登打順序排列
 
-                    foreach (var item in group.Where(x => x.DEP_SET_QUALITY == "N" && x.PUT_DATE != x.COMMIT_DATE)
-                    .OrderBy(x => x.COMMIT_DATE).ThenBy(x => x.COMMIT_DATE).ThenBy(x => x.ITEMID))
+                    foreach (var item in group.Where(x => x.DEP_SET_QUALITY == "N" && (x.PUT_DATE != x.COMMIT_DATE || x.COMMIT_DATE != APLY_DT_From))
+                    .OrderBy(x => x.EXPIRY_DATE).ThenBy(x => x.COMMIT_DATE).ThenBy(x => x.ITEMID))
                     {
                         var _setData = setData(_ITEM_DEP_ORDER_D, item);
                         ReportDataList2.AddRange(_setData.Item1);

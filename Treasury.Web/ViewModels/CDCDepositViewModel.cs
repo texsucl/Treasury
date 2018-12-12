@@ -12,6 +12,11 @@ namespace Treasury.Web.ViewModels
     /// </summary>
     public class CDCDepositViewModel : ICDCItem
     {
+        public CDCDepositViewModel() {
+            vDeposit_M = new List<CDCDeposit_M>();
+            vDeposit_D = new List<CDCDeposit_D>();
+        }
+
         /// <summary>
         /// 定期存單庫存資料檔
         /// </summary>
@@ -339,10 +344,34 @@ namespace Treasury.Web.ViewModels
         public int? vTrans_Tms_Aft { get; set; }
 
         /// <summary>
+        /// 已轉期次數
+        /// </summary>
+        [Description("已轉期次數")]
+        public int? vAlready_Trans_Tms { get; set; }
+
+        /// <summary>
+        /// 已轉期次數_異動後
+        /// </summary>
+        [Description("已轉期次數_異動後")]
+        public int? vAlready_Trans_Tms_Aft { get; set; }
+
+        /// <summary>
         /// 異動註記
         /// </summary>
         [Description("異動註記")]
         public bool vAftFlag { get; set; }
+
+        /// <summary>
+        /// 轉期註記
+        /// </summary>
+        [Description("轉期註記")]
+        public bool vTransFlag { get; set; }
+
+        /// <summary>
+        /// 確認是否轉期
+        /// </summary>
+        [Description("確認是否轉期")]
+        public string sAutoTransFlag { get; set; }
 
         /// <summary>
         /// 最後更新時間 (庫存資料才有)

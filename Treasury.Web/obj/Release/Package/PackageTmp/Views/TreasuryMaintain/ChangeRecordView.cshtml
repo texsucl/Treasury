@@ -42,28 +42,30 @@
                 jQuery("#" + listId).jqGrid('setGroupHeaders', {
                     useColSpanStyle: true,
                     groupHeaders: [
+                      { startColumnName: 'vEquip_Name_B', numberOfColumns: 2, titleText: '設備名稱' },
                       { startColumnName: 'vControl_Mode_B_Name', numberOfColumns: 2, titleText: '控管模式' },
                       { startColumnName: 'vNormal_Cnt_B', numberOfColumns: 2, titleText: '常用數量' },
                       { startColumnName: 'vReserve_Cnt_B', numberOfColumns: 2, titleText: '備份數量' },
-                    { startColumnName: 'vMemo_B', numberOfColumns: 2, titleText: '備註' }
-                    ]
+                      { startColumnName: 'vMemo_B', numberOfColumns: 2, titleText: '備註' },
+                      { startColumnName: 'vIs_Disabled_B', numberOfColumns: 2, titleText: '停用註記' }
+        ]
                 });
                 isGroupHeaders = false;
             }
         }
 
         function TM_ChangeRecord_TempGrid() {
-            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行', '設備名稱', '停用註記',
-                '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+            var colNameArray = ['異動日期', '工作單號', '異動人員', '執行',
+                '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
                 '覆核狀態', '覆核意見'];
             var colModelArray = [];
             colModelArray.push({ name: "vAply_Date", index: "vAply_Date", width: 90, sortable: false, align: 'center' });
             colModelArray.push({ name: "vAply_No", index: "vAply_No", width: 120, sortable: false });
             colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 80, sortable: false });
             colModelArray.push({ name: "vExec_Action_Name", index: "vExec_Action_Name", width: 60, sortable: false, align: 'center' });
-            colModelArray.push({ name: "vEquip_Name", index: "vEquip_Name", width: 100, sortable: false });
-            colModelArray.push({ name: "vIs_Disabled", index: "vIs_Disabled", width: 70, sortable: false, align: 'center' });
 
+            colModelArray.push({ name: "vEquip_Name_B", index: "vEquip_Name", width: 100, sortable: false });
+            colModelArray.push({ name: "vEquip_Name", index: "vEquip_Name", width: 100, sortable: false });
             colModelArray.push({ name: "vControl_Mode_B_Name", index: "vControl_Mode_B_Name", width: 70, sortable: false });
             colModelArray.push({ name: "vControl_Mode_Name", index: "vControl_Mode_Name", width: 70, sortable: false });
             colModelArray.push({ name: "vNormal_Cnt_B", index: "vNormal_Cnt_B", width: 70, sortable: false });
@@ -72,6 +74,8 @@
             colModelArray.push({ name: "vReserve_Cnt", index: "vReserve_Cnt", width: 70, sortable: false });
             colModelArray.push({ name: "vMemo_B", index: "vMemo_B", width: 70, sortable: false });
             colModelArray.push({ name: "vMemo", index: "vMemo", width: 70, sortable: false });
+            colModelArray.push({ name: "vIs_Disabled_B", index: "vIs_Disabled_B", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "vIs_Disabled", index: "vIs_Disabled", width: 70, sortable: false, align: 'center' });
 
             colModelArray.push({ name: "vAppr_Status_Name", index: "vAppr_Status_Name", width: 80, sortable: false, align: 'center' });
             colModelArray.push({ name: "vAppr_Desc", index: "vAppr_Desc", width: 100, sortable: false, align: 'center' });

@@ -97,5 +97,23 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("保管單位存取項目編號")]
         public string vCHARGE_UNIT_ID { get; set; }
+
+        /// <summary>
+        /// 權責部門
+        /// </summary>
+        [Description("權責部門")]
+        public string vCHARGE_DEPT_VALUE { get; set; }
+
+        /// <summary>
+        /// 權責單位
+        /// </summary>
+        [Description("權責單位")]
+        public string vCHARGE_SECT_VALUE { get; set; }
+
+        /// <summary>
+        /// 資料庫名稱
+        /// </summary>
+        [Description("資料庫名稱")]
+        public string vTREA_ITEM_NAME_VALUE { get; set; }
     }
 }

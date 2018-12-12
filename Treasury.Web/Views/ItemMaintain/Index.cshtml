@@ -53,7 +53,7 @@
     </div>
     <div id="IM_SearchDetail" style="display:none" role="dialog" class="myDialog">
         <div style="padding-bottom:5px;">
-            <input type="button" id="IM_Insert" value="新增存入明細" class="btn btn-primary" />
+            <input type="button" id="IM_Insert" value="新增存取項目" class="btn btn-primary" />
         </div>
         <div id="IM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
         <div style="text-align:center;" class="IM_Act">
@@ -258,6 +258,33 @@
                                         customerUtility.closeDialog(this);
                                         });
                         break;
+                }
+            });
+            //#endregion
+            //#region 連結資料庫 根據 存取項目編號 連動
+            $('#' + Op_Type_Mod_Id).on('change', function () {
+                var opType = $('#' + Op_Type_Mod_Id).val();
+                if (opType == '1' || opType == '4'){
+                    $('#' + Is_Item_Mod_Id).val('N');
+                }
+                else {
+                    $('#' + Is_Item_Mod_Id).val('Y');
+                }
+                $('#' + Is_Item_Mod_Id).trigger("change");
+            });
+            //#endregion
+            //#region 根據 連結資料庫 判斷 資料庫類別(CRUD) & 資料庫名稱(CRUD) 
+            $('#' + Is_Item_Mod_Id).on('change', function () {
+                var isItemMod = $('#' + Is_Item_Mod_Id).val();
+                if (isItemMod == 'N') {
+                    $('#' + Type_Mod_Id).val(' ');
+                    $('#' + Name_Mod_Id).val(' ');
+                    $('#' + Type_Mod_Id).prop('disabled', true);
+                    $('#' + Name_Mod_Id).prop('disabled', true);
+                }
+                else {
+                    $('#' + Type_Mod_Id).prop('disabled', false);
+                    $('#' + Name_Mod_Id).prop('disabled', false);
                 }
             });
             //#endregion
@@ -577,12 +604,15 @@
                     var status = tr.find($.validator.format('td[aria-describedby$={0}_vDATA_STATUS]', listId)).text();
                     var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
                     var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_vEXEC_ACTION]', listId)).text();
-                    if (status != '1' || Is_Disabled == "Y") {
+                    if (status != '1') {
                         $(this).find('.actionEditIcon').hide();
                         $(this).find('.actionDeleIcon').hide();
                     }
                     if (exec_action != 'A') {
                         $(this).find('.actionDeleIcon').hide();
+                    }
+                    else {
+                        $(this).find('.actionEditIcon').hide();
                     }
 
                     //異動申請單號
@@ -625,7 +655,7 @@
                     contentType: 'application/json',
                     success: function (datas, textStatus, jqXHR) {
                         $('#' + openChangeRecordDetailId).html(datas);
-                        openDetailDialog('金庫存取項目異動紀錄', 1250, 'OpenChangeRecordDialog');
+                        openDetailDialog('金庫存取項目異動紀錄', 1350, 'OpenChangeRecordDialog');
                     }
                 });
             }
@@ -672,6 +702,7 @@
                 if (type == '@Ref.ActionType.Add.ToString()') {
                     $('#IM_InsertTemp').show();
                     $('.' + IM_InsertClass).prop('disabled', false);
+                    $('#' + Op_Type_Mod_Id).trigger("change");                   
                 }
                 else if (type == '@Ref.ActionType.Edit.ToString()') {
                     dialogSetData(listId, rowid);
@@ -679,6 +710,7 @@
                     $('.' + IM_InsertClass).prop('disabled', false);
                     $('#' + Item_Mod_Id).prop('disabled', true);
                     $('#' + Op_Type_Mod_Id).prop('disabled', true);
+                    $('#' + Is_Item_Mod_Id).trigger("change");
                 }
                 else if (type == '@Ref.ActionType.Dele.ToString()') {
                     dialogSetData(listId, rowid);

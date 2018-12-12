@@ -92,7 +92,7 @@ namespace Treasury.Web.Service.Actual
                         vData_Status = x.DATA_STATUS,
                         vData_Status_Name = _Data_Status_Name.FirstOrDefault(y => y.CODE == x.DATA_STATUS)?.CODE_VALUE?.Trim(),
                         vLast_Update_Dt = x.LAST_UPDATE_DT,
-                        vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
+                        vFreeze_Uid_Name = emps.FirstOrDefault(y => y.USR_ID != null && y.USR_ID == x.FREEZE_UID)?.EMP_NAME?.Trim(),
                         vAply_No = _Trea_Equip_HisList.FirstOrDefault(y => y.TREA_EQUIP_ID == x.TREA_EQUIP_ID)?.APLY_NO?.Trim()
                     }).ToList());
             }
@@ -121,7 +121,8 @@ namespace Treasury.Web.Service.Actual
                 var _Control_Mode = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "CONTROL_MODE").ToList();
                 var _Appr_Status = db.SYS_CODE.AsNoTracking()
-                    .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
+                    .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();                    
+
 
                 if (aply_No.IsNullOrWhiteSpace())
                 {

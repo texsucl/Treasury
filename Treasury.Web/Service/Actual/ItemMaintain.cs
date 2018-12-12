@@ -69,15 +69,16 @@ namespace Treasury.Web.Service.Actual
 
                 if (aply_No.IsNullOrWhiteSpace())
                 {
-                    var _TREA_ITEM = db.TREA_ITEM.AsNoTracking()
-                        .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
+                    //var _TREA_ITEM = db.TREA_ITEM.AsNoTracking()
+                    //    .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
+                    var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().ToList();
                     result = db.TREA_ITEM_HIS.AsNoTracking()
                         .Where(x => x.ITEM_OP_TYPE == searchData.vItem_Op_Type, searchData.vItem_Op_Type != "All")
                         .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != "All")
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
                         .AsEnumerable()
-                        .Select(x => new ItemMaintainChangeRecordSearchDetailViewModel{
+                        .Select(x => new ItemMaintainChangeRecordSearchDetailViewModel {
                             //vFreeze_Dt = x.EXEC_ACTION != "A" ? _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd"): null,
                             vFreeze_Dt = x.APLY_DATE.ToString("yyyy/MM/dd"),
                             vAply_No = x.APLY_NO,
@@ -96,6 +97,7 @@ namespace Treasury.Web.Service.Actual
                             vMEMO_B = x.MEMO_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
                             vAPPR_DESC = x.APPR_DESC,
+                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
 
@@ -157,6 +159,7 @@ namespace Treasury.Web.Service.Actual
                             vMEMO_B = x.MEMO_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
                             vAPPR_DESC = x.APPR_DESC,
+                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
                     //result = db.TREA_ITEM_HIS.AsNoTracking()

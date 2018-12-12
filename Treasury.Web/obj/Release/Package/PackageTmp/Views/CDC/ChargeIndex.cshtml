@@ -566,10 +566,74 @@
                                 </text>
                             }
                         }
-                                        default:
-                                    return '';
+                            default:
+                        return '';
                     }
                 }
+
+            function formattervMargin_Take_Of_Type(cellvalue, options, rdata) {               
+                switch (cellvalue) {
+                        @{
+                        foreach (var item in ((List<SelectOption>)new Treasury.Web.Service.Actual.Common().GetSysCode("MARGIN_TAKE_OF_TYPE")))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                        }
+                        default:
+                    return '';
+                }
+            }
+
+            function formattervMargin_Item(cellvalue, options, rdata) {               
+                switch (cellvalue) {
+                        @{
+                        foreach (var item in ((List<SelectOption>)new Treasury.Web.Service.Actual.Common().GetSysCode("MARGIN_ITEM")))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                        }
+                        default:
+                    return '';
+                }
+            }
+
+            function formattervMarging_Type(cellvalue, options, rdata) {               
+                switch (cellvalue) {
+                        @{
+                        foreach (var item in ((List<SelectOption>)new Treasury.Web.Service.Actual.Common().GetSysCode("MARGING_TYPE")))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                        }
+                        default:
+                    return '';
+                }
+            }
+
+            function formattervDep_Type(cellvalue, options, rdata) {               
+                switch (cellvalue) {
+                        @{
+                        foreach (var item in ((List<SelectOption>)new Treasury.Web.Service.Actual.Common().GetSysCode("DEP_TYPE")))
+                        {
+                            <text>
+                            case '@item.Value':
+                            return '@item.Text';
+                            </text>
+                        }
+                        }
+                        default:
+                    return '';
+                }
+            }
 
             function formattervStatus(cellvalue, options, rdata) {               
                 switch (rdata.vStatus) {
@@ -725,12 +789,12 @@
                 colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false, align: 'center' });
 
                 colModelArray.push({ name: "vCurrency", index: "vCurrency", width: 70, sortable: false, align: 'center' });
-                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 150, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 150, sortable: false });
                 colModelArray.push({ name: "vCommit_Date", index: "vCommit_Date", width: 90, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vExpiry_Date", index: "vExpiry_Date", width: 90, sortable: false});
                 //colModelArray.push({ name: "vInterest_Rate_Type", index: "vInterest_Rate_Type", width: 90, sortable: false, align: 'center'});
                 //colModelArray.push({ name: "vInterest_Rate", index: "vInterest_Rate", width: 90, sortable: false, align: 'right'});
-                colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 90, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vDep_Type", index: "vDep_Type", width: 90, sortable: false, align: 'center', formatter: formattervDep_Type });
                 //colModelArray.push({ name: "vTotal_Denomination", index: "vTotal_Denomination", width: 100, sortable: false, align: 'right'});
                 colModelArray.push({ name: "vDep_Set_Quality", index: "vDep_Set_Quality", width: 70, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAuto_Trans", index: "vAuto_Trans", width: 90, sortable: false, align: 'center'});
@@ -781,7 +845,7 @@
             function CDC_EstateDbGrid() {
                 var colNameArray = ['動作', '狀態', '入庫日期'];
                 colNameArray = colNameArray.concat(['存入申請人', '權責單位',
-                    '冊號', '群組編號', '大樓名稱', '坐落', '備註',
+                    '冊號',  '大樓名稱', '坐落', '備註',
                     '狀別', '發狀日', '字號', '地號/建號', '門牌號', '流水號/編號', '備註',
                     '物品編號', '狀態Id']);
                 var colModelArray = [];
@@ -790,10 +854,9 @@
                 colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false, align: 'center'});
-
-                colModelArray.push({ name: "vIB_Book_No_Name", index: "vIB_Book_No_Name", width: 200, sortable: false, align: 'center'});
-                colModelArray.push({ name: "vIB_Book_No", index: "vIB_Book_No", hidden: true });
-                colModelArray.push({ name: "vIB_Building_Name", index: "vIB_Building_Name", hidden: true });
+      
+                colModelArray.push({ name: "vIB_Book_No", index: "vIB_Book_No", width: 60, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vIB_Building_Name", index: "vIB_Building_Name", width: 200, sortable: false});
                 colModelArray.push({ name: "vIB_Located", index: "vIB_Located", hidden: true });
                 colModelArray.push({ name: "vIB_Memo", index: "vIB_Memo", hidden: true });
 
@@ -922,12 +985,12 @@
                 colModelArray.push({ name: "vStatusShow", index: "vStatusShow", width: 90, formatter: formattervStatus, align: 'center' });
                 colModelArray.push({ name: "vPut_Date", index: "vPut_Date", width: 90, sortable: false, align: 'center' });
 
-                colModelArray.push({ name: "vBook_No_Show", index: "vBook_No_Show", width: 50, align: 'center', sortable: false, align: 'center'});
+                colModelArray.push({ name: "vBook_No", index: "vBook_No", width: 50, align: 'center', sortable: false, align: 'center'});
                 colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 90, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 170, sortable: false, align: 'center'});
 
-                colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 70, align: 'center', sortable: false});
-                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, align: 'center', sortable: false});
+                colModelArray.push({ name: "vMargin_Dep_Type", index: "vMargin_Dep_Type", width: 70, align: 'center', sortable: false, formatter: formattervMarging_Type });
+                colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 250, sortable: false});
                 colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, align: 'center', sortable: false });
                 //colModelArray.push({ name: "vAmount", index: "vAmount", width: 80, align: 'right', sortable: false});
                 //colModelArray.push({ name: "vWorkplace_Code", index: "vWorkplace_Code", width: 100, align: 'center', sortable: false});
@@ -992,11 +1055,11 @@
                 colModelArray.push({ name: "vAply_Uid_Name", index: "vAply_Uid_Name", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", width: 200, sortable: false, align: 'center' });
 
-                colModelArray.push({ name: "vMargin_Take_Of_Type", index: "vMargin_Take_Of_Type", width: 70, align: 'center', sortable: false });
+                colModelArray.push({ name: "vMargin_Take_Of_Type", index: "vMargin_Take_Of_Type", width: 70, align: 'center', sortable: false, formatter: formattervMargin_Take_Of_Type });
                 colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", width: 100, align: 'center', sortable: false });
                 colModelArray.push({ name: "vlItem_Id", index: "vlItem_Id", width: 100, align: 'center', sortable: false });
                 //colModelArray.push({ name: "vAmount", index: "vAmount", width: 90, align: 'right', sortable: false});
-                colModelArray.push({ name: "vMargin_Item", index: "vMargin_Item", align: 'center', width: 120, sortable: false});
+                colModelArray.push({ name: "vMargin_Item", index: "vMargin_Item", align: 'center', width: 120, sortable: false, formatter: formattervMargin_Item });
                 colModelArray.push({ name: "vMargin_Item_Issuer", index: "vMargin_Item_Issuer", align: 'center', width: 100, sortable: false });
                 colModelArray.push({ name: "vPledge_Item_No", index: "vPledge_Item_No", width: 100, align: 'center', sortable: false });
                 //colModelArray.push({ name: "vEffective_Date_B", index: "vEffective_Date_B", width: 100, align: 'center', sortable: false});

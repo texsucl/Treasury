@@ -298,7 +298,7 @@ namespace Treasury.Web.Scheduler
                             new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                             new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
                             null,
-                            _Mail_Time?.FUNC_ID ?? "金庫每日例行開庫通知",
+                            _MAIL_CONTENT?.MAIL_SUBJECT ?? "金庫每日例行開庫通知",
                             sb.ToString()
                             );
 

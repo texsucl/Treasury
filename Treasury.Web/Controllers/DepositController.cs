@@ -938,6 +938,19 @@ namespace Treasury.Web.Controllers
                             _vTotal_Denomination_Aft.Item2 || _vDep_Set_Quality_Aft.Item2 || _vAuto_Trans_Aft.Item2 || _vTrans_Expiry_Date_Aft.Item2 ||
                             _vMemo_Aft.Item2 || _vTrans_Tms_Aft.Item2;
 
+                        updateTempData.sAutoTransFlag = model.sAutoTransFlag;
+                        if (model.sAutoTransFlag == "Y")
+                        {
+                            var _vAlready_Trans_Tms_Aft = model.vAlready_Trans_Tms.CheckAFT(updateTempData.vAlready_Trans_Tms);
+                            if (_vAlready_Trans_Tms_Aft.Item2)
+                            {
+                                updateTempData.vAlready_Trans_Tms_Aft = _vAlready_Trans_Tms_Aft.Item1;
+                                updateTempData.vAftFlag = true;
+                            }
+                        }
+                        else if(model.sAutoTransFlag == "N")
+                            updateTempData.vAftFlag = true;
+
                         Cache.Invalidate(CacheList.CDCDepositDataM);
                         Cache.Set(CacheList.CDCDepositDataM, dbData);
                         result.Datas = dbData.Any(x => x.vAftFlag);
@@ -1129,7 +1142,9 @@ namespace Treasury.Web.Controllers
                     updateTempData.vTrans_Expiry_Date_Aft = "";
                     updateTempData.vMemo_Aft = null;
                     updateTempData.vTrans_Tms_Aft = null;
+                    updateTempData.vAlready_Trans_Tms_Aft = null;
                     updateTempData.vAftFlag = false;
+                    updateTempData.sAutoTransFlag = null;
 
                     Cache.Invalidate(CacheList.CDCDepositDataM);
                     Cache.Set(CacheList.CDCDepositDataM, dbData);

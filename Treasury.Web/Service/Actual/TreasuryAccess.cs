@@ -342,7 +342,7 @@ namespace Treasury.Web.Service.Actual
         {
             List<TreasuryAccessSearchDetailViewModel> result = new List<TreasuryAccessSearchDetailViewModel>();
 
-            if (!data.vItem.Any() || !data.vAplyUnit.Any()) //無查詢項目 or 申請單位 表示沒有權限查詢
+            if (data.vItem == null || data.vAplyUnit == null || !data.vItem.Any() || !data.vAplyUnit.Any()) //無查詢項目 or 申請單位 表示沒有權限查詢
                 return result;
             var depts = GetDepts();
             var emps = GetEmps();

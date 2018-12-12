@@ -54,17 +54,41 @@ namespace Treasury.Web.Service.Actual
                     }).ToList();
 
                 if (Charge_Sect.IsNullOrWhiteSpace())
+                {
                     _Charge_Sect = dCharge_Sect.FirstOrDefault()?.Value;
-                else
-                    _Charge_Sect = Charge_Sect;
 
-                dCharge_Uid = _V_EMPLY2
-                    .Where(x => x.DPT_CD == _Charge_Sect, _Charge_Sect != "All")
+                    dCharge_Uid = _V_EMPLY2
+                    .Where(x => x.DPT_CD == _Charge_Sect, !_Charge_Sect.IsNullOrWhiteSpace())
+                    .Where(x => x.DPT_CD == Charge_Dept, _Charge_Sect.IsNullOrWhiteSpace())
                     .AsEnumerable()
-                    .Select(x => new SelectOption() {
+                    .Select(x => new SelectOption()
+                    {
                         Value = x.USR_ID?.Trim(),
                         Text = x.EMP_NAME?.Trim()
                     }).ToList();
+                }  
+                else
+                {
+                    _Charge_Sect = Charge_Sect;
+
+                    dCharge_Uid = _V_EMPLY2
+                    .Where(x => x.DPT_CD == _Charge_Sect, _Charge_Sect != "All")
+                    .AsEnumerable()
+                    .Select(x => new SelectOption()
+                    {
+                        Value = x.USR_ID?.Trim(),
+                        Text = x.EMP_NAME?.Trim()
+                    }).ToList();
+                }
+                    
+
+                //dCharge_Uid = _V_EMPLY2
+                //    .Where(x => x.DPT_CD == _Charge_Sect, _Charge_Sect != "All")
+                //    .AsEnumerable()
+                //    .Select(x => new SelectOption() {
+                //        Value = x.USR_ID?.Trim(),
+                //        Text = x.EMP_NAME?.Trim()
+                //    }).ToList();
             }
             return new Tuple<List<SelectOption>, List<SelectOption>>(dCharge_Sect, dCharge_Uid);
         }
@@ -91,7 +115,9 @@ namespace Treasury.Web.Service.Actual
             using(TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 TREA_ITEM = db.TREA_ITEM.AsNoTracking()
-                    .Where(x => x.DAILY_FLAG == "N")
+                    //.Where(x => x.DAILY_FLAG == "N")
+                    .Where(x => x.IS_DISABLED == "N" && x.ITEM_OP_TYPE == "3") //「入庫作業類型=3」且啟用中的存取項目
+                    .OrderBy(x => x.ITEM_ID)
                     .AsEnumerable()
                     .Select(x => new SelectOption()
                     {
@@ -100,6 +126,19 @@ namespace Treasury.Web.Service.Actual
                     }).ToList();
             }
             return new Tuple<List<SelectOption>, List<SelectOption>>(CHARGE_DEPT, TREA_ITEM);
+        }
+
+        /// <summary>
+        /// 使用 部門ID 獲得 部門名稱
+        /// </summary>
+        /// <param name="depts"></param>
+        /// <param name="DPT_CD"></param>
+        /// <returns></returns>
+        private string getEmpName(List<VW_OA_DEPT> depts, string DPT_CD)
+        {
+            if (!DPT_CD.IsNullOrWhiteSpace() && depts.Any())
+                return depts.FirstOrDefault(x => x.DPT_CD.Trim() == DPT_CD.Trim())?.DPT_NAME?.Trim();
+            return string.Empty;
         }
 
         /// <summary>
@@ -116,14 +155,15 @@ namespace Treasury.Web.Service.Actual
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
                 var emps = GetEmps();
+                var depts = GetDepts();
                 var _Exec_Action = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "EXEC_ACTION").ToList();
                 var _Appr_Status = db.SYS_CODE.AsNoTracking()
                     .Where(x => x.CODE_TYPE == "APPR_STATUS").ToList();
+                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking()
+                    .Where(x => x.ITEM_OP_TYPE == "3");
 
-
-
-                if (searchData.vCHARGE_UNIT_ID.IsNullOrWhiteSpace())
+                if (aply_No.IsNullOrWhiteSpace())
                 {
                     var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking()
                         .Where(x => x.FREEZE_UID == searchData.vLast_Update_Uid, searchData.vLast_Update_Uid != null).ToList();
@@ -142,7 +182,7 @@ namespace Treasury.Web.Service.Actual
                             vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_UID_B = x.CHARGE_UID_B,
+                            vCHARGE_UID_B = !x.CHARGE_UID_B.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID_B)?.EMP_NAME?.Trim() : null,
                             vIS_MAIL_DEPT_MGR = x.IS_MAIL_DEPT_MGR,
                             vIS_MAIL_DEPT_MGR_B = x.IS_MAIL_DEPT_MGR_B,
                             vIS_MAIL_SECT_MGR = x.IS_MAIL_SECT_MGR,
@@ -150,7 +190,11 @@ namespace Treasury.Web.Service.Actual
                             vIS_DISABLED = x.IS_DISABLED,
                             vIS_DISABLED_B = x.IS_DISABLED_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
-                            vAPPR_DESC = x.APPR_DESC
+                            vAPPR_DESC = x.APPR_DESC,
+                            // vCHARGE_DEPT_VALUE = !x.CHARGE_DEPT.IsNullOrWhiteSpace() ? depts.FirstOrDefault(y => y.DPT_CD != null && y.DPT_CD.Trim() == x.CHARGE_DEPT)?.DPT_NAME?.Trim() : null,
+                            vCHARGE_DEPT_VALUE = !x.CHARGE_DEPT.IsNullOrWhiteSpace() ? getEmpName(depts, x.CHARGE_DEPT) : null,
+                            vCHARGE_SECT_VALUE = !x.CHARGE_SECT.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.DPT_CD != null && y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim().Replace(getEmpName(depts, x.CHARGE_DEPT), "")?.Trim() : null,
+                            vTREA_ITEM_NAME_VALUE = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
                     //result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
@@ -188,7 +232,7 @@ namespace Treasury.Web.Service.Actual
                 {
                     var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking().ToList();
                     result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
-                        //.Where(x => x.APLY_NO == aply_No)
+                        .Where(x => x.APLY_NO == aply_No)
                         .Where(x => x.CHARGE_UNIT_ID == searchData.vCHARGE_UNIT_ID, searchData.vCHARGE_UNIT_ID != null)
                         .AsEnumerable()
                         .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
@@ -199,7 +243,7 @@ namespace Treasury.Web.Service.Actual
                             vFreeze_Uid_Name = !x.APLY_UID.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.APLY_UID)?.EMP_NAME?.Trim() : null,
                             vExec_Action_Name = _Exec_Action.FirstOrDefault(y => y.CODE == x.EXEC_ACTION)?.CODE_VALUE.Trim(),
                             vCHARGE_UID = emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID)?.EMP_NAME?.Trim(),
-                            vCHARGE_UID_B = x.CHARGE_UID_B,
+                            vCHARGE_UID_B = !x.CHARGE_UID_B.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.USR_ID == x.CHARGE_UID_B)?.EMP_NAME?.Trim() : null,
                             vIS_MAIL_DEPT_MGR = x.IS_MAIL_DEPT_MGR,
                             vIS_MAIL_DEPT_MGR_B = x.IS_MAIL_DEPT_MGR_B,
                             vIS_MAIL_SECT_MGR = x.IS_MAIL_SECT_MGR,
@@ -208,7 +252,10 @@ namespace Treasury.Web.Service.Actual
                             vIS_DISABLED_B = x.IS_DISABLED_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
                             vAPPR_DESC = x.APPR_DESC,
-                            vCHARGE_UNIT_ID = x.CHARGE_UNIT_ID
+                            vCHARGE_UNIT_ID = x.CHARGE_UNIT_ID,
+                            vCHARGE_DEPT_VALUE = !x.CHARGE_DEPT.IsNullOrWhiteSpace() ? getEmpName(depts, x.CHARGE_DEPT) : null,
+                            vCHARGE_SECT_VALUE = !x.CHARGE_SECT.IsNullOrWhiteSpace() ? emps.FirstOrDefault(y => y.DPT_CD != null && y.DPT_CD.Trim() == x.CHARGE_SECT)?.DPT_NAME?.Trim().Replace(getEmpName(depts, x.CHARGE_DEPT), "")?.Trim() : null,
+                            vTREA_ITEM_NAME_VALUE = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
                     //result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
@@ -292,7 +339,7 @@ namespace Treasury.Web.Service.Actual
                         vIS_DISABLED = ICU.IS_DISABLED,
                         vCHARGE_UNIT_ID = ICU.CHARGE_UNIT_ID,
                         vLAST_UPDATE_DT = ICU.LAST_UPDATE_DT,
-                        vAPLY_NO = _ITEM_CHARGE_UNIT_HIS.FirstOrDefault(y => y.CHARGE_UNIT_ID == ICU.CHARGE_UNIT_ID)?.APLY_NO?.Trim()
+                        vAPLY_NO = ICU.DATA_STATUS != "1" ? _ITEM_CHARGE_UNIT_HIS.FirstOrDefault(y => y.CHARGE_UNIT_ID == ICU.CHARGE_UNIT_ID)?.APLY_NO?.Trim() : "",
                     }).ToList();
             }
                 return result;
@@ -369,7 +416,7 @@ namespace Treasury.Web.Service.Actual
             var result = new MSGReturnModel<IEnumerable<ITinItem>>();
             result.RETURN_FLAG = false;
             DateTime dt = DateTime.Now;
-
+            //return result;
             try
             {
                 if (saveData != null)
@@ -472,7 +519,7 @@ namespace Treasury.Web.Service.Actual
                                         CHARGE_UID = item.vCHARGE_UID,
                                         IS_MAIL_DEPT_MGR = item.vIS_MAIL_DEPT_MGR,
                                         IS_MAIL_SECT_MGR = item.vIS_MAIL_SECT_MGR,
-                                        IS_DISABLED = "N",
+                                        IS_DISABLED = item.vIS_DISABLED,
                                         APLY_DATE = dt,
                                         APLY_UID = searchData.vCUSER_ID,
                                         APPR_STATUS = "1" //表單申請
@@ -494,15 +541,18 @@ namespace Treasury.Web.Service.Actual
                                         CHARGE_UID = item.vCHARGE_UID,
                                         IS_MAIL_DEPT_MGR = item.vIS_MAIL_DEPT_MGR,
                                         IS_MAIL_SECT_MGR = item.vIS_MAIL_SECT_MGR,
-                                        IS_DISABLED = "N",
+                                        IS_DISABLED = item.vIS_DISABLED,
                                         CHARGE_UID_B = _ICU_Data.CHARGE_UID,
                                         IS_MAIL_DEPT_MGR_B = _ICU_Data.IS_MAIL_DEPT_MGR,
                                         IS_MAIL_SECT_MGR_B = _ICU_Data.IS_MAIL_SECT_MGR,
-                                        IS_DISABLED_B = "N",
+                                        IS_DISABLED_B = _ICU_Data.IS_DISABLED,
                                         APLY_DATE = dt,
                                         APLY_UID = searchData.vCUSER_ID,
                                         APPR_STATUS = "1" //表單申請
                                     };
+                                    db.ITEM_CHARGE_UNIT_HIS.Add(_ICUH);
+                                    logStr += "|";
+                                    logStr += _ICUH.modelToString();
                                 }
                                 #endregion 
                             }
@@ -573,6 +623,7 @@ namespace Treasury.Web.Service.Actual
                             _ITEM_CHARGE_UNIT.CHARGE_UID = ItemChargeUnitHis.CHARGE_UID;
                             _ITEM_CHARGE_UNIT.IS_MAIL_DEPT_MGR = ItemChargeUnitHis.IS_MAIL_DEPT_MGR;
                             _ITEM_CHARGE_UNIT.IS_MAIL_SECT_MGR = ItemChargeUnitHis.IS_MAIL_SECT_MGR;
+                            _ITEM_CHARGE_UNIT.IS_DISABLED = ItemChargeUnitHis.IS_DISABLED;
 
                             _ITEM_CHARGE_UNIT.FREEZE_DT = null;
                             _ITEM_CHARGE_UNIT.FREEZE_UID = null;
@@ -583,6 +634,8 @@ namespace Treasury.Web.Service.Actual
                             }
                             _ITEM_CHARGE_UNIT.APPR_UID = userId;
                             _ITEM_CHARGE_UNIT.APPR_DT = dt;
+                            _ITEM_CHARGE_UNIT.LAST_UPDATE_UID = userId;
+                            _ITEM_CHARGE_UNIT.LAST_UPDATE_DT = dt;
                             logStr += _ITEM_CHARGE_UNIT.modelToString(logStr);
                         }
                         else
@@ -602,7 +655,7 @@ namespace Treasury.Web.Service.Actual
                                 DATA_STATUS = "1", //可異動
                                 CREATE_UID = ItemChargeUnitHis.APLY_UID,
                                 CREATE_DT = dt,
-                                LAST_UPDATE_UID = ItemChargeUnitHis.APLY_UID,
+                                LAST_UPDATE_UID = userId,
                                 LAST_UPDATE_DT = dt,
                                 APPR_UID = userId,
                                 APPR_DT = dt
@@ -687,6 +740,29 @@ namespace Treasury.Web.Service.Actual
                 }
             }
             return new Tuple<bool, string>(true, logStr);
+        }
+
+        /// <summary>
+        /// 檢查是否有相同欄位存在相同人名
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public bool CheckName(ItemChargeUnitInsertViewModel model)
+        {
+            bool hasSameName = false;
+            if(model != null)
+            {
+                using (TreasuryDBEntities db = new TreasuryDBEntities())
+                {
+                    var _ITEM_CHARGE_UNIT = db.ITEM_CHARGE_UNIT.AsNoTracking().FirstOrDefault(x => x.ITEM_ID == model.vTREA_ITEM_NAME && x.CHARGE_UID == model.vCHARGE_UID);
+
+                    if(_ITEM_CHARGE_UNIT != null)
+                    {
+                        hasSameName = true;
+                    }
+                }
+            }
+            return hasSameName;
         }
     }
 }
