@@ -29,6 +29,7 @@
         </div>
     </div>
     <div id="TMT_SearchDetail" style="display:none" role="dialog" class="myDialog">
+        <p style="color: red;">此支程序要有程式作支援,新增內文需要提需求</p>
         <div id="TMT_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
         <div style="text-align:center;" class="TMT_Act">
             <input type="button" id="TMT_Apply" value="申請覆核" class="btn btn-primary" />
@@ -44,7 +45,7 @@
                         <label>程式編號 : </label>
                     </td>
                     <td>
-                        <input type="text" class="TMT_InsertType" id="tFUNC_ID" name="tFUNC_ID" />
+                        <input type="text" @*class="TMT_InsertType"*@ id="tFUNC_ID" name="tFUNC_ID" disabled="disabled"/>
                         <input type="hidden" id="hMAIL_TIME_ID" />
                     </td>
                 </tr>
@@ -116,6 +117,7 @@
                     <td>
                         @*<input type="button" id="TMT_InsertTemp" value="新增" class="btn btn-primary" />*@
                         <input type="button" id="TMT_UpdateTemp" value="修改" class="btn btn-primary" />
+                        @Html.Hidden("h_MAIL_TIME_ID")
                         @*<input type="button" id="TMT_DeleteTemp" value="刪除" class="btn btn-primary" />*@
                     </td>
                     <td style="text-align:right;">
@@ -182,6 +184,7 @@
             //#region 初始動作
             setTMT_Verified();
             setTimepicker();
+            $('#' + TMT_MAIL_ID).prop('disabled', true);
             //#endregion 初始動作
             //#region 註冊verified
             function setTMT_Verified() {
@@ -282,12 +285,25 @@
                     dialogSetData(listId, rowid);
                     $('#TMT_UpdateTemp').show();
                     $('.' + TMT_InsertClass).prop('disabled', false);
+
+                    console.log($('#h_MAIL_TIME_ID').val());
+                    var vMAIL_ID= $('#h_MAIL_TIME_ID').val();
+                    if (vMAIL_ID == '1' || vMAIL_ID == '2') {
+                        $('#' + TMT_Interval_Min).prop('disabled', true);
+                    }
+                    if (vMAIL_ID == '3') {
+                        $('#' + TMT_Send_Time).prop('disabled', true);
+                        $('#' + TMT_Trea_Open_Time).prop('disabled', true);
+                    }
+
                 }
                 else if (type == '@Ref.ActionType.View.ToString()') {
                     dialogSetData(listId, rowid);
                     $('.' + TMT_InsertClass).prop('disabled', true);
                 }
                 $('#' + dialogId).dialog('open');
+                $('#tSend_Time').focus();
+                $('#tMemo').focus();
             }
 
             function dialogSetData(listId, rowid) {
@@ -307,6 +323,7 @@
                     $('#' + TMT_MAIL_ID).val(data.vMAIL_CONTENT_ID);
                     $('#' + TMT_Memo).val(data.vMEMO);
                     $('#' + TMT_Is_Disabled).val(data.vIS_DISABLED);
+                    $('#h_MAIL_TIME_ID').val(data.vMAIL_TIME_ID);
                 }
             }
             //#endregion dialog
@@ -426,7 +443,7 @@
             function TMT_TempGrid() {
                 var colNameArray = [
                     //'動作',
-                    '執行功能', '發送時間', '功能名稱', '間隔時間',
+                    '執行功能', '發送時間', '發送通知', '間隔時間',
                     '時間(起)', '時間(迄)', '開庫時間', '內文編號',
                     '備註', '停用註記', '資料狀態', '資料凍結人員',
                     '異動人員', '異動日期', '功能名稱',
@@ -564,7 +581,13 @@
                 if ($('#' + TMT_Exec_Time_B).val() != '') {
                     if ($('#' + TMT_Exec_Time_B).val() >= $('#' + TMT_Exec_Time_E).val())
                     {
-                        customerUtility.alert('時間(迄)必須 > 時間(起)', 'w');
+                        customerUtility.alert('時間(迄) 必須 > 時間(起)', 'w');
+                        return false;
+                    }
+                }
+                if ($('#' + TMT_Trea_Open_Time).val() != '') {
+                    if ($('#' + TMT_Exec_Time_E).val() >= $('#' + TMT_Trea_Open_Time).val()) {
+                        customerUtility.alert('開庫時間 必須 > 時間(迄)', 'w');
                         return false;
                     }
                 }

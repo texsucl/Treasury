@@ -32,5 +32,12 @@ namespace Treasury.Web.Service.Interface
         /// <param name="cUserId"></param>
         /// <returns></returns>
         MSGReturnModel<string> ResetData(string AplyNo, ItemChargeUnitSearchViewModel searchModel, string cUserId);
+
+        /// <summary>
+        /// 新增時檢查項目是否已存在經辦
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        bool CheckName(ItemChargeUnitInsertViewModel model);
     }
 }

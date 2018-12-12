@@ -43,13 +43,12 @@ namespace Treasury.Web.Controllers
             dCharge_Dept.Insert(0, All);
             dTrea_Item.Insert(0, All);
 
-            //ViewBag.dTREA_ITEM_NAME = new SelectList(new Service.Actual.Common().GetSysCode("TREA_ITEM_NAME", true), "Value", "Text"); 
-            //ViewBag.dTREA_ITEM_NAME_MOD = new SelectList(new Service.Actual.Common().GetSysCode("TREA_ITEM_NAME"), "Value", "Text");
             ViewBag.dTREA_ITEM = new SelectList(dTrea_Item, "Value", "Text");
             ViewBag.dTREA_ITEM_MOD = new SelectList(dResult_MOD.Item2, "Value", "Text");
             ViewBag.dCHARGE_DEPT = new SelectList(dCharge_Dept, "Value", "Text");
             ViewBag.dCHARGE_DEPT_MOD = new SelectList(dResult_MOD.Item1, "Value", "Text");
             ViewBag.dYN_FLAG_MOD = new SelectList(new Service.Actual.Common().GetSysCode("YN_FLAG"), "Value", "Text");
+            ViewBag.dIS_DISABLED_MOD = new SelectList(new Service.Actual.Common().GetSysCode("IS_DISABLED"), "Value", "Text");
             return View();
         }
 
@@ -80,12 +79,13 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.ItemChargeUnitSearchData, searchModel);
 
             var datas = ItemChargeUnit.GetSearchData(searchModel);
-            if (datas.Any())
-            {
+
+            //if (datas.Any())
+            //{
                 Cache.Invalidate(CacheList.ItemChargeUnitSearchDetailViewData);
                 Cache.Set(CacheList.ItemChargeUnitSearchDetailViewData, datas);
                 result.RETURN_FLAG = true;
-            }
+            //}
             return Json(result);
         }
 
@@ -180,11 +180,23 @@ namespace Treasury.Web.Controllers
         public JsonResult InsertTempData(ItemChargeUnitInsertViewModel model)
         {
             MSGReturnModel<string> result = new MSGReturnModel<string>();
+            //List<ItemChargeUnitSearchDetailViewModel> tempData = new List<ItemChargeUnitSearchDetailViewModel>();
             result.RETURN_FLAG = false;
             result.DESCRIPTION = Ref.MessageType.login_Time_Out.GetDescription();
+
+            var HasSameName = ItemChargeUnit.CheckName(model);
+            //var HasSameData = tempData.FirstOrDefault(x => x.vTREA_ITEM_NAME == model.vTREA_ITEM_NAME && x.vCHARGE_UID == model.vCHARGE_UID);
+
+            if (HasSameName)
+            {
+                result.DESCRIPTION = string.Format("此經辦已經是資料庫名稱 {0} 的經辦", model.vTREA_ITEM_NAME_VALUE);
+                result.RETURN_FLAG = false;
+                return Json(result);
+            }
             if (Cache.IsSet(CacheList.ItemChargeUnitSearchDetailViewData))
             {
                 var tempData = (List<ItemChargeUnitSearchDetailViewModel>)Cache.Get(CacheList.ItemChargeUnitSearchDetailViewData);
+
                 var _TREA_ITEM_NAME = new Service.Actual.Common().GetSysCode("TREA_ITEM_NAME");
                 var _DATA_STATUS = new Service.Actual.Common().GetSysCode("DATA_STATUS");
                 var _EMPS = new Service.Actual.Common().GetEmps();
@@ -197,7 +209,7 @@ namespace Treasury.Web.Controllers
                     vTREA_ITEM_NAME_VALUE = model.vTREA_ITEM_NAME_VALUE,
                     vCHARGE_DEPT = model.vCHARGE_DEPT,
                     vCHARGE_DEPT_VALUE = !model.vCHARGE_DEPT.IsNullOrWhiteSpace() ? _EMPS.FirstOrDefault(y => y.DPT_CD != null && y.DPT_CD.Trim() == model.vCHARGE_DEPT)?.DPT_NAME?.Trim() : null,
-                    vCHARGE_SECT = model.vCHARGE_SECT,
+                    vCHARGE_SECT = !model.vCHARGE_SECT.IsNullOrWhiteSpace() ? model.vCHARGE_SECT : "",
                     vCHARGE_SECT_VALUE = !model.vCHARGE_SECT.IsNullOrWhiteSpace() ? _EMPS.FirstOrDefault(y => y.DPT_CD != null && y.DPT_CD.Trim() == model.vCHARGE_SECT)?.DPT_NAME?.Trim() : null,
                     vIS_MAIL_DEPT_MGR = model.vIS_MAIL_DEPT_MGR,
                     vIS_MAIL_SECT_MGR = model.vIS_MAIL_SECT_MGR,
@@ -205,19 +217,18 @@ namespace Treasury.Web.Controllers
                     vCHARGE_NAME = !model.vCHARGE_UID.IsNullOrWhiteSpace() ? _EMPS.FirstOrDefault(y => y.USR_ID == model.vCHARGE_UID)?.EMP_NAME?.Trim() : null,
                     vDATA_STATUS = "1",
                     vDATA_STATUS_VALUE = _DATA_STATUS.FirstOrDefault(x => x.Value == "1")?.Text?.Trim(),
-                    //vFREEZE_UID = cUserId,
-                    //vFREEZE_NAME = _EMPS.FirstOrDefault(y => y.USR_ID == cUserId)?.EMP_NAME?.Trim(),
                     vEXEC_ACTION = "A",
                     vEXEC_ACTION_VALUE = "新增",
-                    vIS_DISABLED = "N"
+                    vIS_DISABLED = model.vIs_Disabled
                 };
                 tempData.Add(_ItemChargeUnitSearchDetailVM);
                 Cache.Invalidate(CacheList.ItemChargeUnitSearchDetailViewData);
                 Cache.Set(CacheList.ItemChargeUnitSearchDetailViewData, tempData);
                 result.RETURN_FLAG = true;
                 result.DESCRIPTION = Ref.MessageType.insert_Success.GetDescription();
-            }
 
+
+            }
                 return Json(result);
         }
         /// <summary>
@@ -244,6 +255,7 @@ namespace Treasury.Web.Controllers
                     updateTempData.vEXEC_ACTION_VALUE = updateTempData.vEXEC_ACTION_VALUE == "A" ? "新增" : "修改";
                     updateTempData.vIS_MAIL_DEPT_MGR = model.vIS_MAIL_DEPT_MGR;
                     updateTempData.vIS_MAIL_SECT_MGR = model.vIS_MAIL_SECT_MGR;
+                    updateTempData.vIS_DISABLED = model.vIs_Disabled;
 
                     Cache.Invalidate(CacheList.ItemChargeUnitSearchDetailViewData);
                     Cache.Set(CacheList.ItemChargeUnitSearchDetailViewData, tempData);

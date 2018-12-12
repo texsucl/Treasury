@@ -153,8 +153,8 @@
                     <td>
                         <label>備註 : </label>
                     </td>
-                    <td colspan="3">
-                        <input type="text" class="CDC_DepositUpdateType_M" id="tMemo" name="tMemo" maxlength="50" style="width:500px" />
+                    <td>
+                        <input type="text" class="CDC_DepositUpdateType_M" id="tMemo" name="tMemo" maxlength="50" />
                         <span class="red" style="padding-left:20px" id="sMemo"></span>
                         <input type="hidden" id="hItem_Id" />
                     </td>
@@ -164,6 +164,14 @@
                     <td>
                         <input type="text" class="CDC_DepositUpdateType_M" id="tTrans_Tms" name="tTrans_Tms" />
                         <span class="red" style="padding-left:20px" id="sTrans_Tms"></span>
+                    </td>
+                    <td>
+                        <label>已轉期次數 : </label>
+                    </td>
+                    <td>
+                        <label id="vAlready_Trans_Tms" name="vAlready_Trans_Tms"></label>
+                        <label class="red" id="sAlready_Trans_Tms"></label>
+                        <input type="hidden" id="sAutoTransFlag" />
                     </td>
                 </tr>
                 <tr>
@@ -319,6 +327,9 @@
         var CDC_DepositMemo_Aft = 'sMemo';//備註_異動後Id
         var CDC_DepositTrans_Tms = 'tTrans_Tms';//轉期次數Id
         var CDC_DepositTrans_Tms_Aft = 'sTrans_Tms';//轉期次數_異動後Id
+        var vAlready_Trans_TmsId = 'vAlready_Trans_Tms'; //已轉期次數Id
+        var sAlready_Trans_TmsId = 'sAlready_Trans_Tms'; //已轉期次數_異動後Id
+        var sAutoTransFlagId = 'sAutoTransFlag'; //確認是否轉期
         var CDC_ItemId = 'hItem_Id';//物品單號Id
 
         var CDC_DepositDialog_D_Id = 'CDC_DepositDialog_D'; //dialogId
@@ -348,6 +359,7 @@
             $('#CDC_DepositApply').hide();
 
         var CDC_DepositConfirmFlag_M = false; //離開時提醒訊息(主檔)
+        var CDC_Auto_Trans = false; //轉期註記
         var CDC_DepositConfirmFlag_D = false; //離開時提醒訊息(明細)
 
         var isView = false;
@@ -383,12 +395,21 @@
                 var val = parseInt($('#' + CDC_DepositTrans_Tms).val());
                 var commit_date = $('#' + CDC_DepositCommit_Date).val();
                 if (!isNaN(val) && verified.isDate(commit_date)) {
-                    var _date = (parseInt(commit_date.split('/')[0]) + val) + '/' + commit_date.split('/')[1] + '/' + commit_date.split('/')[2];
-                    $('#' + CDC_DepositTrans_Expiry_Date).val(_date);
+                    //var _date = (parseInt(commit_date.split('/')[0]) + val) + '/' + commit_date.split('/')[1] + '/' + commit_date.split('/')[2];
+                    var _Trans_Expiry_Date = $('#' + CDC_DepositExpiry_Date).val();
+                    if (CDC_Auto_Trans) {
+                        _Trans_Expiry_Date = getTrans_Expiry_Date($('#' + vAlready_Trans_TmsId).val());
+                    }
+                    $('#' + CDC_DepositTrans_Expiry_Date).val(_Trans_Expiry_Date);
                 }
             }
             var Expiry_Fun = function () {
-                $('#' + CDC_DepositTrans_Expiry_Date).val($('#' + CDC_DepositExpiry_Date).val());
+                var _Trans_Expiry_Date = $('#' + CDC_DepositExpiry_Date).val();
+                if (CDC_Auto_Trans)
+                {
+                    _Trans_Expiry_Date = getTrans_Expiry_Date($('#' + vAlready_Trans_TmsId).val());
+                }
+                $('#' + CDC_DepositTrans_Expiry_Date).val(_Trans_Expiry_Date);
                 $('#' + CDC_DepositCommit_Date).datepicker("option", "maxDate", $('#' + CDC_DepositExpiry_Date).val());
             };
 
@@ -433,7 +454,9 @@
                     $('#' + id).off('click');
                     $('#' + id).on('click',
                         function () {
-                            if (((id == 'CDC_DepositBack' && CDC_DepositConfirmFlag_M) || (id == 'CDC_DepositCancelTemp_M' && (CDC_DepositConfirmFlag_D || checkData()))) &&
+                            if (((id == 'CDC_DepositBack' && CDC_DepositConfirmFlag_M) ||
+                                //(id == 'CDC_DepositBack' && CDC_Auto_Trans) ||
+                                (id == 'CDC_DepositCancelTemp_M' && (CDC_DepositConfirmFlag_D || checkData()))) &&
                                 !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
                                 return false;
                             }
@@ -602,10 +625,35 @@
             else if (type == '@Ref.ActionType.Dele.ToString()') {
             }
             else if (type == '@Ref.ActionType.Edit.ToString()') {
-                dialogSetData_M(listId, rowid);
-                $('#CDC_DepositUpdateTemp_M').show();
+                var rowData =  $("#" + listId).getRowData(rowid);
+                var TransFlag = rowData.vTransFlag; //是否展延
+                var Trans_Expiry_Date = rowData.vTrans_Expiry_Date; //轉期後到期日
+                var Dep_Set_Quality = rowData.vDep_Set_Quality; //設質
+                var Trans_Tms = rowData.vTrans_Tms; //轉期次數
+                var Already_Trans_Tms = rowData.vAlready_Trans_Tms; //已轉期次數
+                CDC_Auto_Trans = false;
+                $('#' + sAutoTransFlagId).val('');
+                if (TransFlag === 'true') {
+                    if (confirm(('@Ref.MessageType.auto_Trans.GetDescription()').replace('@@Time', Trans_Expiry_Date))) {
+                        CDC_Auto_Trans = true;
+                        $('#' + sAutoTransFlagId).val('Y');
+                    }
+                    else
+                    {
+                        $('#' + sAutoTransFlagId).val('N');
+                    }
+                }                 
+                $('#CDC_DepositUpdateTemp_M').
+                    show();
+                $('#' + CDC_DepositCommit_Date).next().prop('disabled', false);
+                $('#' + CDC_DepositExpiry_Date).next().prop('disabled', false);
                 $('.' + DepositUpdateClassM).prop('disabled', false);
                 setDialog_M();
+                dialogSetData_M(listId, rowid);
+                if (TransFlag != 'true' && Dep_Set_Quality == 'Y' && (Trans_Tms == '0' || Trans_Tms == Already_Trans_Tms) && new Date() >= new Date($('#' + CDC_DepositTrans_Expiry_Date).val())) {
+                    alert('@Ref.MessageType.already_Max_Trans.GetDescription()');
+                    $('#' + sAutoTransFlagId).val('N');
+                }            
                 isView = false;
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
@@ -614,6 +662,8 @@
                 }
                 dialogSetData_M(listId, rowid);
                 $('.' + DepositUpdateClassM).prop('disabled', true);
+                $('#' + CDC_DepositCommit_Date).next().prop('disabled', true);
+                $('#' + CDC_DepositExpiry_Date).next().prop('disabled', true);
                 isView = true;
             }
             $('#' + CDC_DepositDialog_M_Id).dialog('open');
@@ -656,6 +706,8 @@
             $('#' + CDC_DepositMemo_Aft).text('');
             $('#' + CDC_DepositTrans_Tms).val('');
             $('#' + CDC_DepositTrans_Tms_Aft).text('');
+            $('#' + vAlready_Trans_TmsId).text('');
+            $('#' + sAlready_Trans_TmsId).text('');
             $('#' + CDC_ItemId).val('');
         }
 
@@ -704,6 +756,25 @@
                 $('#' + CDC_DepositMemo_Aft).text(data.vMemo_Aft);
                 $('#' + CDC_DepositTrans_Tms).val(data.vTrans_Tms);
                 $('#' + CDC_DepositTrans_Tms_Aft).text(data.vTrans_Tms_Aft);
+                $('#' + vAlready_Trans_TmsId).text(data.vAlready_Trans_Tms);
+                $('#' + sAlready_Trans_TmsId).text(data.vAlready_Trans_Tms_Aft);
+                var _vAlready_Trans_Tms = 0; //已轉期次數
+                if (parseInt(data.vAlready_Trans_Tms).toString() != 'NaN') {
+                    _vAlready_Trans_Tms = parseInt(data.vAlready_Trans_Tms);
+                }
+                if (_vAlready_Trans_Tms > 0) //已轉期過
+                {
+                    $('#' + CDC_DepositCommit_Date).prop('disabled', true); //承作日鎖定
+                    $('#' + CDC_DepositCommit_Date).next().prop('disabled', true);
+                    $('#' + CDC_DepositExpiry_Date).prop('disabled', true); //到期日鎖定
+                    $('#' + CDC_DepositExpiry_Date).next().prop('disabled', true);
+                    $('#' + CDC_DepositTrans_Tms).prop('disabled', true); //轉期次數鎖定
+                }
+                if (CDC_Auto_Trans)
+                {
+                    $('#' + CDC_DepositTrans_Expiry_Date).val(getTrans_Expiry_Date(data.vAlready_Trans_Tms));
+                    $('#' + sAlready_Trans_TmsId).text(_vAlready_Trans_Tms + 1);
+                }
                 $('#' + CDC_ItemId).val(data.vItemId);
             }
         }
@@ -1058,6 +1129,13 @@
                 return '<span class="red">' + rdata.vTrans_Tms_Aft + '</span>';
         }
 
+        function formattervAlready_Trans_Tms(cellvalue, options, rdata) {
+            if (rdata.vAlready_Trans_Tms_Aft == null)
+                return rdata.vAlready_Trans_Tms || '';
+            else
+                return '<span class="red">' + rdata.vAlready_Trans_Tms_Aft + '</span>';
+        }
+
         function formattervCharge_Name(cellvalue, options, rdata) {
             if (rdata.vCharge_Name_AFT != null) {
                 return customerUtility.errorSpan(rdata.vCharge_Name_AFT);
@@ -1092,7 +1170,7 @@
                 if (status != '1') {
                     $(this).find('.actionEditIcon').hide();
                     $(this).find('.actionRepeatIcon').hide();
-                }
+                };
             });
         }
 
@@ -1124,10 +1202,10 @@
                 colNameArray = colNameArray.concat(['取出日期', '取出申請人']);
             }
             colNameArray = colNameArray.concat(['存入申請人', '權責單位',
-                '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數',
-                '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前', '權責單位異動前',
-                '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後', '權責單位異動後',
-                '物品編號', '狀態Id']);
+                '幣別', '交易對象', '承作日期', '到期日', '計息方式', '利率%', '存單類型', '總面額', '設質', '自動轉期', '轉期後到期日', '備註', '轉期次數', '已轉期次數',
+                '幣別異動前', '交易對象異動前', '承作日期異動前', '到期日異動前', '計息方式異動前', '利率%異動前', '存單類型異動前', '總面額異動前', '設質異動前', '自動轉期異動前', '轉期後到期日異動前', '備註異動前', '轉期次數異動前', '權責單位異動前', '已轉期次數異動前',
+                '幣別異動後', '交易對象異動後', '承作日期異動後', '到期日異動後', '計息方式異動後', '利率%異動後', '存單類型異動後', '總面額異動後', '設質異動後', '自動轉期異動後', '轉期後到期日異動後', '備註異動後', '轉期次數異動後', '權責單位異動後', '已轉期次數異動後',
+                '轉期註記', '物品編號', '狀態Id']);
             var colModelArray = [];
             colModelArray.push({ name: "act", index: "act", width: 90, sortable: false, formatter: formatterAct });
             colModelArray.push({ name: "vStatus_Show", index: "vStatus_Show", width: 90, formatter: formattervStatus, align: 'center' });
@@ -1147,11 +1225,12 @@
             colModelArray.push({ name: "vInterest_Rate_Show", index: "vInterest_Rate_Show", width: 90, sortable: false, align: 'right', formatter: formattervInterest_Rate });
             colModelArray.push({ name: "vDep_Type_Show", index: "vDep_Type_Show", width: 90, sortable: false, align: 'center', formatter: formattervDep_Type, unformatter: unformattervDeposit });
             colModelArray.push({ name: "vTotal_Denomination_Show", index: "vTotal_Denomination_Show", width: 100, sortable: false, align: 'right', formatter: formattervTotal_Denomination });
-            colModelArray.push({ name: "vDep_Set_Quality_Show", index: "vDep_Set_Quality_Show", width: 70, sortable: false, align: 'center', formatter: formattervDep_Set_Quality, unformatter: unformattervDeposit });
+            colModelArray.push({ name: "vDep_Set_Quality_Show", index: "vDep_Set_Quality_Show", width: 70,  align: 'center', formatter: formattervDep_Set_Quality, unformatter: unformattervDeposit });
             colModelArray.push({ name: "vAuto_Trans_Show", index: "vAuto_Trans_Show", width: 90, sortable: false, align: 'center', formatter: formattervAuto_Trans, unformatter: unformattervDeposit });
             colModelArray.push({ name: "vTrans_Expiry_Date_Show", index: "vTrans_Expiry_Date_Show", width: 100, sortable: false, align: 'center', formatter: formattervTrans_Expiry_Date });
             colModelArray.push({ name: "vMemo_Show", index: "vMemo_Show", width: 100, sortable: false, formatter: formattervMemo });
-            colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", width: 90, sortable: false, align: 'right', formatter: formattervTrans_Tms });
+            colModelArray.push({ name: "vTrans_Tms_Show", index: "vTrans_Tms_Show", width: 90, sortable: false, align: 'right', formatter: formattervTrans_Tms });
+            colModelArray.push({ name: "vAlready_Trans_Tms_Show", index: "vAlready_Trans_Tms_Show", width: 90, sortable: false, align: 'right', formatter: formattervAlready_Trans_Tms })
 
             colModelArray.push({ name: "vCurrency", index: "vCurrency", hidden: true });
             colModelArray.push({ name: "vTrad_Partners", index: "vTrad_Partners", hidden: true });
@@ -1167,6 +1246,7 @@
             colModelArray.push({ name: "vMemo", index: "vMemo", hidden: true });
             colModelArray.push({ name: "vTrans_Tms", index: "vTrans_Tms", hidden: true });
             colModelArray.push({ name: "vCharge_Name", index: "vCharge_Name", hidden: true });
+            colModelArray.push({ name: "vAlready_Trans_Tms", index: "vAlready_Trans_Tms", hidden: true });
 
             colModelArray.push({ name: "vCurrency_Aft", index: "vCurrency_Aft", hidden: true });
             colModelArray.push({ name: "vTrad_Partners_Aft", index: "vTrad_Partners_Aft", hidden: true });
@@ -1182,7 +1262,9 @@
             colModelArray.push({ name: "vMemo_Aft", index: "vMemo_Aft", hidden: true });
             colModelArray.push({ name: "vTrans_Tms_Aft", index: "vTrans_Tms_Aft", hidden: true });
             colModelArray.push({ name: "vCharge_Name_AFT", index: "vCharge_Name_AFT", hidden: true });
+            colModelArray.push({ name: "vAlready_Trans_Tms_Aft", index: "vAlready_Trans_Tms_Aft" , hidden: true });
 
+            colModelArray.push({ name: "vTransFlag", index: "vTransFlag", hidden: true });
             colModelArray.push({ name: "vItemId", index: "vItemId", hidden: true });
             colModelArray.push({ name: "vStatus", index: "vStatus", hidden: true });
             jqgridCustom.createJqgridByCache(
@@ -1394,7 +1476,9 @@
                             $('#' + CDC_DepositAuto_Trans).val().trim(),
                             $('#' + CDC_DepositTrans_Expiry_Date).val().trim(),
                             $('#' + CDC_DepositTrans_Tms).val().trim(),
-                            $('#' + CDC_DepositMemo).val().trim())
+                            $('#' + CDC_DepositMemo).val().trim(),
+                            $('#' + sAlready_Trans_TmsId).text(),
+                            $('#' + sAutoTransFlagId).val())
                     }),
                     dataType: "json",
                     url: CDC_DepositUrl.UpdateDbDataM,
@@ -1552,7 +1636,9 @@
             vAuto_Trans,
             vTrans_Expiry_Date,
             vTrans_Tms,
-            vMemo
+            vMemo,
+            vAlready_Trans_Tms,
+            sAutoTransFlag
             ) {
             var obj = {};
             obj['vItemId'] = vItem_Id;
@@ -1569,6 +1655,8 @@
             obj['vTrans_Expiry_Date'] = vTrans_Expiry_Date;
             obj['vTrans_Tms'] = vTrans_Tms;
             obj['vMemo'] = vMemo;
+            obj['vAlready_Trans_Tms'] = vAlready_Trans_Tms;
+            obj['sAutoTransFlag'] = sAutoTransFlag;
             return obj;
         }
 
@@ -1594,6 +1682,21 @@
             obj['vDenomination'] = vDenomination;
             obj['vSubtotal_Denomination'] = vSubtotal_Denomination;
             return obj;
+        }
+
+        function getTrans_Expiry_Date(Already_Trans_Tms)
+        {
+            var _Already_Trans_Tms = 1; //預設為0 故轉期後為1期
+            if (parseInt(Already_Trans_Tms).toString() != 'NaN')
+                _Already_Trans_Tms = parseInt(Already_Trans_Tms) + 1;
+            var _Expiry_Date = new Date($('#' + CDC_DepositExpiry_Date).val());
+            var _Commit_Date_Year = new Date($('#' + CDC_DepositCommit_Date).val()).getFullYear(); //承作日年分
+            var _Expiry_Date_Year = _Expiry_Date.getFullYear(); //到期日年份
+            var _Expiry_Date_Month = _Expiry_Date.getMonth() + 1; //到期日月份
+            var _Expiry_Date_Date = _Expiry_Date.getDate(); //到期日日期
+            if(_Commit_Date_Year != 'NaN' && _Expiry_Date_Year != 'NaN')
+                return (_Expiry_Date_Year + ((_Expiry_Date_Year - _Commit_Date_Year) * _Already_Trans_Tms)) + '/' + created.padLeft(_Expiry_Date_Month, 2) + '/' + created.padLeft(_Expiry_Date_Date, 2);
+            return '';
         }
     });
 </script>

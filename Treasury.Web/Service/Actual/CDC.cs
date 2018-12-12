@@ -124,7 +124,7 @@ namespace Treasury.Web.Service.Actual
         public CDCChargeViewModel GetChargeData() {
             CDCChargeViewModel result = new CDCChargeViewModel();
             List<CDCChargeModel> ChargeData = new List<CDCChargeModel>();
-            var searchModel = new CDCSearchViewModel() { vTreasuryIO = "Y" , vJobProject = "All"};
+            var searchModel = new CDCSearchViewModel() { vTreasuryIO = "Y" , vJobProject = "All", vTRAD_Partners = "All" , vEstate_Form_No = "All" , vMargin_Dep_Type = "All"};
             #region 空白票據
             List<CDCBillViewModel> _Bill = (List<CDCBillViewModel>)(new Bill().GetCDCSearchData(searchModel));
             ChargeData.AddRange(
@@ -277,7 +277,7 @@ namespace Treasury.Web.Service.Actual
         public CDCChargeViewModel GetChargeDetailData(TreaItemType type, string charge_Dept, string charge_Sect )
         {
             CDCChargeViewModel result = new CDCChargeViewModel();
-            var searchModel = new CDCSearchViewModel() { vTreasuryIO = "Y"};
+            var searchModel = new CDCSearchViewModel() { vTreasuryIO = "Y",vTRAD_Partners = "All",vEstate_Form_No = "All",vMargin_Dep_Type = "All"};
             switch (type)
             {
                 #region 空白票據

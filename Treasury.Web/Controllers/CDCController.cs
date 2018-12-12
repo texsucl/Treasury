@@ -300,34 +300,34 @@ namespace Treasury.Web.Controllers
                 switch (type)
                 {
                     case TreaItemType.D1012:
-                        data.BillData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.BillData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1024:
-                        data.CaData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.CaData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1013:
-                        data.DepositData.vDeposit_M.ForEach(x => x.vAftFlag = (checkType == "Y"));
+                        data.DepositData.vDeposit_M.ForEach(x => x.vAftFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1014:
-                        data.EstateData.ForEach(x => x.vAftFlag = (checkType == "Y"));
+                        data.EstateData.ForEach(x => x.vAftFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1018:
-                        data.ItemImpData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.ItemImpData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1016:
-                        data.MargingData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.MargingData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1017:
-                        data.MarginpData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.MarginpData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1008:
                     case TreaItemType.D1009:
                     case TreaItemType.D1010:
                     case TreaItemType.D1011:
-                        data.SealData.ForEach(x => x.vAFTFlag = (checkType == "Y"));
+                        data.SealData.ForEach(x => x.vAFTFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                     case TreaItemType.D1015:
-                        data.StockData.ForEach(x => x.vAftFlag = (checkType == "Y"));
+                        data.StockData.ForEach(x => x.vAftFlag = (x.vStatus == "1" && checkType == "Y"));
                         break;
                 }
                 Cache.Invalidate(CacheList.CDCChargeSearchViewModel);

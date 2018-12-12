@@ -320,7 +320,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="ISSUING_BANK" Type="nvarchar" MaxLength="10" />
           <Property Name="CHECK_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
           <Property Name="CHECK_NO_TRACK" Type="nvarchar" MaxLength="4" Nullable="false" />
@@ -365,7 +365,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="CA_USE" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="CA_DESC" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="BANK" Type="nvarchar" MaxLength="8" />
@@ -474,7 +474,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="CURRENCY" Type="varchar" MaxLength="3" Nullable="false" />
           <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="COMMIT_DATE" Type="date" Nullable="false" />
@@ -525,13 +525,16 @@
           <Property Name="TRANS_EXPIRY_DATE_ACCESS" Type="date" />
           <Property Name="TRANS_TMS_ACCESS" Type="int" />
           <Property Name="MEMO_ACCESS" Type="nvarchar" MaxLength="200" />
+          <Property Name="ALREADY_TRANS_TMS" Type="int" />
+          <Property Name="ALREADY_TRANS_TMS_AFT" Type="int" />
+          <Property Name="TRANS_Flag" Type="varchar" MaxLength="1" />
         </EntityType>
         <EntityType Name="ITEM_DEP_RECEIVED">
           <Key>
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="9" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="MARGIN_TAKE_OF_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="MARGIN_ITEM" Type="varchar" MaxLength="1" Nullable="false" />
@@ -581,7 +584,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="ITEM_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="QUANTITY" Type="int" Nullable="false" />
           <Property Name="REMAINING" Type="int" Nullable="false" />
@@ -618,7 +621,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="11" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="ITEM_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
           <Property Name="BOOK_NO" Type="varchar" MaxLength="5" />
@@ -641,7 +644,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="GROUP_NO" Type="int" Nullable="false" />
           <Property Name="ESTATE_FORM_NO" Type="nvarchar" MaxLength="8" Nullable="false" />
           <Property Name="ESTATE_DATE" Type="date" Nullable="false" />
@@ -680,7 +683,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="9" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="TRAD_PARTNERS" Type="nvarchar" MaxLength="30" Nullable="false" />
           <Property Name="MARGIN_DEP_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
           <Property Name="AMOUNT" Type="decimal" Precision="18" Scale="0" />
@@ -718,7 +721,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="TREA_ITEM_NAME" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="SEAL_DESC" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
@@ -743,7 +746,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="varchar" MaxLength="10" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="varchar" MaxLength="2" />
           <Property Name="GROUP_NO" Type="int" Nullable="false" />
           <Property Name="TREA_BATCH_NO" Type="int" Nullable="false" />
           <Property Name="STOCK_TYPE" Type="varchar" MaxLength="1" Nullable="false" />
@@ -1522,7 +1525,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="11" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="ITEM_NAME" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="BOOK_NO" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
@@ -1545,7 +1548,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
           <Property Name="ESTATE_FORM_NO" Type="String" MaxLength="8" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="ESTATE_DATE" Type="DateTime" Nullable="false" Precision="0" />
@@ -1584,7 +1587,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="TREA_ITEM_NAME" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="SEAL_DESC" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
@@ -1980,7 +1983,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="ISSUING_BANK" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
           <Property Name="CHECK_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="CHECK_NO_TRACK" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="true" />
@@ -2013,7 +2016,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="CA_USE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="CA_DESC" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="BANK" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
@@ -2045,7 +2048,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="CURRENCY" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="TRAD_PARTNERS" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="COMMIT_DATE" Type="DateTime" Nullable="false" Precision="0" />
@@ -2096,13 +2099,16 @@
           <Property Name="TRANS_EXPIRY_DATE_ACCESS" Type="DateTime" Precision="0" />
           <Property Name="TRANS_TMS_ACCESS" Type="Int32" />
           <Property Name="MEMO_ACCESS" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="ALREADY_TRANS_TMS" Type="Int32" />
+          <Property Name="ALREADY_TRANS_TMS_AFT" Type="Int32" />
+          <Property Name="TRANS_Flag" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="ITEM_DEP_RECEIVED">
           <Key>
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="TRAD_PARTNERS" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="MARGIN_TAKE_OF_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="MARGIN_ITEM" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
@@ -2152,7 +2158,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="TRAD_PARTNERS" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="MARGIN_DEP_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
           <Property Name="AMOUNT" Type="Decimal" Precision="18" Scale="0" />
@@ -2190,7 +2196,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="GROUP_NO" Type="Int32" Nullable="false" />
           <Property Name="TREA_BATCH_NO" Type="Int32" Nullable="false" />
           <Property Name="STOCK_TYPE" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
@@ -2295,7 +2301,7 @@
             <PropertyRef Name="ITEM_ID" />
           </Key>
           <Property Name="ITEM_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
-          <Property Name="INVENTORY_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="INVENTORY_STATUS" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="ITEM_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="QUANTITY" Type="Int32" Nullable="false" />
           <Property Name="REMAINING" Type="Int32" Nullable="false" />
@@ -3269,6 +3275,9 @@
           <EntitySetMapping Name="ITEM_DEP_ORDER_M">
             <EntityTypeMapping TypeName="dbTreasuryModel.ITEM_DEP_ORDER_M">
               <MappingFragment StoreEntitySet="ITEM_DEP_ORDER_M">
+                <ScalarProperty Name="TRANS_Flag" ColumnName="TRANS_Flag" />
+                <ScalarProperty Name="ALREADY_TRANS_TMS_AFT" ColumnName="ALREADY_TRANS_TMS_AFT" />
+                <ScalarProperty Name="ALREADY_TRANS_TMS" ColumnName="ALREADY_TRANS_TMS" />
                 <ScalarProperty Name="MEMO_ACCESS" ColumnName="MEMO_ACCESS" />
                 <ScalarProperty Name="TRANS_TMS_ACCESS" ColumnName="TRANS_TMS_ACCESS" />
                 <ScalarProperty Name="TRANS_EXPIRY_DATE_ACCESS" ColumnName="TRANS_EXPIRY_DATE_ACCESS" />

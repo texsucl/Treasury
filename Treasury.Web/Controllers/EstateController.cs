@@ -476,8 +476,12 @@ namespace Treasury.Web.Controllers
                     }
                     else
                     {
-                        updateTempData.vIB_Located = _vIB_Located_Aft.Item1;
-                        updateTempData.vIB_Memo = _vIB_Memo_Aft.Item1;
+                        dbData.ForEach(x => {
+                            x.vIB_Located = _vIB_Located_Aft.Item1;
+                            x.vIB_Memo = _vIB_Memo_Aft.Item1;
+                        });
+                        //updateTempData.vIB_Located = _vIB_Located_Aft.Item1;
+                        //updateTempData.vIB_Memo = _vIB_Memo_Aft.Item1;
                     }
                 }
 

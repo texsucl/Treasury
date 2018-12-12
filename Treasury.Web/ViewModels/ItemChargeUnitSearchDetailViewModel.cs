@@ -25,6 +25,7 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("資料庫代碼")]
         public string vTREA_ITEM_NAME { get; set; }
+
         /// <summary>
         /// 資料庫名稱
         /// </summary>

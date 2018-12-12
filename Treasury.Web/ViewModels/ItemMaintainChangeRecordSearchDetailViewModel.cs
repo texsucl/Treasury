@@ -109,5 +109,11 @@ namespace Treasury.Web.ViewModels
         /// </summary>
         [Description("存取作業代碼")]
         public string vITEM_ID { get; set; }
+
+        /// <summary>
+        /// 存取作業
+        /// </summary>
+        [Description("存取作業")]
+        public string vITEM_DESC { get; set; }
     }
 }

@@ -44,6 +44,7 @@
                         <tr>
                             <td colspan="4" align="center">
                                 <input type="button" class="btn btn-primary" id="Item_Search" value="查詢" />
+                                @*<input type="button" id="IM_Insert" value="新增發送單位" class="btn btn-primary" />*@
                                 <input type="button" class="btn btn-primary" id="Item_Record_Search" value="開啟異動紀錄查詢" />
                             </td>
                         </tr>
@@ -61,8 +62,8 @@
         </div>
         <div id="IM_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
         <div style="text-align:center;" class="IM_Act">
-            <input type="button" id="IM_Apply" value="申請覆核" class="btn btn-primary" />
-            <input type="button" id="IM_Cancel" value="取消申請" class="btn btn-primary" />
+            <input type="button" id="IM_Apply" value="申請覆核" class="btn btn-primary ShowOrNot" />
+            <input type="button" id="IM_Cancel" value="取消申請" class="btn btn-primary ShowOrNot" />
             <input type="button" id="IM_Back" value="回上一頁" class="btn btn-primary" />
         </div>
     </div>
@@ -120,6 +121,14 @@
                 </tr>
                 <tr>
                     <td>
+                        <label>停用註記 :&ensp;</label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("dIS_DISABLED_MOD", (SelectList)ViewBag.dIS_DISABLED_MOD, new { @class = "IM_InsertType" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <input type="button" id="IM_InsertTemp" value="新增" class="btn btn-primary" />
                         <input type="button" id="IM_UpdateTemp" value="修改" class="btn btn-primary" />
                         <input type="button" id="IM_DeleteTemp" value="刪除" class="btn btn-primary" />
@@ -165,6 +174,7 @@
         var MAIL_SECTD_MOD_Id = 'dMAIL_SECT_MOD'; //Mail 科主管(CRUD)
         var CHARGE_UID_MOD_Id = 'dCHARGE_UID_MOD'; //經辦(CRUD)
         var CHARGE_UNIT_MOD_Id = 'hCHARGE_UNIT'; //保管單位存取項目編號(CRUD)
+        var Is_Disabled_Mod_Id = 'dIS_DISABLED_MOD'; //停用註記(CRUD)
 
         var IM_ConfirmFlag = false; //離開時提醒訊息
 
@@ -401,8 +411,8 @@
                     url: UrlFor.search,
                     contentType: 'application/json',
                 }).done(function (result) {
+                    $('#' + dialogId).dialog('open');
                     if (result.RETURN_FLAG) {
-                        $('#' + dialogId).dialog('open');
                         IM_TempGrid();
                     }
                     else {
@@ -413,7 +423,7 @@
             //#endregion
             //新增保管資料發送維護作業
             function IM_InsertTempFun() {
-                if ($('#' + SECT_MOD_Id).val() == null) {
+                if ($('#' + SECT_MOD_Id).val() == null && $('#' + CHARGE_UID_MOD_Id).val() == null) {
                     customerUtility.alert('必須選擇權責科別', 'w');
                     return false;
                 }
@@ -424,10 +434,14 @@
                 var vTREA_ITEM = $('#' + NAME_MOD_Id).val().trim(); //資料庫名稱(CRUD)
                 var vTREA_ITEM_VALUE = $('#' + NAME_MOD_Id).find(":selected").text().trim(); //資料庫名稱(CRUD)
                 var vCHARGE_DEPT = $('#' + DEPT_MOD_Id).val().trim(); //權責部門(CRUD)
-                var vCHARGE_SECT = $('#' + SECT_MOD_Id).val().trim(); //權責科別(CRUD)
+                var vCHARGE_SECT = ''
+                if ($('#' + SECT_MOD_Id).val() != null) {
+                    vCHARGE_SECT = $('#' + SECT_MOD_Id).val().trim(); //權責科別(CRUD)
+                }
                 var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val().trim(); //Mail 部主管(CRUD)
                 var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val().trim(); //Mail 科主管(CRUD)
                 var vCHARGE_UID = $('#' + CHARGE_UID_MOD_Id).val().trim(); //經辦(CRUD)
+                var vIs_Disabled = $('#' + Is_Disabled_Mod_Id).val().trim(); //停用註記(CRUD)
 
                 $.ajax({
                     type: "POST",
@@ -440,7 +454,8 @@
                             vCHARGE_SECT,
                             vMAIL_DEPT,
                             vMAIL_SECT,
-                            vCHARGE_UID
+                            vCHARGE_UID,
+                            vIs_Disabled
                             )
                     }),
                     dataType: "json",
@@ -451,6 +466,9 @@
                         customerUtility.closeDialog($('#IM_DeleteTemp'));
                         IM_TempGrid();
                         IM_ConfirmFlag = result.Datas;
+
+                    } else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
                     }
                 });
             }
@@ -465,6 +483,8 @@
                 var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val().trim(); //Mail 部主管(CRUD)
                 var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val().trim(); //Mail 科主管(CRUD)
                 var vCHARGE_UID = $('#' + CHARGE_UID_MOD_Id).val().trim(); //經辦(CRUD)
+                var vIs_Disabled = $('#' + Is_Disabled_Mod_Id).val().trim(); //停用註記(CRUD)
+
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify({
@@ -476,7 +496,8 @@
                             vCHARGE_SECT,
                             vMAIL_DEPT,
                             vMAIL_SECT,
-                            vCHARGE_UID
+                            vCHARGE_UID,
+                            vIs_Disabled
                             )
                     }),
                     dataType: "json",
@@ -524,19 +545,20 @@
             }
             //查詢Grid
             function IM_TempGrid() {
-                var colNameArray = ['動作', '執行功能', '資料庫名稱', '權責部門', '權責科別', 'Mail 部主管', 'Mail 科主管', '經辦', '資料狀態', '資料凍結人員',
-                    '執行功能代號', '資料庫代碼', '權責部門代碼', '權責科別代碼', '經辦編號', '資料狀態代碼', '停用註記', '保管單位存取項目編號', '異動申請單號']
+                var colNameArray = ['動作', '執行功能', '資料庫名稱', '權責部門', '權責科別', 'Mail 部主管', 'Mail 科主管', '經辦', '資料狀態', '資料凍結人員', '停用註記',
+                    '執行功能代號', '資料庫代碼', '權責部門代碼', '權責科別代碼', '經辦編號', '資料狀態代碼', '保管單位存取項目編號', '異動申請單號']
                 var colModelArray = [];
                 colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
-                colModelArray.push({ name: "vEXEC_ACTION_VALUE", index: "vEXEC_ACTION_VALUE", width: 80, sortable: false });
+                colModelArray.push({ name: "vEXEC_ACTION_VALUE", index: "vEXEC_ACTION_VALUE", width: 80, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vTREA_ITEM_NAME_VALUE", index: "vTREA_ITEM_NAME_VALUE", width: 95, sortable: false });
                 colModelArray.push({ name: "vCHARGE_DEPT_VALUE", index: "vCHARGE_DEPT_VALUE", width: 80, sortable: false });
-                colModelArray.push({ name: "vCHARGE_SECT_VALUE", index: "vCHARGE_SECT_VALUE", width: 80, sortable: false });
-                colModelArray.push({ name: "vIS_MAIL_DEPT_MGR", index: "vIS_MAIL_DEPT_MGR", width: 95, sortable: false });
-                colModelArray.push({ name: "vIS_MAIL_SECT_MGR", index: "vIS_MAIL_SECT_MGR", width: 95, sortable: false });
-                colModelArray.push({ name: "vCHARGE_NAME", index: "vCHARGE_NAME", width: 80, sortable: false });
+                colModelArray.push({ name: "vCHARGE_SECT_VALUE", index: "vCHARGE_SECT_VALUE", width: 160, sortable: false });
+                colModelArray.push({ name: "vIS_MAIL_DEPT_MGR", index: "vIS_MAIL_DEPT_MGR", width: 95, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vIS_MAIL_SECT_MGR", index: "vIS_MAIL_SECT_MGR", width: 95, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vCHARGE_NAME", index: "vCHARGE_NAME", width: 75, sortable: false, align: 'center' });
                 colModelArray.push({ name: "vDATA_STATUS_VALUE", index: "vDATA_STATUS_VALUE", width: 80, sortable: false, align: 'center', formatter: formattervvDATA_STATUS_VALUE, unformat: UnformattervvDATA_STATUS_VALUE });
-                colModelArray.push({ name: "vFREEZE_NAME", index: "vFREEZE_NAME", width: 100, sortable: false });
+                colModelArray.push({ name: "vFREEZE_NAME", index: "vFREEZE_NAME", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", width: 80, sortable: false, align: 'center' });
 
                 colModelArray.push({ name: "vEXEC_ACTION", index: "vEXEC_ACTION", hidden: true });
                 colModelArray.push({ name: "vTREA_ITEM_NAME", index: "vTREA_ITEM_NAME", hidden: true });
@@ -544,7 +566,6 @@
                 colModelArray.push({ name: "vCHARGE_SECT", index: "vCHARGE_SECT", hidden: true });
                 colModelArray.push({ name: "vCHARGE_UID", index: "vCHARGE_UID", hidden: true });
                 colModelArray.push({ name: "vDATA_STATUS", index: "vDATA_STATUS", hidden: true });
-                colModelArray.push({ name: "vIS_DISABLED", index: "vIS_DISABLED", hidden: true });
                 colModelArray.push({ name: "vCHARGE_UNIT_ID", index: "vCHARGE_UNIT_ID", hidden: true });
                 colModelArray.push({ name: "vAPLY_NO", index: "vAPLY_NO", hidden: true });
                 jqgridCustom.createJqgridByCache(
@@ -573,9 +594,15 @@
                     var status = tr.find($.validator.format('td[aria-describedby$={0}_vDATA_STATUS]', listId)).text();
                     var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
                     var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_vEXEC_ACTION]', listId)).text();
-                    if (status != '1' || Is_Disabled == "Y") {
+                    //if (status != '1' || Is_Disabled == "Y") {
+                    if (status != '1') {
                         $(this).find('.actionEditIcon').hide();
                         $(this).find('.actionDeleIcon').hide();
+                    }
+                    if (exec_action != 'A') {
+                        $(this).find('.actionDeleIcon').hide(); 
+                    } else {
+                        $(this).find('.actionEditIcon').hide();
                     }
 
                     //異動申請單號
@@ -618,7 +645,7 @@
                     contentType: 'application/json',
                     success: function (datas, textStatus, jqXHR) {
                         $('#' + openChangeRecordDetailId).html(datas);
-                        openDetailDialog('保管資料發送維護異動紀錄', 1250, 'OpenChangeRecordDialog');
+                        openDetailDialog('保管資料發送維護異動紀錄', 1300, 'OpenChangeRecordDialog');
                     }
                 });
             }
@@ -699,8 +726,9 @@
                     $('#' + DEPT_MOD_Id).val(data.vCHARGE_DEPT);
                     $('#' + SECT_MOD_Id).append($('<option></option>').val(data.vCHARGE_SECT).html(data.vCHARGE_SECT_VALUE));
                     $('#' + CHARGE_UID_MOD_Id).append($('<option></option>').val(data.vCHARGE_UID).html(data.vCHARGE_NAME));
-                    var vMAIL_DEPT = $('#' + MAIL_DEPT_MOD_Id).val(data.vIS_MAIL_DEPT_MGR); //Mail 部主管(CRUD)
-                    var vMAIL_SECT = $('#' + MAIL_SECTD_MOD_Id).val(data.vIS_MAIL_SECT_MGR); //Mail 科主管(CRUD)
+                    $('#' + MAIL_DEPT_MOD_Id).val(data.vIS_MAIL_DEPT_MGR); //Mail 部主管(CRUD)
+                    $('#' + MAIL_SECTD_MOD_Id).val(data.vIS_MAIL_SECT_MGR); //Mail 科主管(CRUD)
+                    $('#' + Is_Disabled_Mod_Id).val(data.vIS_DISABLED); //停用註記
                 }
             }
             //#region 重設輸入項目
@@ -723,6 +751,9 @@
                 if ($('#' + CHARGE_UID_MOD_Id + ' option').length > 0) {
                     $('#' + CHARGE_UID_MOD_Id).find('option').remove();
                 }
+                if ($('#' + Is_Disabled_Mod_Id + ' option').length > 0) {
+                    $('#' + Is_Disabled_Mod_Id).val($($('#' + Is_Disabled_Mod_Id + ' option')[0]).val());
+                }
             }
             //#region 查詢畫面  ViewModel
             function ItemSearchViewModel(vTREA_ITEM_NAME, vCHARGE_DEPT, vCHARGE_SECT, vCHARGE_UID) {
@@ -735,7 +766,7 @@
             }
             //#endregion
             //#region Insert ViewModel
-            function IM_ViewModel(vCHARGE_UNIT_ID, vTREA_ITEM, vTREA_ITEM_VALUE, vCHARGE_DEPT, vCHARGE_SECT, vMAIL_DEPT, vMAIL_SECT, vCHARGE_UID) {
+            function IM_ViewModel(vCHARGE_UNIT_ID, vTREA_ITEM, vTREA_ITEM_VALUE, vCHARGE_DEPT, vCHARGE_SECT, vMAIL_DEPT, vMAIL_SECT, vCHARGE_UID, vIs_Disabled) {
                 var obj = {};
 
                 obj['vCHARGE_UNIT_ID'] = vCHARGE_UNIT_ID;
@@ -746,6 +777,7 @@
                 obj['vIS_MAIL_DEPT_MGR'] = vMAIL_DEPT;
                 obj['vIS_MAIL_SECT_MGR'] = vMAIL_SECT;
                 obj['vCHARGE_UID'] = vCHARGE_UID;
+                obj['vIs_Disabled'] = vIs_Disabled;
                 return obj;
             }
             //#endregion

@@ -128,9 +128,9 @@ from
 TREA_OPEN_REC TOR
 join  @#SomeTable st
 on TOR.TREA_REGISTER_ID = st.TREA_REGISTER_ID
-where ACTUAL_PUT_TIME BETWEEN @APLY_DT_From AND @APLY_DT_To
+where ACTUAL_PUT_TIME >= @APLY_DT_From AND ACTUAL_PUT_TIME <= DATEADD(Day, 1, @APLY_DT_To)
 ";
-
+                //where ACTUAL_PUT_TIME BETWEEN @APLY_DT_From AND @APLY_DT_To
                 //if(vOpenTreaType == "All")
                 //    sql = sql.Remove(sql.Count() - 38, 37);
                 if (vOpenTreaType != "All")

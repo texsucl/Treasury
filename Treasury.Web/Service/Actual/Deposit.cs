@@ -606,6 +606,9 @@ namespace Treasury.Web.Service.Actual
                             vMemo_Aft = x.MEMO_AFT,
                             vTrans_Tms = x.TRANS_TMS,
                             vTrans_Tms_Aft = x.TRANS_TMS_AFT,
+                            vAlready_Trans_Tms = x.DEP_SET_QUALITY == "Y" ? (x.ALREADY_TRANS_TMS ?? 0) : x.ALREADY_TRANS_TMS,
+                            vAlready_Trans_Tms_Aft = x.ALREADY_TRANS_TMS_AFT,
+                            vTransFlag = checkExpiry(x),
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                     if (searchModel.vTreasuryIO == "N") //取出
@@ -670,6 +673,9 @@ namespace Treasury.Web.Service.Actual
                             vMemo_Aft = x.MEMO_AFT,
                             vTrans_Tms = x.TRANS_TMS,
                             vTrans_Tms_Aft = x.TRANS_TMS_AFT,
+                            vAlready_Trans_Tms = x.DEP_SET_QUALITY == "Y" ? (x.ALREADY_TRANS_TMS ?? 0) : x.ALREADY_TRANS_TMS,
+                            vAlready_Trans_Tms_Aft = x.ALREADY_TRANS_TMS_AFT,
+                            vTransFlag = checkExpiry(x),
                             vLast_Update_Time = x.LAST_UPDATE_DT
                         }).ToList());
                 }
@@ -1209,6 +1215,8 @@ namespace Treasury.Web.Service.Actual
                                 _IDOM.TRANS_TMS_AFT = model.vTrans_Tms_Aft;
                                 _IDOM.MEMO_AFT = model.vMemo_Aft;
                                 _IDOM.LAST_UPDATE_DT = dt;
+                                _IDOM.ALREADY_TRANS_TMS_AFT = model.vAlready_Trans_Tms_Aft;
+                                _IDOM.TRANS_Flag = model.sAutoTransFlag;
 
                                 logStr = _IDOM.modelToString(logStr);
 
@@ -1299,6 +1307,8 @@ namespace Treasury.Web.Service.Actual
                     _Deposit.TRANS_EXPIRY_DATE_AFT = null;
                     _Deposit.TRANS_TMS_AFT = null;
                     _Deposit.MEMO_AFT = null;
+                    _Deposit.ALREADY_TRANS_TMS_AFT = null;
+                    _Deposit.TRANS_Flag = null;
                     _Deposit.LAST_UPDATE_DT = dt;
                     logStr = _Deposit.modelToString(logStr);
 
@@ -1368,6 +1378,12 @@ namespace Treasury.Web.Service.Actual
                     _Deposit.TRANS_TMS_AFT = null;
                     _Deposit.MEMO = GetNewValue(_Deposit.MEMO, _Deposit.MEMO_AFT);
                     _Deposit.MEMO_AFT = null;
+                    if (_Deposit.TRANS_Flag == "N")
+                    {
+                        _Deposit.INVENTORY_STATUS = "2"; //取出
+                    }
+                    _Deposit.ALREADY_TRANS_TMS = TypeTransfer.stringToIntN(GetNewValue(TypeTransfer.intNToString(_Deposit.ALREADY_TRANS_TMS), TypeTransfer.intNToString(_Deposit.ALREADY_TRANS_TMS_AFT)));
+                    _Deposit.ALREADY_TRANS_TMS_AFT = null;
                     _Deposit.LAST_UPDATE_DT = dt;
                     logStr = _Deposit.modelToString(logStr);
 
@@ -1606,6 +1622,28 @@ namespace Treasury.Web.Service.Actual
                 vDenomination = accessStatus ? (x.DENOMINATION_ACCESS ?? 0M) : x.DENOMINATION, //單張面額
                 vSubtotal_Denomination = accessStatus ? (x.SUBTOTAL_DENOMINATION_ACCESS ?? 0M) : x.SUBTOTAL_DENOMINATION    //面額小計
             });
+        }
+
+        /// <summary>
+        /// 判斷是否需要轉期
+        /// </summary>
+        /// <param name="data">ITEM_DEP_ORDER_M</param>
+        /// <returns></returns>
+        private bool checkExpiry(ITEM_DEP_ORDER_M data)
+        {
+            int _TRANS_TMS = 0; //可轉期次數
+            int _ALREADY_TRANS_TMS = 0; //已轉期次數
+
+            _TRANS_TMS = data.TRANS_TMS ?? 0;
+            _ALREADY_TRANS_TMS = data.ALREADY_TRANS_TMS ?? 0;
+
+            if (data.DEP_SET_QUALITY != "Y" ||  //設質否
+                data.AUTO_TRANS != "Y" || //自動轉期
+                data.TRANS_EXPIRY_DATE == null ||  //轉期後到期日不等於null
+                data.TRANS_TMS == null) //轉期次數
+                return false;
+            //資料為在庫 && 系統日期 >= 轉期後到期日 && 可轉期次數 > 已轉期次數
+            return data.INVENTORY_STATUS == "1" && DateTime.Now.Date >= data.TRANS_EXPIRY_DATE.Value && _TRANS_TMS > _ALREADY_TRANS_TMS;
         }
 
         #endregion
