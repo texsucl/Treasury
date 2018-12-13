@@ -56,6 +56,8 @@ namespace Treasury.Web.Report.Data
 
                         foreach (var MasterDataN in _IDOM_DataNList)
                         {
+                            Decimal TOTAL_DENOMINATION = 0;
+
                             //使用物品編號去定期存單庫存資料明細檔抓取資料
                             var _IDOD_DataList = db.ITEM_DEP_ORDER_D.AsNoTracking()
                                 .Where(x => x.ITEM_ID == MasterDataN.ITEM_ID).ToList();
@@ -82,8 +84,14 @@ namespace Treasury.Web.Report.Data
 
                                 addDatas.Add(ReportData);
 
+                                TOTAL_DENOMINATION += DetailData.SUBTOTAL_DENOMINATION;
                                 TOTAL_DEP_CNT += DetailData.DEP_CNT;
                             }
+
+                            addDatas.ForEach(x =>
+                            {
+                                x.TOTAL_DENOMINATION = TOTAL_DENOMINATION;
+                            });
 
                             ReportDataList.AddRange(addDatas);
                         }
