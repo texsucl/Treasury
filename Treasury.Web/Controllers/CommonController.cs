@@ -380,7 +380,7 @@ namespace Treasury.Web.Controllers
                             new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
                            _mailTo,
                             _ccTo,
-                            MT?.FUNC_ID ?? "金庫物品庫存表",
+                            MC?.MAIL_SUBJECT ?? "季追蹤庫存表",
                             sb.ToString(),
                             false,
                             attachment

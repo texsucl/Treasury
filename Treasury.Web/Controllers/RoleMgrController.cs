@@ -1288,7 +1288,7 @@ namespace Treasury.Web.Controllers
         public JsonResult GetEquip(string contrlMod)
         {
             TreaEquipDao treaEquipDao = new TreaEquipDao();
-            var equipList = treaEquipDao.loadSelectList();
+            var equipList = treaEquipDao.getEquipFun(contrlMod);
             return Json(equipList);
         }
 

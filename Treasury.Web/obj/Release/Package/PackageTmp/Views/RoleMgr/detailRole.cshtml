@@ -315,7 +315,6 @@
     <script type="text/javascript">
         var currentOpType;
 
-
         ////切換tab
         //$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         //    var target = $(e.target).attr("href");
@@ -362,11 +361,6 @@
 
         //});
 
-
-
-
-
-
         //新增金庫設備
         $("#btnNewEquip").on("click", function () {
             $('#validationSummary').children().remove();
@@ -389,7 +383,7 @@
             $('#controlMode').attr('disabled', true);
             $('#custodyMode').attr('disabled', true);
             $('#custodyOrder').attr('disabled', true);
-                
+
 
             $("#gridEquip").jqGrid('addRow', "new", { addParams: { position: "last" } });
             var sel_id = $('#gridEquip').jqGrid('getGridParam', 'selrow');
@@ -404,8 +398,11 @@
             $("#btn_edit_" + sel_id).hide();
             $("#btn_del_" + sel_id).hide();
 
-            getControlMode(sel_id, $("#" + sel_id + "_treaEquipId").val());
-            
+            var controlMod = $('#controlMode').val()
+            getEquipByControlMod(controlMod, sel_id);
+
+            //getControlMode(sel_id, $("#" + sel_id + "_treaEquipId").val());
+
             $("#onEdit").val("Y");
 
         });
@@ -461,6 +458,22 @@
 
         }
 
+        //查下拉選單
+        function getEquipByControlMod(controlModeValue, rowId) {
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    contrlMod: controlModeValue
+                }),
+                url: '@Url.Action("GetEquip", "RoleMgr")',
+                contentType: 'application/json'
+            }).done(function (result) {
+                $('#' + rowId + '_treaEquipId').find('option').remove();
+                customerUtility.addoption(rowId + '_treaEquipId', result);
+
+                getControlMode(rowId, $("#" + rowId + "_treaEquipId").val());
+            });
+        }
 
         //jqgrid中的修改
         function TheOnEditFunction(rowid, gridType) {
@@ -588,6 +601,7 @@
 
         //依"金庫設備"取得對應的控管模式
         function getControlMode(rowId, equipId) {
+            equipId = equipId || '';
             equipId = equipId.toUpperCase();
 
             $.ajax({
@@ -616,7 +630,7 @@
         //依"作業類型"取得對應的存取項目
         function getOpItem(gridType, opType, itemId) {
 
-            
+
 
 
             $.ajax({
@@ -643,7 +657,7 @@
 
                     var sel = jQuery("#grid" + gridType).getGridParam('selrow');
 
-                    
+
                     $("select#" + sel + "_itemId").html(itemStr);
 
                     if(itemId != '')
@@ -678,7 +692,7 @@
 
                     break;
                 case 'E':
-                    
+
 
                     $("#liFunc").hide();
                     $("#liEquip").show();
@@ -692,7 +706,7 @@
 
                     break;
                 case 'I':
-                   
+
 
                     $("#liFunc").hide();
                     $("#liEquip").hide();
@@ -706,7 +720,7 @@
 
                     break;
                 case 'A':
-                    
+
 
                     $("#liFunc").hide();
                     $("#liEquip").hide();
@@ -740,7 +754,8 @@
 
 
         $(function () {
-
+            var UrlFor = {};
+            UrlFor.GetEquip = '@Url.Action("GetEquip", "RoleMgr")';
             var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
             //$("#tabEquip").hide();
             //$("#tabItem").hide();
@@ -763,9 +778,9 @@
                 $('#hidItemOpType').val('@Html.Raw(ViewBag.itemOpTypeList)');
                 $('#hidItem').val('@Html.Raw(ViewBag.itemList)');
 
-               
 
-                
+
+
 
 
             } else {
@@ -820,17 +835,15 @@
                 }
 
             }
-                
 
 
-
-       
 
         //金庫設備權限下拉選單
             function getEquip() {
                 return $('#hidEquip').val();
 
             }
+         
 
         //存取項目下拉選單
             function getControl() {
@@ -932,12 +945,15 @@
 
                 var bPass = true;
 
-
                 if ($('#onEdit').val() == "Y") {
                     bPass = false;
                     validationSummary.append('<li>' + '畫面尚有資料未存檔!!' + '</li>');
                 }
 
+                if ($('#roleAuthType').val() == "" || $('#controlMode').val() == "" || $('#custodyMode').val() == "" || $("#custodyOrder").val().length == 0) {
+                    bPass = false;
+                    validationSummary.append('<li>' + '尚未選取角色群組或新增角色群組明細,無法新增!!' + '</li>');
+                }
 
                 if ($('#cRoleName').val() == "") {
                     bPass = false;
@@ -1017,7 +1033,7 @@
                                 validationSummary.append('<li>' + data.errors + '</li>');
                             }
 
-                            
+
                         }
                     });
                 //} else {
@@ -1046,7 +1062,7 @@
                 $.unblockUI();
 
 
-               
+
 
 
 
@@ -1184,7 +1200,7 @@
                     } else {
                         var ids = jQuery("#gridEquip").jqGrid('getDataIDs');
                         for (var i = 0; i < ids.length; i++) {
-                           
+
 
                             var treaEquipId = ids[i];
                             //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + treaEquipId + "' value='修改' onclick=\"jQuery('#gridEquip').editRow('" + treaEquipId + "', true, TheOnEditFunction );\"  />";
@@ -1206,7 +1222,7 @@
                                 $('#custodyMode').val(rowData.custodyMode);
                                 $('#custodyOrder').val(rowData.custodyOrder);
                             }
-                            
+
 
                         }
                     }
@@ -1284,7 +1300,7 @@
 
                         }
 
-                        
+
                         $.unblockUI();
 
                     }

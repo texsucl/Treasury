@@ -951,7 +951,7 @@ namespace Treasury.Web.Service.Actual
 
                         result.RETURN_FLAG = true;
                         result.DESCRIPTION = $"申請單號 : {string.Join(",", aplynos)} 覆核成功!";
-                        result.Datas = GetApprSearchDetail(searchData);
+                        result.Datas = GetChargeApprSearchDetail(searchData);
                     }
                     catch (DbUpdateException ex)
                     {

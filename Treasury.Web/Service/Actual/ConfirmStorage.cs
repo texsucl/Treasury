@@ -920,15 +920,15 @@ namespace Treasury.Web.Service.Actual
                 using (TreasuryDBEntities db = new TreasuryDBEntities())
                 {
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == register_ID);
-                    if (_TREA_OPEN_REC.APPR_STATUS != "C01")
+                    if (_TREA_OPEN_REC.REGI_STATUS != "C02")
                     {
                         result.DESCRIPTION = "此金庫登記簿單號已入庫確認，無法執行";
                         return result;
                     }
 
-                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":00";
+                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":59";
                     var _endTimeDT = DateTime.Parse(_endTime);
-                    if (_endTimeDT > now)
+                    if (_endTimeDT < now)
                     {
                         result.DESCRIPTION = "已超過開庫時間(迄)，無法執行";
                         return result;
@@ -1010,16 +1010,16 @@ namespace Treasury.Web.Service.Actual
                 {
                     var _TREA_OPEN_REC = db.TREA_OPEN_REC.AsNoTracking().FirstOrDefault(x => x.TREA_REGISTER_ID == register_ID);
 
-                    if (_TREA_OPEN_REC.APPR_STATUS != "C01")
+                    if (_TREA_OPEN_REC.REGI_STATUS != "C02")
                     {
                         result.DESCRIPTION = "此金庫登記簿單號已入庫確認，無法執行";
 
                         return result;
                     }
 
-                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":00";
+                    string _endTime = _TREA_OPEN_REC.EXEC_TIME_E + ":59";
                     var _endTimeDT = DateTime.Parse(_endTime);
-                    if (_endTimeDT > now)
+                    if (_endTimeDT < now)
                     {
                         result.DESCRIPTION = "已超過開庫時間(迄)，無法執行";
                         return result;
