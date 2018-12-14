@@ -626,8 +626,6 @@ namespace Treasury.Web.Service.Actual
                         MC = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID && x.IS_DISABLED != "Y");
                         #region 寄信
 
-                        string str = MC.MAIL_CONTENT1;
-
                         foreach (var NoUidType in approvedList)
                         {
                             var aplyNo = NoUidType.Split(';')[0];
@@ -635,6 +633,7 @@ namespace Treasury.Web.Service.Actual
                             var itemOpType = NoUidType.Split(';')[2];
                             if(itemOpType == "3")
                             {
+                                string str = MC.MAIL_CONTENT1;
                                 StringBuilder sb = new StringBuilder();
                                 str = str.Replace("@_APLYNO_", aplyNo);
                                 sb.AppendLine(str);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Treasury.Web.Models;
+using Treasury.WebUtility;
 
 namespace Treasury.Web.Daos
 {
@@ -69,8 +70,22 @@ namespace Treasury.Web.Daos
             }
             equipStr = equipStr.Substring(0, equipStr.Length - 1) + "";
             return equipStr;
+        }
 
-        
+        public List<SelectOption> getEquipFun(string contrlMod)
+        {
+            dbTreasuryEntities context = new dbTreasuryEntities();
+
+            var _equip = context.TREA_EQUIP.AsNoTracking()
+                .Where(x => x.IS_DISABLED == "N")
+                .Where(x => x.CONTROL_MODE == contrlMod, !contrlMod.IsNullOrWhiteSpace())
+                .AsEnumerable()
+                .Select(x => new SelectOption()
+                {
+                    Value = x.TREA_EQUIP_ID,
+                    Text = x.EQUIP_NAME
+                }).ToList(); ;
+            return _equip;
         }
     }
 }

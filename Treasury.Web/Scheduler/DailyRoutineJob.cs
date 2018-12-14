@@ -12,6 +12,7 @@ using Treasury.WebDaos;
 using Treasury.WebUtility;
 using static Treasury.Web.Enum.Ref;
 
+
 namespace Treasury.Web.Scheduler
 {
     public class DailyRoutineJob : IJob
@@ -254,6 +255,31 @@ namespace Treasury.Web.Scheduler
 
                     var _MAIL_CONTENT = db.MAIL_CONTENT.AsNoTracking()
                         .First(x => x.MAIL_CONTENT_ID == _Mail_Time.MAIL_CONTENT_ID);
+                    var _MAIL_RECEIVE = db.MAIL_RECEIVE.AsNoTracking();
+                    var _CODE_ROLE_FUNC = db.CODE_ROLE_FUNC.AsNoTracking();
+                    var _CODE_USER_ROLE = db.CODE_USER_ROLE.AsEnumerable();
+                    var _CODE_USER = db.CODE_USER.AsNoTracking();
+                    List<string> _userIdList = new List<string>();
+                    var emps = GetEmps();
+                    List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
+                    List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
+
+                    var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
+                    var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
+                    var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
+                    _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID));
+
+                    if (_userIdList.Any())
+                    {
+                        //人名 EMAIl
+                        var _EMP = emps.Where(x => _userIdList.Contains(x.USR_ID)).ToList();
+                        if (_EMP.Any())
+                        {
+                            _EMP.ForEach(x => {
+                                _mailTo.Add(new Tuple<string, string>(x.EMAIL, x.EMP_NAME));
+                            });
+                        }
+                    }
 
                     var str = _MAIL_CONTENT.MAIL_CONTENT1;
 
@@ -296,8 +322,8 @@ namespace Treasury.Web.Scheduler
                         Extension.NlogSet($" 寄送mail內容 : {sb.ToString()}");
                         sms.Mail_Send(
                             new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
-                            new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
-                            null,
+                            _mailTo,
+                            _ccTo,
                             _MAIL_CONTENT?.MAIL_SUBJECT ?? "金庫每日例行開庫通知",
                             sb.ToString()
                             );
@@ -399,6 +425,32 @@ namespace Treasury.Web.Scheduler
                         db.SaveChanges();
                         #endregion
 
+                        List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
+                        List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
+                        var _MAIL_RECEIVE = db.MAIL_RECEIVE.AsNoTracking();
+                        var _CODE_ROLE_FUNC = db.CODE_ROLE_FUNC.AsNoTracking();
+                        var _CODE_USER_ROLE = db.CODE_USER_ROLE.AsEnumerable();
+                        var _CODE_USER = db.CODE_USER.AsNoTracking();
+                        List<string> _userIdList = new List<string>();
+                        var emps = GetEmps();
+
+                        var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
+                        var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
+                        var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
+                        _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID).ToList());
+                        if (_userIdList.Any())
+                        {
+                            //人名 EMAIl
+                            var _EMP = emps.Where(x => _userIdList.Contains(x.USR_ID)).ToList();
+                            if (_EMP.Any())
+                            {
+                                _EMP.ForEach(x => {
+                                    _mailTo.Add(new Tuple<string, string>(x.EMAIL, x.EMP_NAME));
+                                });
+                            }
+                        }
+
+
                         StringBuilder sb = new StringBuilder();
 
                         string str = _MAIL_CONTENT.MAIL_CONTENT1;
@@ -411,55 +463,34 @@ namespace Treasury.Web.Scheduler
                                 if (_TREA_OPEN_REC.APPR_STATUS == "3")
                                 {
                                     status = "【指定開庫申請作業】";
-//                                    sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫申請作業】，請儘速完成，謝謝");
                                 }
                                 else if (_TREA_OPEN_REC.APPR_STATUS == "1")
                                 {
                                     status = "【指定開庫覆核作業】";
-//                                    sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【指定開庫覆核作業】，請儘速完成，謝謝");
                                 }
                                 else if (_TREA_OPEN_REC.APPR_STATUS == "2")
                                 {
                                     if (_TREA_APLY_REC == null)
                                     {
                                         status = "【入庫人員確認作業】";
-//                                        sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【入庫人員確認作業】，請儘速完成，謝謝");
                                     }
                                     else
                                     {
                                         status = "【金庫登記簿執行作業(開庫前)】";
-//                                        sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫前)】，請儘速完成，謝謝");
                                     }
                                 }
                                 break;
                             case "D01":
                                 status = "【金庫登記簿執行作業(開庫後)】";
-//                                sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿執行作業(開庫後)】，請儘速完成，謝謝");
                                 break;
                             case "D02":
                             case "D04":
                                 status = "【金庫登記簿覆核作業】";
-//                                sb.AppendLine(
-//$@"您好, 
-//尚有任務 {_TREA_OPEN_REC.TREA_REGISTER_ID} 未完成，目前階段: 【金庫登記簿覆核作業】，請儘速完成，謝謝");
                                 break;
                         }
 
                         str = str.Replace("@_STATUS_", status);
                         sb.AppendLine(str);
-                        //                        sb.AppendLine(
-                        //$@"您好, 
-                        //通知系統尚未登打金庫進 / 出入庫時間，請儘速完成，謝謝");
 
                         #region 寄送mail給相關人員
                         Extension.NlogSet($" 寄送mail給相關人員");
@@ -473,9 +504,9 @@ namespace Treasury.Web.Scheduler
                             Extension.NlogSet($" 寄送mail內容 : {sb.ToString()}");
                             sms.Mail_Send(
                                 new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
-                                new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
-                                null,
-                                 _Mail_Time?.FUNC_ID ?? "出入庫時間提醒通知",
+                                _mailTo,
+                                _ccTo,
+                                 _MAIL_CONTENT?.MAIL_SUBJECT ?? "金庫登記簿開庫流程尚完成通知",
                                 sb.ToString()
                                 );
                         }
@@ -520,6 +551,21 @@ namespace Treasury.Web.Scheduler
                 }
             }
             //return result;
+        }
+
+        /// <summary>
+        /// 獲取 員工資料
+        /// </summary>
+        /// <returns></returns>
+        public List<V_EMPLY2> GetEmps()
+        {
+            var emps = new List<V_EMPLY2>();
+            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+            {
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().Where(x => x.USR_ID != null).ToList();
+            }
+
+            return emps;
         }
     }
 }
