@@ -65,7 +65,7 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
-        /// 定存檢核表項目異動紀錄
+        /// 定存檢核表項目排序調整
         /// </summary>
         /// <param name="Access_Type">交易別</param>
         /// <returns></returns>
@@ -358,6 +358,63 @@ namespace Treasury.Web.Controllers
         }
 
         /// <summary>
+        /// 重新排序
+        /// </summary>
+        /// <param name="Access_Type"></param>
+        /// <param name="Isortby"></param>
+        /// <param name="Old_Order"></param>
+        /// <param name="New_Order"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult ResetOrder(string Access_Type, int Isortby, int Old_Order, int New_Order)
+        {
+            MSGReturnModel<string> result = new MSGReturnModel<string>();
+
+            var tempData = (List<DepChkItemViewModel>)Cache.Get(CacheList.DepChkItemOrderSearchDataList);
+
+            //本次順序修改
+            var Updata = tempData.FirstOrDefault(x => x.vAccess_Type == Access_Type && x.vIsortby == Isortby);
+            Updata.vItem_Order = New_Order;
+
+            //判斷移動順序
+            if (New_Order < Old_Order)//往前移動
+            {
+                int UpOtherOrder = New_Order + 1;
+                var UpOtherData = tempData
+                    .Where(x => x.vAccess_Type == Access_Type && x.vIsortby != Isortby)
+                    .Where(x => x.vItem_Order >= New_Order && x.vItem_Order < Old_Order)
+                    .OrderBy(x => x.vItem_Order);
+
+                foreach(var item in UpOtherData)
+                {
+                    item.vItem_Order = UpOtherOrder;
+                    UpOtherOrder++;
+                }
+            }
+            else//往後移動
+            {
+                int UpOtherOrder = Old_Order;
+                var UpOtherData = tempData
+                    .Where(x => x.vAccess_Type == Access_Type && x.vIsortby != Isortby)
+                    .Where(x => x.vItem_Order > Old_Order && x.vItem_Order <= New_Order)
+                    .OrderBy(x => x.vItem_Order);
+
+                foreach (var item in UpOtherData)
+                {
+                    item.vItem_Order = UpOtherOrder;
+                    UpOtherOrder++;
+                }
+            }
+
+            Cache.Invalidate(CacheList.DepChkItemOrderSearchDataList);
+            Cache.Set(CacheList.DepChkItemOrderSearchDataList, tempData);
+
+            result.RETURN_FLAG = true;
+
+            return Json(result);
+        }
+
+        /// <summary>
         /// jqgrid cache data
         /// </summary>
         /// <param name="jdata"></param>
@@ -392,6 +449,7 @@ namespace Treasury.Web.Controllers
         public JsonResult qryOrderData()
         {
             List<DepChkItemViewModel> rows = (List<DepChkItemViewModel>)Cache.Get(CacheList.DepChkItemOrderSearchDataList);
+            rows = rows.OrderBy(x => x.vItem_Order).ToList();
 
             var jsonData = new { success = true, orderList = rows };
             return Json(jsonData, JsonRequestBehavior.AllowGet);

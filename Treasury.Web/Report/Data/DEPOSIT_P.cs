@@ -166,6 +166,7 @@ namespace Treasury.Web.Report.Data
                     .Where(x => x.IS_DISABLED == "N")
                     .OrderBy(x => x.ITEM_ORDER).ToList();
 
+                int Item_NO = 1;//項次預設1
                 foreach(var item in _Dep_Chk_Item)
                 {
                     string DEP_CHK_ITEM_DESC = string.Empty;
@@ -192,11 +193,12 @@ namespace Treasury.Web.Report.Data
                     ReportData = new DepositReportData()
                     {
                         TYPE = "Item",
-                        ISORTBY = item.ITEM_ORDER.ToString(),
+                        ISORTBY = Item_NO.ToString(),
                         DEP_CHK_ITEM_DESC = DEP_CHK_ITEM_DESC
                     };
 
                     ReportDataList.Add(ReportData);
+                    Item_NO++;
                 }
             }
 

@@ -142,6 +142,7 @@ namespace Treasury.Web.Service.Actual
             {
                 result.AddRange(db.DEP_CHK_ITEM.AsNoTracking()
                     .Where(x => x.ACCESS_TYPE == vAccess_Type)
+                    .Where(x => x.IS_DISABLED == "N")
                     .AsEnumerable()
                     .Select((x) => new DepChkItemViewModel()
                     {
@@ -230,12 +231,12 @@ namespace Treasury.Web.Service.Actual
                                         if (item.vAccess_Type == "P")
                                         {
                                             _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
-                                            _Item_Order = GetItem_Order("P");
+                                            //_Item_Order = GetItem_Order("P");
                                         }
                                         else if (item.vAccess_Type == "G")
                                         {
                                             _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
-                                            _Item_Order = GetItem_Order("G");
+                                            //_Item_Order = GetItem_Order("G");
                                         }
                                         //_DCI = new DEP_CHK_ITEM()
                                         //{
@@ -566,7 +567,7 @@ namespace Treasury.Web.Service.Actual
                     foreach (var DepChkItemHis in _DepChkItemHisList)
                     {
                         //var _Isortby = 0;
-                        //var _Item_Order = 0;
+                        var _Item_Order = 0;
                         //定存檢核表項目設定檔
                         var _DepChkItem = db.DEP_CHK_ITEM.FirstOrDefault(x => x.ACCESS_TYPE == DepChkItemHis.ACCESS_TYPE && x.ISORTBY == DepChkItemHis.ISORTBY);
                         if (_DepChkItem != null)
@@ -583,24 +584,24 @@ namespace Treasury.Web.Service.Actual
                         }
                         else
                         {
-                            ////判斷交易別
-                            //if (DepChkItemHis.ACCESS_TYPE == "P")
-                            //{
-                            //    _Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
-                            //    _Item_Order = GetItem_Order("P");
-                            //}
-                            //else if (DepChkItemHis.ACCESS_TYPE == "G")
-                            //{
-                            //    _Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
-                            //    _Item_Order = GetItem_Order("G");
-                            //}
+                            //判斷交易別
+                            if (DepChkItemHis.ACCESS_TYPE == "P")
+                            {
+                                //_Isortby = sysSeqDao.qrySeqNo("DCI_P", string.Empty);
+                                _Item_Order = GetItem_Order("P");
+                            }
+                            else if (DepChkItemHis.ACCESS_TYPE == "G")
+                            {
+                                //_Isortby = sysSeqDao.qrySeqNo("DCI_G", string.Empty);
+                                _Item_Order = GetItem_Order("G");
+                            }
                             var _DCI = new DEP_CHK_ITEM()
                             {
                                 ACCESS_TYPE = DepChkItemHis.ACCESS_TYPE,
                                 ISORTBY = DepChkItemHis.ISORTBY,
                                 DEP_CHK_ITEM_DESC = DepChkItemHis.DEP_CHK_ITEM_DESC,
                                 IS_DISABLED = DepChkItemHis.IS_DISABLED,
-                                ITEM_ORDER = DepChkItemHis.ITEM_ORDER,
+                                ITEM_ORDER = _Item_Order,
                                 REPLACE = DepChkItemHis.REPLACE,
                                 DATA_STATUS = "1", //可異動
                                 CREATE_UID = DepChkItemHis.APLY_UID,
@@ -612,6 +613,8 @@ namespace Treasury.Web.Service.Actual
                             };
                             db.DEP_CHK_ITEM.Add(_DCI);
                             logStr += _DCI.modelToString();
+
+                            db.SaveChanges();
                         }
 
                         //定存檢核表項目設定異動檔
