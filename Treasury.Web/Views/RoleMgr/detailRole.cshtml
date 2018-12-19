@@ -401,7 +401,7 @@
             var controlMod = $('#controlMode').val()
             getEquipByControlMod(controlMod, sel_id);
 
-            getControlMode(sel_id, $("#" + sel_id + "_treaEquipId").val());
+            //getControlMode(sel_id, $("#" + sel_id + "_treaEquipId").val());
 
             $("#onEdit").val("Y");
 
@@ -468,7 +468,10 @@
                 url: '@Url.Action("GetEquip", "RoleMgr")',
                 contentType: 'application/json'
             }).done(function (result) {
-                return result;
+                $('#' + rowId + '_treaEquipId').find('option').remove();
+                customerUtility.addoption(rowId + '_treaEquipId', result);
+
+                getControlMode(rowId, $("#" + rowId + "_treaEquipId").val());
             });
         }
 

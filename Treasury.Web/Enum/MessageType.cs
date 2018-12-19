@@ -265,7 +265,8 @@ namespace Treasury.Web.Enum
             /// <summary>
             /// Mail內文設定替換規則
             /// </summary>
-            [Description(@"替換規則
+            [Description(@"針對部分功能權限有權者作發送,需有相關程式配合,才能執行
+替換規則
 每日例行性排程:
 1. @_TREA_OPEN_TIME_ => (開關庫時間) 
 2. @_EXEC_TIME_E_ => (系統(迄)時間)

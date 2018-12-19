@@ -93,9 +93,10 @@ namespace Treasury.Web.Service.Actual
                         }
                         ));
                     //內文編號(EmailId)
-                    var _emailId = db.MAIL_RECEIVE.AsNoTracking()
-                        .Where(x => x.FUNC_ID == "0000000013");
-                    mailId = _emailId.Select(x => x.MAIL_CONTENT_ID).FirstOrDefault().PadLeft(2, '0');
+                    //var _emailId = db.MAIL_RECEIVE.AsNoTracking()
+                    //    .Where(x => x.FUNC_ID == "0000000017");
+                    //mailId = _emailId.Select(x => x.MAIL_CONTENT_ID).FirstOrDefault().PadLeft(2, '0');
+                    mailId = "01";
                 }
             }
             catch (Exception ex)
@@ -563,36 +564,68 @@ namespace Treasury.Web.Service.Actual
                         db.SaveChanges();
 
                         #region 寄信
-                        foreach(var TOR in TORs)
+                        List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
+                        List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
+                        var emps = GetEmps();
+                        var _MAIL_CONTENT = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == "01" && x.IS_DISABLED == "N");
+                        var _MAIL_RECEIVE = db.MAIL_RECEIVE.AsNoTracking();
+                        var _CODE_ROLE_FUNC = db.CODE_ROLE_FUNC.AsNoTracking();
+                        var _CODE_USER_ROLE = db.CODE_USER_ROLE.AsEnumerable();
+                        var _CODE_USER = db.CODE_USER.AsNoTracking();
+                        foreach (var TOR in TORs)
                         {
-                            StringBuilder sb = new StringBuilder();
-                            sb.AppendLine(
-        $@"您好,
-通知今日金庫開關庫時間為:{TOR.OPEN_TREA_TIME}，請準時至金庫門口集合。
-為配合金庫大門之啟閉，請有權人在:{TOR.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
-");
-                            try
+                            if (_MAIL_CONTENT != null)
                             {
-                                var sms = new SendMail.SendMailSelf();
-                                sms.smtpPort = 25;
-                                sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
-                                sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
-                                sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
-                                sms.Mail_Send(
-                                    new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
-                                    new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
-                                    null,
-                                    "金庫指定開庫通知",
-                                    sb.ToString()
-                                    );
+                                string _content = _MAIL_CONTENT.MAIL_CONTENT1;
+                                _content = _content.Replace("@_TREA_OPEN_TIME_", TOR.OPEN_TREA_TIME);
+                                _content = _content.Replace("@_EXEC_TIME_E_", TOR.EXEC_TIME_E);
+                                StringBuilder sb = new StringBuilder();
+                                sb.AppendLine(_content);
+                                //                            sb.AppendLine(
+                                //        $@"您好,
+                                //通知今日金庫開關庫時間為:{TOR.OPEN_TREA_TIME}，請準時至金庫門口集合。
+                                //為配合金庫大門之啟閉，請有權人在:{TOR.EXEC_TIME_E} 前進入「金庫進出管理系統」完成入庫確認作業，謝謝。
+                                //");
+                                var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
+                                var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
+                                List<string> _userIdList = new List<string>();
+                                var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
 
-                            }
-                            catch (Exception ex)
-                            {
-                                result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                                _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID).ToList());
+                                if (_userIdList.Any())
+                                {
+                                    //人名 EMAIl
+                                    var _EMP = emps.Where(x => _userIdList.Contains(x.USR_ID)).ToList();
+                                    if (_EMP.Any())
+                                    {
+                                        _EMP.ForEach(x => {
+                                            _mailTo.Add(new Tuple<string, string>(x.EMAIL, x.EMP_NAME));
+                                        });  
+                                    }
+                                }
+
+                                try
+                                {
+                                    var sms = new SendMail.SendMailSelf();
+                                    sms.smtpPort = 25;
+                                    sms.smtpServer = Properties.Settings.Default["smtpServer"]?.ToString();
+                                    sms.mailAccount = Properties.Settings.Default["mailAccount"]?.ToString();
+                                    sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
+                                    sms.Mail_Send(
+                                        new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
+                                        _mailTo,
+                                        _ccTo,
+                                        _MAIL_CONTENT?.MAIL_SUBJECT ?? "入庫人員確認作業通知",
+                                        sb.ToString()
+                                        );
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    result.DESCRIPTION = $"Email 發送失敗請人工通知。";
+                                }
                             }
                         }
-
                         #endregion
 
                         #region LOG
@@ -729,7 +762,7 @@ namespace Treasury.Web.Service.Actual
             var emps = new List<V_EMPLY2>();
             using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
             {
-                emps = dbINTRA.V_EMPLY2.AsNoTracking().ToList();
+                emps = dbINTRA.V_EMPLY2.AsNoTracking().Where(x => x.USR_ID != null).ToList();
             }
             return emps;
         }

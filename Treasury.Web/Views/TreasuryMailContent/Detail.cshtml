@@ -110,6 +110,12 @@
 
         function TMC_D_Apply()
         {
+            debugger;
+            var  rowCount = jQuery('#TMC_R_TempList').jqGrid('getGridParam', 'reccount');
+            if (rowCount == 0) {
+                customerUtility.alert('没有發送對象', 'w');
+                return false;
+            }
             $('#' + TMC_D_Form_Id).validate().resetForm();
             if ($('#' + TMC_D_Form_Id).valid())
             {
