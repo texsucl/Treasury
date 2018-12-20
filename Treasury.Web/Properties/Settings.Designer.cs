@@ -58,5 +58,14 @@ namespace Treasury.Web.Properties {
                 return ((string)(this["mailPwd"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Y")]
+        public string ActionOrNot {
+            get {
+                return ((string)(this["ActionOrNot"]));
+            }
+        }
     }
 }

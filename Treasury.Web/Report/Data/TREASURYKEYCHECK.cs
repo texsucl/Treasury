@@ -32,7 +32,8 @@ namespace Treasury.Web.Report.Data
                 var _APLY_DT_From = TypeTransfer.stringToDateTimeN(APLY_DT_From);
                 DateTime? _APLY_DT_To = TypeTransfer.stringToDateTimeN(APLY_DT_To).DateToLatestTime();
                 List<string> _EMP_Roles = new List<string>();
-                 List<string> _AGENT_Roles = new List<string>();
+                List<string> _AGENT_Roles = new List<string>();
+                List<string> _ITEM_ID_AlreadyHave = new List<string>();
                 if(EMP_NAME != "All")
                     _EMP_Roles = db.CODE_USER_ROLE.AsNoTracking().Where(x=>x.USER_ID == EMP_NAME).Select(x=>x.ROLE_ID).ToList();
                 if(AGENT_NAME != "All")
@@ -58,6 +59,7 @@ namespace Treasury.Web.Report.Data
                 var _TREA_EQUIP_IDs = _CRTI.Select(x=>x.TREA_EQUIP_ID).ToList();
 
                 var _TE =db.TREA_EQUIP.AsNoTracking()//金庫設備名稱
+                    .Where(x => x.IS_DISABLED == "N")
                     .Where(x=> _TREA_EQUIP_IDs.Contains(x.TREA_EQUIP_ID))
                     .Where(x => x.CONTROL_MODE ==CONTROL_MODE )
                     .ToList();
@@ -101,6 +103,7 @@ namespace Treasury.Web.Report.Data
                     }
                     if (addFlag)
                     {
+                        _ITEM_ID_AlreadyHave.Add(item.Key.TREA_EQUIP_ID);
                         var TREA_EQUIP_ID_Key = item.Key.TREA_EQUIP_ID;
                         var TE = _TE.FirstOrDefault(x => x.TREA_EQUIP_ID == TREA_EQUIP_ID_Key);
                         var CUSTODY_Value_1 = string.Join("、", getEmpName(depts, curs, item.Where(x => x.CUSTODY_ORDER == 1).Select(x => x.ROLE_ID).ToList()));//保管人
@@ -124,7 +127,28 @@ namespace Treasury.Web.Report.Data
                             ReportDataList.Add(ReportData);
                         }
                     }
-                }                                     
+                }
+                if (EMP_NAME == "All" && AGENT_NAME == "All")
+                {
+                    var _TREA_EQUIP = db.TREA_EQUIP.AsNoTracking()
+                        .Where(x => x.CONTROL_MODE == CONTROL_MODE)
+                        .Where(x => x.IS_DISABLED == "N")
+                        .Where(x => !_ITEM_ID_AlreadyHave.Contains(x.TREA_EQUIP_ID));
+
+                    foreach(var item in _TREA_EQUIP)
+                    {
+                       var EQUIPData = new TreasuryKeyCheckReport()
+                        {
+                            ROW = ++Total,
+                            CUSTODY_MODE = getCSMTtype(types, CUSTODY_MODE),
+                            EQUIP_NAME = item.EQUIP_NAME,
+                            EMP_NAME = "",
+                            AGENT_NAME = "",
+                            MEMO = "",
+                        };
+                        ReportDataList.Add(EQUIPData);
+                    }
+                }
             }
             resultsTable.Tables.Add(ReportDataList.ToDataTable());
             return resultsTable;

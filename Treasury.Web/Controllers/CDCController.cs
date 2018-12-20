@@ -463,10 +463,11 @@ namespace Treasury.Web.Controllers
         /// <param name="treaItem"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult GetCharge_Sect_AFT(string treaItem, string dept)
+        public JsonResult GetCharge_Sect_AFT(string treaItem, string dept, string sect)
         {
             List<SelectOption> result = new List<SelectOption>() { new SelectOption() { Text = " ", Value = " " } };
             result.AddRange(CDC.GetChargeSect(treaItem, dept));
+            result = result.Where(x => x.Value != sect).ToList();
             return Json(result);
         }
 
