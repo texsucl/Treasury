@@ -12,7 +12,7 @@ using Treasury.Web.Enum;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
 /// <summary>
-/// 功能說明：金庫進出管理作業-金庫物品存取申請作業 電子憑證
+/// 
 /// 初版作者：20180723 張家華
 /// 修改歷程：20180723 張家華 
 ///           需求單號：

@@ -53,9 +53,10 @@ namespace Treasury.Web.Controllers
         internal List<string> Custody_Aply_Appr_Type { get; set; }
 
         protected ITreasuryAccess TreasuryAccess;
-
+        Service.Actual.Common comm = new Service.Actual.Common();
         public CommonController()
         {
+            
             Cache = new DefaultCacheProvider();
             Aply_Appr_Type = new List<string>()
             {
@@ -81,6 +82,7 @@ namespace Treasury.Web.Controllers
                 Ref.AccessProjectFormStatus.B04.ToString()
             };
             TreasuryAccess = new TreasuryAccess();
+            
         }
 
         /// <summary>
@@ -304,6 +306,12 @@ namespace Treasury.Web.Controllers
                     MT = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.MAIL_TIME_ID == "5" && x.IS_DISABLED != "Y");
                     var _MAIL_CONTENT_ID = MT?.MAIL_CONTENT_ID;
                     MC = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID && x.IS_DISABLED != "Y");
+                    var _MAIL_RECEIVE = db.MAIL_RECEIVE.AsNoTracking();
+                    var _CODE_ROLE_FUNC = db.CODE_ROLE_FUNC.AsNoTracking();
+                    var _CODE_USER_ROLE = db.CODE_USER_ROLE.AsEnumerable();
+                    var _CODE_USER = db.CODE_USER.AsNoTracking();
+                    
+                    var emps = comm.GetEmps();
                     using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
                     {
                         //存許項目
@@ -353,6 +361,26 @@ namespace Treasury.Web.Controllers
                                 }
                             }
                         });
+                        if(MC != null)
+                        {
+                            var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == MC.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
+                            var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
+                            var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
+                            List<string> _userIdList = new List<string>();
+
+                            _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID).ToList());
+                            if (_userIdList.Any())
+                            {
+                                //人名 EMAIl
+                                var _EMP = emps.Where(x => _userIdList.Contains(x.USR_ID)).ToList();
+                                if (_EMP.Any())
+                                {
+                                    _EMP.ForEach(x => {
+                                        _ccTo.Add(new Tuple<string, string>(x.EMAIL, x.EMP_NAME));
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
                 Dictionary<string, Stream> attachment = new Dictionary<string, Stream>();

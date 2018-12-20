@@ -206,7 +206,7 @@ namespace Treasury.Web.Controllers
                     return Json(jdta.modelToJqgridResult(SearchDatas.OrderBy(x => x.vTREA_REGISTER_ID).ToList()));
                 case "DetilsData":
                     var DetailDatas = (List<TREAReviewWorkSearchDetailViewModel>)Cache.Get(CacheList.TREAReviewWorkSearchDetailViewData);
-                    return Json(jdta.modelToJqgridResult(DetailDatas.ToList()));
+                    return Json(jdta.modelToJqgridResult(DetailDatas.OrderBy(x => x.vITeM_OP_TYPE).ThenBy(x => x.vITEM_ID).ToList()));
             }
             return null;
         }

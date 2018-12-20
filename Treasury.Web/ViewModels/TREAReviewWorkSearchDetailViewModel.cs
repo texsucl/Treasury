@@ -17,6 +17,12 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 存取項目
         /// </summary>
+        [Description("存取項目編號")]
+        public string vITEM_ID { get; set; }
+
+        /// <summary>
+        /// 存取項目
+        /// </summary>
         [Description("存取項目")]
         public string vITEM_DESC { get; set; }
 

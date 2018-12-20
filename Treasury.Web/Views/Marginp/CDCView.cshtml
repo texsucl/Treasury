@@ -240,12 +240,12 @@
         var CDCMarginpConfirmFlag = false; //離開時提醒訊息
 
         //#endregion 參數設定
-        
+
         //#region 初始動作
         CDCMarginpDbGrid();
         setCDCMarginpVerified();
         //#endregion 初始動作
-        created.createDatepickerRange(tCDCEffective_Date_BId, tCDCEffective_Date_EId);
+        created.createDatepickerRange(tCDCEffective_Date_BId, tCDCEffective_Date_EId, null, changeEndTime);
 
         //#region 註冊verified
         function setCDCMarginpVerified() {
@@ -325,9 +325,29 @@
             })
         }
         //#endregion 註冊事件
-
+        $('#' + tCDCEffective_Date_BId).on('change', function () {
+            changeEndTime();
+        });
         //#region 初始設定
-
+        function changeEndTime(){
+            var _date = $('#' + tCDCEffective_Date_BId).val();
+            var _Margin_Item = $('#' + dMargin_ItemId).val();
+            $('#' + tCDCEffective_Date_EId).next().prop('disabled', false);
+            //有效期間(迄) 	支票：有效期間(起)+1年
+            if (_Margin_Item == '1' && verified.isDate(_date)) {
+                _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                $('#' + tCDCEffective_Date_EId).val(_date);
+                $('#' + tCDCEffective_Date_EId).next().prop('disabled', true);
+            }
+            else if (_Margin_Item == '2' && verified.isDate(_date)) {
+                _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                $('#' + tCDCEffective_Date_EId).val(_date);
+                $('#' + tCDCEffective_Date_EId).next().prop('disabled', true);
+            }
+            //else {
+            //    $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
+            //}
+        }
         //#endregion 初始設定
 
         //#region function
@@ -679,6 +699,7 @@
                 $('#CDCMarginpUpdateTemp').show();
                 $('#' + tCDCEffective_Date_BId).next().prop('disabled', false);
                 $('#' + tCDCEffective_Date_EId).next().prop('disabled', true);
+                //$('#' + tCDCEffective_Date_EId).prop('disabled', true);
             }
             else if (type == '@Ref.ActionType.View.ToString()') {
                 if (GetFlag) {
@@ -761,22 +782,23 @@
                 $('#' + sCDCPledge_Item_NoId).text(data.vPledge_Item_No_AFT);
                 $('#' + tCDCEffective_Date_BId).val(data.vEffective_Date_B);
                 $('#' + sCDCEffective_Date_BId).text(data.vEffective_Date_B_AFT);
-                var _date = $('#' + tCDCEffective_Date_BId).val();
+                $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
+                //var _date = $('#' + tCDCEffective_Date_BId).val();
                 
-                //有效期間(迄) 	支票：有效期間(起)+1年
-                if (data.vMargin_Item == '1' && verified.isDate(_date)) {
-                    _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
-                    $('#' + tCDCEffective_Date_EId).val(_date);
-                    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
-                }
-                else if (data.vMargin_Item == '2' && verified.isDate(_date)) {
-                    _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
-                    $('#' + tCDCEffective_Date_EId).val(_date);
-                    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
-                }
-                else {
-                    $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
-                }
+                ////有效期間(迄) 	支票：有效期間(起)+1年
+                //if (data.vMargin_Item == '1' && verified.isDate(_date)) {
+                //    _date = Number(_date.split('/')[0]) + 1 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                //    $('#' + tCDCEffective_Date_EId).val(_date);
+                //    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
+                //}
+                //else if (data.vMargin_Item == '2' && verified.isDate(_date)) {
+                //    _date = Number(_date.split('/')[0]) + 3 + '/' + _date.split('/')[1] + '/' + _date.split('/')[2];
+                //    $('#' + tCDCEffective_Date_EId).val(_date);
+                //    $('#' + tCDCEffective_Date_EId).prop('disabled', true);
+                //}
+                //else {
+                //    $('#' + tCDCEffective_Date_EId).val(data.vEffective_Date_E);
+                //}
                 $('#' + sCDCEffective_Date_EId).text(data.vEffective_Date_E_AFT);
                 $('#' + tCDCDescriptionId).val(data.vDescription);
                 $('#' + sCDCDescriptionId).text(data.vDescription_AFT);

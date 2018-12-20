@@ -286,7 +286,6 @@
                     $('#TMT_UpdateTemp').show();
                     $('.' + TMT_InsertClass).prop('disabled', false);
 
-                    console.log($('#h_MAIL_TIME_ID').val());
                     var vMAIL_ID= $('#h_MAIL_TIME_ID').val();
                     if (vMAIL_ID == '1' || vMAIL_ID == '2') {
                         $('#' + TMT_Interval_Min).prop('disabled', true);
@@ -302,7 +301,8 @@
                     $('.' + TMT_InsertClass).prop('disabled', true);
                 }
                 $('#' + dialogId).dialog('open');
-                $('#tSend_Time').focus();
+                //$('#tSend_Time').focus();
+                $('.ui-timepicker-wrapper').css("display", "none");
                 $('#tMemo').focus();
             }
 
@@ -523,7 +523,7 @@
                     success: function (vdata, textStatus, jqXHR) {
                         $('#' + openSearchDetailId).children().remove();
                         $('#' + openSearchDetailId).html(vdata);
-                        openChangeRecordDialog('金庫設備異動紀錄', 1320, 'TMT_OpenSearchDialog');
+                        openChangeRecordDialog('保管資料發送異動紀錄', 1320, 'TMT_OpenSearchDialog');
                     }
                 })
             }

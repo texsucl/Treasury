@@ -246,8 +246,14 @@ namespace Treasury.Web.Report.Data
             [Description("物品發行人")]
             public string MARGIN_ITEM_ISSUER { get; set; }
 
-            [Description("質押標的號碼 ")]
+            [Description("質押標的號碼")]
             public string PLEDGE_ITEM_NO { get; set; }
+
+            [Description("有效期間(起)")]
+            public string EFFECTIVE_DATE_B { get; set; }
+
+            [Description("有效期間(迄)")]
+            public string EFFECTIVE_DATE_E { get; set; }
 
             [Description("說明")]
             public string DESCRIPTION { get; set; }
@@ -382,6 +388,9 @@ namespace Treasury.Web.Report.Data
 
             [Description("區域")]
             public string AREA { get; set; }
+
+            [Description("類型")]
+            public string STOCK_TYPE { get; set; }
 
             [Description("批次")]
             public string BATCH_NO { get; set; }

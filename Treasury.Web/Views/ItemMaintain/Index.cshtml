@@ -87,7 +87,7 @@
                         <label>連結資料庫 :&ensp;</label>
                     </td>
                     <td>
-                        @Html.DropDownList("dIS_TREA_ITEM_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { @class = "IM_InsertType" })
+                        @Html.DropDownList("dIS_TREA_ITEM_MOD", (SelectList)ViewBag.dYN_FLAG_MOD, new { disabled = "disabled" })
                     </td>
                 </tr>
                 <tr>
@@ -264,30 +264,56 @@
             //#region 連結資料庫 根據 存取項目編號 連動
             $('#' + Op_Type_Mod_Id).on('change', function () {
                 var opType = $('#' + Op_Type_Mod_Id).val();
+                $('#' + Type_Mod_Id).val(' ');
+                $('#' + Name_Mod_Id).val(' ');
                 if (opType == '1' || opType == '4'){
                     $('#' + Is_Item_Mod_Id).val('N');
                 }
-                else {
+                if (opType == '2') {
+                    $('#' + Is_Item_Mod_Id).val('Y');
+                    $('#' + Type_Mod_Id).val('SEAL');
+                }
+                if (opType == '3') {
                     $('#' + Is_Item_Mod_Id).val('Y');
                 }
+
                 $('#' + Is_Item_Mod_Id).trigger("change");
+                $('#' + Type_Mod_Id).trigger("change");
             });
             //#endregion
             //#region 根據 連結資料庫 判斷 資料庫類別(CRUD) & 資料庫名稱(CRUD) 
             $('#' + Is_Item_Mod_Id).on('change', function () {
                 var isItemMod = $('#' + Is_Item_Mod_Id).val();
+                var opType = $('#' + Op_Type_Mod_Id).val();
+                
+
                 if (isItemMod == 'N') {
-                    $('#' + Type_Mod_Id).val(' ');
-                    $('#' + Name_Mod_Id).val(' ');
+                    //$('#' + Type_Mod_Id).val(' ');
+                    //$('#' + Name_Mod_Id).val(' ');
                     $('#' + Type_Mod_Id).prop('disabled', true);
                     $('#' + Name_Mod_Id).prop('disabled', true);
                 }
                 else {
-                    $('#' + Type_Mod_Id).prop('disabled', false);
-                    $('#' + Name_Mod_Id).prop('disabled', false);
+                    if (opType == '2') {
+                        $('#' + Type_Mod_Id).prop('disabled', true);
+                    }
+                    else {
+                        $('#' + Type_Mod_Id).prop('disabled', false);
+                    } 
                 }
+                
             });
             //#endregion
+            $('#' + Type_Mod_Id).on('change', function () {
+                var typeMod = $('#' + Type_Mod_Id).val();
+                if (typeMod == 'SEAL') {
+                    $('#' + Name_Mod_Id).prop('disabled', false);
+                }
+                else {
+                    $('#' + Name_Mod_Id).prop('disabled', true);
+                    $('#' + Name_Mod_Id).val(' ');
+                }
+            });
             //#region 查詢
             function Item_Search() {
                 var dialogId = 'IM_SearchDetail';
@@ -332,7 +358,7 @@
                     success: function (vdata, textStatus, jqXHR) {
                         $('#' + openSearchDetailId).children().remove();
                         $('#' + openSearchDetailId).html(vdata);
-                        openChangeRecordDialog('金庫設備異動紀錄', 1250, 'OpenSearchDialog');
+                        openChangeRecordDialog('金庫存取項目異動紀錄', 1250, 'OpenSearchDialog');
                     }
                 })
             }
