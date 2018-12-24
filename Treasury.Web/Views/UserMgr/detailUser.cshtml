@@ -489,6 +489,10 @@
         if ($("#hidDataStatus").val() != null) {
             if ($("#hidDataStatus").val().substring(0, 1) == "2") {
                 $("#btnModify").attr('disabled', true);
+                $("#btnNewRole").attr('disabled', true);
+                $("#isDisabled").attr('disabled', true);
+                $("#isMail").attr('disabled', true);
+                $("#vMemo").attr('disabled', true);
             }
         }
 
@@ -769,6 +773,13 @@
                         se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + rowId + "' value='儲存' onclick=\"TheOnSaveFunction('" + rowId + "');\"  />";
                         ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + rowId + "'  value='取消' onclick=\"TheOnCancelFunction('" + rowId + "');\"  />";
                         jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                        //凍結判斷
+                        if ($("#hidDataStatus").val().substring(0, 1) == "2")
+                        {
+                            $("#btn_edit_" + rowId).attr('disabled', true);
+                            $("#btn_del_" + rowId).attr('disabled', true);
+                        }
 
                         $("#btn_save_" + rowId).hide();
                         $("#btn_cancel_" + rowId).hide();
