@@ -56,10 +56,14 @@ namespace Treasury.Web.Service.Actual
                 if (Charge_Sect.IsNullOrWhiteSpace())
                 {
                     _Charge_Sect = dCharge_Sect.FirstOrDefault()?.Value;
+                    List<string> _sectList = new List<string>();
+                    dCharge_Sect.ForEach(x => { _sectList.Add(x.Value); });
 
                     dCharge_Uid = _V_EMPLY2
-                    .Where(x => x.DPT_CD == _Charge_Sect, !_Charge_Sect.IsNullOrWhiteSpace())
-                    .Where(x => x.DPT_CD == Charge_Dept, _Charge_Sect.IsNullOrWhiteSpace())
+                    //.Where(x => x.DPT_CD == _Charge_Sect, !_Charge_Sect.IsNullOrWhiteSpace())
+                    //.Where(x => x.DPT_CD == Charge_Dept, _Charge_Sect.IsNullOrWhiteSpace())
+                    .Where(x => _sectList.Contains(x.DPT_CD), _sectList.Count > 0)
+                    .Where(x => x.DPT_CD == Charge_Dept, _sectList.Count == 0)
                     .AsEnumerable()
                     .Select(x => new SelectOption()
                     {
@@ -170,9 +174,11 @@ namespace Treasury.Web.Service.Actual
                     result = db.ITEM_CHARGE_UNIT_HIS.AsNoTracking()
                         .Where(x => x.ITEM_ID == searchData.vTREA_ITEM_NAME, searchData.vTREA_ITEM_NAME != "All")
                         .Where(x => x.CHARGE_DEPT == searchData.vCHARGE_DEPT, searchData.vCHARGE_DEPT != "All")
-                        .Where(x => x.CHARGE_SECT == searchData.vCHARGE_SECT, searchData.vCHARGE_SECT != "All")
+                        .Where(x => x.CHARGE_SECT == searchData.vCHARGE_SECT, searchData.vCHARGE_SECT != "All" && !searchData.vCHARGE_SECT.IsNullOrWhiteSpace())
+                        .Where(x => x.CHARGE_UID == searchData.vCHARGE_UID, searchData.vCHARGE_UID != "All")
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
+                        .Where(x => x.APLY_UID == searchData.vLast_Update_Uid, !searchData.vLast_Update_Uid.IsNullOrWhiteSpace())
                         .AsEnumerable()
                         .Select(x => new ItemChargeUnitChangeRecordSearchDetailViewModel {
                             //vFreeze_Dt = x.EXEC_ACTION != "A" ? _ITEM_CHARGE_UNIT.FirstOrDefault(y => y.CHARGE_UNIT_ID == x.CHARGE_UNIT_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd") : null,

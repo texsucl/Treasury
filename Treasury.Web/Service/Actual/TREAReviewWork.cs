@@ -13,7 +13,7 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Actual
 {
-    public class TREAReviewWork : ITREAReviewWork
+    public class TREAReviewWork : Common, ITREAReviewWork
     {
         /// <summary>
         /// 取得初始資料
@@ -77,6 +77,7 @@ namespace Treasury.Web.Service.Actual
                             vACTUAL_ACCESS_TYPE = x.ACTUAL_ACCESS_TYPE != x.ACCESS_TYPE? _SYS_CODE.FirstOrDefault(y => y.CODE == x.ACTUAL_ACCESS_TYPE)?.CODE_VALUE : null,
                             vACTUAL_ACCESS_NAME = x.ACTUAL_ACCESS_UID != x.CONFIRM_UID ? GetUserInfo(x.ACTUAL_ACCESS_UID)?.EMP_Name : null,
                             vTREA_REGISTER_ID = x. TREA_REGISTER_ID,
+                            vITEM_ID = x.ITEM_ID
                         }).ToList();
                 }
             }
@@ -621,28 +622,56 @@ namespace Treasury.Web.Service.Actual
                         MAIL_TIME MT = new MAIL_TIME();
                         MAIL_CONTENT MC = new MAIL_CONTENT();
                         //通知表單申請人及保管科人員已完成物品存入,取出 抓4
+                        
+                        List<Tuple<string, string>> _ccTo = new List<Tuple<string, string>>();
                         MT = db.MAIL_TIME.AsNoTracking().FirstOrDefault(x => x.MAIL_TIME_ID == "4" && x.IS_DISABLED != "Y");
                         var _MAIL_CONTENT_ID = MT?.MAIL_CONTENT_ID;
                         MC = db.MAIL_CONTENT.AsNoTracking().FirstOrDefault(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT_ID && x.IS_DISABLED != "Y");
+                        var _MAIL_RECEIVE = db.MAIL_RECEIVE.AsNoTracking();
+                        var _CODE_ROLE_FUNC = db.CODE_ROLE_FUNC.AsNoTracking();
+                        var _CODE_USER_ROLE = db.CODE_USER_ROLE.AsEnumerable();
+                        var _CODE_USER = db.CODE_USER.AsNoTracking();
+                        var emps = GetEmps();
                         #region 寄信
+                        if (MC != null)
+                        {
+                            var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == MC.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
+                            var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
+                            var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
+                            List<string> _userIdList = new List<string>();
+
+                            _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID).ToList());
+                            if (_userIdList.Any())
+                            {
+                                //人名 EMAIl
+                                var _EMP = emps.Where(x => _userIdList.Contains(x.USR_ID)).ToList();
+                                if (_EMP.Any())
+                                {
+                                    _EMP.ForEach(x => {
+                                        _ccTo.Add(new Tuple<string, string>(x.EMAIL, x.EMP_NAME));
+                                    });
+                                }
+                            }
+                        }
 
                         foreach (var NoUidType in approvedList)
                         {
+                            List<Tuple<string, string>> _mailTo = new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") };
                             var aplyNo = NoUidType.Split(';')[0];
                             var aplyUid = NoUidType.Split(';')[1];
                             var itemOpType = NoUidType.Split(';')[2];
                             if(itemOpType == "3")
                             {
-                                string str = MC.MAIL_CONTENT1;
+                                string str = MC?.MAIL_CONTENT1;
                                 StringBuilder sb = new StringBuilder();
                                 str = str.Replace("@_APLYNO_", aplyNo);
                                 sb.AppendLine(str);
-                                //                            sb.AppendLine(
-                                //                                $@"您好，通知您
-                                //申請單號 {aplyNo}已完成出入庫相關作業!
-                                //1.若您的申請作業為存出入保證金物品，請儘速通知會計部門完成入帳作業!
-                                //2.若您所申請的物品為取出，請儘速至財務部領取相關物品，謝謝!"
-                                //                                );
+
+                                var _aplyInfo = emps.FirstOrDefault(x => x.USR_ID == aplyUid);
+                                if(_aplyInfo != null)
+                                {
+                                    _mailTo.Add(new Tuple<string, string>(_aplyInfo.EMAIL, _aplyInfo.EMP_NAME));
+                                }
 
                                 try
                                 {
@@ -653,8 +682,8 @@ namespace Treasury.Web.Service.Actual
                                     sms.mailPwd = Properties.Settings.Default["mailPwd"]?.ToString();
                                     sms.Mail_Send(
                                        new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys"),
-                                       new List<Tuple<string, string>>() { new Tuple<string, string>("glsisys.life@fbt.com", "測試帳號-glsisys") },
-                                       null,
+                                       _mailTo,
+                                       _ccTo,
                                        MT?.FUNC_ID ?? "存取作業確認通知",
                                        sb.ToString()
                                        );

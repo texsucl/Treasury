@@ -156,8 +156,7 @@
         //#endregion
 
         //#region 核准
-        function TAApprApproved()
-        {
+        function TAApprApproved() {
             var aplyNos = [];
             var openflag = false;
             if ($('#' + hAply_No).val() == '') {
@@ -176,8 +175,7 @@
                 openflag = true;
             }
             if (aplyNos.length > 0) {
-                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?"))
-                {
+                if (confirm("是否覆核單號:" + aplyNos.join(",") + "?")) {
                     $.ajax({
                         type: 'POST',
                         data: JSON.stringify({
@@ -187,8 +185,7 @@
                         contentType: 'application/json',
                     }).done(function (result) {
                         if (result.RETURN_FLAG) {
-                            if (openflag)
-                            {
+                            if (openflag) {
                                 customerUtility.closeDialog($('#TAAppr_V_Appr'));
                             }
                             TAApprGrid();
@@ -204,8 +201,7 @@
         //#endregion
 
         //#region 駁回
-        function TAApprReject()
-        {
+        function TAApprReject() {
             var flag = false;
             if ($('#' + hAply_No).val() == '') {
                 if ($('.TAApprCs:checked').length > 0) {
@@ -215,8 +211,7 @@
             else {
                 flag = true;
             }
-            if (!flag)
-            {
+            if (!flag) {
                 customerUtility.alert('無選擇駁回項目', 'w');
                 return false;
             }
@@ -236,8 +231,7 @@
         //#endregion
 
         //#region 駁回確認
-        function TAApprRejectY()
-        {
+        function TAApprRejectY() {
             var aplyNos = [];
             var openflag = false;
             if ($('#' + hAply_No).val() == '') {
@@ -259,7 +253,7 @@
                 $.ajax({
                     type: 'POST',
                     data: JSON.stringify({
-                        AplyNos : aplyNos,
+                        AplyNos: aplyNos,
                         apprDesc: $('#TAApprDesc').val().trim()
                     }),
                     url: TACurl.Reject,
@@ -267,8 +261,7 @@
                 }).done(function (result) {
                     if (result.RETURN_FLAG) {
                         customerUtility.closeDialog($('#TAAppr_Y_Reject'));
-                        if (openflag)
-                        {
+                        if (openflag) {
                             customerUtility.closeDialog($('#TAAppr_V_Appr'));
                         }
                         TAApprGrid();
@@ -337,7 +330,7 @@
         }
 
         function formatterAPLYNO(cellvalue, options, rdata) {
-                return "<a href='#' class='openDialog DialogAPLYNO' style='text-decoration:underline;' return:false; id='" + options.gid + "APLYNO" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
+            return "<a href='#' class='openDialog DialogAPLYNO' style='text-decoration:underline;' return:false; id='" + options.gid + "APLYNO" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' '>" + cellvalue + "</a>";
         }
 
         function UnformatterAPLYNO(cellvalue, options, rdata) {
@@ -347,14 +340,22 @@
         //#endregion
 
         //#region 查詢表單
+        function formattervAPLY_STATUS_D(cellvalue, options, rdata) {
+            if (rdata.vAPLY_STATUS == "B02")
+                return '<span class="red">' + rdata.vAPLY_STATUS_D + '</span>';
+            else
+                return rdata.vAPLY_STATUS_D || '';
+        }
+
         function TAApprGrid() {
-            var colNameArray = [' ','表單狀態',
+            var colNameArray = [' ', '表單狀態',
                 '存取項目', '申請日期', '申請單號',
                 '申請單位', '申請人', '入庫原因', '覆核意見',
                 '存取項目ID', '覆核權限', '存入/取出'];
             var colModelArray = [
                 { name: "vCheckFlag", index: "vCheckFlag", width: 60, sortable: false, align: 'center', formatter: formatterCheck },
-                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 300, sortable: false, align: 'center' },
+                //{ name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 300, sortable: false, align: 'center' },
+                { name: "vAPLY_STATUS_D", index: "vAPLY_STATUS_D", width: 150, sortable: false, align: 'center', formatter: formattervAPLY_STATUS_D },
                 { name: "vItemDec", index: "vItemDec", width: 120, sortable: false, align: 'center' },
                 { name: "vAPLY_DT", index: "vAPLY_DT", width: 100, sortable: false, align: 'center' },
                 { name: "vAPLY_NO", index: "vAPLY_NO", width: 130, sortable: false, align: 'center', formatter: formatterAPLYNO, unformat: UnformatterAPLYNO },
@@ -364,7 +365,7 @@
                 { name: "vAPPR_DESC", index: "vAPPR_DESC", width: 120, sortable: false, align: 'left' },
                 { name: "vItem", index: "vItem", hidden: true },
                 { name: "vAPPRFlag", index: "vAPPRFlag", hidden: true },
-                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true}
+                { name: "vACCESS_TYPE", index: "vACCESS_TYPE", hidden: true }
             ];
             jqgridCustom.createJqgridByCache(
                 'TAApprjqgridDiv',
@@ -555,14 +556,12 @@
             title += '明細';
             var dialogId = dialogId;
             $('.TAApprAct').hide();
-            if (vACCESS_TYPE == 'P')
-            {
+            if (vACCESS_TYPE == 'P') {
                 $('.TAApplyClass').after('<input type="button" id="TAAppr_C_Reject" value="駁回" style="margin-left:10px; margin-right:5px;" class="btn btn-primary"></input>');
                 $('#TAAppr_C_Reject').off('click');
                 $('#TAAppr_C_Reject').on('click', function () { TAApprReject() });
             }
-            if (vACCESS_TYPE == 'G')
-            {
+            if (vACCESS_TYPE == 'G') {
                 $('.TAApprAct').show();
             }
             $('#' + dialogId).dialog({

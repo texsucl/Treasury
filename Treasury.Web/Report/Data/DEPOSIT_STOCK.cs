@@ -52,14 +52,16 @@ namespace Treasury.Web.Report.Data
                 .ToList();
                 
                 var depts = new List<VW_OA_DEPT>();
-                var types = new List<SYS_CODE>(); 
+                var area = new List<SYS_CODE>();
+                var types = new List<SYS_CODE>();
                 var book = new List<ITEM_BOOK>(); 
                 using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
                 {
                    depts = dbINTRA.VW_OA_DEPT.AsNoTracking().Where(x => x.DPT_CD != null).ToList();
                 }
 
-                types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null && x.CODE_TYPE == "STOCK_AREA").ToList();
+                area = db.SYS_CODE.AsNoTracking().Where(x => x.CODE !=null && x.CODE_TYPE == "STOCK_AREA").ToList();
+                types = db.SYS_CODE.AsNoTracking().Where(x => x.CODE != null && x.CODE_TYPE == "STOCK_TYPE").ToList();
                 book = db.ITEM_BOOK.AsNoTracking().Where(x => x.GROUP_NO.ToString() !=null).ToList();
                 
                 foreach(var STOCKdata in _IS.OrderBy(x=>x.GROUP_NO).ThenBy(x=>x.PUT_DATE).ThenBy(x=>x.CHARGE_DEPT).ThenBy(x=>x.CHARGE_SECT).ThenBy(x=>x.GROUP_NO).ThenBy(x=>x.STOCK_NO_PREAMBLE).ThenBy(x=>x.STOCK_NO_B)) 
@@ -75,7 +77,8 @@ namespace Treasury.Web.Report.Data
                         STOCK_CNT = STOCKdata.STOCK_CNT,
                         DENOMINATION = STOCKdata.DENOMINATION,
                         NUMBER_OF_SHARES = STOCKdata.NUMBER_OF_SHARES,
-                        AREA = types.FirstOrDefault(z=>z.CODE == getArea(book, STOCKdata.GROUP_NO.ToString()))?.CODE_VALUE,
+                        AREA = area.FirstOrDefault(z=>z.CODE == getArea(book, STOCKdata.GROUP_NO.ToString()))?.CODE_VALUE,
+                        STOCK_TYPE = types.FirstOrDefault(z => z.CODE == STOCKdata.STOCK_TYPE)?.CODE_VALUE,
                         BATCH_NO = STOCKdata.TREA_BATCH_NO.ToString(),
                         STOCK_NO_PREAMBLE = STOCKdata.STOCK_NO_PREAMBLE,
                         AMOUNT_PER_SHARE = STOCKdata.AMOUNT_PER_SHARE,

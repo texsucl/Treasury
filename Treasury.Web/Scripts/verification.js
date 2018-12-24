@@ -27,8 +27,7 @@
         return arr == null ? this.length : this.length + arr.length;
     }
 
-    var errorPlacementfun = function (error, element)
-    {
+    var errorPlacementfun = function (error, element) {
         if (element.is('input:text') &&
             element.prev() != null &&
             element.prev().is('select')) {
@@ -284,12 +283,12 @@
     created.createDatepicker = function (datepickerid, date, completeEvent) {
         var d = null;
         if (!(date === d)) {
-                if (verified.isDate(date)) {
-                    d = verified.datepickerStrToDate(date);
-                }
-                else {
-                    d = created.getOnlyDate();
-                }  
+            if (verified.isDate(date)) {
+                d = verified.datepickerStrToDate(date);
+            }
+            else {
+                d = created.getOnlyDate();
+            }
         }
 
         $("#" + datepickerid).datepicker({
@@ -299,8 +298,7 @@
             showOn: "both",
             buttonText: '<i class="fa fa-calendar fa-2x toggle-btn"></i>',
             onSelect: function (value) {
-                if (verified.isDate(value))
-                {
+                if (verified.isDate(value)) {
                     $(this).parent().children().each(function () {
                         if ($(this).is('label') && $(this).hasClass('error'))
                             $(this).remove();
@@ -310,21 +308,17 @@
                 }
             },
             onClose: function (value) {
-                if (verified.isDate(value))
-                {
-                    if(typeof completeEvent == 'function')
+                if (verified.isDate(value)) {
+                    if (typeof completeEvent == 'function')
                         completeEvent();
                 }
                 if (typeof completeEvent != "undefined" &&
                     typeof completeEvent.success == 'function' &&
-                    typeof completeEvent.fail == 'function')
-                {
-                    if (verified.isDate(value))
-                    {
+                    typeof completeEvent.fail == 'function') {
+                    if (verified.isDate(value)) {
                         completeEvent.success();
                     }
-                    else
-                    {
+                    else {
                         completeEvent.fail();
                     }
                 }
@@ -332,8 +326,7 @@
         }).datepicker('setDate', d);
 
         if (typeof completeEvent != "undefined" &&
-            typeof completeEvent.success == 'function')
-        {
+            typeof completeEvent.success == 'function') {
             completeEvent.success();
         }
     }
@@ -349,7 +342,7 @@
 
     //範圍datepicker
     created.createDatepickerRange = function (datepickerStartid,
-        datepickerEndid, format) {
+        datepickerEndid, format, completerStartEvent, completerEndEvent) {
         format = format || 'yy/mm/dd';
 
         var from = $("#" + datepickerStartid)
@@ -368,13 +361,29 @@
                                     if ($(this).is('input') && $(this).hasClass('error'))
                                         $(this).removeClass('error');
                                 })
-                            }                          
+                            }
+                        },
+                        onClose: function (value) {
+                            if (verified.isDate(value)) {
+                                if (typeof completerStartEvent == 'function')
+                                    completerStartEvent();
+                            }
+                            if (typeof completerStartEvent != "undefined" &&
+                                typeof completerStartEvent.success == 'function' &&
+                                typeof completerStartEvent.fail == 'function') {
+                                if (verified.isDate(value)) {
+                                    completerStartEvent.success();
+                                }
+                                else {
+                                    completerStartEvent.fail();
+                                }
+                            }
                         }
                     });
 
         from.off('change');
         from.on('change', function () {
-            if($(this).val() == '')
+            if ($(this).val() == '')
                 to.datepicker("option", "minDate", null);
         });
 
@@ -393,6 +402,22 @@
                         if ($(this).is('input') && $(this).hasClass('error'))
                             $(this).removeClass('error');
                     })
+                }
+            },
+            onClose: function (value) {
+                if (verified.isDate(value)) {
+                    if (typeof completerEndEvent == 'function')
+                        completerEndEvent();
+                }
+                if (typeof completerEndEvent != "undefined" &&
+                    typeof completerEndEvent.success == 'function' &&
+                    typeof completerEndEvent.fail == 'function') {
+                    if (verified.isDate(value)) {
+                        completerEndEvent.success();
+                    }
+                    else {
+                        completerEndEvent.fail();
+                    }
                 }
             }
         });
@@ -434,12 +459,10 @@
         if (verified.checkSpace(value))
             return false;
         var len = value.length;
-        if (len == 7)
-        {
+        if (len == 7) {
             return dateFormat.test((Number(value.substr(0, 3)) + 1911) + '/' + value.substr(3, 2) + '/' + value.substr(5, 2));
         }
-        else if (len == 6)
-        {
+        else if (len == 6) {
             return dateFormat.test((Number(value.substr(0, 2)) + 1911) + '/' + value.substr(2, 2) + '/' + value.substr(4, 2));
         }
         return false;
@@ -455,11 +478,10 @@
         if (arr.length == 3) {
             return (Number(arr[0]) + 1911) + '/' + created.padLeft(arr[1], 2, '0') + '/' + created.padLeft(arr[2], 2, '0');
         }
-        return  '';
+        return '';
     }
 
-    verified.isPrice = function (value)
-    {
+    verified.isPrice = function (value) {
         value = value || '';
         if (value == '')
             return true;
@@ -532,8 +554,7 @@
         return false;
     }
 
-    verified.dateToStr = function (value)
-    {
+    verified.dateToStr = function (value) {
         return value.getFullYear() + '/' + created.padLeft((value.getMonth() + 1), 2) + '/' + (value.getDate())
     }
 
@@ -567,7 +588,7 @@
     }
 
     function verifiedReportDate(value) {
-        if (dateFormat.test(value)) {           
+        if (dateFormat.test(value)) {
             var datepicker = verified.datepickerStrToDate(value);
             if (!datepicker) {
                 return false;
@@ -594,13 +615,12 @@
         return d;
     }
 
-    created.getOnlyDateStr = function getOnlyDateStr(backSlashFlag, tawFlag, notLinkFlag)
-    {
+    created.getOnlyDateStr = function getOnlyDateStr(backSlashFlag, tawFlag, notLinkFlag) {
         backSlashFlag = backSlashFlag || false;
         tawFlag = tawFlag || false;
         notLinkFlag = notLinkFlag || false;
         var d = new Date();
-        var r = '';   
+        var r = '';
         r = tawFlag ? d.getFullYear() - 1911 : d.getFullYear();
         r += ((notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getMonth() + 1), 2) + (notLinkFlag ? '' : (backSlashFlag ? '/' : '-')) + created.padLeft((d.getDate()), 2));
         return r;
@@ -626,7 +646,7 @@
         if (str.length >= lenght)
             return str;
         else
-            return padLeft(padStr + str, lenght , padStr);
+            return padLeft(padStr + str, lenght, padStr);
     }
     created.padRight = function padRight(str, lenght, padStr) {
         str = (str || '') + '';

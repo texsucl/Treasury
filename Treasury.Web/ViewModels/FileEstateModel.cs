@@ -13,8 +13,8 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 群組編號
         /// </summary>
-        [Required]
-        [RegularExpression(@"^[0-9]+$", ErrorMessage = "請輸入數字")]
+        //[Required]
+        //[RegularExpression(@"^[0-9]+$", ErrorMessage = "請輸入數字")]
         [Description("群組編號")]
         public string GROUP_NO { get; set; }
 
@@ -89,8 +89,8 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 申請人
         /// </summary>
-        [Required]
-        [RegularExpression(@"^[0-9A-z]{5}$", ErrorMessage = "申請人需等於5個字元")]
+        //[Required]
+        //[RegularExpression(@"^[0-9A-z]{5}$", ErrorMessage = "申請人需等於5個字元")]
         [Description("申請人")]
         public string APLY_UID { get; set; }
     }

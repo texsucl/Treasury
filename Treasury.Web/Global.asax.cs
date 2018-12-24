@@ -34,8 +34,11 @@ namespace Treasury.Web
            // SqlMapper.AddTypeHandler(new DateTimeHandler());
 
             AntiForgeryConfig.SuppressXFrameOptionsHeader = true;
-
-            //JobScheduler.Start();
+            string action = Properties.Settings.Default["ActionOrNot"]?.ToString();
+            if(action == "Y")
+            {
+                //JobScheduler.Start();
+            }
         }
 
         protected void Application_BeginRequest(Object sender, EventArgs e)

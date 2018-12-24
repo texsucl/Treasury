@@ -318,7 +318,8 @@
                     type: "POST",
                     data: JSON.stringify({
                         treaItem: $('#' + CDC_C_TreaItemId).val(),
-                        dept: $('#' + CDC_C_Dept_BId).val()
+                        dept: $('#' + CDC_C_Dept_BId).val(),
+                        sect: $('#' + CDC_C_SectId).val()
                     }),
                     dataType: "json",
                     url: CDCCurl.GetCharge_Sect_AFT,
@@ -334,6 +335,10 @@
                     customerUtility.alert('作業項目不能為空', 'w');
                     return false;
                 }
+                $('#' + CDC_C_Dept_BId).val('');
+                $('#' + CDC_C_Dept_BId).trigger("change");
+                //$('#' + CDC_C_Sect_BId + ' option').remove();
+
                 var itemData = GetItemData($('#' + CDC_C_TreaItemId).val());
                 $.ajax({
                     type: 'POST',

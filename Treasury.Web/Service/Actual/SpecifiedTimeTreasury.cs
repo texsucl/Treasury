@@ -14,7 +14,7 @@ using Treasury.WebUtility;
 
 namespace Treasury.Web.Service.Actual
 {
-    public class SpecifiedTimeTreasury : ISpecifiedTimeTreasury
+    public class SpecifiedTimeTreasury : Common, ISpecifiedTimeTreasury
     {
         public SpecifiedTimeTreasury()
         {
@@ -588,8 +588,8 @@ namespace Treasury.Web.Service.Actual
                                 //");
                                 var _FuncId = _MAIL_RECEIVE.Where(x => x.MAIL_CONTENT_ID == _MAIL_CONTENT.MAIL_CONTENT_ID).Select(x => x.FUNC_ID);
                                 var _RoleId = _CODE_ROLE_FUNC.Where(x => _FuncId.Contains(x.FUNC_ID)).Select(x => x.ROLE_ID);
-                                List<string> _userIdList = new List<string>();
                                 var _UserId = _CODE_USER_ROLE.Where(x => _RoleId.Contains(x.ROLE_ID)).Select(x => x.USER_ID).Distinct();
+                                List<string> _userIdList = new List<string>();
 
                                 _userIdList.AddRange(_CODE_USER.Where(x => _UserId.Contains(x.USER_ID) && x.IS_MAIL == "Y").Select(x => x.USER_ID).ToList());
                                 if (_userIdList.Any())
@@ -757,29 +757,29 @@ namespace Treasury.Web.Service.Actual
         /// 員工資料
         /// </summary>
         /// <returns></returns>
-        protected List<V_EMPLY2> GetEmps()
-        {
-            var emps = new List<V_EMPLY2>();
-            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-            {
-                emps = dbINTRA.V_EMPLY2.AsNoTracking().Where(x => x.USR_ID != null).ToList();
-            }
-            return emps;
-        }
+        //protected List<V_EMPLY2> GetEmps()
+        //{
+        //    var emps = new List<V_EMPLY2>();
+        //    using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+        //    {
+        //        emps = dbINTRA.V_EMPLY2.AsNoTracking().Where(x => x.USR_ID != null).ToList();
+        //    }
+        //    return emps;
+        //}
 
         /// <summary>
         /// 部門資料
         /// </summary>
         /// <returns></returns>
-        protected List<VW_OA_DEPT> GetDepts()
-        {
-            var depts = new List<VW_OA_DEPT>();
-            using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
-            {
-                depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
-            }
-            return depts;
-        }
+        //protected List<VW_OA_DEPT> GetDepts()
+        //{
+        //    var depts = new List<VW_OA_DEPT>();
+        //    using (DB_INTRAEntities dbINTRA = new DB_INTRAEntities())
+        //    {
+        //        depts = dbINTRA.VW_OA_DEPT.AsNoTracking().ToList();
+        //    }
+        //    return depts;
+        //}
 
         /// <summary>
         /// 取得 人員基本資料

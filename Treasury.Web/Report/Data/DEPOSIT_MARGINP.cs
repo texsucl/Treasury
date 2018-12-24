@@ -84,7 +84,9 @@ namespace Treasury.Web.Report.Data
                         DESCRIPTION =Stockdata.DESCRIPTION,
                         MEMO =Stockdata.MEMO,
                         CHARGE_DEPT_ID = Stockdata.CHARGE_DEPT,
-                        CHARGE_SECT_ID = Stockdata.CHARGE_SECT
+                        CHARGE_SECT_ID = Stockdata.CHARGE_SECT,
+                        EFFECTIVE_DATE_B = Stockdata.EFFECTIVE_DATE_B.dateTimeToStr(),
+                        EFFECTIVE_DATE_E = Stockdata.EFFECTIVE_DATE_E.dateTimeToStr()
                     };
                     ReportDataList.Add(ReportData);
                 }

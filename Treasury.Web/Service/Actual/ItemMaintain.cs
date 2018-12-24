@@ -77,6 +77,7 @@ namespace Treasury.Web.Service.Actual
                         .Where(x => x.ITEM_ID == searchData.vTrea_IItem, searchData.vTrea_IItem != "All")
                         .Where(x => x.APLY_NO == searchData.vAply_No, searchData.vAply_No != null)
                         .Where(x => x.APPR_STATUS == searchData.vAppr_Status, searchData.vAppr_Status != "All")
+                        .Where(x => x.APLY_UID == searchData.vLast_Update_Uid, !searchData.vLast_Update_Uid.IsNullOrWhiteSpace())
                         .AsEnumerable()
                         .Select(x => new ItemMaintainChangeRecordSearchDetailViewModel {
                             //vFreeze_Dt = x.EXEC_ACTION != "A" ? _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.FREEZE_DT?.ToString("yyyy/MM/dd"): null,
@@ -97,7 +98,8 @@ namespace Treasury.Web.Service.Actual
                             vMEMO_B = x.MEMO_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
                             vAPPR_DESC = x.APPR_DESC,
-                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
+                            vITEM_DESC = x.ITEM_DESC
+                            //vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
 
