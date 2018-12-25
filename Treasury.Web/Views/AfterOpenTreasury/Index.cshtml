@@ -622,16 +622,22 @@
                 return false;
             }
             if (opType == "4") {
-                console.log(insertReasonTxT);
                 if (insertReasonTxT.length == 0) {
                     customerUtility.alert("請輸入入庫原因!!", 'w');
                     return false;
                 }
             }
             if (opType == "2") {
-                //accessType = $('#AccessType option:selected').text();
                 accessTypeCode = $('#' + AccessType).val();
                 SealItemId = $('#' + SealItem).val();
+                if (SealItemId.length == 0) {
+                    customerUtility.alert("請選擇印章!!", 'w');
+                    return false;
+                }
+                if (actualAccType.length == 0) {
+                    customerUtility.alert("請選擇實際作業別!!", 'w');
+                    return false;
+                }               
             }
             if (confirm("確定新增?")) {
                 $.ajax({
@@ -676,10 +682,28 @@
                 var opType = data.vITEM_OP_TYPE;
                 var accessTypeCode;
                 var SealItemId;
+                if (actualAccEmp.trim() == '') {
+                    customerUtility.alert("未輸入實際入庫人員!!", 'w');
+                    return false;
+                }
+                if (opType == "4") {
+                    if (insertReasonTxT.length == 0) {
+                        customerUtility.alert("請輸入入庫原因!!", 'w');
+                        return false;
+                    }
+                }
                 if (opType == "2") {
                     //accessType = $('#AccessType option:selected').text();
                     accessTypeCode = $('#' + AccessType).val();
                     SealItemId = $('#' + SealItem).val();
+                    if (SealItemId.length == 0) {
+                        customerUtility.alert("請選擇印章!!", 'w');
+                        return false;
+                    }
+                    if (accessTypeCode.length == 0 && actualAccType.length == 0) {
+                        customerUtility.alert("請選擇實際作業別!!", 'w');
+                        return false;
+                    }
                 }
                 $.ajax({
                     type: 'POST',
@@ -723,6 +747,7 @@
             if (rowid > 0) {
                 var data = $("#" + listId).getRowData(rowid);
                 var actualAccEmp = $('#' + ActualAccessEmps).val();
+                var actualAccType = $('#' + ActualAccessType).val();
                 if (actualAccEmp.trim() == '') {
                     customerUtility.alert("未輸入實際入庫人員!!", 'w');
                     return false;
@@ -733,6 +758,7 @@
                     data: JSON.stringify({
                         APLYNO: data.hvAPLY_NO,
                         ActualAccEmp: actualAccEmp,
+                        ActualAccType: actualAccType
                     }),
                     url: UrlFor.UnConfirmedUpdate,
                     contentType: 'application/json'
@@ -1141,15 +1167,11 @@
             }
             else if (type == '@Ref.ActionType.Add.ToString()') {
                 $('#' + InsertConfirm).show();
-                $('#' + CONFIRM_NAME_TR).hide();
                 $('#' + InsertConfirm).prop('disabled', false);
-                //$('#' + ActualAccessType).prop('disabled', true);
-                //$('#' + ActualAccessEmps).prop('disabled', false);
                 if ($('#ItemOpType option').length > 0) {
                     $('#' + ItemOpType).val($($('#ItemOpType option')[0]).val()).change();
                 }
-                //$('#' + InsertConfirm).on('click', function () { InsertFun(listId, rowid); });
-
+                $('#' + CONFIRM_NAME_TR).hide();
             }
             $('#' + dialogId).dialog('open');
         }
@@ -1330,7 +1352,6 @@
             });
             $('#' + dialogId).dialog('open');
         }
-
         //#endregion
 
         function GetActualAccessTypeFun(SEAL_ID, ACCESS_TYPE_CODE) {
@@ -1512,8 +1533,8 @@
             $('#' + ActualAccessEmps).prop('disabled', false);
             $('#' + CONFIRM_NAME_TR).show();
             $('#' + AplyNo_TR).hide();
-            $('#' + CONFIRM_NAME_LAB).text();
-            $('#' + AplyNo_LAB).text();
+            $('#' + CONFIRM_NAME_LAB).text('');
+            $('#' + AplyNo_LAB).text('');
             $('#' + AccessType).val(' ');
             $('#' + TreaItem).val('');
             $('#' + InsertReason).val('');

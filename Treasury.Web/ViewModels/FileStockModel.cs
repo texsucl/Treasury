@@ -33,6 +33,7 @@ namespace Treasury.Web.ViewModels
         /// <summary>
         /// 入庫批號
         /// </summary>
+        [Required]
         [Description("入庫批號")]
         public string TREA_BATCH_NO { get; set; }
 

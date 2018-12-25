@@ -440,11 +440,11 @@ namespace Treasury.Web.Service.Actual
                     
                     _TREA_APLY_REC = _TREA_APLY_REC
                    .Where(x => x.APLY_STATUS == "C01")
-                   //.Where(x => x.EXPECTED_ACCESS_DATE <= _vAPLY_DT_E, _vAPLY_DT_E != null)
-                   //.Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
-                   .Where(x => !confirmItemIdList.Contains(x.ITEM_ID))
-                   //.Where(x => _TREA_ITEM.Contains(x.ITEM_ID))
                    .Where(x => x.TREA_REGISTER_ID == null);
+                    //.Where(x => x.EXPECTED_ACCESS_DATE <= _vAPLY_DT_E, _vAPLY_DT_E != null)
+                    //.Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))
+                    //.Where(x => !confirmItemIdList.Contains(x.ITEM_ID))
+                    //.Where(x => _TREA_ITEM.Contains(x.ITEM_ID))
 
                     _TREA_APLY_TEMP = _TREA_APLY_TEMP
                     .Where(x => data.vITEM_ID_List.Contains(x.ITEM_ID))

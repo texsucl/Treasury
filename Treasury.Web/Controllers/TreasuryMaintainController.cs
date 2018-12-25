@@ -97,12 +97,12 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.TreasuryMaintainSearchData, searchModel);
 
             var datas = TreasuryMaintain.GetSearchData(searchModel);
-            if (datas.Any())
-            {
+            //if (datas.Any())
+            //{
                 Cache.Invalidate(CacheList.TreasuryMaintainSearchDataList);
                 Cache.Set(CacheList.TreasuryMaintainSearchDataList, datas);
                 result.RETURN_FLAG = true;
-            }
+            //}
 
             return Json(result);
         }

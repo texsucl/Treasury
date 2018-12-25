@@ -189,7 +189,7 @@ namespace Treasury.Web.Service.Actual
                                             {
                                                 _ITEM_SEAL.SEAL_DESC_ACCESS = _ITEM_SEAL.SEAL_DESC;
                                                 _ITEM_SEAL.MEMO_ACCESS = _ITEM_SEAL.MEMO;
-                                                _ITEM_SEAL.PUT_DATE_ACCESS = _ITEM_SEAL.PUT_DATE;
+                                                _ITEM_SEAL.PUT_DATE_ACCESS = dt;
                                             }
 
                                             _ITEM_SEAL.INVENTORY_STATUS = "1";

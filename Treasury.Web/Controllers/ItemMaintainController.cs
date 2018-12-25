@@ -64,12 +64,12 @@ namespace Treasury.Web.Controllers
             Cache.Set(CacheList.ItemMaintainSearchData, searchModel);
 
             var datas = ItemMaintain.GetSearchData(searchModel);
-            if (datas.Any())
-            {
+            //if (datas.Any())
+            //{
                 Cache.Invalidate(CacheList.ItemMaintainSearchDetailViewData);
                 Cache.Set(CacheList.ItemMaintainSearchDetailViewData, datas);
                 result.RETURN_FLAG = true;
-            }
+            //}
 
             return Json(result);
         }

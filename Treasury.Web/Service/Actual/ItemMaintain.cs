@@ -161,7 +161,8 @@ namespace Treasury.Web.Service.Actual
                             vMEMO_B = x.MEMO_B,
                             vAPPR_STATUS = _Appr_Status.FirstOrDefault(y => y.CODE == x.APPR_STATUS)?.CODE_VALUE.Trim(),
                             vAPPR_DESC = x.APPR_DESC,
-                            vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
+                            vITEM_DESC = x.ITEM_DESC
+                            //vITEM_DESC = _TREA_ITEM.FirstOrDefault(y => y.ITEM_ID == x.ITEM_ID)?.ITEM_DESC
                         }).ToList();
 
                     //result = db.TREA_ITEM_HIS.AsNoTracking()

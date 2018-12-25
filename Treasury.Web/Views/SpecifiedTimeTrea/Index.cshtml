@@ -278,10 +278,16 @@
                                         $('#STT_Insert').prop('disabled', false);
                                         formInsert("ADD");
                                     }
-                                });                       
+                                });
+                                    
                             });
                     }
                 });
+                //#endregion 
+                //查詢是否有未完成的單號
+                function checkUnfinichNo() {
+                    
+                }
                 //#endregion 
                 //region 設定Timepicker
                 function setTimepicker() {
@@ -356,7 +362,24 @@
                         $('#' + whitchDialog + '_REGISTER_ID').prop('disabled', true);
                         $('#' + whitchDialog + '_INTRADATE_ID').val(today).prop('disabled', true);
                         $('#' + whitchDialog + '_CASENO_ID').val('@ViewBag.emailId').prop('disabled', true);
-                        $('#' + whitchDialog + '_Apply_ID').click(function () { ApplyReview(whitchDialog); });
+                        $('#' + whitchDialog + '_Apply_ID').click(function () {
+                            $.ajax({
+                                type: 'POST',
+                                data: null,
+                                url: UrlFor.CheckRegisterId,
+                                contentType: 'application/json',
+                            }).done(function (result) {
+                                if (!result.RETURN_FLAG) {
+                                    customerUtility.alert(result.DESCRIPTION, 'w');
+                                    $('#STT_Insert').prop('disabled', true);
+                                    return false;
+                                } else {
+                                    $('#STT_Insert').prop('disabled', false);
+                                    ApplyReview(whitchDialog);
+                                }
+                            });
+                                
+                        });
                         //$('#' + whitchDialog + '_Close_ID').click(function () { $('#SSTADDDialog').dialog("close"); });
                         break;
                     case "Update":             

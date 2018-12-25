@@ -19,6 +19,11 @@
     //#region 參數設定
     var CheckEdit = false; //檢查修改
     var DCI_Order_ConfirmFlag = false; //離開時提醒訊息
+
+    var Access_Type = ""//交易別
+    var Isortby = ""//資料順序
+    var Old_Order = "";//舊的順序
+    var New_Order = "";//新的順序
     //#endregion 參數設定
 
 
@@ -26,6 +31,8 @@
     function TheOnEditFunction(rowid) {
         if (CheckEdit == false) {
             var rowData = jQuery("#gridOrder").jqGrid("getRowData", rowid);
+
+            Old_Order = rowData.vItem_Order;
 
             jQuery("#gridOrder").setSelection(rowid, true);
 
@@ -48,22 +55,32 @@
 
     //jqgrid中的儲存
     function TheOnSaveFunction(rowid) {
-        jQuery("#gridOrder").saveRow(rowid, false);
+        //判斷輸入順序範圍
+        if ($("#" + rowid + "_vItem_Order").val() < 1 || $("#" + rowid + "_vItem_Order").val() > jQuery("#gridOrder")["0"].p.reccount)
+        {
+            customerUtility.alert('可輸入順序範圍為1~' + jQuery("#gridOrder")["0"].p.reccount + ',請重新輸入', 'w');
+        }
+        else if ($("#" + rowid + "_vItem_Order").val() == Old_Order)
+        {
+            customerUtility.alert('新舊順序相同，請重新輸入', 'w');
+        }
+        else
+        {
+            jQuery("#gridOrder").saveRow(rowid, false);
 
-        var rowData = jQuery("#gridOrder").jqGrid("getRowData", rowid);
+            var rowData = jQuery("#gridOrder").jqGrid("getRowData", rowid);
 
-        $("#btn_save_" + rowid).css("visibility", "hidden");
-        $("#btn_cancel_" + rowid).css("visibility", "hidden");
+            Access_Type = rowData.vAccess_Type;
+            Isortby = rowData.vIsortby;
+            New_Order = rowData.vItem_Order;
 
-        $("#btn_edit_" + rowid).css("visibility", "visible");
-        $("#btn_edit_" + rowid).show();
-        $("#btn_save_" + rowid).hide();
-        $("#btn_cancel_" + rowid).hide();
+            //重新排序
+            ResetOrder(Access_Type, Isortby, Old_Order, New_Order, rowid);
 
-        CheckEdit = false;
-        DCI_Order_ConfirmFlag = true;
+            CheckEdit = false;
+            DCI_Order_ConfirmFlag = true;
+        }
     }
-
 
     //jqgrid中的取消
     function TheOnCancelFunction(rowid) {
@@ -79,6 +96,49 @@
         $("#btn_cancel_" + rowid).hide();
 
         CheckEdit = false;
+    }
+
+    //重新排序
+    function ResetOrder(Access_Type, Isortby, Old_Order, New_Order, rowid) {
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify({
+                Access_Type: Access_Type,
+                Isortby: Isortby,
+                Old_Order: Old_Order,
+                New_Order: New_Order
+            }),
+            url: '@Url.Action("ResetOrder", "DepChkItem")',
+            contentType: 'application/json',
+        }).done(function (result) {
+            if (result.RETURN_FLAG) {
+                ShowOrder();
+            }
+        });
+    }
+
+    function ShowOrder() {
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: '@Url.Action("qryOrderData", "DepChkItem")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    //更新畫面GRID
+                    jQuery("#gridOrder").jqGrid('clearGridData')
+                        .jqGrid('setGridParam', { data: data.orderList })
+                        .trigger("reloadGrid");
+                } else {
+                    customerUtility.alert(data.err, 'w');
+                }
+            }
+        });
+
+        $.unblockUI(); //畫面打開
     }
 
     $(function () {
