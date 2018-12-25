@@ -949,10 +949,16 @@
                     bPass = false;
                     validationSummary.append('<li>' + '畫面尚有資料未存檔!!' + '</li>');
                 }
-
-                if ($('#roleAuthType').val() == "" || $('#controlMode').val() == "" || $('#custodyMode').val() == "" || $("#custodyOrder").val().length == 0) {
+                debugger;
+                if ($('#roleAuthType').val() == "") {
                     bPass = false;
                     validationSummary.append('<li>' + '尚未選取角色群組或新增角色群組明細,無法新增!!' + '</li>');
+                }
+                if ($('#roleAuthType').val() == "E") {
+                    if ($('#controlMode').val() == "" || $('#custodyMode').val() == "" || $("#custodyOrder").val().length == 0) {
+                        bPass = false;
+                        validationSummary.append('<li>' + '尚未選取角色群組或新增角色群組明細,無法新增!!' + '</li>');
+                    }
                 }
 
                 if ($('#cRoleName').val() == "") {

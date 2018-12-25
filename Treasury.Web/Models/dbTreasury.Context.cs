@@ -39,7 +39,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<DEP_CHK_ITEM> DEP_CHK_ITEM { get; set; }
         public virtual DbSet<ITEM_CHARGE_UNIT> ITEM_CHARGE_UNIT { get; set; }
         public virtual DbSet<ITEM_OTHER> ITEM_OTHER { get; set; }
-        public virtual DbSet<ITEM_REAL_ESTATE> ITEM_REAL_ESTATE { get; set; }
         public virtual DbSet<ITEM_SEAL> ITEM_SEAL { get; set; }
         public virtual DbSet<MAIL_RECEIVE> MAIL_RECEIVE { get; set; }
         public virtual DbSet<PIA_EXEC_TYPE> PIA_EXEC_TYPE { get; set; }
@@ -81,5 +80,6 @@ namespace Treasury.Web.Models
         public virtual DbSet<ITEM_CHARGE_UNIT_HIS> ITEM_CHARGE_UNIT_HIS { get; set; }
         public virtual DbSet<DEP_CHK_ITEM_HIS> DEP_CHK_ITEM_HIS { get; set; }
         public virtual DbSet<TREA_EQUIP_HIS> TREA_EQUIP_HIS { get; set; }
+        public virtual DbSet<ITEM_REAL_ESTATE> ITEM_REAL_ESTATE { get; set; }
     }
 }

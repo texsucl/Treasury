@@ -548,16 +548,17 @@ namespace Treasury.Web.Service.Actual
                     var PUT_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_DT_To).DateToLatestTime();
                     var GET_DATE_From = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_From);
                     var GET_DATE_To = TypeTransfer.stringToDateTimeN(searchModel.vAPLY_ODT_To).DateToLatestTime();
+
                     var Commit_Date = TypeTransfer.stringToDateTime(searchModel.vCommit_Date);
                     var Expiry_Date= TypeTransfer.stringToDateTime(searchModel.vExpiry_Date);
 
                     CDC_MasterDataList.AddRange(db.ITEM_DEP_ORDER_M.AsNoTracking()
                         .Where(x => TreasuryIn.Contains(x.INVENTORY_STATUS), searchModel.vTreasuryIO == "Y")
                         .Where(x => x.INVENTORY_STATUS == TreasuryOut, searchModel.vTreasuryIO == "N")
-                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_From.Value, PUT_DATE_From != null)
-                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_To.Value, PUT_DATE_To != null)
-                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_From.Value, GET_DATE_From != null)
-                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_To.Value, GET_DATE_To != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value >= PUT_DATE_From.Value, PUT_DATE_From != null)
+                        .Where(x => x.PUT_DATE != null && x.PUT_DATE.Value <= PUT_DATE_To.Value, PUT_DATE_To != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value >= GET_DATE_From.Value, GET_DATE_From != null)
+                        .Where(x => x.GET_DATE != null && x.GET_DATE.Value <= GET_DATE_To.Value, GET_DATE_To != null)
                         .Where(x => x.COMMIT_DATE == Commit_Date, searchModel.vCommit_Date != null)
                         .Where(x => x.EXPIRY_DATE == Expiry_Date, searchModel.vExpiry_Date != null)
                         .Where(x => x.TRAD_PARTNERS == searchModel.vTRAD_Partners, searchModel.vTRAD_Partners != "All")

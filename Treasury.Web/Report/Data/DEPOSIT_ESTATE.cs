@@ -83,7 +83,7 @@ namespace Treasury.Web.Report.Data
                         ESTATE_SEQ = ESTATEdata.ESTATE_SEQ,
                         BOOK_NO_DETAIL = ESTATEdata.GROUP_NO.ToString(),
                         BUILDING_NAME = getBuildName(book,ESTATEdata.GROUP_NO.ToString()),
-                        LOCATED = getBuildName(book,ESTATEdata.GROUP_NO.ToString()),
+                        LOCATED = getLocated(book,ESTATEdata.GROUP_NO.ToString()),
                         CHARGE_DEPT = _CHARGE_DEPT,
                         CHARGE_SECT= _CHARGE_SECT,
                         CHARGE_DEPT_ID = ESTATEdata.CHARGE_DEPT,

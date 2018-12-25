@@ -28,12 +28,15 @@ namespace Treasury.Web.Service.Actual
         /// <returns></returns>
         public int GetMaxStockNo()
         {
-            int result;
+            int result = 0;
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                result = db.ITEM_BOOK.AsNoTracking()
-                    .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString())
-                    .Max(x => x.GROUP_NO);
+                var _ITEM_BOOK = db.ITEM_BOOK.AsNoTracking()
+                    .Where(x => x.ITEM_ID == Ref.TreaItemType.D1015.ToString()).ToList();
+                    //.Max(x => x.GROUP_NO);
+
+            if(_ITEM_BOOK.Count > 0)
+                    result = _ITEM_BOOK.Max(x => x.GROUP_NO);
             }
             return result;
         }

@@ -306,7 +306,7 @@ namespace Treasury.Web.Service.Actual
                             vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
                             vEstate_Form_No = x.ESTATE_FORM_NO,
                             vEstate_Form_No_Aft = x.ESTATE_FORM_NO_AFT,
-                            vEstate_Date = x.ESTATE_DATE.ToString("yyyy/MM/dd"),
+                            vEstate_Date = x.ESTATE_DATE?.ToString("yyyy/MM/dd"),
                             vEstate_Date_Aft = x.ESTATE_DATE_AFT?.ToString("yyyy/MM/dd"),
                             vOwnership_Cert_No = x.OWNERSHIP_CERT_NO,
                             vOwnership_Cert_No_Aft = x.OWNERSHIP_CERT_NO_AFT,
@@ -363,7 +363,7 @@ namespace Treasury.Web.Service.Actual
                             vIB_Memo = _Item_Book.FirstOrDefault(y => y.GROUP_NO == x.GROUP_NO && y.COL == "MEMO")?.COL_VALUE,
                             vEstate_Form_No = x.ESTATE_FORM_NO,
                             vEstate_Form_No_Aft = x.ESTATE_FORM_NO_AFT,
-                            vEstate_Date = x.ESTATE_DATE.ToString("yyyy/MM/dd"),
+                            vEstate_Date = x.ESTATE_DATE?.ToString("yyyy/MM/dd"),
                             vEstate_Date_Aft = x.ESTATE_DATE_AFT?.ToString("yyyy/MM/dd"),
                             vOwnership_Cert_No = x.OWNERSHIP_CERT_NO,
                             vOwnership_Cert_No_Aft = x.OWNERSHIP_CERT_NO_AFT,
@@ -557,7 +557,7 @@ namespace Treasury.Web.Service.Actual
                                                 }
                                                 _IRE.GROUP_NO = groupUp; //群組編號
                                                 _IRE.ESTATE_FORM_NO = item.vEstate_From_No; //狀別
-                                                _IRE.ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date); //發狀日
+                                                _IRE.ESTATE_DATE = TypeTransfer.stringToDateTimeN(item.vEstate_Date); //發狀日
                                                 _IRE.OWNERSHIP_CERT_NO = item.vOwnership_Cert_No; //字號
                                                 _IRE.LAND_BUILDING_NO = item.vLand_Building_No; // 地/建號
                                                 _IRE.HOUSE_NO = item.vHouse_No; //門牌號
@@ -578,7 +578,7 @@ namespace Treasury.Web.Service.Actual
                                                     INVENTORY_STATUS = "3", //預約存入
                                                     GROUP_NO = groupUp, //群組編號
                                                     ESTATE_FORM_NO = item.vEstate_From_No, //狀別
-                                                    ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date), //發狀日
+                                                    ESTATE_DATE = TypeTransfer.stringToDateTimeN(item.vEstate_Date), //發狀日
                                                     OWNERSHIP_CERT_NO = item.vOwnership_Cert_No, //字號
                                                     LAND_BUILDING_NO = item.vLand_Building_No, // 地/建號
                                                     HOUSE_NO = item.vHouse_No, //門牌號
@@ -752,7 +752,7 @@ namespace Treasury.Web.Service.Actual
                                                 INVENTORY_STATUS = "3", //預約存入
                                                 GROUP_NO = groupUp, //群組編號
                                                 ESTATE_FORM_NO = item.vEstate_From_No, //狀別
-                                                ESTATE_DATE = TypeTransfer.stringToDateTime(item.vEstate_Date), //發狀日
+                                                ESTATE_DATE = TypeTransfer.stringToDateTimeN(item.vEstate_Date), //發狀日
                                                 OWNERSHIP_CERT_NO = item.vOwnership_Cert_No, //字號
                                                 LAND_BUILDING_NO = item.vLand_Building_No, // 地/建號
                                                 HOUSE_NO = item.vHouse_No, //門牌號
@@ -1229,7 +1229,7 @@ namespace Treasury.Web.Service.Actual
                 vStatus = _Inventory_types.FirstOrDefault(y => y.CODE == x.INVENTORY_STATUS)?.CODE_VALUE,//代碼.庫存狀態 
                 vGroupNo = x.GROUP_NO.ToString(), //群組編號
                 vEstate_From_No = accessStatus? x.ESTATE_FORM_NO_ACCESS : x.ESTATE_FORM_NO, //狀別
-                vEstate_Date = accessStatus? x.ESTATE_DATE_ACCESS?.ToString("yyyy/MM/dd") : TypeTransfer.dateTimeToString(x.ESTATE_DATE,false), //發狀日
+                vEstate_Date = accessStatus? x.ESTATE_DATE_ACCESS?.ToString("yyyy/MM/dd") : TypeTransfer.dateTimeNToString(x.ESTATE_DATE), //發狀日
                 vOwnership_Cert_No = accessStatus? x.OWNERSHIP_CERT_NO_ACCESS : x.OWNERSHIP_CERT_NO, //字號
                 vLand_Building_No = accessStatus? x.LAND_BUILDING_NO_ACCESS : x.LAND_BUILDING_NO, //地/建號
                 vHouse_No = accessStatus? x.HOUSE_NO_ACCESS : x.HOUSE_NO, //門牌號

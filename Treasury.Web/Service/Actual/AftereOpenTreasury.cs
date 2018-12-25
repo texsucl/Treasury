@@ -62,6 +62,7 @@ namespace Treasury.Web.Service.Actual
                     }).ToList();
 
                 itemOpType = db.TREA_ITEM.AsNoTracking()
+                    .Where(x => x.IS_DISABLED == "N")
                     .Where(x => x.ITEM_OP_TYPE != "3")
                     .AsEnumerable()
                     .Select(x => new SelectOption()
@@ -74,6 +75,7 @@ namespace Treasury.Web.Service.Actual
                 firstItemOpType = itemOpType.FirstOrDefault().Value;
 
                 treaItem = db.TREA_ITEM.AsNoTracking()
+                    .Where(x => x.IS_DISABLED == "N")
                     .Where(x => x.ITEM_OP_TYPE == firstItemOpType)
                     .Select(x => new SelectOption()
                     {
@@ -175,7 +177,7 @@ namespace Treasury.Web.Service.Actual
 
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
+                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x => x.IS_DISABLED == "N");
                 var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
                 var _CODE_ROLE_ITEM = db.CODE_ROLE_ITEM.AsNoTracking();
                 var _CODE_ROLE = db.CODE_ROLE.AsNoTracking();
@@ -428,7 +430,7 @@ namespace Treasury.Web.Service.Actual
             string status = Ref.AccessProjectFormStatus.C01.ToString(); // 保管科覆核完成覆核，待入庫人員確認中
             using (TreasuryDBEntities db = new TreasuryDBEntities())
             {
-                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking();
+                var _TREA_ITEM = db.TREA_ITEM.AsNoTracking().Where(x => x.IS_DISABLED == "N");
                 var _ITEM_SEAL = db.ITEM_SEAL.AsNoTracking();
                 var _OTHER_ITEM_APLY = db.OTHER_ITEM_APLY.AsNoTracking();
                 var _SYS_CODE = db.SYS_CODE.AsNoTracking().Where(x => x.CODE_TYPE == "ACCESS_TYPE").ToList();
@@ -982,8 +984,8 @@ namespace Treasury.Web.Service.Actual
 
                     if (!InsertModel.ACTUAL_ACCESS_UID.IsNullOrWhiteSpace())
                         _TREA_APLY_REC.ACTUAL_ACCESS_UID = InsertModel.ACTUAL_ACCESS_UID;
-                    if (!InsertModel.vACCESS_TYPE_CODE.IsNullOrWhiteSpace())
-                        _TREA_APLY_REC.ACTUAL_ACCESS_TYPE = InsertModel.vACCESS_TYPE_CODE;
+                    if (!InsertModel.ACTUAL_ACCESS_TYPE.IsNullOrWhiteSpace())
+                        _TREA_APLY_REC.ACTUAL_ACCESS_TYPE = InsertModel.ACTUAL_ACCESS_TYPE;
                     if(!InsertModel.vACCESS_REASON.IsNullOrWhiteSpace())
                         _TREA_APLY_REC.ACCESS_REASON = InsertModel.vACCESS_REASON;
                     _TREA_APLY_REC.LAST_UPDATE_UID = cUserId;

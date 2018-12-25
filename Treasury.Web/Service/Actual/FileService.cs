@@ -430,21 +430,21 @@ namespace Treasury.Web.Service.Actual
                             }
                             db.SaveChanges();
 
-                            //更新下一次入庫批號
-                            using (TreasuryDBEntities dbs = new TreasuryDBEntities())
-                            {
-                                var item_books = dbs.ITEM_BOOK.Where(x => x.ITEM_ID == "D1015" &&
-                                x.COL == "NEXT_BATCH_NO").ToList();
-                                foreach (var item in StockModels.GroupBy(x => x.GROUP_NO))
-                                {
-                                    int GROUP_NO = item.Key; //股票群組
-                                    int max_TREA_BATCH_NO = item.Max(x => x.TREA_BATCH_NO) + 1; //下一次的入庫批號
-                                    var item_book = item_books.FirstOrDefault(x => x.GROUP_NO == GROUP_NO);
-                                    if (item_book != null)
-                                        item_book.COL_VALUE = max_TREA_BATCH_NO.ToString();
-                                }
-                                dbs.SaveChanges();
-                            }
+                            ////更新下一次入庫批號
+                            //using (TreasuryDBEntities dbs = new TreasuryDBEntities())
+                            //{
+                            //    var item_books = dbs.ITEM_BOOK.Where(x => x.ITEM_ID == "D1015" &&
+                            //    x.COL == "NEXT_BATCH_NO").ToList();
+                            //    foreach (var item in StockModels.GroupBy(x => x.GROUP_NO))
+                            //    {
+                            //        int GROUP_NO = item.Key; //股票群組
+                            //        int max_TREA_BATCH_NO = item.Max(x => x.TREA_BATCH_NO) + 1; //下一次的入庫批號
+                            //        var item_book = item_books.FirstOrDefault(x => x.GROUP_NO == GROUP_NO);
+                            //        if (item_book != null)
+                            //            item_book.COL_VALUE = max_TREA_BATCH_NO.ToString();
+                            //    }
+                            //    dbs.SaveChanges();
+                            //}
                         }
                         catch (Exception ex)
                         {
@@ -965,10 +965,15 @@ namespace Treasury.Web.Service.Actual
                                 flag = false;
                                 msgs.Add($@"股票類型 : {item.STOCK_TYPE} 找不到指定的代碼");
                             }
+                            else if (_NEXT_BATCH_NO <= TypeTransfer.stringToInt(item.TREA_BATCH_NO))
+                            {
+                                flag = false;
+                                msgs.Add($@"股票類型 : {item.STOCK_TYPE} ,股票名稱 : {item.STOCK_NAME}, 找不到入庫批號 : {item.TREA_BATCH_NO}");                              
+                            }
                             else
                             {
                                 item.GROUP_NO = _groupNo.ToString();
-                                item.TREA_BATCH_NO = _NEXT_BATCH_NO.ToString();
+                                item.TREA_BATCH_NO = item.TREA_BATCH_NO;
                                 if (_area == "D")//國內
                                 {
                                     item.STOCK_TYPE_CODE = ST.CODE; //股票類型代碼
@@ -1031,8 +1036,8 @@ namespace Treasury.Web.Service.Actual
                                             if (!item.SINGLE_NUMBER_OF_SHARES.IsNullOrWhiteSpace() && !item.STOCK_CNT.IsNullOrWhiteSpace())
                                             {
                                                 //股數 = 張數 * 單張股數
-                                                item.NUMBER_OF_SHARES = (TypeTransfer.stringToInt(item.STOCK_CNT) * TypeTransfer.stringToInt(item.SINGLE_NUMBER_OF_SHARES)).ToString();                                                
-                                            }                                          
+                                                item.NUMBER_OF_SHARES = (TypeTransfer.stringToInt(item.STOCK_CNT) * TypeTransfer.stringToInt(item.SINGLE_NUMBER_OF_SHARES)).ToString();
+                                            }
                                             break;
                                         case "P": //股權(持股)憑證
                                             if (item.STOCK_CNT.IsNullOrWhiteSpace())
@@ -1104,7 +1109,7 @@ namespace Treasury.Web.Service.Actual
                                     {
                                         flag = false;
                                         msgs.Add($@"股票名稱 : {model.Key}, 區域為國外, 不符合驗證規則, 需要有一個欄位有參數");
-                                    }               
+                                    }
                                 }
                             }
                             var emp = emps.FirstOrDefault(x => x.USR_ID == item.APLY_UID);
@@ -1141,7 +1146,7 @@ namespace Treasury.Web.Service.Actual
                             if (item.PUT_DATE.IsNullOrWhiteSpace())
                                 item.PUT_DATE = dtn;
                         }                     
-                        _NEXT_BATCH_NO += 1;
+                        //_NEXT_BATCH_NO += 1;
                     }               
                 }
                 else

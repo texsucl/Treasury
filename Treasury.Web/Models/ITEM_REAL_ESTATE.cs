@@ -18,7 +18,7 @@ namespace Treasury.Web.Models
         public string INVENTORY_STATUS { get; set; }
         public int GROUP_NO { get; set; }
         public string ESTATE_FORM_NO { get; set; }
-        public System.DateTime ESTATE_DATE { get; set; }
+        public Nullable<System.DateTime> ESTATE_DATE { get; set; }
         public string OWNERSHIP_CERT_NO { get; set; }
         public string LAND_BUILDING_NO { get; set; }
         public string HOUSE_NO { get; set; }
