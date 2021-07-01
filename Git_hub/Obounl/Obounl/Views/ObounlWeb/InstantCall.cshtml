@@ -1,0 +1,287 @@
+﻿@model Obounl.Models.Model.InstantCallViewModel
+@{
+    if (Model.CaseNo != string.Empty)
+    {
+        //Layout = "~/Views/Shared/_ApiLayout.cshtml";
+        <link href="~/Content/bootstrap.css" rel="stylesheet" />
+        <script src="~/Scripts/jquery-3.3.1.js"></script>
+        <script src="~/Scripts/bootstrap.js"></script>
+    }
+    ViewBag.Title = "InstantCall";
+}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <div class="container-fluid">
+        @if (Model.Flag)
+        {
+            <div class="row justify-content-md-center align-items-center" style="justify-content:center; background-color: cornflowerblue;">
+                <h3>申請【即時電訪】服務</h3>
+            </div>
+            <div class="row">
+                @*<div class="col-md-1"></div>*@
+                <div class="col-sm-4">
+                    <h4>本次需電訪對象為：</h4>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>選取</th>
+                                <th>保戶身分</th>
+                                <th>保戶姓名</th>
+                                @*<th style="display:none">保戶ID</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="InstantCall_Table">
+                            @foreach (var item in Model.CallData)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="custom-control custom-checkbox ">
+                                            <input type="checkbox" class="custom-control-input customerCheck" id="@item.CustID" name="example1" checked>
+                                            <label class="custom-control-label" for="@item.CustID"></label>
+                                        </div>
+                                        @*<input type="checkbox" id="" class="InstantCallInput" checked />*@
+                                    </td>
+                                    <td>@item.CustContGen</td>
+                                    <td>@item.Cust_Name</td>
+                                    @*<td>@item.CustID</td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <h4>@Model.TopMemo</h4>
+                    </div>
+                    @foreach (var item in Model.MemoData)
+                    {
+                        <div class="row">
+                            <div class="col-sm-1">
+                                <h4>@item.Num .</h4>
+                            </div>
+                            <div class="col-sm-11">
+                                <h4>@item.Memo</h4>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="row justify-content-md-center align-items-center pt-3 pb-3" style="justify-content:center;">
+                @*<div class="col-sm-4 Situation Situation_1 Situation_2 Situation_3" style="display:none;">*@
+                <input type="button" class="btn btn-primary Situation Situation_1 Situation_2 Situation_3 mr-2 ml-2" style="display:none;" data-toggle="modal" data-target="#CancelModel" value="取消申請" />
+                @*</div>*@
+                @*<div class="col-sm-4 Situation Situation_1" style="display:none;">*@
+                @*<input type="button" class="btn btn-primary Situation Situation_1 mr-2 ml-2" style="display:none;" data-toggle="modal" data-target="#BookingModel_1" value="預約電訪" />*@
+                @*</div>*@
+                @*<div class="col-sm-4 Situation Situation_2 Situation_3" style="display:none;">*@
+                @*<input type="button" class="btn btn-primary Situation Situation_2 Situation_3 mr-2 ml-2" style="display:none;" data-toggle="modal" data-target="#BookingModel_2" value="預約電訪" />*@
+                @*</div>*@
+                @*<div class="col-sm-4 Situation Situation_1" style="display:none;">*@
+                <input type="button" class="btn btn-primary Situation Situation_1 mr-2 ml-2" style="display:none;" data-toggle="modal" data-target="" value="確認送出" id="InstantCall_Confirm" />
+                @*</div>*@
+            </div>
+        }
+        else
+        {
+            <div class="col-sm-12">
+                <h3>@Model.ErrorMsg</h3>
+            </div>
+        }
+    </div>
+
+    <!-- 確認送出 Modal -->
+    <div class="modal fade" id="ConfrimModel" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success justify-content-md-center">
+                </div>
+                <div class="modal-body">
+                    已為您申請【即時電訪】服務
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-obounl" data-dismiss="modal">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 取消電訪 Modal -->
+    <div class="modal fade" id="CancelModel" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info justify-content-md-center">
+                </div>
+                <div class="modal-body">
+                    將等待案件受理後，另行安排電訪
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-obounl" data-dismiss="modal">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 無可供服務的電訪員 -->
+    <div class="modal fade" id="Overloading" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning justify-content-md-center">
+                </div>
+                <div class="modal-body">
+                    <p><h4><b>目前無可供服務的人員</b></h4></p>
+                    <p>很抱歉！目前所有電訪人員均在忙線中</p>
+                    <p>保戶 @String.Join("、", Model.CallData.Select(x => x.Cust_Name)) 符合承保前電訪資格，將等待案件受理後另行安排電訪</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-obounl" data-dismiss="modal">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 非服務時段 -->
+    <div class="modal fade" id="NonService" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning justify-content-md-center">
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <p><h4><b>目前非【即時電訪】服務時段</b></h4></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-0">即時電訪服務時間：周一至周五 @ViewBag.ServiceTime</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                            </div>
+                            <div class="col-9">
+                                <p>（例假日、國定假日無提供）</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <p>保戶 @String.Join("、", Model.CallData.Select(x => x.Cust_Name)) 符合承保前電訪資格，將等待案件受理後另行安排電訪</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer pb-0">
+                        <button type="button" class="btn btn-secondary close-obounl" data-dismiss="modal">完成</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 錯誤 Modal -->
+    <div class="modal fade" id="ErrorModel" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning justify-content-md-center">
+                </div>
+                <div class="modal-body">
+                    <label id="errorMsg"></label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-obounl" data-dismiss="modal">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    $(function () {
+        $('.Situation').hide();
+        $('.' + '@Model.Situation').show();
+        $('#InstantCall_Confirm').off('click', function () { });
+        $('#InstantCall_Confirm').on('click', function () {
+            var _CustID_Array = [];
+            $('.customerCheck:checked').each(function () {
+                _CustID_Array.push($(this).attr('id'));
+            });
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    CaseNo: '@Model.CaseNo',
+                    CustID: _CustID_Array
+                }),
+                dataType: "json",
+                url: '@Url.Action("Confrim", "ObounlWeb")',
+                contentType: 'application/json'
+              }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#ConfrimModel').modal('show');
+                }
+                else {
+                    switch (result.REASON_CODE) {
+                        case '01':
+                            $('#NonService').modal('show');
+                            break;
+                        case '02':
+                            $('#Overloading').modal('show');
+                            break;
+                        default:
+                            $('#errorMsg').html(result.DESCRIPTION);
+                            $('#ErrorModel').modal('show');
+                    }
+                }
+            });
+        });
+
+        $('.close-obounl').on('click', function () {
+            document.location = '@Url.Action("Done", "ObounlWeb")';
+        });
+    });
+
+    </script>
+
+    <!-- 預約電訪(1) Modal -->
+    <div class="modal fade" id="BookingModel_1" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info justify-content-md-center">
+                    <h5 class="modal-title " id="">提醒您 !</h5>
+                    @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>*@
+                </div>
+                <div class="modal-body">
+                    保單需依據承保前電訪結果進行核保審查，所以建議您選擇【即時電訪】以加速核保審查進度。
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">回上一步</button>
+                    <button type="button" class="btn btn-primary">下一步</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 預約電訪(2) Modal -->
+    <div class="modal fade" id="BookingModel_2" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info justify-content-md-center">
+                    <h5 class="modal-title" id="">提醒您 !</h5>
+                    @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>*@
+                </div>
+                <div class="modal-body">
+                    保單需依據承保前電訪結果進行核保審查，所以建議您選擇2天內的預約時段，以加速核保審查進度。
+                </div>
+                <div class="modal-footer">
+                    @*<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>*@
+                    <button type="button" class="btn btn-primary">下一步</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+﻿@{
+    ViewBag.Title = "Search";
+}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.min.js"></script>
+    <script src="~/Scripts/locales/bootstrap-datepicker.zh-TW.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        @if (ViewBag.Flag)
+        {
+            <div class="row justify-content-sm-center align-items-center" style="justify-content:center; text-align:center;background-color: cornflowerblue;">
+                <h3>請輸入查詢條件</h3> &emsp;
+                <h5>(提供近90天電訪進度查詢,每次查詢範圍不可超過90天)</h5>
+            </div>
+            <div class="row pt-3 align-items-center">
+                <div class="col-sm-2 ">
+                    <h5>要保文件上傳 : </h5>
+                </div>
+                <div class="col-sm-1">
+                    <h5>起日</h5>
+                </div>
+                <div class="col-sm-4 justify-content-sm-center">
+                    <div id="Search_DatePicker_S" class="input-group date">
+                        <input type="text" class="form-control">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar fa-1_5x"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <h5>迄日</h5>
+                </div>
+                <div class="col-sm-4 justify-content-sm-center">
+                    <div id="Search_DatePicker_E" class="input-group date">
+                        <input type="text" class="form-control">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar fa-1_5x"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-3 align-items-center">
+                <div class="col-sm-2">
+                    <h5>受訪者身分證字號 :</h5>
+                </div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="UserId" placeholder="受訪者身分證字號" aria-label="UserId" autocomplete="off">
+                </div>
+            </div>
+            <div class="row pt-3 align-items-center">
+                <div class="col-sm-2">
+                    <h5>同意書編號 :</h5>
+                </div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="UserNo" placeholder="同意書編號" aria-label="UserNo" autocomplete="off">
+                </div>
+            </div>
+            <div class="row pt-3 pb-3 justify-content-md-center" style="justify-content:center;">
+                <div class="col-sm-6">
+                    <input type="button" class="btn btn-secondary" id="SearchCallDone" value="離開" />
+                </div>
+                <div class="col-sm-6">
+                    <input type="button" class="btn btn-primary" id="SearchButton" value="開始查詢" />
+                </div>
+            </div>
+            <div>
+                <form style="display: none" action="~/ObounlWeb/Data" method="POST" id="form">
+                    <input type="hidden" id="agentID" name="agentID" value="" />
+                    <input type="hidden" id="Sdate" name="Sdate" value="" />
+                    <input type="hidden" id="Edate" name="Edate" value="" />
+                    <input type="hidden" id="custid" name="custid" value="" />
+                    <input type="hidden" id="RptReceNo" name="RptReceNo" value="" />
+                    <input type="hidden" id="token" name="token" value="" />
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="col-sm-12">
+                <h3>@ViewBag.msg</h3>
+            </div>
+            <div class="row justify-content-md-center pb-3" style="justify-content:center;">
+                <input type="button" class="btn btn-secondary" id="SearchCallDone" value="離開" />
+            </div>
+        }
+
+    </div>
+    <script type="text/javascript">
+    $(function () {
+        var d = new Date();
+        d.setMonth(d.getMonth() - 3);
+        $('#Search_DatePicker_S').datepicker({
+            language: "zh-TW",
+            autoclose: true,
+            todayHighlight: true,
+            orientation: "bottom auto",
+            format: "yyyy-mm-dd",
+            startDate: d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+        }).on('hide', function () {
+             $('#Search_DatePicker_E').datepicker('setStartDate', $('#Search_DatePicker_S').datepicker('getFormattedDate'));
+        }).on('clearDate', function () {  $('#Search_DatePicker_E').datepicker('setStartDate','')});
+         $('#Search_DatePicker_E').datepicker({
+            language: "zh-TW",
+            autoclose: true,
+            todayHighlight: true,
+            orientation: "bottom auto",
+            format: "yyyy-mm-dd"
+         }).on('hide', function () {
+             $('#Search_DatePicker_S').datepicker('setEndDate', $('#Search_DatePicker_E').datepicker('getFormattedDate'));
+        }).on('clearDate',function () {  $('#Search_DatePicker_S').datepicker('setEndDate','')});
+        $('#SearchButton').off('click');
+        $('#SearchButton').on('click', function () {
+            $('#agentID').val('@ViewBag.agentID');
+            $('#Sdate').val($('#Search_DatePicker_S').datepicker('getFormattedDate'));
+            $('#Edate').val($('#Search_DatePicker_E').datepicker('getFormattedDate'));
+            $('#custid').val($('#UserId').val());
+            $('#RptReceNo').val($('#UserNo').val());
+            $('#token').val('@ViewBag.tokenKey');
+            $("#form").submit();
+        });
+        $('#SearchCallDone').on('click', function () {
+            document.location = '@Url.Action("Done", "ObounlWeb")';
+        });
+    });
+</script>
+
+</body>
+</html>
+
+

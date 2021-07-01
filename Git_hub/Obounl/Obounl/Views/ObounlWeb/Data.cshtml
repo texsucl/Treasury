@@ -1,0 +1,106 @@
+﻿@model List<Obounl.Models.Model.DataViewModel>
+@{
+    ViewBag.Title = "Data";
+}
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-table.min.css" rel="stylesheet">
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/bootstrap-table.min.js"></script>
+    <script src="~/Scripts/locales/bootstrap-table-zh-TW.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        @if (ViewBag.Flag)
+        {
+            @*<div class="row">
+                <div>
+                    <h6>提醒您：若即時電訪失敗的案件，可改預約申請電訪</h6>
+                </div>
+            </div>*@
+            <div class="table-responsive">
+                <table id="table"
+                       data-toggle="table"
+                       data-remember-order="true"
+                       data-height="520"
+                       data-search="true"
+                       data-pagination="true"
+                       data-page-list="[10, 25, 50, 100, all]"
+                       data-locale="zh-TW">
+                    <thead>
+                        <tr>
+                            <th data-field="AssignSchDate" data-sortable="true">要保文件上傳日期</th>
+                            <th data-field="custid" data-sortable="true">受訪者身分證字號</th>
+                            <th data-field="RptReceNo" data-sortable="true">同意書編號</th>
+                            <th data-field="MPolicyNo" data-sortable="true">保單號碼</th>
+                            <th data-field="CustName" data-sortable="true">受訪者姓名</th>
+                            <th data-field="Appointment" data-sortable="true">電訪方式</th>
+                            <th data-field="Reservation_Date" data-sortable="true">電訪日期</th>
+                            <th data-field="SMemo1" data-sortable="true">電訪狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.AssignSchDate</td>
+                                <td>@item.custid</td>
+                                <td>@item.RptReceNo</td>
+                                <td>@item.MPolicyNo</td>
+                                <td>@item.CustName</td>
+                                <td>@item.Appointment</td>
+                                <td>@item.Reservation_Date</td>
+                                <td>@item.SMemo1</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="row justify-content-md-center pb-3" style="justify-content:center;">
+                <div class="col-sm-6">
+                    <input type="button" class="btn btn-secondary" id="DataCallDone" value="離開" />
+                </div>
+                <div class="col-sm-6">
+                    <input type="button" class="btn btn-primary" id="BackButton" value="回查詢頁" />
+                </div>                          
+            </div>
+            <div>
+                <form style="display: none" action="~/ObounlWeb/Search" method="POST" id="form">
+                    <input type="hidden" id="agentID" name="agentID" value="" />
+                    <input type="hidden" id="token" name="token" value="" />
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="col-sm-12">
+                <h3>@ViewBag.msg</h3>
+            </div>
+            <div class="row justify-content-md-center pb-3" style="justify-content:center;">
+                <input type="button" class="btn btn-secondary" id="DataCallDone" value="離開" />
+            </div>
+        }
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#BackButton').off('click');
+            $('#BackButton').on('click', function () {
+                $('#agentID').val('@ViewBag.agentID');
+                $('#token').val('@ViewBag.tokenKey');
+                $("#form").submit();
+            });
+            $('#DataCallDone').on('click', function () {
+                document.location = '@Url.Action("Done", "ObounlWeb")';
+            });
+       })
+    </script>
+</body>
+</html>
