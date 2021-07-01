@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbGLModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="CODE_ROLE">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ROLE_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+    <Property Name="AUTH_UNIT" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="FREE_AUTH" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="CODE_USER">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="USER_UNIT" Type="varchar" MaxLength="5" />
+    <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+    <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+    <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+    <Property Name="APPR_DT" Type="datetime" />
+    <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="FREEZE_DT" Type="datetime" />
+    <Property Name="LAST_LOGIN_DT" Type="datetime" />
+    <Property Name="LAST_LOGOUT_DT" Type="datetime" />
+    <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
+  </EntityType>
+  <EntityType Name="CODE_USER_ROLE">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="CREATE_DT" Type="datetime" />
+    <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+    <Property Name="LAST_UPDATE_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="FRT_MAIL_LOG">
+    <Key>
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="SEQ" Type="bigint" Nullable="false" />
+    <Property Name="MAIL_DATE" Type="date" Nullable="false" />
+    <Property Name="MAIL_TIME" Type="time" Precision="7" Nullable="false" />
+    <Property Name="RECEIVER_EMPNO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="EMAIL" Type="nvarchar" MaxLength="266" Nullable="false" />
+    <Property Name="MAIL_RESULT" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="RESULT_DESC" Type="nvarchar" MaxLength="250" />
+    <Property Name="MAIL_SUB" Type="nvarchar" MaxLength="100" />
+  </EntityType>
+  <EntityType Name="FRT_MAIL_NOTIFY">
+    <Key>
+      <PropertyRef Name="GROUP_CODE" />
+      <PropertyRef Name="RECEIVER_EMPNO" />
+    </Key>
+    <Property Name="GROUP_CODE" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="RECEIVER_EMPNO" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="EMP_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+    <Property Name="IS_NOTIFY_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="MEMO" Type="nvarchar" MaxLength="250" />
+    <Property Name="IS_NOTIFY_DEPT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="RESERVE1" Type="varchar" MaxLength="200" />
+    <Property Name="RESERVE2" Type="varchar" MaxLength="200" />
+    <Property Name="RESERVE3" Type="varchar" MaxLength="200" />
+    <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+    <Property Name="UPDATE_ID" Type="varchar" MaxLength="10" />
+    <Property Name="UPDATE_DATETIME" Type="datetime" />
+    <Property Name="APPR_ID" Type="varchar" MaxLength="10" />
+    <Property Name="APPR_DT" Type="datetime" />
+  </EntityType>
+  <EntityType Name="SYS_SEQ">
+    <Key>
+      <PropertyRef Name="SYS_CD" />
+      <PropertyRef Name="SEQ_TYPE" />
+      <PropertyRef Name="PRECODE" />
+    </Key>
+    <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="SEQ_TYPE" Type="varchar" MaxLength="5" Nullable="false" />
+    <Property Name="PRECODE" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="CURR_VALUE" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityContainer Name="dbGLModelStoreContainer">
+    <EntitySet Name="CODE_ROLE" EntityType="Self.CODE_ROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER" EntityType="Self.CODE_USER" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="FRT_MAIL_LOG" EntityType="Self.FRT_MAIL_LOG" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="FRT_MAIL_NOTIFY" EntityType="Self.FRT_MAIL_NOTIFY" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SYS_SEQ" EntityType="Self.SYS_SEQ" Schema="dbo" store:Type="Tables" />
+  </EntityContainer>
+</Schema>

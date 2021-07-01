@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbGLModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="CODE_USER">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="USER_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="IS_MAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_LOGIN_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_LOGOUT_DT" Type="DateTime" Precision="3" />
+    <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="CODE_USER_ROLE">
+    <Key>
+      <PropertyRef Name="USER_ID" />
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="USER_ID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ROLE_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="FRT_MAIL_LOG">
+    <Key>
+      <PropertyRef Name="SEQ" />
+    </Key>
+    <Property Name="SEQ" Type="Int64" Nullable="false" />
+    <Property Name="MAIL_DATE" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="MAIL_TIME" Type="Time" Nullable="false" Precision="7" />
+    <Property Name="RECEIVER_EMPNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="EMAIL" Type="String" MaxLength="266" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="MAIL_RESULT" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="RESULT_DESC" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+    <Property Name="MAIL_SUB" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="FRT_MAIL_NOTIFY">
+    <Key>
+      <PropertyRef Name="GROUP_CODE" />
+      <PropertyRef Name="RECEIVER_EMPNO" />
+    </Key>
+    <Property Name="GROUP_CODE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="RECEIVER_EMPNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="EMP_TYPE" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="IS_NOTIFY_MGR" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="MEMO" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+    <Property Name="IS_NOTIFY_DEPT_MGR" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="RESERVE1" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+    <Property Name="RESERVE2" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+    <Property Name="RESERVE3" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="UPDATE_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="UPDATE_DATETIME" Type="DateTime" Precision="3" />
+    <Property Name="APPR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+  <EntityType Name="SYS_SEQ">
+    <Key>
+      <PropertyRef Name="SYS_CD" />
+      <PropertyRef Name="SEQ_TYPE" />
+      <PropertyRef Name="PRECODE" />
+    </Key>
+    <Property Name="SYS_CD" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="SEQ_TYPE" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PRECODE" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="CURR_VALUE" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityContainer Name="dbGLEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="CODE_USER" EntityType="Self.CODE_USER" />
+    <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" />
+    <EntitySet Name="FRT_MAIL_LOG" EntityType="Self.FRT_MAIL_LOG" />
+    <EntitySet Name="FRT_MAIL_NOTIFY" EntityType="Self.FRT_MAIL_NOTIFY" />
+    <EntitySet Name="SYS_SEQ" EntityType="Self.SYS_SEQ" />
+    <EntitySet Name="CODE_ROLE" EntityType="dbGLModel.CODE_ROLE" />
+  </EntityContainer>
+  <EntityType Name="CODE_ROLE">
+    <Key>
+      <PropertyRef Name="ROLE_ID" />
+    </Key>
+    <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="ROLE_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="AUTH_UNIT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="FREE_AUTH" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+    <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+    <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+    <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+  </EntityType>
+</Schema>

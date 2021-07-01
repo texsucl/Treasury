@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="DB_INTRAModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="V_EMPLY2">
+    <Key>
+      <PropertyRef Name="EMP_NO" />
+      <PropertyRef Name="EMP_NAME" />
+      <PropertyRef Name="EMP_NAME_E" />
+      <PropertyRef Name="ID_NO" />
+    </Key>
+    <Property Name="GRP_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="EMP_NO" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="EMP_NAME" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="EMP_NAME_E" Type="String" MaxLength="40" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="ID_NO" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="DPT_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="USR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="EMAIL" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+    <Property Name="ext" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="DPT_HEAD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="Voice_Fr1" Type="String" MaxLength="3" FixedLength="true" Unicode="false" />
+    <Property Name="Voice_No1" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+    <Property Name="Address" Type="String" MaxLength="62" FixedLength="true" Unicode="false" />
+    <Property Name="floor" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="FUN_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="FUN_DESCR" Type="String" MaxLength="20" FixedLength="true" Unicode="false" />
+  </EntityType>
+  <EntityType Name="VW_OA_DEPT">
+    <Key>
+      <PropertyRef Name="DPT_NAME" />
+      <PropertyRef Name="DPT_CD" />
+      <PropertyRef Name="Dpt_type" />
+      <PropertyRef Name="DPT_HEAD" />
+    </Key>
+    <Property Name="DPT_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="GRP_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="UP_DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="Dpt_type" Type="String" MaxLength="2" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="DPT_HEAD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="VW_OA_EMP">
+    <Key>
+      <PropertyRef Name="EMP_NAME" />
+      <PropertyRef Name="EMP_NAME_E" />
+      <PropertyRef Name="EMP_NO" />
+      <PropertyRef Name="ID_NO" />
+      <PropertyRef Name="ext" />
+      <PropertyRef Name="fax_fr" />
+      <PropertyRef Name="fax_no" />
+      <PropertyRef Name="mobile" />
+      <PropertyRef Name="bbcall" />
+    </Key>
+    <Property Name="EMP_NAME" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="EMP_NAME_E" Type="String" MaxLength="40" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="FUN_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="EMP_NO" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="ID_NO" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="USR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="EmailAddress" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+    <Property Name="HO_TEL" Type="String" MaxLength="8000" FixedLength="false" Unicode="false" />
+    <Property Name="ext" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="fax_fr" Type="String" MaxLength="3" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="fax_no" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="mobile" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="bbcall" Type="String" MaxLength="20" FixedLength="true" Unicode="false" Nullable="false" />
+    <Property Name="WORK_LOC" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+    <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="MGR_EMPNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="JobStatus" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+    <Property Name="HO_ADD" Type="String" MaxLength="8000" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityContainer Name="DB_INTRAEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="V_EMPLY2" EntityType="Self.V_EMPLY2" />
+    <EntitySet Name="VW_OA_DEPT" EntityType="Self.VW_OA_DEPT" />
+    <EntitySet Name="VW_OA_EMP" EntityType="Self.VW_OA_EMP" />
+  </EntityContainer>
+</Schema>

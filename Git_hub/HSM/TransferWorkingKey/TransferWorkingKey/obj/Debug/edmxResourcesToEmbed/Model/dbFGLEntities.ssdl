@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbGLModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="FRT_MAC">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="WorkingKeyLabel" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="Data" Type="varchar" MaxLength="250" Nullable="false" />
+    <Property Name="IV" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="ErrorCode" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ErrorMessage" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="MAC" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="CreateDate" Type="date" Nullable="false" />
+    <Property Name="CreateTime" Type="time" Precision="7" Nullable="false" />
+  </EntityType>
+  <EntityType Name="FRT_WorkingKey">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="WorkingKeyLabel" Type="varchar" MaxLength="100" Nullable="false" />
+    <Property Name="ErrorCode" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="ErrorMessage" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="ECDKey" Type="varchar" MaxLength="16" Nullable="false" />
+    <Property Name="Random" Type="varchar" MaxLength="16" Nullable="false" />
+    <Property Name="Random1" Type="varchar" MaxLength="16" Nullable="false" />
+    <Property Name="Random2" Type="varchar" MaxLength="8" />
+    <Property Name="Random2_2" Type="varchar" MaxLength="8" />
+    <Property Name="FubonBankXml" Type="varchar" MaxLength="1000" />
+    <Property Name="FubonBankXml_2" Type="varchar" MaxLength="1000" />
+    <Property Name="CreateDate" Type="date" Nullable="false" />
+    <Property Name="CreateTime" Type="time" Precision="7" Nullable="false" />
+    <Property Name="IsActive" Type="varchar" MaxLength="1" Nullable="false" />
+  </EntityType>
+  <EntityContainer Name="dbGLModelStoreContainer">
+    <EntitySet Name="FRT_MAC" EntityType="Self.FRT_MAC" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="FRT_WorkingKey" EntityType="Self.FRT_WorkingKey" Schema="dbo" store:Type="Tables" />
+  </EntityContainer>
+</Schema>

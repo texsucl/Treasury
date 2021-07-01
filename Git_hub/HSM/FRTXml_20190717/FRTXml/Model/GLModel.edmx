@@ -1,0 +1,1043 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="dbGLModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CODE_ROLE">
+          <Key>
+            <PropertyRef Name="ROLE_ID" />
+          </Key>
+          <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ROLE_NAME" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="AUTH_UNIT" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="FREE_AUTH" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+          <Property Name="MEMO" Type="nvarchar" MaxLength="200" />
+          <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" />
+          <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="CREATE_DT" Type="datetime" />
+          <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="LAST_UPDATE_DT" Type="datetime" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DT" Type="datetime" />
+          <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="FREEZE_DT" Type="datetime" />
+        </EntityType>
+        <EntityType Name="CODE_USER">
+          <Key>
+            <PropertyRef Name="USER_ID" />
+          </Key>
+          <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="USER_UNIT" Type="varchar" MaxLength="5" />
+          <Property Name="IS_DISABLED" Type="varchar" MaxLength="1" />
+          <Property Name="IS_MAIL" Type="varchar" MaxLength="1" />
+          <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="CREATE_DT" Type="datetime" />
+          <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="LAST_UPDATE_DT" Type="datetime" />
+          <Property Name="APPR_UID" Type="varchar" MaxLength="5" />
+          <Property Name="APPR_DT" Type="datetime" />
+          <Property Name="FREEZE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="FREEZE_DT" Type="datetime" />
+          <Property Name="LAST_LOGIN_DT" Type="datetime" />
+          <Property Name="LAST_LOGOUT_DT" Type="datetime" />
+          <Property Name="CREATE_UNIT" Type="varchar" MaxLength="5" />
+        </EntityType>
+        <EntityType Name="CODE_USER_ROLE">
+          <Key>
+            <PropertyRef Name="USER_ID" />
+            <PropertyRef Name="ROLE_ID" />
+          </Key>
+          <Property Name="USER_ID" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="ROLE_ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="CREATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="CREATE_DT" Type="datetime" />
+          <Property Name="LAST_UPDATE_UID" Type="varchar" MaxLength="5" />
+          <Property Name="LAST_UPDATE_DT" Type="datetime" />
+        </EntityType>
+        <EntityType Name="FRT_MAC">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="WorkingKeyLabel" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Data" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="IV" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="ErrorCode" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ErrorMessage" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="MAC" Type="varchar" MaxLength="20" />
+          <Property Name="CreateDate" Type="date" Nullable="false" />
+          <Property Name="CreateTime" Type="time" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FRT_MAIL_LOG">
+          <Key>
+            <PropertyRef Name="SEQ" />
+          </Key>
+          <Property Name="SEQ" Type="bigint" Nullable="false" />
+          <Property Name="MAIL_DATE" Type="date" Nullable="false" />
+          <Property Name="MAIL_TIME" Type="time" Precision="7" Nullable="false" />
+          <Property Name="RECEIVER_EMPNO" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="EMAIL" Type="nvarchar" MaxLength="266" Nullable="false" />
+          <Property Name="MAIL_RESULT" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="RESULT_DESC" Type="nvarchar" MaxLength="250" />
+          <Property Name="MAIL_SUB" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="FRT_MAIL_NOTIFY">
+          <Key>
+            <PropertyRef Name="GROUP_CODE" />
+            <PropertyRef Name="RECEIVER_EMPNO" />
+          </Key>
+          <Property Name="GROUP_CODE" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="RECEIVER_EMPNO" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="EMP_TYPE" Type="varchar" MaxLength="2" Nullable="false" />
+          <Property Name="IS_NOTIFY_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="MEMO" Type="nvarchar" MaxLength="250" />
+          <Property Name="IS_NOTIFY_DEPT_MGR" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="RESERVE1" Type="varchar" MaxLength="200" />
+          <Property Name="RESERVE2" Type="varchar" MaxLength="200" />
+          <Property Name="RESERVE3" Type="varchar" MaxLength="200" />
+          <Property Name="DATA_STATUS" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="UPDATE_ID" Type="varchar" MaxLength="10" />
+          <Property Name="UPDATE_DATETIME" Type="datetime" />
+          <Property Name="APPR_ID" Type="varchar" MaxLength="10" />
+          <Property Name="APPR_DT" Type="datetime" />
+        </EntityType>
+        <EntityType Name="FRT_WORD">
+          <Key>
+            <PropertyRef Name="frt_word_id" />
+          </Key>
+          <Property Name="frt_word_id" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="frt_sys_type" Type="nvarchar" MaxLength="3" Nullable="false" />
+          <Property Name="frt_srce_from" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="frt_srce_kind" Type="varchar" MaxLength="5" />
+          <Property Name="frt_memo_apx" Type="nvarchar" MaxLength="3" />
+          <Property Name="frt_achcode" Type="nvarchar" MaxLength="3" />
+          <Property Name="update_id" Type="varchar" MaxLength="10" />
+          <Property Name="update_datetime" Type="datetime" />
+          <Property Name="data_status" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="appr_id" Type="varchar" MaxLength="10" />
+          <Property Name="approve_datetime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="FRT_WorkingKey">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="WorkingKeyLabel" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="ErrorCode" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ErrorMessage" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="ECDKey" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="Random" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="Random1" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="Random2" Type="varchar" MaxLength="50" />
+          <Property Name="Random2_2" Type="varchar" MaxLength="50" />
+          <Property Name="FubonBankXml" Type="varchar(max)" />
+          <Property Name="FubonBankXml_2" Type="varchar(max)" />
+          <Property Name="CreateDate" Type="date" Nullable="false" />
+          <Property Name="CreateTime" Type="time" Precision="7" Nullable="false" />
+          <Property Name="IsActive" Type="varchar" MaxLength="1" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG">
+          <Key>
+            <PropertyRef Name="fast_no" />
+          </Key>
+          <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="create_date" Type="date" />
+          <Property Name="create_time_hms" Type="time" Precision="7" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG_DETAIL">
+          <Key>
+            <PropertyRef Name="fast_no" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="create_time_hms" />
+          </Key>
+          <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="operation_status" Type="char" MaxLength="2" />
+          <Property Name="create_date" Type="date" Nullable="false" />
+          <Property Name="create_time_hms" Type="time" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FRT_XML_R_622821">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HEADER" Type="varchar" MaxLength="1024" />
+          <Property Name="ACT_DATE" Type="varchar" MaxLength="8" />
+          <Property Name="PRE_REQSRL" Type="varchar" MaxLength="8" />
+          <Property Name="SETL_ID" Type="varchar" MaxLength="20" />
+          <Property Name="MSG_TYPE" Type="varchar" MaxLength="1" />
+          <Property Name="TX_AMT" Type="varchar" MaxLength="15" />
+          <Property Name="FEE_AMT" Type="varchar" MaxLength="4" />
+          <Property Name="SIGN_ACT" Type="varchar" MaxLength="1" />
+          <Property Name="ACT_BAL" Type="varchar" MaxLength="15" />
+          <Property Name="SIGN_AVAL" Type="varchar" MaxLength="1" />
+          <Property Name="AVAL_BAL" Type="varchar" MaxLength="15" />
+          <Property Name="PRE_REQDATE" Type="varchar" MaxLength="8" />
+          <Property Name="EMSGID" Type="varchar" MaxLength="10" />
+          <Property Name="EMSGTXT" Type="nvarchar" MaxLength="1024" />
+          <Property Name="RC_CODE" Type="varchar" MaxLength="4" />
+          <Property Name="SQL_STS" Type="varchar" MaxLength="3" />
+          <Property Name="CRT_TIME" Type="datetime" />
+          <Property Name="UPD_TIME" Type="datetime" />
+          <Property Name="FAST_NO" Type="varchar" MaxLength="10" />
+          <Property Name="GUID" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="FRT_XML_R_eACH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HEADER" Type="varchar" MaxLength="1024" />
+          <Property Name="REQUESTID" Type="varchar" MaxLength="16" />
+          <Property Name="SEQNO" Type="varchar" MaxLength="4" />
+          <Property Name="ACHSTAN" Type="varchar" MaxLength="7" />
+          <Property Name="TXNCODE" Type="varchar" MaxLength="4" />
+          <Property Name="ACHCODE" Type="varchar" MaxLength="3" />
+          <Property Name="TXNAMT" Type="varchar" MaxLength="13" />
+          <Property Name="TXNINBANK" Type="varchar" MaxLength="7" />
+          <Property Name="TXNOUTBANK" Type="varchar" MaxLength="7" />
+          <Property Name="TRANSFERINACTNO" Type="varchar" MaxLength="16" />
+          <Property Name="TRANSFEROUTACTNO" Type="varchar" MaxLength="16" />
+          <Property Name="INIDNO" Type="varchar" MaxLength="10" />
+          <Property Name="OUTIDNO" Type="varchar" MaxLength="10" />
+          <Property Name="USERNO" Type="nvarchar" MaxLength="20" />
+          <Property Name="MERCHANTID" Type="varchar" MaxLength="15" />
+          <Property Name="ORDERNO" Type="varchar" MaxLength="40" />
+          <Property Name="TERMID" Type="varchar" MaxLength="8" />
+          <Property Name="MEMO" Type="nvarchar" MaxLength="20" />
+          <Property Name="CHARGEFEE" Type="varchar" MaxLength="5" />
+          <Property Name="ACHBIZDATE" Type="varchar" MaxLength="8" />
+          <Property Name="O360TXNSEQNO" Type="varchar" MaxLength="20" />
+          <Property Name="STLFLAG" Type="varchar" MaxLength="2" />
+          <Property Name="ERROR_CODE" Type="varchar" MaxLength="4" />
+          <Property Name="EMSGID" Type="varchar" MaxLength="10" />
+          <Property Name="EMSGTXT" Type="nvarchar" MaxLength="1024" />
+          <Property Name="SQL_STS" Type="varchar" MaxLength="3" />
+          <Property Name="CRT_TIME" Type="datetime" />
+          <Property Name="UPD_TIME" Type="datetime" />
+          <Property Name="FAST_NO" Type="varchar" MaxLength="10" />
+          <Property Name="GUID" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="FRT_XML_T_622821">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HEADER" Type="varchar" MaxLength="1024" />
+          <Property Name="TRAN_ID" Type="varchar" MaxLength="4" />
+          <Property Name="TX_RMK" Type="varchar" MaxLength="1" />
+          <Property Name="ACT_DATE" Type="varchar" MaxLength="8" />
+          <Property Name="PRE_REQDATE" Type="varchar" MaxLength="8" />
+          <Property Name="PRE_REQSRL" Type="varchar" MaxLength="8" />
+          <Property Name="PAY_IDNO" Type="varchar" MaxLength="11" />
+          <Property Name="NAME_COD" Type="varchar" MaxLength="4" />
+          <Property Name="SETL_ID" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="PAY_BANK" Type="varchar" MaxLength="7" />
+          <Property Name="ACNO_OUT" Type="varchar" MaxLength="16" />
+          <Property Name="CERT_BKID" Type="varchar" MaxLength="3" />
+          <Property Name="CERT_NO" Type="varchar" MaxLength="25" />
+          <Property Name="RCV_BANK" Type="varchar" MaxLength="7" />
+          <Property Name="RCV_ACNO" Type="varchar" MaxLength="16" />
+          <Property Name="TX_AMT" Type="varchar" MaxLength="15" />
+          <Property Name="FEE_COD" Type="varchar" MaxLength="2" />
+          <Property Name="REF_NO" Type="varchar" MaxLength="36" />
+          <Property Name="PAY_NAME" Type="nvarchar" MaxLength="26" />
+          <Property Name="RCV_NAME" Type="nvarchar" MaxLength="36" />
+          <Property Name="APX" Type="nvarchar" MaxLength="40" />
+          <Property Name="AG_BKID" Type="varchar" MaxLength="10" />
+          <Property Name="MAC" Type="varchar" MaxLength="8" />
+          <Property Name="SYNC" Type="varchar" MaxLength="8" />
+          <Property Name="ICV" Type="varchar" MaxLength="6" />
+          <Property Name="SQL_STS" Type="varchar" MaxLength="3" />
+          <Property Name="CRT_TIME" Type="datetime" />
+          <Property Name="UPD_TIME" Type="datetime" />
+          <Property Name="FAST_NO" Type="varchar" MaxLength="10" />
+          <Property Name="GUID" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="FRT_XML_T_eACH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HEADER" Type="varchar" MaxLength="1024" />
+          <Property Name="REQUESTID" Type="varchar" MaxLength="16" />
+          <Property Name="SEQNO" Type="varchar" MaxLength="4" />
+          <Property Name="TXNCODE" Type="varchar" MaxLength="4" />
+          <Property Name="ACHCODE" Type="varchar" MaxLength="3" />
+          <Property Name="TXNAMT" Type="varchar" MaxLength="15" />
+          <Property Name="TXNINBANK" Type="varchar" MaxLength="7" />
+          <Property Name="TXNOUTBANK" Type="varchar" MaxLength="7" />
+          <Property Name="TRANSFERINACTNO" Type="varchar" MaxLength="16" />
+          <Property Name="TRANSFEROUTACTNO" Type="varchar" MaxLength="16" />
+          <Property Name="INIDNO" Type="varchar" MaxLength="10" />
+          <Property Name="OUTIDNO" Type="varchar" MaxLength="10" />
+          <Property Name="USERNO" Type="varchar" MaxLength="20" />
+          <Property Name="REFNO" Type="nvarchar" MaxLength="10" />
+          <Property Name="MERCHANTID" Type="varchar" MaxLength="15" />
+          <Property Name="ORDERNO" Type="varchar" MaxLength="40" />
+          <Property Name="TERMID" Type="varchar" MaxLength="8" />
+          <Property Name="MEMO" Type="nvarchar" MaxLength="20" />
+          <Property Name="MAC" Type="varchar" MaxLength="8" />
+          <Property Name="SQL_STS" Type="varchar" MaxLength="3" />
+          <Property Name="CRT_TIME" Type="datetime" />
+          <Property Name="UPD_TIME" Type="datetime" />
+          <Property Name="FAST_NO" Type="varchar" MaxLength="10" />
+          <Property Name="GUID" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="SYS_PARA">
+          <Key>
+            <PropertyRef Name="SYS_CD" />
+            <PropertyRef Name="GRP_ID" />
+            <PropertyRef Name="PARA_ID" />
+          </Key>
+          <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="GRP_ID" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="PARA_ID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="PARA_VALUE" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="REMARK" Type="nvarchar" MaxLength="200" />
+          <Property Name="RESERVE1" Type="varchar" MaxLength="200" />
+          <Property Name="RESERVE2" Type="varchar" MaxLength="200" />
+          <Property Name="RESERVE3" Type="varchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="SYS_SEQ">
+          <Key>
+            <PropertyRef Name="SYS_CD" />
+            <PropertyRef Name="SEQ_TYPE" />
+            <PropertyRef Name="PRECODE" />
+          </Key>
+          <Property Name="SYS_CD" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="SEQ_TYPE" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="PRECODE" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="CURR_VALUE" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+          <End Role="FRT_XML_LOG" Type="Self.FRT_XML_LOG" Multiplicity="1" />
+          <End Role="FRT_XML_LOG_DETAIL" Type="Self.FRT_XML_LOG_DETAIL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FRT_XML_LOG">
+              <PropertyRef Name="fast_no" />
+            </Principal>
+            <Dependent Role="FRT_XML_LOG_DETAIL">
+              <PropertyRef Name="fast_no" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="dbGLModelStoreContainer">
+          <EntitySet Name="CODE_ROLE" EntityType="Self.CODE_ROLE" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CODE_USER" EntityType="Self.CODE_USER" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CODE_USER_ROLE" EntityType="Self.CODE_USER_ROLE" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_MAC" EntityType="Self.FRT_MAC" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_MAIL_LOG" EntityType="Self.FRT_MAIL_LOG" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_MAIL_NOTIFY" EntityType="Self.FRT_MAIL_NOTIFY" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_WORD" EntityType="Self.FRT_WORD" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_WorkingKey" EntityType="Self.FRT_WorkingKey" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_LOG" EntityType="Self.FRT_XML_LOG" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="Self.FRT_XML_LOG_DETAIL" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_R_622821" EntityType="Self.FRT_XML_R_622821" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_R_eACH" EntityType="Self.FRT_XML_R_eACH" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_T_622821" EntityType="Self.FRT_XML_T_622821" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_T_eACH" EntityType="Self.FRT_XML_T_eACH" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SYS_PARA" EntityType="Self.SYS_PARA" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SYS_SEQ" EntityType="Self.SYS_SEQ" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="Self.FK_PK_FRT_XML_LOG_DETAIL">
+            <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+            <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="dbGLModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="FRT_MAC">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="WorkingKeyLabel" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Data" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IV" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ErrorCode" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ErrorMessage" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MAC" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CreateTime" Type="Time" Nullable="false" Precision="7" />
+        </EntityType>
+        <EntityContainer Name="dbGLEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="FRT_MAC" EntityType="Self.FRT_MAC" />
+          <EntitySet Name="SYS_PARA" EntityType="dbGLModel.SYS_PARA" />
+          <EntitySet Name="FRT_XML_R_622821" EntityType="dbGLModel.FRT_XML_R_622821" />
+          <EntitySet Name="FRT_XML_R_eACH" EntityType="dbGLModel.FRT_XML_R_eACH" />
+          <EntitySet Name="FRT_XML_T_eACH" EntityType="dbGLModel.FRT_XML_T_eACH" />
+          <EntitySet Name="FRT_WorkingKey" EntityType="dbGLModel.FRT_WorkingKey" />
+          <EntitySet Name="CODE_ROLE" EntityType="dbGLModel.CODE_ROLE" />
+          <EntitySet Name="CODE_USER" EntityType="dbGLModel.CODE_USER" />
+          <EntitySet Name="CODE_USER_ROLE" EntityType="dbGLModel.CODE_USER_ROLE" />
+          <EntitySet Name="FRT_MAIL_LOG" EntityType="dbGLModel.FRT_MAIL_LOG" />
+          <EntitySet Name="FRT_MAIL_NOTIFY" EntityType="dbGLModel.FRT_MAIL_NOTIFY" />
+          <EntitySet Name="SYS_SEQ" EntityType="dbGLModel.SYS_SEQ" />
+          <EntitySet Name="FRT_XML_T_622821" EntityType="dbGLModel.FRT_XML_T_622821" />
+          <EntitySet Name="FRT_WORD" EntityType="dbGLModel.FRT_WORD" />
+          <EntitySet Name="FRT_XML_LOG" EntityType="dbGLModel.FRT_XML_LOG" />
+          <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="dbGLModel.FRT_XML_LOG_DETAIL" />
+          <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL">
+            <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+            <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="SYS_PARA">
+          <Key>
+            <PropertyRef Name="SYS_CD" />
+            <PropertyRef Name="GRP_ID" />
+            <PropertyRef Name="PARA_ID" />
+          </Key>
+          <Property Name="SYS_CD" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="GRP_ID" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PARA_ID" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PARA_VALUE" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="REMARK" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="RESERVE1" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="RESERVE2" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="RESERVE3" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="FRT_XML_R_622821">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HEADER" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="ACT_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="PRE_REQSRL" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="SETL_ID" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="MSG_TYPE" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="TX_AMT" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="FEE_AMT" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="SIGN_ACT" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ACT_BAL" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="SIGN_AVAL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="AVAL_BAL" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="PRE_REQDATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="EMSGID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EMSGTXT" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="RC_CODE" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="SQL_STS" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CRT_TIME" Type="DateTime" Precision="3" />
+          <Property Name="UPD_TIME" Type="DateTime" Precision="3" />
+          <Property Name="FAST_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="GUID" Type="Guid" />
+        </EntityType>
+        <EntityType Name="FRT_XML_R_eACH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HEADER" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="REQUESTID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="SEQNO" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="ACHSTAN" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="TXNCODE" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="ACHCODE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="TXNAMT" Type="String" MaxLength="13" FixedLength="false" Unicode="false" />
+          <Property Name="TXNINBANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="TXNOUTBANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINACTNO" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFEROUTACTNO" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="INIDNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="OUTIDNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="USERNO" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="MERCHANTID" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="ORDERNO" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="TERMID" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="CHARGEFEE" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="ACHBIZDATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="O360TXNSEQNO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="STLFLAG" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="ERROR_CODE" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="EMSGID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EMSGTXT" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="SQL_STS" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CRT_TIME" Type="DateTime" Precision="3" />
+          <Property Name="UPD_TIME" Type="DateTime" Precision="3" />
+          <Property Name="FAST_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="GUID" Type="Guid" />
+        </EntityType>
+        <EntityType Name="FRT_XML_T_eACH">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HEADER" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="REQUESTID" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="SEQNO" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="TXNCODE" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="ACHCODE" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="TXNAMT" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="TXNINBANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="TXNOUTBANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFERINACTNO" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="TRANSFEROUTACTNO" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="INIDNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="OUTIDNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="USERNO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="REFNO" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="MERCHANTID" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="ORDERNO" Type="String" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="TERMID" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="MAC" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="SQL_STS" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CRT_TIME" Type="DateTime" Precision="3" />
+          <Property Name="UPD_TIME" Type="DateTime" Precision="3" />
+          <Property Name="FAST_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="GUID" Type="Guid" />
+        </EntityType>
+        <EntityType Name="FRT_WorkingKey">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="WorkingKeyLabel" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ErrorCode" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ErrorMessage" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="ECDKey" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="Random" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="Random1" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="Random2" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Random2_2" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="FubonBankXml" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="FubonBankXml_2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="CreateTime" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="IsActive" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="CODE_ROLE">
+          <Key>
+            <PropertyRef Name="ROLE_ID" />
+          </Key>
+          <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ROLE_NAME" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="AUTH_UNIT" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="FREE_AUTH" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="DATA_STATUS" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="CODE_USER">
+          <Key>
+            <PropertyRef Name="USER_ID" />
+          </Key>
+          <Property Name="USER_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="USER_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="IS_DISABLED" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="IS_MAIL" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="DATA_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="APPR_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+          <Property Name="FREEZE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="FREEZE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_LOGIN_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_LOGOUT_DT" Type="DateTime" Precision="3" />
+          <Property Name="CREATE_UNIT" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="CODE_USER_ROLE">
+          <Key>
+            <PropertyRef Name="USER_ID" />
+            <PropertyRef Name="ROLE_ID" />
+          </Key>
+          <Property Name="USER_ID" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="ROLE_ID" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CREATE_DT" Type="DateTime" Precision="3" />
+          <Property Name="LAST_UPDATE_UID" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="LAST_UPDATE_DT" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="FRT_MAIL_LOG">
+          <Key>
+            <PropertyRef Name="SEQ" />
+          </Key>
+          <Property Name="SEQ" Type="Int64" Nullable="false" />
+          <Property Name="MAIL_DATE" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="MAIL_TIME" Type="Time" Nullable="false" Precision="7" />
+          <Property Name="RECEIVER_EMPNO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" Nullable="false" MaxLength="266" FixedLength="false" Unicode="true" />
+          <Property Name="MAIL_RESULT" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="RESULT_DESC" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="MAIL_SUB" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="FRT_MAIL_NOTIFY">
+          <Key>
+            <PropertyRef Name="GROUP_CODE" />
+            <PropertyRef Name="RECEIVER_EMPNO" />
+          </Key>
+          <Property Name="GROUP_CODE" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="RECEIVER_EMPNO" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EMP_TYPE" Type="String" Nullable="false" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="IS_NOTIFY_MGR" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="MEMO" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="IS_NOTIFY_DEPT_MGR" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="RESERVE1" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="RESERVE2" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="RESERVE3" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="DATA_STATUS" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="UPDATE_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="UPDATE_DATETIME" Type="DateTime" Precision="3" />
+          <Property Name="APPR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="APPR_DT" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="SYS_SEQ">
+          <Key>
+            <PropertyRef Name="SYS_CD" />
+            <PropertyRef Name="SEQ_TYPE" />
+            <PropertyRef Name="PRECODE" />
+          </Key>
+          <Property Name="SYS_CD" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="SEQ_TYPE" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PRECODE" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CURR_VALUE" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FRT_XML_T_622821">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HEADER" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="TRAN_ID" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="TX_RMK" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ACT_DATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="PRE_REQDATE" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="PRE_REQSRL" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="PAY_IDNO" Type="String" MaxLength="11" FixedLength="false" Unicode="false" />
+          <Property Name="NAME_COD" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="SETL_ID" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="PAY_BANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="ACNO_OUT" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="CERT_BKID" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CERT_NO" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="RCV_BANK" Type="String" MaxLength="7" FixedLength="false" Unicode="false" />
+          <Property Name="RCV_ACNO" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="TX_AMT" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="FEE_COD" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="REF_NO" Type="String" MaxLength="36" FixedLength="false" Unicode="false" />
+          <Property Name="PAY_NAME" Type="String" MaxLength="26" FixedLength="false" Unicode="true" />
+          <Property Name="RCV_NAME" Type="String" MaxLength="36" FixedLength="false" Unicode="true" />
+          <Property Name="APX" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="AG_BKID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="MAC" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="SYNC" Type="String" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="ICV" Type="String" MaxLength="6" FixedLength="false" Unicode="false" />
+          <Property Name="SQL_STS" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CRT_TIME" Type="DateTime" Precision="3" />
+          <Property Name="UPD_TIME" Type="DateTime" Precision="3" />
+          <Property Name="FAST_NO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="GUID" Type="Guid" />
+        </EntityType>
+        <EntityType Name="FRT_WORD">
+          <Key>
+            <PropertyRef Name="frt_word_id" />
+          </Key>
+          <Property Name="frt_word_id" Type="String" Nullable="false" MaxLength="12" FixedLength="false" Unicode="false" />
+          <Property Name="frt_sys_type" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="true" />
+          <Property Name="frt_srce_from" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="frt_srce_kind" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="frt_memo_apx" Type="String" MaxLength="3" FixedLength="false" Unicode="true" />
+          <Property Name="frt_achcode" Type="String" MaxLength="3" FixedLength="false" Unicode="true" />
+          <Property Name="update_id" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="update_datetime" Type="DateTime" Precision="3" />
+          <Property Name="data_status" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="appr_id" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="approve_datetime" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG">
+          <Key>
+            <PropertyRef Name="fast_no" />
+          </Key>
+          <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Precision="0" />
+          <Property Name="create_time_hms" Type="Time" Precision="7" />
+          <NavigationProperty Name="FRT_XML_LOG_DETAIL" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG" ToRole="FRT_XML_LOG_DETAIL" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG_DETAIL">
+          <Key>
+            <PropertyRef Name="fast_no" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="create_time_hms" />
+          </Key>
+          <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="operation_status" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="create_time_hms" Type="Time" Nullable="false" Precision="7" />
+          <NavigationProperty Name="FRT_XML_LOG" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG_DETAIL" ToRole="FRT_XML_LOG" />
+        </EntityType>
+        <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+          <End Type="dbGLModel.FRT_XML_LOG" Role="FRT_XML_LOG" Multiplicity="1" />
+          <End Type="dbGLModel.FRT_XML_LOG_DETAIL" Role="FRT_XML_LOG_DETAIL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FRT_XML_LOG">
+              <PropertyRef Name="fast_no" />
+            </Principal>
+            <Dependent Role="FRT_XML_LOG_DETAIL">
+              <PropertyRef Name="fast_no" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="dbGLModelStoreContainer" CdmEntityContainer="dbGLEntities">
+          <EntitySetMapping Name="FRT_MAC">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_MAC">
+              <MappingFragment StoreEntitySet="FRT_MAC">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="WorkingKeyLabel" ColumnName="WorkingKeyLabel" />
+                <ScalarProperty Name="Data" ColumnName="Data" />
+                <ScalarProperty Name="IV" ColumnName="IV" />
+                <ScalarProperty Name="ErrorCode" ColumnName="ErrorCode" />
+                <ScalarProperty Name="ErrorMessage" ColumnName="ErrorMessage" />
+                <ScalarProperty Name="MAC" ColumnName="MAC" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateTime" ColumnName="CreateTime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SYS_PARA">
+            <EntityTypeMapping TypeName="dbGLModel.SYS_PARA">
+              <MappingFragment StoreEntitySet="SYS_PARA">
+                <ScalarProperty Name="RESERVE3" ColumnName="RESERVE3" />
+                <ScalarProperty Name="RESERVE2" ColumnName="RESERVE2" />
+                <ScalarProperty Name="RESERVE1" ColumnName="RESERVE1" />
+                <ScalarProperty Name="REMARK" ColumnName="REMARK" />
+                <ScalarProperty Name="PARA_VALUE" ColumnName="PARA_VALUE" />
+                <ScalarProperty Name="PARA_ID" ColumnName="PARA_ID" />
+                <ScalarProperty Name="GRP_ID" ColumnName="GRP_ID" />
+                <ScalarProperty Name="SYS_CD" ColumnName="SYS_CD" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_R_622821">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_R_622821">
+              <MappingFragment StoreEntitySet="FRT_XML_R_622821">
+                <ScalarProperty Name="GUID" ColumnName="GUID" />
+                <ScalarProperty Name="FAST_NO" ColumnName="FAST_NO" />
+                <ScalarProperty Name="UPD_TIME" ColumnName="UPD_TIME" />
+                <ScalarProperty Name="CRT_TIME" ColumnName="CRT_TIME" />
+                <ScalarProperty Name="SQL_STS" ColumnName="SQL_STS" />
+                <ScalarProperty Name="RC_CODE" ColumnName="RC_CODE" />
+                <ScalarProperty Name="EMSGTXT" ColumnName="EMSGTXT" />
+                <ScalarProperty Name="EMSGID" ColumnName="EMSGID" />
+                <ScalarProperty Name="PRE_REQDATE" ColumnName="PRE_REQDATE" />
+                <ScalarProperty Name="AVAL_BAL" ColumnName="AVAL_BAL" />
+                <ScalarProperty Name="SIGN_AVAL" ColumnName="SIGN_AVAL" />
+                <ScalarProperty Name="ACT_BAL" ColumnName="ACT_BAL" />
+                <ScalarProperty Name="SIGN_ACT" ColumnName="SIGN_ACT" />
+                <ScalarProperty Name="FEE_AMT" ColumnName="FEE_AMT" />
+                <ScalarProperty Name="TX_AMT" ColumnName="TX_AMT" />
+                <ScalarProperty Name="MSG_TYPE" ColumnName="MSG_TYPE" />
+                <ScalarProperty Name="SETL_ID" ColumnName="SETL_ID" />
+                <ScalarProperty Name="PRE_REQSRL" ColumnName="PRE_REQSRL" />
+                <ScalarProperty Name="ACT_DATE" ColumnName="ACT_DATE" />
+                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_R_eACH">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_R_eACH">
+              <MappingFragment StoreEntitySet="FRT_XML_R_eACH">
+                <ScalarProperty Name="GUID" ColumnName="GUID" />
+                <ScalarProperty Name="FAST_NO" ColumnName="FAST_NO" />
+                <ScalarProperty Name="UPD_TIME" ColumnName="UPD_TIME" />
+                <ScalarProperty Name="CRT_TIME" ColumnName="CRT_TIME" />
+                <ScalarProperty Name="SQL_STS" ColumnName="SQL_STS" />
+                <ScalarProperty Name="EMSGTXT" ColumnName="EMSGTXT" />
+                <ScalarProperty Name="EMSGID" ColumnName="EMSGID" />
+                <ScalarProperty Name="ERROR_CODE" ColumnName="ERROR_CODE" />
+                <ScalarProperty Name="STLFLAG" ColumnName="STLFLAG" />
+                <ScalarProperty Name="O360TXNSEQNO" ColumnName="O360TXNSEQNO" />
+                <ScalarProperty Name="ACHBIZDATE" ColumnName="ACHBIZDATE" />
+                <ScalarProperty Name="CHARGEFEE" ColumnName="CHARGEFEE" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="TERMID" ColumnName="TERMID" />
+                <ScalarProperty Name="ORDERNO" ColumnName="ORDERNO" />
+                <ScalarProperty Name="MERCHANTID" ColumnName="MERCHANTID" />
+                <ScalarProperty Name="USERNO" ColumnName="USERNO" />
+                <ScalarProperty Name="OUTIDNO" ColumnName="OUTIDNO" />
+                <ScalarProperty Name="INIDNO" ColumnName="INIDNO" />
+                <ScalarProperty Name="TRANSFEROUTACTNO" ColumnName="TRANSFEROUTACTNO" />
+                <ScalarProperty Name="TRANSFERINACTNO" ColumnName="TRANSFERINACTNO" />
+                <ScalarProperty Name="TXNOUTBANK" ColumnName="TXNOUTBANK" />
+                <ScalarProperty Name="TXNINBANK" ColumnName="TXNINBANK" />
+                <ScalarProperty Name="TXNAMT" ColumnName="TXNAMT" />
+                <ScalarProperty Name="ACHCODE" ColumnName="ACHCODE" />
+                <ScalarProperty Name="TXNCODE" ColumnName="TXNCODE" />
+                <ScalarProperty Name="ACHSTAN" ColumnName="ACHSTAN" />
+                <ScalarProperty Name="SEQNO" ColumnName="SEQNO" />
+                <ScalarProperty Name="REQUESTID" ColumnName="REQUESTID" />
+                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_T_eACH">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_T_eACH">
+              <MappingFragment StoreEntitySet="FRT_XML_T_eACH">
+                <ScalarProperty Name="GUID" ColumnName="GUID" />
+                <ScalarProperty Name="FAST_NO" ColumnName="FAST_NO" />
+                <ScalarProperty Name="UPD_TIME" ColumnName="UPD_TIME" />
+                <ScalarProperty Name="CRT_TIME" ColumnName="CRT_TIME" />
+                <ScalarProperty Name="SQL_STS" ColumnName="SQL_STS" />
+                <ScalarProperty Name="MAC" ColumnName="MAC" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="TERMID" ColumnName="TERMID" />
+                <ScalarProperty Name="ORDERNO" ColumnName="ORDERNO" />
+                <ScalarProperty Name="MERCHANTID" ColumnName="MERCHANTID" />
+                <ScalarProperty Name="REFNO" ColumnName="REFNO" />
+                <ScalarProperty Name="USERNO" ColumnName="USERNO" />
+                <ScalarProperty Name="OUTIDNO" ColumnName="OUTIDNO" />
+                <ScalarProperty Name="INIDNO" ColumnName="INIDNO" />
+                <ScalarProperty Name="TRANSFEROUTACTNO" ColumnName="TRANSFEROUTACTNO" />
+                <ScalarProperty Name="TRANSFERINACTNO" ColumnName="TRANSFERINACTNO" />
+                <ScalarProperty Name="TXNOUTBANK" ColumnName="TXNOUTBANK" />
+                <ScalarProperty Name="TXNINBANK" ColumnName="TXNINBANK" />
+                <ScalarProperty Name="TXNAMT" ColumnName="TXNAMT" />
+                <ScalarProperty Name="ACHCODE" ColumnName="ACHCODE" />
+                <ScalarProperty Name="TXNCODE" ColumnName="TXNCODE" />
+                <ScalarProperty Name="SEQNO" ColumnName="SEQNO" />
+                <ScalarProperty Name="REQUESTID" ColumnName="REQUESTID" />
+                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_WorkingKey">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_WorkingKey">
+              <MappingFragment StoreEntitySet="FRT_WorkingKey">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CreateTime" ColumnName="CreateTime" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="FubonBankXml_2" ColumnName="FubonBankXml_2" />
+                <ScalarProperty Name="FubonBankXml" ColumnName="FubonBankXml" />
+                <ScalarProperty Name="Random2_2" ColumnName="Random2_2" />
+                <ScalarProperty Name="Random2" ColumnName="Random2" />
+                <ScalarProperty Name="Random1" ColumnName="Random1" />
+                <ScalarProperty Name="Random" ColumnName="Random" />
+                <ScalarProperty Name="ECDKey" ColumnName="ECDKey" />
+                <ScalarProperty Name="ErrorMessage" ColumnName="ErrorMessage" />
+                <ScalarProperty Name="ErrorCode" ColumnName="ErrorCode" />
+                <ScalarProperty Name="WorkingKeyLabel" ColumnName="WorkingKeyLabel" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CODE_ROLE">
+            <EntityTypeMapping TypeName="dbGLModel.CODE_ROLE">
+              <MappingFragment StoreEntitySet="CODE_ROLE">
+                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
+                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
+                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="FREE_AUTH" ColumnName="FREE_AUTH" />
+                <ScalarProperty Name="AUTH_UNIT" ColumnName="AUTH_UNIT" />
+                <ScalarProperty Name="ROLE_NAME" ColumnName="ROLE_NAME" />
+                <ScalarProperty Name="ROLE_ID" ColumnName="ROLE_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CODE_USER">
+            <EntityTypeMapping TypeName="dbGLModel.CODE_USER">
+              <MappingFragment StoreEntitySet="CODE_USER">
+                <ScalarProperty Name="CREATE_UNIT" ColumnName="CREATE_UNIT" />
+                <ScalarProperty Name="LAST_LOGOUT_DT" ColumnName="LAST_LOGOUT_DT" />
+                <ScalarProperty Name="LAST_LOGIN_DT" ColumnName="LAST_LOGIN_DT" />
+                <ScalarProperty Name="FREEZE_DT" ColumnName="FREEZE_DT" />
+                <ScalarProperty Name="FREEZE_UID" ColumnName="FREEZE_UID" />
+                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
+                <ScalarProperty Name="APPR_UID" ColumnName="APPR_UID" />
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
+                <ScalarProperty Name="IS_MAIL" ColumnName="IS_MAIL" />
+                <ScalarProperty Name="IS_DISABLED" ColumnName="IS_DISABLED" />
+                <ScalarProperty Name="USER_UNIT" ColumnName="USER_UNIT" />
+                <ScalarProperty Name="USER_ID" ColumnName="USER_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CODE_USER_ROLE">
+            <EntityTypeMapping TypeName="dbGLModel.CODE_USER_ROLE">
+              <MappingFragment StoreEntitySet="CODE_USER_ROLE">
+                <ScalarProperty Name="LAST_UPDATE_DT" ColumnName="LAST_UPDATE_DT" />
+                <ScalarProperty Name="LAST_UPDATE_UID" ColumnName="LAST_UPDATE_UID" />
+                <ScalarProperty Name="CREATE_DT" ColumnName="CREATE_DT" />
+                <ScalarProperty Name="CREATE_UID" ColumnName="CREATE_UID" />
+                <ScalarProperty Name="ROLE_ID" ColumnName="ROLE_ID" />
+                <ScalarProperty Name="USER_ID" ColumnName="USER_ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_MAIL_LOG">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_MAIL_LOG">
+              <MappingFragment StoreEntitySet="FRT_MAIL_LOG">
+                <ScalarProperty Name="MAIL_SUB" ColumnName="MAIL_SUB" />
+                <ScalarProperty Name="RESULT_DESC" ColumnName="RESULT_DESC" />
+                <ScalarProperty Name="MAIL_RESULT" ColumnName="MAIL_RESULT" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="RECEIVER_EMPNO" ColumnName="RECEIVER_EMPNO" />
+                <ScalarProperty Name="MAIL_TIME" ColumnName="MAIL_TIME" />
+                <ScalarProperty Name="MAIL_DATE" ColumnName="MAIL_DATE" />
+                <ScalarProperty Name="SEQ" ColumnName="SEQ" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_MAIL_NOTIFY">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_MAIL_NOTIFY">
+              <MappingFragment StoreEntitySet="FRT_MAIL_NOTIFY">
+                <ScalarProperty Name="APPR_DT" ColumnName="APPR_DT" />
+                <ScalarProperty Name="APPR_ID" ColumnName="APPR_ID" />
+                <ScalarProperty Name="UPDATE_DATETIME" ColumnName="UPDATE_DATETIME" />
+                <ScalarProperty Name="UPDATE_ID" ColumnName="UPDATE_ID" />
+                <ScalarProperty Name="DATA_STATUS" ColumnName="DATA_STATUS" />
+                <ScalarProperty Name="RESERVE3" ColumnName="RESERVE3" />
+                <ScalarProperty Name="RESERVE2" ColumnName="RESERVE2" />
+                <ScalarProperty Name="RESERVE1" ColumnName="RESERVE1" />
+                <ScalarProperty Name="IS_NOTIFY_DEPT_MGR" ColumnName="IS_NOTIFY_DEPT_MGR" />
+                <ScalarProperty Name="MEMO" ColumnName="MEMO" />
+                <ScalarProperty Name="IS_NOTIFY_MGR" ColumnName="IS_NOTIFY_MGR" />
+                <ScalarProperty Name="EMP_TYPE" ColumnName="EMP_TYPE" />
+                <ScalarProperty Name="RECEIVER_EMPNO" ColumnName="RECEIVER_EMPNO" />
+                <ScalarProperty Name="GROUP_CODE" ColumnName="GROUP_CODE" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SYS_SEQ">
+            <EntityTypeMapping TypeName="dbGLModel.SYS_SEQ">
+              <MappingFragment StoreEntitySet="SYS_SEQ">
+                <ScalarProperty Name="CURR_VALUE" ColumnName="CURR_VALUE" />
+                <ScalarProperty Name="PRECODE" ColumnName="PRECODE" />
+                <ScalarProperty Name="SEQ_TYPE" ColumnName="SEQ_TYPE" />
+                <ScalarProperty Name="SYS_CD" ColumnName="SYS_CD" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_T_622821">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_T_622821">
+              <MappingFragment StoreEntitySet="FRT_XML_T_622821">
+                <ScalarProperty Name="GUID" ColumnName="GUID" />
+                <ScalarProperty Name="FAST_NO" ColumnName="FAST_NO" />
+                <ScalarProperty Name="UPD_TIME" ColumnName="UPD_TIME" />
+                <ScalarProperty Name="CRT_TIME" ColumnName="CRT_TIME" />
+                <ScalarProperty Name="SQL_STS" ColumnName="SQL_STS" />
+                <ScalarProperty Name="ICV" ColumnName="ICV" />
+                <ScalarProperty Name="SYNC" ColumnName="SYNC" />
+                <ScalarProperty Name="MAC" ColumnName="MAC" />
+                <ScalarProperty Name="AG_BKID" ColumnName="AG_BKID" />
+                <ScalarProperty Name="APX" ColumnName="APX" />
+                <ScalarProperty Name="RCV_NAME" ColumnName="RCV_NAME" />
+                <ScalarProperty Name="PAY_NAME" ColumnName="PAY_NAME" />
+                <ScalarProperty Name="REF_NO" ColumnName="REF_NO" />
+                <ScalarProperty Name="FEE_COD" ColumnName="FEE_COD" />
+                <ScalarProperty Name="TX_AMT" ColumnName="TX_AMT" />
+                <ScalarProperty Name="RCV_ACNO" ColumnName="RCV_ACNO" />
+                <ScalarProperty Name="RCV_BANK" ColumnName="RCV_BANK" />
+                <ScalarProperty Name="CERT_NO" ColumnName="CERT_NO" />
+                <ScalarProperty Name="CERT_BKID" ColumnName="CERT_BKID" />
+                <ScalarProperty Name="ACNO_OUT" ColumnName="ACNO_OUT" />
+                <ScalarProperty Name="PAY_BANK" ColumnName="PAY_BANK" />
+                <ScalarProperty Name="SETL_ID" ColumnName="SETL_ID" />
+                <ScalarProperty Name="NAME_COD" ColumnName="NAME_COD" />
+                <ScalarProperty Name="PAY_IDNO" ColumnName="PAY_IDNO" />
+                <ScalarProperty Name="PRE_REQSRL" ColumnName="PRE_REQSRL" />
+                <ScalarProperty Name="PRE_REQDATE" ColumnName="PRE_REQDATE" />
+                <ScalarProperty Name="ACT_DATE" ColumnName="ACT_DATE" />
+                <ScalarProperty Name="TX_RMK" ColumnName="TX_RMK" />
+                <ScalarProperty Name="TRAN_ID" ColumnName="TRAN_ID" />
+                <ScalarProperty Name="HEADER" ColumnName="HEADER" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_WORD">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_WORD">
+              <MappingFragment StoreEntitySet="FRT_WORD">
+                <ScalarProperty Name="approve_datetime" ColumnName="approve_datetime" />
+                <ScalarProperty Name="appr_id" ColumnName="appr_id" />
+                <ScalarProperty Name="data_status" ColumnName="data_status" />
+                <ScalarProperty Name="update_datetime" ColumnName="update_datetime" />
+                <ScalarProperty Name="update_id" ColumnName="update_id" />
+                <ScalarProperty Name="frt_achcode" ColumnName="frt_achcode" />
+                <ScalarProperty Name="frt_memo_apx" ColumnName="frt_memo_apx" />
+                <ScalarProperty Name="frt_srce_kind" ColumnName="frt_srce_kind" />
+                <ScalarProperty Name="frt_srce_from" ColumnName="frt_srce_from" />
+                <ScalarProperty Name="frt_sys_type" ColumnName="frt_sys_type" />
+                <ScalarProperty Name="frt_word_id" ColumnName="frt_word_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_LOG">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_LOG">
+              <MappingFragment StoreEntitySet="FRT_XML_LOG">
+                <ScalarProperty Name="create_time_hms" ColumnName="create_time_hms" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="fast_no" ColumnName="fast_no" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_LOG_DETAIL">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_LOG_DETAIL">
+              <MappingFragment StoreEntitySet="FRT_XML_LOG_DETAIL">
+                <ScalarProperty Name="create_time_hms" ColumnName="create_time_hms" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="operation_status" ColumnName="operation_status" />
+                <ScalarProperty Name="fast_no" ColumnName="fast_no" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

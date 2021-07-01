@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbGLModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="FRT_XML_LOG">
+    <Key>
+      <PropertyRef Name="fast_no" />
+    </Key>
+    <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="create_date" Type="date" />
+    <Property Name="create_time_hms" Type="time" Precision="7" />
+  </EntityType>
+  <EntityType Name="FRT_XML_LOG_DETAIL">
+    <Key>
+      <PropertyRef Name="fast_no" />
+      <PropertyRef Name="create_date" />
+      <PropertyRef Name="create_time_hms" />
+    </Key>
+    <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+    <Property Name="operation_status" Type="char" MaxLength="2" />
+    <Property Name="create_date" Type="date" Nullable="false" />
+    <Property Name="create_time_hms" Type="time" Precision="7" Nullable="false" />
+  </EntityType>
+  <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+    <End Role="FRT_XML_LOG" Type="Self.FRT_XML_LOG" Multiplicity="1" />
+    <End Role="FRT_XML_LOG_DETAIL" Type="Self.FRT_XML_LOG_DETAIL" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="FRT_XML_LOG">
+        <PropertyRef Name="fast_no" />
+      </Principal>
+      <Dependent Role="FRT_XML_LOG_DETAIL">
+        <PropertyRef Name="fast_no" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="dbGLModelStoreContainer">
+    <EntitySet Name="FRT_XML_LOG" EntityType="Self.FRT_XML_LOG" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="Self.FRT_XML_LOG_DETAIL" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="Self.FK_PK_FRT_XML_LOG_DETAIL">
+      <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+      <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

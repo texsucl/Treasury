@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="dbGLModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="FRT_XML_LOG">
+          <Key>
+            <PropertyRef Name="fast_no" />
+          </Key>
+          <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="create_date" Type="date" />
+          <Property Name="create_time_hms" Type="time" Precision="7" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG_DETAIL">
+          <Key>
+            <PropertyRef Name="fast_no" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="create_time_hms" />
+          </Key>
+          <Property Name="fast_no" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="operation_status" Type="char" MaxLength="2" />
+          <Property Name="create_date" Type="date" Nullable="false" />
+          <Property Name="create_time_hms" Type="time" Precision="7" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+          <End Role="FRT_XML_LOG" Type="Self.FRT_XML_LOG" Multiplicity="1" />
+          <End Role="FRT_XML_LOG_DETAIL" Type="Self.FRT_XML_LOG_DETAIL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FRT_XML_LOG">
+              <PropertyRef Name="fast_no" />
+            </Principal>
+            <Dependent Role="FRT_XML_LOG_DETAIL">
+              <PropertyRef Name="fast_no" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="dbGLModelStoreContainer">
+          <EntitySet Name="FRT_XML_LOG" EntityType="Self.FRT_XML_LOG" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="Self.FRT_XML_LOG_DETAIL" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="Self.FK_PK_FRT_XML_LOG_DETAIL">
+            <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+            <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="dbGLModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="dbGLEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="FRT_XML_LOG" EntityType="dbGLModel.FRT_XML_LOG" />
+          <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="dbGLModel.FRT_XML_LOG_DETAIL" />
+          <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL">
+            <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+            <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="FRT_XML_LOG">
+          <Key>
+            <PropertyRef Name="fast_no" />
+          </Key>
+          <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Precision="0" />
+          <Property Name="create_time_hms" Type="Time" Precision="7" />
+          <NavigationProperty Name="FRT_XML_LOG_DETAIL" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG" ToRole="FRT_XML_LOG_DETAIL" />
+        </EntityType>
+        <EntityType Name="FRT_XML_LOG_DETAIL">
+          <Key>
+            <PropertyRef Name="fast_no" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="create_time_hms" />
+          </Key>
+          <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="operation_status" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="create_time_hms" Type="Time" Nullable="false" Precision="7" />
+          <NavigationProperty Name="FRT_XML_LOG" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG_DETAIL" ToRole="FRT_XML_LOG" />
+        </EntityType>
+        <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+          <End Type="dbGLModel.FRT_XML_LOG" Role="FRT_XML_LOG" Multiplicity="1" />
+          <End Type="dbGLModel.FRT_XML_LOG_DETAIL" Role="FRT_XML_LOG_DETAIL" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FRT_XML_LOG">
+              <PropertyRef Name="fast_no" />
+            </Principal>
+            <Dependent Role="FRT_XML_LOG_DETAIL">
+              <PropertyRef Name="fast_no" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="dbGLModelStoreContainer" CdmEntityContainer="dbGLEntities">
+          <EntitySetMapping Name="FRT_XML_LOG">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_LOG">
+              <MappingFragment StoreEntitySet="FRT_XML_LOG">
+                <ScalarProperty Name="create_time_hms" ColumnName="create_time_hms" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="fast_no" ColumnName="fast_no" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FRT_XML_LOG_DETAIL">
+            <EntityTypeMapping TypeName="dbGLModel.FRT_XML_LOG_DETAIL">
+              <MappingFragment StoreEntitySet="FRT_XML_LOG_DETAIL">
+                <ScalarProperty Name="create_time_hms" ColumnName="create_time_hms" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="operation_status" ColumnName="operation_status" />
+                <ScalarProperty Name="fast_no" ColumnName="fast_no" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="false" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

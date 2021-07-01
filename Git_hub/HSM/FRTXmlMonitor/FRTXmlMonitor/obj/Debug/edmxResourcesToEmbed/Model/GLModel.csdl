@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="dbGLModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityContainer Name="dbGLEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="FRT_XML_LOG" EntityType="dbGLModel.FRT_XML_LOG" />
+    <EntitySet Name="FRT_XML_LOG_DETAIL" EntityType="dbGLModel.FRT_XML_LOG_DETAIL" />
+    <AssociationSet Name="FK_PK_FRT_XML_LOG_DETAIL" Association="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL">
+      <End Role="FRT_XML_LOG" EntitySet="FRT_XML_LOG" />
+      <End Role="FRT_XML_LOG_DETAIL" EntitySet="FRT_XML_LOG_DETAIL" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="FRT_XML_LOG">
+    <Key>
+      <PropertyRef Name="fast_no" />
+    </Key>
+    <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="create_date" Type="DateTime" Precision="0" />
+    <Property Name="create_time_hms" Type="Time" Precision="7" />
+    <NavigationProperty Name="FRT_XML_LOG_DETAIL" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG" ToRole="FRT_XML_LOG_DETAIL" />
+  </EntityType>
+  <EntityType Name="FRT_XML_LOG_DETAIL">
+    <Key>
+      <PropertyRef Name="fast_no" />
+      <PropertyRef Name="create_date" />
+      <PropertyRef Name="create_time_hms" />
+    </Key>
+    <Property Name="fast_no" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Name="operation_status" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+    <Property Name="create_date" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="create_time_hms" Type="Time" Nullable="false" Precision="7" />
+    <NavigationProperty Name="FRT_XML_LOG" Relationship="dbGLModel.FK_PK_FRT_XML_LOG_DETAIL" FromRole="FRT_XML_LOG_DETAIL" ToRole="FRT_XML_LOG" />
+  </EntityType>
+  <Association Name="FK_PK_FRT_XML_LOG_DETAIL">
+    <End Type="dbGLModel.FRT_XML_LOG" Role="FRT_XML_LOG" Multiplicity="1" />
+    <End Type="dbGLModel.FRT_XML_LOG_DETAIL" Role="FRT_XML_LOG_DETAIL" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="FRT_XML_LOG">
+        <PropertyRef Name="fast_no" />
+      </Principal>
+      <Dependent Role="FRT_XML_LOG_DETAIL">
+        <PropertyRef Name="fast_no" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>
