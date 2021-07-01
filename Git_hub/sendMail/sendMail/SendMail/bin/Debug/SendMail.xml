@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SendMail</name>
+    </assembly>
+    <members>
+        <member name="T:SendMail.SendMailSelf">
+            <summary>
+            寄信
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.mailTitle">
+            <summary>
+            寄信標題
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.smtpServer">
+            <summary>
+            寄信smtp server
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.smtpPort">
+            <summary>
+            寄信smtp server的Port，預設25
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.mailAccount">
+            <summary>
+            寄信帳號
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.mailPwd">
+            <summary>
+            寄信密碼
+            </summary>
+        </member>
+        <member name="M:SendMail.SendMailSelf.Mail_Send(System.Tuple{System.String,System.String},System.Collections.Generic.IEnumerable{System.Tuple{System.String,System.String}},System.Collections.Generic.IEnumerable{System.Tuple{System.String,System.String}},System.String,System.String,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.IO.Stream})">
+            <summary>
+            完整的寄信函數 , MailFrom(寄信人位置,寄信人名稱) , MailTos(收信人位置,收信人名稱) , Ccs(副本人位置,副本人名稱) , MailSub(主旨) , MailBody(內文) , isBodyHtml(是否為Html格式) , files(要夾帶的附檔) , 如果失敗回傳錯誤訊息
+            </summary>
+            <param name="MailFrom">寄信人Email Address 欄位一為位置,欄位二為名稱</param>
+            <param name="MailTos">收信人Email Address 欄位一為位置,欄位二為名稱</param>
+            <param name="Ccs">副本Email Address 欄位一為位置,欄位二為名稱</param>
+            <param name="MailSub">主旨</param>
+            <param name="MailBody">內文</param>
+            <param name="isBodyHtml">是否為Html格式</param>
+            <param name="files">要夾帶的附檔</param>
+            <returns>回傳寄信是否成功(空值:成功,錯誤訊息:失敗)</returns>
+        </member>
+        <member name="P:SendMail.SendMailSelf.Mplus_BaseAddress">
+            <summary>
+            M+ server location
+            </summary>
+        </member>
+        <member name="P:SendMail.SendMailSelf.Mplus_Url">
+            <summary>
+            執行傳送 M+ 的Url
+            </summary>
+        </member>
+        <member name="M:SendMail.SendMailSelf.Mplus_Send(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            發送 M+ 函數 
+            </summary>
+            <param name="systemName">(必要)於Web Service平台註冊的系統名稱 (ex:MAPP)</param>
+            <param name="mplusId">(必要)發送訊息的企業帳號代碼 (ex:DCC => 行政企業帳號)</param>
+            <param name="target">(必要)發送對象的Email Address或手機門號，因業務員會有共用手機門號的情形，所以建議使用O365的Email進行訊息發送(ex:xxx.xx@fubon.com or 09xxxxxxxx)</param>
+            <param name="sendType">(必要)寄送類型 (ex: T => 文字,U => 圖片URL路徑,I => 圖片檔案路徑,圖片容量大小不可超過500KB)</param>
+            <param name="message">(必要)訊息內容 </param>
+            <param name="policyNo">保單號碼</param>
+            <param name="hideSysName">隱藏系統名稱 (ex: Y)</param>
+            <param name="senderId">發訊人員5碼AD帳號</param>
+            <param name="senderName">發訊人員姓名</param>
+            <param name="unitId">發訊人員單位代碼</param>
+            <returns>參數1:成功失敗 , 參數2:Api的returCode 中文 , 參數3:Api的returnMsg , 參數4:guid</returns>
+        </member>
+        <member name="P:SendMail.Mplus_Response.systemName">
+            <summary>
+            於Web Service平台註冊的系統名稱
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Response.guid">
+            <summary>
+            訊息序號，呼叫系統建議紀錄此序號
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Response.returnCode">
+            <summary>
+            結果代碼
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Response.returnMessage">
+            <summary>
+            錯誤訊息
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.systemName">
+            <summary>
+            (必要)於Web Service平台註冊的系統名稱 (ex:MAPP)
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.mplusId">
+            <summary>
+            (必要)發送訊息的企業帳號代碼 (ex:DCC => 行政企業帳號)
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.target">
+            <summary>
+            (必要)發送對象的Email Address或手機門號，因業務員會有共用手機門號的情形，所以建議使用O365的Email進行訊息發送(ex:xxx.xx@fubon.com or 09xxxxxxxx)
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.message">
+            <summary>
+            (必要)訊息內容
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.hideSysName">
+            <summary>
+            隱藏系統名稱 (ex: Y)
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.senderId">
+            <summary>
+            發訊人員5碼AD帳號
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.policyNo">
+            <summary>
+            保單號碼
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.senderName">
+            <summary>
+            發訊人員姓名
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.unitId">
+            <summary>
+            發訊人員單位代碼
+            </summary>
+        </member>
+        <member name="P:SendMail.Mplus_Request.sendType">
+            <summary>
+            (必要)寄送類型 (ex: T => 文字,U => 圖片URL路徑,I => 圖片檔案路徑,圖片容量大小不可超過500KB)
+            </summary>
+        </member>
+    </members>
+</doc>
