@@ -1,0 +1,180 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var paidTypeList = ViewBag.paidTypeList as SelectList;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <table>
+                    <tr>
+                        <td align="right" valign="top">
+                            <span style="color:red;">＊報表種類：</span>
+                            </td>
+                        <td>
+                            @Html.RadioButton("rptType", "rpt4", new { @checked = true, onchange = "rptTypeChange();" })<span >快速付款失敗件明細表(累計)</span><br/>
+                            @Html.RadioButton("rptType", "rpt1", new { onchange = "rptTypeChange();" })<span>快速付款待匯款件明細表(累計)</span><br />
+                            @Html.RadioButton("rptType", "rpt1CloseDt", new { onchange = "rptTypeChange();" })<span>快速付款待匯款件明細表(依結案日)</span><br />
+                            @Html.RadioButton("rptType", "4RemitDt", new { onchange = "rptTypeChange();" })<span>快速付款失敗報表-跨天通知</span><br />
+                            @Html.RadioButton("rptType", "ORTB007P5", new { onchange = "rptTypeChange();"})<span>快速付款失敗報表-取消件</span>
+                            </td>
+                        
+                        </tr>
+                    <tr>
+                        <td align="right">
+                            <span id="qDateWord" style="color:red;">＊截止日期：</span>
+</td>
+                        <td>
+
+                            <input type="text" id="qDate" name="qDate" maxlength="8" size="10" />
+                        </td>
+                        </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <input type="submit" id="btnPrint" name="btnPrint" value="確定" class="btn btn-primary" />
+
+                        </td>
+                    </tr>
+                    @*<tr>
+                        <td>
+                            截止日期：<input type="text" id="endDate" name="endDate" maxlength="8" size="10" />
+                        </td>
+                        <td><input type="submit" id="btnRpt4" name="btnRpt4" value="快速付款失敗件明細表(累計)" class="btn btn-primary" /></td>
+                        <td><input type="submit" id="btnRpt1" name="btnRpt1" value="快速付款待匯款件明細表(累計)" class="btn btn-primary" /></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            結案日期：<input type="text" id="closeDate" name="closeDate" maxlength="8" size="10" />
+                        </td>
+                        <td><input type="submit" id="btnRpt1CloseDt" name="btnRpt1CloseDt" value="快速付款待匯款件明細表(依結案日)" class="btn btn-primary" /></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            匯款日期：<input type="text" id="remitDate" name="remitDate" maxlength="8" size="10" />
+                        </td>
+                        <td><input type="submit" id="btnRpt4RemitDt" name="btnRpt4RemitDt" value="快速付款失敗報表-跨天通知" class="btn btn-primary" /></td>
+                    </tr>*@
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function rptTypeChange() {
+        value = $('input:radio:checked[name="rptType"]').val();
+        if (value == 'rpt4' || value == 'rpt1') {
+            $('#qDateWord').html("＊截止日期：");
+        } else if (value == 'rpt1CloseDt') {
+            $('#qDateWord').html("＊結案日：");
+        } else if (value == '4RemitDt' || value == 'ORTB007P5') {
+            $('#qDateWord').html("＊匯款日：");
+        }
+       
+    }
+
+    $(function () {
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            var nowDate = getChtYYYYMMDD();
+            $('#endDate').val(nowDate);
+            $('#closeDate').val(nowDate);
+            $('#remitDate').val(nowDate);
+            $('#qDate').val(nowDate);
+        }
+
+  
+
+
+        $("#btnPrint").click().on('click', function () {
+            value = $('input:radio:checked[name="rptType"]').val();
+            if (value == 'rpt4') {
+                genRpt("4");
+            } else if (value == 'rpt1') {
+                genRpt("1");
+            } else if (value == 'rpt1CloseDt') {
+                genRpt("1CloseDt");
+            } else if (value == '4RemitDt') {
+                genRpt("4RemitDt");
+            } else if (value == 'ORTB007P5') {
+                genRpt(value)
+            }
+        });
+
+
+        //*---------------報表列印 begin ----------------*//
+        function genRpt(type) {
+            $('#validationSummary').children().remove();
+
+            $.blockUI();
+
+            $.ajax({
+                url: "@Url.Action("print", "ORTB007")",
+                data: JSON.stringify({
+                    'remitStat': type, 'qDate': $("#qDate").val()
+                }
+                ),
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var link = '';
+                if (data.success) {
+                    link = '@Url.HttpRouteUrl("Report", new { aspx = "ORTB007PViewer",  id = "-1"})';
+                    link = link.replace("-1", data.guid);
+                    window.open(link);
+
+
+                } else {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (data.err.length > 0) {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+
+                $.unblockUI();
+            },
+            error: function () {
+                $.unblockUI();
+            }
+        });
+
+        
+        }
+        //*---------------報表列印 end ----------------*//
+
+    });
+</script>
+
+

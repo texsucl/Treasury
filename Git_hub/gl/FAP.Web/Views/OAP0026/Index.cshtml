@@ -1,0 +1,567 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+
+}
+@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OAP0026s_Form">
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                <label>部門代碼 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="OAP0026_unit_code" name="OAP0026_unit_code" maxlength="5" style="text-transform: uppercase;" />
+                                <label id="OAP0026_unit_code_memo"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td >
+                                <label>給付類型 : </label>
+                            </td>
+                            <td >
+                                @Html.DropDownList("OAP0026_ap_paid", (SelectList)ViewBag.AP_PAID_A, new { @class = "" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="OAP0026_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="ShowOrNot">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="OAP0026_Insert" value="新增" class="btn btn-primary" />
+        </div>
+        <div class="col-sm-24">
+            <div id="OAP0026_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div style="text-align:center;" class="Customer_Act">
+            <input type="button" id="OAP0026_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="OAP0026_Cancel" value="取消申請" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="OAP0026_Dialog" style="display:none;">
+        <form id="OAP0026_DialogForm">
+            <table>
+                <tr>
+                    <td width="80px;">
+                        <label>部門代碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="OAP0026_unit_code_d" name="OAP0026_unit_code_d" maxlength="5" style="text-transform: uppercase;"/>
+                        <label id="OAP0026_unit_code_d_memo"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>給付類型 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("OAP0026_ap_paid_d", (SelectList)ViewBag.AP_PAID)
+                        @*<input type="text" id="OAP0026_ap_paid_d" name="OAP0026_ap_paid_d" maxlength="5" />*@
+                    </td>
+                </tr>           
+                <tr>
+                    <td>
+                        <input type="button" id="OAP0026_btnInsert_Mod" value="新增" class="btn btn-primary" />
+                        @*<input type="button" id="OAP0026_btnUpdate_Mod" value="修改" class="btn btn-primary" />*@
+                        <input type="button" id="OAP0026_btnDelete_Mod" value="刪除" class="btn btn-primary" />
+                        <input type="hidden" id="OAP0026_hPk_id" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="OAP0026_btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.search = '@Url.Action("qryOAP0026", "OAP0026")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "OAP0026")';
+        UrlFor.InsertData = '@Url.Action("updateOAP0026", "OAP0026")';
+        @*UrlFor.UpdateData = '@Url.Action("UpdateData", "OAP0026")';*@
+        UrlFor.DeleteData = '@Url.Action("updateOAP0026", "OAP0026")';
+        UrlFor.ResetData = '@Url.Action("ResetData", "OAP0026")';
+        UrlFor.ApplyData = '@Url.Action("ApplyData", "OAP0026")';
+        UrlFor.GetDeptName = '@Url.Action("GetDeptNameData", "OAP0026")';
+        //#endregion
+
+        //region 參數設定
+        var OAP0026_unit_code_id = 'OAP0026_unit_code'; //查詢區塊部門代碼ID
+        var OAP0026_unit_code_memo_id = 'OAP0026_unit_code_memo'; //查詢區塊部門代碼(中文)ID
+        var OAP0026_unit_code_d_id = 'OAP0026_unit_code_d'; //明細部分部門代碼ID
+        var OAP0026_unit_code_d_memo_id = 'OAP0026_unit_code_d_memo'; //明細部分部門代碼(中文)ID
+        var OAP0026_ap_paid_d_id = 'OAP0026_ap_paid_d'; //明細部分給付類型ID
+        var OAP0026_hPk_id = 'OAP0026_hPk_id';
+        var OAP0026_FormId = 'OAP0026_DialogForm';
+        var _ConfirmFlag = false; //離開時提醒訊息
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始動作
+            set_Verified();
+            $('.ShowOrNot').hide();
+            //#endregion
+
+            function set_Verified() {
+                verified.required(OAP0026_FormId, OAP0026_unit_code_d_id, message.required('部門代碼'));
+            }
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'OAP0026_Search':
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'OAP0026_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { OAP0026_InsertFun(); });
+                        break;
+                    case 'OAP0026_btnInsert_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { InsertDataFun(); });
+                        break;
+                    case 'OAP0026_btnDelete_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DeleteDataFun(); });
+                        break;
+                    case 'OAP0026_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApplyDataFun(); });
+                        break;
+                    case 'OAP0026_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            _ConfirmFlag = false;
+                            OAP0026_CancelFun();
+                        });
+                        break;
+                    case 'OAP0026_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+
+            $('input:text').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'OAP0026_unit_code':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + OAP0026_unit_code_id).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + OAP0026_unit_code_id).val().toUpperCase();
+                                getDeptName(DeptId, 'S');  //S = 查詢區塊(部門代碼)
+                            } else {
+                                $('#' + OAP0026_unit_code_memo_id).text('');
+                            }
+                        });
+                        break;
+                    case 'OAP0026_unit_code_d':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + OAP0026_unit_code_d_id).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + OAP0026_unit_code_d_id).val().toUpperCase();
+                                getDeptName(DeptId, 'D');  //D = 明細部分(部門代碼)
+                            } else {
+                                $('#' + OAP0026_unit_code_d_memo_id).text('');
+                            }
+                        });
+                        break;
+                }
+            });
+            //#endregion
+
+            //#region 取部門名稱
+            function getDeptName(deptId, swithType) {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        deptId: deptId
+                    }),
+                    dataType: "json",
+                    url: UrlFor.GetDeptName,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    $.unblockUI(); //畫面打開
+                    if (result != '' || result != null) {
+                        if (swithType == 'S')
+                            $('#' + OAP0026_unit_code_memo_id).text(result);
+
+                        if(swithType == 'D')
+                            $('#' + OAP0026_unit_code_d_memo_id).text(result);
+                    }
+                    else {
+                        if (swithType == 'S')
+                            $('#' + OAP0026_unit_code_memo_id).text('');
+
+                        if (swithType == 'D')
+                            $('#' + OAP0026_unit_code_d_memo_id).text('');
+                    }
+                });
+            }
+            //#endregion
+
+            //申請覆核
+            function ApplyDataFun() {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ApplyData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    $.unblockUI(); //畫面打開
+                    if (result.RETURN_FLAG) {
+                        OAP0026_SearchGrid();
+                    }
+                });
+            }
+            //#endregion
+
+            //取消申請
+            function OAP0026_CancelFun() {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ResetData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    ResetDialog();
+                    $.unblockUI(); //畫面打開
+                    OAP0026_SearchGrid();
+                });
+            }
+            //#endregion
+
+            //#region新增
+            function OAP0026_InsertFun() {
+                dialogOpen('@Ref.ActionType.Add.ToString()', null);
+            }
+
+            function InsertDataFun() {
+                $('#validationSummary').children().remove();
+                //$('#' + OAP0026_FormId).validate().resetForm();
+                if (!$('#' + OAP0026_FormId).valid()) {
+                    return false;
+                }
+
+                var OAP0026_unit_code_d_value = ($('#' + OAP0026_unit_code_d_id).val() || '').trim().toUpperCase();
+                var OAP0026_unit_code_d_memo_value = $('#' + OAP0026_unit_code_d_memo_id).text();
+                var OAP0026_ap_paid_d_value = ($('#' + OAP0026_ap_paid_d_id).val() || '').trim();
+
+                if (OAP0026_unit_code_d_memo_value == null || OAP0026_unit_code_d_memo_value == '') {
+                    alert('請輸入正確的部門代碼!');
+                    return false;
+                }
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: OAP0026ViewModel(
+                            'A',
+                            OAP0026_unit_code_d_value,
+                            OAP0026_ap_paid_d_value
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.InsertData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#OAP0026_btnInsert_Mod'));
+                        OAP0026_SearchGrid();
+                        _ConfirmFlag = result.Datas;
+                    } else {
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                        alert(result.DESCRIPTION);
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 刪除
+            function DeleteDataFun() {
+                $('#validationSummary').children().remove();
+                var OAP0026_unit_code_d_value = ($('#' + OAP0026_unit_code_d_id).val() || '').trim().toUpperCase();
+                var OAP0026_ap_paid_d_value = $('#' + OAP0026_ap_paid_d_id).val();
+                var pk_id = $('#' + OAP0026_hPk_id).val();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: OAP0026ViewModel(
+                            'D',
+                            OAP0026_unit_code_d_value,
+                            OAP0026_ap_paid_d_value,
+                            pk_id
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.DeleteData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#OAP0026_btnDelete_Mod'));
+                        OAP0026_SearchGrid();
+                        _ConfirmFlag = result.Datas;
+
+                    }
+                    else {
+                        customerUtility.alertAuto(result,'a');
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('OAP0026_jqgridDiv');
+                $('.ShowOrNot').hide();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: OAP0026SearchModel(
+                            $('#' + OAP0026_unit_code_id).val().trim().toUpperCase(),
+                            $('#' + 'OAP0026_ap_paid').val())
+                    }),
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    //$('#' + dialogId).dialog('open');
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        OAP0026_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //查詢Grid
+            function OAP0026_SearchGrid() {
+                var colNameArray = ['動作', '執行功能', '資料狀態', '部門代碼', '部門代碼(中文)', '給付類型', '給付類型(中文)',
+                                    '建立人員', '建立時間', '覆核人員', '覆核時間','執行功能代碼', '資料狀態代碼', 'pkid'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 40, sortable: false });
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "data_status_value", index: "data_status_value", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "unit_code", index: "unit_code", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "unit_code_value", index: "unit_code_value", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "ap_paid", index: "ap_paid", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "ap_paid_value", index: "ap_paid_value", width: 300, sortable: false, align: 'left' });
+                colModelArray.push({ name: "create_id", index: "create_id", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_id", index: "appr_id", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_datetime", index: "appr_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "exec_action", index: "exec_action", hidden: true });
+                colModelArray.push({ name: "data_status", index: "data_status", hidden: true });
+                colModelArray.push({ name: "pk_id", index: "pk_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'OAP0026_jqgridDiv',
+                'OAP0026_SearchList',
+                'OAP0026_SearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'OAP0026ViewData'
+                },
+                colNameArray,
+                colModelArray,
+                '部門類型關聯作業檔',
+                jqgridCustom.getPage('OAP0026_jqgridDiv'),
+                jqgridCustom.getRowNum('OAP0026_jqgridDiv'),
+                OAP0026_CompleteFun,
+                true
+                );
+            }
+            //#endregion
+
+            //#region jqgrid 事件
+            function OAP0026_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'OAP0026_Search', OAP0026ActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_data_status]', listId)).text();
+                    //var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_exec_action]', listId)).text();
+
+                    if (status == '2') { //資料異動中不能刪除
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+
+                    $(this).find('.actionEditIcon').hide();
+                    $(this).find('.actionViewIcon').hide();
+                });
+            }
+
+            var OAP0026ActFun = {};
+            OAP0026ActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            OAP0026ActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            OAP0026ActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                $('#' + OAP0026_FormId).validate().resetForm();
+                var dialogId = 'OAP0026_Dialog';
+                var listId = 'OAP0026_SearchList';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+20%", at: "center top", of: window },
+                    title: title + '部門類型關聯作業檔',
+                    width: '600px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                ResetDialog();
+                //$('#' + OAP0026_FormId).validate().resetForm();
+
+                $('#OAP0026_btnInsert_Mod,#OAP0026_btnDelete_Mod').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {
+                    $('#OAP0026_btnInsert_Mod').show();
+                    $('#' + OAP0026_unit_code_d_id).prop('disabled', false);
+                    $('#' + OAP0026_ap_paid_d_id).prop('disabled', false);
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#OAP0026_btnDelete_Mod').show();
+                }
+
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    
+                    $('#' + OAP0026_hPk_id).val(data.pk_id);
+                    $('#' + OAP0026_unit_code_d_id).val(data.unit_code);
+                    $('#' + OAP0026_unit_code_d_memo_id).text(data.unit_code_value);
+                    $('#' + OAP0026_ap_paid_d_id).val(data.ap_paid);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetDialog() {
+                $('#' + OAP0026_hPk_id).val('');
+
+                if ($('#' + OAP0026_ap_paid_d_id + ' option').length > 0) {
+                    $('#' + OAP0026_ap_paid_d_id).val($($('#' + OAP0026_ap_paid_d_id + ' option')[0]).val());
+                }
+                //$('#' + OAP0026_ap_paid_d_id).val('');
+                $('#' + OAP0026_unit_code_d_id).val('');
+                $('#' + OAP0026_unit_code_d_memo_id).text('');
+                $('#' + OAP0026_unit_code_d_id).prop('disabled', true);
+                $('#' + OAP0026_ap_paid_d_id).prop('disabled', true);
+                $('#validationSummary').children().remove();
+            }
+            //#endregion
+
+            //#region 查詢畫面  ViewModel
+            function OAP0026SearchModel(unit_code, ap_paid) {
+                var obj = {};
+                obj['unit_code'] = unit_code;
+                obj['ap_paid'] = ap_paid;
+                return obj;
+            }
+            //#endregion
+
+            //#region OAP0026ViewModel
+            function OAP0026ViewModel(exec_action, unit_code, ap_paid, pk_id) {
+                var obj = {};
+                obj['exec_action'] = exec_action;
+                obj['unit_code'] = unit_code;
+                obj['ap_paid'] = ap_paid;
+                obj['pk_id'] = pk_id;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

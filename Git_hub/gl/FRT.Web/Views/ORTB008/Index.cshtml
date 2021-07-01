@@ -1,0 +1,287 @@
+﻿@model FRT.Web.ViewModels.ORTB008Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var mailResultList = ViewBag.mailResultList as SelectList;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+    @Html.Hidden("hidMailResult", "")
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.qDateB)：
+                            <input id="qDateB" name="qDateB" type="text">
+                            ~
+                            <input id="qDateE" name="qDateE" type="text">
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.mailResult)：@Html.DropDownList("mailResult", mailResultList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.receiverEmpno)：@Html.TextBoxFor(model => model.receiverEmpno, new { @size = "5", @maxlength = "5", @onkeyup = "InputToUpper(this);" })
+                        </td>
+                    </tr>
+
+
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    function getMailResult() {
+        return $('#hidMailResult').val();
+    } 
+
+    
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            var nowDate = getCurDate();
+
+            $('#qDateB').val(nowDate.substring(0, 4) + "-" + nowDate.substring(4, 6) + "-" + nowDate.substring(6, 8));
+            $('#qDateE').val(nowDate.substring(0, 4) + "-" + nowDate.substring(4, 6) + "-" + nowDate.substring(6, 8));
+            $('#hidMailResult').val('@Html.Raw(ViewBag.mailResultjqList)');
+        }
+
+
+        $('#qDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#qDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#qDateB').val("");
+            $('#qDateE').val("");
+            $('#mailResult').val("");
+            $('#receiverEmpno').val("");
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#qDateB").val().length = 0 || $("#qDateE").val().length == 0) {
+                validationSummary.append('<li>發送日期起訖必需輸入!!</li>');
+
+                return;
+            } else {
+
+                if (!checkDate($("#qDateB").val(), true)) {
+                    validationSummary.append('<li>發送日期起-格式錯誤!!</li>');
+
+                    return;
+
+                }
+
+                if (!checkDate($("#qDateE").val(), true)) {
+                    validationSummary.append('<li>發送日期訖-格式錯誤!!</li>');
+
+                    return;
+
+                }
+            }
+
+            var jsonData = JSON.stringify({
+                'qDateB': $("#qDateB").val(),
+                'qDateE': $("#qDateE").val(),
+                'mailResult': $("#mailResult").val(),
+                'receiverEmpno': $("#receiverEmpno").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("loadData", "ORTB008")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if(data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "seq" },
+            colModel: [
+               
+                {
+                    label: '序號',
+                    name: 'seq', align: 'center', width: '130',hidden: true,
+                    editable: false
+                },
+                {
+                    label: '發送日期',
+                    name: 'mailDate', align: 'center', width: '110',
+                    editable: false
+
+                },
+                {
+                    label: '發送時間',
+                    name: 'mailTime', align: 'center', width: '120',
+                    editable: false
+
+                },
+                {
+                    label: '收件人',
+                    name: 'receiverEmpno', align: 'center', width: '80',
+                    editable: false
+
+                },
+                {
+                    label: 'EMAIL',
+                    name: 'eMail', align: 'left', width: '250',
+                    editable: false
+
+                },
+                {
+                    label: '主旨',
+                    name: 'mailSub', align: 'left', width: '250',
+                    editable: false
+
+                },
+                {
+                    label: '寄送結果',
+                    name: 'mailResult', align: 'center', width: '90',
+                    editable: false,
+        edittype: "select",
+        formatter: 'select',
+        editoptions: {
+            value: getMailResult()
+        }
+                },
+                {
+                    label: '訊息',
+                    name: 'resultDesc', align: 'left', width:'350',
+                    editable: false
+                }
+                
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            loadComplete: function () {
+               
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+        
+
+
+    });
+</script>
+
+

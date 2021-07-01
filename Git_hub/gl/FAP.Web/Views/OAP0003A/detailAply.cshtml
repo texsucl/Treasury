@@ -1,0 +1,301 @@
+﻿@model FAP.Web.ViewModels.OAP0003Model
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.Title = ViewBag.funcName;
+    var policyList = ViewBag.ppadList as ICollection<FAP.Web.ViewModels.OAP0003PoliModel>;
+    var rStatusList = ViewBag.rStatusList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            @Html.Hidden("hidOPaidCd", "")
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+                        @Html.DisplayTextFor(model => model.aplyNo)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_id)：
+                        @Html.DisplayTextFor(model => model.create_id)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_dt)：
+                        @Html.DisplayTextFor(model => model.create_dt)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.report_no)：@Html.TextBoxFor(model => model.report_no, new { @size = "20", @disabled = true })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "10", @maxlength = "10", @disabled = true })
+                    </td>
+                </tr>
+                <tr>
+                    
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_name)：@Html.TextBoxFor(model => model.paid_name, new { @size = "25", @maxlength = "25", @disabled = true })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.r_status)：@Html.DropDownList("r_status", rStatusList, "", new { @disabled = true })
+                    </td>
+                </tr>
+
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+           
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+            <br>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+    //取得"給付方式"下拉選單
+    function getOPaidCd() {
+        return $('#hidOPaidCd').val();
+    }
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            $('#hidOPaidCd').val('@Html.Raw(ViewBag.oPaidCdjqList)');
+            var policyList= @Html.Raw(Json.Encode(this.ViewBag.ppadList));
+            genGrid(policyList);
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+        //*---------------產生GRID begin ----------------*//
+        function genGrid(policyList) {
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+            $("#grid").jqGrid({
+                datatype: "local",
+                data: policyList,
+                //caption: '保單明細',
+                jsonReader: {
+                    repeatitems: false, id: 'tempId'
+                },
+                colModel: [
+                     {
+                         label: '支票號碼',
+                         name: 'check_no', align: 'center', 
+                         editable: false,
+                     },
+                    {
+                        label: '保單號碼',
+                        name: 'policy_no', align: 'center',
+                        editable: false
+                    },
+                    {
+                        label: '保單序號',
+                        name: 'policy_seq', align: 'center',
+                        editable: false
+                    },
+                    {
+                        label: '重覆碼',
+                        name: 'id_dup', align: 'center',
+                        editable: false
+                    },
+                    {
+                        label: '案號',
+                        name: 'change_id', align: 'center',
+                        editable: false
+                    },
+                    {
+                        label: '給付項目',
+                        name: 'o_paid_cd', align: 'center',
+                        editable: true,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getOPaidCd()
+                        }
+                    },
+                    {
+                        label: '回存金額',
+                        name: 'main_amt', align: 'center',
+                        editable: false,
+                        formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 2 }
+                    }
+                ],
+                autowidth: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: true,
+                forceFit: true,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                pager: "#pager",
+                loadComplete: function () {
+
+
+                }
+            });
+
+        }
+        //*---------------產生GRID end ----------------*//
+
+
+
+
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10181A/index");
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data:JSON.stringify({
+                        model: {
+                            'aplyNo': '@Html.Raw(ViewBag.aplyNo)',
+                            'report_no': $("#report_no").val(),
+                            'paid_id': $("#paid_id").val(),
+                        }, 'apprStat': "3"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OAP0003A")',
+            contentType: 'application/json',
+            success: function (data) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+        
+
+
+
+
+    });
+
+
+
+    //*------------------------核可--------------------------*//
+    $("#btnConfirm").click().on('click', function () {
+        $('#validationSummary').children().remove();
+        $.blockUI();
+
+        var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'aplyNo': '@Html.Raw(ViewBag.aplyNo)',
+                    'report_no': $("#report_no").val(),
+                    'paid_id': $("#paid_id").val(),
+                }, 'apprStat': "2"
+            }),
+            dataType: "json",
+            url: '@Url.Action("execSave", "OAP0003A")',
+            contentType: 'application/json',
+            success: function (data) {
+
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+    });
+
+
+
+    });
+</script>
+
+

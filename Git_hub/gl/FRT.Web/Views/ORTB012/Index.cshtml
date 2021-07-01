@@ -1,0 +1,388 @@
+﻿@model FRT.Web.ViewModels.ORTB012Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var elecTypeList = ViewBag.elecTypeList as SelectList;
+    var elecTypejqList = ViewBag.elecTypejqList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidElecType", "")
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.elecType)：@Html.DropDownList("elecType", elecTypeList, "請選擇")
+                        </td>
+                        <td> <span style="color:red;" />＊
+                            @Html.DisplayNameFor(model => model.actDateB)：
+                            <input id="actDateB" name="actDateB" type="text">
+                            ~
+                            <input id="actDateE" name="actDateE" type="text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span style="color:red;" />＊
+                            @Html.DisplayNameFor(model => model.fastNoB)：
+                            @Html.TextBoxFor(model => model.fastNoB, new { @size = "12", @maxlength = "10" })
+                            ~
+                            @Html.TextBoxFor(model => model.fastNoE, new { @size = "12", @maxlength = "10"})
+                        </td> 
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //取得"電文種類"下拉選單
+    function getElecType() {
+        return $('#hidElecType').val();
+    }
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#hidElecType').val('@Html.Raw(ViewBag.elecTypejqList)');
+        }
+
+
+        $("#fastNoB").blur(function () {
+            InputToUpper(this);
+        });
+
+        $("#fastNoE").blur(function () {
+            InputToUpper(this);
+        });
+
+
+        $('#actDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#actDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#elecType').val("");
+            $('#actDateB').val("");
+            $('#actDateE').val("");
+            $('#fastNoB').val("");
+            $('#fastNoE').val("");
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            createGrid();
+        });
+
+
+        //*---------------查詢 begin ----------------*//
+        function createGrid() {
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            //快速付款編號檢核
+            if ($("#fastNoB").val().length = 0 || $("#fastNoE").val().length == 0) {
+                validationSummary.append('<li>快速付款編號起訖必需輸入!!</li>');
+                return;
+            } else {
+                if ($("#fastNoE").val() < $("#fastNoB").val()) {
+                    validationSummary.append('<li>快速付款編號訖 不可小於 快速付款編號訖 !!</li>');
+                    return;
+                }
+            }
+
+            //匯款日期檢核
+            if ($("#actDateB").val().length = 0 || $("#actDateE").val().length == 0) {
+                validationSummary.append('<li>匯款日期起訖必需輸入!!</li>');
+                return;
+            } else {
+                if (!checkDate($("#actDateB").val(), true)) {
+                    validationSummary.append('<li>匯款日期起-格式錯誤!!</li>');
+                    return;
+                }
+
+                if (!checkDate($("#actDateE").val(), true)) {
+                    validationSummary.append('<li>匯款日期訖-格式錯誤!!</li>');
+                    return;
+                }
+
+                if ($("#actDateE").val() < $("#actDateB").val()) {
+                    validationSummary.append('<li>匯款日期訖 不可小於 匯款日期訖 !!</li>');
+                    return;
+                }
+            }
+
+
+            var jsonData = {
+                elecType: $("#elecType").val(),
+                actDateB: $("#actDateB").val(),
+                actDateE: $("#actDateE").val(),
+                fastNoB: $("#fastNoB").val(),
+                fastNoE: $("#fastNoE").val()
+            };
+
+
+
+            $.blockUI(); //畫面鎖起來
+              
+                $("#grid").jqGrid({
+                       url: '/ORTB012/LoadData/',
+                       postData: jsonData,
+                       datatype: 'json',
+                       jsonReader: {
+                           repeatitems: false//, id: 'fastNo'
+                       },
+                       mtype: 'POST',
+                       colModel: [
+               {
+                   label: '電文種類',
+                   name: 'elecType', align: 'center', width: '190', frozen: true,
+                   editable: false,
+                   edittype: "select",
+                   formatter: 'select',
+                   editoptions: {
+                       value: getElecType()
+                   }
+               },
+               {
+                   label: '快速付款編號',
+                   name: 'fastNo', align: 'center', width: '130', frozen: true,
+                   editable: false
+               },
+               {
+                   label: '匯款日期',
+                   name: 'actDate', align: 'center', width: '100',
+                   editable: false
+               },
+                {
+                    label: '銀行代號',
+                    name: 'bank', align: 'center', width: '100',
+                    editable: false,
+                },
+                {
+                    label: '匯款帳號',
+                    name: 'actNo', align: 'left', width: '180',
+                    editable: false,
+                }
+                ,
+                {
+                    label: '匯款金額',
+                    name: 'rmtAmt', align: 'left', width: '120',
+                    editable: false,
+                },
+                {
+                    label: '收款人戶名',
+                    name: 'rcvName', align: 'left', width: '150',
+                    editable: false,
+                },
+                {
+                    label: '錯誤代碼',
+                    name: 'errorCode', align: 'left', width: '180',
+                    editable: false,
+                },
+                {
+                    label: '附言',
+                    name: 'rmtApx', align: 'left', width: '250',
+                    editable: false,
+                },
+                {
+                    label: '電文日期/時間',
+                    name: 'crtTime', align: 'left', width: '160',
+                    editable: false,
+                },
+                {
+                    label: 'FunCode',
+                    name: 'funCode', align: 'left', width: '80',
+                    editable: false,
+                },
+                {
+                    label: 'STATUS',
+                    name: 'status', align: 'left', width: '80',
+                    editable: false,
+                }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: false,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20, 50],
+                //sortname: 'fastNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+                    fixPositionsOfFrozenDivs.call(this);
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (data.success) {
+                        if (cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+
+                    } else if (data.success == false && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                    }
+                },
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+            });
+
+
+
+            jQuery("#grid").jqGrid('setFrozenColumns');
+            $.unblockUI(); //畫面打開
+        };
+        //*---------------查詢 end ----------------*//
+
+
+
+        //處理凍結grid時...凍結行的高度與原grid行不一致問題
+        resizeColumnHeader = function () {
+            var rowHight, resizeSpanHeight,
+                // get the header row which contains
+                headerRow = $(this).closest("div.ui-jqgrid-view")
+                    .find("table.ui-jqgrid-htable>thead>tr.ui-jqgrid-labels");
+
+            // reset column height
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.height = '';
+            });
+
+            // increase the height of the resizing span
+            resizeSpanHeight = 'height: ' + headerRow.height() + 'px !important; cursor: col-resize;';
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.cssText = resizeSpanHeight;
+            });
+
+            // set position of the dive with the column header text to the middle
+            rowHight = headerRow.height();
+            headerRow.find("div.ui-jqgrid-sortable").each(function () {
+                var ts = $(this);
+                ts.css('top', (rowHight - ts.outerHeight()) / 2 + 'px');
+            });
+        },
+               fixPositionsOfFrozenDivs = function () {
+                   var $rows;
+                   if (typeof this.grid.fbDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-btable>tbody>tr', this.grid.bDiv);
+                       $('>table.ui-jqgrid-btable>tbody>tr', this.grid.fbDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           if ($(this).hasClass("jqgrow")) {
+                               $(this).height(rowHight);
+                               rowHightFrozen = $(this).height();
+                               if (rowHight !== rowHightFrozen) {
+                                   $(this).height(rowHight + (rowHight - rowHightFrozen));
+                               }
+                           }
+                       });
+                       $(this.grid.fbDiv).height(this.grid.bDiv.clientHeight);
+                       $(this.grid.fbDiv).css($(this.grid.bDiv).position());
+                   }
+                   if (typeof this.grid.fhDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-htable>thead>tr', this.grid.hDiv);
+                       $('>table.ui-jqgrid-htable>thead>tr', this.grid.fhDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           $(this).height(rowHight);
+                           rowHightFrozen = $(this).height();
+                           if (rowHight !== rowHightFrozen) {
+                               $(this).height(rowHight + (rowHight - rowHightFrozen));
+                           }
+                       });
+                       $(this.grid.fhDiv).height(this.grid.hDiv.clientHeight);
+                       $(this.grid.fhDiv).css($(this.grid.hDiv).position());
+                   }
+               },
+               fixGboxHeight = function () {
+                   var gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight(),
+                       pagerHeight = $(this.p.pager).outerHeight();
+
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+                   gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight();
+                   pagerHeight = $(this.p.pager).outerHeight();
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+               };
+    });
+</script>
+
+

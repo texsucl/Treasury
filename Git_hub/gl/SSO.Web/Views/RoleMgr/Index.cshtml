@@ -1,0 +1,328 @@
+﻿@model SSO.Web.ViewModels.RoleMgrModel
+
+@{
+    // Layout = null;
+    Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var opScope = ViewBag.opScope;
+
+    var isDisabledList = ViewBag.isDisabledList as SelectList;
+    var CodeRoleList = ViewBag.CodeRoleList as SelectList;
+    var CodeUserList = ViewBag.CodeUserList as SelectList;
+    var AuthUnitList = ViewBag.AuthUnitList as SelectList;
+}
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary" >
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            <table>
+                <tr>
+                    <td>@Html.DisplayNameFor(model => model.cRoleName)：@Html.DropDownList("codeRole", CodeRoleList, "請選擇")
+                        </td>
+
+
+                    <td>@Html.DisplayNameFor(model => model.isDisabled)：@Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        </td>
+                    </tr>
+                <tr>
+                    <td>@Html.DisplayNameFor(model => model.cUpdUserID)：@Html.DropDownList("cUpdUserID", CodeUserList, "請選擇")
+                    
+                    
+                    @*@Html.DisplayNameFor(model => model.cUpdUserID)：@Html.TextBoxFor(model => model.cUpdUserID)*@
+                        </td>
+                    <td>
+
+                        @Html.DisplayNameFor(model => model.authUnit)：@Html.DropDownList("authUnit", AuthUnitList, "請選擇")
+                        @*@Html.DisplayNameFor(model => model.authUnit)：
+            @Html.TextBoxFor(model => model.authUnit, new { @maxlength = "5", @onkeyup = "getAuthUnitNm('auth')" })
+            <label id="lblAuthUnit"></label>*@
+
+
+                    </td>
+
+                    </tr>
+                <tr>
+                    
+                    <td>
+                        @Html.DisplayNameFor(model => model.mgrUnit)：
+                    @Html.TextBoxFor(model => model.mgrUnit, new { @maxlength = "5", @onkeyup = "getAuthUnitNm('mgr')" })
+                    <label id="lblMgrUnit"></label>
+                </td>
+
+            </tr>
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                    <input type="submit" id="btnInsert" name="btnInsert" value="新增" class="btn btn-primary" />
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+    //轉跳"角色明細"畫面
+    function qryDetail(roleId) {
+        document.location.href = "/RoleMgr/detailRole/?cRoleId=" + roleId;
+
+
+    }
+
+    //轉跳"角色歷史資料"畫面
+    function qryHis(rodId) {
+        document.location.href = "/RoleAppr/detailRole/?cRoleId=" + roleId;
+
+    }
+
+    //取得授權單位名稱
+    function getAuthUnitNm(type) {
+        var qUnit = "";
+
+        if (type == "auth") {
+            qUnit = $('#authUnit').val();
+            $('#lblAuthUnit').text("");
+        } else {
+            qUnit = $('#mgrUnit').val();
+            $('#lblMgrUnit').text("");
+        }
+
+
+        if (qUnit.length == 5) {
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify({
+                    'authUnit': qUnit
+                }),
+                url: '@Url.Action("getAuthUnitNm", "FuncMgr")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (type == "auth")
+                        $('#lblAuthUnit').text(data.authUnitNm);
+                    else
+                        $('#lblMgrUnit').text(data.authUnitNm);
+
+                },
+                error: function () {
+                    alert("授權單位錯誤！")
+                }
+            });
+        }
+    }
+
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        var authUnitCnt = '@Html.Raw(ViewBag.authUnitCnt)';
+
+        if (opScope == "" || opScope == "0" || authUnitCnt == 0) {
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (authUnitCnt == 0)
+                    validationSummary.append('<li>' + '未建管理者可授權程式table檔,請先建檔!' + '</li>');
+                else
+                    validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+                $("#btnQry").hide();
+                $("#btnInsert").hide();
+
+            } else {
+               // $('#authUnit').attr('disabled', true);
+                $('#mgrUnit').attr('disabled', true);
+                $("#mgrUnit").val('@Html.Raw(ViewBag.mgrUnit)');
+                $("#lblMgrUnit").text('@Html.Raw(ViewBag.mgrUnitNm)');
+
+            }
+
+
+            //新增
+            $("#btnInsert").click().on('click', function () {
+
+
+                // document.location = '@Url.Action("createRole","RoleMgr")';
+
+                var param = 'A';
+                var url = '@Url.Action("detailRole", "RoleMgr", new { execType = "__param__" })';
+                //$("#iframe").prop('src', url.replace('__param__', encodeURIComponent(param)))
+              //  $("#iframe").load(url.replace('__param__', encodeURIComponent(param)));
+                //document.getElementById("iframe").src = url.replace('__param__', encodeURIComponent(param));
+
+
+                document.location.href = url.replace('__param__', encodeURIComponent(param));
+
+            });
+
+            //清除
+            $("#btnClear").click().on('click', function () {
+                $('#CodeRole').val('');
+                $('#isDisabled').val('');
+                $('#vMemo').val('');
+                $('#cUpdUserID').val('');
+
+                $('#qryResult').children().remove();
+
+                $('#validationSummary').children().remove();
+            });
+
+            //查詢
+            $("#btnQry").click().on('click', function () {
+
+                createGrid();
+            });
+
+
+            function createGrid() {
+                var mgrUnit = $('#mgrUnit').val();
+                var authUnit = $('#authUnit').val();
+                var codeRole = $('#CodeRole').val();
+                var isDisabled = $('#isDisabled').val();
+                var vMemo = $('#vMemo').val();
+                var cUpdUserID = $('#cUpdUserID').val();
+
+                $('#qryResult').children().remove();
+
+                $('#qryResult').append('<table id="' + "grid" + '"></table>');
+                $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+                var para = {
+                    'mgrUnit': mgrUnit,
+                    'authUnit':authUnit,
+                    'codeRole': codeRole,
+                    'isDIsabled': isDisabled,
+                    'vMemo': vMemo,
+                    'cUpdUserID': cUpdUserID
+                };
+
+                $.blockUI(); //畫面鎖起來
+
+                $("#grid").jqGrid({
+                    url: '@Url.Action("LoadData", "RoleMgr")',
+                    postData: para,
+                    datatype: 'json',
+
+                    jsonReader: {
+                        repeatitems: false, id: 'cRoleID'
+                    },
+                    mtype: 'POST',
+                    colNames: ['角色ID', '角色名稱', '停用註記','允許其它單位授權', '備註', '資料狀態','資料凍結人員', '異動人員', '異動時間'],
+                    colModel: [
+                        { name: 'cRoleID', index: 'cRoleID', align: 'left', hidden: true, width: "120" },
+                        {
+                            name: 'cRoleName', align: 'left', width: "160",
+                            formatter: function (cellvalue, options, rowObject) {
+
+                                //return '<a style="color:Blue;text-decoration:underline;" href="' + location.hostname + '/RoleMgr/detailRole/?cRoleId=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+                                //return '<a style="color:Blue;text-decoration:underline;" document.location.href="/SSO/RoleMgr/detailRole/?cRoleId=' + options.rowId + ' "target="_top">' + cellvalue.trim() + '</a>';
+                                return '<a href="javascript:qryDetail(\'' + options.rowId + '\')" style="color: #3366ff" id="' + options.rowId + '" >' + cellvalue.trim() + '</a>';
+
+                            }
+
+                            //formatoptions: {
+                            //    baseLinkUrl: "/RoleMgr/detailRole", idName: 'cRoleId'
+
+                            //}
+                        },
+                        { name: 'isDisabled', align: 'center', width: "80" },
+                        { name: 'freeAuth', align: 'center', width: "160", hidden: true },
+                        { name: 'vMemo', align: 'left', width: "200" },
+                        { name: 'dataStatus', align: 'center', width: "100" },
+                       // { name: 'freezeUid', align: 'center', width: "100" },
+
+                        {
+                            name: 'freezeUid', align: 'center', width: "140", formatter: function (cellvalue, options, rowObject) {
+                                return '<a href="javascript:qryHis(\'' + options.rowId + '\')" style="color: #3366ff" id="' + options.rowId + '" >' + cellvalue.trim() + '</a>';
+
+                                //return '<a style="color:Blue;text-decoration:underline;" href="/SSO/RoleAppr/detailRole/?roleId=' + options.rowId + ' "target="view_window">' + cellvalue + '</a>';
+
+                            }
+                        },
+                        { name: 'cUpdUserID', align: 'center', width: "140" },
+                        { name: 'cUpdDateTime', align: 'center', width: "150" },
+
+                    ],
+                    autowidth: true,
+                    shrinkToFit: false,
+                    forceFit: true,
+                    pager: '#pager',
+                    width: 'auto',
+                    height: 'auto',
+                    rowNum: 10,
+                    rowList: [10, 20],
+                    sortname: 'cRoleID',
+                    sortorder: "acs",
+                    viewrecords: true,
+                    loadonce: true,
+                    loadComplete: function () {
+                        var cnt = $('#grid').getGridParam('records')
+                        $('#validationSummary').children().remove();
+
+                        if (cnt == 0) {
+
+
+                            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                            if (validationSummary.length == 0) {
+                                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                            }
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                        }
+
+                        $.unblockUI(); //畫面打開
+                    }
+
+                });
+            }
+
+
+            var cRoleID = '@Html.Raw(ViewBag.cRoleID)';
+            if (cRoleID != null) {
+                if (cRoleID.length > 0) {
+
+                    $('#CodeRole').val(cRoleID);
+                    createGrid();
+                }
+
+            }
+
+
+
+
+        });
+</script>
+
+

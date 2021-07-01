@@ -1,0 +1,630 @@
+﻿@model FGL.Web.ViewModels.OGL00003Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = "OGL00004 投資交易商品資料維護作業";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+
+    var prodNoVerList = ViewBag.prodNoVerList as SelectList;
+    var sysTypeList = ViewBag.sysTypeList as SelectList;
+    var itemMainTypeList = ViewBag.itemMainTypeList as SelectList;
+    var investTypeList = ViewBag.investTypeList as SelectList;
+    var insTermList = ViewBag.insTermList as SelectList;
+    var busiTypeList = ViewBag.busiTypeList as SelectList;
+    var comTypeList = ViewBag.comTypeList as SelectList;
+
+    var apprMkList = ViewBag.apprMkList as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidAplyNo", "")
+                <table>
+                    <tr>
+                        <td>
+                            查詢暫存檔資料(勾選表暂存檔、未勾選表正式檔)：<input type="checkbox" id="isQryTmp" disabled>
+                            </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.item)：@Html.TextBoxFor(model => model.item, new { @size = "10", @maxlength = "8", @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fuMk)：@Html.DropDownList("fuMk", ynList, "請選擇", new { @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.itemCon)：@Html.DropDownList("itemCon", itemConList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.discPartFeat)：@Html.DropDownList("discPartFeat", ynList, "請選擇", new { @disabled = true })
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnModify" name="btnModify" value="修改" class="btn btn-primary" />
+                        <input type="submit" id="btnDelete" name="btnDelete" value="刪除商品" class="btn btn-primary" />
+                        <input type="submit" id="btnCancel" name="btnCancel" value="取消申請" class="btn btn-primary" />
+                        <input type="submit" id="btnPrint" name="btnPrint" value="列印" class="btn btn-primary" />
+                        <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+                    </div>
+                </div>
+
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.apprMk)：@Html.DropDownList("apprMk", apprMkList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.effMk)：@Html.TextBoxFor(model => model.effMk, new { @size = "2", @disabled = true })
+                        </td>
+
+              
+                    </tr>
+
+                    <tr>
+                        <td>
+                            商品資訊異動人員/時間：
+                            @Html.DisplayTextFor(model => model.prodUpId)　@Html.DisplayTextFor(model => model.prodUpDt)
+                            @*@Html.DisplayNameFor(model => model.prodUpId)：@Html.TextBoxFor(model => model.prodUpId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        <td>
+                            商品資訊覆核人員/時間：
+                            @Html.DisplayTextFor(model => model.prodApprId)　@Html.DisplayTextFor(model => model.prodApprDt)
+                            @*@Html.DisplayNameFor(model => model.prodUpDt)：@Html.TextBoxFor(model => model.prodUpDt, new { @size = "16", @disabled = true })*@
+                        </td>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.prodApprId)：@Html.TextBoxFor(model => model.prodApprId, new { @size = "6", @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.prodApprDt)：@Html.TextBoxFor(model => model.prodApprDt, new { @size = "16", @disabled = true })
+                        </td>*@
+                    </tr>
+
+                    <tr>
+                        <td>
+                            投資資訊異動人員/時間：
+                            @Html.DisplayTextFor(model => model.investUpId)　@Html.DisplayTextFor(model => model.investUpDt)
+                            @*@Html.TextBoxFor(model => model.investUpId, new { @size = "6", @disabled = true }) @Html.TextBoxFor(model => model.investUpDt, new { @size = "16", @disabled = true, @style = "display:inline" })*@
+                        </td>
+                        <td>
+                            投資資訊覆核人員/時間：
+                            @Html.DisplayTextFor(model => model.investApprId)　@Html.DisplayTextFor(model => model.investApprDt)
+                            @*@Html.TextBoxFor(model => model.investApprId, new { @size = "6", @disabled = true }) @Html.TextBoxFor(model => model.investApprDt, new { @size = "16", @disabled = true })*@
+                        </td>
+                    </tr>
+                </table>
+
+
+                @*<div class="row">
+                        <div id="qryResult" class="col-sm-24">
+                            <table id="grid"></table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>*@
+            }
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="panel panel-primary" id="itemInvest">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#itemInvest"
+                   href="#collapseItemInvest">
+                    Ｖ
+                </a>
+                (保單投資)
+            </h4>
+        </div>
+
+
+        <div id="collapseItemInvest" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+                    <tr>
+                        <td valign="top">
+                            <div id="ga" />
+                        </td>
+                        <td valign="top">
+                            <div id="sa" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+
+
+        //執行"修改"、"取消申請"
+         function execSave(execAction) {
+             $('#validationSummary').children().remove();
+
+             var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+             if (validationSummary.length == 0) {
+                 $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                 validationSummary = $('#validationSummary ul.validation-summary-errors');
+             }
+
+             $.blockUI(); //畫面鎖起來
+
+             var acctList = [];
+
+             //var r = $('input[type=radio]');
+             var r = $('[name^="Boolean"]');
+
+             for (var i = 0; i < r.length; i++) {
+                 var acctItem = r[i].name.replace("Boolean", "");
+
+                 var inAcctList = false;
+                 for (var d in acctList) {
+                     if (acctList[d].acctItem == acctItem) {
+                         inAcctList = true;
+                         break;
+                     }
+                 }
+
+                 if (!inAcctList) {
+                     var d = document.getElementsByName(r[i].name);
+                     //alert($('input[name='+ r[i].name +']:checked').val());
+
+                     var acctItemVal = "";
+                     try {
+                         acctItemVal = document.querySelector('input[name="' + r[i].name + '"]:checked').value;
+                     } catch (err) {
+                         acctItemVal = "";
+                         var errItem = document.getElementsByName('label' + acctItem);
+                         validationSummary.append('<li>科目名稱：「' + errItem[0].innerHTML + '」未設定!!</li>');
+
+                         $.unblockUI(); //畫面打開
+                         return;
+                     }
+
+
+                     acctList.push({
+                         acctItem: acctItem,
+                         acctItemVal: acctItemVal
+                     });
+                 }
+             }
+
+
+
+
+             $.ajax({
+                 type: "POST",
+                 data: JSON.stringify({
+                     execAction: execAction,
+                     model: {
+                         'aplyNo': $('#hidAplyNo').val(),
+                         'item': $('#item').val(),
+                         'productType': $('#productType').val(),
+                         'fuMk': $('#fuMk').val(),
+                         'itemCon': $('#itemCon').val(),
+                         'discPartFeat': $('#discPartFeat').val()
+                     },
+                     acctList: acctList
+                 }),
+                 dataType: "json",
+                 url: '@Url.Action("execSave", "OGL00004")',
+                 contentType: 'application/json',
+                 success: function (data) {
+
+                     if (data.success) {
+
+                         if (execAction == "C") {
+                             validationSummary.append('<li>作業完成!!</li>');
+                         } else {
+                             validationSummary.append('<li>作業完成，請覆核人員覆核!!</li>');
+                             $("#isQryTmp").prop("checked", true);
+                             $('#hidAplyNo').val(data.model.aplyNo)
+                         }
+
+
+                         $("#btnModify").attr('disabled', true);
+                         $("#btnCancel").attr('disabled', true);
+                         $("#btnPrint").attr('disabled', false);
+
+
+                     } else
+                         validationSummary.append('<li>' + data.err + '</li>');
+
+
+
+                     $.unblockUI(); //畫面打開
+                 }
+             });
+
+         }
+
+
+        //查詢FGLSMPB取得SA、GA項目
+        function qrySMPB() {
+            $('#ga').children().remove();
+            $('#sa').children().remove();
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                        'aplyNo': $('#hidAplyNo').val(),
+                        'item': $('#item').val(),
+                        'productType': $('#productType').val(),
+                        'fuMk': $('#fuMk').val(),
+                        'itemCon': $('#itemCon').val(),
+                        'discPartFeat': $('#discPartFeat').val()
+                    }
+                }),
+                dataType: "json",
+                url: '@Url.Action("qrySMPB", "OGL00004")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    var sumpD = data.sumpD;
+
+                    if (data.success) {
+                        var ga = document.getElementById('ga');
+                        var sa = document.getElementById('sa');
+
+                        //組合GA項目
+                        if (data.gaList.length > 0) {
+                            var lblHead = document.createElement("lable");
+                            lblHead.innerHTML = "GA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            ga.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            ga.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.gaList.length - 1; i++) {
+                                var nowId = data.gaList[i].tempId;
+
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + nowId);
+                                radioYes.setAttribute("name", "Boolean" + nowId);
+                                radioYes.setAttribute("value", "Y");
+
+                                var lblYes = document.createElement("lable");
+                                lblYes.innerHTML = "Y　";
+
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + nowId);
+                                radioNo.setAttribute("name", "Boolean" + nowId);
+                                radioNo.setAttribute("value", "N");
+
+
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+
+
+                                var wording = document.createElement("label");
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.innerHTML = data.gaList[i].smpName;
+
+                                var bMatch = false;
+                                if (sumpD != null) {
+                                    for (var j = 0; j <= sumpD.length - 1; j++) {
+                                        var sumpId = sumpD[j].smpNum + "|" + sumpD[j].productType + "|" + sumpD[j].acctType
+                                        if (sumpId == nowId) {
+                                            bMatch = true;
+                                            if (sumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                if (!bMatch)
+                                    radioNo.setAttribute("checked", true);
+
+                                ga.appendChild(radioYes);
+                                ga.appendChild(lblYes);
+                                ga.appendChild(radioNo);
+                                ga.appendChild(lblNo);
+                                ga.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                ga.appendChild(spaceBr);
+
+
+                            }
+                        }
+
+                        //組合SA項目
+                        if (data.saList.length > 0) {
+                            var lblHead = document.createElement("lable");
+                            lblHead.innerHTML = "SA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            sa.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            sa.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.saList.length - 1; i++) {
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + data.saList[i].tempId);
+                                radioYes.setAttribute("name", "Boolean" + data.saList[i].tempId);
+                                radioYes.setAttribute("value", "Y");
+
+                                var lblYes = document.createElement("lable");
+                                lblYes.innerHTML = "Y　";
+                                //sa.appendChild(radioYes);
+                                //sa.appendChild(lblYes);
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + data.saList[i].tempId);
+                                radioNo.setAttribute("name", "Boolean" + data.saList[i].tempId);
+                                radioNo.setAttribute("value", "N");
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+                                //sa.appendChild(radioNo);
+                                //sa.appendChild(lblNo);
+
+                                var wording = document.createElement("label");
+                                wording.innerHTML = "　" + data.saList[i].smpName;
+
+                                var bMatch = false;
+                                if (sumpD != null) {
+                                    for (var j = 0; j <= sumpD.length - 1; j++) {
+                                        var sumpId = sumpD[j].smpNum + "|" + sumpD[j].productType + "|" + sumpD[j].acctType
+                                        if (sumpId == data.saList[i].tempId) {
+
+                                            bMatch = true;
+
+                                            if (sumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                if (!bMatch)
+                                    radioNo.setAttribute("checked", true);
+
+                                sa.appendChild(radioYes);
+                                sa.appendChild(lblYes);
+                                sa.appendChild(radioNo);
+                                sa.appendChild(lblNo);
+                                sa.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                sa.appendChild(spaceBr);
+
+
+                            }
+                        }
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+
+
+        $(function () {
+            init();
+
+            function init() {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                var opScope = '@Html.Raw(ViewBag.opScope)';
+                var isQryTmp = '@Html.Raw(ViewBag.isQryTmp)';
+                var apprMkHis = '@Html.Raw(ViewBag.apprMkHis)';
+                var status = '@Html.Raw(ViewBag.status)';
+                var execAction = '@Html.Raw(ViewBag.execAction)';
+
+                if (isQryTmp == "1") {
+                    $("#isQryTmp").prop("checked", true);
+                    $("#hidAplyNo").val('@Html.Raw(ViewBag.aplyNo)');
+
+                    if (execAction == "D") {
+                        $("#btnModify").attr('disabled', true);
+                        $("#btnCancel").attr('disabled', true);
+                        $("#btnDelete").attr('disabled', false);
+                        validationSummary.append('<li>此商品申請"刪除"流程!!</li>');
+
+                    } else {
+                        $("#btnDelete").attr('disabled', true);
+
+                        if (apprMkHis == "2" || apprMkHis == "10" || apprMkHis == "11")
+                            $("#btnModify").attr('disabled', false);
+                        else
+                            $("#btnModify").attr('disabled', true);
+
+                        if (status == "3")
+                            $("#btnCancel").attr('disabled', false);
+                        else
+                            $("#btnCancel").attr('disabled', true);
+                    }
+                } else {
+                    $("#isQryTmp").prop("checked", false);
+                    $("#btnDelete").attr('disabled', true);
+                    $("#btnCancel").attr('disabled', true);
+
+                    if (apprMkHis != "") {
+                        validationSummary.append('<li>此商品已有資料在覆核中，不可進行修改!!</li>');
+                        $("#btnModify").attr('disabled', true);
+                    } else {
+                        $("#btnModify").attr('disabled', false);
+                    }
+                }
+
+
+                $("#btnPrint").attr('disabled', false);
+                qrySMPB();
+
+            }
+
+
+
+            //回上一頁
+            $("#btnPrepage").click().on('click', function () {
+                history.go(-1)
+            })
+
+            //*---------------清除 begin ----------------*//
+            $("#btnClear").click().on('click', function () {
+                $('#validationSummary').children().remove();
+
+                $('#ga').children().remove();
+                $('#sa').children().remove();
+                qrySMPB();
+
+                $("#btnModify").attr('disabled', true);
+                $("#btnCancel").attr('disabled', true);
+                $("#btnPrint").attr('disabled', true);
+
+            });
+            //*---------------清除 end ----------------*//
+
+
+            //*---------------取消申請 begin ----------------*//
+            $("#btnCancel").click().on('click', function () {
+                    execSave("C");
+
+            });
+            //*---------------取消申請 end ----------------*//
+
+
+            //*---------------刪除 begin ----------------*//
+            $("#btnDelete").click().on('click', function () {
+                execSave("D");
+
+            });
+            //*---------------刪除 end ----------------*//
+
+
+
+            //*---------------修改 begin ----------------*//
+            $("#btnModify").click().on('click', function () {
+                execSave("U");
+            });
+            //*---------------修改 end ----------------*//
+
+
+
+            //*---------------報表列印 begin ----------------*//
+            $("#btnPrint").click().on('click', function () {
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("Print", "OGL00004")",
+                    data: JSON.stringify({
+                        model: {
+                            'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                            'aplyNo': $('#hidAplyNo').val(),
+                            'item': $('#item').val(),
+                            'productType': $('#productType').val(),
+                            'fuMk': $('#fuMk').val(),
+                            'itemCon': $('#itemCon').val(),
+                            'discPartFeat': $('#discPartFeat').val()
+                        }
+                    }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    var link = '';
+                    if (data.success) {
+                        link = '@Url.HttpRouteUrl("Report", new { aspx = "OGL00004PViewer",  id = "-1"})';
+                        link = link.replace("-1", data.guid);
+                        window.open(link);
+
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+                    $.unblockUI();
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+            });
+
+
+            });
+
+        //*---------------報表列印 end ----------------*//
+
+        });
+</script>
+
+

@@ -1,0 +1,243 @@
+﻿@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OAP0030_Form">
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                <label>用印申請日期 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0030_APPLY_s" name="OAP0030_APPLY_s" type="text">
+                                ~
+                                <input id="OAP0030_APPLY_e" name="OAP0030_APPLY_e" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>表單號碼 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="OAP0030_REPORT_NO" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" class="btn btn-primary" id="OAP0030_Search" value="查詢" />
+                        <input type="button" id="OAP0030_Print_Done" value="用印完成" class="btn btn-primary" disabled />
+                    </div>
+                </div>
+                <br>
+            }
+        </div>
+    </div>
+    <div class="row" style="padding-left:10px">
+        <div id="OAP0030jqgridDiv" class="jqd" style="padding-bottom:5px;">
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function () {
+
+        var OAP0030url = {};
+        OAP0030url.getData = '@Url.Action("GetCacheData", "OAP0030")';
+        OAP0030url.qryOAP0030 = '@Url.Action("qryOAP0030", "OAP0030")';
+        OAP0030url.CheckChange = '@Url.Action("CheckChange", "OAP0030")';
+        OAP0030url.updateOAP0030 = '@Url.Action("updateOAP0030", "OAP0030")';
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+
+        $('#OAP0030_APPLY_s').datepicker();
+        $('#OAP0030_APPLY_e').datepicker();
+        var _dtn = new Date();
+        var _date = (_dtn.getFullYear() - 1911) + '/' + created.padLeft((_dtn.getMonth() + 1), 2) + '/' + created.padLeft((_dtn.getDate()), 2);
+        $('#OAP0030_APPLY_s').val(_date);
+        $('#OAP0030_APPLY_e').val(_date);
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'OAP0030_Search':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { OAP0030_SearchFun(); });
+                    break;
+                case 'OAP0030_Print_Done':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { OAP0030_UpdateFun(); });           
+                    break;
+            }
+        });
+
+        function OAP0030_UpdateFun() {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: OAP0030url.updateOAP0030,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    $('#OAP0030_Print_Done').prop('disabled', result.RETURN_FLAG);
+                    if (result.RETURN_FLAG) {
+                        OAP0030Data();
+                    }
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    $.unblockUI(); //畫面打開
+                });
+            }
+        }
+
+        function OAP0030_SearchFun() {
+            jqgridCustom.clearJqgrid('OAP0030jqgridDiv');
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            if (($('#OAP0030_APPLY_s').val() || '').trim() == "" )
+            {
+                alert('覆核日期(起)不能為空!');
+                return false;
+            }
+            if( ($('#OAP0030_APPLY_e').val() || '').trim() == "")
+            {
+                alert('覆核日期(迄)不能為空!');
+                return false;
+            }
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    applyDt_s: $('#OAP0030_APPLY_s').val(),
+                    applyDt_e: $('#OAP0030_APPLY_e').val(),
+                    report_no: $('#OAP0030_REPORT_NO').val()
+                }),
+                dataType: "json",
+                url: OAP0030url.qryOAP0030,
+                contentType: 'application/json',
+            }).done(function (result) {          
+                $('#OAP0030_Print_Done').prop('disabled', !result.RETURN_FLAG);
+                if (result.RETURN_FLAG) {
+                    OAP0030Data();
+                }
+                else {
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+
+        function formatterCheck(cellvalue, options, rdata) {
+            var str = '';
+            
+            str = "<input type='checkbox' class = 'OAP0030check' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.checkFlag == true ? 'checked' : ' ') + " />";
+            
+            return str;
+        }
+
+        function OAP0030Data() {
+            var colNameArray = ['選擇', '申請單號', '支票號碼', '接收日', '接收人員', '表單號碼'];
+            var colModelArray = [];
+            colModelArray.push({ name: "chechFlag", index: "checkFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck }),
+            colModelArray.push({ name: "apply_no", index: "apply_no", width: 120, sortable: false, align: 'center' });
+            colModelArray.push({ name: "check_no", index: "check_no", width: 500, sortable: false, align: 'left' });
+            colModelArray.push({ name: "rece_date", index: "rece_date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "rece_id", index: "rece_id", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "report_no", index: "report_no", width: 115, sortable: false, align: 'center' });
+            jqgridCustom.createJqgridByCache(
+                'OAP0030jqgridDiv',
+                'OAP0030TempList',
+                'OAP0030TempPeger', 
+                OAP0030url.getData,
+                {
+                    type: "OAP0030ViewData"
+                },
+                colNameArray,
+                colModelArray,
+                '應付票據變更用印檢視確認清冊',
+                jqgridCustom.getPage('OAP0030jqgridDiv'),
+                jqgridCustom.getRowNum('OAP0030jqgridDiv'),
+                OAP0030TempCompleteFun,
+                true
+                );
+        }
+
+        function OAP0030TempCompleteFun(listId)
+        {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                $(this).find('td').find('.OAP0030check').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        OAP0030Check(i + 1, $(this).prop('checked'));
+                    });
+                });
+            });
+        }
+
+        function OAP0030Check(rowid, flag) {
+            var listId = 'OAP0030TempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    check_no: data.check_no,
+                    apply_no: data.apply_no,
+                    flag: flag
+                }),
+                dataType: "json",
+                url: OAP0030url.CheckChange,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#OAP0030_Print_Done').attr('disabled', !result.Datas);
+                    //OAP0030Data();
+                }
+                else {
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                }
+            });
+        }
+
+
+    });
+</script>
+
+

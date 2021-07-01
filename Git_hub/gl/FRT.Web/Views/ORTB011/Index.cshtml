@@ -1,0 +1,135 @@
+﻿@model FRT.Web.ViewModels.ORTB011Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            <label>查詢選項 : </label>
+                            @Html.RadioButton("FunCodeType", "0", new { @checked = true }) FunCode = 0 (同步匯出匯款狀況)
+                            @Html.RadioButton("FunCodeType", "1") FunCode = 1 (匯出異常)
+                            @Html.RadioButton("FunCodeType", "2") FunCode = 2 (匯出被退匯)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊ @Html.DisplayNameFor(model => model.fastNo)：</span>@Html.TextBoxFor(model => model.fastNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                        </td>
+
+
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#fastNo').val("");
+        });
+        //*---------------清除 end ----------------*//
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($('#fastNo').val().length == 0)
+            {
+                validationSummary.append('<li>' + '快速付款編號  必需輸入!!' + '</li>');
+                return;
+            }
+
+            var jsonData = JSON.stringify({
+                'fastNo': $("#fastNo").val(),
+                'funCode': $('input[name=FunCodeType]:checked').val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("callBankApi", "ORTB011")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        validationSummary.append('<li>' + data.msg +'</li>');
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+    });
+</script>
+
+

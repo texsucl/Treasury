@@ -1,0 +1,392 @@
+﻿@model FRT.Web.ViewModels.ORT0102Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var codeTypeList = ViewBag.codeTypeList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidElecType", "")
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.ptype)：@Html.DropDownList("ptype", codeTypeList, "請選擇")
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //切換組別碼
+    $("#ptype").on("change", function () {
+
+        if ("" == $("#ptype").val())
+            return
+
+        createGrid(true);
+
+    });
+
+
+
+     //取得"執行功能"下拉選單
+    function getExecAction() {
+        var list = '@Html.Raw(ViewBag.execActionjqList)'
+        return list;
+    }
+
+
+
+
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRec == "True")
+                recList.push(rowId);
+            else if (index >= 0)
+                recList.splice(index, 1);
+        }
+
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRtn == "True")
+                rtnList.push(rowId);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+    //*--------------查詢待覆核資料  begin-----------------*//
+    function createGrid(bClearMsg) {
+
+        if (bClearMsg)
+            $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        recList = [];
+        rtnList = [];
+
+        $('#qryResult').children().remove();
+
+        $('#qryResult').append('<table id="' + "grid" + '"></table>');
+        $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+        $.blockUI(); //畫面鎖起來
+        var para = {
+            groupId: $("#ptype").val()
+        };
+
+
+        $("#grid").jqGrid({
+            url: '/ORT0102A/LoadData/',
+            postData: para,
+            datatype: 'json',
+            jsonReader: {
+                repeatitems: false, id: 'ref_no'
+            },
+            mtype: 'POST',
+            colModel: [
+                {
+                    label: '核可',
+                    name: 'rec', index: 'rec', align: 'center', width: '50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                    cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                        return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                    }, editoptions: { value: "True:False" }
+                },
+                {
+                    label: '駁回',
+                    name: 'rtn', index: 'rtn', align: 'center', width: '50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                    cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                        return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                    }, editoptions: { value: "True:False" }
+                },
+
+                { label: '申請單號', name: 'aply_no', align: 'center', hidden: true },
+                {
+                    label: '執行功能',
+                    name: 'exec_action', align: 'center', width: '90',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getExecAction()
+                    }
+                },
+                {
+                    label: 'ref_no',
+                    name: 'ref_no', align: 'center', hidden: true,
+                    editable: false,
+                },
+                {
+                    label: 'group_id',
+                    name: 'group_id', align: 'center', hidden: true,
+                    editable: false,
+                },
+                {
+                    label: '系統別',
+                    name: 'system', align: 'center', editable: false
+                },
+                {
+                    label: '資料來源',
+                    name: 'srce_from', align: 'center', editable: false
+                },
+                {
+                    label: '資料類別',
+                    name: 'srce_kind', align: 'center', editable: false
+                },
+
+                { label: '申請人', name: 'update_id', align: 'center', width: '80' },
+                //{ label: '申請人', name: 'update_name', align: 'center', width: '80' },
+                { label: '申請日期時間', name: 'update_datetime', align: 'center', width: '160' }
+            ],
+            autowidth: true,
+            shrinkToFit: false,
+            forceFit: false,
+            pager: '#pager',
+            width: 'auto',
+            height: 'auto',
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            //sortname: 'fastNo',
+            sortorder: "acs",
+            viewrecords: true,
+            loadonce: true,
+            loadComplete: function (data) {
+
+                var cnt = $('#grid').getGridParam('records')
+
+                if (data.success) {
+                    if (bClearMsg & cnt == 0)
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+
+                } else if (data.success == false && cnt == 0) {
+                    validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+
+                }
+
+                //還原畫面有勾選的資料
+                ids = $(this).jqGrid('getDataIDs');
+
+                for (j = 0; j <= ids.length - 1; j++) {
+                    rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                    for (i = 0, count = recList.length; i < count; i++) {
+                        if (rowData.ref_no == recList[i])
+                            $("#grid").jqGrid("setCell", rowData.ref_no, "rec", "True");
+                    }
+
+                    for (i = 0, count = rtnList.length; i < count; i++) {
+                        if (rowData.ref_no == rtnList[i])
+                            $("#grid").jqGrid("setCell", rowData.ref_no, "rtn", "True");
+                    }
+                }
+
+            }
+
+        });
+
+        $.unblockUI(); //畫面打開
+    }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+       
+
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+
+
+            $('#validationSummary').children().remove();
+
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.ref_no == recList[i])
+                                recData.push({
+                                    'aply_no': rowData.aply_no,
+                                    'group_id': rowData.group_id,
+                                    'ref_no': rowData.ref_no,
+                                    'system': rowData.system,
+                                    'srce_from': rowData.srce_from,
+                                    'srce_kind': rowData.srce_kind,
+                                    'update_id': rowData.update_id
+                                });
+                        }
+                    } else
+                        recData = null;
+
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.ref_no == rtnList[i])
+                                rtnData.push({
+                                    'aply_no': rowData.aply_no,
+                                    'group_id': rowData.group_id,
+                                    'ref_no': rowData.ref_no,
+                                    'system': rowData.system,
+                                    'srce_from': rowData.srce_from,
+                                    'srce_kind': rowData.srce_kind,
+                                    'update_id': rowData.update_id
+                                });
+                        }
+                    } else
+                        rtnData = null;
+                }
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "ORT0102A")",
+                    data: JSON.stringify({
+                        'recData': recData,
+                        'rtnData': rtnData
+                    }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        validationSummary.append('<li>作業成功！</li>');
+                    } else {
+                        if (data.err.length > 0) {
+                            for (var i = 0; i <= data.err.length - 1; i++) {
+                                validationSummary.append('<li>' + data.err[i].refNo + ':' + data.err[i].errorMsg + '</li>');
+                            }
+                        }
+                    }
+
+                    recList = [];
+                    rtnList = [];
+
+                    createGrid(false);
+
+                    $.unblockUI(); //畫面打開
+
+                },
+                error: function () {
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+
+
+
+
+
+
+    });
+</script>
+
+

@@ -1,0 +1,298 @@
+﻿@model FAP.Web.ViewModels.OAP0001Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>
+                            上傳格式：<input type="text" id="impType" name="impType" size="1" maxlength="1" />
+                            (1. 團險 2.人工CR/繳款單3.其他 )
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>匯入檔案：<input type="file"  id="fileUpload" name="file" accept=".xls,.xlsx" style="display:inline"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            
+                            上傳支票筆數：<input type="text" id="fileCnt" name="fileCnt" maxlength="6" disabled />
+                        </td>
+                        <td>
+                            資料錯誤筆數：<input type="text" id="errCnt" name="errCnt" maxlength="6" disabled />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            上傳支票金額：<input type="text" id="fileCheckAmt" name="fileCheckAmt" maxlength="6" disabled />
+                        </td>
+                        <td>
+                            資料錯誤金額：<input type="text" id="errCheckAmt" name="errCheckAmt" maxlength="6" disabled />
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnChkFile" name="btnChkFile" value="檔案檢核" class="btn btn-primary" />
+                        <input type="submit" id="btnImpFile" name="btnImpFile" value="執行匯入" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //"檔案檢核"、"執行匯入"
+    function execImp(execAction) {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        var bPass = true;
+
+        //## 宣告一個FormData
+        var data = new FormData();
+
+
+        //## 將檔案append FormData
+        var files = $("#fileUpload").get(0).files;
+        if (files.length > 0) {
+            data.append("UploadedFile", files[0]);
+        } else {
+            validationSummary.append('<li>未選擇「匯入檔案」!!</li>');
+            bPass = false;
+        }
+
+        if ($("#impType").val().length > 0) {
+            data.append("impType", $("#impType").val());
+            data.append("execAction", execAction);
+        } else {
+            validationSummary.append('<li>請輸入「上傳格式」!!</li>');
+            bPass = false;
+        }
+        
+
+
+        if (!bPass)
+            return
+
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            data: data,
+            dataType: "json",
+            url: '@Url.Action("procImport", "OAP0001")',
+            contentType: false,
+            processData: false,
+            success: function (data) {
+            
+                if (execAction == "I")
+                    $("#fileUpload").val('');
+
+                $.unblockUI(); //畫面打開
+
+                $("#fileCnt").val(data.fileCnt);
+                $("#errCnt").val(data.errCnt);
+                $("#fileCheckAmt").val(data.fileAmt);
+                $("#errCheckAmt").val(data.errAmt);
+
+                //更新畫面GRID
+                jQuery("#grid").jqGrid('clearGridData')
+                    .jqGrid('setGridParam', { data: data.errList })
+                    .trigger("reloadGrid");
+
+
+                if (data.success) {
+                    if (execAction == "I") {
+                        validationSummary.append('<li>匯入作業成功</li>');
+                        $("#btnImpFile").attr('disabled', true);
+                    } else {
+                        validationSummary.append('<li>檔案檢核作業成功</li>');
+                        $("#btnImpFile").attr('disabled', false);
+                    }
+
+  
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+                    $("#btnImpFile").attr('disabled', true);
+                }
+
+            }
+        });
+    }
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+
+        }
+        $("#btnImpFile").attr('disabled', true);
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#impType').val("");
+            $('#fileUpload').val("");
+            $('#fileCnt').val("");
+            $('#errCnt').val("");
+            $('#fileCheckAmt').val("");
+            $('#errCheckAmt').val("");
+
+            $("#btnImpFile").attr('disabled', true);
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------檔案檢核 begin ----------------*//
+        $("#btnChkFile").click().on('click', function () {
+            execImp("C");
+        });
+        //*---------------檔案檢核 end ----------------*//
+
+
+        //*---------------檔案檢核 begin ----------------*//
+        $("#btnImpFile").click().on('click', function () {
+            execImp("I");
+        });
+        //*---------------檔案檢核 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '錯誤資料',
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                 {
+                     label: '在檔位置',
+                     name: 'linePos', align: 'center', width: 80,
+                     editable: false,
+                 },
+                 {
+                     label: '系統別', width: 60,
+                     name: 'system', align: 'center',
+                     editable: false,
+                 },
+                 {
+                     label: '支票號碼',
+                     name: 'checkNo', align: 'center', width: 160,
+                     editable: false,
+
+                 },
+                 {
+                     label: '帳戶簡稱',
+                     name: 'checkShrt', align: 'center', width: 80,
+                     editable: false,
+
+                 },
+                 {
+                     label: '檢核訊息',
+                     name: 'msg', align: 'left', width: 800,
+                     editable: false, cellattr: function (rowId, tv, rawObject, cm, rdata) { return 'style=" white-space: normal !important; height:auto;"' }
+                 }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+                }
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+    });
+</script>
+
+

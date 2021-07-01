@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="DFDBUTModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="DF_SCH_DEP">
+          <Key>
+            <PropertyRef Name="DEP_GUID" />
+          </Key>
+          <Property Name="DEP_GUID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SYS_TYPE" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="PAR_DEP" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DEP_ID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DEP_NAME" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="DEP_LEVEL" Type="nvarchar" MaxLength="50" />
+          <Property Name="DEP_MEMO1" Type="nvarchar" MaxLength="500" />
+          <Property Name="DEP_MEMO2" Type="nvarchar" MaxLength="500" />
+          <Property Name="DEP_MEMO3" Type="nvarchar" MaxLength="500" />
+          <Property Name="CREATE_DATE" Type="datetime" />
+        </EntityType>
+        <EntityType Name="DF_SCH_MEM">
+          <Key>
+            <PropertyRef Name="MEM_GUID" />
+          </Key>
+          <Property Name="MEM_GUID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SYS_TYPE" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="DEP_ID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="MEM_ID" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="MEM_NAME" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="MEM_EMAIL" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="MEM_JOBTITLE" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="IS_MANA" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="IS_MJOB" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="MEM_MEMO1" Type="nvarchar" MaxLength="500" />
+          <Property Name="MEM_MEMO2" Type="nvarchar" MaxLength="500" />
+          <Property Name="MEM_MEMO3" Type="nvarchar" MaxLength="500" />
+          <Property Name="MEM_MEMO4" Type="nvarchar" MaxLength="500" />
+          <Property Name="MEM_MEMO5" Type="nvarchar" MaxLength="500" />
+          <Property Name="ID_MEMO" Type="nvarchar" MaxLength="500" />
+          <Property Name="AGENT_MEMO" Type="nvarchar" MaxLength="500" />
+          <Property Name="CREATE_DATE" Type="datetime" />
+        </EntityType>
+        <EntityContainer Name="DFDBUTModelStoreContainer">
+          <EntitySet Name="DF_SCH_DEP" EntityType="Self.DF_SCH_DEP" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DF_SCH_MEM" EntityType="Self.DF_SCH_MEM" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DFDBUTModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="DF_SCH_DEP">
+          <Key>
+            <PropertyRef Name="DEP_GUID" />
+          </Key>
+          <Property Name="DEP_GUID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SYS_TYPE" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="PAR_DEP" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DEP_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DEP_NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DEP_LEVEL" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DEP_MEMO1" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="DEP_MEMO2" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="DEP_MEMO3" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="CREATE_DATE" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="DF_SCH_MEM">
+          <Key>
+            <PropertyRef Name="MEM_GUID" />
+          </Key>
+          <Property Name="MEM_GUID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SYS_TYPE" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="DEP_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MEM_ID" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MEM_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MEM_EMAIL" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MEM_JOBTITLE" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IS_MANA" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="IS_MJOB" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="MEM_MEMO1" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="MEM_MEMO2" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="MEM_MEMO3" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="MEM_MEMO4" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="MEM_MEMO5" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ID_MEMO" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="AGENT_MEMO" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="CREATE_DATE" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityContainer Name="DFDBUTEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="DF_SCH_DEP" EntityType="Self.DF_SCH_DEP" />
+          <EntitySet Name="DF_SCH_MEM" EntityType="Self.DF_SCH_MEM" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DFDBUTModelStoreContainer" CdmEntityContainer="DFDBUTEntities">
+          <EntitySetMapping Name="DF_SCH_DEP">
+            <EntityTypeMapping TypeName="DFDBUTModel.DF_SCH_DEP">
+              <MappingFragment StoreEntitySet="DF_SCH_DEP">
+                <ScalarProperty Name="DEP_GUID" ColumnName="DEP_GUID" />
+                <ScalarProperty Name="SYS_TYPE" ColumnName="SYS_TYPE" />
+                <ScalarProperty Name="PAR_DEP" ColumnName="PAR_DEP" />
+                <ScalarProperty Name="DEP_ID" ColumnName="DEP_ID" />
+                <ScalarProperty Name="DEP_NAME" ColumnName="DEP_NAME" />
+                <ScalarProperty Name="DEP_LEVEL" ColumnName="DEP_LEVEL" />
+                <ScalarProperty Name="DEP_MEMO1" ColumnName="DEP_MEMO1" />
+                <ScalarProperty Name="DEP_MEMO2" ColumnName="DEP_MEMO2" />
+                <ScalarProperty Name="DEP_MEMO3" ColumnName="DEP_MEMO3" />
+                <ScalarProperty Name="CREATE_DATE" ColumnName="CREATE_DATE" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DF_SCH_MEM">
+            <EntityTypeMapping TypeName="DFDBUTModel.DF_SCH_MEM">
+              <MappingFragment StoreEntitySet="DF_SCH_MEM">
+                <ScalarProperty Name="MEM_GUID" ColumnName="MEM_GUID" />
+                <ScalarProperty Name="SYS_TYPE" ColumnName="SYS_TYPE" />
+                <ScalarProperty Name="DEP_ID" ColumnName="DEP_ID" />
+                <ScalarProperty Name="MEM_ID" ColumnName="MEM_ID" />
+                <ScalarProperty Name="MEM_NAME" ColumnName="MEM_NAME" />
+                <ScalarProperty Name="MEM_EMAIL" ColumnName="MEM_EMAIL" />
+                <ScalarProperty Name="MEM_JOBTITLE" ColumnName="MEM_JOBTITLE" />
+                <ScalarProperty Name="IS_MANA" ColumnName="IS_MANA" />
+                <ScalarProperty Name="IS_MJOB" ColumnName="IS_MJOB" />
+                <ScalarProperty Name="MEM_MEMO1" ColumnName="MEM_MEMO1" />
+                <ScalarProperty Name="MEM_MEMO2" ColumnName="MEM_MEMO2" />
+                <ScalarProperty Name="MEM_MEMO3" ColumnName="MEM_MEMO3" />
+                <ScalarProperty Name="MEM_MEMO4" ColumnName="MEM_MEMO4" />
+                <ScalarProperty Name="MEM_MEMO5" ColumnName="MEM_MEMO5" />
+                <ScalarProperty Name="ID_MEMO" ColumnName="ID_MEMO" />
+                <ScalarProperty Name="AGENT_MEMO" ColumnName="AGENT_MEMO" />
+                <ScalarProperty Name="CREATE_DATE" ColumnName="CREATE_DATE" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

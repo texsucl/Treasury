@@ -1,0 +1,542 @@
+﻿@model FAP.Web.ViewModels.OAP0013Model
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var clrStatusList = ViewBag.clrStatusList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+                                    @if (opScope != "" && opScope != "0")
+            {
+
+        <table class="table table-bordered">
+            <tr>
+                <td>統計方式</td>
+                <td>@Html.RadioButton("stat_type", "check_ym", new { @checked = true })<span>支票年月</span>　　　@Html.RadioButton("stat_type", "repaid_ym")<span>給付年月</span>　　　@Html.RadioButton("stat_type", "fsc_range")<span>保局範圍</span><br /></td>
+            </tr>
+            <tr id="tr_check_ym">
+                <td >
+                    指定支票年月
+                </td>
+                <td>
+                    <input id="check_ym_b" name="check_ym_b" type="text">
+                    ~
+                    <input id="check_ym_e" name="check_ym_e" type="text">
+                </td>
+            </tr>
+            <tr  id="tr_repaid_ym">
+                <td>
+                    給付年月
+                </td>
+                <td>
+                    <input id="repaid_ym_b" name="repaid_ym_b" type="text">
+                    ~
+                    <input id="repaid_ym_e" name="repaid_ym_e" type="text">
+                </td>
+            </tr>
+            <tr id="tr_fsc_range">
+                <td>
+                    保局範圍
+                </td>
+                <td>
+                    <table id="fscRangeList">
+                        <tbody>
+                            <tr>
+                                <td colspan="4">
+                                    <input name="chkFsc" id="fsc_chkALL" type="checkbox"> 全選
+                                </td>
+                            <tr>
+                                @{
+                                    int fscTotal = 0;
+                                }
+                                @foreach (var item in Model.fscRangeList)
+                                {
+                                    if (fscTotal % 4 == 0)
+                                    {
+                                        @:<tr>
+                                        }
+
+                                        <td>
+                                            <input id="fsc_chk@(item.code_id)"
+                                                   name="chkFsc"
+                                                   type="checkbox"
+                                                   value="@item.code_id"
+                                                   onclick="fscOnClick()" />
+                                            @item.code_value
+                                        </td>
+
+                                        if ((fscTotal + 1) % 4 == 0)
+                                        {
+                                        @:</tr>
+                                }
+                                fscTotal++;
+                            }
+
+                            </tbody>
+                        </table>
+
+
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.status)
+                    </td>
+                    <td>
+                        @Html.DropDownList("status", clrStatusList, "請選擇")
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    統計截止日
+                </td>
+                <td>
+                    @*<input id="date_b" name="date_b" type="text">
+                ~*@
+                    <input id="date_e" name="date_e" type="text">
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+                    清理大、小類
+                </td>
+                <td>
+                    <table id="level1List">
+                        <tbody>
+                            <tr>
+                                <td colspan="2">
+                                    <input name="chkLevel1" id="level1_chkALL" type="checkbox"> 全選
+
+                                </td>
+                                <td colspan="2">
+                                    <input name="level1_chkSPACE" id="level1_chkSPACE" type="checkbox"> 含無清理大小類的資料
+                                </td>
+                            </tr>
+                            <tr>
+                                @foreach (var item in Model.level1List)
+                                {
+
+                                <tr>
+                                    <td colspan="4">
+                                        <input id="level1_chk@(item.code_id)"
+                                               name="chkLevel1"
+                                               type="checkbox"
+                                               value="@item.code_id"
+                                               onclick="level1OnClick(this)" />
+                                        @item.code_value
+                                    </td>
+
+                                </tr>
+
+                                int levelTotal = 0;
+
+                                foreach (var item2 in Model.level2List)
+                                {
+                                    if (item2.code_id.Substring(0, 1) == item.code_id)
+                                    {
+                                        if (levelTotal % 3 == 0)
+                                        {
+                                            @:<tr>
+                                            }
+
+                                            if (levelTotal == 0)
+                                            {
+                                                @:<td>==></td>
+                                            }
+                                            else
+                                            {
+                                                @:<td></td>
+                                            }
+
+
+                                            <td>
+                                                <input id="level2_chk@(item2.code_id)"
+                                                       name="chkLevel2"
+                                                       type="checkbox"
+                                                       value="@item2.code_id"
+                                                       onclick="level2OnClick()" />
+                                                @item2.code_value
+                                            </td>
+
+                                            if ((levelTotal + 1) % 3 == 0)
+                                            {
+                                            @:</tr>
+                                        }
+                                        levelTotal++;
+                                    }
+
+                                }
+
+                            }
+
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        歸戶條件
+                    </td>
+                    <td>
+                        @Html.RadioButton("cnt_type", "paid_id", new { @checked = true })<span>給付對象ID</span>　　　@Html.RadioButton("cnt_type", "check_no")<span>支票號碼</span><br />
+                    </td>
+                </tr>
+            </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="匯出" class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //切換統計方式
+    $('input:radio[name="stat_type"]').change(function () {
+        stat_type = $('input:radio:checked[name="stat_type"]').val();
+
+        if (stat_type == "check_ym") {
+            $('#tr_check_ym').show();
+            $('#tr_repaid_ym').hide();
+            $('#tr_fsc_range').hide();
+        } else if (stat_type == "repaid_ym") {
+            $('#tr_check_ym').hide();
+            $('#tr_repaid_ym').show();
+            $('#tr_fsc_range').hide();
+        } else {
+            $('#tr_check_ym').hide();
+            $('#tr_repaid_ym').hide();
+            $('#tr_fsc_range').show();
+        }
+
+
+    });
+
+
+    function fscOnClick() {
+        $("#fsc_chkALL").prop("checked", false);
+    }
+    
+    function level1OnClick(level1Obj) {
+        $("#level1_chkALL").prop("checked", false);
+        var leve1 = level1Obj.id.replace("level1_chk", "");
+
+        var r = $('[name^="chkLevel2"]');
+        if (level1Obj.checked) {
+            for (var i = 0; i < r.length; i++) {
+                var level2Obj = r[i];
+                var leve2 = level2Obj.id.replace("level2_chk", "");
+                if (leve2.startsWith(leve1))
+                    document.getElementById(level2Obj.id).checked = true;
+            }
+        } else {
+            for (var i = 0; i < r.length; i++) {
+                var level2Obj = r[i];
+                var leve2 = level2Obj.id.replace("level2_chk", "");
+                if (leve2.startsWith(leve1))
+                    document.getElementById(level2Obj.id).checked = false;
+            }
+        }
+    }
+
+    function level2OnClick() {
+        $("#level2_chkALL").prop("checked", false);
+    }
+
+    //"保局範圍"的全選/全不選
+    $("#fsc_chkALL").click(function () {
+        if ($("#fsc_chkALL").prop("checked")) {
+            $("input[name='chkFsc']").each(function () {
+                $(this).prop("checked", true);
+            });
+        } else {
+            $("input[name='chkFsc']").each(function () {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+
+
+    //"清理大類"的全選/全不選
+    $("#level1_chkALL").click(function () {
+        if ($("#level1_chkALL").prop("checked")) {
+            $("input[name='chkLevel1']").each(function () {
+                $(this).prop("checked", true);
+            });
+
+            $("input[name='chkLevel2']").each(function () {
+                $(this).prop("checked", true);
+            });
+        } else {
+            $("input[name='chkLevel1']").each(function () {
+                $(this).prop("checked", false);
+            });
+
+            $("input[name='chkLevel2']").each(function () {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+
+    $("#level2_chkALL").click(function () {
+        if ($("#level2_chkALL").prop("checked")) {
+            $("input[name='chkLevel2']").each(function () {
+                $(this).prop("checked", true);
+            });
+        } else {
+            $("input[name='chkLevel2']").each(function () {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+
+
+
+
+    $(function () {
+
+        $('#check_ym_b').datepicker({
+            dateFormat: 'yyyy-mm'
+        });
+
+        $('#check_ym_e').datepicker({
+            dateFormat: 'yyyy-mm'
+        });
+
+
+        $('#repaid_ym_b').datepicker({
+            dateFormat: 'yyyy-mm'
+        });
+
+        $('#repaid_ym_e').datepicker({
+            dateFormat: 'yyyy-mm'
+        });
+
+        //$('#date_b').datepicker({
+        //    dateFormat: 'yyyy-mm-dd'
+        //});
+
+        $('#date_e').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnPrint').attr('disabled', true);
+
+            $('#tr_check_ym').show();
+            $('#tr_repaid_ym').hide();
+            $('#tr_fsc_range').hide();
+
+
+        }
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            recList = [];
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            
+            var bPass = true;
+
+            //檢核"指定支票年月"
+            //if ($("#check_ym_b").val().length == 0 || $("#check_ym_e").val().length == 0) {
+            //    bPass = false;
+            //    validationSummary.append('<li>' + '請輸入「指定支票年月」起迄!!' + '</li>');
+            //}
+
+
+            //取得有勾選的"保局範圍"
+            var rFsc = document.getElementsByName("chkFsc");
+            var fsc_range = "";
+            for (var i = 0; i < rFsc.length; i++) {
+                if (rFsc[i].checked)
+                    fsc_range = fsc_range + rFsc[i].value + '|';
+            }
+
+            //檢核"指定支票年月"及"保局範圍"
+            //if (fsc_range == "" & ($("#check_ym_b").val().length == 0 || $("#check_ym_e").val().length == 0)) {
+            //    bPass = false;
+            //    validationSummary.append('<li>' + '請輸入「指定支票年月」或 勾選一個以上的「保局範圍」!!' + '</li>');
+            //}
+
+
+            //if (fsc_range != "" & !($("#check_ym_b").val().length == 0 || $("#check_ym_e").val().length == 0)) {
+            //    bPass = false;
+            //    validationSummary.append('<li>' + '「指定支票年月」與「保局範圍」需擇一輸入!!' + '</li>');
+            //}
+
+
+            var stat_type = $('input:radio:checked[name="stat_type"]').val();
+            if (stat_type == "check_ym") {
+                if ($("#check_ym_b").val().length == 0 || $("#check_ym_e").val().length == 0) {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入「指定支票年月」!!' + '</li>');
+                }
+                
+            } else if (stat_type == "repaid_ym") {
+                if ($("#repaid_ym_b").val().length == 0 || $("#repaid_ym_e").val().length == 0) {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入「給付年月」!!' + '</li>');
+                }
+                
+            } else {
+                if (fsc_range == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入「保局範圍」!!' + '</li>');
+                }
+            }
+
+            //if (fsc_range != "")
+            //    stat_type = "fsc_range"
+            //else
+            //    stat_type = "check_ym"
+
+
+            //檢核"統計截止區間"
+            if ($("#date_e").val().length == 0) {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入「統計截止迄日期」!!' + '</li>');
+            }
+
+
+            var levelSpace = document.getElementsByName("level1_chkSPACE")[0].checked;
+
+            //取得有勾選的"清理大類"
+            var rLevel1 = document.getElementsByName("chkLevel1");
+            var level_1 = "";
+            for (var i = 0; i < rLevel1.length; i++) {
+                if (rLevel1[i].checked) 
+                    level_1 = level_1 + rLevel1[i].value + '|';
+            }
+            if (level_1 == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請勾選一個以上的「清理大類」!!' + '</li>');
+            }
+
+
+            //取得有勾選的"清理小類"
+            var rLevel2 = document.getElementsByName("chkLevel2");
+            var level_2 = "";
+            for (var i = 0; i < rLevel2.length; i++) {
+                if (rLevel2[i].checked)
+                    level_2 = level_2 + rLevel2[i].value + '|';
+            }
+            if (level_2 == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請勾選一個以上的「清理小類」!!' + '</li>');
+            }
+
+
+            //歸戶條件
+            cnt_type = $('input:radio:checked[name="cnt_type"]').val();
+
+
+            if (!bPass)
+                return;
+
+
+            var jsonData = JSON.stringify({
+                'stat_type': stat_type
+                , 'fsc_range': fsc_range
+                , 'check_ym_b': $("#check_ym_b").val()
+                , 'check_ym_e': $("#check_ym_e").val()
+                , 'date_b': ''//$("#date_b").val()
+                , 'date_e': $("#date_e").val()
+                , 'status': $("#status").val()
+                , 'level_1': level_1
+                , 'level_2': level_2
+                , 'cnt_type': cnt_type
+                , 'levelSpace': levelSpace
+                , 'repaid_ym_b': $("#repaid_ym_b").val()
+                , 'repaid_ym_e': $("#repaid_ym_e").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execExport", "OAP0014")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        var url = '/OAP0014/downloadRpt?id=' + data.guid;
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+    });
+</script>
+
+

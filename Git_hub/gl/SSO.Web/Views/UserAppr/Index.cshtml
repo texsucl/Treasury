@@ -1,0 +1,176 @@
+﻿@model SSO.Web.ViewModels.AuthReviewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.mgrUnit)：
+                            <label id="lblMgrUnit"></label>
+                            <label id="lblMgrUnitNm"></label>
+                        </td>
+
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //轉跳"申請單明細"畫面
+    function qryDetail(aplyNo) {
+        document.location.href = "/UserAppr/detailUser/?aplyNo=" + aplyNo;
+        //$("#iframe").load("/SSO/RoleAppr/detailRole/?aplyNo=" + aplyNo);
+
+    }
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        var authUnitCnt = '@Html.Raw(ViewBag.authUnitCnt)';
+
+        if (opScope == "" || opScope == "0" || authUnitCnt == 0) {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if (authUnitCnt == 0)
+                validationSummary.append('<li>' + '未建管理者可授權程式table檔,請先建檔!' + '</li>');
+            else
+                validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#lblMgrUnit').text('@Html.Raw(ViewBag.mgrUnit)');
+            $('#lblMgrUnitNm').text('@Html.Raw(ViewBag.mgrUnitNm)');
+
+           
+                createGrid();
+        }
+
+
+        function createGrid() {
+            var CodeRole = $('#cReviewType').val();
+            //var cSearchArea = $('#cReviewFlag').val();
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                cReviewType: 'U'
+            , mgrUnit: '@Html.Raw(ViewBag.mgrUnit)'
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/UserAppr/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'aplyNo'
+                },
+                mtype: 'POST',
+                colNames: ['覆核單編號', '角色OWNER單位/使用者單位', '異動資料內容', '異動資料內容', '覆核狀態代碼', '覆核狀態', '申請人', '申請日期'],
+                colModel: [
+                    {
+                        name: 'aplyNo', align: 'center',
+                        formatter: function (cellvalue, options, rowObject) {
+                            var aplyNo = rowObject.aplyNo;
+                            return '<a href="javascript:qryDetail(\'' + options.rowId + '\')" style="color: #3366ff" id="' + options.rowId + '" >' + cellvalue.trim() + '</a>';
+                            //return '<a style="color:Blue;text-decoration:underline;" href="/SSO/UserAppr/detailUser/?aplyNo=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+
+                        }
+                    },
+                    { name: 'authUnit', align: 'center' },
+                    { name: 'cMappingKey', align: 'center', hidden: true },
+                    { name: 'cMappingKeyDesc', align: 'center' },
+                    { name: 'apprStatus', align: 'center', hidden: true },
+                    { name: 'apprStatusDesc', align: 'center', hidden: true },
+                    { name: 'createUid', align: 'center' },
+                    { name: 'createDt', align: 'left' }
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aplyNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+        @*var cRoleID = '@Html.Raw(ViewBag.cRoleID)';
+        if (cRoleID != null) {
+            if (cRoleID.length > 0) {
+
+                $('#CodeRole').val(cRoleID);
+                createGrid();
+            }
+
+        }*@
+    });
+</script>
+
+

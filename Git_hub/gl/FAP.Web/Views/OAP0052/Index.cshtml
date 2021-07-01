@@ -1,0 +1,168 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+        <table>
+            <tr>
+                <td width="100px">
+                    <span style="color:red;">＊</span>
+                    <span>報表類別 : </span>
+                </td>
+                <td>
+                    @Html.RadioButton("qryType", "OAP0052_VE_Clear_Scheduler", new { @checked = true, @onclick = "chgType()" }) 電訪逾期追蹤報表
+                    @Html.RadioButton("qryType", "OAP0052_VE_Level_Detail", new { @onclick = "chgType()" }) 清理暨逾期處理清單
+                    @Html.RadioButton("qryType", "OAP0052_CLEAN", new { @onclick = "chgType()" }) 清理處理清單
+                </td>
+            </tr>
+            @*<tr>
+                <td colspan="2">
+                    <input type="checkbox" id="OAP0052_send_mail" /> 寄送 E-Mail
+                </td>
+            </tr>*@
+            <tr id="clean_date">
+                <td colspan="2">
+                    起迄期間(覆核日期)：<input type="text" id="clean_date_b" name="clean_date_b" size = "8" maxlength="7" /> ~ 
+                    <input type="text" id="clean_date_e" name="clean_date_e" size = "8" maxlength="7" />
+                    (民國年YYYMMDD，例:0980507)
+                </td>
+            </tr>
+            <tr id="clean_status">
+                <td>
+                    清理狀態
+                </td>
+                <td>
+                    <input id="status_chk0" name="chkStatus" type="checkbox" value="0" />空值
+                    @*<input id="status_chk1" name="chkStatus" type="checkbox" value="1" />已給付*@
+                    <input id="status_chk2" name="chkStatus" type="checkbox" value="2" />已清理結案
+                    <input id="status_chk3" name="chkStatus" type="checkbox" value="3" />已通知尚未給付
+                    <input id="status_chk4" name="chkStatus" type="checkbox" value="4" />尚未通知
+                </td>
+
+            </tr>
+        </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+
+    function chgType() {
+        var type = $('input[name=qryType]:checked').val();
+        $('#clean_date_b').val("");
+        $('#clean_date_e').val("");
+        $("#status_chk0").prop("checked", false);
+        $("#status_chk1").prop("checked", false);
+        $("#status_chk2").prop("checked", false);
+        $("#status_chk3").prop("checked", false);
+        $("#status_chk4").prop("checked", false);
+
+        if ("OAP0052_CLEAN" == type) {
+            $('#clean_date').show();
+            $('#clean_status').show();
+        } else {
+            $('#clean_date').hide();
+            $('#clean_status').hide();
+        }
+    }
+
+    $(function () {
+        var UrlFor = {};
+        UrlFor.Export = '@Url.Action("Export", "OAP0052")';
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            $('#clean_date').hide();
+            $('#clean_status').hide();
+
+            $('#btnExport').off('click');
+            $('#btnExport').on('click', function () {
+                OAP0052_out();
+            });
+
+            function OAP0052_out() {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                var status = "";
+                if ($('input[name=qryType]:checked').val() == "OAP0052_CLEAN") {
+                    if (!checkChtDate($('#clean_date_b').val(), true) || !checkChtDate($('#clean_date_e').val(), true)) {
+                        validationSummary.append('<li>「起迄期間」錯誤!!</li>');
+
+                        return;
+                    }
+
+                    //取得有勾選的"清理狀態"
+                    var rStatus = document.getElementsByName("chkStatus");
+                    
+                    for (var i = 0; i < rStatus.length; i++) {
+                        if (rStatus[i].checked)
+                            status = status + rStatus[i].value + '|';
+                    }
+
+                    if (status != "") {
+                        status = status.substring(0, status.length - 1);
+                    } 
+                }
+
+
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.Export,
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        exec: $('input[name=qryType]:checked').val(),
+                        type: $('#OAP0052_send_mail').prop('checked') ? "A" : "E",
+                        clean_date_b: $('#clean_date_b').val(), 
+                        clean_date_e: $('#clean_date_e').val(), 
+                        status: status
+                    }),
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        var url = '/OAP0052/downloadRpt?id=' + result.REASON_CODE;
+
+
+                        window.location = url;
+
+                        @*window.location.href = "@Url.RouteUrl(new { Controller = "File", Action = "DownloadExcel" })/?type=OAP0052";*@
+                    }
+                    else {
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+        }
+        }
+    });
+</script>

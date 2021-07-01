@@ -1,0 +1,332 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="DB_INTRAModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--產生期間發現錯誤:
+警告 6013: 資料表/檢視 'DB_INTRA.dbo.V_EMPLY' 未定義主索引鍵，也無法推斷有效的主索引鍵。此資料表/檢視已被排除。如果要使用此實體，您必須檢閱您的結構描述，加入正確的索引鍵，並將它取消註解。
+        <EntityType Name="V_EMPLY">
+          <Property Name="EMP_NO" Type="char" MaxLength="6" />
+          <Property Name="EMP_NAME" Type="char" MaxLength="10" />
+          <Property Name="EMP_NAME_E" Type="char" MaxLength="40" />
+          <Property Name="ID_NO" Type="char" MaxLength="10" />
+          <Property Name="SEX" Type="char" MaxLength="1" />
+          <Property Name="BIRTHDAY" Type="char" MaxLength="8" />
+          <Property Name="AETNA_DT" Type="char" MaxLength="8" />
+          <Property Name="QUIT_DT" Type="char" MaxLength="8" />
+          <Property Name="SECT" Type="char" MaxLength="10" />
+          <Property Name="DPT_CD" Type="char" MaxLength="10" />
+          <Property Name="HO_ADDR" Type="varchar" MaxLength="80" />
+          <Property Name="FUN_CD" Type="char" MaxLength="10" />
+          <Property Name="FUN_DESCR" Type="char" MaxLength="20" />
+          <Property Name="DPT_NAME" Type="char" MaxLength="60" />
+          <Property Name="USR_ID" Type="varchar" MaxLength="10" />
+          <Property Name="EMAIL" Type="nvarchar" MaxLength="266" />
+          <Property Name="ext" Type="char" MaxLength="5" />
+          <Property Name="DPT_HEAD" Type="char" MaxLength="6" />
+          <Property Name="SGN_MGR" Type="varchar" MaxLength="10" />
+          <Property Name="Voice_No1" Type="char" MaxLength="8" />
+          <Property Name="Address" Type="char" MaxLength="62" />
+        </EntityType>-->
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'DB_INTRA.dbo.V_EMPLY2' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+        <EntityType Name="V_EMPLY2">
+          <Key>
+            <PropertyRef Name="EMP_NO" />
+            <PropertyRef Name="EMP_NAME" />
+            <PropertyRef Name="EMP_NAME_E" />
+            <PropertyRef Name="ID_NO" />
+          </Key>
+          <Property Name="GRP_CD" Type="char" MaxLength="10" />
+          <Property Name="EMP_NO" Type="char" MaxLength="6" Nullable="false" />
+          <Property Name="EMP_NAME" Type="char" MaxLength="10" Nullable="false" />
+          <Property Name="EMP_NAME_E" Type="char" MaxLength="40" Nullable="false" />
+          <Property Name="ID_NO" Type="char" MaxLength="10" Nullable="false" />
+          <Property Name="DPT_CD" Type="char" MaxLength="10" />
+          <Property Name="DPT_NAME" Type="nvarchar" MaxLength="100" />
+          <Property Name="USR_ID" Type="varchar" MaxLength="10" />
+          <Property Name="EMAIL" Type="nvarchar" MaxLength="255" />
+          <Property Name="ext" Type="char" MaxLength="5" />
+          <Property Name="DPT_HEAD" Type="char" MaxLength="10" />
+          <Property Name="Voice_Fr1" Type="char" MaxLength="3" />
+          <Property Name="Voice_No1" Type="char" MaxLength="8" />
+          <Property Name="Address" Type="char" MaxLength="62" />
+          <Property Name="floor" Type="char" MaxLength="5" />
+          <Property Name="FUN_CD" Type="char" MaxLength="10" />
+          <Property Name="FUN_DESCR" Type="char" MaxLength="20" />
+        </EntityType>
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'DB_INTRA.dbo.VW_OA_DEPT' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+        <EntityType Name="VW_OA_DEPT">
+          <Key>
+            <PropertyRef Name="DPT_NAME" />
+            <PropertyRef Name="DPT_CD" />
+            <PropertyRef Name="Dpt_type" />
+            <PropertyRef Name="DPT_HEAD" />
+          </Key>
+          <Property Name="DPT_NAME" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="DPT_CD" Type="char" MaxLength="10" Nullable="false" />
+          <Property Name="GRP_CD" Type="char" MaxLength="10" />
+          <Property Name="UP_DPT_CD" Type="char" MaxLength="10" />
+          <Property Name="Dpt_type" Type="char" MaxLength="2" Nullable="false" />
+          <Property Name="DPT_HEAD" Type="char" MaxLength="10" Nullable="false" />
+        </EntityType>
+        <!--產生期間發現錯誤:
+警告 6002: 資料表/檢視 'DB_INTRA.dbo.VW_OA_EMP' 未定義主索引鍵。已推斷此索引鍵，並將定義建立成唯讀的資料表/檢視。-->
+        <EntityType Name="VW_OA_EMP">
+          <Key>
+            <PropertyRef Name="EMP_NAME" />
+            <PropertyRef Name="EMP_NAME_E" />
+            <PropertyRef Name="EMP_NO" />
+            <PropertyRef Name="ID_NO" />
+            <PropertyRef Name="ext" />
+            <PropertyRef Name="fax_fr" />
+            <PropertyRef Name="fax_no" />
+            <PropertyRef Name="mobile" />
+            <PropertyRef Name="bbcall" />
+          </Key>
+          <Property Name="EMP_NAME" Type="char" MaxLength="10" Nullable="false" />
+          <Property Name="EMP_NAME_E" Type="char" MaxLength="40" Nullable="false" />
+          <Property Name="FUN_CD" Type="char" MaxLength="10" />
+          <Property Name="EMP_NO" Type="char" MaxLength="6" Nullable="false" />
+          <Property Name="ID_NO" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="USR_ID" Type="varchar" MaxLength="10" />
+          <Property Name="EmailAddress" Type="nvarchar" MaxLength="255" />
+          <Property Name="HO_TEL" Type="varchar" MaxLength="8000" />
+          <Property Name="ext" Type="char" MaxLength="5" Nullable="false" />
+          <Property Name="fax_fr" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="fax_no" Type="char" MaxLength="8" Nullable="false" />
+          <Property Name="mobile" Type="char" MaxLength="14" Nullable="false" />
+          <Property Name="bbcall" Type="char" MaxLength="20" Nullable="false" />
+          <Property Name="WORK_LOC" Type="char" MaxLength="50" />
+          <Property Name="DPT_CD" Type="char" MaxLength="10" />
+          <Property Name="MGR_EMPNO" Type="varchar" MaxLength="10" />
+          <Property Name="JobStatus" Type="char" MaxLength="5" />
+          <Property Name="HO_ADD" Type="varchar" MaxLength="8000" />
+        </EntityType>
+        <EntityContainer Name="DB_INTRAModelStoreContainer">
+          <EntitySet Name="V_EMPLY2" EntityType="Self.V_EMPLY2" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [V_EMPLY2].[GRP_CD] AS [GRP_CD], 
+    [V_EMPLY2].[EMP_NO] AS [EMP_NO], 
+    [V_EMPLY2].[EMP_NAME] AS [EMP_NAME], 
+    [V_EMPLY2].[EMP_NAME_E] AS [EMP_NAME_E], 
+    [V_EMPLY2].[ID_NO] AS [ID_NO], 
+    [V_EMPLY2].[DPT_CD] AS [DPT_CD], 
+    [V_EMPLY2].[DPT_NAME] AS [DPT_NAME], 
+    [V_EMPLY2].[USR_ID] AS [USR_ID], 
+    [V_EMPLY2].[EMAIL] AS [EMAIL], 
+    [V_EMPLY2].[ext] AS [ext], 
+    [V_EMPLY2].[DPT_HEAD] AS [DPT_HEAD], 
+    [V_EMPLY2].[Voice_Fr1] AS [Voice_Fr1], 
+    [V_EMPLY2].[Voice_No1] AS [Voice_No1], 
+    [V_EMPLY2].[Address] AS [Address], 
+    [V_EMPLY2].[floor] AS [floor], 
+    [V_EMPLY2].[FUN_CD] AS [FUN_CD], 
+    [V_EMPLY2].[FUN_DESCR] AS [FUN_DESCR]
+    FROM [dbo].[V_EMPLY2] AS [V_EMPLY2]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="VW_OA_DEPT" EntityType="Self.VW_OA_DEPT" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [VW_OA_DEPT].[DPT_NAME] AS [DPT_NAME], 
+    [VW_OA_DEPT].[DPT_CD] AS [DPT_CD], 
+    [VW_OA_DEPT].[GRP_CD] AS [GRP_CD], 
+    [VW_OA_DEPT].[UP_DPT_CD] AS [UP_DPT_CD], 
+    [VW_OA_DEPT].[Dpt_type] AS [Dpt_type], 
+    [VW_OA_DEPT].[DPT_HEAD] AS [DPT_HEAD]
+    FROM [dbo].[VW_OA_DEPT] AS [VW_OA_DEPT]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="VW_OA_EMP" EntityType="Self.VW_OA_EMP" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [VW_OA_EMP].[EMP_NAME] AS [EMP_NAME], 
+    [VW_OA_EMP].[EMP_NAME_E] AS [EMP_NAME_E], 
+    [VW_OA_EMP].[FUN_CD] AS [FUN_CD], 
+    [VW_OA_EMP].[EMP_NO] AS [EMP_NO], 
+    [VW_OA_EMP].[ID_NO] AS [ID_NO], 
+    [VW_OA_EMP].[USR_ID] AS [USR_ID], 
+    [VW_OA_EMP].[EmailAddress] AS [EmailAddress], 
+    [VW_OA_EMP].[HO_TEL] AS [HO_TEL], 
+    [VW_OA_EMP].[ext] AS [ext], 
+    [VW_OA_EMP].[fax_fr] AS [fax_fr], 
+    [VW_OA_EMP].[fax_no] AS [fax_no], 
+    [VW_OA_EMP].[mobile] AS [mobile], 
+    [VW_OA_EMP].[bbcall] AS [bbcall], 
+    [VW_OA_EMP].[WORK_LOC] AS [WORK_LOC], 
+    [VW_OA_EMP].[DPT_CD] AS [DPT_CD], 
+    [VW_OA_EMP].[MGR_EMPNO] AS [MGR_EMPNO], 
+    [VW_OA_EMP].[JobStatus] AS [JobStatus], 
+    [VW_OA_EMP].[HO_ADD] AS [HO_ADD]
+    FROM [dbo].[VW_OA_EMP] AS [VW_OA_EMP]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="DB_INTRAModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="V_EMPLY2">
+          <Key>
+            <PropertyRef Name="EMP_NO" />
+            <PropertyRef Name="EMP_NAME" />
+            <PropertyRef Name="EMP_NAME_E" />
+            <PropertyRef Name="ID_NO" />
+          </Key>
+          <Property Name="GRP_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="EMP_NO" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="EMP_NAME" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="EMP_NAME_E" Type="String" MaxLength="40" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="ID_NO" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="DPT_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="USR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="ext" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+          <Property Name="DPT_HEAD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="Voice_Fr1" Type="String" MaxLength="3" FixedLength="true" Unicode="false" />
+          <Property Name="Voice_No1" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="Address" Type="String" MaxLength="62" FixedLength="true" Unicode="false" />
+          <Property Name="floor" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+          <Property Name="FUN_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="FUN_DESCR" Type="String" MaxLength="20" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityType Name="VW_OA_DEPT">
+          <Key>
+            <PropertyRef Name="DPT_NAME" />
+            <PropertyRef Name="DPT_CD" />
+            <PropertyRef Name="Dpt_type" />
+            <PropertyRef Name="DPT_HEAD" />
+          </Key>
+          <Property Name="DPT_NAME" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="GRP_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="UP_DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="Dpt_type" Type="String" MaxLength="2" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="DPT_HEAD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+        </EntityType>
+        <EntityType Name="VW_OA_EMP">
+          <Key>
+            <PropertyRef Name="EMP_NAME" />
+            <PropertyRef Name="EMP_NAME_E" />
+            <PropertyRef Name="EMP_NO" />
+            <PropertyRef Name="ID_NO" />
+            <PropertyRef Name="ext" />
+            <PropertyRef Name="fax_fr" />
+            <PropertyRef Name="fax_no" />
+            <PropertyRef Name="mobile" />
+            <PropertyRef Name="bbcall" />
+          </Key>
+          <Property Name="EMP_NAME" Type="String" MaxLength="10" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="EMP_NAME_E" Type="String" MaxLength="40" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="FUN_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="EMP_NO" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="ID_NO" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="USR_ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="EmailAddress" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="HO_TEL" Type="String" MaxLength="8000" FixedLength="false" Unicode="false" />
+          <Property Name="ext" Type="String" MaxLength="5" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="fax_fr" Type="String" MaxLength="3" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="fax_no" Type="String" MaxLength="8" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="mobile" Type="String" MaxLength="14" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="bbcall" Type="String" MaxLength="20" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="WORK_LOC" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+          <Property Name="DPT_CD" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="MGR_EMPNO" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="JobStatus" Type="String" MaxLength="5" FixedLength="true" Unicode="false" />
+          <Property Name="HO_ADD" Type="String" MaxLength="8000" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="DB_INTRAEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="V_EMPLY2" EntityType="Self.V_EMPLY2" />
+          <EntitySet Name="VW_OA_DEPT" EntityType="Self.VW_OA_DEPT" />
+          <EntitySet Name="VW_OA_EMP" EntityType="Self.VW_OA_EMP" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="DB_INTRAModelStoreContainer" CdmEntityContainer="DB_INTRAEntities">
+          <EntitySetMapping Name="V_EMPLY2">
+            <EntityTypeMapping TypeName="DB_INTRAModel.V_EMPLY2">
+              <MappingFragment StoreEntitySet="V_EMPLY2">
+                <ScalarProperty Name="GRP_CD" ColumnName="GRP_CD" />
+                <ScalarProperty Name="EMP_NO" ColumnName="EMP_NO" />
+                <ScalarProperty Name="EMP_NAME" ColumnName="EMP_NAME" />
+                <ScalarProperty Name="EMP_NAME_E" ColumnName="EMP_NAME_E" />
+                <ScalarProperty Name="ID_NO" ColumnName="ID_NO" />
+                <ScalarProperty Name="DPT_CD" ColumnName="DPT_CD" />
+                <ScalarProperty Name="DPT_NAME" ColumnName="DPT_NAME" />
+                <ScalarProperty Name="USR_ID" ColumnName="USR_ID" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="ext" ColumnName="ext" />
+                <ScalarProperty Name="DPT_HEAD" ColumnName="DPT_HEAD" />
+                <ScalarProperty Name="Voice_Fr1" ColumnName="Voice_Fr1" />
+                <ScalarProperty Name="Voice_No1" ColumnName="Voice_No1" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="floor" ColumnName="floor" />
+                <ScalarProperty Name="FUN_CD" ColumnName="FUN_CD" />
+                <ScalarProperty Name="FUN_DESCR" ColumnName="FUN_DESCR" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VW_OA_DEPT">
+            <EntityTypeMapping TypeName="DB_INTRAModel.VW_OA_DEPT">
+              <MappingFragment StoreEntitySet="VW_OA_DEPT">
+                <ScalarProperty Name="DPT_NAME" ColumnName="DPT_NAME" />
+                <ScalarProperty Name="DPT_CD" ColumnName="DPT_CD" />
+                <ScalarProperty Name="GRP_CD" ColumnName="GRP_CD" />
+                <ScalarProperty Name="UP_DPT_CD" ColumnName="UP_DPT_CD" />
+                <ScalarProperty Name="Dpt_type" ColumnName="Dpt_type" />
+                <ScalarProperty Name="DPT_HEAD" ColumnName="DPT_HEAD" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VW_OA_EMP">
+            <EntityTypeMapping TypeName="DB_INTRAModel.VW_OA_EMP">
+              <MappingFragment StoreEntitySet="VW_OA_EMP">
+                <ScalarProperty Name="EMP_NAME" ColumnName="EMP_NAME" />
+                <ScalarProperty Name="EMP_NAME_E" ColumnName="EMP_NAME_E" />
+                <ScalarProperty Name="FUN_CD" ColumnName="FUN_CD" />
+                <ScalarProperty Name="EMP_NO" ColumnName="EMP_NO" />
+                <ScalarProperty Name="ID_NO" ColumnName="ID_NO" />
+                <ScalarProperty Name="USR_ID" ColumnName="USR_ID" />
+                <ScalarProperty Name="EmailAddress" ColumnName="EmailAddress" />
+                <ScalarProperty Name="HO_TEL" ColumnName="HO_TEL" />
+                <ScalarProperty Name="ext" ColumnName="ext" />
+                <ScalarProperty Name="fax_fr" ColumnName="fax_fr" />
+                <ScalarProperty Name="fax_no" ColumnName="fax_no" />
+                <ScalarProperty Name="mobile" ColumnName="mobile" />
+                <ScalarProperty Name="bbcall" ColumnName="bbcall" />
+                <ScalarProperty Name="WORK_LOC" ColumnName="WORK_LOC" />
+                <ScalarProperty Name="DPT_CD" ColumnName="DPT_CD" />
+                <ScalarProperty Name="MGR_EMPNO" ColumnName="MGR_EMPNO" />
+                <ScalarProperty Name="JobStatus" ColumnName="JobStatus" />
+                <ScalarProperty Name="HO_ADD" ColumnName="HO_ADD" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="false" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,595 @@
+﻿@model SSO.Web.ViewModels.RoleMgrModel
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    ViewBag.Title = "角色明細畫面";
+
+    var isDisabledList = ViewBag.isDisabledList as SelectList;
+    var freeAuthList = ViewBag.freeAuthList as SelectList;
+    var authUnitList = ViewBag.AuthUnitList as SelectList;
+    //var test = ViewBag.test as SelectList;
+
+    var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+    var userAuthJson = jss.Serialize(ViewBag.userAuthFuncList);
+
+    var bHaveData = ViewBag.bHaveData as String;
+
+
+}
+
+
+    <div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cRoleID)：
+                        @Html.DisplayTextFor(model => model.cRoleID)
+                        @Html.Hidden("cRoleID", Model.cRoleID)
+                    </td>
+
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.cRoleName)：
+                        @Html.TextBoxFor(model => model.cRoleName)
+                        @Html.Hidden("hidcRoleName", Model.cRoleName)
+                    </td>
+
+                </tr>
+
+                <tr>
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.authUnit)：@Html.DropDownList("authUnit", authUnitList, "請選擇", new { @onchange = "getFuncList()" })
+                        @*@Html.DisplayNameFor(model => model.authUnit)：
+                        @Html.DisplayTextFor(model => model.authUnit)
+                        @Html.Hidden("authUnit", Model.authUnit)
+                        @Html.DisplayTextFor(model => model.authUnitNm)*@
+                    </td>
+
+                    <td>
+                        @*<span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.freeAuth)：
+                        @Html.DropDownList("freeAuth", freeAuthList, "請選擇")
+                        @Html.ValidationMessageFor(model => model.freeAuth, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidfreeAuth", Model.freeAuth)*@
+
+                        @Html.DisplayNameFor(model => model.mgrUnit)：
+                        @Html.DisplayTextFor(model => model.mgrUnit)
+                        @Html.Hidden("mgrUnit", Model.mgrUnit)
+                        @Html.DisplayTextFor(model => model.mgrUnitNm)
+                    </td>
+
+                </tr>
+
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.dataStatus)：
+                        @Html.DisplayTextFor(model => model.dataStatus)
+                        @Html.Hidden("hidDataStatus", Model.dataStatus)
+                    </td>
+                    <td>
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+                    
+                        @Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        @Html.ValidationMessageFor(model => model.isDisabled, "", new { @class = "text-danger" })
+                        @Html.Hidden("hidisDisabled", Model.isDisabled)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        @Html.DisplayNameFor(model => model.vMemo)：
+                        @Html.TextBoxFor(model => model.vMemo, new { style = "width:70%", @maxlength = "250" })
+                        @Html.Hidden("hidvMemo", Model.vMemo)
+   
+                        (最多請輸入中/英文字共250字內)
+                        @Html.ValidationMessageFor(model => model.vMemo, "", new { @class = "text-danger" })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtUserID)：
+                        @Html.DisplayTextFor(model => model.cCrtUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtDateTime)：
+                        @Html.DisplayTextFor(model => model.cCrtDateTime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdUserID)：
+                        @Html.DisplayTextFor(model => model.cUpdUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdDateTime)：
+                        @Html.DisplayTextFor(model => model.cUpdDateTime)
+                    </td>
+                </tr>
+            </table>
+
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-24" style="text-align:center;">
+            <input type="button" id="btnConfirm" name="btnConfirm" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="btnQryHis" name="btnQryHis" value="查詢歷史紀錄" class="btn btn-primary" />
+            <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+            <input type="button" id="btnReturn" name="btnReturn" value="返回" class="btn btn-primary" />
+            
+        </div>
+        @Html.Hidden("bChgFunc", false)
+        @Html.Hidden("onEdit", "")
+        @Html.Hidden("valueErr", "")
+    </div>
+  
+
+    <div class="panel panel-primary">
+        <div class="panel-body">
+           
+                <div  id="tabFunct">
+                    @{
+                        int total = 0;
+                        int sysTotal = 0;
+                        bool bEndRow = true;
+                        bool bRoot = true;
+                    }
+
+                    <table id="memberlist">
+                        <tbody>
+                            @foreach (var item in Model.Categories)
+                            {
+                                if (@item.funcUrl == "")
+                                {
+                                    sysTotal = 0;
+                                    bRoot = true;
+
+                                    if (!bEndRow)
+                                    {
+                                        @:</tr>
+                         bEndRow = true;
+                                    }
+
+                                    <tr>
+                                        
+                                                                                    @if (@item.iFunctionLevel == 1)
+                                                                                    {
+                                                                                        <td colspan="3" >
+                                                                                            ======@item.cFunctionName======
+                                                                                        </td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        if (@item.iFunctionLevel == 2)
+                                                                                        {
+                                                                                            <td colspan="3" style='border-top:1px dashed #337ab7'>
+                                                                                                @item.cFunctionName
+                                                                                            </td>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <td colspan="3">
+                                                                                                @item.cFunctionName
+                                                                                            </td>
+                                                                                        }
+
+                                                                                    }
+
+                                                                                       
+                                    </tr>
+
+                                }
+                                else
+                                {
+                                    bRoot = false;
+
+                                }
+
+
+
+                                if (!bRoot)
+                                {
+
+                                    if (sysTotal % 3 == 0)
+                                    {
+                                        bEndRow = false;
+                                        @:<tr>
+                            }
+
+                                    <td>
+                                        <input id="chk@(item.cFunctionID)"
+                                               name="chkFun"
+                                               type="checkbox"
+                                               value="@item.cFunctionID" />
+                                        @item.cFunctionName
+                                    </td>
+
+                                    if (sysTotal + 1 % 4 == 0)
+                                    {
+
+                                        @:</tr>
+                                        bEndRow = true;
+                                    }
+                                }
+
+                                if (@item.funcUrl != "")
+                                {
+                                    sysTotal++;
+                                }
+
+
+                                total++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                </div>
+            
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        var currentOpType;
+
+
+        //取得可選取的程式
+        function getFuncList() {
+
+            $('#tabFunct').children().remove();
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            if ($('#authUnit').val() == "") {
+                validationSummary.append('<li>請輸入程式OWNER單位!!</li>');
+
+                return;
+            }
+
+            $.blockUI();
+            
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                        'cRoleId': "",
+                        'auth_unit': $('#authUnit').val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryFuncList", "RoleMgr")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        var tabFunct = document.getElementById('tabFunct');
+                        var total = 0;
+                        var sysTotal = 0;
+                        var bEndRow = true;
+                        var bRoot = true;
+
+                        if (data.funcList.length > 0) {
+
+                            var html = "";
+
+                            html += "<table><tbody>";
+
+                            for (var i = 0; i <= data.funcList.length - 1; i++) {
+                                if (data.funcList[i].funcUrl == "") {
+                                    sysTotal = 0;
+                                    bRoot = true;
+
+                                    if (!bEndRow) {
+                                        html += "</tr>";
+                                        bEndRow = true;
+                                    }
+                                    html += "<tr>";
+
+                                    if (data.funcList[i].iFunctionLevel == "1") {
+                                        html += " <td colspan='3' >";
+                                        html += "===" + data.funcList[i].cFunctionName + "===";
+                                        html += "</td>";
+                                    } else {
+                                        if (data.funcList[i].iFunctionLevel == "2") {
+                                            html += " <td colspan='3' style='border-top:1px dashed #337ab7'>";
+                                            html += data.funcList[i].cFunctionName;
+                                            html += "</td>";
+                                        } else {
+                                            html += " <td colspan='3'>";
+                                            html += data.funcList[i].cFunctionName;
+                                            html += "</td>";
+                                        }
+                                    }
+
+                                    html += "</tr>";
+
+                                } else
+                                    bRoot = false;
+
+
+                                if (!bRoot) {
+                                    if (sysTotal % 3 == 0)
+                                    {
+                                        bEndRow = false;
+                                        html += "<tr>";
+                                    }
+
+                                    html += "<td>";
+                                    html += " <input id='chk" + data.funcList[i].cFunctionID + "' name='chkFun' type='checkbox' value='" + data.funcList[i].cFunctionID + "' />" + data.funcList[i].cFunctionName;
+                                    html += "</td>";
+                                }
+
+                                if (data.funcList[i].funcUrl != "")
+                                    sysTotal++;
+
+                                total++;
+
+                          
+                            }
+                        }
+
+                        //var newTable = document.createElement("table");
+                        //tabFunct.appendChild(newTable);
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    document.getElementById("tabFunct").innerHTML = html;
+
+                    $('#tabFunct').show();
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+
+
+        $(function () {
+
+            var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+            $('#authUnit').attr('disabled', true);
+
+            if ($('#cRoleID').val() == '') {
+
+                $("#tabFunct").hide();
+                $("#btnQryHis").hide();
+                $("#isDisabled").val('N');
+                $('#authUnit').attr('disabled', false);
+
+                if ($('#authUnit').val() != '')
+                    getFuncList();
+
+            } else {
+                $('#authUnit').val('@Html.Raw(ViewBag.authUnit)')
+                $("#tabFunct").show();
+            }
+
+            if (bHaveData) {
+
+                $.blockUI();
+
+                //授權功能
+                createFuncList();
+                
+
+            } else {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                validationSummary.append('<li>' + '無此角色資料' + '</li>');
+            }
+
+
+
+            if ($("#hidDataStatus").val() != null) {
+                if ($("#hidDataStatus").val().substring(0, 1) == "2") {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnClear").attr('disabled', true);
+                }
+            }
+
+
+            //查詢歷史紀錄
+            $("#btnQryHis").click().on('click', function () {
+                var param = $('#cRoleID').val();
+                var url = '@Url.Action("roleHis", "RoleMgr", new { cRoleId = "__param__" })';
+
+                //$("#iframe").load(url.replace('__param__', encodeURIComponent(param)));
+
+                window.location.href = url.replace('__param__', encodeURIComponent(param));
+            });
+
+
+            //清空
+            $("#btnClear").click().on('click', function () {
+                $('#validationSummary').children().remove();
+                $('#cRoleName').val($('#hidcRoleName').val());
+
+                if ($("#cRoleID").val() == "") {
+                    $('#authUnit').val("");
+                    $('#tabFunct').children().remove();
+                } else {
+                    createFuncList();
+                }
+                
+
+                $('#isDisabled').val($('#hidisDisabled').val());
+                $('#freeAuth').val($('#hidfreeAuth').val());
+                $('#vMemo').val($('#hidvMemo').val());
+                
+            });
+
+
+            //返回
+            $("#btnReturn").click().on('click', function () {
+
+                var param = $('#cRoleID').val();
+                var url = '@Url.Action("Index", "RoleMgr", new { cRoleId = "__param__" })';
+                //$("#iframe").load(url.replace('__param__', encodeURIComponent(param)));
+
+                window.location.href = url.replace('__param__', encodeURIComponent(param));
+
+
+            });
+
+
+
+            //*-----------------------申請覆核  begin-----------------------*//
+            $("#btnConfirm").click().on('click', function () {
+
+
+
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                var bPass = true;
+
+
+                if ($('#cRoleName').val() == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入角色名稱!!' + '</li>');
+                }
+
+                if ($('#authUnit').val() == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入程式OWNER單位!!' + '</li>');
+                }
+
+                //if ($('#freeAuth').val() == "") {
+                //    bPass = false;
+                //    validationSummary.append('<li>' + '請輸入允許其他單位授權!!' + '</li>');
+                //}
+
+                if ($('#isDisabled').val() == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請輸入啟用狀態!!' + '</li>');
+                }
+
+
+                var r = document.getElementsByName("chkFun");
+                var authFunc = "";
+                for (var i = 0; i < r.length; i++) {
+                    if (r[i].checked) {
+                        authFunc = authFunc + r[i].value + '|';
+
+                    }
+                }
+                if (authFunc == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請授權一個以上的功能!!' + '</li>');
+                }
+
+
+                if (bPass == false)
+                    return;
+
+
+                $.blockUI();
+
+
+                //若有異動角色資訊時
+                var bRoleChg = false;
+                if ($('#cRoleName').val() != $('#hidcRoleName').val() ||
+                    $('#freeAuth').val() != $('#hidfreeAuth').val() ||
+                    $('#isDisabled').val() != $('#hidisDisabled').val() ||
+                    $('#vMemo').val() != $('#hidvMemo').val()
+                    ) {
+                    bRoleChg = true;
+                }
+
+
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            roleMgrModel: {
+                                'cRoleID': $('#cRoleID').val(),
+                                'cRoleName': $('#cRoleName').val(),
+                                'freeAuth': $('#freeAuth').val(),
+                                'isDisabled': $('#isDisabled').val(),
+                                'vMemo': $('#vMemo').val(),
+                                'authUnit': $('#authUnit').val()
+                            }, 'authFunc': authFunc
+                        }),
+                        dataType: "json",
+                        url: '@Url.Action("updateRole", "RoleMgr")',
+                        contentType: 'application/json',
+                        success: function (data) {
+                            $.unblockUI();
+
+                            if (data.success) {
+                                $('#hidcRoleName').val($('#cRoleName').val())
+                                $('#hidfreeAuth').val($('#freeAuth').val())
+                                $('#hidcFlag').val($('#cFlag').val())
+                                $('#hidvMemo').val($('#vMemo').val())
+
+
+                                $("#btnConfirm").attr('disabled', true);
+
+                                validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+                            } else {
+                                validationSummary.append('<li>' + data.errors + '</li>');
+                            }
+                        }
+                    });
+                //} else {
+                //    alert('未異動角色資料!!');
+                //}
+
+            });
+            //*-----------------------申請覆核  end-----------------------*//
+
+
+
+
+            //*----------------授權功能清單  begin------------------*//
+            function createFuncList() {
+                var authObj = JSON.parse('@Html.Raw(userAuthJson)');
+
+                for (i = 0; i < authObj.Data.item.length; i++) {
+                    if (authObj.Data.item[i].funcUrl != "") {
+                        $('#chk' + authObj.Data.item[i].cFunctionID).prop('checked', true);
+                    }
+                }
+
+                $.unblockUI();
+
+            }
+            //*----------------授權功能清單   end------------------*//
+
+        });
+
+
+    </script>
+
+

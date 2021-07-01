@@ -1,0 +1,380 @@
+﻿@model FGL.Web.ViewModels.OGL00001Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+    var isIfrs4List = ViewBag.isIfrs4List as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+    @Html.Hidden("hidProductType", "")
+    @Html.Hidden("hidYNFlag", "")
+    @Html.Hidden("hidItemCon", "")
+    @Html.Hidden("hidIsIfrs4", "")
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.isQryTmp)：@Html.CheckBox("isQryTmp", false)
+                            </td>
+                        </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fuMk)：@Html.DropDownList("fuMk", ynList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.itemCon)：@Html.DropDownList("itemCon", itemConList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.discPartFeat)：@Html.DropDownList("discPartFeat", ynList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isIfrs4)：@Html.DropDownList("isIfrs4", isIfrs4List, "請選擇")
+                        </td>
+
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnNew" name="btnNew" value="新增" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //取得"險種類別"下拉選單
+    function getProductType() {
+        return $('#hidProductType').val();
+    }
+
+    //取得"YN"下拉選單
+    function getYNFlag() {
+        return $('#hidYNFlag').val();
+    }
+
+    //取得"合約分類"下拉選單
+    function getItemCon() {
+        return $('#hidItemCon').val();
+    }
+
+    //取得"是否適用 IFRS4"下拉選單
+    function getIsIfrs4() {
+        return $('#hidIsIfrs4').val();
+    }
+
+
+    function showDetal(tempId) {
+        rowData = $("#grid").jqGrid('getRowData', tempId);
+
+        var pExecType = 'U';
+        var pTempId = rowData.tempId;
+        var pIsQryTmp = $('#isQryTmp')[0].checked == true ? "1" : "0";
+        var pDataStatus = rowData.dataStatus;
+
+        @*var url = '@Url.Action("detail", "OGL00001", new { @execType = "U", @tempId = "123" })';
+        document.location.href = url.replace('__paramTempId__', encodeURIComponent(paramTempId));*@
+
+
+        var url = '@Html.Raw(Url.Action("detail", "OGL00001"
+                  , new { execType = "__pExecType__", tempId = "__pTempId__", isQryTmp = "__pIsQryTmp__" , dataStatus = "__pDataStatus__" }))';
+        var params = url.replace('__pExecType__', pExecType).replace('__pTempId__', pTempId).replace('__pIsQryTmp__', pIsQryTmp).replace('__pDataStatus__', pDataStatus);
+        window.location.href = params;
+
+    }
+
+
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#hidProductType').val('@Html.Raw(ViewBag.productTypejqList)');
+            $('#hidYNFlag').val('@Html.Raw(ViewBag.ynjqList)');
+            $('#hidItemCon').val('@Html.Raw(ViewBag.itemConjqList)');
+            $('#hidIsIfrs4').val('@Html.Raw(ViewBag.isIfrs4jqList)');
+
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#productType').val("");
+            $('#fuMk').val("");
+            $('#itemCon').val("");
+            $('#discPartFeat').val("");
+            $('#isIfrs4').val("");
+            $('#isQryTmp').prop('checked', false);
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------新增 begin ----------------*//
+        $("#btnNew").click().on('click', function () {
+            var param = 'A';
+            var url = '@Url.Action("detail", "OGL00001", new { execType = "__param__" })';
+
+            document.location.href = url.replace('__param__', encodeURIComponent(param));
+
+        });
+        //*---------------新增 end ----------------*//
+
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+
+            //var jsonData = JSON.stringify({ 'smpNum': $("#smpNum").val() });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                        'productType': $('#productType').val(),
+                        'fuMk': $('#fuMk').val(),
+                        'itemCon': $('#itemCon').val(),
+                        'discPartFeat': $('#discPartFeat').val(),
+                        'isIfrs4': $('#isIfrs4').val(),
+                    }
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryProductHead", "OGL00001")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在，請進行新增維護!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '科目樣本險種類別',
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                 {
+                     label: 'tempId',
+                     name: 'tempId', align: 'center', hidden: true,
+                     editable: false,
+                 },
+                 {
+                     name: '開啟維護畫面', index: 'detail', align: 'center', width: 110,
+                     formatter: function (cellvalue, options, rowObject) {
+                         return "<input type='button' id='btn-" + rowObject.tempId + "' value='修改' onclick='showDetal(" + options.rowId + ");'>";
+
+                         //return '<a style="color:Blue;text-decoration:underline;" href="/OGL00001/detail/?tempId=' + rowObject.tempId + ' ">修改</a>';
+
+                     }
+                 },
+                {
+                    label: '險種類別',
+                    name: 'productType', align: 'left',
+                    editable: true,
+        edittype: "select",
+        formatter: 'select',
+        editoptions: {
+            value: getProductType()
+        }
+
+                },
+
+                {
+                    label: '外幣註記',
+                    name: 'fuMk', align: 'left', width: 170,
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getYNFlag()
+                    }
+
+                },
+                {
+                    label: '合約分類',
+                    name: 'itemCon', align: 'center',
+                        editable: true,
+        edittype: "select",
+        formatter: 'select',
+        editoptions: {
+            value: getItemCon()
+        }
+                },
+                {
+                    label: '裁量參與特性',
+                    name: 'discPartFeat', align: 'center',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getYNFlag()
+                    }
+                },
+                {
+                    label: '是否適用 IFRS4',
+                    name: 'isIfrs4', align: 'center',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getIsIfrs4()
+                    }
+                },
+                 {
+                     label: '資料狀態',
+                     name: 'dataStatus', align: 'center', width: 80, hidden: true,
+                     editable: false
+
+                 },
+                {
+                    label: '資料狀態',
+                    name: 'dataStatusDesc', align: 'center', width: 80,
+                    editable: false
+
+                }
+                //,
+                //{
+                //    label: '最後異動人員',
+                //    name: 'updateId', width: 100,
+                //    align: 'center',
+                //    editable: false
+                //},
+                //{
+                //    label: '異動日期',
+                //    name: 'updateDatetime', width: 150,
+                //    align: 'center',
+                //    editable: false
+                //}
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: true,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+                }
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+    });
+</script>
+
+

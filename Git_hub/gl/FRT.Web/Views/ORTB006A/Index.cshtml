@@ -1,0 +1,403 @@
+﻿@model FRT.Web.ViewModels.ORTB006Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+
+    var failCodejqList = ViewBag.failCodejqList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidFailCode", "")
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fastNo)：@Html.TextBoxFor(model => model.fastNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.policyNo)：@Html.TextBoxFor(model => model.policyNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                            - @Html.TextBoxFor(model => model.policySeq, new { @size = "2", @maxlength = "2" })
+                            - @Html.TextBoxFor(model => model.idDup, new { @size = "1", @maxlength = "1" })
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                    </div>
+                </div>
+
+                <div id="dataSum" style="color:red;">
+                </div>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRec == "True")
+                recList.push(rowId);
+            else if (index >= 0)
+                recList.splice(index, 1);
+        }
+
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRtn == "True")
+                rtnList.push(rowId);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+    //取得"失敗原因"下拉選單
+    function getFailCode() {
+        return $('#hidFailCode').val();
+    }
+
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            dataSum
+
+            
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#hidFailCode').val('@Html.Raw(ViewBag.failCodejqList)');
+
+            //createGrid();
+        }
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            createGrid(true);
+        });
+
+        //*--------------查詢待覆核資料  begin-----------------*//
+        function createGrid(bClearMsg) {
+            recList = [];
+            rtnList = [];
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                fastNo: $("#fastNo").val(),
+                policyNo: $("#policyNo").val(),
+                policySeq: $("#policySeq").val(),
+                idDup: $("#idDup").val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/ORTB006A/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'fastNo'
+                },
+                mtype: 'POST',
+                colModel: [
+                    {
+                        label: '核可',
+                        name: 'rec', index: 'rec', align: 'center', width:'50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    {
+                        label: '駁回',
+                        name: 'rtn', index: 'rtn', align: 'center', width:'50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    {
+                        label: '匯款失敗原因',
+                        name: 'failCode', align: 'center', width: '130',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getFailCode()
+                        }
+                    },
+                    { label: '申請單號', name: 'applyNo', align: 'center', hidden: true },
+                {
+                    label: '快速付款編號',
+                    name: 'fastNo', align: 'center', width: '120',
+                    editable: false
+
+                },
+                {
+                    label: '匯款日期',
+                    name: 'remitDate', align: 'center', width: '90',
+                    editable: false
+                },
+                {
+                    label: '銀行代號',
+                    name: 'bankCode', align: 'center', width: '100',
+                    editable: false
+                },
+                {
+                    label: '匯款帳號',
+                    name: 'bankAct', align: 'left', width: '340',
+                    editable: false
+                },
+                {
+                    label: '收款人戶名',
+                    name: 'rcvName', align: 'center', width: '150',
+                    editable: false
+                },
+                {
+                    label: '匯款金額',
+                    name: 'remitAmt', align: 'center', width: '120', formatter: "number", formatoptions: { thousandsSeparator: ',', decimalPlaces: 0 },
+                    editable: false
+                },
+                { label: '建立人員', name: 'entryId', align: 'center', width: '80', hidden: true },
+                { label: '申請人', name: 'updId', align: 'center', width: '80' },
+                    { label: '申請日期', name: 'updDate', align: 'center', width: '90' },
+                    { label: '申請時間', name: 'updTime', align: 'center', width: '80' },
+                    { label: '匯款轉檔批號', name: 'filler_20', hidden: true }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                sortname: 'fastNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+                   
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (bClearMsg)
+                        $('#validationSummary').children().remove();
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        if (bClearMsg & cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+                    } else if (!data.success && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                        //還原畫面有勾選的資料
+                        ids = $(this).jqGrid('getDataIDs');
+
+                        for (j = 0; j <= ids.length - 1; j++) {
+                            rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                            for (i = 0, count = recList.length; i < count; i++) {
+                                if (rowData.tempId == recList[i])
+                                    $("#grid").jqGrid("setCell", rowData.tempId, "rec", "True");
+                            }
+
+                            for (i = 0, count = rtnList.length; i < count; i++) {
+                                if (rowData.tempId == rtnList[i])
+                                    $("#grid").jqGrid("setCell", rowData.tempId, "rtn", "True");
+                            }
+                        }
+                    }
+
+                    $("#dataSum").html("");
+                    $('#dataSum').append("合計筆數：" + data.cnt + "　　　合計金額：" + data.totAmt);
+                    
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+            
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.fastNo == recList[i])
+                                recData.push(rowData);
+                        }
+                    } else {
+                        recData = null;
+                    }
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.fastNo == rtnList[i])
+                                rtnData.push(rowData);
+                        }
+                    } else {
+                        rtnData = null;
+                    }
+
+                }
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "ORTB006A")",
+                    data: JSON.stringify({ 'recData': recData, 'rtnData': rtnData }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        recList = [];
+                        rtnList = [];
+
+                        validationSummary.append('<li>作業成功！</li>');
+
+                        if (data.errCnt > 0) {
+                            validationSummary.append('<li>以下快速付款MAIL通知失敗:');
+                            var myArray = data.errMap;
+                            var errStr = '';
+                            for (key in myArray) {
+                                errStr += key + ':' + myArray[key] + '、'
+                                
+                            }
+
+                            validationSummary.append(errStr.substr(0, (errStr.length - 1)) + '</li>');
+                        }
+                        
+
+                        createGrid(false);
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                      
+
+
+
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI(); //畫面打開
+
+                },
+                error: function () {
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+    
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+    });
+</script>
+
+

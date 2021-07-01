@@ -1,0 +1,571 @@
+﻿@model FAP.Web.ViewModels.OAP0002Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.Title = ViewBag.funcName;
+
+    var statusList = ViewBag.statusList as SelectList;
+    var rPaidTpList = ViewBag.rPaidTpList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+                        @Html.DisplayTextFor(model => model.aplyNo)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_id)：
+                        @Html.DisplayTextFor(model => model.create_id)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_dt)：
+                        @Html.DisplayTextFor(model => model.create_dt)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.system)：
+                        @Html.DisplayTextFor(model => model.system)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_no)：
+                        @Html.DisplayTextFor(model => model.check_no)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_acct_short)：
+                        @Html.DisplayTextFor(model => model.check_acct_short)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_date)：@Html.DisplayTextFor(model => model.check_date)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_amt)：@Html.DisplayTextFor(model => model.check_amt)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_name)：@Html.TextBoxFor(model => model.paid_name, new { @size = "10", @disabled = true })
+                    </td>
+                    </tr>
+                <tr>
+                    <td colspan="3">
+                        <div id="execActionDesc">
+                            @Html.HiddenFor(model => model.exec_action)
+                            資料狀態：
+                            @Html.DisplayTextFor(model => model.execActionDesc)
+                            </div>
+                        
+                    </td>
+</tr>
+
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <td colspan="2" style="border-bottom:dashed 1px"></td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.status)：<label id="statusLabel">＊</label>@Html.DropDownList("status", statusList, "", new { @disabled = true })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.filler_10)：<label id="filler_10">@Html.DisplayTextFor(model => model.filler_10) </label>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.filler_14)：<label id="filler_14">@Html.DisplayTextFor(model => model.filler_14) </label>
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_id)：<label id="paid_id">@Html.DisplayTextFor(model => model.paid_id) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="border-bottom:dashed 1px"></td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_type)：<label id="re_paid_typeLabel">＊</label>@Html.DropDownList("re_paid_type", rPaidTpList, "", new { @disabled = true })
+                    </td>
+                    <td>
+                        區部/來源/類別：
+                        <label id="area">
+                            @Html.DisplayTextFor(model => model.area)
+                        </label>
+                        /　<label id="srce_from">
+                            @Html.DisplayTextFor(model => model.srce_from)
+                        </label>
+                        /　<label id="source_kind">@Html.DisplayTextFor(model => model.source_kind) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.pay_no)：
+                        <label id="pay_no">@Html.DisplayTextFor(model => model.pay_no)</label>
+
+                        -　<label id="pay_seq">@Html.DisplayTextFor(model => model.pay_seq) </label>
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_no)：
+                        <label id="re_paid_no">
+                            @Html.DisplayTextFor(model => model.re_paid_no)
+                        </label>
+                        <label id="re_paid_seq">@Html.DisplayTextFor(model => model.re_paid_seq) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_check_no)：<label id="re_paid_check_no">@Html.DisplayTextFor(model => model.re_paid_check_no) </label>
+                    </td>
+                    <td>
+                        轉繳之保單：
+                        <label id="rt_system">
+                            @Html.DisplayTextFor(model => model.rt_system)
+                        </label>
+                        -　<label id="rt_policy_no">@Html.DisplayTextFor(model => model.rt_policy_no)</label>
+                        -　<label id="rt_policy_seq">@Html.DisplayTextFor(model => model.rt_policy_seq)</label>
+                        -　<label id="rt_id_dup">@Html.DisplayTextFor(model => model.rt_id_dup) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        再給付匯款：
+                        <label id="re_bank_code">
+                            @Html.DisplayTextFor(model => model.re_bank_code)
+                        </label>
+                        <label id="re_sub_bank">
+                            @Html.DisplayTextFor(model => model.re_sub_bank)
+                        </label>
+                        <label id="re_bank_account"> @Html.DisplayTextFor(model => model.re_bank_account) </label>
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.o_paid_cd)：
+                        <label id="o_paid_cd">
+                            @Html.DisplayTextFor(model => model.o_paid_cd)
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_id)：<label id="re_paid_id">@Html.DisplayTextFor(model => model.re_paid_id) </label>
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_date_n)：<label id="re_paid_date_n">@Html.DisplayTextFor(model => model.re_paid_date_n) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.re_paid_date)：<label id="re_paid_date">@Html.DisplayTextFor(model => model.re_paid_date) </label>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+            <br>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            if ($('#exec_action').val() == "D")
+                $('#execActionDesc').css('color', 'red');
+
+
+            setChgData();
+
+            createGrid();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+
+        //將有修改的欄位標顏色
+        function setChgData() {
+
+
+            if ('@Html.Raw(ViewBag.statusChg)' == "Y") {
+                $('#statusLabel').show();
+                $('#statusLabel').css('color', 'red');
+            } else {
+                $('#statusLabel').hide();
+            }
+
+            if ('@Html.Raw(ViewBag.filler_10Chg)' == "Y")
+                $('#filler_10').css('color', 'red');
+            else
+                $('#filler_10').css('color', 'black');
+
+            if ('@Html.Raw(ViewBag.filler_14Chg)' == "Y")
+                $('#filler_14').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.paid_idChg)' == "Y")
+                $('#paid_id').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.o_paid_cdChg)' == "Y")
+                $('#o_paid_cd').css('color', 'red');
+
+
+
+            if ('@Html.Raw(ViewBag.re_paid_typeChg)' == "Y") {
+                $('#re_paid_typeLabel').show();
+                $('#re_paid_typeLabel').css('color', 'red');
+            } else {
+                $('#re_paid_typeLabel').hide();
+            }
+
+            if ('@Html.Raw(ViewBag.areaChg)' == "Y")
+                $('#area').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.srce_fromChg)' == "Y")
+                $('#srce_from').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.source_kindChg)' == "Y")
+                $('#source_kind').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.pay_noChg)' == "Y")
+                $('#pay_no').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.pay_seqChg)' == "Y")
+                $('#pay_seq').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_paid_noChg)' == "Y")
+                $('#re_paid_no').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_paid_seqChg)' == "Y")
+                $('#re_paid_seq').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_paid_check_noChg)' == "Y")
+                $('#re_paid_check_no').css('color', 'red');
+
+
+            if ('@Html.Raw(ViewBag.rt_systemChg)' == "Y")
+                $('#rt_system').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.rt_policy_noChg)' == "Y")
+                $('#rt_policy_no').css('color', 'red');
+
+
+            if ('@Html.Raw(ViewBag.rt_policy_seqChg)' == "Y")
+                $('#rt_policy_seq').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.rt_id_dupChg)' == "Y")
+                $('#rt_id_dup').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_bank_codeChg)' == "Y")
+                $('#re_bank_code').css('color', 'red');
+
+
+            if ('@Html.Raw(ViewBag.re_sub_bankChg)' == "Y")
+                $('#re_sub_bank').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_bank_accountChg)' == "Y")
+                $('#re_bank_account').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_paid_idChg)' == "Y")
+                $('#re_paid_id').css('color', 'red');
+
+            if ('@Html.Raw(ViewBag.re_paid_date_Chg)' == "Y") {
+
+                $('#re_paid_date').css('color', 'red');
+            }
+
+            if ('@Html.Raw(ViewBag.re_paid_date_nChg)' == "Y") {    //add by daiyu 20201027
+
+                $('#re_paid_date_n').css('color', 'red');
+            }
+
+
+        }
+
+
+        /*------------------保單明細---------------------*/
+        function createGrid() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'aplyNo': aplyNo
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryPoliHis", "OAP0002A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    $("#grid").jqGrid({
+                        datatype: "local",
+                        data: data.rows,
+                        jsonReader: {
+                            repeatitems: false//, id: 'cFunctionID'
+                        },
+                        mtype: 'POST',
+                        //caption: '異動清單',
+                        colModel: [
+                            {
+                                label: 'temp_id',
+                                name: 'temp_id', align: 'center',
+                                editable: false, hidden: true,
+                            },
+                   {
+                       label: '保單號碼',
+                       name: 'policy_no', align: 'center',
+                       editable: false
+                   },
+                {
+                    label: '保單序號',
+                    name: 'policy_seq', align: 'center',
+                    editable: false
+                },
+                {
+                    label: '重覆碼',
+                    name: 'id_dup', align: 'center',
+                    editable: false
+                },
+                {
+                    label: '案號人員別',
+                    name: 'member_id', align: 'center',
+                    editable: false
+                },
+                {
+                    label: '案號',
+                    name: 'change_id', align: 'center',
+                    editable: false
+                },
+                {
+                    label: '回存金額',
+                    name: 'main_amt', align: 'center',
+                    editable: false,
+                    formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 2 }
+                }
+                        ],
+                        autowidth: true,
+                        shrinkToFit: false,
+                        forceFit: true,
+                        pager: '#pager',
+                        width: 'auto',
+                        height: 'auto',
+                        sortorder: "acs",
+                        viewrecords: true,
+                        loadonce: true,
+                        loadComplete: function () {
+                            $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                            $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                            $('#validationSummary').children().remove();
+
+
+                            ids = $(this).jqGrid('getDataIDs');
+                            for (i = 0; i <= ids.length - 1; i++) {
+                                rowData = $("#grid").jqGrid('getRowData', ids[i]);
+                                var tempId = rowData.temp_id.split("|");
+                                var system = tempId[0];
+                                var source_op = tempId[1];
+                                var policy_no = tempId[2];
+                                var policy_seq = tempId[3];
+                                var id_dup = tempId[4];
+                                var member_id = tempId[5];
+                                var change_id = tempId[6];
+                                var paid_id = tempId[7];
+                                var check_no = tempId[8];
+
+                                if (rowData.policy_no != policy_no)
+                                    $("#grid").jqGrid('setCell', ids[i], "policy_no", "", { color: 'red' });
+
+                                if (rowData.policy_seq != policy_seq)
+                                    $("#grid").jqGrid('setCell', ids[i], "policy_seq", "", { color: 'red' });
+
+                                if (rowData.id_dup != id_dup)
+                                    $("#grid").jqGrid('setCell', ids[i], "id_dup", "", { color: 'red' });
+
+                                if (rowData.change_id != change_id)
+                                    $("#grid").jqGrid('setCell', ids[i], "change_id", "", { color: 'red' });
+
+                                if (rowData.member_id != member_id)
+                                    $("#grid").jqGrid('setCell', ids[i], "member_id", "", { color: 'red' });
+
+                            }
+
+                            $.unblockUI(); //畫面打開
+                        }
+                    });
+                }
+            });
+        }
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10181A/index");
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'aplyNo': '@Html.Raw(ViewBag.aplyNo)',
+                    }, 'apprStat': "3"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OAP0002A")',
+                contentType: 'application/json',
+                success: function (data) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.errors + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+
+
+            });
+
+
+
+
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'aplyNo': '@Html.Raw(ViewBag.aplyNo)'
+                    }, 'apprStat': "2"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OAP0002A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.errors + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+
+        });
+
+
+
+    });
+</script>
+
+

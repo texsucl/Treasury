@@ -1,0 +1,319 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+@using FRT.Web.Enum;
+@using FRT.Web.BO;
+
+    <div class="container-fluid" id="main">
+        <div class="panel panel-primary">
+            <div class="panel-heading">@ViewBag.Title</div>
+            <div class="panel-body">
+                <div id="validationSummary" style="color:red;"></div>
+                @if (opScope != "" && opScope != "0")
+                {
+                    <form id="ORT0109A_Form">
+                        <table>
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <input type="button" class="btn btn-primary" id="ORT0109A_Search" value="查詢" />
+                                    @Html.Hidden("h_aply_no")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="left">
+                                    <label style=" color: red;">當登打人員=覆核人員時,覆核人員無法勾選該筆資料</label>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class=" ShowOrNot">
+            <div class="col-sm-24">
+                <div id="Review_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnApproved_Mod" value="核准" />
+                    <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnRejected_Mod" value="駁回" />
+                </div>
+            </div>
+        </div>
+        <div id="RejectedCheckDialog" style="display:none">
+            <table>
+                <tr>
+                    <td>
+                        <input type="button" id="btnConfirmed_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                        <input type="button" id="btnCancel_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("SearchData", "ORT0109A")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "ORT0109A")';
+        UrlFor.Approved = '@Url.Action("ApprovedData", "ORT0109A")';
+        UrlFor.Rejected = '@Url.Action("RejectedData", "ORT0109A")';
+        UrlFor.CheckChange = '@Url.Action("CheckChange", "ORT0109A")';
+        //#endregion
+
+        //region 參數設定
+        var ReApproved = 'btnApproved_Mod'; //核准
+        var ReRejected = 'btnRejected_Mod'; //駁回
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始設定
+            $('.ShowOrNot').hide();
+            $('.Review_DetailAct').hide();
+            $("#" + ReApproved).prop('disabled', true);
+            $("#" + ReRejected).prop('disabled', true);
+
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'ORT0109A_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'btnApproved_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            ApprovedDataFun();
+                        });
+                        break;
+                    case 'btnRejected_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            RejectedDataFun();
+                        });
+                        break;
+                    case 'btnConfirmed_Reject':                  
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            ConfirmedRejectFun();
+                        });
+                        break;                  
+                    case 'ORT0109A_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                    case 'btnCancel_Reject':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            customerUtility.closeDialog(this);                   
+                        });
+                        break;
+                    //case 'btnCancel_Reject':
+                    //case 'btnDetailBack_Mod':
+                    //    $('#' + id).on('click', function () { customerUtility.closeDialog(this); $('#' + h_Aply_No).val(''); });
+                    //    break;
+                }
+            });
+            //#endregion
+
+            //#region 核准
+            function ApprovedDataFun() {
+                $('#validationSummary').children().remove();
+                if ($('#ORT0109A_SelectAll') == "Y")
+                    $('#' + his_pk_id).val('');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    dataType: "json",
+                    url: UrlFor.Approved,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0109A_btnCancel'));
+                        review_SearchGrid();
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //region 駁回
+            function RejectedDataFun() {
+                var dialogId = 'RejectedCheckDialog';
+                $('#' + dialogId).dialog({
+                    position: { my: "top+30%", at: "center top", of: window },
+                    title: '確定駁回',
+                    width: 500,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    zIndex : 100,
+                    closeText: '取消'
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+
+            //region 確定駁回
+            function ConfirmedRejectFun() {
+                $('#validationSummary').children().remove();
+                if ($('#ORT0109A_SelectAll') == "Y")
+                    $('#' + his_pk_id).val('');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    dataType: "json",
+                    url: UrlFor.Rejected,
+                    contentType: 'application/json',
+                }).done(function (result) {                 
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#btnCancel_Reject'));
+                        customerUtility.closeDialog($('#ORT0109A_btnCancel'));
+                        customerUtility.alertAuto(result, 'a');
+                        review_SearchGrid();
+                    }                 
+                    else {
+                         alert(result.DESCRIPTION);
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('Review_jqgridDiv');
+                $('.ShowOrNot').hide();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        review_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region jqgrid
+            function formatterCheck(cellvalue, options, rdata) {
+                var str = '';
+                if (rdata.review_flag)
+                {
+                    str = "<input type='checkbox' class = 'ApprovedIschecked' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.Ischecked == true ? 'checked' : ' ') + " />";
+                }
+                return str;
+            }
+
+            //查詢Grid
+            function review_SearchGrid() {
+                $("#" + ReApproved).prop('disabled', true);
+                $("#" + ReRejected).prop('disabled', true);
+                var colNameArray = ['勾選', '執行動作', '帳號','銀行簡稱','申請人', '申請日期', '申請編號', '是否為本人'];
+                var colModelArray = [];
+                colModelArray.push({ name: "Ischecked", index: "Ischecked", width: 60, sortable: false, align: 'center', formatter: formatterCheck });
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "bank_acct_no", index: "bank_acct_no", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "bank_acct_make_out", index: "bank_acct_make_out", width: 220, sortable: false, align: 'center' });      
+                colModelArray.push({ name: "update_name", index: "update_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_datetime", index: "update_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "his_pk_id", index: "his_pk_id", hidden: true });
+                colModelArray.push({ name: "review_flag", index: "review_flag", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'Review_jqgridDiv',
+                    'Review_List',
+                    'Review_Peger',
+                     UrlFor.GetData,
+                     {
+                         type: 'ORT0109AViewData'
+                     },
+                     colNameArray,
+                     colModelArray,
+                     '待覆核文件-跨系統資料庫勾稽銀存銷帳不比對帳號',
+                     jqgridCustom.getPage('Review_jqgridDiv'),
+                     jqgridCustom.getRowNum('Review_jqgridDiv'),
+                     ReviewrGridCompeleteFun,
+                     true
+                    )
+            }
+
+            function ReviewrGridCompeleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    //CheckBox
+                    $(this).find('td').find('.ApprovedIschecked').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            forChecked(i + 1, $(this).prop('checked'));
+                        });
+                    });
+                });
+            }
+
+
+            //#endregion
+
+            //region 打勾事件
+            function forChecked(rowid, flag) {
+                var listId = 'Review_List';
+                var data = $("#" + listId).getRowData(rowid);
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        his_pk_id: data.his_pk_id,
+                        flag: flag
+                    }),
+                    dataType: "json",
+                    url: UrlFor.CheckChange,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $("#" + ReApproved + ",#" + ReRejected).prop('disabled', !result.Datas);
+                    }
+                });
+            }
+            //#endregion
+        }
+    });
+</script>

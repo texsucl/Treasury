@@ -1,0 +1,513 @@
+﻿@using FRT.Web.Enum;
+@model FRT.Web.ViewModels.ORTB016Model
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <span style="color:red;">如須”新增”或”刪除”，請先按”查詢”!</span>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <input type="button" id="btnNew" name="btnNew" value="新增" class="btn btn-primary" style="margin-bottom:10px" />
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <div id="ORTB016jqgridDiv" class="jqd" style="padding-bottom:5px;">
+                        </div>
+                    </div>
+                </div>
+                <div id="ORTB016Dialog" style="display:none;">
+                    <form id="ORTB016DialogForm">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label>系統別 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="tsys_type" name="tsys_type" class="ORTB016InsertType" maxlength="1" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>資料來源 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="tsrce_from" name="tsrce_from" class="ORTB016InsertType" maxlength="5" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>資料類別 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="tsrce_kind" name="tsrce_kind" class="ORTB016InsertType" maxlength="5" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>存摺顯示字樣 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="tmemo_apx" name="tmemo_apx" class="ORTB016InsertType" maxlength="3" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>eACH交易代碼 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="tachcode" name="tachcode" class="ORTB016InsertType" maxlength="3" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="hidden" id="hfrt_word_id" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" id="ORTB016InsertTemp" value="新增" class="btn btn-primary" />
+                                    <input type="button" id="ORTB016UpdateTemp" value="修改" class="btn btn-primary" />
+                                    <input type="button" id="ORTB016DeleteTemp" value="刪除" class="btn btn-primary" />
+                                </td>
+                                <td style="text-align:right;">
+                                    <input type="button" id="ORTB016CancelTemp" value="取消" class="btn btn-primary" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        var ORTB016url = {};
+        ORTB016url.query = '@Url.Action("qryFRTWord", "ORTB016")';
+        ORTB016url.getData = '@Url.Action("GetCacheData", "ORTB016")';
+        ORTB016url.InsertTempData = '@Url.Action("InsertTempData", "ORTB016")';
+        ORTB016url.UpdateTempData = '@Url.Action("UpdateTempData", "ORTB016")';
+        ORTB016url.DeleteTempData = '@Url.Action("DeleteTempData", "ORTB016")';
+        ORTB016url.ResetTempData = '@Url.Action("ResetTempData", "ORTB016")';
+        ORTB016url.execSave = '@Url.Action("execSave", "ORTB016")';
+
+        var ORTB016btnQry = 'btnQry'; //queryId
+        var ORTB016btnModify = 'btnModify'; //btnModify
+        var ORTB016btnClear = 'btnClear'; //btnClear
+        var ORTB016btnNew = 'btnNew'; //btnNew
+        var ORTB016InsertTempId = 'ORTB016InsertTemp';
+        var ORTB016UpdateTempId = 'ORTB016UpdateTemp';
+        var ORTB016DeleteTempId = 'ORTB016DeleteTemp';
+        var ORTB016CancelTempId = 'ORTB016CancelTemp';
+        var ORTB016jqgridDivId = 'ORTB016jqgridDiv'; //jqgridDivId
+        var ORTB016DialogId = 'ORTB016Dialog'; //dialogId
+        var ORTB016DialogFormId = 'ORTB016DialogForm'; //dialogFormId
+        var ORTB016_sys_typeId = 'tsys_type'; //系統別Id(text)
+        var ORTB016_srce_fromId = 'tsrce_from'; //資料來源Id(text)
+        var ORTB016_srce_kindId = 'tsrce_kind'; //資料類別Id(text)
+        var ORTB016_memo_apxId = 'tmemo_apx'; //存摺顯示字樣Id(text)
+        var ORTB016_achcodeId = 'tachcode'; //eACH交易代碼Id(text)
+        var ORTB016_Item_IdHlId = 'hfrt_word_id'; //Id(hidden)
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            customerUtility.reSetSummary('無使用權限');
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+        }
+
+
+        function unformatterDefault(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formatterDataStatus(cellvalue, options, rdata) {
+            switch (rdata.dataStatus) {
+                @{
+                    foreach (var item in ((Dictionary<string,string>)(ViewBag.dataStatusjqList)))
+                {
+                    <text>
+            case '@item.Key':
+                return '@item.Value';
+                    </text>
+                }
+            }
+        }
+        return '';
+    }
+
+    function formatterStatus(cellvalue, options, rdata) {
+        switch (rdata.status) {
+            @{
+            foreach (var item in ((Dictionary<string,string>)(ViewBag.statusjqList)))
+            {
+                <text>
+            case '@item.Key':
+                return '@item.Value';
+                </text>
+            }
+        }
+    }
+    return cellvalue || '';
+    }
+
+
+        //#region 初始動作
+        setORTB016Verified();
+        //#endregion
+
+        //#region 註冊verified
+        function setORTB016Verified() {
+            verified.required(ORTB016DialogFormId, ORTB016_sys_typeId, message.required('系統別')); //系統別為必填
+            verified.required(ORTB016DialogFormId, ORTB016_srce_fromId, message.required('資料來源')); //資料來源為必填
+        }
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case ORTB016btnQry:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016SearchFun(); });
+                    break;
+                case ORTB016btnModify:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016ApplyFun(); });
+                    break;
+                case ORTB016btnClear:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016CancelFun(); });
+                    break;
+                case ORTB016btnNew:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016InsertFun(); });
+                    break;
+                case ORTB016CancelTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog($('#' + ORTB016CancelTempId)); });
+                    break;
+                case ORTB016InsertTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016InsertTempFun(); });
+                    break;
+                case ORTB016UpdateTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016UpdateTempFun(); });
+                    break;
+                case ORTB016DeleteTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORTB016DeleteTempFun(); });
+                    break;
+            }
+        });
+
+        function ORTB016SearchFun() {           
+            customerUtility.reSetSummary();
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORTB016url.query,
+                contentType: 'application/json'
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORTB016btnQry).attr('disabled', true);
+                    $('#' + ORTB016btnNew).attr('disabled', false);
+                    ORTB016TempGrid();
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+
+        function ORTB016ApplyFun() {
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORTB016url.execSave,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORTB016btnModify).attr('disabled', true);
+                }
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function ORTB016CancelFun() {
+            $.blockUI(); //畫面鎖起來
+            customerUtility.reSetSummary();
+            $('#' + ORTB016btnModify).attr('disabled', true);
+            $('#' + ORTB016btnNew).attr('disabled', true);
+            $('#' + ORTB016btnQry).attr('disabled', false);
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORTB016url.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                jqgridCustom.clearJqgrid(ORTB016jqgridDivId);
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+
+        function ORTB016TempGrid() {
+            var colNameArray = ['動作', '資料狀態', '執行動作', '系統別', '資料來源', '資料類別', '存摺顯示字樣', 'eACH交易代碼', '異動人員', '異動日期', '覆核人員', '覆核日期', 'ID'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+            colModelArray.push({ name: "dataStatus", index: "dataStatus", width: 80, align: 'center', sortable: false, formatter: formatterDataStatus, unformat: unformatterDefault });
+            colModelArray.push({ name: "status", index: "status", width: 80, align: 'center', sortable: false, formatter: formatterStatus, unformat: unformatterDefault });
+            colModelArray.push({ name: "frt_sys_type", index: "frt_sys_type", width: 60, align: 'left' });
+            colModelArray.push({ name: "frt_srce_from", index: "frt_srce_from", width: 100, align: 'left' });
+            colModelArray.push({ name: "frt_srce_kind", index: "frt_srce_kind", width: 100, align: 'left' });
+            colModelArray.push({ name: "frt_memo_apx", index: "frt_memo_apx", width: 120, align: 'left' });
+            colModelArray.push({ name: "frt_achcode", index: "frt_achcode", width: 120, align: 'left' });
+            colModelArray.push({ name: "updateUName", index: "updateUName", width: 80, align: 'center', sortable: false });
+            colModelArray.push({ name: "updDatetime", index: "updDatetime", width: 160, align: 'center', sortable: false });
+            colModelArray.push({ name: "apprName", index: "apprName", width: 80, align: 'center', sortable: false });
+            colModelArray.push({ name: "apprDt", index: "apprDt", width: 160, align: 'center', sortable: false });
+            colModelArray.push({ name: "frt_word_Id", index: "frt_word_Id", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                ORTB016jqgridDivId,
+                'ORTB016TempList',
+                'ORTB016TempPeger',
+                ORTB016url.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '存摺顯示字樣資料',
+                jqgridCustom.getPage(ORTB016jqgridDivId),
+                jqgridCustom.getRowNum(ORTB016jqgridDivId),
+                ORTB016TempCompleteFun,
+                true
+                );
+        }
+
+
+        function ORTB016TempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'ORTB016Temp', tempActFun);
+
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function () {
+                let tr = $(this);
+                let dataStatus = tr.find($.validator.format('td[aria-describedby$={0}_dataStatus]', listId)).text();
+                if (dataStatus == '凍結中') {
+                    tr.find('.actionEditIcon').hide();
+                    tr.find('.actionDeleIcon').hide();
+                }
+            });
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function ORTB016InsertFun() {
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid) {
+            $('#' + ORTB016DialogFormId).validate().resetForm();
+            var listId = 'ORTB016TempList';
+            var ORTB016InsertClass = 'ORTB016InsertType';
+            var title = customerUtility.getDialogType(type);
+            $('#' + ORTB016DialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '存摺顯示字樣',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#' + ORTB016InsertTempId + ',#' + ORTB016UpdateTempId + ',#' + ORTB016DeleteTempId).hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog();
+                $('#' + ORTB016InsertTempId).show();
+                $('.' + ORTB016InsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#' + ORTB016DeleteTempId).show();
+                $('.' + ORTB016InsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#' + ORTB016UpdateTempId).show();
+                $('.' + ORTB016InsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + ORTB016InsertClass).prop('disabled', true);
+            }
+            $('#' + ORTB016DialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            $('#' + ORTB016_sys_typeId).val('');
+            $('#' + ORTB016_srce_fromId).val('');
+            $('#' + ORTB016_srce_kindId).val('');
+            $('#' + ORTB016_memo_apxId).val('');
+            $('#' + ORTB016_achcodeId).val('');
+            $('#' + ORTB016_Item_IdHlId).val('');
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                $('#' + ORTB016_sys_typeId).val(data.frt_sys_type);
+                $('#' + ORTB016_srce_fromId).val(data.frt_srce_from);
+                $('#' + ORTB016_srce_kindId).val(data.frt_srce_kind);
+                $('#' + ORTB016_memo_apxId).val(data.frt_memo_apx);
+                $('#' + ORTB016_achcodeId).val(data.frt_achcode);
+                $('#' + ORTB016_Item_IdHlId).val(data.frt_word_Id);
+            }
+        }
+
+        //新增暫存印章明細
+        function ORTB016InsertTempFun() {
+            if ($('#' + ORTB016DialogFormId).valid()) {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ORTB016ViewModel(
+                            created.uuid(),
+                            $('#' + ORTB016_sys_typeId).val().trim(),
+                            $('#' + ORTB016_srce_fromId).val().trim(),
+                            $('#' + ORTB016_srce_kindId).val().trim(),
+                            $('#' + ORTB016_memo_apxId).val().trim(),
+                            $('#' + ORTB016_achcodeId).val().trim()
+                            )
+                    }),
+                    dataType: "json",
+                    url: ORTB016url.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        $('#' + ORTB016btnModify).attr('disabled', false);
+                        customerUtility.closeDialog($('#' + ORTB016InsertTempId));
+                        ORTB016TempGrid();
+                    }
+                    $.unblockUI(); //畫面打開
+                })
+            }
+        }
+
+        function ORTB016UpdateTempFun() {
+            if ($('#' + ORTB016DialogFormId).valid()) {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ORTB016ViewModel(
+                            $('#' + ORTB016_Item_IdHlId).val(),
+                            $('#' + ORTB016_sys_typeId).val().trim(),
+                            $('#' + ORTB016_srce_fromId).val().trim(),
+                            $('#' + ORTB016_srce_kindId).val().trim(),
+                            $('#' + ORTB016_memo_apxId).val().trim(),
+                            $('#' + ORTB016_achcodeId).val().trim()
+                            )
+                    }),
+                    dataType: "json",
+                    url: ORTB016url.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        $('#' + ORTB016btnModify).attr('disabled', false);
+                        customerUtility.closeDialog($('#' + ORTB016UpdateTempId));
+                        ORTB016TempGrid();                     
+                    }
+                    $.unblockUI(); //畫面打開
+                })
+            }
+        }
+
+        function ORTB016DeleteTempFun() {
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: ORTB016ViewModel(
+                        $('#' + ORTB016_Item_IdHlId).val())
+                }),
+                dataType: "json",
+                url: ORTB016url.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORTB016btnModify).attr('disabled', false);
+                    customerUtility.closeDialog($('#' + ORTB016DeleteTempId));
+                    ORTB016TempGrid();           
+                }
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function ORTB016ViewModel(
+            frt_word_Id,
+            frt_sys_type,
+            frt_srce_from,
+            frt_srce_kind,
+            frt_memo_apx,
+            frt_achcode
+            ) {
+            var obj = {};
+            obj['frt_word_Id'] = frt_word_Id;
+            obj['frt_sys_type'] = frt_sys_type;
+            obj['frt_srce_from'] = frt_srce_from;
+            obj['frt_srce_kind'] = frt_srce_kind;
+            obj['frt_memo_apx'] = frt_memo_apx;
+            obj['frt_achcode'] = frt_achcode;
+            return obj;
+        }
+
+        //#endregion
+
+    });
+</script>
+
+

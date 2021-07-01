@@ -1,0 +1,601 @@
+﻿@using FGL.Web.Enum;
+@using FGL.Web.Utilitys;
+@model FGL.Web.ViewModels.OGL00010ViewModel
+
+<div class="row" style="width:950px;padding-left:10px;">
+    <div >
+        <table>
+            <tr>
+                <td style="width:100px">
+                    <label>退費類別 : </label>
+                </td>
+                <td style="width:100px">
+                    <input type="text" value="@Model.pay_class" id="OGL00010Sub_payclass" class="OGL00010SubDetailStatus" style="width:50px" maxlength="2"></input>
+                </td>
+                <td style="width:100px">
+                    <label>說明 : </label>
+                </td>
+                <td style="width:450px;">
+                    <input type="text" value="@Model.memo_n" maxlength="19" id="OGL00010Sub_memo" class="OGL00010SubDetailStatus" style="width:400px;" ></input>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <label>*相關欄位設定(必須有值上V，不需有值放空白；例外:帳本否欄位，須有值放空白，不須有值上X)</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>險種否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_item_yn", (SelectList)ViewBag.item_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+                <td>
+                    <label>年度否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_year_yn", (SelectList)ViewBag.year_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>保費類別否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_prem_yn", (SelectList)ViewBag.prem_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+                <td>
+                    <label>費用單位否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_unit_yn", (SelectList)ViewBag.unit_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>送金單否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_recp_yn", (SelectList)ViewBag.recp_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+                <td>
+                    <label>合約別否 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_cont_yn", (SelectList)ViewBag.cont_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>帳本否 : </label>
+                </td>
+                <td >
+                    @Html.DropDownList("OGL00010Sub_corp_yn", (SelectList)ViewBag.corp_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:50px" })
+                </td>
+                <td colspan="2">
+                    <input type="hidden" id="OGL00010Sub_main_pk_id" value="@Model.pk_id"/>
+                </td>                
+            </tr>
+        </table>             
+    </div>
+    <div style="padding-bottom: 10px;">
+        <input type="button" id="OGL00010Sub_Insert" value="新增明細資料" class="btn btn-primary" style="display:none;" />
+    </div>
+    <div id="OGL00010SubSubjqgridDiv" class="jqd"  style="padding-bottom:5px; ">
+
+    </div>
+    <div style="text-align:center;">
+        <input type="button" id="OGL00010SubInsert" value="申請新增" class="btn btn-primary OGL00010SubDetailAdd" style="display:none;margin-right: 50px;"/>
+        <input type="button" id="OGL00010SubUpdate" value="申請修改" class="btn btn-primary OGL00010SubDetailEdit" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OGL00010SubDelete" value="申請刪除" class="btn btn-primary OGL00010SubDetailDel" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OGL00010SubAPPRY" value="核准" class="btn btn-primary OGL00010SubDetailAPPR" style="display:none;margin-right: 50px;"/>
+        <input type="button" id="OGL00010SubAPPRN" value="駁回" class="btn btn-primary OGL00010SubDetailAPPR" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OGL00010SubBack" value="取消" class="btn btn-primary" />
+    </div>
+    <div  id="OGL00010SubOpenDetailDialog" style="display:none;overflow-y:auto;">
+        <table>
+            <tr>
+                <td>
+                    <label>保費類別 : </label>
+                </td>
+                <td style="width:200px">
+                    @Html.DropDownList("OGL00010Sub_prem_kind", (SelectList)ViewBag.prem_kind, new { @class = "OGL00010SubDetailStatus", @style="width:100px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>合約別 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_cont_type", (SelectList)ViewBag.cont_type, new { @class = "OGL00010SubDetailStatus", @style = "width:100px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>商品別 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_prod_type", (SelectList)ViewBag.prod_type, new { @class = "OGL00010SubDetailStatus", @style = "width:100px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>帳本別 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_corp_no", (SelectList)ViewBag.corp_no, new { @class = "OGL00010SubDetailStatus", @style = "width:100px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>會科取後六 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OGL00010Sub_actnum_yn", (SelectList)ViewBag.actnum_yn, new { @class = "OGL00010SubDetailStatus", @style = "width:100px" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>首年首次 : </label>
+                </td>
+                <td>
+                    <input type="text" id="OGL00010Sub_acct_code" class="OGL00010SubDetailStatus" maxlength="10"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>首年續次 : </label>
+                </td>
+                <td>
+                    <input type="text" id="OGL00010Sub_acct_codef" class="OGL00010SubDetailStatus" maxlength="10"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>續年度 : </label>
+                </td>
+                <td>
+                    <input type="text" id="OGL00010Sub_acct_coder" class="OGL00010SubDetailStatus" maxlength="10"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="hidden" id="OGL00010Sub_pk_id"/></td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="OGL00010Sub_btnInsert_Mod" value="新增" class="btn btn-primary" />
+                    <input type="button" id="OGL00010Sub_btnUpdate_Mod" value="修改" class="btn btn-primary" />
+                    <input type="button" id="OGL00010Sub_btnDelete_Mod" value="刪除" class="btn btn-primary" />
+                </td>
+                <td style="text-align:right;">
+                    <input type="button" id="OGL00010Sub_btnCancel" value="取消" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    $(function () {
+
+        var OGL00010SubDetailurl = {};
+        OGL00010SubDetailurl.getData = '@Url.Action("GetCacheData", "OGL00010")';
+        OGL00010SubDetailurl.applyData = '@Url.Action("applyData", "OGL00010")';
+        OGL00010SubDetailurl.execUpdateSubData = '@Url.Action("execUpdateSubData", "OGL00010")';
+
+        OGL00010SubDetailurl.APPRY = '@Url.Action("ApprovedData", "OGL00010A")';
+        OGL00010SubDetailurl.APPRN = '@Url.Action("RejectedData", "OGL00010A")';
+
+        var payclass = 'OGL00010Sub_payclass'; //退費類別
+        var memo = 'OGL00010Sub_memo'; //說明
+        var item_yn = 'OGL00010Sub_item_yn'; //險種否
+        var year_yn = 'OGL00010Sub_year_yn'; //年度否
+        var prem_yn = 'OGL00010Sub_prem_yn'; //保費類別否
+        var unit_yn = 'OGL00010Sub_unit_yn'; //費用單位否
+        var recp_yn = 'OGL00010Sub_recp_yn'; //送金單否
+        var cont_yn = 'OGL00010Sub_cont_yn'; //合約別否
+        var corp_yn = 'OGL00010Sub_corp_yn'; //帳本否
+
+        var prem_kind = 'OGL00010Sub_prem_kind'; //保費類別
+        var cont_type = 'OGL00010Sub_cont_type'; //合約別
+        var prod_type = 'OGL00010Sub_prod_type'; //商品別
+        var corp_no = 'OGL00010Sub_corp_no'; //帳本別
+        var actnum_yn = 'OGL00010Sub_actnum_yn'; //會科取後六
+        var acct_code = 'OGL00010Sub_acct_code'; //首年首次
+        var acct_codef = 'OGL00010Sub_acct_codef'; //首年續次
+        var acct_coder = 'OGL00010Sub_acct_coder'; //續年度
+        var sub_pk_id = 'OGL00010Sub_pk_id'; //sub Pk Id
+
+        var action = '@ViewBag.action';
+        var _action = '';
+        switch(action)
+        {
+            case '@Ref.ActionType.View.ToString()':
+                $('.OGL00010SubDetailStatus').prop('disabled', true);
+                break;
+            case '@Ref.ActionType.Dele.ToString()':
+                $('#OGL00010SubDelete').show();
+                $('.OGL00010SubDetailStatus').prop('disabled', true);
+                _action = 'D';
+                break;
+            case '@Ref.ActionType.Edit.ToString()':
+                $('#OGL00010SubUpdate').show();
+                $('#OGL00010Sub_Insert').show();
+                $('.OGL00010SubDetailStatus').prop('disabled', false);
+                $('#' + payclass).prop('disabled', true);
+                _action = 'U';
+                break;
+            case '@Ref.ActionType.Add.ToString()':
+                $('#OGL00010SubInsert').show();
+                $('#OGL00010Sub_Insert').show();
+                $('.OGL00010SubDetailStatus').prop('disabled', false);
+                _action = 'A';
+                break;
+            case 'APPR':
+                if ('@ViewBag.apprFlag' == "Y")
+                {
+                    $('#OGL00010SubAPPRY').show();
+                    $('#OGL00010SubAPPRN').show();
+                }
+                $('.OGL00010SubDetailStatus').prop('disabled', true);
+                break;
+        }
+
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'OGL00010SubAPPRY':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                pk_id: '@Model.pk_id',
+                            }),
+                            dataType: "json",
+                            url: OGL00010SubDetailurl.APPRY,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                customerUtility.closeDialog($('#OGL00010SubBack'));
+                            }
+                            alert(result.DESCRIPTION);
+                            $.unblockUI(); //畫面打開
+                        });
+                    });
+                    break;
+                case 'OGL00010SubAPPRN':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                pk_id: '@Model.pk_id',
+                            }),
+                            dataType: "json",
+                            url: OGL00010SubDetailurl.APPRN,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                customerUtility.closeDialog($('#OGL00010SubBack'));
+                            }
+                            alert(result.DESCRIPTION);
+                            $.unblockUI(); //畫面打開
+                        });
+                    });
+                    break;
+                case 'OGL00010SubInsert':
+                case 'OGL00010SubUpdate':
+                case 'OGL00010SubDelete':
+                    $('#' + id).off('ckick');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                mainModel: OGL00010ViewModel(
+                                '@Model.pk_id',
+                                _action,
+                                $('#' + payclass).val().trim(),
+                                $('#' + item_yn).val(),
+                                $('#' + year_yn).val(),
+                                $('#' + prem_yn).val(),
+                                $('#' + unit_yn).val(),
+                                $('#' + recp_yn).val(),
+                                $('#' + cont_yn).val(),
+                                $('#' + corp_yn).val(),
+                                $('#' + memo).val().trim())
+                            }),
+                            dataType: "json",
+                            url: OGL00010SubDetailurl.applyData,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            alert(result.DESCRIPTION);
+                            if (result.RETURN_FLAG) {
+                                customerUtility.closeDialog($('#OGL00010SubBack'));                              
+                            }
+                            $.unblockUI(); //畫面打開
+                        })
+                    });
+                    break;
+                case 'OGL00010Sub_Insert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        dialogOpen('@Ref.ActionType.Add.ToString()', 0);
+                    })
+                    break;
+                case 'OGL00010Sub_btnInsert_Mod':
+                case 'OGL00010Sub_btnUpdate_Mod':
+                case 'OGL00010Sub_btnDelete_Mod':
+                    var exec_action = (id == 'OGL00010Sub_btnInsert_Mod' ? 'A' :
+                        (id == 'OGL00010Sub_btnUpdate_Mod' ? 'U' :
+                        (id == 'OGL00010Sub_btnDelete_Mod' ? 'D' : '')));
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                exec_action : exec_action,
+                                subModel: OGL00010ViewSubModel(
+                                 $('#' + sub_pk_id).val(),
+                                 null,
+                                 $('#' + prem_kind).val(),
+                                 $('#' + cont_type).val(),
+                                 $('#' + prod_type).val(),
+                                 $('#' + corp_no).val(),
+                                 $('#' + actnum_yn).val(),
+                                 $('#' + acct_code).val(),
+                                 $('#' + acct_codef).val(),
+                                 $('#' + acct_coder).val())
+                            }),
+                            dataType: "json",
+                            url: OGL00010SubDetailurl.execUpdateSubData,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                OGL00010SubSubData();
+                                customerUtility.closeDialog($('#OGL00010Sub_btnCancel'));
+                            }
+                            else {
+                                alert(result.DESCRIPTION);
+                            }
+                            $.unblockUI(); //畫面打開
+                        })
+                    });
+                    break;
+                case 'OGL00010SubBack':
+                case 'OGL00010Sub_btnCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+            }
+        });
+
+        OGL00010SubSubData();
+
+        function OGL00010SubSubData() {
+            var colNameArray = ['動作', '執行功能', '保費類別', '合約別', '商品別', '帳本別', '會科取後六', '首年首次',
+                '首年續次', '續年度', 'pk_id', '保費類別_h', '合約別_h', '商品別_h'];
+            var colModelArray = [];
+            colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+            colModelArray.push({ name: "exec_action_D", index: "exec_action_D", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "prem_kind_n_D", index: "prem_kind_n_D", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "cont_type_n_D", index: "cont_type_n_D", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "prod_type_n_D", index: "prod_type_n_D", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "corp_no_n", index: "corp_no_n", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "actnum_yn_n", index: "actnum_yn_n", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "acct_code_n", index: "acct_code_n", width: 120, sortable: false, align: 'right' });
+            colModelArray.push({ name: "acct_codef_n", index: "acct_codef_n", width: 120, sortable: false, align: 'right' });
+            colModelArray.push({ name: "acct_coder_n", index: "acct_coder_n", width: 120, sortable: false, align: 'right' });
+            colModelArray.push({ name: "pk_id", index: "pk_id", hidden: true });
+            colModelArray.push({ name: "prem_kind_n", index: "prem_kind_n", hidden: true });
+            colModelArray.push({ name: "cont_type_n", index: "cont_type_n", hidden: true });
+            colModelArray.push({ name: "prod_type_n", index: "prod_type_n", hidden: true });
+
+            jqgridCustom.createJqgridByCache(
+                'OGL00010SubSubjqgridDiv',
+                'OGL00010SubSubTempList',
+                'OGL00010SubSubTempPeger',
+                OGL00010SubDetailurl.getData,
+                {
+                    type: "OGL00010ViewSubData"
+                },
+                colNameArray,
+                colModelArray,
+                '退費類別明細檔資料',
+                jqgridCustom.getPage('OGL00010SubSubjqgridDiv'),
+                jqgridCustom.getRowNum('OGL00010SubSubjqgridDiv'),
+                OGL00010SubSubTempCompleteFun,
+                true,
+                '900px'
+                );
+        }
+
+        function OGL00010SubSubTempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'OGL00010SubSubTemp', tempActFun);
+
+            if (action == '@Ref.ActionType.View.ToString()' || 
+                action == '@Ref.ActionType.Dele.ToString()' || 
+                action == 'APPR') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                    $(this).find('.actionEditIcon').hide();
+                });
+            }
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region dialog open
+        function dialogOpen(type, rowid) {
+            var dialogId = 'OGL00010SubOpenDetailDialog';
+            var listId = 'OGL00010SubSubTempList';
+            var title = customerUtility.getDialogType(type);
+            $('#' + dialogId).dialog({
+                position: { my: "top+20%", at: "center top", of: window },
+                title: title + '退費類別明細資料',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            ResetDialog();
+
+            $('#OGL00010Sub_btnInsert_Mod,#OGL00010Sub_btnUpdate_Mod,#OGL00010Sub_btnDelete_Mod').hide();
+
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                DisabledDialog(false);
+                $('#OGL00010Sub_btnInsert_Mod').show();
+                $('#' + sub_pk_id).val(created.uuid());
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                DisabledDialog(false);
+                dialogSetData(listId, rowid);
+                $('#OGL00010Sub_btnUpdate_Mod').show();
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#OGL00010Sub_btnDelete_Mod').show();
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+            }
+
+            $('#' + dialogId).dialog('open');
+        }
+
+        function DisabledDialog(flag) {
+            $('#' + prem_kind).prop('disabled', flag);
+            $('#' + cont_type).prop('disabled', flag);
+            $('#' + prod_type).prop('disabled', flag);
+            $('#' + corp_no).prop('disabled', flag);
+            $('#' + actnum_yn).prop('disabled', flag);
+            $('#' + acct_code).prop('disabled', flag);
+            $('#' + acct_codef).prop('disabled', flag);
+            $('#' + acct_coder).prop('disabled', flag);
+            $('#' + sub_pk_id).prop('disabled', flag);
+        }
+
+        function ResetDialog() {
+            if ($('#' + prem_kind + ' option').length > 0) {
+                $('#' + prem_kind).val($($('#' + prem_kind + ' option')[0]).val());
+            }
+            if ($('#' + cont_type + ' option').length > 0) {
+                $('#' + cont_type).val($($('#' + cont_type + ' option')[0]).val());
+            }
+            if ($('#' + prod_type + ' option').length > 0) {
+                $('#' + prod_type).val($($('#' + prod_type + ' option')[0]).val());
+            }
+            if ($('#' + corp_no + ' option').length > 0) {
+                $('#' + corp_no).val($($('#' + corp_no + ' option')[0]).val());
+            }
+            if ($('#' + actnum_yn + ' option').length > 0) {
+                $('#' + actnum_yn).val($($('#' + actnum_yn + ' option')[0]).val());
+            }
+
+            $('#' + acct_code).val('');
+            $('#' + acct_codef).val('');
+            $('#' + acct_coder).val('');
+            $('#' + sub_pk_id).val('');
+            DisabledDialog(true);
+        }
+        //#endregion
+
+        //#region Dialog Set Data
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                if (data.prem_kind_n != '')
+                    $('#' + prem_kind).val(data.prem_kind_n).change();
+                if (data.cont_type_n != '')
+                    $('#' + cont_type).val(data.cont_type_n).change();
+                if (data.prod_type_n != '')
+                    $('#' + prod_type).val(data.prod_type_n).change();
+                if (data.corp_no_n != '')
+                    $('#' + corp_no).val(data.corp_no_n).change();                
+                if (data.actnum_yn_n != '')
+                    $('#' + actnum_yn).val(data.actnum_yn_n).change();               
+
+                $('#' + acct_code).val(data.acct_code_n);
+                $('#' + acct_codef).val(data.acct_codef_n);
+                $('#' + acct_coder).val(data.acct_coder_n);
+                $('#' + sub_pk_id).val(data.pk_id);
+            }
+        }
+        //#endregion
+
+        function OGL00010ViewModel(
+            pk_id,
+            exec_action,
+            pay_class,
+            item_yn_n,
+            year_yn_n,
+            prem_yn_n,
+            unit_yn_n,
+            recp_yn_n,
+            cont_yn_n,
+            corp_yn_n,
+            memo_n
+            ) {
+            var obj = {};
+            obj['pk_id'] = pk_id;
+            obj['exec_action'] = exec_action;
+            obj['pay_class'] = pay_class;
+            obj['item_yn_n'] = item_yn_n;
+            obj['year_yn_n'] = year_yn_n;
+            obj['prem_yn_n'] = prem_yn_n;
+            obj['unit_yn_n'] = unit_yn_n;
+            obj['recp_yn_n'] = recp_yn_n;
+            obj['cont_yn_n'] = cont_yn_n;
+            obj['corp_yn_n'] = corp_yn_n;
+            obj['memo_n'] = memo_n;
+            return obj;
+        }
+
+        function OGL00010ViewSubModel(
+            pk_id,
+            exec_action,
+            prem_kind_n,
+            cont_type_n,
+            prod_type_n,
+            corp_no_n,
+            actnum_yn_n,
+            acct_code_n,
+            acct_codef_n,
+            acct_coder_n
+            ){
+            var obj = {};
+            obj['pk_id'] = pk_id;
+            obj['exec_action'] = exec_action;
+            obj['prem_kind_n'] = prem_kind_n;
+            obj['cont_type_n'] = cont_type_n;
+            obj['prod_type_n'] = prod_type_n;
+            obj['corp_no_n'] = corp_no_n;
+            obj['actnum_yn_n'] = actnum_yn_n;
+            obj['acct_code_n'] = acct_code_n;
+            obj['acct_codef_n'] = acct_codef_n;
+            obj['acct_coder_n'] = acct_coder_n;
+            return obj;
+        }
+    })
+</script>

@@ -1,0 +1,108 @@
+﻿@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OAP0033_Form">
+                    <table>
+                        <tr>
+                            <td width="120px">
+                                <label>變更完成日期 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0033_UP_DATE" name="OAP0033_UP_DATE" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>變更處理人員 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0033_RECE_ID" name="OAP0033_RECE_ID" type="text">
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="OAP0033_Print" value="列印" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function () {
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+
+        $('#OAP0033_UP_DATE').datepicker();
+        var _dtn = new Date();
+        var _date = (_dtn.getFullYear() - 1911) + '/' + created.padLeft((_dtn.getMonth() + 1), 2) + '/' + created.padLeft((_dtn.getDate()), 2);
+        $('#OAP0033_UP_DATE').val(_date);
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'OAP0033_Print':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        var date = $('#OAP0033_UP_DATE').val() || '';
+                        var rece_id = $('#OAP0033_RECE_ID').val() || '';
+
+                        if (date == '') {
+                             alert('新增日期為必輸!');
+                             return false;
+                        }
+                        if (!verified.isDate(created.dateToTWDate(date)))
+                        {
+                            alert('日期格式有誤!');
+                            return false;
+                        }
+                         $.blockUI(); //畫面鎖起來
+                         var parms = [];
+                         parms.push(customerUtility.reportParm('UP_DATE', date));
+                         parms.push(customerUtility.reportParm('RECE_ID', rece_id));
+                         customerUtility.report(
+                         customerUtility.reportModel('票據變更歸檔檢視報表', 'OAP0033'),
+                         parms,
+                         null);
+                         $.unblockUI(); //畫面打開
+                    });
+                    break;
+            }
+        });
+    });
+</script>
+
+

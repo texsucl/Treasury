@@ -1,0 +1,566 @@
+﻿@model SSO.Web.ViewModels.AuthRptModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var userUnitRptUserList = ViewBag.userUnitRptUserList as SelectList;
+    var userUnitRptMgrList = ViewBag.userUnitRptMgrList as SelectList;
+    var userUnitRptOwnerList = ViewBag.userUnitRptOwnerList as SelectList;
+    var ownerUnitList = ViewBag.ownerUnitList as SelectList;
+    var userList = ViewBag.userList as SelectList;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <span id="authMark" style="color:red;">
+                提醒:非管理者單位或程式owner部門「管理者單位列印」「程式owner部門列印」無顯示勾選欄位
+            </span>
+            <br />
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+
+                            <span style="color:red;">＊</span>
+                            @Html.DisplayNameFor(model => model.rptType)：
+
+                            @Html.RadioButton("rptType", "rptUserUnit", new { @checked = true, onchange = "rptTypeChange();" }) 使用者單位列印　
+
+                            <label id="mgrLable">
+                                @Html.RadioButton("rptType", "rptMgrUnit", new { onchange = "rptTypeChange();" }) 管理者單位列印　
+
+                            </label>
+                            <label id="ownerLable">
+                                @Html.RadioButton("rptType", "rptOwnerUnit", new { onchange = "rptTypeChange();" })程式OWNER部門列印
+                            </label>
+                        </td>
+                    </tr>
+                   @*200319 Bianco 新增報表格式*@
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>
+                            @Html.DisplayNameFor(model => model.rptFormat)：
+
+                            <label id="userRoleRptLable">
+                                @Html.RadioButton("rptFormat", "userRoleRpt", new { @checked = true, onchange = "rptFormatChange();" }) 󠆸角色功能報表　
+                            </label>                                
+                            <label id="userRptLable">
+                                @Html.RadioButton("rptFormat", "userRpt", new { onchange = "rptFormatChange();" }) 󠆸使用者角色報表　
+
+                            </label>
+                            <label id="allRptLable">
+                                @Html.RadioButton("rptFormat", "allRpt", new { onchange = "rptFormatChange();" }) 󠆸程式權限授權報表
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="userUnitRptUserDiv">
+                                依使用者單位：@*@Html.DropDownList("userUnitRptUser", userUnitRptUserList, "",new { multiple = "multiple"})*@
+                                <select id="userUnitRptUser" name="userUnitRptUser" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @if (ViewBag.userUnitRptUserList != null)
+                                    {
+                                        foreach (var item in ViewBag.userUnitRptUserList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="userUnitRptMgrDiv">
+                                依使用者單位：@*@Html.DropDownList("userUnitRptMgr", userUnitRptMgrList, "")*@
+                                <select id="userUnitRptMgr" name="userUnitRptMgr" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @if (ViewBag.userUnitRptMgrList != null)
+                                    {
+                                        foreach (var item in ViewBag.userUnitRptMgrList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="userUnitRptOwnerDiv">
+                                依使用者單位：@*@Html.DropDownList("userUnitRptOwner", userUnitRptOwnerList, "")*@
+                                <select id="userUnitRptOwner" name="userUnitRptOwner" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @if (ViewBag.userUnitRptOwnerList != null)
+                                    {
+                                        foreach (var item in ViewBag.userUnitRptOwnerList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="ownerUnitDiv">
+                                @*@Html.DropDownList("ownerUnit", ownerUnitList, "")*@
+                                依程式OWNER單位：
+                                <select id="ownerUnit" name="ownerUnit" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @if (ViewBag.ownerUnitList != null)
+                                    {
+                                        foreach (var item in ViewBag.ownerUnitList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @* @Html.DisplayNameFor(model => model.user)：@Html.DropDownList("user", userList, "")*@
+                            <div id="userDiv">
+                                依使用者：
+                                <select id="user" name="user" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @if (ViewBag.userList != null)
+                                    {
+                                        foreach (var item in ViewBag.userList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    @*200319 Bianco 新增依角色*@
+                    <tr>
+                        <td>
+                            <div id="userRoleDiv">
+                                依角色：
+                                <select id="userRole" name="userRole" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇">
+                                    @*@if (ViewBag.userRoleList != null)
+                                    {
+                                        foreach (var item in ViewBag.userRoleList)
+                                        {
+                                            if (item.Text != null)
+                                            {
+                                                <option value="@item.Value">
+                                                    @item.Text
+                                                </option>
+                                            }
+                                        }
+                                    }*@
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <input type="button" id="btnPrint" name="btnPrint" value="確定列印" class="btn btn-primary" style="display: none;" />
+                            <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    function rptTypeChange() {
+        value = $('input:radio:checked[name="rptType"]').val();
+
+        //$("#userUnitRptUser").selectpicker('deselectAll');   //200319 Bianco 註解
+        //$("#userUnitRptMgr").selectpicker('deselectAll');    //200319 Bianco 註解
+        //$("#userUnitRptOwner").selectpicker('deselectAll');  //200319 Bianco 註解
+        //$("#user").selectpicker('deselectAll');              //200319 Bianco 註解
+        //$("#ownerUnit").selectpicker('deselectAll');         //200319 Bianco 註解
+
+        changeUserRoleList(value);  //200319 Bianco 變動 UserRoleList 下拉選單
+
+        switch (value) {
+            case "rptUserUnit":
+                //$('#userUnitRptUserDiv').show();             //200319 Bianco 註解
+                //$('#userUnitRptMgrDiv').hide();              //200319 Bianco 註解
+                //$('#userUnitRptOwnerDiv').hide();            //200319 Bianco 註解
+
+                //$('#userDiv').hide();                        //200319 Bianco 註解
+                //$('#ownerUnitDiv').hide();                   //200319 Bianco 註解
+
+                //200319 Bianco add 󠆸使用者單位列印 僅可以印󠆸 程式權限授權報表
+                $('input[name=rptFormat][value=userRpt]').prop('disabled', true);
+                $('input[name=rptFormat][value=userRoleRpt]').prop('disabled', true);
+                $("#userRoleRptLable").css("color", '#D0D0D0');
+                $("#userRptLable").css("color", '#D0D0D0');
+                $('input[name=rptFormat][value=allRpt]').prop('checked', true);
+
+                
+                break;
+            case "rptMgrUnit":
+                //$('#userUnitRptUserDiv').hide();            //200319 Bianco 註解
+                //$('#userUnitRptMgrDiv').show();             //200319 Bianco 註解
+                //$('#userUnitRptOwnerDiv').hide();           //200319 Bianco 註解
+
+                //$('#userDiv').show();                       //200319 Bianco 註解
+                //$('#ownerUnitDiv').show();                  //200319 Bianco 註解
+
+                //200319 Bianco add 󠆸使用者單位列印 僅可以印󠆸 程式權限授權報表
+                $('input[name=rptFormat][value=userRpt]').prop('disabled', false);
+                $('input[name=rptFormat][value=userRoleRpt]').prop('disabled', false);
+                $("#userRoleRptLable").css("color", 'black');
+                $("#userRptLable").css("color", 'black');
+
+                break;
+            case "rptOwnerUnit":
+                //$('#userUnitRptUserDiv').hide();           //200319 Bianco 註解
+                //$('#userUnitRptMgrDiv').hide();            //200319 Bianco 註解
+                //$('#userUnitRptOwnerDiv').show();          //200319 Bianco 註解
+
+                //$('#userDiv').hide();                      //200319 Bianco 註解
+                //$('#ownerUnitDiv').hide();                 //200319 Bianco 註解
+
+                //200319 Bianco add 󠆸使用者單位列印 僅可以印󠆸 程式權限授權報表
+                $('input[name=rptFormat][value=userRpt]').prop('disabled', false);
+                $('input[name=rptFormat][value=userRoleRpt]').prop('disabled', false);
+                $("#userRoleRptLable").css("color", 'black');
+                $("#userRptLable").css("color", 'black');
+
+                break;
+        }
+        //200319 Bianco 顯示選項
+        valueFormat = $('input:radio:checked[name="rptFormat"]').val();
+        checkShowOrNot(value, valueFormat);
+    }
+
+    $('select').each(function () {
+        var id = $(this).attr('id');
+        switch (id) {
+            case 'ownerUnit':
+                $('#' + id).off('change');
+                $('#' + id).on('change', function () { changeUserRoleList($('input:radio:checked[name="rptType"]').val()) });
+                break;
+        }
+    });
+
+    ////200319 Bianco 變動 UserRoleList 下拉選單
+    function changeUserRoleList(Type) {
+        $("#userRole").selectpicker('deselectAll');     //200319 Bianco Add
+        $('#userRole').find('option').remove();
+
+        if (Type != 'rptUserUnit') {
+            $.blockUI();
+            $.ajax({
+                url: "@Url.Action("changeUserRole", "AuthRpt")",
+                data: JSON.stringify({
+                    'rptType': Type,
+                    'ownerUnit': $("#ownerUnit").val()
+                }),
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $.unblockUI();
+                console.log(data);
+
+                $.each(data.item, function (key, rData) {
+                    var value = rData.value || '';
+                    var text = rData.text || '';
+                    var Value = rData.Value || '';
+                    var Text = rData.Text || '';
+                    if (value != '' && text != '')
+                        $("#userRole").append($("<option></option>").attr("value", rData.value).text(rData.text));
+                    if (Value != '' && Text != '')
+                        $("#userRole").append($("<option></option>").attr("value", rData.Value).text(rData.Text));
+                });
+                
+                $('#userRole').selectpicker('refresh');//200319 Bianco Add
+            },
+            error: function () {
+                $.unblockUI();
+            }
+        });
+        }
+    }
+
+    //200319 Bianco change變動顯示選項
+    function rptFormatChange() {
+        value = $('input:radio:checked[name="rptType"]').val();
+        valueFormat = $('input:radio:checked[name="rptFormat"]').val();
+        checkShowOrNot(value, valueFormat);
+    }
+
+    ////200319 Bianco 顯示選項Function
+    function checkShowOrNot(Type, Format) {
+        $("#userUnitRptUser").selectpicker('deselectAll');
+        $("#userUnitRptMgr").selectpicker('deselectAll');
+        $("#userUnitRptOwner").selectpicker('deselectAll');
+        $("#user").selectpicker('deselectAll');
+        $("#ownerUnit").selectpicker('deselectAll');
+        $("#userRole").selectpicker('deselectAll');
+
+        switch (Type) {
+            case "rptUserUnit":
+                $('#userUnitRptUserDiv').show();
+                $('#userUnitRptMgrDiv').hide();
+                $('#userUnitRptOwnerDiv').hide();
+
+                $('#userDiv').hide();
+                $('#ownerUnitDiv').hide();
+                $('#userRoleDiv').hide();
+                
+                break;
+            case "rptMgrUnit":
+                $('#userUnitRptUserDiv').hide();
+                $('#userUnitRptOwnerDiv').hide();
+                switch (Format) {
+                    case "userRoleRpt":
+                        $('#userUnitRptMgrDiv').hide();
+
+                        $('#userDiv').hide();
+                        $('#ownerUnitDiv').show();
+                        $('#userRoleDiv').show();
+                        break;
+                    case "userRpt":
+                        $('#userUnitRptMgrDiv').show();
+
+                        $('#userDiv').show();
+                        $('#ownerUnitDiv').show();
+                        $('#userRoleDiv').show();
+                        break;
+                    case "allRpt":
+                        $('#userUnitRptMgrDiv').show();
+
+                        $('#userDiv').show();
+                        $('#ownerUnitDiv').show();
+                        $('#userRoleDiv').show();
+                        break;
+                }
+
+                break;
+            case "rptOwnerUnit":
+                $('#userUnitRptUserDiv').hide();       
+                $('#userUnitRptMgrDiv').hide();      
+                
+                $('#userDiv').hide(); 
+                $('#ownerUnitDiv').hide();
+                $('#userRoleDiv').show();
+                switch (Format) {
+                    case "userRoleRpt":
+                        $('#userUnitRptOwnerDiv').hide();
+                        break;
+                    case "userRpt":
+                        $('#userUnitRptOwnerDiv').show();
+                        break;
+                    case "allRpt":
+                        $('#userUnitRptOwnerDiv').show();
+                        break;
+                        break;
+                }
+        }
+    }
+
+    $(function () {
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        $("#btnPrint").hide();
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $("#btnPrint").show();
+
+            $('#userUnitRptUserDiv').show();
+            $('#userUnitRptMgrDiv').hide();
+            $('#userUnitRptOwnerDiv').hide();
+            $('#userDiv').hide();
+            $('#ownerUnitDiv').hide();
+            $('#userRoleDiv').hide();       //200319 Bianco add
+
+            //200319 Bianco add 󠆸使用者單位列印 僅可以印󠆸 程式權限授權報表
+            $('input[name=rptFormat][value=userRpt]').prop('disabled', true);
+            $('input[name=rptFormat][value=userRoleRpt]').prop('disabled', true);
+            $("#userRoleRptLable").css("color", '#D0D0D0');
+            $("#userRptLable").css("color", '#D0D0D0');
+            $('input[name=rptFormat][value=allRpt]').prop('checked', true);
+
+            var userUnitRptMgr = '@Html.Raw(ViewBag.userUnitRptMgr)';
+            if (userUnitRptMgr == "N") {
+                $("input[name=rptType][value=rptMgrUnit]").attr('disabled', 'disabled');
+                $("#mgrLable").css("color", '#D0D0D0');
+            } else {
+                $("#mgrLable").css("color", 'black');
+            }
+
+
+            var userUnitRptOwner = '@Html.Raw(ViewBag.userUnitRptOwner)';
+            if (userUnitRptOwner == "N") {
+                $("input[name=rptType][value=rptOwnerUnit]").attr('disabled', 'disabled');
+                $("#ownerLable").css("color", '#D0D0D0');
+            } else {
+                $("#ownerLable").css("color", 'black');
+            }
+
+            if (userUnitRptMgr == "N" || userUnitRptOwner == "N") {
+                $('#authMark').show();
+            } else {
+                $('#authMark').hide();
+            }
+        }
+
+
+        //確定列印
+        $("#btnPrint").click().on('click', function () {
+            genRpt();
+        });
+
+        //清空
+        $("#btnClear").click().on('click', function () {
+
+            $("#userUnitRptUser").selectpicker('deselectAll');
+            $("#userUnitRptMgr").selectpicker('deselectAll');
+            $("#userUnitRptOwner").selectpicker('deselectAll');
+            $("#user").selectpicker('deselectAll');
+            $("#ownerUnit").selectpicker('deselectAll');
+            $("#userRole").selectpicker('deselectAll');     //200319 Bianco Add
+
+            $('#userUnitRptUserDiv').show();
+            $('#userUnitRptMgrDiv').hide();
+            $('#userUnitRptOwnerDiv').hide();
+
+            $('#userDiv').hide();
+            $('#ownerUnitDiv').hide();
+            $('#userRoleDiv').hide();     //200319 Bianco Add
+
+            $("input[name=rptType][value=rptUserUnit]").prop('checked', 'true');
+            $('input[name=rptFormat][value=allRpt]').prop('checked', true); //200319 Bianco Add
+
+            $('input[name=rptFormat][value=userRpt]').prop('disabled', true);     //200319 Bianco Add
+            $('input[name=rptFormat][value=userRoleRpt]').prop('disabled', true);   //200319 Bianco Add
+            $("#userRoleRptLable").css("color", '#D0D0D0');    //200319 Bianco Add
+            $("#userRptLable").css("color", '#D0D0D0');  //200319 Bianco Add
+        });
+
+
+        //組合報表
+        function genRpt(type) {
+            $('#validationSummary').children().remove();
+
+            //if (printList.length == 0) {
+
+            //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+            //    validationSummary.append('<li>' + '請選擇需要列印的資料！' + '</li>');
+
+            //} else {
+
+
+            var userUnit;
+            value = $('input:radio:checked[name="rptType"]').val();
+            switch (value) {
+                case "rptUserUnit":
+                    userUnit = $("#userUnitRptUser").val();
+                    break;
+                case "rptMgrUnit":
+                    userUnit = $("#userUnitRptMgr").val();
+                    break;
+                case "rptOwnerUnit":
+                    userUnit = $("#userUnitRptOwner").val();
+                    break;
+            }
+            $.blockUI();
+
+            $.ajax({
+                url: "@Url.Action("print", "AuthRpt")",
+                data: JSON.stringify({
+                    'rptType': $('input:radio:checked[name="rptType"]').val(),
+                    'userUnit': userUnit,
+                    'ownerUnit': $("#ownerUnit").val(),
+                    'user': $("#user").val(),
+                    'userRole': $("#userRole").val(),    //200319 Bianco add 依角色
+                    'rptFormat': $('input:radio:checked[name="rptFormat"]').val()  //200319 Bianco add 報表格式
+                }
+                ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $.unblockUI();
+                    if (data.success) {
+                        var url = '/AuthRpt/downloadRpt?id=' + data.guid;
+                        window.location = url;
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+            });
+
+
+        }
+    });
+
+
+</script>

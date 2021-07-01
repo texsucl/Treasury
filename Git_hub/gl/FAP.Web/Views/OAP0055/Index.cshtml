@@ -1,0 +1,280 @@
+﻿@model FAP.Web.ViewModels.OAP0055Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+
+                <table id="tbQuery">
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "11", @maxlength = "10", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+   
+
+    function execClear() {
+        $('#validationSummary').children().remove();
+
+        $('#paid_id').val("");
+
+        $("#btnQry").attr('disabled', false);
+        $("#btnExport").attr('disabled', true);
+
+
+        jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+    }
+
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } 
+        
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            execClear();
+        });
+        //*---------------清除 end ----------------*//
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#paid_id").val().length == 0) {
+                validationSummary.append('<li>' + '請輸入「給付對象ID」!!"' + '</li>');
+                return
+            }
+
+
+
+                var jsonData = JSON.stringify({
+                    'paid_id': $("#paid_id").val()
+                });
+
+                $.blockUI(); //畫面鎖起來
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("qryAddr", "OAP0055")',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        if (data.success) {
+                            //更新畫面GRID
+                            jQuery("#grid").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.dataList })
+                                .trigger("reloadGrid");
+
+
+                            if (data.dataList.length == 0)
+                                validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+                            else
+                                $('#btnExport').attr('disabled', false);
+
+
+                        } else
+                            validationSummary.append('<li>' + data.err + '</li>');
+
+                        $.unblockUI(); //畫面打開
+                    }
+                });
+
+                //*---------------查詢 end ----------------*//
+
+            
+
+
+            });
+
+
+            //*---------------匯出 begin ----------------*//
+            $("#btnExport").click().on('click', function () {
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+
+                var jsonData = JSON.stringify({
+                    'paid_id': $("#paid_id").val()
+                });
+
+
+                $.blockUI(); //畫面鎖起來
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("execExport", "OAP0055")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data.success) {
+                            var url = '/OAP0055/downloadRpt?id=' + data.guid;
+
+                            window.location = url;
+
+                        } else {
+
+                            if (data.err.length > 0) {
+                                validationSummary.append('<li>' + data.err + '</li>');
+                            }
+                        }
+
+
+                        $.unblockUI(); //畫面打開
+                    }
+                });
+            });
+            //*---------------匯出 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '錯誤資料',
+            jsonReader: {
+                repeatitems: false, id: 'addr_type'
+            },
+            colModel: [
+                {
+                    label: '地址類別', width: 110,
+                    name: 'addr_type', align: 'center',
+                    editable: false,
+                },
+                {
+                    label: '給付對象ID', width: 110,
+                    name: 'paid_id', align: 'center',
+                    editable: false,
+                },
+                {
+                    label: '給付對象姓名',
+                    name: 'paid_name', align: 'center', width: 130,
+                    editable: false,
+
+                },
+                {
+                    label: '郵遞區號',
+                    name: 'zip_code', align: 'center', width: 80,
+                    editable: false,
+
+                },
+                {
+                    label: '地址',
+                    name: 'address', align: 'center', width: 200,
+                    editable: false, cellattr: function (rowId, tv, rawObject, cm, rdata) { return 'style=" white-space: normal !important; height:auto;"' }
+
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+                }
+
+            }
+        });
+
+            //*-------------------GRID end--------------------*//
+        });
+</script>
+
+

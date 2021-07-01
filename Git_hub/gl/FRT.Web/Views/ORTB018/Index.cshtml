@@ -1,0 +1,183 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <div>
+                    <table>
+                        <tr>
+                            <td>
+                                匯款轉檔批號 : 
+                            </td>
+                            <td>
+                                <input type="text" id="filler_20"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                匯款日期 :
+                            </td>
+                            <td>
+                                <label id="VOUCHER_DATE"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                匯款筆數/匯款金額 : 
+                            </td>
+                            <td>
+                                <label id="VOUCHER_COUNT_AMT"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                轉檔人員 :
+                            </td>
+                            <td>
+                                <label id="TRANSFER_ID"></label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnReset" name="btnReset" value="執行FBO匯款轉檔回復作業" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>              
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+
+        var ORTB018url = {};
+        ORTB018url.query = '@Url.Action("qryORTB018", "ORTB018")';
+        ORTB018url.Reset = '@Url.Action("ORTB018Event", "ORTB018")';
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnReset').attr('disabled', true);
+        }
+
+        $('#btnReset').on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $('#btnQry').attr('disabled', true);
+            $('#btnClear').attr('disabled', false);
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    filler_20: $('#filler_20').val()
+                }),
+                dataType: "json",
+                url: ORTB018url.Reset,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#validationSummary ul.validation-summary-errors').append('<li>' + result.Datas + '</li>');
+                    $('#btnReset').attr('disabled', true);
+                }
+                else {
+                    $('#validationSummary ul.validation-summary-errors').append('<li>' + result.DESCRIPTION + '</li>');
+                }
+                $.unblockUI(); //畫面打開
+            });
+        });
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#btnReset').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+            $('#filler_20').attr('disabled', false);
+            $('#filler_20').val('');
+            $('#VOUCHER_DATE').text('');
+            $('#VOUCHER_COUNT_AMT').text('');
+            $('#TRANSFER_ID').text('');
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    filler_20: $('#filler_20').val()
+                }),
+                dataType: "json",
+                url: ORTB018url.query,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#filler_20').attr('disabled',true);
+                    $('#btnQry').attr('disabled', true);
+                    $('#btnReset').attr('disabled', false);
+                    var data = result.Datas;
+                    $('#VOUCHER_DATE').text(data.VOUCHER_DATE);
+                    $('#VOUCHER_COUNT_AMT').text(customerUtility.addCommas(data.VOUCHER_COUNT) + '/' + customerUtility.addCommas(data.VOUCHER_AMT));
+                    $('#TRANSFER_ID').text(data.TRANSFER_ID);
+                }
+                else {
+                    $('#validationSummary ul.validation-summary-errors').append('<li>' + result.DESCRIPTION + '</li>');
+                }
+                $.unblockUI(); //畫面打開
+            });
+        });
+        //*---------------查詢 end ----------------*//
+    });
+</script>
+
+

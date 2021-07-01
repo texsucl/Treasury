@@ -1,0 +1,140 @@
+﻿@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OAP0022_Form">
+                    <table>
+                        <tr>
+                            <td width="120px">
+                                <label>新增日期 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0025_ENTRY_DATE_s" name="OAP0025_ENTRY_DATE_s" type="text">
+                                ~
+                                <input id="OAP0025_ENTRY_DATE_e" name="OAP0025_ENTRY_DATE_e" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>部門代碼 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0025_UNIT_CODE" name="OAP0025_UNIT_CODE" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>資料來源 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("OAP0025_srce_from", (SelectList)ViewBag.SRCE_FROM, new { @class = "" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>批次單號 : </label>
+                            </td>
+                            <td>
+                                <input id="OAP0025_APPLY_NO" name="OAP0025_APPLY_NO" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>票據變更退件 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("OAP0025_REJ_FLAG", (SelectList)ViewBag.YN, new { @class = "" })
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="OAP0025_Print" value="列印" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function () {
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+
+        $('#OAP0025_ENTRY_DATE_s').datepicker();
+        $('#OAP0025_ENTRY_DATE_e').datepicker();
+        var _dtn = new Date();
+        var _date = (_dtn.getFullYear() - 1911) + '/' + created.padLeft((_dtn.getMonth() + 1), 2) + '/' + created.padLeft((_dtn.getDate()), 2);
+        $('#OAP0025_ENTRY_DATE_s').val(_date);
+        $('#OAP0025_ENTRY_DATE_e').val(_date);
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'OAP0025_Print':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                         var entry_date_s = $('#OAP0025_ENTRY_DATE_s').val() || '';
+                         var entry_date_e = $('#OAP0025_ENTRY_DATE_e').val() || '';
+                         var unit_code = $('#OAP0025_UNIT_CODE').val() || '';
+                         var srce_from = $('#OAP0025_srce_from').val();
+                         var apply_no = $('#OAP0025_APPLY_NO').val();
+                         var rej_flag = $('#OAP0025_REJ_FLAG').val();
+                        
+                         if (entry_date_s == '' || entry_date_e == '') {
+                             alert('新增日期為必輸!');
+                             return false;
+                         }
+                         $.blockUI(); //畫面鎖起來
+                         var parms = [];
+                         parms.push(customerUtility.reportParm('entry_date_s', entry_date_s));
+                         parms.push(customerUtility.reportParm('entry_date_e', entry_date_e));
+                         parms.push(customerUtility.reportParm('unit_code', unit_code));
+                         parms.push(customerUtility.reportParm('srce_from', srce_from));
+                         parms.push(customerUtility.reportParm('apply_no', apply_no));
+                         parms.push(customerUtility.reportParm('rej_flag', rej_flag));
+                         customerUtility.report(
+                         customerUtility.reportModel('應付票據寄送清冊', 'OAP0025'),
+                         parms,
+                         null);
+                         $.unblockUI(); //畫面打開
+                    });           
+                    break;
+            }
+        });
+    });
+</script>
+
+

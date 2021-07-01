@@ -1,0 +1,470 @@
+﻿@model FAP.Web.ViewModels.OAP0049Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "12", @maxlength = "10" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_proc_no)：@Html.TextBoxFor(model => model.tel_proc_no, new { @size = "13", @maxlength = "12" })
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+
+                <div class="row">
+
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="margin-left:10px">
+        <div class="modal-content" style="width:850px;position:relative;left:10px">
+            <!-- Modal Header -->
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form class="form-horizontal" role="form" onsubmit="return false">
+
+                    <table>
+                        <tr>
+                            <td>電訪編號：<input type="text" id="iKey" style="width:200px" disabled /></td>
+                           
+                        </tr>
+              
+
+                    </table>
+                    <div class="row">
+                        <div id="qryResultCheck" class="col-sm-24">
+                            <table id="gridCheck"></table>
+                            <div id="pagerCheck"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnSave" class="btn btn-primary">確定</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+
+
+    //支票明細-取消
+    $("#btnSave").on("click", function () {
+        $('#modal').modal('hide');
+
+    });
+
+
+    //查詢
+    $("#btnQry").on("click", function () {
+        qryTelCheck();
+
+       
+    });
+
+
+
+    function qryTelCheck() {
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        if ($("#paid_id").val() == "" & $("#tel_proc_no").val() == "") {
+
+            validationSummary.append('<li>' + '請輸入一個以上的查詢條件"' + '</li>');
+            return
+        } 
+
+
+         var jsonData = JSON.stringify({
+             'paid_id': $("#paid_id").val()
+             , 'tel_proc_no': $("#tel_proc_no").val()
+        });
+
+        $.blockUI();
+
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("qryTelCheck", "OAP0049")',
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: jsonData,
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+
+
+                    //更新待派案件的GRID
+                    jQuery("#grid").jqGrid('clearGridData')
+                        .jqGrid('setGridParam', { data: data.dataList })
+                        .trigger("reloadGrid");
+
+                    if (data.dataList.length == 0)
+                        validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+
+    }
+
+
+
+
+
+        //開啟支票明細的畫面
+        function qryCheckFunction(rowid) {
+
+
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+            var tel_proc_no = rowData.tel_proc_no
+            $('#iKey').val(rowData.tel_proc_no);
+           // jQuery("#grid").setSelection(rowid, true);
+
+            
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("qryCheck", "OAP0049")',
+                async: false,
+                cache: false,
+                dataType: "json",
+                data: {
+                    'tel_proc_no': tel_proc_no
+                },
+
+                success: function (json) {
+
+                    if (json.success) {
+
+
+                        //更新畫面GRID
+                        jQuery("#gridCheck").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: json.rows })
+                            .trigger("reloadGrid");
+                        $('#modal').modal('show');
+                    }
+                }
+            });
+
+        }
+
+
+
+
+
+
+        $(function () {
+            $(window).bind('resize', function () {
+                var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+                jQuery("#grid").setGridWidth(newWidth, false);
+            }).trigger('resize');
+
+            $.unblockUI();
+            var opScope = '@Html.Raw(ViewBag.opScope)';
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            if (opScope == "" || opScope == "0") {
+
+                validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+            } else {
+
+
+            }
+
+
+
+            //*-------------------電訪明細  GRID begin--------------------*//
+            $("#grid").jqGrid({
+                editurl: 'clientArray',
+                datatype: "local",
+                //caption: '明細資料',
+                localReader: { id: "tel_proc_no" },
+                colModel: [
+                    {
+                        label: '電訪編號',
+                        name: 'tel_proc_no', align: 'center', width: '120', editable: false
+                    },
+                       {
+                           label: "支票明細", name: 'Action', index: 'Action', search: false, align: 'center', width: 120//, cellattr: arrtRowspan
+                       },
+
+                ],
+                autowidth: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: true,
+                forceFit: true,
+                loadonce: true,
+                //sortname: "exec_date",
+                rownumbers: true,
+                viewrecords: true,
+                rowNum: -1,
+                //rowList: [10, 25, 50],
+                pager: "#pager",
+                loadComplete: function () {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    var dataStatus = "";
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+
+                        rowData = $("#grid").jqGrid('getRowData', rowId);
+                        be = "<input class=\"edit\" style='height:28x;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='明細' onclick=\"qryCheckFunction('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be });
+
+                       
+
+                    }
+                },
+                subGrid: true,
+                subGridOptions: {
+                    "plusicon": "ui-icon-triangle-1-e",
+                    "minusicon": "ui-icon-triangle-1-s",
+                    "openicon": "ui-icon-arrowreturn-1-e",
+                    // load the subgrid data only once
+                    // and the just show/hide
+                    "reloadOnExpand": false,
+                    // select the row when the expand column is clicked
+                    "selectOnExpand": true
+                }, subGridRowExpanded: function (subgrid_id, row_id) {
+                    var subgrid_table_id, pager_id;
+
+                    var para = {
+                        'tel_proc_no': row_id
+                    };
+
+                    subgrid_table_id = subgrid_id + "_t";
+                    pager_id = "p_" + subgrid_table_id;
+                    $("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
+
+                    jQuery("#" + subgrid_table_id).jqGrid({
+                        url: '/OAP0049/qryProc/',
+                        postData: para,
+                        datatype: 'json',
+                        jsonReader: {
+                            repeatitems: false, id: 'seq'
+                        },
+                        mtype: 'POST',
+
+                        colModel: [
+         {
+             label: 'aply_no',name: 'aply_no', align: 'center', hidden: true, editable: false
+         },
+         {
+             label: '資料類別',
+             name: 'data_type_desc', align: 'center', editable: false, width: '80'
+                            },
+                            {
+                                label: '處理人員',
+                                name: 'proc_name', align: 'center', editable: false, width: '90'
+                            },
+                            {
+                                label: '處理結果/清理階段',
+                                name: 'proc_status_desc', align: 'left', editable: false
+                            },
+                            {
+                                label: '處理日期',
+                                name: 'proc_datetime', align: 'center', editable: false, width: '90'
+                            },
+                            {
+                                label: '備註說明',
+                                name: 'reason', align: 'left', width: '200',
+                                editable: true,
+                                edittype: "textarea",
+                                editoptions: {
+                                    rows: "5"
+                                }, cellattr: function (rowId, tv, rawObject, cm, rdata) { return 'style="white-space: pre;"' }
+                            },
+                            {
+                                label: '電訪覆核結果',
+                                name: 'appr_status_desc', align: 'center', editable: false, width: '110'
+                            },
+                            {
+                                label: '覆核人員',
+                                name: 'appr_name', align: 'center', editable: false, width: '90'
+                            },
+                            {
+                                label: '覆核日期',
+                                name: 'appr_datetime', align: 'left', editable: false, width: '170'
+                            }
+                           
+
+                        ],
+                        rowNum: 20,
+                        pager: pager_id,
+                        height: '100%',
+                        loadComplete: function () {
+                            var ids = jQuery("#grid").jqGrid('getDataIDs');
+                            var dataStatus = "";
+                            for (var i = 0; i < ids.length; i++) {
+                                var rowId = ids[i];
+
+                                rowData = $("#grid").jqGrid('getRowData', rowId);
+                                be = "<input class=\"edit\" style='height:28x;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='明細' onclick=\"qryCheckFunction('" + rowId + "');\"  />";
+                                jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be });
+
+
+
+                            }
+                        }
+                    });
+                    jQuery("#" + subgrid_table_id).jqGrid('navGrid', "#" + pager_id, { edit: false, add: false, del: false })
+                }
+            });
+
+            //*-------------------電訪明細 GRID end--------------------*//
+
+
+
+
+
+            //*-------------------支票 GRID begin--------------------*//
+            $("#gridCheck").jqGrid({
+                editurl: 'clientArray',
+                datatype: "local",
+                //caption: '明細資料',
+                localReader: { id: "check_no" },
+                colModel: [
+                    {
+                         label: 'check_no',
+                         name: 'check_no', align: 'center', hidden: true,
+                         editable: false,
+                    },
+                    {
+                        label: '保局範圍',
+                        name: 'fsc_range', align: 'center', editable: false
+                    },
+                    {
+                        label: '支票號碼',
+                        name: 'check_no', align: 'center', editable: false, width: 100 
+                    },
+                    {
+                        label: '支票簡稱',
+                        name: 'check_acct_short', align: 'center', editable: false, width: 80 
+                    },
+                    {
+                        label: '支票到期日',
+                        name: 'check_date', align: 'center', editable: false, width: 100 
+                    },
+                    {
+                        label: '支票金額',
+                        name: 'check_amt', align: 'right', width: '120',
+                        editable: false,
+                        formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                    }
+                ],
+                autowidth: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: false,
+                forceFit: false,
+                loadonce: true,
+                rownumbers: true,
+                viewrecords: true,
+                rowNum: 25,
+                rowList: [10, 25, 50],
+                pager: "#pagerCheck",
+
+                loadComplete: function () {
+
+
+                }
+            });
+
+            //*-------------------支票 GRID end--------------------*//
+
+
+
+
+
+            //*---------------清除 begin ----------------*//
+            $("#btnClear").click().on('click', function () {
+
+                $('#validationSummary').children().remove();
+
+                $('#paid_id').val("");
+                $('#tel_proc_no').val("");
+
+                jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+                jQuery("#gridCheck").jqGrid('clearGridData').trigger("reloadGrid");
+
+            });
+            //*---------------清除 end ----------------*//
+
+        });
+
+</script>
+
+

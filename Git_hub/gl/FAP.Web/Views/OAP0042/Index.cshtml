@@ -1,0 +1,933 @@
+﻿@model FAP.Web.ViewModels.OAP0042Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var typeList = ViewBag.typeList as SelectList;
+
+    var dataStatusList = ViewBag.dataStatusList as SelectList;
+
+    var clrStatusList = ViewBag.clrStatusList as SelectList;
+    var ppssStatusList = ViewBag.ppssStatusList as SelectList;
+    var oPaidCdList = ViewBag.oPaidCdList as SelectList;
+    var telApprCodeList = ViewBag.telApprCodeList as SelectList;
+    var smsStatusList = ViewBag.smsStatusList as SelectList;
+    var fscRangeList = ViewBag.fscRangeList as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @Html.Hidden("hidAplyNo", "")
+
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.type)：@Html.DropDownList("type", typeList, "請選擇")
+                        </td>
+                    </tr>
+                    
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        @*<input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />*@
+                        <input type="button" id="btnConfirm" name="btnConfirm" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnRptS" name="btnRptS" value="統計表" class="btn btn-primary" />
+                        <input type="button" id="btnRptD" name="btnRptD" value="明細表" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+
+                <table id="dataArea" border="1">
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.data_status)：@Html.DropDownList("data_status", dataStatusList, "", new { @disabled = true })
+                            @*@Html.DisplayNameFor(model => model.status)：@Html.TextBoxFor(model => model.status, new { @size = "1", @maxlength = "1", @disabled = true })
+                @Html.TextBoxFor(model => model.status_desc, new { @size = "30", @disabled = true })*@
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <span style="color:red;">＊</span>計算條件：@Html.RadioButton("cntType", "P", new { @checked = true }) 給付對象ID　@Html.RadioButton("cntType", "C") 支票號碼
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.stat_amt)：@Html.TextBoxFor(model => model.stat_amt_b, new { @size = "12", @maxlength = "10" })
+                            ~　
+                            @Html.TextBoxFor(model => model.stat_amt_e, new { @size = "12", @maxlength = "10" })
+                        </td>
+                    </tr>
+                    <tr id="tr_assign_month">
+                        <td colspan="2">
+                            <span style="color:red;">＊</span>@Html.DisplayNameFor(model => model.assign_month)：@Html.TextBoxFor(model => model.assign_month, new { @size = "2", @maxlength = "3" })（個月）
+                        </td>
+                    </tr>
+
+                    <tr id="tr_sms_clear_month">
+                        <td colspan="2">
+                            <span style="color:red;">＊</span>@Html.DisplayNameFor(model => model.sms_clear_month)：@Html.TextBoxFor(model => model.sms_clear_month, new { @size = "2", @maxlength = "3" })（個月）
+                        </td>
+                    </tr>
+
+                    <tr id="tr_paid_id">
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "12", @maxlength = "10" })
+                        </td>
+                    </tr>
+
+                    <tr id="tr_check_no">
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.check_no)：@Html.TextBoxFor(model => model.check_no, new { @size = "12", @maxlength = "10" })
+                        </td>
+                    </tr>
+
+
+                    <tr id="tr_exclude">
+                        <td>
+                            排除條件
+                        </td>
+                        <td>
+                            <table>
+                                <tr id="tr_clr_status">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.clr_status)：@Html.DropDownList("clr_status", clrStatusList, "")*@
+                                        @Html.DisplayNameFor(model => model.clr_status)：
+                                        <select id="clr_status" name="clr_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.clrStatusList != null)
+                                            {
+                                                foreach (var item in ViewBag.clrStatusList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="tr_ppaa_status">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.ppaa_status)：@Html.DropDownList("ppaa_status", ppssStatusList, "")*@
+
+                                        @Html.DisplayNameFor(model => model.ppaa_status)：
+                                        <select id="ppaa_status" name="ppaa_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.ppssStatusList != null)
+                                            {
+                                                foreach (var item in ViewBag.ppssStatusList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="tr_o_paid_cd">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.o_paid_cd)：@Html.DropDownList("o_paid_cd", oPaidCdList, "")*@
+
+                                        @Html.DisplayNameFor(model => model.o_paid_cd)：
+                                        <select id="o_paid_cd" name="o_paid_cd" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.oPaidCdList != null)
+                                            {
+                                                foreach (var item in ViewBag.oPaidCdList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="tr_appr_code">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.appr_code)：@Html.DropDownList("appr_code", telApprCodeList, "")*@
+
+                                        @Html.DisplayNameFor(model => model.appr_code)：
+                                        <select id="appr_code" name="appr_code" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.telApprCodeList != null)
+                                            {
+                                                foreach (var item in ViewBag.telApprCodeList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="tr_sms_status">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.fsc_range)：@Html.DropDownList("fsc_range", fscRangeList, "")*@
+
+
+                                        @Html.DisplayNameFor(model => model.sms_status)：
+                                        <select id="sms_status" name="sms_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.smsStatusList != null)
+                                            {
+                                                foreach (var item in ViewBag.smsStatusList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr id="tr_fsc_range">
+                                    <td>
+                                        @*@Html.DisplayNameFor(model => model.fsc_range)：@Html.DropDownList("fsc_range", fscRangeList, "")*@
+
+
+                                        @Html.DisplayNameFor(model => model.fsc_range)：
+                                        <select id="fsc_range" name="fsc_range" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                                            @if (ViewBag.fscRangeList != null)
+                                            {
+                                                foreach (var item in ViewBag.fscRangeList)
+                                                {
+                                                    if (item.Text != null)
+                                                    {
+                                                        <option value="@item.Value">
+                                                            @item.Text
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+
+
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr id="tr_check_date">
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.check_date)：@Html.TextBoxFor(model => model.check_date_b, new { @size = "12", @maxlength = "10" })
+                            ~　
+                            @Html.TextBoxFor(model => model.check_date_e, new { @size = "12", @maxlength = "10" })
+                            （格式：YYYMMDD，民國年）
+                            <br />
+                            <span style="color:red;">僅挑選"票據狀態=2列印"的資料(一張支票以一張保單為代表)</span>
+                        </td>
+                    </tr>
+
+                </table>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    //檢核資料
+    function chkData(execAction) {
+
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        //畫面欄位檢核
+        var bPass = true;
+
+        //檢核-歸戶金額
+        if ($('#stat_amt_b').val() != "") {
+            //bPass = false;
+            if (!checkNumP($('#stat_amt_b').val())) {
+                bPass = false;
+                validationSummary.append('<li>「歸戶金額(起)」需為整數！！</li>');
+            } else if ($('#stat_amt_b').val() < 0) {
+                bPass = false;
+                validationSummary.append('<li>「歸戶金額(起)」不可為負數！！</li>');
+            }
+        } else
+            $('#stat_amt_b').val("0");
+
+        if ($('#stat_amt_e').val() != "") {
+            //bPass = false;
+            if (!checkNumP($('#stat_amt_e').val())) {
+                bPass = false;
+                validationSummary.append('<li>「歸戶金額(訖)」需為整數！！</li>');
+            } else if ($('#stat_amt_e').val() < 0) {
+                bPass = false;
+                validationSummary.append('<li>「歸戶金額(訖)」不可為負數！！</li>');
+            }
+        } else
+            $('#stat_amt_e').val("9999999999");
+
+
+        if ($("#type").val() == "tel_assign_case") {    //電話訪問
+
+            //尚未派件月份
+            if ($('#assign_month').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>請輸入「尚未派件月份」！！</li>');
+            } else {
+                if (!checkNumP($('#assign_month').val())) {
+                    bPass = false;
+                    validationSummary.append('<li>「尚未派件月份」需為整數！！</li>');
+                } else if ($('#assign_month').val() < 0) {
+                    bPass = false;
+                    validationSummary.append('<li>「尚未派件月份」不可為負數！！</li>');
+                }
+            }
+
+        } else if ($("#type").val() == "sms_assign_case") {     //一年以上簡訊通知
+
+            //簡訊狀態清除月份
+            if ($('#sms_clear_month').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>請輸入「簡訊狀態清除月份」！！</li>');
+            } else {
+                if (!checkNumP($('#sms_clear_month').val())) {
+                    bPass = false;
+                    validationSummary.append('<li>「簡訊狀態清除月份」需為整數！！</li>');
+                } else if ($('#sms_clear_month').val() < 0) {
+                    bPass = false;
+                    validationSummary.append('<li>「簡訊狀態清除月份」不可為負數！！</li>');
+                }
+            }
+
+        } else if ($("#type").val() == "sms_notify_case") {     //一年以下簡訊通知
+
+            //支票到期日
+            if (!checkChtDate($('#check_date_b').val(), true)) {
+                bPass = false;
+                validationSummary.append('<li>「支票到期日(起)」格式錯誤！！</li>');
+            }
+
+            if (!checkChtDate($('#check_date_e').val(), true)) {
+                bPass = false;
+                validationSummary.append('<li>「支票到期日(訖)」格式錯誤！！</li>');
+            }
+
+            var _sms_date = '@Html.Raw(ViewBag.smsDate)';
+            if ($('#check_date_b').val() < _sms_date || $('#check_date_e').val() < _sms_date) {
+
+            } else {
+                bPass = false;
+                validationSummary.append('<li>支票到期日的設定需為３個月以上！！</li>');
+            }
+
+        }
+
+        if (bPass == false)
+            return;
+
+
+        //清理狀態
+        var clrStatusArr = $('#clr_status').find("option:selected");
+        var clr_status = "";
+        clrStatusArr.each(function () {
+            clr_status += $(this).val() + "|";
+        });
+        if (clr_status != "")
+            clr_status = clr_status.substring(0, clr_status.length - 1);
+
+
+        //PPAA主檔狀態
+        var ppaaStatusArr = $('#ppaa_status').find("option:selected");
+        var ppaa_status = "";
+        ppaaStatusArr.each(function () {
+            ppaa_status += $(this).val() + "|";
+        });
+        if (ppaa_status != "")
+            ppaa_status = ppaa_status.substring(0, ppaa_status.length - 1);
+
+
+        //原給付性質
+        var oPaidCdArr = $('#o_paid_cd').find("option:selected");
+        var o_paid_cd = "";
+        oPaidCdArr.each(function () {
+            o_paid_cd += $(this).val() + "|";
+        });
+        if (o_paid_cd != "")
+            o_paid_cd = o_paid_cd.substring(0, o_paid_cd.length - 1);
+
+
+        //覆核狀態
+        var apprCodeArr = $('#appr_code').find("option:selected");
+        var appr_code = "";
+        apprCodeArr.each(function () {
+            appr_code += $(this).val() + "|";
+        });
+        if (appr_code != "")
+            appr_code = appr_code.substring(0, appr_code.length - 1);
+
+
+        //簡訊狀態
+        var smsStatusArr = $('#sms_status').find("option:selected");
+        var sms_status = "";
+        smsStatusArr.each(function () {
+            sms_status += $(this).val() + "|";
+        });
+        if (sms_status != "")
+            sms_status = sms_status.substring(0, sms_status.length - 1);
+
+
+        //保局範圍
+        var fscRangeArr = $('#fsc_range').find("option:selected");
+        var fsc_range = "";
+        fscRangeArr.each(function () {
+            fsc_range += $(this).val() + "|";
+        });
+        if (fsc_range != "")
+            fsc_range = fsc_range.substring(0, fsc_range.length - 1);
+
+
+        //歸戶金額
+        var stat_amt = "";
+        if ($('#stat_amt_b').val() != "" || $('#stat_amt_e').val() != "") {
+            stat_amt = $('#stat_amt_b').val() + "|" + $('#stat_amt_e').val();
+        }
+
+        //支票到期日
+        var check_date = "";
+        if ($('#check_date_b').val() != "" || $('#check_date_e').val() != "") {
+            check_date = $('#check_date_b').val() + "|" + $('#check_date_e').val();
+        }
+
+
+        if (execAction == "btnConfirm")
+            execAply(clr_status, ppaa_status, o_paid_cd, appr_code, sms_status, fsc_range, stat_amt, check_date);
+        else
+            execExport(execAction,  clr_status, ppaa_status, o_paid_cd, appr_code, sms_status, fsc_range, stat_amt, check_date);
+
+
+    }
+
+
+    //畫面資料正確，執行匯出
+    function execExport(execAction, clr_status, ppaa_status, o_paid_cd, appr_code, sms_status, fsc_range, stat_amt, check_date) {
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        $.blockUI(); //畫面鎖起來
+
+        var rpt_type = execAction == "btnRptS" ? "S" : "D";
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'type': $('#type').val(),
+                    'rpt_cnt_tp': $('input:radio:checked[name="cntType"]').val(),
+                    'stat_amt_b': $('#stat_amt_b').val(),
+                    'stat_amt_e': $('#stat_amt_e').val(),
+                    'stat_amt': stat_amt,
+                    'assign_month': $('#assign_month').val(),
+                    'sms_clear_month': $('#sms_clear_month').val(),
+                    'clr_status': clr_status,
+                    'ppaa_status': ppaa_status,
+                    'o_paid_cd': o_paid_cd,
+                    'appr_code': appr_code,
+                    'sms_status': sms_status,
+                    'fsc_range': fsc_range,
+                    'check_date': check_date,
+                    'paid_id': $('#paid_id').val(),
+                    'check_no': $('#check_no').val()
+                },
+                'rpt_type': rpt_type
+            }),
+            dataType: "json",
+            url: '@Url.Action("execExport", "OAP0042")',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.success) {
+                    if ($("#type").val() == "sms_notify_case" & data.guid == "") {
+                        alert("「一年以下簡訊通知」將以MAIL方式寄送報表!!")
+                    } else {
+                        if(data.rpt == "")
+                            alert("「一年以下簡訊通知」將以MAIL方式寄送報表!!")
+                        else {
+                            var url = '/OAP0042/downloadRpt?id=' + data.guid;
+
+                            if (data.bFinish == "Y") {
+                                window.location = url;
+                            } else {
+                                var bFinish = data.bFinish;
+
+                                    var myTimer = setInterval(function () {
+                                        $.ajax({
+            type: "POST",
+            data: JSON.stringify({ 'id': data.guid}),
+            dataType: "json",
+            url: '@Url.Action("chkRpt", "OAP0042")',
+            contentType: 'application/json',
+            success: function (data) {
+                bFinish = data.bFinish;
+                if (data.bFinish == "Y") {
+                    clearInterval(myTimer);
+                    window.location = url;
+                    $.unblockUI(); //畫面打開
+                }
+                    
+
+            }
+                                        });
+                                        if (data.bFinish == "Y")
+                                            clearInterval(myTimer);
+                                    }, 10000);
+                            }
+                        }
+
+                    }
+                } else {
+
+                    if (data.err.length > 0) {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+
+
+                //$.unblockUI(); //畫面打開
+
+            }
+        });
+    }
+
+
+    //畫面資料正確，執行申請覆核
+    function execAply(clr_status, ppaa_status, o_paid_cd, appr_code, sms_status, fsc_range, stat_amt, check_date) {
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'type': $('#type').val(),
+                    'rpt_cnt_tp': $('input:radio:checked[name="cntType"]').val(),
+                    'stat_amt': stat_amt,
+                    'assign_month': $('#assign_month').val(),
+                    'sms_clear_month': $('#sms_clear_month').val(),
+                    'clr_status': clr_status,
+                    'ppaa_status': ppaa_status,
+                    'o_paid_cd': o_paid_cd,
+                    'appr_code': appr_code,
+                    'sms_status': sms_status,
+                    'fsc_range': fsc_range,
+                    'check_date': check_date,
+                    'paid_id': $('#paid_id').val(),
+                    'check_no': $('#check_no').val()
+                },
+                'getAplyNo': true
+            }),
+            dataType: "json",
+            url: '@Url.Action("execAply", "OAP0042")',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnRptS").attr('disabled', true);
+                    $("#btnRptD").attr('disabled', true);
+                    $("#btnClear").attr('disabled', false);
+
+                    validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+                }
+
+
+                $.unblockUI(); //畫面打開
+
+            }
+        });
+    }
+
+
+
+    //切換設定項目
+    $("#type").on("change", function () {
+
+        if ("" == $("#type").val())
+            return
+
+        $("#data_status").val("");
+        $("#stat_amt").val("");
+        $("#stat_amt_e").val("");
+        $("#assign_month").val("");
+        $("#sms_clear_month").val("");
+        $("#clr_status").val("");
+        $("#ppaa_status").val("");
+        $("#o_paid_cd").val("");
+        $("#appr_code").val("");
+        $("#sms_status").val("");
+        $("#fsc_range").val("");
+        $("#check_date_b").val("");
+        $("#check_date_e").val("");
+
+        $("#paid_id").val("");  //add by daiyu 20210208
+        $("#check_no").val("");   //add by daiyu 20210208
+
+
+
+        $('#dataArea').show();
+
+        $('#btnModify').attr('disabled', false);
+        $('#btnExport').attr('disabled', false);
+
+        if ($("#type").val() == "tel_assign_case") {
+            $('#tr_exclude').show();
+
+            $('#tr_assign_month').show();
+            $('#tr_clr_status').show();
+            $('#tr_appr_code').show();
+            $('#tr_fsc_range').show();
+            $('#tr_o_paid_cd').show();
+            $('#tr_ppaa_status').show();
+
+            $('#tr_paid_id').show();    //add by daiyu 20210208
+            $('#tr_check_no').show();   //add by daiyu 20210208
+
+            $('#tr_sms_clear_month').hide();
+            $('#tr_sms_status').hide();
+            $('#tr_check_date').hide();
+
+
+        } else if ($("#type").val() == "sms_assign_case") {
+            $('#tr_exclude').show();
+
+            $('#tr_clr_status').show();
+            $('#tr_ppaa_status').show();
+            $('#tr_o_paid_cd').show();
+            $('#tr_fsc_range').show();
+            $('#tr_sms_clear_month').show();
+            $('#tr_sms_status').show();
+
+            $('#tr_assign_month').hide();
+            $('#tr_appr_code').hide();
+            $('#tr_check_date').hide();
+            $('#tr_paid_id').hide();    //add by daiyu 20210208
+            $('#tr_check_no').hide();   //add by daiyu 20210208
+
+        } else if ($("#type").val() == "sms_notify_case") {
+            $('#tr_check_date').show();
+
+            $('#tr_assign_month').hide();
+            $('#tr_clr_status').hide();
+            $('#tr_ppaa_status').hide();
+            $('#tr_o_paid_cd').hide();
+            $('#tr_appr_code').hide();
+            $('#tr_fsc_range').hide();
+            $('#tr_sms_clear_month').hide();
+            $('#tr_sms_status').hide();
+
+            $('#tr_exclude').hide();
+
+            $('#tr_paid_id').hide();    //add by daiyu 20210208
+            $('#tr_check_no').hide();   //add by daiyu 20210208
+
+        }
+
+
+        var jsonData = JSON.stringify({
+            'type': $("#type").val()
+        });
+
+        $.blockUI();
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        $.unblockUI(); //畫面打開
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("qrySysPara", "OAP0042")',
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: jsonData,
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+
+                    //資料狀態
+                    $("#data_status").val(data.model.data_status);
+                    if ($("#data_status").val() == "1")
+                        $('#btnConfirm').attr('disabled', false);
+                    else
+                        $('#btnConfirm').attr('disabled', true);
+
+                    //計算條件
+                    if (data.model.rpt_cnt_tp = "P")
+                        $("#P").prop("checked", true);
+                    else
+                        $("#C").prop("checked", true);
+
+                    //歸戶金額
+                    $("#stat_amt_b").val(data.model.stat_amt_b);
+                    $("#stat_amt_e").val(data.model.stat_amt_e);
+
+                    //簡訊清除月份
+                    $("#assign_month").val(data.model.assign_month);
+
+                    //尚未派件月份
+                    $("#sms_clear_month").val(data.model.sms_clear_month);
+
+                    //支票號碼
+                    $("#check_no").val(data.model.check_no);
+
+                    //給付對象ID
+                    $("#paid_id").val(data.model.paid_id);
+
+
+
+                    //清理狀態
+                    if (data.model.clr_status != "") {
+                        var clrArr = data.model.clr_status.split('|');
+                        $('select[name=clr_status]').val(clrArr);
+                        $('select[name=clr_status]').selectpicker('refresh');
+                    }
+
+
+                    //PPAA主檔狀態
+                    if (data.model.ppaa_status != "") {
+                        var ppaaStatusArr = data.model.ppaa_status.split('|');
+                        $('select[name=ppaa_status]').val(ppaaStatusArr);
+                        $('select[name=ppaa_status]').selectpicker('refresh');
+                    }
+
+                    //原給付性質
+                    if (data.model.o_paid_cd != "") {
+                        var oPaidCdArr = data.model.o_paid_cd.split('|');
+                        $('select[name=o_paid_cd]').val(oPaidCdArr);
+                        $('select[name=o_paid_cd]').selectpicker('refresh');
+                    }
+
+                    //覆核狀態
+                    if (data.model.appr_code != "") {
+                        var apprCodeArr = data.model.appr_code.split('|');
+                        $('select[name=appr_code]').val(apprCodeArr);
+                        $('select[name=appr_code]').selectpicker('refresh');
+                    }
+
+                    //簡訊狀態
+                    if (data.model.sms_status != "") {
+                        var smsStatusArr = data.model.sms_status.split('|');
+                        $('select[name=sms_status]').val(smsStatusArr);
+                        $('select[name=sms_status]').selectpicker('refresh');
+                    }
+
+                    //保局範圍
+                    if (data.model.fsc_range != "") {
+                        var fscRangeArr = data.model.fsc_range.split('|');
+                        $('select[name=fsc_range]').val(fscRangeArr);
+                        $('select[name=fsc_range]').selectpicker('refresh');
+                    }
+
+                    //支票到期日
+                    $("#check_date_b").val(data.model.check_date_b);
+                    $("#check_date_e").val(data.model.check_date_e);
+
+
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+
+    });
+
+
+
+
+
+    $(function () {
+
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+        if (opScope == "" || opScope == "0") {
+
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#dataArea').hide();
+            if ('@Html.Raw(ViewBag.isQryTmp)' == "1") {
+
+            } else {
+                $("#btnRptS").attr('disabled', true);
+                $("#btnRptD").attr('disabled', true);
+                $("#btnDelete").attr('disabled', true);
+            }
+
+
+            if ('@Html.Raw(ViewBag.dataStatus)' == "2") {
+                validationSummary.append('<li>' + '資料覆核中，不可異動!!' + '</li>');
+                $("#btnConfirm").attr('disabled', true);
+                $("#btnRptS").attr('disabled', true);
+                $("#btnRptD").attr('disabled', true);
+                $("#btnClear").attr('disabled', true);
+            } else {
+                $("#btnConfirm").attr('disabled', false);
+                $("#btnRptS").attr('disabled', false);
+                $("#btnRptD").attr('disabled', false);
+            }
+
+        }
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+
+            $('#validationSummary').children().remove();
+
+            $('#dataArea').hide();
+
+            $("#btnConfirm").attr('disabled', false);
+            $("#btnRptS").attr('disabled', false);
+            $("#btnRptD").attr('disabled', false);
+
+            $('#type').val("");
+            $('#data_status').val("");
+            $("#P").prop("checked", true);
+            $('#stat_amt_b').val("");
+            $('#stat_amt_e').val("");
+            $('#assign_month').val("");
+
+
+            $('#sms_clear_month').val("");
+            $('#clr_status').val("");
+            $('#ppaa_status').val("");
+            $('#o_paid_cd').val("");
+            $('#appr_code').val("");
+            $('#sms_status').val("");
+            $('#fsc_range').val("");
+            $('#check_date_b').val("");
+            $('#check_date_e').val("");
+
+
+            $('#paid_id').val(""); //add by daiyu 20210208
+            $('#check_no').val(""); //add by daiyu 20210208
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+
+        //*---------------統計表 begin ----------------*//
+        $("#btnRptS").click().on('click', function () {
+            chkData("btnRptS");
+
+        });
+        //*---------------統計表 end ----------------*//
+
+
+
+        //*---------------明細表 begin ----------------*//
+        $("#btnRptD").click().on('click', function () {
+            chkData("btnRptD");
+
+        });
+        //*---------------明細表 end ----------------*//
+
+
+
+        //*---------------申請覆核 begin ----------------*//
+        $("#btnConfirm").click().on('click', function () {
+
+
+            if (window.confirm('是否重新框列電訪清單？') == false)
+                return;
+            else
+                chkData("btnConfirm");
+
+        });
+        //*---------------申請覆核 end ----------------*//
+
+    });
+</script>
+
+

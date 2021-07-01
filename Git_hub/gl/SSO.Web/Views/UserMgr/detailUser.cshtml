@@ -1,0 +1,859 @@
+﻿@model SSO.Web.ViewModels.UserMgrModel
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    ViewBag.Title = "使用者資訊";
+
+    var isDisabledList = ViewBag.isDisabledList as SelectList;
+    var isMailList = ViewBag.isMailList as SelectList;
+
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            
+            <table>
+                <tr>
+                    @Html.Hidden("hidRoleAll", "")
+                    @Html.Hidden("hidRole", "")
+                    @Html.Hidden("hidRoleAuthUnit", "")
+
+                    <td colspan="2">
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.cUserID)：
+                        @Html.TextBoxFor(model => model.cUserID, new { @maxlength = "5" ,@onkeyup = "userIdChg();"})
+                        @Html.Hidden("hidUserId", Model.cUserID)
+                    </td>
+                    <td colspan="2">
+                        <span style="color:red;">＊</span>
+                        @Html.DisplayNameFor(model => model.cUserName)：
+                        @Html.TextBoxFor(model => model.cUserName, new { @maxlength = "10" })
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.isDisabled)：
+                        @Html.DropDownList("isDisabled", isDisabledList, "請選擇")
+                        @Html.Hidden("hidisDisabled", Model.isDisabled)
+                    </td>
+
+                    @*<td>
+                        @Html.DisplayNameFor(model => model.isMail)：
+                        @Html.DropDownList("isMail", isMailList, "請選擇")
+                        @Html.Hidden("hidisMail", Model.isMail)
+                    </td>*@
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.dataStatus)：
+                        @Html.DisplayTextFor(model => model.dataStatusDesc)
+                        @Html.Hidden("hidDataStatus", Model.dataStatus)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtUserID)：
+                        @Html.DisplayTextFor(model => model.cCrtUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cCrtDate)：
+                        @Html.DisplayTextFor(model => model.cCrtDate)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdUserID)：
+                        @Html.DisplayTextFor(model => model.cUpdUserID)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.cUpdDate)：
+                        @Html.DisplayTextFor(model => model.cUpdDate)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.apprUid)：
+                        @Html.DisplayTextFor(model => model.apprUid)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.apprDt)：
+                        @Html.DisplayTextFor(model => model.apprDt)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.frezzeUid)：
+                        @Html.DisplayTextFor(model => model.frezzeUid)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.frezzeDt)：
+                        @Html.DisplayTextFor(model => model.frezzeDt)
+                    </td>
+                </tr>
+
+            </table>
+
+            
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnQryHis" name="btnQryHis" value="查詢歷史紀錄" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        <input type="submit" id="btnRtn" name="btnRtn" value="返回" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+            @Html.Hidden("onEdit", "")
+            @Html.Hidden("valueErr", "")
+            <button id="btnNewRole" name="btnNewRole" class="btn btn-primary">新增角色</button>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            <br>
+
+            <div class="row">
+                <div id="qryRoleAuth" class="col-sm-24">
+                    <table id="gridRoleAuth"></table>
+                    <div id="pagerRoleAuth"></div>
+                </div>
+            </div>
+            <br>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+    //取得"執行功能"下拉選單
+    function getExecAction() {
+        var list = '@Html.Raw(ViewBag.execActionjqList)'
+        return list;
+    }
+
+    function userIdChg() {
+        $("#cUserID").val($("#cUserID").val().toUpperCase());
+
+        if ($("#cUserID").val().length == 5) {
+            $('#validationSummary').children().remove();
+
+            $.blockUI();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'userId': $('#cUserID').val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("getUserName", "UserMgr")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $('#cUserName').val(data.userName);
+                    } else {
+                        $('#cUserName').val("");
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+            });
+            $.unblockUI();
+        }
+
+    }
+
+
+    //新增使用者角色
+    $("#btnNewRole").on("click", function () {
+
+        $("#grid").jqGrid('addRow', "new", { addParams: { position: "last" } });
+        var sel_id = $('#grid').jqGrid('getGridParam', 'selrow');
+
+
+       // var invoId = sel_id;
+        //be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "');\"  />";
+        de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "');\"  />";
+
+        se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + sel_id + "' value='儲存' onclick=\"TheOnSaveFunction('" + sel_id + "');\"  />";
+        ce = "<input class=\"cancel\" style='height:28px;width:50px; ' type='button' id='btn_cancel_" + sel_id + "'  value='取消' onclick=\"TheOnCancelFunction('" + sel_id + "');\"  />";
+        jQuery("#grid").jqGrid('setRowData', sel_id, { Action: de + se + ce });
+        //jQuery("#grid").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
+        //$("#btn_edit_" + sel_id).hide();
+        $("#btn_del_" + sel_id).hide();
+        $("#onEdit").val("Y");
+        getRole();
+    });
+
+
+    //*-----------------------角色下拉選單  begin-----------------------*//
+    function getRoleAll() {
+        return $('#hidRoleAll').val();
+    }
+
+    function getRole() {
+        var sel = jQuery("#grid").getGridParam('selrow');
+        var roleIdStr = '';
+        var res = $('#hidRole').val().split(";");
+        if (sel != null) {
+            var codeItem = res[0].split(":");
+            roleIdStr = codeItem[0];
+            getRoleAuth(roleIdStr);
+        }
+
+        var roleList = "";
+        for (i = 0; i < res.length; i++) {
+            var codeItem = res[i].split(":");
+            roleList += "<option role='option' value='" + codeItem[0] + "'>" + codeItem[1] + "</option>"
+
+        }
+
+        $("select#" + sel + "_roleId").html(roleList);
+        
+        //return $('#hidRole').val();
+    }
+    //*-----------------------角色下拉選單  end-----------------------*//
+
+
+    //*-----------------------角色所屬授權單位  begin-----------------------*//
+    function getRoleAuthUnit() {
+        return $('#hidRoleAuthUnit').val();
+    }
+    //*-----------------------角色所屬授權單位  end-----------------------*//
+
+
+
+    //*-----------------------查詢角色所擁有的授權項目  begin-----------------------*//
+    function getRoleAuth(roleId) {
+        var sel = $('#grid').jqGrid('getGridParam', 'selrow');
+        $("#grid").jqGrid("setCell", sel, "roleAuthUnit", roleId);
+
+
+        $('#qryRoleAuth').children().remove();
+
+        $('#qryRoleAuth').append('<table id="' + "gridRoleAuth" + '"></table>');
+        $('#qryRoleAuth').append('<div id="' + "pagerRoleAuth" + '"></div>');
+
+        var para = {
+            roleId: roleId
+        };
+
+        $.blockUI(); //畫面鎖起來
+
+        $("#gridRoleAuth").jqGrid({
+            url: '/UserMgr/qryRoleAuth/',
+            postData: para,
+            datatype: 'json',
+            jsonReader: {
+                repeatitems: false, id: 'authId'
+            },
+            mtype: 'POST',
+            //caption: '授權清單',
+            colNames: ['', '系統別', '編號', '授權項目'],
+            colModel: [
+                { name: 'sysCd', align: 'left', hidden: true },
+                { name: 'sysCdDesc', align: 'left', width: '160' },
+                { name: 'cFunctionID', align: 'left', hidden: true },
+                { name: 'cFunctionName', align: 'left', width: '300' }
+
+            ],
+            autowidth: true,
+            shrinkToFit: false,
+            forceFit: true,
+            pager: '#pagerRoleAuth',
+            width: 'auto',
+            height: 'auto',
+            rowNum: 10,
+            rowList: [10, 20],
+            sortname: 'authId',
+            sortorder: "acs",
+            viewrecords: true,
+            loadonce: true,
+            loadComplete: function () {
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                $("#gridRoleAuth").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+            }
+
+        });
+
+        $.unblockUI(); //畫面打開
+
+
+
+    }
+    //*-----------------------查詢角色所擁有的授權項目  end-----------------------*//
+
+
+    //jqgrid中的刪除
+    function TheOnDelFunction(rowid) {
+        var rowData = $("#grid").jqGrid('getRowData', rowid);
+
+        //modify by daiyu 20200110
+        if (rowData.createUid == "") {
+            $("#grid").jqGrid('delRowData', rowid);
+            jQuery("#grid").trigger("reloadGrid");
+        } else {
+            $("#grid").jqGrid("setCell", rowid, "execAction", "D");
+        }
+
+
+        //$('#qryRoleAuth').children().remove();
+        //$("#grid").jqGrid('delRowData', rowid);
+        //jQuery("#grid").trigger("reloadGrid");
+
+        //end modify 20200110
+
+    }
+
+
+    //jqgrid中的修改
+    function TheOnEditFunction(rowid) {
+
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+        var roleId = rowData.roleId;
+
+
+
+        jQuery("#grid").setSelection(rowid, true);
+        jQuery("#grid").editRow(rowid);
+
+
+        //alert("rowid is " + rowid);
+        $("#btn_save_" + rowid).css("visibility", "visible");
+        $("#btn_cancel_" + rowid).css("visibility", "visible");
+
+        $("#btn_edit_" + rowid).css("visibility", "hidden");
+        $("#btn_del_" + rowid).css("visibility", "hidden");
+        $("#btn_edit_" + rowid).hide();
+        $("#btn_del_" + rowid).hide();
+        $("#btn_save_" + rowid).show();
+        $("#btn_cancel_" + rowid).show();
+
+        $("#onEdit").val("Y");
+        getRole();
+        getRoleAuth(roleId);
+
+    }
+
+
+    //jqgrid中的儲存
+    function TheOnSaveFunction(rowid) {
+        
+        jQuery("#grid").saveRow(rowid, false);
+
+
+        //add by daiyu 20200110
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+        if (rowData.createUid == "") {
+            $("#grid").jqGrid("setCell", rowid, "execAction", "A");
+
+            var unitSPos = $('#hidRoleAuthUnit').val().indexOf(rowData.roleId) + rowData.roleId.length;
+            var authUnit = $('#hidRoleAuthUnit').val().substring(unitSPos + 1, unitSPos + 6)
+            
+            $("#grid").jqGrid("setCell", rowid, "roleAuthUnit", authUnit);
+            $("#grid").jqGrid("setCell", rowid, "roleAuthUnitNm", rowData.roleId);
+
+        } else {
+            $("#grid").jqGrid("setCell", rowid, "execAction", "U");
+        }
+        //end add 20200110
+
+
+        if ($("#valueErr").val() == "Y") {
+        } else {
+            $('#qryRoleAuth').children().remove();
+            DisplayEditButton(rowid);
+
+        }
+    }
+
+
+    //jqgrid中的取消
+    function TheOnCancelFunction(rowid) {
+        $('#qryRoleAuth').children().remove();
+
+        jQuery("#grid").restoreRow(rowid);
+
+
+        $("#btn_save_" + rowid).css("visibility", "hidden");
+        $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+        $("#btn_edit_" + rowid).css("visibility", "visible");
+        $("#btn_del_" + rowid).css("visibility", "visible");
+        $("#btn_edit_" + rowid).show();
+        $("#btn_del_" + rowid).show();
+        $("#btn_save_" + rowid).hide();
+        $("#btn_cancel_" + rowid).hide();
+        $('#onEdit').val('');
+        $('#valueErr').val('');
+
+    }
+
+
+
+    function DisplayEditButton(rowid) {
+        if ($("#valueErr").val() == "Y") {
+        } else {
+
+
+
+            jQuery("#grid").trigger("reloadGrid");
+            //alert("rowid is " + rowid);
+            $("#btn_save_" + rowid).css("visibility", "hidden");
+            $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+            $("#btn_edit_" + rowid).css("visibility", "visible");
+            $("#btn_del_" + rowid).css("visibility", "visible");
+            $("#btn_edit_" + rowid).show();
+            $("#btn_del_" + rowid).show();
+            $("#btn_save_" + rowid).hide();
+            $("#btn_cancel_" + rowid).hide();
+
+            $("#onEdit").val("");
+
+
+        }
+
+
+    }
+
+
+
+    $(function () {
+
+        var bHaveData = '@ViewBag.bHaveData';
+        $("#cUserName").attr('disabled', true);
+        $('#hidRole').val('@Html.Raw(ViewBag.roleList)');
+        $('#hidRoleAll').val('@Html.Raw(ViewBag.roleAllList)');
+        $('#hidRoleAuthUnit').val('@Html.Raw(ViewBag.roleAuthUnitList)');
+
+        $("#btnClear").hide();
+
+        if (bHaveData.toUpperCase() == "TRUE") {
+            $('#isMail').val($('#hidisMail').val());
+            $('#isDisabled').val($('#hidisDisabled').val());
+            $("#cUserID").attr('disabled', true);
+
+            qryRole();
+
+        } else {
+
+            $('#isDisabled').val('N');
+            $('#isMail').val('N');
+            $("#btnQryHis").hide();
+
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($('#cUserID').val().length > 0)
+                validationSummary.append('<li>' + '無此使用者資料' + '</li>');
+        }
+        if ($("#hidDataStatus").val() != null) {
+            if ($("#hidDataStatus").val().substring(0, 1) == "2") {
+                $("#btnModify").attr('disabled', true);
+            }
+        }
+
+        //清空
+        $("#btnClear").click().on('click', function () {
+            $('#cUserID').val('');
+            $('#hidUserId').val('');
+            $('#cUserName').val('');
+            $('#hidUserId').val('');
+            $('#hidUserId').val('');
+            $('#isDisabled').val('N');
+            $('#isMail').val('N');
+
+            $('#onEdit').val('');
+            $('#valueErr').val('N');
+
+            $("#btnQryHis").hide();
+            $("#btnModify").attr('disabled', false);
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+            $('#validationSummary').children().remove();
+
+        });
+
+        //返回
+        $("#btnRtn").click().on('click', function () {
+
+            var param = $('#cUserID').val();
+            var url = '@Url.Action("Index", "UserMgr", new { cUserID = "__param__" })';
+            window.location.href = url.replace('__param__', encodeURIComponent(param));
+
+        });
+
+        //查詢歷史紀錄
+        $("#btnQryHis").click().on('click', function () {
+            var param = $('#hidUserId').val();
+            var url = '@Url.Action("userHis", "UserMgr", new { cUserID = "__param__" })';
+            window.location.href = url.replace('__param__', encodeURIComponent(param));
+        });
+
+
+
+        //*-----------------------修改(申請覆核)  begin-----------------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var bPass = true;
+
+            if ($('#onEdit').val() == "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '畫面角色授權未存檔!!' + '</li>');
+            }
+
+
+            if ($('#cUserID').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入使用者帳號!!' + '</li>');
+            }
+
+
+            if ($('#isDisabled').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入停用註記!!' + '</li>');
+            }
+
+            if ($('#cUserName').val() == "" & $('#isDisabled').val() != "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '使用者帳號錯誤!!' + '</li>');
+            }
+
+            //if ($('#isMail').val() == "") {
+            //    bPass = false;
+            //    validationSummary.append('<li>' + '請輸入是否寄送MAIL!!' + '</li>');
+            //}
+
+
+            //modify by daiyu 20200110
+            //var roleData = $("#grid").jqGrid('getRowData');
+            //var roleData = $("#grid").jqGrid('getGridParam', 'data');
+
+            var authUnit = "";
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+            var roleData = [];
+            for (j = 0; j <= gridData.length - 1; j++) {
+                rowData = gridData[j];
+                if (rowData.execAction == "A" || rowData.execAction == "U" || rowData.execAction == "D") {
+                    if (authUnit != "" & authUnit != rowData.roleAuthUnit) {
+                        bPass = false;
+                        validationSummary.append('<li>' + '本次異動的角色含不同的程式OWNER單位，請重新確認!!' + '</li>');
+                    } else
+                        authUnit = rowData.roleAuthUnit;
+
+                    roleData.push({
+                        'tempId': rowData.tempId,
+                        'execAction': rowData.execAction,
+                        'roleId': rowData.roleId,
+                        'roleAuthUnit': rowData.roleAuthUnit
+
+                    });
+                }
+                    
+            }
+            //end modify 20200110
+
+            //if (roleData.length == 0) {
+            //    bPass = false;
+            //    validationSummary.append('<li>' + '請授權一個以上的角色!!' + '</li>');
+            //}
+
+
+            if (bPass == false)
+                return;
+
+
+
+
+            var execAction = "";
+            if ($('#hidUserId').val() == "")
+                execAction = "A";
+            else
+                execAction = "U";
+
+            $.blockUI();
+
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        userMgrModel: {
+                            'cUserID': $('#cUserID').val(),
+                            'isDisabled': $('#isDisabled').val(),
+                            //'isMail': $('#isMail').val()
+                        }, 'roleData': roleData, 'execAction': execAction
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("updateUser", "UserMgr")',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+
+                        if (data.success) {
+                            $("#btnModify").attr('disabled', true);
+                            validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+
+                            if (execAction == "A")
+                                $("#btnClear").show();
+                        } else {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                });
+
+            $.unblockUI();
+
+        });
+        //*-----------------------修改(申請覆核)  end-----------------------*//
+
+
+        //新增
+        $("#btnInsert").click().on('click', function () {
+
+            document.location = '@Url.Action("createUser","UserMgr")';
+
+        });
+
+        ////清除
+        //$("#btnClear").click().on('click', function () {
+        //    $('#cUserID').val('');
+        //    $('#cUserName').val('');
+        //    $('#cFlag').val('');
+        //    $('#cBelongUnitCode').val('');
+        //    $('#cBelongUnitSeq').val('');
+        //    $('#cWorkUnitCode').val('');
+        //    $('#cWorkUnitSeq').val('');
+        //    $('#cUnitCode').val('');
+        //    $('#cUnitCodeSeq').val('');
+        //    $('#codeRole').val('');
+        //    $('#cUserType').prop('checked', false);
+        //    $('#vMemo').val('');
+        //    $('#cUpdUserID').val('');
+        //    $('#cUpdDateB').val('');
+        //    $('#cUpdDateE').val('');
+
+
+
+        //    $('#qryResult').children().remove();
+
+        //    $('#validationSummary').children().remove();
+        //});
+
+
+
+
+
+        //*-----------------------授權角色資訊  begin-----------------------*//
+        function qryRole(bClearMsg) {
+            if (bClearMsg)
+                $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var jsonData = JSON.stringify({ 'userId': $("#cUserID").val() });
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryUserRole", "UserMgr")',
+                contentType: 'application/json',
+
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.roleList })
+                            .trigger("reloadGrid");
+
+
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    }
+                }
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+
+
+        //使用者角色GRID
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            caption: '使用者授權角色',
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                {
+                    label: "刪除", name: 'Action', index: 'Action', search: false, align: 'center', width:'80'
+                },
+                {
+                    label: '執行功能',
+                    name: 'execAction', align: 'center', width: '80',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getExecAction()
+                    }
+                },
+                {
+                    label: 'tempId',
+                    name: 'tempId', align: 'center', hidden: true,
+                    editable: false,
+                },
+                {
+                    label: '角色名稱',
+                    name: 'roleId', align: 'left',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRoleAll(),
+                        dataEvents: [{
+                            type: 'change', fn: function (e) {
+
+                                this.value = this.value.toUpperCase();
+                                var sel = jQuery("#grid").getGridParam('selrow');
+
+                                //$("#grid").jqGrid("setCell", sel, "roleAuthUnit", roleId);
+                                //$("#grid").jqGrid("setCell", sel, "roleAuthUnitNm", roleId);
+
+                                $("#grid").jqGrid("setCell", sel, "roleAuthUnit", this.value);
+                                $("#grid").jqGrid("setCell", sel, "roleAuthUnitNm", this.value);
+                                getRoleAuth(this.value);
+                            }
+                        }]
+                    }
+                },
+                {
+                    label: '角色所屬單位',
+                    name: 'roleAuthUnit', align: 'left', width: '250', hidden: true
+                },
+                {
+                    label: '角色所屬單位',
+                    name: 'roleAuthUnitNm', align: 'left', width: '250', 
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRoleAuthUnit()
+                    }
+
+                },
+                 {
+                     label: '授權人',
+                     name: 'createUid',
+                     align: 'center',
+                     editable: false
+                 }
+                ,
+                 {
+                     label: '授權日期',
+                     name: 'createDt',
+                     align: 'center',
+                     editable: false
+                 }
+
+            ],
+            autowidth: true,
+            height: 'auto',
+            shrinkToFit: true,
+            forceFit: true,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            pager: "#pager",
+            onSelectRow: function (id) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+                        //be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+
+                        de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+
+                        se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + rowId + "' value='儲存' onclick=\"TheOnSaveFunction('" + rowId + "');\"  />";
+                        ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + rowId + "'  value='取消' onclick=\"TheOnCancelFunction('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: de + se + ce });
+                        //jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                        $("#btn_save_" + rowId).hide();
+                        $("#btn_cancel_" + rowId).hide();
+
+                        var rowData = jQuery("#grid").jqGrid("getRowData", rowId);
+
+                        if ($("#hidRole").val().indexOf(rowData.roleId) < 0) {
+                           // $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                        }
+                    }
+                }
+            }
+        });
+        //*-----------------------授權角色資訊  begin-----------------------*//
+
+
+
+    });
+</script>
+
+

@@ -1,0 +1,1125 @@
+﻿@model FAP.Web.ViewModels.OAP0046Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var telCallList = ViewBag.telCallList as SelectList;
+    var calledPersonList = ViewBag.calledPersonList as SelectList;
+    //var level1List = ViewBag.level1List as SelectList;
+    //var level2List = ViewBag.level2List as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidTelCall", "")
+                @Html.Hidden("hidStatus", "")
+                @Html.Hidden("hidClrStatus", "")
+                @Html.Hidden("hidOPaidCd", "")
+                @Html.Hidden("hidDispatchStatus", "")
+                @Html.Hidden("hidApprStat", "")
+                @Html.Hidden("hidTelApprCode", "")
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.RadioButton("qryType", "q_paid_id", new { @checked = true, onchange = "qryTypeChange();" })
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "12", @maxlength = "10", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton("qryType", "q_policy_no", new { onchange = "qryTypeChange();" })
+                            @Html.DisplayNameFor(model => model.policy_no)：@Html.TextBoxFor(model => model.policy_no, new { @size = "11", @maxlength = "10", @disabled = true, @onkeyup = "this.value = this.value.toUpperCase();" })
+                            @Html.TextBoxFor(model => model.policy_seq, new { @size = "4", @maxlength = "3", @disabled = true })
+                            @Html.TextBoxFor(model => model.id_dup, new { @size = "2", @maxlength = "1", @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_name)：@Html.TextBoxFor(model => model.paid_name, new { @size = "30", @maxlength = "30", @disabled = true })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.RadioButton("qryType", "q_check_no", new { onchange = "qryTypeChange();" })
+                            @Html.DisplayNameFor(model => model.check_no)：@Html.TextBoxFor(model => model.check_no, new { @size = "11", @maxlength = "9", @disabled = true, @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnPrint" name="btnPrint" value="印表" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+                <br>
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_proc_no)：@Html.TextBoxFor(model => model.tel_proc_no, new { @size = "13", @maxlength = "12", @disabled = true })
+                        </td>
+                        <td>
+                            最後一次電訪日期：@Html.TextBoxFor(model => model.tel_interview_f_datetime, new { @size = "8", @maxlength = "7", @disabled = true })
+                        </td>
+
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_result_o)：@Html.DropDownList("tel_result_o", telCallList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.record_no)：@Html.TextBoxFor(model => model.record_no, new { @size = "21", @maxlength = "20" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>追蹤結果：@Html.DropDownList("tel_result", telCallList, "請選擇")
+                        </td>
+                        <td>
+                            <span style="color:red;">＊</span>處理日期：@Html.TextBoxFor(model => model.tel_interview_datetime, new { @size = "8", @maxlength = "7" }) (民國年YYYMMDD，例:0980507)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊</span>@Html.DisplayNameFor(model => model.called_person)：@Html.DropDownList("called_person", calledPersonList, "請選擇")
+                        </td>
+                        <td>
+                            <span style="color:red;">＊</span>@Html.DisplayNameFor(model => model.cust_tel)：@Html.TextBoxFor(model => model.cust_tel, new { @size = "31", @maxlength = "30" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_zip_code)：@Html.TextBoxFor(model => model.tel_zip_code, new { @size = "7", @maxlength = "6" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_mail)：@Html.TextBoxFor(model => model.tel_mail, new { @size = "50", @maxlength = "200" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.tel_addr)：@Html.TextBoxFor(model => model.tel_addr, new { @size = "100", @maxlength = "200", @onchange = "addrChange()" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.cust_counter)：@Html.TextBoxFor(model => model.cust_counter, new { @size = "3", @maxlength = "2" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.counter_date)：@Html.TextBoxFor(model => model.counter_date, new { @size = "8", @maxlength = "7" }) (民國年YYYMMDD，例:0980507)
+                        </td>
+                    </tr>
+
+                    @*<tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.level_1)：@Html.DropDownList("level_1", level1List, "請選擇")
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.level_2)：@Html.DropDownList("level_2", level2List, "請選擇")
+                    </td>
+                </tr>*@
+
+                    <tr>
+                        <td colspan="2">
+                            <span style="color:red;">＊</span>@Html.DisplayNameFor(model => model.reason)：
+                            @Html.TextAreaFor(model => model.reason, 2, 40, htmlAttributes: new { style = "width: 80%; max-width: 80%;" })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+                <br/>
+                <div class="row">
+                    <div id="qryResultProc" class="col-sm-24">
+                        <table id="gridProc"></table>
+                        <div id="pagerProc"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    function addrChange() {
+        $('#tel_addr').val(halfToFull($('#tel_addr').val()));
+    }
+
+
+    //切換查詢條件
+    function qryTypeChange() {
+        value = $('input:radio:checked[name="qryType"]').val();
+
+        if (value == 'q_paid_id') {
+            execClear(true);
+            $('input[id=qryType][value=q_paid_id]').prop("checked", true);
+
+            $('#paid_id').attr('disabled', false);
+
+            $('#policy_no').attr('disabled', true);
+            $('#policy_seq').attr('disabled', true);
+            $('#id_dup').attr('disabled', true);
+            $('#paid_name').attr('disabled', true);
+
+            $('#check_no').attr('disabled', true);
+
+
+        } else if (value == 'q_policy_no') {
+            execClear(true);
+            $('input[id=qryType][value=q_policy_no]').prop("checked", true);
+
+
+            $('#paid_id').attr('disabled', true);
+
+            $('#policy_no').attr('disabled', false);
+            $('#policy_seq').attr('disabled', false);
+            $('#id_dup').attr('disabled', false);
+            $('#paid_name').attr('disabled', false);
+
+            $('#check_no').attr('disabled', true);
+
+        } else if (value == 'q_check_no') {
+            execClear(true);
+            $('input[id=qryType][value=q_check_no]').prop("checked", true);
+
+            $('#paid_id').attr('disabled', true);
+
+            $('#policy_no').attr('disabled', true);
+            $('#policy_seq').attr('disabled', true);
+            $('#id_dup').attr('disabled', true);
+            $('#paid_name').attr('disabled', true);
+
+            $('#check_no').attr('disabled', false);
+
+        }
+
+    }
+
+
+    function qryTelProc(tel_proc_no) {
+        $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'tel_proc_no': tel_proc_no
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryTelProc", "OAP0047")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面資料
+                        $('#tel_proc_no').val(data.model.tel_proc_no);
+                        $('#tel_interview_f_datetime').val(data.model.tel_interview_f_datetime);
+                        $('#tel_result_o').val(data.model.tel_result_o);
+                        $('#record_no').val(data.model.record_no);
+                        $('#tel_result').val("");
+                        $('#tel_interview_datetime').val("");
+                        $('#called_person').val(data.model.called_person);
+                        $('#cust_tel').val(data.model.cust_tel);
+                        $('#tel_zip_code').val(data.model.tel_zip_code);
+                        $('#tel_mail').val(data.model.tel_mail);
+                        $('#tel_addr').val(data.model.tel_addr);
+                        $('#cust_counter').val(data.model.cust_counter);
+                        $('#counter_date').val(data.model.counter_date);
+                        $('#reason').val(data.model.reason);
+
+                        if (data.model.data_status == "2") {
+                            $('#record_no').attr('disabled', true);
+                            $('#tel_result').attr('disabled', true);
+                            $('#tel_interview_datetime').attr('disabled', true);
+                            $('#called_person').attr('disabled', true);
+                            $('#cust_tel').attr('disabled', true);
+                            $('#tel_zip_code').attr('disabled', true);
+                            $('#tel_mail').attr('disabled', true);
+                            $('#tel_addr').attr('disabled', true);
+                            $('#cust_counter').attr('disabled', true);
+                            $('#counter_date').attr('disabled', true);
+                            $('#reason').attr('disabled', true);
+                        } else {
+                            $('#record_no').attr('disabled', false);
+                            $('#tel_result').attr('disabled', false);
+                            $('#tel_interview_datetime').attr('disabled', false);
+                            $('#called_person').attr('disabled', false);
+                            $('#cust_tel').attr('disabled', false);
+                            $('#tel_zip_code').attr('disabled', false);
+                            $('#tel_mail').attr('disabled', false);
+                            $('#tel_addr').attr('disabled', false);
+                            $('#cust_counter').attr('disabled', false);
+                            $('#counter_date').attr('disabled', false);
+                            $('#reason').attr('disabled', false);
+                        }
+
+                        //更新畫面GRID
+                        jQuery("#gridProc").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+                    }
+                    else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+    }
+
+    //查詢"給付對象姓名"
+    function qryName() {
+        $('#paid_id').val($('#paid_id').val().toUpperCase());
+
+        //if ($('#paid_id').val().length == 10) {
+            $('#paid_name').val("");
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'paid_id': $('#paid_id').val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryPaidName", "OAP0047")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success)
+                        $('#paid_name').val(data.paid_name);
+                    else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+    
+
+
+
+    //清畫面
+    function execClear(clearQry) {
+        recList = [];
+        recPList = [];
+
+        if (clearQry) {
+            $('#validationSummary').children().remove();
+
+            //畫面功能鍵
+            $('#btnModify').attr('disabled', true);
+            $('#btnPrint').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+
+            //查詢條件
+            $('input[id=qryType][value=q_paid_id]').prop("checked", true);
+            $('#paid_id').attr('disabled', false);
+            $('#paid_id').val("");
+
+            $('#policy_no').attr('disabled', true);
+            $('#policy_seq').attr('disabled', true);
+            $('#id_dup').attr('disabled', true);
+            $('#paid_name').attr('disabled', true);
+            $('#policy_no').val("");
+            $('#policy_seq').val("");
+            $('#id_dup').val("");
+            $('#paid_name').val("");
+
+            $('#check_no').attr('disabled', true);
+            $('#check_no').val("");
+
+        }
+
+
+
+        //查詢結果
+        $('#tel_interview_datetime').val("");
+        $('#tel_interview_f_datetime').val("");
+        $('#tel_proc_no').val("");
+        $('#tel_result').val("");
+        $('#tel_result_o').val("");
+        $('#record_no').val("");
+        $('#called_person').val("");
+        $('#cust_tel').val("");
+        $('#tel_zip_code').val("");
+        $('#tel_mail').val("");
+        $('#tel_addr').val("");
+        $('#cust_counter').val("");
+        $('#counter_date').val("");
+
+        //$('#level_1').val("");
+        //$('#level_2').val("");
+        $('#reason').val("");
+
+        jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+    jQuery("#gridProc").jqGrid('clearGridData').trigger("reloadGrid");
+
+    }
+
+
+
+    //取得"處理結果"下拉選單
+    function getTelCall() {
+        return $('#hidTelCall').val();
+    }
+
+    //取得"電訪對象"下拉選單
+    function getCalledPerson() {
+        return $('#hidCalledPerson').val();
+    }
+
+    //取得"資料狀態"下拉選單
+    function getStatus() {
+        return $('#hidStatus').val();
+    }
+
+    //取得"清理狀態"下拉選單
+    function getClrStatus() {
+        return $('#hidClrStatus').val();
+    }
+
+    //取得"給付性質"下拉選單
+    function getOPaidCd() {
+        return $('#hidOPaidCd').val();
+    }
+
+    //取得"派案狀態"下拉選單
+    function getDispatchStatus() {
+        return $('#hidDispatchStatus').val();
+    }
+
+    //取得"覆核狀態"下拉選單
+    function getApprStat() {
+        return $('#hidApprStat').val();
+    }
+
+    //取得"電訪覆核結果"下拉選單
+    function getTelApprCode() {
+        return $('#hidTelApprCode').val();
+    }
+
+    //執行查詢
+    function qryTelInterview() {
+        recList = [];
+            recPList = [];
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            value = $('input:radio:checked[name="qryType"]').val();
+            if (value == 'q_paid_id') {
+                if ($("#paid_id").val().length == 0) {
+                    validationSummary.append('<li>' + '請輸入「給付對象ID」!!' + '</li>');
+                    return
+                }
+            } else if (value == 'q_check_no') {
+                if ($("#check_no").val().length == 0) {
+                    validationSummary.append('<li>' + '請輸入「支票號碼」!!' + '</li>');
+                    return
+                }
+            } else if (value == 'q_policy_no') {
+                if ($("#policy_no").val().length == 0 || $("#policy_seq").val().length == 0) {
+                    validationSummary.append('<li>' + '請輸入「保單號碼」!!' + '</li>');
+                    return
+                }
+
+                if ($("#paid_name").val().length == 0) {
+                    validationSummary.append('<li>' + '請輸入「給付對象姓名」!!' + '</li>');
+                    return
+                }
+            }
+
+            $('#paid_id').attr('disabled', true);
+            $('#policy_no').attr('disabled', true);
+            $('#policy_seq').attr('disabled', true);
+            $('#id_dup').attr('disabled', true);
+            $('#paid_name').attr('disabled', true);
+            $('#check_no').attr('disabled', true);
+
+            $('#btnQry').attr('disabled', true);
+            $('#btnModify').attr('disabled', false);
+
+
+            var jsonData = JSON.stringify({
+                model: {
+                    'qType': value
+                    , 'paid_id': $("#paid_id").val()
+                    , 'policy_no': $("#policy_no").val()
+                    , 'policy_seq': $("#policy_seq").val()
+                    , 'id_dup': $("#id_dup").val()
+                    , 'paid_name': $("#paid_name").val()
+                    , 'check_no': $("#check_no").val()
+                }
+
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryTelInterview", "OAP0047")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+                        else {
+                            if (value != 'q_paid_id' & data.paid_id.length > 0) {
+                                alert("查詢出的資料有給付對象ID，將改以給付對象ID查詢!!!")
+                                execClear(true);
+                                $("#paid_id").val(data.paid_id);
+                                qryTelInterview();
+                            }
+
+
+                            $('#btnPrint').attr('disabled', false);
+                        }
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+
+    }
+
+
+
+    //勾選、取消勾選電訪的支票
+    var $grid = $("#grid"), recList = [], ckRec = function (chItem, rowId) {
+        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+
+        var value = chItem.checked;
+        var index = $.inArray(rowId, recList);
+
+        if (value == true) {
+            $grid.jqGrid('setSelection', rowId, true);
+            recList.push(rowId);
+        } else {
+            if (index >= 0) {
+                $grid.jqGrid('setSelection', rowId, false);
+                recList.splice(index, 1);
+            }
+        }
+    };
+
+
+    //勾選、取消勾選列印的支票
+    var $grid = $("#grid"), recPList = [], ckRecP = function (chItem, rowId) {
+        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+        var value = chItem.checked;
+        var index = $.inArray(rowId, recPList);
+
+        if (value == true) {
+            recPList.push(rowId);
+        } else {
+            if (index >= 0) {
+                recPList.splice(index, 1);
+            }
+        }
+    };
+
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnPrint').attr('disabled', true);
+
+
+            $('#hidTelCall').val('@Html.Raw(ViewBag.telCalljqList)');
+            $('#hidStatus').val('@Html.Raw(ViewBag.statusjqList)');
+            $('#hidClrStatus').val('@Html.Raw(ViewBag.clrStatusjqList)');
+            $('#hidOPaidCd').val('@Html.Raw(ViewBag.oPaidCdjqList)');
+            $('#hidDispatchStatus').val('@Html.Raw(ViewBag.dispatchStatusjqList)');
+            $('#hidApprStat').val('@Html.Raw(ViewBag.apprStatjqList)');
+            $('#hidTelApprCode').val('@Html.Raw(ViewBag.telApprCodejqList)');
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            execClear(true);
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+    jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+    jQuery("#gridProc").jqGrid('clearGridData').trigger("reloadGrid");
+            qryTelInterview();
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------電訪明細 GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            caption: '電訪明細',
+            localReader: { id: "tel_proc_no" },
+            colModel: [
+                 //{
+                 //    label: 'temp_id',
+                 //    name: 'temp_id', align: 'center', hidden: true,
+                 //    editable: false,
+                 //},
+                // {
+                //     label: '維護',
+                //     name: 'rec', index: 'rec', align: 'center', width: '60', editable: true
+                //        , formatter: function (cellvalue, options, rowObject) {
+                //            var id = options.rowId.length == 0 ? "0" : options.rowId;
+                //            return '<input type="checkbox" id="chk_rec_' + id + '" onClick="ckRec(this,' + '\'' + id + '\'' + ')"';
+                //        }
+                //},
+                //{
+                //    label: '印表',
+                //    name: 'recP', index: 'recP', align: 'center', width: '60', editable: true
+                //    , formatter: function (cellvalue, options, rowObject) {
+                //        var id = options.rowId.length == 0 ? "0" : options.rowId;
+                //        return '<input type="checkbox" id="chk_recP_' + id + '" onClick="ckRecP(this,' + '\'' + id + '\'' + ')"';
+                //    }
+                //},
+                {
+                    label: '電訪編號',
+                    name: 'tel_proc_no', align: 'center', width: '120', editable: false
+                },
+                {
+                    label: '追蹤人員',
+                    name: 'update_id', align: 'center', width: '110', editable: false
+                },
+                {
+                    label: '電訪覆核結果',
+                    name: 'tel_appr_result', align: 'center', editable: false, width: '100',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getTelApprCode()
+                    }
+                },
+
+                  {
+                      label: '支票號碼',
+                      name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                  },
+                  {
+                      label: '支票帳號簡稱',
+                      name: 'check_acct_short', align: 'center', width: '110', editable: false
+                  },
+                  {
+                      label: '支票到期日',
+                      name: 'check_date', align: 'center', width: '110', editable: false
+                },
+
+                {
+                    label: '支票金額',
+                    name: 'check_amt', align: 'right', width: '100',
+                    editable: false,
+                    formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                },
+                {
+                    label: '派案狀態',
+                    name: 'dispatch_status', align: 'center', editable: false, width: '80',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getDispatchStatus()
+                    }
+                },
+                {
+                    label: '電訪處理結果',
+                    name: 'tel_result', align: 'center', editable: false, width: '110',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getTelCall()
+                    }
+                },
+                  {
+                      label: '資料狀態',
+                      name: 'data_status', align: 'center', editable: false, width: '80',
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getStatus()
+                      }
+                }
+                
+
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            //sortname: "exec_date",
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 25,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (ids) {
+                qryTelProc(ids);
+            },
+            loadComplete: function () {
+                
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+            }
+        });
+
+        //*-------------------電訪明細 GRID end--------------------*//
+
+
+
+        //*-------------------處理狀態 GRID begin--------------------*//
+        $("#gridProc").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            caption: '處理結果及追蹤歷程',
+            localReader: { id: "aply_no" },
+            colModel: [
+                {
+                    label: 'aply_no',
+                    name: 'aply_no', align: 'center', hidden: true,
+                    editable: false,
+                },
+                {
+                    label: '類別',
+                    name: 'data_type_desc', align: 'center', width: '110', 
+                    editable: false,
+                },
+                {
+                    label: '處理人員',
+                    name: 'update_id', align: 'center', editable: false, width: '80'
+                },
+                {
+                    label: '處理人員',
+                    name: 'update_name', align: 'center', width: '100', editable: false, width: '100'
+                },
+                {
+                    label: '處理日期時間',
+                    name: 'update_datetime', align: 'center', width: '120', editable: false, width: '100'
+                },
+                {
+                    label: '電訪處理結果',
+                    name: 'tel_result', align: 'center', editable: false, width: '100',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getTelCall()
+                    }
+                },
+                {
+                    label: '覆核人員',
+                    name: 'appr_id', align: 'center',editable: false, width: '80'
+                },
+                {
+                    label: '覆核人員',
+                    name: 'appr_name', align: 'center', editable: false, width: '100'
+                },
+                {
+                    label: '覆核日期時間',
+                    name: 'approve_datetime', align: 'center',editable: false, width: '100'
+                },
+                {
+                    label: '覆核狀態',
+                    name: 'appr_stat', align: 'center', editable: false, width: '80',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getApprStat()
+                    }
+                },
+                {
+                    label: '電訪覆核結果',
+                    name: 'tel_appr_result', align: 'center', editable: false, width: '100',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getTelApprCode()
+                    }
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            //sortname: "exec_date",
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 25,
+            rowList: [10, 25, 50],
+            pager: "#pagerProc",
+            
+            loadComplete: function () {
+
+            }
+        });
+
+        //*-------------------處理狀態 GRID end--------------------*//
+
+
+
+    //申請覆核
+    $("#btnModify").on("click", function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        var bPass = true;
+        var msg = "";
+
+        //檢核輸入的資料是否正確
+
+
+        if (!checkChtDate($('#tel_interview_datetime').val(), true)) {
+            bPass = false;
+            validationSummary.append('<li>「處理日期」錯誤!!</li>');
+        } else {
+            var now = getChtDate(3);
+            if ($('#tel_interview_datetime').val() > now) {
+                bPass = false;
+                validationSummary.append('<li>「處理日期」不可大於系統日!!</li>');
+            }
+        }
+
+        if (!checkChtDate($('#counter_date').val(), false)) {
+            bPass = false;
+            validationSummary.append('<li>「臨櫃日期」錯誤!!</li>');
+        }
+
+        if ($('#tel_result').val() == "") {
+            bPass = false;
+            validationSummary.append('<li>請輸入「電訪處理結果」!!</li>');
+        }
+
+
+        if ($('#called_person').val() == "") {
+            bPass = false;
+            validationSummary.append('<li>請輸入「電訪對象」!!</li>');
+        }
+
+        if ($('#cust_tel').val() == "") {
+            bPass = false;
+            validationSummary.append('<li>請輸入「電話」!!</li>');
+        }
+
+        if ($('#reason').val() == "") {
+            bPass = false;
+            validationSummary.append('<li>請輸入「原因說明」!!</li>');
+        }
+
+
+        if ($('#tel_result').val() == "3" & ($('#tel_zip_code').val() == "" || $('#tel_addr').val() == "")) {
+            bPass = false;
+            validationSummary.append('<li>追蹤結果為「寄信」時，請輸入「地址」</li > ');
+        }
+
+        if ($('#tel_result').val() == "4" & $('#tel_mail').val() == "" ) {
+            bPass = false;
+            validationSummary.append('<li>追蹤結果為「 E-MAIL」時，請輸入「 E-MAIL」</li > ');
+        }
+
+        if ($('#tel_zip_code').val() != "") {
+            if (!checkNumP($('#tel_zip_code').val())) {
+                bPass = false;
+                validationSummary.append('<li>「郵遞區號」，需為數值</li > ');
+            }
+        }
+
+        var rowObject = [];
+        var id = jQuery("#grid").getGridParam('selrow');
+        if (id == null) {
+            validationSummary.append('<li>' + '請選擇要覆核的資料！' + '</li>');
+            return
+        } else {
+            rowData = jQuery("#grid").getRowData(id);
+
+            //判斷可否"申請覆核"
+            if (rowData.data_status != "2" & rowData.status != "1"
+                & (rowData.tel_appr_result == "11" || rowData.tel_appr_result == "12" || rowData.tel_appr_result == "15")) {
+                rowObject.push({
+                    'tel_proc_no': rowData.tel_proc_no
+                });
+            } else {
+                validationSummary.append('<li>此電訪編號不可執行申請覆核</li > ');
+    bPass = false;
+            }
+        }
+           
+
+
+
+        if (bPass == false)
+            return;
+
+
+        var jsonData = JSON.stringify({
+            model: {
+                'paid_id': $("#paid_id").val(),
+                'policy_no': $("#policy_no").val(),
+                'policy_seq': $("#policy_seq").val(),
+                'id_dup': $("#id_dup").val(),
+                'paid_name': $("#paid_name").val(),
+                'check_no': $("#check_no").val(),
+                'tel_interview_f_datetime': $("#tel_interview_f_datetime").val(),
+                'tel_interview_datetime': $("#tel_interview_datetime").val(),
+                'tel_proc_no': $("#tel_proc_no").val(),
+                'tel_result': $("#tel_result").val(),
+                'tel_result_o': $("#tel_result_o").val(),
+                'record_no': $("#record_no").val(),
+                'called_person': $("#called_person").val(),
+                'cust_tel': $("#cust_tel").val(),
+                'tel_zip_code': $("#tel_zip_code").val(),
+                'tel_mail': $("#tel_mail").val(),
+                'tel_addr': $("#tel_addr").val(),
+                'cust_counter': $("#cust_counter").val(),
+                'counter_date': $("#counter_date").val(),
+                //'level_1': $("#level_1").val(),
+                //'level_2': $("#level_2").val(),
+                'reason': $("#reason").val(),
+            },
+            'gridData': rowObject
+        });
+
+        $.blockUI();
+
+        $.ajax({
+            type: "POST",
+            data: jsonData,
+            dataType: "json",
+            url: '@Url.Action("execSave", "OAP0047")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    $("#btnModify").attr('disabled', true);
+
+                    if (data.err.length > 0) {
+                        validationSummary.append('<li>' + '以下資料覆核中，不可修改/刪除此筆資料：' + data.err + '</li>');
+                        return;
+                    }
+
+                    validationSummary.append('<li>' + '申請覆核成功：' + data.aply_no + '</li>');
+                    $("#tel_proc_no").val(data.tel_proc_no);
+
+                    $("#grid").jqGrid("setCell", data.tel_proc_no, "data_status", "2");
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI();
+            }
+        });
+
+
+
+    });
+
+
+
+    //*---------------報表列印 begin ----------------*//
+    $("#btnPrint").click().on('click', function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        var rowObject = [];
+        var id = jQuery("#grid").getGridParam('selrow');
+        if (id == null) {
+            validationSummary.append('<li>' + '請選擇要列印的資料！' + '</li>');
+            return
+        } else {
+            rowData = jQuery("#grid").getRowData(id);
+
+            rowObject.push({
+                'system': rowData.check_no,
+                'check_no': rowData.check_no,
+                'check_acct_short': rowData.check_acct_short,
+                'check_date': rowData.check_date,
+                'tel_proc_no': rowData.tel_proc_no
+            });
+        }
+            
+
+    
+        var jsonData = JSON.stringify({
+            'paid_id': $("#paid_id").val(),
+            'paid_name': $("#paid_name").val(),
+            'tel_proc_no': $("#tel_proc_no").val(),
+    'print_srce': 'screen',
+    'pgm_srce': '0047',
+            'gridData': rowObject,
+    'model': {
+                'paid_id': $("#paid_id").val(),
+                'policy_no': $("#policy_no").val(),
+                'policy_seq': $("#policy_seq").val(),
+                'id_dup': $("#id_dup").val(),
+                'paid_name': $("#paid_name").val(),
+        'check_no': $("#check_no").val(),
+        'tel_interview_f_datetime': $("#tel_interview_f_datetime").val(),
+                'tel_interview_datetime': $("#tel_interview_datetime").val(),
+                'tel_proc_no': $("#tel_proc_no").val(),
+                'tel_result': $("#tel_result").val(),
+                'record_no': $("#record_no").val(),
+                'called_person': $("#called_person").val(),
+                'cust_tel': $("#cust_tel").val(),
+                'tel_zip_code': $("#tel_zip_code").val(),
+                'tel_mail': $("#tel_mail").val(),
+                'tel_addr': $("#tel_addr").val(),
+                'cust_counter': $("#cust_counter").val(),
+                'counter_date': $("#counter_date").val(),
+                //'level_1': $("#level_1").val(),
+                //'level_2': $("#level_2").val(),
+                'reason': $("#reason").val(),
+            }
+        });
+        $.blockUI();
+
+        $.ajax({
+            url: "@Url.Action("Print", "OAP0046")",
+            data: jsonData,
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+
+
+                var link = '';
+                if (data.success) {
+                    var url = '/OAP0046/downloadRpt?id=' + data.guid;
+
+                    window.location = url;
+
+                    @*link = '@Url.HttpRouteUrl("Report", new { aspx = "OAP0011PViewer",  id = "-1"})';
+                    link = link.replace("-1", data.guid);
+                    window.open(link);*@
+
+
+
+                } else {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (data.err.length > 0) {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+
+                $.unblockUI();
+            },
+            error: function () {
+                $.unblockUI();
+            }
+        });
+
+
+    });
+
+    //*---------------報表列印 end ----------------*//
+
+    });
+</script>
+
+
+
+

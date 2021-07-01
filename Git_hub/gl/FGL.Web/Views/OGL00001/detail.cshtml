@@ -1,0 +1,1079 @@
+﻿@model FGL.Web.ViewModels.OGL00001Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName + " 明細畫面";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+    var isIfrs4List = ViewBag.isIfrs4List as SelectList;
+    var lodprmTypeList = ViewBag.lodprmTypeList as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidYNFlag", "")
+                @Html.Hidden("hidExecType", "")
+                @Html.Hidden("hidAcctType", "")
+                @Html.Hidden("hidAplyNo", "")
+                @Html.Hidden("hidApprStat", "")
+
+                <table>
+                    <tr>
+                        <td colspan="2"  style="border-bottom:dashed 1px">
+                            查詢暫存檔資料(勾選表暂存檔、未勾選表正式檔)：<input type="checkbox" id="isQryTmp" disabled>
+                            @*@Html.DisplayNameFor(model => model.isQryTmp)：@Html.CheckBox("isQryTmp", Model.isQryTmp.Equals("1"))*@
+                            </td>
+                        </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fuMk)：@Html.DropDownList("fuMk", ynList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.itemCon)：@Html.DropDownList("itemCon", itemConList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.discPartFeat)：@Html.DropDownList("discPartFeat", ynList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isIfrs4)：@Html.DropDownList("isIfrs4", isIfrs4List, "請選擇")
+                        </td>
+                        
+                    </tr>
+                    <tr>
+                        <td colspan="2"  style="border-bottom:dashed 1px"></td>
+                        </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.investTypeMk)：@Html.DropDownList("investTypeMk", ynList, "請選擇", new { @onchange = "updProdAttr()"})
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.investTradMk)：@Html.DropDownList("investTradMk", ynList, "請選擇", new { @onchange = "updProdAttr()"})
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.lodprmMk)：@Html.DropDownList("lodprmMk", ynList, "請選擇", new { @onchange = "updProdAttr()"})
+                        </td>
+                        <td>
+                            @*@Html.DisplayNameFor(model => model.extSchedulMk)：@Html.DropDownList("extSchedulMk", ynList, "請選擇", new { @onchange = "updProdAttr()"})*@
+                            @Html.DisplayNameFor(model => model.pakindDmopMk)：@Html.DropDownList("pakindDmopMk", ynList, "請選擇", new { @onchange = "updProdAttr()" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.coiType)：@Html.DropDownList("coiType", ynList, "請選擇", new { @onchange = "updProdAttr()"})
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnConfirm" name="btnConfirm" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnClear" name="btnClear" value="新增下筆" class="btn btn-primary" />
+                        <input type="button" id="btnDelTmp" name="btnDelTmp" value="刪除暫存資料" class="btn btn-primary" />
+                        <input type="button" id="btnReturn" name="btnReturn" value="返回" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                @Html.Hidden("onEdit", "")
+                @Html.Hidden("valueErr", "")
+                <button id="btnNew" name="btnNew" class="btn btn-primary">新增科目明細</button>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    var lastSelectRoot = "";
+
+
+    //刪除暫存資料
+    $("#btnDelTmp").on("click", function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        if($("#hidAplyNo").val() == "")
+            validationSummary.append('<li>無暫存資料需刪除!!</li>');
+
+        if (window.confirm('是否刪除暫存資料？') == true) {
+            $.blockUI(); //畫面鎖起來
+
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'aplyNo': $("#hidAplyNo").val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("delTmpData", "OGL00001")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    if (data.success) {
+                        $("#hidAplyNo").val("");
+                        $("#hidApprStat").val("");
+                        $("#isQryTmp").prop("checked", false);
+                        validationSummary.append('<li>作業成功!!</li>');
+                        qryDetail(false);
+                    } else {
+                        validationSummary.append('<li>' + err + '</li>');
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+
+                }
+            });
+        }
+    });
+
+
+    $("#isQryTmp").on("onchange", function () {
+        if($('#isQryTmp')[0].checked)
+            $("#btnDelTmp").prop("disabled", false);
+        else
+            $("#btnDelTmp").prop("disabled", true);
+    });
+
+
+    //新增
+    $("#btnNew").on("click", function () {
+
+        if (!$("#productType").prop('disabled')) {
+            if (chkProdHead()) {
+                if (window.confirm('"請確認商品屬性設定是否正確？') == true) {
+
+                    $("#productType").attr('disabled', true);
+                    $("#fuMk").attr('disabled', true);
+                    $("#itemCon").attr('disabled', true);
+                    $("#discPartFeat").attr('disabled', true);
+                    $("#isIfrs4").attr('disabled', true);
+
+                    $("#productType").css({ 'background': '#cccccc' });
+                    $("#fuMk").css({ 'background': '#cccccc' });
+                    $("#itemCon").css({ 'background': '#cccccc' });
+                    $("#discPartFeat").css({ 'background': '#cccccc' });
+                    $("#isIfrs4").css({ 'background': '#cccccc' });
+
+                    //if ($("#hidExecType").val() == "A")
+                    showNewLine();
+                } else
+                    return;
+
+            }
+
+        } else
+            showNewLine();
+    });
+
+    function showNewLine() {
+        if ($("#onEdit").val() == "Y") {
+            alert("畫面仍有資料在編輯中，不可修改!!");
+            return;
+        }
+
+        $("#grid").jqGrid('addRow', "new", { addParams: { position: "last" } });
+        var sel_id = $('#grid').jqGrid('getGridParam', 'selrow');
+        //$("#grid").jqGrid("setCell", sel_id, "execAction", "A");
+
+
+        be = "<input class=\"edit\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_edit_" + sel_id + "' value='修改' onclick=\" TheOnEditFunction ('" + sel_id + "');\"  />";
+        de = "<input class=\"del\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_del_" + sel_id + "' value='刪除' onclick=\" TheOnDelFunction ('" + sel_id + "');\"  />";
+
+        se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + sel_id + "' value='儲存' onclick=\"TheOnSaveFunction('" + sel_id + "');\"  />";
+        ce = "<input class=\"cancel\" style='height:28px;width:50px; ' type='button' id='btn_cancel_" + sel_id + "'  value='取消' onclick=\"TheOnCancelFunction('" + sel_id + "');\"  />";
+        jQuery("#grid").jqGrid('setRowData', sel_id, { Action: be + de + se + ce });
+        $("#btn_edit_" + sel_id).hide();
+        $("#btn_del_" + sel_id).hide();
+        $("#onEdit").val("Y");
+
+        lastSelectRoot = sel_id;
+    }
+
+
+    //jqgrid中的刪除
+    function TheOnDelFunction(rowid) {
+        if ($("#onEdit").val() == "Y") {
+            alert("畫面仍有資料在編輯中，不可修改!!");
+            return;
+        } else {
+            if (window.confirm('您確定要刪除嗎？') == true) {
+                chkData(rowid, "Delete");
+            }
+        }
+    }
+
+
+
+    //jqgrid中的修改
+    function TheOnEditFunction(rowid) {
+        if ($("#onEdit").val() == "Y") {
+            alert("畫面仍有資料在編輯中，不可修改!!");
+            return;
+        } else {
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+
+            jQuery("#grid").setSelection(rowid, true);
+            jQuery("#grid").editRow(rowid);
+
+            $("#btn_save_" + rowid).css("visibility", "visible");
+            $("#btn_cancel_" + rowid).css("visibility", "visible");
+
+            $("#btn_edit_" + rowid).css("visibility", "hidden");
+            $("#btn_del_" + rowid).css("visibility", "hidden");
+            $("#btn_edit_" + rowid).hide();
+            $("#btn_del_" + rowid).hide();
+            $("#btn_save_" + rowid).show();
+            $("#btn_cancel_" + rowid).show();
+
+            $("#onEdit").val("Y");
+            lastSelectRoot = rowid;
+        }
+
+    }
+
+    //jqgrid中的儲存
+    function TheOnSaveFunction(rowid) {
+        chkData(rowid, "Edit")
+    }
+
+
+
+    //檢查該筆資料是否合法
+    function chkData(rowid, execBtn) {
+        var execAction = "";
+
+        var acctType = "";
+        var acctItem = "";
+        var corpNo = "";
+        var dmopMk = "";
+
+        var errMsg = "";
+        rowData = $("#grid").jqGrid('getRowData', rowid);
+
+
+        if (execBtn == "Edit") {
+
+            //var rowid = $('#grid').jqGrid('getGridParam', 'selrow');
+
+
+            acctType = $("#" + rowid + "_acctType").val();
+            acctItem = $("#" + rowid + "_acctItem").val();
+            corpNo = $("#" + rowid + "_corpNo").val();
+            dmopMk = $("#" + rowid + "_dmopMk").val();
+
+            if (acctType.length == 0)
+                errMsg += "　請輸入'帳務類別'！";
+
+            if (acctItem.length == 0)
+                errMsg += "　請輸入'科目代號'！";
+
+            if (corpNo.length == 0)
+                errMsg += "　請輸入'帳本'！";
+
+            if ("1" == corpNo || "3" == corpNo || "7" == corpNo || "9" == corpNo) {
+
+            } else {
+                errMsg += "　'帳本'錯誤，僅能輸入1、3、7或9！";
+            }
+
+            if (dmopMk.length == 0)
+                errMsg += "　請輸入'限躉繳'！";
+
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+            for (i = 0, count = gridData.length; i < count; i += 1) {
+
+                if (rowData.tempId != gridData[i].tempId
+                    && acctType == gridData[i].acctType
+                    && acctItem == gridData[i].acctItem
+                    && corpNo == gridData[i].corpNo)
+                    errMsg += "　資料重覆請確認";
+            }
+
+
+
+            if (errMsg != "") {
+                $("#valueErr").val("Y");
+                alert(errMsg);
+                return;
+            } else {
+                jQuery("#grid").saveRow(rowid, false); 
+
+                //if (rowData.tempId.indexOf("jqg") < 0 && rowData.tempId.length > 0) {
+                //    $("#grid").jqGrid("setCell", rowid, "execAction", "U");
+
+                //}
+                $("#valueErr").val("");
+                writeScreenToHis(rowid, "U");
+
+                DisplayEditButton(rowid);
+            }
+
+
+        } else {
+
+            rowData = $("#grid").jqGrid('getRowData', rowid);
+            if (rowData.tempId.indexOf("jqg") < 0 && rowData.tempId.length > 0) {
+                //$("#grid").jqGrid("setCell", rowid, "execAction", "D");
+            } else {
+                $("#grid").jqGrid('delRowData', rowid);
+                jQuery("#grid").trigger("reloadGrid");
+            }
+
+            writeScreenToHis(rowid, "D");
+        }
+    }
+
+    //jqgrid中的儲存
+    function TheOnSaveFunction(rowid) {
+        chkData(rowid, "Edit")
+    }
+
+    //jqgrid中的取消
+    function TheOnCancelFunction(rowid) {
+        jQuery("#grid").restoreRow(rowid);
+
+
+        $("#btn_save_" + rowid).css("visibility", "hidden");
+        $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+        $("#btn_edit_" + rowid).css("visibility", "visible");
+        $("#btn_del_" + rowid).css("visibility", "visible");
+        $("#btn_edit_" + rowid).show();
+        $("#btn_del_" + rowid).show();
+        $("#btn_save_" + rowid).hide();
+        $("#btn_cancel_" + rowid).hide();
+
+        $("#valueErr").val("");
+        $("#onEdit").val("");
+        lastSelectRoot = "";
+    }
+
+
+    function DisplayEditButton(rowid) {
+        if ($("#valueErr").val() == "Y") {
+        } else {
+            //jQuery("#grid").trigger("reloadGrid");    //20190625
+            $("#btn_save_" + rowid).css("visibility", "hidden");
+            $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+            $("#btn_edit_" + rowid).css("visibility", "visible");
+            $("#btn_del_" + rowid).css("visibility", "visible");
+            $("#btn_edit_" + rowid).show();
+            $("#btn_del_" + rowid).show();
+            $("#btn_save_" + rowid).hide();
+            $("#btn_cancel_" + rowid).hide();
+
+            $("#onEdit").val("");
+            $("#valueErr").val("");
+            lastSelectRoot = "";
+
+        }
+    }
+
+
+    function writeScreenToHis(rowid, execAction) {
+        if ($("#hidAplyNo").val() == "") {
+            chkProductStatus(rowid, execAction);
+        } else
+            procHisDetail(rowid, execAction);
+    }
+
+
+    function procHisDetail(rowid, execAction) {
+
+        if (!chkProdHead())
+            return;
+
+        if (!($("#hidApprStat").val() == "" || $("#hidApprStat").val() == "0")) {
+            alert("此商品科目資料已在覆核中，不可異動!!");
+            return;
+        }
+
+
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        rowData = $("#grid").jqGrid('getRowData', rowid);
+
+
+        
+        $.blockUI(); //畫面鎖起來
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'aplyNo': $("#hidAplyNo").val(),
+                    'qryTable': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    'productType': $('#productType').val(),
+                    'fuMk': $('#fuMk').val(),
+                    'itemCon': $('#itemCon').val(),
+                    'discPartFeat': $('#discPartFeat').val(),
+                    'isIfrs4': $('#isIfrs4').val(),
+                    'investTypeMk': $('#investTypeMk').val(),
+                    'investTradMk': $('#investTradMk').val(),
+                    'lodprmMk': $('#lodprmMk').val(),
+                   // 'extSchedulMk': $('#extSchedulMk').val(),
+                    'pakindDmopMk': $('#pakindDmopMk').val(),
+                    'coiType': $('#coiType').val(),
+
+                    'tempId': rowData.tempId,
+                    'acctType': rowData.acctType,
+                    'acctItem': rowData.acctItem,
+                    'corpNo': rowData.corpNo,
+                    'dmopMk': rowData.dmopMk
+                }, 'execAction': execAction
+
+            }),
+            dataType: "json",
+            url: '@Url.Action("procHisDetail", "OGL00001")',
+            contentType: 'application/json',
+            success: function (data) {
+                $.unblockUI(); //畫面打開
+                if (data.success) {
+                    $("#hidAplyNo").val(data.aplyNo);
+                    //$("#hidApprStat").val("0");
+                    $("#isQryTmp").prop("checked", true);
+                    $("#btnDelTmp").prop("disabled", false);
+                    qryDetail();
+                } else {
+                    jQuery("#grid").editRow(rowid);
+                    validationSummary.append('<li>' + data.err + '</li>');
+                }
+            }
+        });
+    }
+
+    //異動商品屬性
+    function updProdAttr() {
+        var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+        if (ids.length > 0) {
+            var rowId = ids[0];
+            chkProductStatus(rowId, "UA")
+        }
+    }
+
+
+    function chkProdHead() {
+        var bPass = true;
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        var msg = "";
+
+        if ($("#productType").val() == "")
+            msg += "「險種類別」 ";
+
+        if ($("#fuMk").val() == "")
+            msg += "「外幣註記」 ";
+
+        if ($("#itemCon").val() == "")
+            msg += "「合約分類」 ";
+
+        if ($("#discPartFeat").val() == "")
+            msg += "「裁量參與特性」 ";
+
+        if ($("#isIfrs4").val() == "")
+            msg += "「是否適用 IFRS4」 ";
+
+        if ($("#investTypeMk").val() == "")
+            msg += "「投資型商品類型維護」 ";
+
+        if ($("#investTradMk").val() == "")
+            msg += "「投資型商品交易維護」 ";
+
+        if ($("#lodprmMk").val() == "")
+            msg += "「保費費用維護」 ";
+
+        //if ($("#extSchedulMk").val() == "")
+        //    msg += "「可展期定期保險維護」 ";
+
+        if ($("#pakindDmopMk").val() == "")
+            msg += "「繳費方式僅限躉繳維護」 ";
+
+        if ($("#coiType").val() == "")
+            msg += "「COI」 ";
+
+        if (msg.length > 0) {
+            validationSummary.append('<li>請輸入' + msg + '</li>');
+            return false;
+        } else
+            return true;
+
+    }
+
+    $(document).click(function (e) {
+        if ($("#onEdit").val() == "Y" & e.target.id != "btnNew" & e.target.id != "btnClear" & e.target.id != "btnRtn") {
+            if (e.target.id.indexOf(lastSelectRoot) < 0) {
+                alert("畫面仍有資料在編輯中，不可執行其它功能!!");
+                return
+            }
+
+        }
+
+    });
+
+    function chkProductStatus(rowid, execAction) {
+
+        $.blockUI(); //畫面鎖起來
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'qryTable': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    'productType': $('#productType').val(),
+                    'fuMk': $('#fuMk').val(),
+                    'itemCon': $('#itemCon').val(),
+                    'discPartFeat': $('#discPartFeat').val(),
+                    'isIfrs4': $('#isIfrs4').val()
+                }
+                //, 'acctList': acctList
+            }),
+            dataType: "json",
+            url: '@Url.Action("chkProductStatus", "OGL00001")',
+            contentType: 'application/json',
+            success: function (data) {
+
+
+                if (data.success) {
+                    if (data.tmpStatus1Cnt > 0) {
+                        alert("此商品科目資料已在覆核中，不可異動!!")
+                        $('#btnConfirm').attr('disabled', true);
+                        $('#btnDelTmp').attr('disabled', true);
+                        qryDetail();
+                        $.unblockUI(); //畫面打開
+                        return;
+                    }
+
+                    if (data.tmpStatus0Cnt > 0
+                        & (($("#hidExecType").val() == "A" & $("#hidAplyNo").val() == "")
+                            || ($("#hidExecType").val() == "U" & $('#isQryTmp')[0].checked == false))) {
+                        if (window.confirm('此商品科目資料已有暫存資料，將不予異動，是否改查暫存資料?') == true) {
+                            var pExecType = 'U';
+                            var pTempId = $('#productType').val() + "|" + $('#fuMk').val() + "|" + $('#itemCon').val() + "|"
+                                + $('#discPartFeat').val() + "|" + $('#isIfrs4').val();
+                            var pIsQryTmp = "1";
+
+                            var url = '@Html.Raw(Url.Action("detail", "OGL00001"
+                  , new { execType = "__pExecType__", tempId = "__pTempId__", isQryTmp = "__pIsQryTmp__" }))';
+        var params = url.replace('__pExecType__', pExecType).replace('__pTempId__', pTempId).replace('__pIsQryTmp__', pIsQryTmp);
+        window.location.href = params;
+
+
+                            return;
+                        } else {
+                            qryDetail();
+                            //$.unblockUI(); //畫面打開
+                            return;
+                        }
+
+                    }
+
+                    if ($("#hidExecType").val() == "A" & data.formalCnt > 0) {
+                        alert("已存在欲新增的商品科目資料，請回前一畫面，執行查詢後再進行維護功能!!")
+                        $.unblockUI(); //畫面打開
+                        return;
+                    }
+
+                    procHisDetail(rowid, execAction);
+
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+
+
+    }
+
+
+    //*---------------查詢GRID資料 begin ----------------*//
+    function qryDetail(bClrMsg) {
+       
+
+        $.blockUI(); //畫面鎖起來
+        if (bClrMsg)
+            $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+        var acctList = $("#grid").jqGrid('getGridParam', 'data');
+
+
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    'productType': $('#productType').val(),
+                    'fuMk': $('#fuMk').val(),
+                    'itemCon': $('#itemCon').val(),
+                    'discPartFeat': $('#discPartFeat').val(),
+                    'isIfrs4': $('#isIfrs4').val(),
+                    'investTypeMk': $('#investTypeMk').val(),
+                    'investTradMk': $('#investTradMk').val(),
+                    'lodprmMk': $('#lodprmMk').val(),
+                    //'extSchedulMk': $('#extSchedulMk').val(),
+                    'pakindDmopMk': $('#pakindDmopMk').val(),
+                    'coiType': $('#coiType').val()
+                }
+
+            }),
+            dataType: "json",
+            url: '@Url.Action("qryDetail", "OGL00001")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    if (data.dataList.length == 0) {
+                        validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+                    } else {
+                        if ($('#isQryTmp')[0].checked) {
+
+                            $("#hidAplyNo").val(data.dataList[0].aplyNo);
+                            $("#hidApprStat").val(data.dataList[0].apprStat);
+
+                            if ($("#hidApprStat").val() == "1") {
+                                $('#btnConfirm').attr('disabled', true);
+                                $('#btnDelTmp').attr('disabled', true);
+                                $('#btnNew').attr('disabled', true);
+                            }
+
+                            if (data.dataList[0].acctType == null){
+                                validationSummary.append('<li>' + '本次申請的異動為『刪除』符合畫面『險種類別+外幣註記+合約分類+裁量參與特性+是否適用IFRS4』的所有科目資料!!' + '</li>');
+
+                                //更新畫面GRID
+                                jQuery("#grid").jqGrid('clearGridData');
+
+                            }
+                                
+                            else 
+                                //更新畫面GRID
+                                jQuery("#grid").jqGrid('clearGridData')
+                                    .jqGrid('setGridParam', { data: data.dataList })
+                                    .trigger("reloadGrid");
+                            
+                        } else {
+                            //$('#btnConfirm').attr('disabled', true);
+
+                            $("#hidAplyNo").val("");
+                            $("#hidApprStat").val("");
+
+                            //更新畫面GRID
+                            jQuery("#grid").jqGrid('clearGridData')
+                                .jqGrid('setGridParam', { data: data.dataList })
+                                .trigger("reloadGrid");
+                        }
+                    }
+
+
+                    
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+
+
+    }
+    //*---------------查詢GRID資料 end ----------------*//
+
+
+    //*---------------產生GRID begin ----------------*//
+    function genGrid() {
+        $('#qryResult').children().remove();
+
+        $('#qryResult').append('<table id="' + "grid" + '"></table>');
+        $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '科目樣本險種類別',
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                {
+                    label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'center', width: 120
+                },
+                 {
+                     label: 'tempId',
+                     name: 'tempId', align: 'center', hidden: true,
+                     editable: false,
+                 },
+                {
+                    label: '帳務類別',
+                    name: 'acctType', align: 'left',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getAcctType()
+                    }
+                },
+                {
+                    label: '科目代號',
+                    name: 'acctItem', align: 'center',
+                    editable: true,
+                    editoptions: {
+                        size: 4,
+                        maxlength: 4
+                    }
+                },
+                {
+                    label: '帳本',
+                    name: 'corpNo', align: 'center',
+                    editable: true,
+                    editoptions: {
+                        size: 1,
+                        maxlength: 1
+                    }
+
+                },
+
+                {
+                    label: '限躉繳註記',
+                    name: 'dmopMk', align: 'center',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getYNFlag()
+                    }
+
+                }
+
+
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: true,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            pager: "#pager",
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+                        be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+                        de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+                        se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + rowId + "' value='儲存' onclick=\"TheOnSaveFunction('" + rowId + "');\"  />";
+                        ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + rowId + "'  value='取消' onclick=\"TheOnCancelFunction('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + de + se + ce });
+
+                        $("#btn_save_" + rowId).hide();
+                        $("#btn_cancel_" + rowId).hide();
+
+
+                        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+                        if ($("#hidApprStat").val() == "1") {
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                        }
+
+                    }
+                }
+
+            }
+        });
+
+    }
+    //*---------------產生GRID end ----------------*//
+
+    //取得"YN"下拉選單
+    function getYNFlag() {
+        return $('#hidYNFlag').val();
+    }
+
+    //取得"帳務類別"下拉選單
+    function getAcctType() {
+        return $('#hidAcctType').val();
+    }
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+        if (opScope == "" || opScope == "0") {
+
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $("#onEdit").val("");
+            $("#valueErr").val("");
+
+            $('#hidYNFlag').val('@Html.Raw(ViewBag.ynjqList)');
+            $('#hidAcctType').val('@Html.Raw(ViewBag.acctTypejqList)');
+            $('#hidExecType').val('@Html.Raw(ViewBag.execType)');
+
+            if ('@Html.Raw(ViewBag.isQryTmp)' == "1") {
+                $("#isQryTmp").prop("checked", true);
+                $("#btnDelTmp").attr('disabled', false);
+            } else {
+                $("#isQryTmp").prop("checked", false);
+                $("#btnDelTmp").attr('disabled', true);
+                $("#btnConfirm").attr('disabled', true);
+            }
+
+
+            genGrid();
+            if ($('#hidExecType').val() == "U") {
+                $("#btnClear").attr('disabled', true);
+
+                $("#productType").attr('disabled', true);
+                $("#fuMk").attr('disabled', true);
+                $("#itemCon").attr('disabled', true);
+                $("#discPartFeat").attr('disabled', true);
+                $("#isIfrs4").attr('disabled', true);
+
+                $("#productType").css({ 'background': '#cccccc' });
+                $("#fuMk").css({ 'background': '#cccccc' });
+                $("#itemCon").css({ 'background': '#cccccc' });
+                $("#discPartFeat").css({ 'background': '#cccccc' });
+                $("#isIfrs4").css({ 'background': '#cccccc' });
+
+                qryDetail(false);
+            } else {
+                $("#btnClear").attr('disabled', true);
+            }
+
+            if('@Html.Raw(ViewBag.dataStatus)' == "2"){
+                validationSummary.append('<li>' + '資料覆核中，不可異動!!' + '</li>');
+                $("#btnConfirm").attr('disabled', true);
+                $("#btnClear").attr('disabled', true);
+                $("#btnDelTmp").attr('disabled', true);
+                $("#btnNew").attr('disabled', true);
+            } else {
+                $("#btnConfirm").attr('disabled', false);
+                $("#btnDelTmp").attr('disabled', false);
+                $("#btnNew").attr('disabled', false);
+            }
+                
+
+
+
+        }
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            var pExecType = "A";
+            var url = '@Html.Raw(Url.Action("detail", "OGL00001", new { execType = "__pExecType__" }))';
+            var params = url.replace('__pExecType__', pExecType);
+            window.location.href = params;
+
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+
+        //*---------------返回 begin ----------------*//
+        $("#btnReturn").click().on('click', function () {
+
+            //var param = $('#cRoleID').val();
+            var url = '@Url.Action("Index", "OGL00001")';
+
+            window.location.href = url;
+
+
+        });
+        //*---------------返回 end ----------------*//
+
+
+        //*---------------申請覆核 begin ----------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            var bPass = true;
+
+            if ($('#onEdit').val() == "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '畫面尚有資料未存檔!!' + '</li>');
+            }
+
+            if ($('#hidAplyNo').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '未異動資料!!' + '</li>');
+            }
+
+            if (bPass == false)
+                return;
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                        'productType': $('#productType').val(),
+                        'fuMk': $('#fuMk').val(),
+                        'itemCon': $('#itemCon').val(),
+                        'discPartFeat': $('#discPartFeat').val(),
+                        'isIfrs4': $('#isIfrs4').val(),
+                        'investTypeMk': $('#investTypeMk').val(),
+                        'investTradMk': $('#investTradMk').val(),
+                        'lodprmMk': $('#lodprmMk').val(),
+                        //'extSchedulMk': $('#extSchedulMk').val(),
+                        'pakindDmopMk': $('#pakindDmopMk').val(),
+                        'coiType': $('#coiType').val()
+                    }
+                    ,'aplyNo': $("#hidAplyNo").val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("execAply", "OGL00001")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnClear").attr('disabled', false);
+                        $("#btnDelTmp").attr('disabled', true);
+                        $("#btnNew").attr('disabled', true);
+
+                        validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var rowId = ids[i];
+
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_save_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                            $("#btn_cancel_" + rowId).hide();
+
+                        }
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+
+                }
+            });
+        });
+        //*---------------申請覆核 end ----------------*//
+
+    });
+</script>
+
+

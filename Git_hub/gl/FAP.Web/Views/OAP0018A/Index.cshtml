@@ -1,0 +1,524 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="O18A_Form">
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                <label>異動日期&ensp;:&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" class="" autocomplete="off" id="Update_DateTime_B" name="Update_DateTime_B" />
+                                <label>&ensp;至&ensp;</label>
+                                <input type="text" class="" autocomplete="off" id="Update_DateTime_E" name="Update_DateTime_E" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="O18A_Search" value="查詢" />
+                                @Html.Hidden("h_aply_no")
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="row ShowOrNot">
+        <div class="col-sm-24">
+            <div id="Review_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-24" style="text-align:center;">
+                <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnApproved_Mod" value="核准" />
+                <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnRejected_Mod" value="駁回" />
+            </div>
+        </div>
+    </div>
+    <div id="Review_DetailDialog" style="display:none;overflow-y:auto" role="dialog" class="myDialog">
+        <div class="col-sm-24">
+            <div id="His_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div style="text-align:center; margin-top: 10px" class="Review_DetailAct">
+            <input type="button" class="btn btn-primary" style="margin-left:-20px;margin-right:20px;" id="btnDetailApproved_Mod" value="核准" />
+            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnDetailRejected_Mod" value="駁回" />
+            <input type="button" class="btn btn-primary" id="btnDetailBack_Mod" value="回上一頁">
+        </div>
+    </div>
+    <div id="RejectedCheckDialog" style="display:none" role="dialog">
+        <table>
+            <tr>
+                <td>
+                    <input type="button" id="btnConfirmed_Reject" class="btn btn-primary" style="" value="確認駁回" />
+                    <input type="button" id="btnCancel_Reject" class="btn btn-primary" style="margin-right:10px;float:right;" value="取消駁回" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("SearchData", "OAP0018A")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "OAP0018A")';
+        UrlFor.Approved = '@Url.Action("ApprovedData", "OAP0018A")';
+        UrlFor.Rejected = '@Url.Action("RejectedData", "OAP0018A")';
+        UrlFor.CheckedData = '@Url.Action("CheckedData", "OAP0018A")';
+        UrlFor.DetailApproved = '@Url.Action("ApprovedDetailData", "OAP0018A")';
+
+        UrlFor.openHIS = '@Url.Action("ChangeRecordView", "OAP0018A")';
+        //#endregion
+
+        //region 參數設定
+        var Update_DateTime_B_Id = 'Update_DateTime_B';
+        var Update_DateTime_E_Id = 'Update_DateTime_E';
+        var h_Aply_No = 'h_aply_no' //申請單號
+        var ReApproved = 'btnApproved_Mod' //核准
+        var ReRejected = 'btnRejected_Mod' //駁回
+
+        var Review_SearchDetailId = 'Review_SearchDetail';
+        var ReDetailApproved = 'btnDetailApproved_Mod' //細項中核准
+        var ReDetailRejected = 'btnDetailRejected_Mod' //細項中駁回
+
+        var isGroupHeaders = true;//合併欄位
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始設定
+            $('.ShowOrNot').hide();
+            $('.Review_DetailAct').hide();
+            $("#" + ReApproved).prop('disabled', true);
+            $("#" + ReRejected).prop('disabled', true);
+
+            $('#Update_DateTime_B').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+
+            $('#Update_DateTime_E').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'O18A_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'btnApproved_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApprovedDataFun(); });
+                        break;
+                    case 'btnRejected_Mod':
+                    case 'btnDetailRejected_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { RejectedDataFun(); });
+                        break;
+                    case 'btnDetailApproved_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApprovedDetailDataFun(); });
+                        break;
+                    case 'btnConfirmed_Reject':
+                        $('#' + id).on('click', function () { ConfirmedRejectFun(); });
+                        break;
+                    case 'btnCancel_Reject':
+                    case 'btnDetailBack_Mod':
+                        $('#' + id).on('click', function () { customerUtility.closeDialog(this); $('#' + h_Aply_No).val(''); });
+                        break;
+                }
+            });
+            //#endregion
+
+            //region Detail 核准
+            function ApprovedDetailDataFun() {
+                $('#validationSummary').children().remove();
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: $('#' + h_Aply_No).val()
+                    }),
+                    url: UrlFor.DetailApproved,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        //if (openflag) {
+                        //    customerUtility.closeDialog($('#btnDetailRejected_Mod'));
+                        //}
+
+                        review_SearchGrid();
+                        customerUtility.closeDialog($('#btnDetailApproved_Mod'));
+                    } else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                        customerUtility.closeDialog($('#btnDetailApproved_Mod'));
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 核准
+            function ApprovedDataFun() {
+                $('#validationSummary').children().remove();
+                var aplyNos = [];
+
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNos: aplyNos
+                    }),
+                    url: UrlFor.Approved,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        //if (openflag) {
+                        //    customerUtility.closeDialog($('#btnDetailRejected_Mod'));
+                        //}
+                        review_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //region 駁回
+            function RejectedDataFun() {
+                var dialogId = 'RejectedCheckDialog';
+                $('#' + dialogId).dialog({
+                    position: { my: "top + 40%", at: "center top", of: window },
+                    title: '確定駁回',
+                    width: 500,
+                    autoOpen: false,
+                    maxHeight: 700,
+                    resizable: false,
+                    closeText: '取消'
+                });
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+
+            //region 確定駁回
+            function ConfirmedRejectFun() {
+                $('#validationSummary').children().remove();
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        AplyNo: $('#' + h_Aply_No).val(),
+                    }),
+                    url: UrlFor.Rejected,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#btnCancel_Reject'));
+                        review_SearchGrid();
+                        customerUtility.closeDialog($('#btnDetailApproved_Mod'));
+                    } else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                        customerUtility.closeDialog($('#btnCancel_Reject'));
+                        customerUtility.closeDialog($('#btnDetailApproved_Mod'));
+                    }
+                });
+            }
+            //#endregion
+
+            //region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                var Update_B = $('#' + Update_DateTime_B_Id).val();
+                var Update_E = $('#' + Update_DateTime_E_Id).val();
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: ReviewSearchViewModel(
+                            Update_B,
+                            Update_E
+                            )
+                    }),
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        review_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region jqgrid
+            function formatterCheck(cellvalue, options, rdata) {
+                var str = '';
+                //if (rdata.vReviewFlag) {
+                //    str += "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 10px; margin-left: 30px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                //        options.gid + options.colModel.index + options.rowId + "' title =' ' class='cbox Review_Check customerCheck'></div>";
+                //}
+                //return str;
+                str = "<input type='checkbox' class = 'ApprovedIschecked' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.Ischecked == true ? 'checked' : ' ') + " />";
+
+    //            var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 10px; margin-left: 30px;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                //options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox ApprovedIschecked customerCheck'></div>";
+                return str;
+            }
+            function formatterAply_No(cellvalue, options, rdata) {
+                return "<a href='#' class='openDialog DialogAply_No' style='text-decoration:underline; color:blue;' return:false; id='" + options.gid + "Aply_No" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' >" + cellvalue + "</a>";
+            }
+            function UnformatterAply_No(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+
+            //查詢Grid
+            function review_SearchGrid() {
+                var _dRelationType = $('#dRelationType').val();
+                var colNameArray = ['勾選', '申請單號', '申請日期', '申請人', '是否為本人'];
+                var colModelArray = [];
+                colModelArray.push({ name: "Ischecked", index: "Ischecked", width: 85, sortable: false, align: 'center', formatter: formatterCheck });
+                colModelArray.push({ name: "aply_no", index: "aply_no", width: 245, sortable: false, align: 'center', formatter: formatterAply_No, unformat: UnformatterAply_No });
+                colModelArray.push({ name: "aply_date", index: "aply_date", width: 215, sortable: false, align: 'center' });
+                colModelArray.push({ name: "aply_name", index: "aply_name", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "review_flag", index: "review_flag", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'Review_jqgridDiv',
+                    'Review_List',
+                    'Review_Peger',
+                     UrlFor.GetData,
+                     {
+                         type: 'Search'
+                     },
+                     colNameArray,
+                     colModelArray,
+                     '待覆核文件-定義檔覆核',
+                     jqgridCustom.getPage('Review_jqgridDiv'),
+                     jqgridCustom.getRowNum('Review_jqgridDiv'),
+                     ReviewrGridCompeleteFun,
+                     true
+                    )
+            }
+            function ReviewrGridCompeleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    //CheckBox
+                    $(this).find('td').find('.ApprovedIschecked').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            forChecked(i + 1, $(this).prop('checked'));
+                        });
+                    });
+
+                    //申請單號
+                    $(this).find('td').find('a.DialogAply_No').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            TDA_OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+                });
+            }
+            //#endregion
+
+            function O18A_HisGrid() {
+                var colNameArray = [
+              //'修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+              '執行功能', '功能', '覆核單位', '承辦單位', '備註說明',
+              '異動人員', '異動時間'
+                ];
+                colModelArray = [];
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                //colModelArray.push({ name: "fun_value_before", index: "fun_value_before", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "fun_value", index: "fun_value", width: 200, sortable: false, align: 'center' });
+
+                //colModelArray.push({ name: "appr_unit_name_before", index: "appr_unit_name_before", width: 180, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_unit_name", index: "appr_unit_name", width: 210, sortable: false, align: 'left' });
+
+                //colModelArray.push({ name: "user_unit_name_before", index: "user_unit_name_before", width: 180, sortable: false, align: 'center' });
+                colModelArray.push({ name: "user_unit_name", index: "user_unit_name", width: 210, sortable: false, align: 'left' });
+
+                //colModelArray.push({ name: "memo_before", index: "memo_before", width: 170, sortable: false, align: 'center' });
+                colModelArray.push({ name: "memo", index: "memo", width: 170, sortable: false, align: 'left' });
+
+                colModelArray.push({ name: "apply_name", index: "apply_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "apply_time", index: "apply_time", width: 150, sortable: false, align: 'center' });
+                jqgridCustom.createJqgridByCache(
+              'His_jqgridDiv',
+              'His_SearchList',
+              'His_SearchPager',
+              UrlFor.GetData,
+              {
+                  type: 'His'
+              },
+              colNameArray,
+              colModelArray,
+              '查詢列表',
+              jqgridCustom.getPage('His_jqgridDiv'),
+              jqgridCustom.getRowNum('His_jqgridDiv'),
+              His_CompleteFun,
+              true
+              );
+            }
+
+            function His_CompleteFun(listId) {
+                //if (isGroupHeaders) {
+                //    jQuery('#' + listId).jqGrid('setGroupHeaders', {
+                //        useColSpanStyle: true,
+                //        groupHeaders: [
+                //            { startColumnName: 'fun_value_before', numberOfColumns: 2, titleText: '功能' },
+                //            { startColumnName: 'appr_unit_name_before', numberOfColumns: 2, titleText: '覆核單位' },
+                //            { startColumnName: 'user_unit_name_before', numberOfColumns: 2, titleText: '承辦單位' },
+                //            { startColumnName: 'memo_before', numberOfColumns: 2, titleText: '備註說明' }
+                //        ]
+                //    });
+                //    isGroupHeaders = false;
+                //}
+            }
+
+            function TDA_OpenAply_NoFun(listId, rowid) {
+                var data = $("#" + listId).getRowData(rowid);
+                var apprFlag = data.review_flag;
+                    $('#' + h_Aply_No).val(data.aply_no);
+                    $.ajax({
+                        type: 'POST',
+                        data: JSON.stringify({
+                            AplyNo: data.aply_no,
+                        }),
+                        dataType: "json",
+                        url: UrlFor.openHIS,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+
+                        if (result.RETURN_FLAG) {
+                            O18A_HisGrid();
+                            openTDA_Dialog('跨部門權限維護記錄查詢', 1050, 'Review_DetailDialog');
+
+                            if (apprFlag == 'true') {
+                                $('.Review_DetailAct').show();
+                            }
+                            else {
+                                $('.Review_DetailAct').hide();
+                            }
+                        }
+                        else {
+                            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                            if (validationSummary.length == 0) {
+                                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                            }
+                            validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                        }
+                    });
+                
+            }
+
+            function openTDA_Dialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+                title += '明細';
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top+40%", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    resizable: false,
+                    maxHeight: 600,
+                    closeText: '取消',
+                    close: function () {
+                        $('#' + h_Aply_No).val('');
+                    }
+                });
+                
+
+                $('#' + dialogId).dialog('open');
+            }
+
+            //region 打勾事件
+            function forChecked(rowid, flag) {
+                var listId = 'Review_List';
+                var data = $("#" + listId).getRowData(rowid);
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        checkedModel: data.aply_no,
+                        checkedFlag: flag
+                    }),
+                    dataType: "json",
+                    url: UrlFor.CheckedData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        //if (result.Datas == true) {
+                        //    $("#" + ReApproved).prop('disabled', false);
+                        //    $("#" + ReRejected).prop('disabled', false);
+                        //} else {
+                        //    $("#" + ReApproved).prop('disabled', true);
+                        //    $("#" + ReRejected).prop('disabled', true);
+                        //}
+                        //review_SearchGrid();
+                        $("#" + ReApproved).prop('disabled', !result.Datas);
+                        $("#" + ReRejected).prop('disabled', !result.Datas);
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 查詢畫面  ViewModel
+            function ReviewSearchViewModel(Update_B, Update_E) {
+                var obj = {};
+                obj['update_time_start'] = Update_B;
+                obj['update_time_end'] = Update_E;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

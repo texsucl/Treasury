@@ -1,0 +1,845 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    
+
+}
+@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="O20_Form">
+                    <table>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="O20_Insert" value="新增" />
+                                <input type="button" class="btn btn-primary" id="O20_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div class="row">
+                    <label style="color:red;margin-left: 20px;">*部門轄下之科別維護，請點選部門欄位值後進入執行</label>
+                </div>
+            }
+        </div>
+        <div id="Detail_Dialog" style="display:none;" role="dialog" class="myDialog">
+            <form id="O20_Detail">
+                <table>
+                    <tr>
+                        <td colspan="4" align="center">
+                            <input type="button" class="btn btn-primary" id="O20_DetailInsert" value="新增" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            <div class="row" style="padding-right:10px;padding-left:10px">
+                <div class="col-sm-24">
+                    <div id="20_DetailjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="O20_Dialog" style="display:none;">
+        <form id="O20_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>部門 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="t20_dept" name="t20_dept" maxlength="5" />
+                        <label id="l20_dept" name="l20_dept"></label>
+                    </td>
+                </tr>
+                <tr id="tr_apt">
+                    <td>
+                        <label>窗口人員 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="t20_apt" name="t20_apt" maxlength="10" />
+                    </td>
+                </tr>
+                <tr id="tr_aptName">
+                    <td>
+                        <label>窗口姓名 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="t20_aptName" name="t20_aptName"  />
+                    </td>
+                </tr>
+                <tr id="tr_email">
+                    <td>
+                        <label>EMAIL :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="t20_email" name="t20_email"  />
+                    </td>
+                </tr>
+                <tr id="tr_division">
+                    <td>
+                        <label>科別 :&ensp;</label>
+                    </td>
+                    <td>
+                        <input type="text" id="t20_division" name="t20_division" maxlength="5" />
+                        <label id="l20_division" name="l20_division"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="btnInsert_Mod" value="新增" class="btn btn-primary" />
+                        <input type="button" id="btnUpdate_Mod" value="修改" class="btn btn-primary" />
+                        <input type="button" id="btnDelete_Mod" value="刪除" class="btn btn-primary" />
+                        <input type="hidden" id="hDep_id" />
+                        <input type="hidden" id="hDep_Name" />
+                        <input type="hidden" id="hType" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="col-sm-24">
+        <div id="O20_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.GetData = '@Url.Action("GetCacheData", "OAP0020")';
+        UrlFor.Search = '@Url.Action("SearchData", "OAP0020")';
+        UrlFor.SearchDetail = '@Url.Action("SearchDetailData", "OAP0020")';
+        UrlFor.Insert = '@Url.Action("InsertData", "OAP0020")';
+        UrlFor.Update = '@Url.Action("UpdateData", "OAP0020")';
+        UrlFor.Delete = '@Url.Action("DeleteData", "OAP0020")';
+        UrlFor.GetDeptName = '@Url.Action("GetDeptNameData", "OAP0020")';
+        UrlFor.GetEmp = '@Url.Action("GetEmpData", "OAP0020")';
+        //#endregion
+
+        //region 參數設定
+        var O20_DialogFormId = 'O20_DialogForm';
+        var t20_deptId = 't20_dept';
+        var l20_deptName = 'l20_dept';
+        var t20_aptId = 't20_apt';
+        var t20_aptName = 't20_aptName';
+        var t20_email = 't20_email';
+        var t20_divisionId = 't20_division';
+        var l20_divisionName = 'l20_division';
+        var tr_divisionId = 'tr_division';
+        var tr_aptId = 'tr_apt';
+        var tr_aptName = 'tr_aptName';
+        var tr_email = 'tr_email';
+        var hDep_id = 'hDep_id';
+        var hDep_Name = 'hDep_Name';
+
+        var hType_Id = 'hType'
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始動作
+            set_Verified();
+            //#endregion
+
+            //#region 註冊verified
+            function set_Verified() {
+
+            }
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'O20_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'O20_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            $('#' + hType_Id).val('M');
+                            dialogOpen('Add', null);
+                        });
+                        break;
+                    case 'btnInsert_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { InsertDataFun(); });
+                        break;
+                    case 'btnUpdate_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { UpdateDataFun(); });
+                        break;
+                    case 'btnDelete_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DeleteDataFun(); });
+                        break;
+                    case 'O20_DetailInsert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            $('#' + hType_Id).val('D');
+                            dialogOpen('Add', null);
+                        });
+                        break;
+                    case 'btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                                        function () {
+                                            @*if (id == 'comp_Back' &&
+                                                _ConfirmFlag &&
+                                                !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                                return false;
+                                            }*@
+                                            customerUtility.closeDialog(this);
+                                        });
+                        break;
+                }
+            });
+            $('input:text').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 't20_dept':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + t20_deptId).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + t20_deptId).val();
+                                getDeptName(DeptId, 'D');  //D = 部門
+                            } else {
+                                $('#' + l20_deptName).text('');
+                            }
+                        });
+                        break;
+                    case 't20_apt':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + t20_aptId).val().length;
+                            if (cLength == 5 || cLength == 10) {
+                                var AptId = $('#' + t20_aptId).val();
+                                getEmpDetail(AptId);
+                            }
+                            else {
+                                $('#' + t20_aptName).prop('disabled', false);
+                                $('#' + t20_email).prop('disabled', false);
+                                $('#' + t20_aptName).val('');
+                                $('#' + t20_email).val('');
+                            }
+                        });
+                        break;
+                    case 't20_division':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + t20_divisionId).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + t20_divisionId).val();
+                                getDeptName(DeptId, 'V');  //V = 科別
+                            } else {
+                                $('#' + l20_divisionName).text('');
+                            }
+                        });
+                        break;
+                }
+            });
+            //#endregion
+
+            //#region 取部門名稱
+            function getDeptName(deptId, Dept) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        deptId: deptId
+                    }),
+                    dataType: "json",
+                    url: UrlFor.GetDeptName,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result != '' || result != null) {
+                        if (Dept == 'D')
+                            $('#' + l20_deptName).text(result);
+                        else
+                            $('#' + l20_divisionName).text(result);
+                    }
+                    else {
+                        if (Dept == 'D')
+                            $('#' + l20_deptName).text('');
+                        else
+                            $('#' + l20_divisionName).text('');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 取人員資料
+            function getEmpDetail(aptId) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aptId: aptId
+                    }),
+                    dataType: "json",
+                    url: UrlFor.GetEmp,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result[0].Item2 != '' && result[0].Item2 != null) {
+                        $('#' + t20_aptName).prop('disabled', true);
+                        $('#' + t20_email).prop('disabled', true);
+                        $('#' + t20_aptName).val(result[0].Item2);
+                        $('#' + t20_email).val(result[0].Item5);
+                    }
+                    else {
+                        $('#' + t20_aptName).prop('disabled', false);
+                        $('#' + t20_email).prop('disabled', false);
+                        $('#' + t20_aptName).val('');
+                        $('#' + t20_email).val('');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                $('#' + O20_DialogFormId).validate().resetForm();
+                var dialogId = 'O20_Dialog';
+
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+45%", at: "center top", of: window },
+                    title: title,
+                    width: 'auto',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                ResetO20Dialog();
+                $('#btnInsert_Mod,#btnUpdate_Mod,#btnDelete_Mod').hide();
+                var hType = $('#' + hType_Id).val();
+                if (hType == 'M')
+                {
+                    var listId = 'O20_SearchList';
+                    $('#' + tr_divisionId).hide();
+
+                    if (type == 'Add') {
+                        $('#btnInsert_Mod').show();
+                    }
+                    else if (type == 'Edit') {
+                        dialogSetData(listId, rowid);
+                        $('#' + t20_deptId).prop('disabled', true);
+                        $('#' + t20_aptName).prop('disabled', true);
+                        $('#' + t20_email).prop('disabled', true);
+                        $('#btnUpdate_Mod').show();
+                    }
+                    else if (type == 'Dele') {
+                        dialogSetData(listId, rowid);
+                        $('#' + t20_deptId).prop('disabled', true);
+                        $('#' + t20_aptId).prop('disabled', true);
+                        $('#' + t20_aptName).prop('disabled', true);
+                        $('#' + t20_email).prop('disabled', true);
+                        $('#btnDelete_Mod').show();
+                    }
+                }
+                else {
+                    var listId = '20_DetailList';
+                    
+                    $('#' + tr_aptId).hide();
+                    $('#' + tr_aptName).hide();
+                    $('#' + tr_email).hide();
+
+                    if (type == 'Add') {
+                        var hDid = $('#' + hDep_id).val();
+                        var hDname = $('#' + hDep_Name).val();
+                        $('#' + t20_deptId).val(hDid);
+                        $('#' + l20_deptName).text(hDname);
+                        $('#' + t20_deptId).prop('disabled', true);
+                        $('#btnInsert_Mod').show();
+                    }
+                    else if (type == 'Edit') {
+                        dialogSetData(listId, rowid);
+                        $('#' + t20_deptId).prop('disabled', true);
+                        $('#btnUpdate_Mod').show();
+                    }
+                    else if (type == 'Dele') {
+                        dialogSetData(listId, rowid);
+                        $('#' + t20_deptId).prop('disabled', true);
+                        $('#' + t20_divisionId).prop('disabled', true);
+                        $('#btnDelete_Mod').show();
+                     }
+                }
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+
+                    $('#' + t20_deptId).val(data.dep_id);
+                    $('#' + l20_deptName).text(data.dep_name);
+                    $('#' + t20_aptId).val(data.apt_id);
+                    $('#' + t20_aptName).val(data.apt_name);
+                    $('#' + t20_email).val(data.email);
+                    $('#' + t20_divisionId).val(data.division);
+                    $('#' + l20_divisionName).text(data.division_name);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetO20Dialog() {
+                $('#' + t20_deptId).val('');
+                $('#' + l20_deptName).text('');
+                $('#' + t20_aptId).val('');
+                $('#' + t20_aptName).val('');
+                $('#' + t20_email).val('');
+                $('#' + t20_divisionId).val('');
+                $('#' + l20_divisionName).text('');
+
+                $('#' + tr_divisionId).show();
+                $('#' + tr_aptId).show();
+                $('#' + tr_aptName).show();
+                $('#' + tr_email).show();
+                $('#' + t20_deptId).prop('disabled', false);
+                $('#' + t20_aptId).prop('disabled', false);
+                $('#' + t20_aptName).prop('disabled', false);
+                $('#' + t20_email).prop('disabled', false);
+                $('#' + t20_divisionId).prop('disabled', false);
+                $('#validationSummary').children().remove();
+            }
+            //#endregion
+
+            //#region 新增
+            function InsertDataFun() {
+                $('#validationSummary').children().remove();
+                var type = $('#' + hType_Id).val();
+                var deptId = $('#' + t20_deptId).val();
+                var deptName = $('#' + l20_deptName).text();
+                var aptId = $('#' + t20_aptId).val();
+                var aptName = $('#' + t20_aptName).val();
+                var email = $('#' + t20_email).val();
+                var divisionId = $('#' + t20_divisionId).val();
+                var divisionName = $('#' + l20_divisionName).text();
+
+                var hType = $('#' + hType_Id).val();
+                if (hType == 'M') {
+                    if (deptName == null || deptName == '') {
+                        alert('請輸入正確的部門代號');
+                        return false;
+                    }
+                    if (aptName == null || aptName == '') {
+                        alert('請輸入窗口姓名');
+                        return false;
+                    }
+                    if (email == null || email == '') {
+                        alert('請輸入窗口Email');
+                        return false;
+                    }
+                }
+                else {
+                    if (divisionName == null || divisionName == '') {
+                        alert('請輸入正確的科別代號');
+                        return false;
+                    }
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: insertViewModel(
+                            deptId,
+                            deptName,
+                            aptId,
+                            aptName,
+                            email,
+                            divisionId,
+                            type
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.Insert,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#btnDelete_Mod'));
+                        
+                        if (hType == 'M')
+                            O20_SearchGrid();
+                        else
+                            O20_DetailGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+
+            }
+            //#endregion
+
+            //#region 修改
+            function UpdateDataFun() {
+                $('#validationSummary').children().remove();
+                var type = $('#' + hType_Id).val();
+                var deptId = $('#' + t20_deptId).val();
+                var deptName = $('#' + l20_deptName).text();
+                var aptId = $('#' + t20_aptId).val();
+                var aptName = $('#' + t20_aptName).val();
+                var email = $('#' + t20_email).val();
+                var divisionId = $('#' + t20_divisionId).val();
+                var divisionName = $('#' + l20_divisionName).text();
+
+                var hType = $('#' + hType_Id).val();
+                if (hType == 'M') {
+                    if (deptName == null || deptName == '') {
+                        alert('請輸入正確的部門代號');
+                        return false;
+                    }
+                    if (aptName == null || aptName == '') {
+                        alert('請輸入窗口姓名');
+                        return false;
+                    }
+                    if (email == null || email == '') {
+                        alert('請輸入窗口Email');
+                        return false;
+                    }
+                }
+                else {
+                    if (divisionName == null || divisionName == '') {
+                        alert('請輸入正確的科別代號');
+                        return false;
+                    }
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: insertViewModel(
+                            deptId,
+                            deptName,
+                            aptId,
+                            aptName,
+                            email,
+                            divisionId,
+                            //divisionName,
+                            hType
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.Update,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#btnDelete_Mod'));
+                        O20_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 刪除
+            function DeleteDataFun() {
+                $('#validationSummary').children().remove();
+                if (!confirm('是否確定刪除')) {
+                    return false;
+                }
+                var deptId = $('#' + t20_deptId).val();
+                var deptName = $('#' + l20_deptName).text();
+                var divisionId = $('#' + t20_divisionId).val();
+                var type = $('#' + hType_Id).val();
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: insertViewModel(
+                            deptId,
+                            deptName,
+                            null,
+                            null,
+                            null,
+                            divisionId,
+                            type
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.Delete,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#btnDelete_Mod'));
+                        var hType = $('#' + hType_Id).val();
+                        if (hType == 'M')
+                            O20_SearchGrid();
+                        else
+                            O20_DetailGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $.ajax({
+                    type: 'POST',
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    //$('#' + dialogId).dialog('open');
+                    if (result.RETURN_FLAG) {
+                        O20_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            function formatterDep_Id(cellvalue, options, rdata) {
+                return "<a href='#' class='openDialog DialogDep' style='text-decoration:underline; color:blue;' return:false; id='" + options.gid + "Dep_Id" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' >" + cellvalue + "</a>";
+            }
+            function UnformatterDep_Id(cellvalue, options, rdata) {
+                return cellvalue;
+            }
+
+            //查詢Grid
+            function O20_SearchGrid() {
+                var colNameArray = ['動作', '部門代碼', '部門名稱', '窗口人員', '窗口姓名', '窗口電子信箱'];
+
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 65, sortable: false });
+                colModelArray.push({ name: "dep_id", index: "dep_id", width: 110, sortable: false, align: 'center', formatter: formatterDep_Id, unformat: UnformatterDep_Id });
+                colModelArray.push({ name: "dep_name", index: "dep_name", width: 210, sortable: false, align: 'center'});
+                colModelArray.push({ name: "apt_id", index: "apt_id", width: 110, sortable: false, align: 'center' });
+                colModelArray.push({ name: "apt_name", index: "apt_name", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "email", index: "email", width: 270, sortable: false, align: 'left' });
+                jqgridCustom.createJqgridByCache(
+               'O20_jqgridDiv',
+               'O20_SearchList',
+               'O20_SearchPager',
+               UrlFor.GetData,
+               {
+                   type: 'OAP0020ViewData'
+               },
+               colNameArray,
+               colModelArray,
+               '查詢列表',
+               jqgridCustom.getPage('O20_jqgridDiv'),
+               jqgridCustom.getRowNum('O20_jqgridDiv'),
+               O20_CompleteFun,
+               true
+               );
+            }
+            //#endregion
+
+            //#region jqgrid 事件
+            function O20_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'O20_Search', O20ActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    //申請單號
+                    $(this).find('td').find('a.DialogDep').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            O20_OpenAply_NoFun(listId, i + 1);
+                        });
+                    });
+
+                    $(this).find('.actionViewIcon').hide();
+                });
+
+
+            }
+            //#endregion
+
+            //#region 動作
+            var O20ActFun = {};
+            O20ActFun.Edit = function (i) {
+                $('#' + hType_Id).val('M');
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            O20ActFun.Dele = function (i) {
+                $('#' + hType_Id).val('M');
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            O20ActFun.View = function (i) {
+                $('#' + hType_Id).val('M');
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#region 點選單號
+            function O20_OpenAply_NoFun(listId, rowid) {
+                var data = $("#" + listId).getRowData(rowid);
+                $('#' + hDep_id).val(data.dep_id);
+                $('#' + hDep_Name).val(data.dep_name);
+                
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        dept: data.dep_id,
+                        dept_Name: data.dep_name
+                    }),
+                    url: UrlFor.SearchDetail,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        O20_DetailGrid();
+
+                        openDetailDialog('查詢科別' + data.dep_id, '750', 'Detail_Dialog');
+                    } else {
+                        customerUtility.alert(result.DESCRIPTION, 'w');
+                    }
+                });
+
+            }
+            //#endregion
+
+            //#region 新增事件(打開Dialog)
+            function openDetailDialog(title, width, dialogId) {
+                title = title || '';
+                width = width || 'auto';
+
+                var dialogId = dialogId;
+                $('#' + dialogId).dialog({
+                    position: { my: "top+40%", at: "center top", of: window },
+                    title: title,
+                    width: width,
+                    autoOpen: false,
+                    maxHeight: 600,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function () {
+                        //MOD_CancelFun();
+                    }
+                });
+
+                $('#' + dialogId).dialog('open');
+                $('#' + dialogId).css('max-height', '300px;');
+            }
+            //#endregion
+
+            //DetailGrid
+            function O20_DetailGrid() {
+                var colNameArray = ['動作', '科別代碼', '科別名稱', '', ''];
+
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 65, sortable: false });
+                colModelArray.push({ name: "division", index: "division", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "division_name", index: "division_name", width: 350, sortable: false, align: 'center' });
+                colModelArray.push({ name: "dep_id", index: "dep_id", hidden: true });
+                colModelArray.push({ name: "dep_name", index: "dep_name", hidden: true });
+                jqgridCustom.createJqgridByCache(
+               '20_DetailjqgridDiv',
+               '20_DetailList',
+               '20_DetailPager',
+               UrlFor.GetData,
+               {
+                   type: 'OAP0020DetailViewData'
+               },
+               colNameArray,
+               colModelArray,
+               '查詢列表',
+               jqgridCustom.getPage('20_DetailjqgridDiv'),
+               jqgridCustom.getRowNum('20_DetailjqgridDiv'),
+               O20Detail_CompleteFun,
+               true
+               );
+            }
+            //#endregion
+
+            //#region jqgrid 事件
+            function O20Detail_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'O20_Detail', DetailActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+
+                    $(this).find('.actionViewIcon').hide();
+                    $(this).find('.actionEditIcon').hide();
+                });
+            }
+            //#endregion
+
+            //#region 動作
+            var DetailActFun = {};
+            DetailActFun.Edit = function (i) {
+                $('#' + hType_Id).val('D');
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            DetailActFun.Dele = function (i) {
+                $('#' + hType_Id).val('D');
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            DetailActFun.View = function (i) {
+                $('#' + hType_Id).val('D');
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#region Insert ViewModel
+            function insertViewModel(deptId, deptName, aptId, aptName, email, divisionId, type) {
+                var obj = {};
+                obj['dep_id'] = deptId;
+                obj['dep_name'] = deptName;
+                obj['apt_id'] = aptId;
+                obj['apt_name'] = aptName;
+                obj['email'] = email;
+                obj['division'] = divisionId;
+                obj['type'] = type;
+                return obj;
+            }
+            //#endregion
+
+        }
+    });
+</script>

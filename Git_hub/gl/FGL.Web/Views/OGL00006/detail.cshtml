@@ -1,0 +1,776 @@
+﻿@model FGL.Web.ViewModels.OGL00003Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = "OGL00006 商品資料查詢作業";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+
+    var prodNoVerList = ViewBag.prodNoVerList as SelectList;
+    var sysTypeList = ViewBag.sysTypeList as SelectList;
+    var itemMainTypeList = ViewBag.itemMainTypeList as SelectList;
+    var investTypeList = ViewBag.investTypeList as SelectList;
+    var insTermList = ViewBag.insTermList as SelectList;
+    var busiTypeList = ViewBag.busiTypeList as SelectList;
+    var comTypeList = ViewBag.comTypeList as SelectList;
+    var lodprmTypeList = ViewBag.lodprmTypeList as SelectList;
+
+    var apprMkList = ViewBag.apprMkList as SelectList;
+    var flagList = ViewBag.flagList as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidAplyNo", "")
+                <table>
+                    <tr>
+                        <td>
+                            查詢暫存檔資料(勾選表暂存檔、未勾選表正式檔)：<input type="checkbox" id="isQryTmp" disabled>
+                            </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.item)：@Html.TextBoxFor(model => model.item, new { @size = "10", @maxlength = "8", @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fuMk)：@Html.DropDownList("fuMk", ynList, "請選擇", new { @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.itemCon)：@Html.DropDownList("itemCon", itemConList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.discPartFeat)：@Html.DropDownList("discPartFeat", ynList, "請選擇", new { @disabled = true })
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+                    </div>
+                </div>
+
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.apprMk)：@Html.DropDownList("apprMk", apprMkList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.effMk)：@Html.TextBoxFor(model => model.effMk, new { @size = "2", @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.flag)：@Html.DropDownList("flag", flagList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            商品資訊異動人員/時間：
+                            @Html.DisplayTextFor(model => model.prodUpId)　@Html.DisplayTextFor(model => model.prodUpDt)
+                            @*@Html.DisplayNameFor(model => model.prodUpId)：@Html.TextBoxFor(model => model.prodUpId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.prodUpDt)：@Html.TextBoxFor(model => model.prodUpDt, new { @size = "16", @disabled = true })
+                        </td>*@
+                        <td></td>
+                        <td>
+                            商品資訊覆核人員/時間：
+                            @Html.DisplayTextFor(model => model.prodApprId)　@Html.DisplayTextFor(model => model.prodApprDt)
+                            @*@Html.DisplayNameFor(model => model.prodApprId)：@Html.TextBoxFor(model => model.prodApprId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.prodApprDt)：@Html.TextBoxFor(model => model.prodApprDt, new { @size = "16", @disabled = true })
+                        </td>*@
+                    </tr>
+
+                    <tr>
+                        <td>
+                            投資資訊異動人員/時間：
+                            @Html.DisplayTextFor(model => model.investUpId)　@Html.DisplayTextFor(model => model.investUpDt)
+                            @*@Html.DisplayNameFor(model => model.investUpId)：@Html.TextBoxFor(model => model.investUpId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        <td>
+                            @*@Html.DisplayNameFor(model => model.investUpDt)：@Html.TextBoxFor(model => model.investUpDt, new { @size = "16", @disabled = true })*@
+                        </td>
+                        <td>
+                            投資資訊覆核人員/時間：
+                            @Html.DisplayTextFor(model => model.investApprId)　@Html.DisplayTextFor(model => model.investApprDt)
+                            @*@Html.DisplayNameFor(model => model.investApprId)：@Html.TextBoxFor(model => model.investApprId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.investApprDt)：@Html.TextBoxFor(model => model.investApprDt, new { @size = "16", @disabled = true })
+                        </td>*@
+                    </tr>
+
+                    <tr>
+                        <td>
+                            會計資訊異動人員/時間：
+                            @Html.DisplayTextFor(model => model.acctUpId)　@Html.DisplayTextFor(model => model.acctUpDt)
+                            @*@Html.DisplayNameFor(model => model.acctUpId)：@Html.TextBoxFor(model => model.acctUpId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        <td>
+                            @*@Html.DisplayNameFor(model => model.acctUpDt)：@Html.TextBoxFor(model => model.acctUpDt, new { @size = "16", @disabled = true })*@
+                        </td>
+                        <td>
+                            會計資訊覆核人員/時間：
+                            @Html.DisplayTextFor(model => model.acctApprId)　@Html.DisplayTextFor(model => model.acctApprDt)
+                            @*@Html.DisplayNameFor(model => model.acctApprId)：@Html.TextBoxFor(model => model.acctApprId, new { @size = "6", @disabled = true })*@
+                        </td>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.acctApprDt)：@Html.TextBoxFor(model => model.acctApprDt, new { @size = "16", @disabled = true })
+                        </td>*@
+                    </tr>
+                </table>
+
+            }
+
+
+
+        </div>
+
+
+    </div>
+
+    <div class="panel panel-primary" id="itemInfo">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+
+                <a id="itemInfoC" data-toggle="collapse" data-parent="#itemInfo"
+                   href="#collapseItemInfo">
+                    Ｖ
+                </a>
+
+                險種資料
+            </h4>
+        </div>
+
+
+        <div id="collapseItemInfo" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.prodNoVer)：@Html.DropDownList("prodNoVer", prodNoVerList, "請選擇", new { @disabled = true })
+
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.prodNo)：@Html.TextBoxFor(model => model.prodNo, new { @size = "32", @maxlength = "27", @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.sysType)：@Html.DropDownList("sysType", sysTypeList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.itemMainType)：@Html.DropDownList("itemMainType", itemMainTypeList, "請選擇", new { @disabled = true })
+                            (商品編號第5碼為9：其他時，請回歸主承保範圍)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.investType)：@Html.DropDownList("investType", investTypeList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.insTerm)：@Html.DropDownList("insTerm", insTermList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.busiType)：@Html.DropDownList("busiType", busiTypeList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.comType)：@Html.DropDownList("comType", comTypeList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.coiType)：@Html.DropDownList("coiType", ynList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.extSchedulType)：@Html.DropDownList("extSchedulType", ynList, "請選擇", new { @disabled = true })
+                        </td>*@
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.pakindDmopType)：@Html.DropDownList("pakindDmopType", ynList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.lodprmType)：@Html.DropDownList("lodprmType", lodprmTypeList, "請選擇", new { @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.healthMgrType)：@Html.DropDownList("healthMgrType", ynList, "請選擇", new { @disabled = true })
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-primary" id="itemProd">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#itemProd"
+                   href="#collapseItemProd">
+                    Ｖ
+                </a>
+                (給付項目/費用)
+            </h4>
+        </div>
+
+
+        <div id="collapseItemProd" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+                    <tr>
+                        <td valign="top">
+                            <div id="prodGa" />
+                        </td>
+                        <td valign="top">
+                            <div id="prodSa" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel panel-primary" id="itemInvest">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#itemInvest"
+                   href="#collapseItemInvest">
+                    Ｖ
+                </a>
+                (保單投資)
+            </h4>
+        </div>
+
+
+        <div id="collapseItemInvest" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+                    <tr>
+                        <td valign="top">
+                            <div id="investGa" />
+                        </td>
+                        <td valign="top">
+                            <div id="investSa" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-primary" id="itemSmp">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+
+                <a id="itemSmpC" data-toggle="collapse" data-parent="#itemSmp"
+                   href="#collapseSmpInfo">
+                    Ｖ
+                </a>
+
+                科目設定
+            </h4>
+        </div>
+
+
+        <div id="collapseSmpInfo" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.itemAcct)：@Html.TextBoxFor(model => model.itemAcct, new { @size = "7", @maxlength = "6", @disabled = true })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.separatAcct)：@Html.TextBoxFor(model => model.separatAcct, new { @size = "7", @maxlength = "6", @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.coiAcct)：@Html.TextBoxFor(model => model.coiAcct, new { @size = "7", @maxlength = "6", @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.itemName)：@Html.TextBoxFor(model => model.itemName, new { @size = "100", @maxlength = "100", @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.itemNameShrt)：@Html.TextBoxFor(model => model.itemNameShrt, new { @size = "22", @maxlength = "10", @disabled = true })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.effectDate)：
+                            @Html.TextBoxFor(model => model.effectYY, new { @size = "5", @maxlength = "4", @disabled = true }) 年
+                            @Html.TextBoxFor(model => model.effectMM, new { @size = "3", @maxlength = "2", @disabled = true }) 月
+                            @Html.TextBoxFor(model => model.effectDD, new { @size = "3", @maxlength = "2", @disabled = true }) 日
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+        //查詢FGLSMPB取得SA、GA項目
+        function qrySMPB() {
+            $('#prodGa').children().remove();
+            $('#prodSa').children().remove();
+            $('#investGa').children().remove();
+            $('#investSa').children().remove();
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                        'aplyNo': $('#hidAplyNo').val(),
+                        'item': $('#item').val(),
+                        'productType': $('#productType').val(),
+                        'fuMk': $('#fuMk').val(),
+                        'itemCon': $('#itemCon').val(),
+                        'discPartFeat': $('#discPartFeat').val()
+                    }
+                }),
+                dataType: "json",
+                url: '@Url.Action("qrySMPB", "OGL00005")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+
+                    if (data.success) {
+
+                        /*---給付項目  begin---*/
+                        var prodSumpD = data.prodSumpD;
+                        var prodGa = document.getElementById('prodGa');
+                        var prodSa = document.getElementById('prodSa');
+
+                        //組合GA項目
+                        if (data.prodGaList.length > 0) {
+                            var lblHead = document.createElement("label");
+                            lblHead.innerHTML = "GA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            prodGa.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            prodGa.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.prodGaList.length - 1; i++) {
+                                var nowId = data.prodGaList[i].tempId;
+
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("class", "with-font");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + nowId);
+                                radioYes.setAttribute("name", "Boolean" + nowId);
+                                radioYes.setAttribute("value", "Y");
+                                radioYes.setAttribute("disabled", true);
+
+                                var lblYes = document.createElement("label");
+                                lblYes.innerHTML = "Y　";
+
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("class", "with-font");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + nowId);
+                                radioNo.setAttribute("name", "Boolean" + nowId);
+                                radioNo.setAttribute("value", "N");
+                                radioNo.setAttribute("disabled", true);
+
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+
+
+                                var wording = document.createElement("label");
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.innerHTML = data.prodGaList[i].smpName;
+
+                                if (prodSumpD != null) {
+                                    for (var j = 0; j <= prodSumpD.length - 1; j++) {
+                                        var sumpId = prodSumpD[j].smpNum + "|" + prodSumpD[j].productType + "|" + prodSumpD[j].acctType
+                                        if (sumpId == nowId) {
+                                            if (prodSumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                prodGa.appendChild(radioYes);
+                                prodGa.appendChild(lblYes);
+                                prodGa.appendChild(radioNo);
+                                prodGa.appendChild(lblNo);
+                                prodGa.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                prodGa.appendChild(spaceBr);
+
+
+                            }
+                        }
+
+                        //組合SA項目
+                        if (data.prodSaList.length > 0) {
+                            var lblHead = document.createElement("label");
+                            lblHead.innerHTML = "SA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            prodSa.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            prodSa.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.prodSaList.length - 1; i++) {
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("class", "with-font");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + data.prodSaList[i].tempId);
+                                radioYes.setAttribute("name", "Boolean" + data.prodSaList[i].tempId);
+                                radioYes.setAttribute("value", "Y");
+                                radioYes.setAttribute("disabled", true);
+
+                                var lblYes = document.createElement("label");
+                                lblYes.innerHTML = "Y　";
+                                //sa.appendChild(radioYes);
+                                //sa.appendChild(lblYes);
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("class", "with-font");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + data.prodSaList[i].tempId);
+                                radioNo.setAttribute("name", "Boolean" + data.prodSaList[i].tempId);
+                                radioNo.setAttribute("value", "N");
+                                radioNo.setAttribute("disabled", true);
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+                                //sa.appendChild(radioNo);
+                                //sa.appendChild(lblNo);
+
+                                var wording = document.createElement("label");
+                                wording.innerHTML = "　" + data.prodSaList[i].smpName;
+
+                                if (prodSumpD != null) {
+                                    for (var j = 0; j <= prodSumpD.length - 1; j++) {
+                                        var sumpId = prodSumpD[j].smpNum + "|" + prodSumpD[j].productType + "|" + prodSumpD[j].acctType
+                                        if (sumpId == data.prodSaList[i].tempId) {
+                                            if (prodSumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                prodSa.appendChild(radioYes);
+                                prodSa.appendChild(lblYes);
+                                prodSa.appendChild(radioNo);
+                                prodSa.appendChild(lblNo);
+                                prodSa.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                prodSa.appendChild(spaceBr);
+
+
+                            }
+                        }
+                        /*---給付項目  end---*/
+
+
+
+
+
+                        /*---保單投資  begin---*/
+                        var investSumpD = data.investSumpD;
+                        var investGa = document.getElementById('investGa');
+                        var investSa = document.getElementById('investSa');
+
+                        //組合GA項目
+                        if (data.investGaList.length > 0) {
+                            var lblHead = document.createElement("label");
+                            lblHead.innerHTML = "GA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            investGa.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            investGa.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.investGaList.length - 1; i++) {
+                                var nowId = data.investGaList[i].tempId;
+
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("class", "with-font");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + nowId);
+                                radioYes.setAttribute("name", "Boolean" + nowId);
+                                radioYes.setAttribute("value", "Y");
+                                radioYes.setAttribute("disabled", true);
+
+                                var lblYes = document.createElement("label");
+                                lblYes.innerHTML = "Y　";
+
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("class", "with-font");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + nowId);
+                                radioNo.setAttribute("name", "Boolean" + nowId);
+                                radioNo.setAttribute("value", "N");
+                                radioNo.setAttribute("disabled", true);
+
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+
+
+                                var wording = document.createElement("label");
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.setAttribute("name", "label" + nowId);
+                                wording.innerHTML = data.investGaList[i].smpName;
+
+                                if (investSumpD != null) {
+                                    for (var j = 0; j <= investSumpD.length - 1; j++) {
+                                        var sumpId = investSumpD[j].smpNum + "|" + investSumpD[j].productType + "|" + investSumpD[j].acctType
+                                        if (sumpId == nowId) {
+                                            if (investSumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                investGa.appendChild(radioYes);
+                                investGa.appendChild(lblYes);
+                                investGa.appendChild(radioNo);
+                                investGa.appendChild(lblNo);
+                                investGa.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                investGa.appendChild(spaceBr);
+
+
+                            }
+                        }
+
+                        //組合SA項目
+                        if (data.investSaList.length > 0) {
+                            var lblHead = document.createElement("label");
+                            lblHead.innerHTML = "SA";
+                            lblHead.style.color = "red";
+                            lblHead.style.fontWeight = 'bold';
+                            investSa.appendChild(lblHead);
+
+                            var spaceBrHead = document.createElement("br");
+                            investSa.appendChild(spaceBrHead);
+
+
+                            for (var i = 0; i <= data.investSaList.length - 1; i++) {
+                                var radioYes = document.createElement("input");
+                                radioYes.setAttribute("class", "with-font");
+                                radioYes.setAttribute("type", "radio");
+                                radioYes.setAttribute("id", "radioYes" + data.investSaList[i].tempId);
+                                radioYes.setAttribute("name", "Boolean" + data.investSaList[i].tempId);
+                                radioYes.setAttribute("value", "Y");
+                                radioYes.setAttribute("disabled", true);
+
+                                var lblYes = document.createElement("label");
+                                lblYes.innerHTML = "Y　";
+                                //sa.appendChild(radioYes);
+                                //sa.appendChild(lblYes);
+
+                                var radioNo = document.createElement("input");
+                                radioNo.setAttribute("class", "with-font");
+                                radioNo.setAttribute("type", "radio");
+                                radioNo.setAttribute("id", "radioNo" + data.investSaList[i].tempId);
+                                radioNo.setAttribute("name", "Boolean" + data.investSaList[i].tempId);
+                                radioNo.setAttribute("value", "N");
+                                radioNo.setAttribute("disabled", true);
+
+                                var lblNo = document.createElement("label");
+                                lblNo.innerHTML = "N　";
+                                //sa.appendChild(radioNo);
+                                //sa.appendChild(lblNo);
+
+                                var wording = document.createElement("label");
+                                wording.innerHTML = "　" + data.investSaList[i].smpName;
+
+                                if (investSumpD != null) {
+                                    for (var j = 0; j <= investSumpD.length - 1; j++) {
+                                        var sumpId = investSumpD[j].smpNum + "|" + investSumpD[j].productType + "|" + investSumpD[j].acctType
+                                        if (sumpId == data.investSaList[i].tempId) {
+                                            if (investSumpD[j].flag == "Y")
+                                                radioYes.setAttribute("checked", true);
+                                            else
+                                                radioNo.setAttribute("checked", true);
+                                        }
+                                    }
+                                }
+
+                                investSa.appendChild(radioYes);
+                                investSa.appendChild(lblYes);
+                                investSa.appendChild(radioNo);
+                                investSa.appendChild(lblNo);
+                                investSa.appendChild(wording);
+
+                                var spaceBr = document.createElement("br");
+                                investSa.appendChild(spaceBr);
+
+
+                            }
+                        }
+                        /*---保單投資  end---*/
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+
+
+
+        $(function () {
+            init();
+
+            function init() {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                var opScope = '@Html.Raw(ViewBag.opScope)';
+                var isQryTmp = '@Html.Raw(ViewBag.isQryTmp)';
+                var execAction = '@Html.Raw(ViewBag.execAction)';
+                var investTradMk = '@Html.Raw(ViewBag.investTradMk)';
+
+                if (isQryTmp == "1") {
+                    $("#isQryTmp").prop("checked", true);
+                    $("#hidAplyNo").val('@Html.Raw(ViewBag.aplyNo)');
+
+                } else
+                    $("#isQryTmp").prop("checked", false);
+
+                switch (execAction) {
+                    case "A":
+                        validationSummary.append('<li>此商品申請"新增"流程!!</li>');
+                        break;
+                    case "U":
+                        validationSummary.append('<li>此商品申請"修改"流程!!</li>');
+                        break;
+                    case "D":
+                        validationSummary.append('<li>此商品申請"刪除"流程!!</li>');
+                        break;
+                }
+
+                if ($("#flag").val() != "O") {
+                    //由OGL0003 新增的商品
+                    $("#itemProd").show();
+
+                    if ('@Html.Raw(ViewBag.itemHealthMgrMk)' == "")
+                        $("#healthMgrType").hide();
+
+                    if ('@Html.Raw(ViewBag.itemInvestTypeMk)' != "Y") {
+                        $("#itemInvest").hide();
+                        $("#investType").hide();
+                    } else {
+                        $("#itemInvest").show();
+                    }
+
+
+                    if ('@Html.Raw(ViewBag.itemLodprmMk)' != "Y")
+                        $("#lodprmType").hide();
+
+                    if ('@Html.Raw(ViewBag.itemPakindDmopMk)' != "Y")
+                        $("#pakindDmopType").hide();
+
+                    if ('@Html.Raw(ViewBag.itemCoiType)' != "Y")
+                        $("#coiType").hide();
+
+                    $("#itemSmp").show();
+
+                    qrySMPB();
+                } else {
+                    //由AS400 新增的新商品
+                    $("#itemProd").hide();
+                    $("#itemInvest").hide();
+                    $("#itemSmp").hide();
+                }
+
+            }
+
+
+            //回上一頁
+            $("#btnPrepage").click().on('click', function () {
+                history.go(-1)
+            })
+
+        });
+</script>
+
+

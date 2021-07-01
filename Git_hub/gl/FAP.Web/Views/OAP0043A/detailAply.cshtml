@@ -1,0 +1,368 @@
+﻿@model FAP.Web.ViewModels.OAP0043Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.Title = ViewBag.funcName;
+
+    var typeList = ViewBag.typeList as SelectList;
+
+    var dataStatusList = ViewBag.dataStatusList as SelectList;
+
+    var clrStatusList = ViewBag.clrStatusList as SelectList;
+    var ppssStatusList = ViewBag.ppssStatusList as SelectList;
+    var oPaidCdList = ViewBag.oPaidCdList as SelectList;
+    var telApprCodeList = ViewBag.telApprCodeList as SelectList;
+    var smsStatusList = ViewBag.smsStatusList as SelectList;
+    var fscRangeList = ViewBag.fscRangeList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aply_no)：
+                        @Html.TextBoxFor(model => model.aply_no, new { @disabled = true })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.type)：
+                        @Html.Hidden("type", "")
+                        @Html.DisplayTextFor(model => model.type_desc)
+</td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_id)：
+                        @Html.DisplayTextFor(model => model.create_id)
+                        @Html.Hidden("create_id", "")
+
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.create_dt)：
+                        @Html.DisplayTextFor(model => model.create_dt)
+                    </td>
+                </tr>
+            </table>
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type = "button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type = "button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type = "button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+            <br>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            var model = @Html.Raw(Json.Encode(Model));
+
+            $('#create_id').val(model.create_id);
+            $('#type').val(model.type);
+
+            createGrid();
+
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+
+        //*--------------查詢覆核明細資料  begin-----------------*//
+        function createGrid() {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+            $.blockUI(); //畫面鎖起來
+
+            var para = {
+                type: $('#type').val(),
+                aply_no: $('#aply_no').val()
+            };
+
+            $("#grid").jqGrid({
+                url: '/OAP0043A/detailRow/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'key'
+                },
+                mtype: 'POST',
+                colModel: [
+                {
+                    label: 'key',
+                    name: 'key', align: 'center', width: '120', editable: false, hidden: true
+                },
+                 {
+                     label: '保局範圍',
+                     name: 'fsc_range', align: 'center', width: '200', editable: false, hidden: true
+                 },
+                 {
+                     label: '保局範圍',
+                     name: 'fsc_range_desc', align: 'center', width: '200', editable: false,
+                 },
+                 {
+                     label: '級距',
+                     name: 'amt_range', align: 'center', width: '200', editable: false, hidden: true
+                 },
+                  {
+                      label: '級距',
+                      name: 'amt_range_desc', align: 'center', width: '200', editable: false, hidden: true
+                  },
+                  {
+                      label: '可派件數',
+                      name: 'cnt', align: 'center', width: '100', editable: false
+                  },
+                   {
+                       label: '派件百分比',
+                       name: 'std_1', align: 'center', width: '120', editable: false
+                   },
+                      {
+                          label: '分派件數',
+                          name: 'std_2', align: 'center', width: '120', editable: false
+                      },
+                      {
+                          label: '第一次電訪人員',
+                          name: 'proc_id', align: 'center', width: '120', editable: false, width: '160'
+                      },
+                       {
+                           label: '第一次電訪人員',
+                           name: 'proc_name', align: 'center', width: '120', editable: false, width: '120'
+                       }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 25,
+                rowList: [10, 25, 50],
+                //sortname: 'code_id',
+                //sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+
+
+                    var cnt = $('#grid').getGridParam('records')
+
+
+                        $('#validationSummary').children().remove();
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        if (cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    } else if (!data.success && cnt == 0)
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+
+                    //處理畫面資料呈現
+                    ids = $(this).jqGrid('getDataIDs');
+
+                    var fsc_range = "";
+                    var amt_range = "";
+
+                    for (j = 0; j <= ids.length - 1; j++) {
+                        rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                        var n = rowData.key.indexOf("-");
+                        if (n == -1) {
+                            jQuery("#grid").jqGrid('setRowData', rowData.key, false, { color: 'white', weightfont: 'bold', background: 'blue' });
+                        }
+
+                        if (fsc_range != rowData.fsc_range || amt_range != rowData.amt_range) {
+                            $("#grid").jqGrid("setCell", rowData.key, "fsc_range_desc", rowData.amt_range_desc);
+                            //rowData.fsc_range_desc = rowData.amt_range_desc;
+
+                            fsc_range = rowData.fsc_range;
+                            amt_range = rowData.amt_range;
+                        } else
+                            $("#grid").jqGrid("setCell", rowData.key, "cnt", " ");
+                    }
+
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+
+
+        }
+
+        //*--------------查詢覆核明細資料  end-----------------*//
+
+
+
+
+
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'aply_no': '@Html.Raw(ViewBag.aply_no)',
+                        'type': $('#type').val(),
+                        'create_id':$('#create_id').val()
+                    }, 'apprStat': "3"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OAP0043A")',
+                contentType: 'application/json',
+                success: function (data) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+
+
+            });
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: {
+                        'aply_no': '@Html.Raw(ViewBag.aply_no)',
+                        'type': $('#type').val(),
+                        'create_id':$('#create_id').val()
+                    }, 'apprStat': "2"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OAP0043A")',
+                contentType: 'application/json',
+                success: function (data) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+
+
+            });
+
+
+        });
+
+
+
+    });
+</script>
+
+

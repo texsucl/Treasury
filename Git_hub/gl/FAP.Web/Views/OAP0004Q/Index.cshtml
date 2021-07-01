@@ -1,0 +1,515 @@
+﻿@model FAP.Web.ViewModels.OAP0004Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var fscRangeList = ViewBag.fscRangeList as SelectList;
+
+    var clrStatusList = ViewBag.clrStatusList as SelectList;
+    var dispatchList = ViewBag.dispatchList as SelectList;
+    var stageList = ViewBag.stageList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @*@Html.Hidden("hidStatus", "")
+                @Html.Hidden("hidExecAction", "")*@
+                @Html.Hidden("hidFscRange", "")
+
+        <table>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.check_date_b)：
+                    <input id="check_date_b" name="check_date_b" type="text">
+                    ~
+                    <input id="check_date_e" name="check_date_e" type="text">
+                </td>
+                <td>
+                    @Html.DisplayNameFor(model => model.check_no)：@Html.TextBoxFor(model => model.check_no, new { @size = "12", @maxlength = "10", @onkeyup = "this.value = this.value.toUpperCase();" })
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.fsc_range)：@Html.DropDownList("fsc_range", fscRangeList, "請選擇")
+                </td>
+                @*<td>
+            @Html.DisplayNameFor(model => model.fsc_range_n)：@Html.DropDownList("fsc_range_n", fscRangeList, "請選擇")
+                </td>
+            </tr>*@
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.check_amt)：@Html.TextBoxFor(model => model.check_amt, new { @size = "30", @maxlength = "30", @disabled = true, onchange = "javascript:this.value=Comma(this.value);" })
+                </td>
+            </tr>
+
+           <tr>
+                <td>
+                    清理狀態：
+                    <select id="clean_status" name="clean_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                        @if (ViewBag.clrStatusList != null)
+                        {
+                            foreach (var item in ViewBag.clrStatusList)
+                            {
+                                if (item.Text != null)
+                                {
+                                    <option value="@item.Value">
+                                        @item.Text
+                                    </option>
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    派件狀態：
+                    <select id="dispatch_status" name="dispatch_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                        @if (ViewBag.dispatchList != null)
+                        {
+                            foreach (var item in ViewBag.dispatchList)
+                            {
+                                if (item.Text != null)
+                                {
+                                    <option value="@item.Value">
+                                        @item.Text
+                                    </option>
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    清理階段：
+                    <select id="stage_status" name="stage_status" multiple="multiple" data-live-search="true" class="selectpicker" title="請選擇" data-width="85%">
+                        @if (ViewBag.stageList != null)
+                        {
+                            foreach (var item in ViewBag.stageList)
+                            {
+                                if (item.Text != null)
+                                {
+                                    <option value="@item.Value">
+                                        @item.Text
+                                    </option>
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        @*<input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />*@
+                        <input type="submit" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                @Html.Hidden("onEdit", "")
+                @Html.Hidden("valueErr", "")
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+     //檢核資料
+    function chkData(execAction) {
+
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        //畫面欄位檢核
+        var bPass = true;
+
+        if ($("#check_date_b").val().length == 0 && $("#check_date_e").val().length == 0 &&
+                $("#check_no").val().length == 0 && $("#fsc_range").val().length == 0) {
+
+                validationSummary.append('<li>' + '「支票到期日」、「支票號碼」、「現在保局範圍」需擇一輸入!!"' + '</li>');
+                return
+            } else {
+
+                $('#check_date_b').attr('disabled', true);
+                $('#check_date_e').attr('disabled', true);
+                $('#check_no').attr('disabled', true);
+                $('#fsc_range').attr('disabled', true);
+                $('#clean_status').attr('disabled', true);
+                $('#dispatch_status').attr('disabled', true);
+                $('#stage_status').attr('disabled', true);
+        }
+
+        if (bPass == false)
+            return;
+
+
+
+        //清理狀態
+        var cleanStatusArr = $('#clean_status').find("option:selected");
+        var clean_status = "";
+        cleanStatusArr.each(function () {
+            clean_status += $(this).val() + "|";
+        });
+        if (clean_status != "")
+            clean_status = clean_status.substring(0, clean_status.length - 1);
+
+
+        //派件狀態
+        var dispatchStatusArr = $('#dispatch_status').find("option:selected");
+        var dispatch_status = "";
+        dispatchStatusArr.each(function () {
+            dispatch_status += $(this).val() + "|";
+        });
+        if (dispatch_status != "")
+            dispatch_status = dispatch_status.substring(0, dispatch_status.length - 1);
+
+
+        //清理階段
+        var stageStatusArr = $('#stage_status').find("option:selected");
+        var stage_status = "";
+        stageStatusArr.each(function () {
+            stage_status += $(this).val() + "|";
+        });
+        if (stage_status != "")
+            stage_status = stage_status.substring(0, stage_status.length - 1);
+
+
+
+        if (execAction == "btnQry")
+            execQuery(clean_status, dispatch_status, stage_status);
+        else
+            execExport(clean_status, dispatch_status, stage_status);
+
+
+    }
+
+
+    function execQuery(clean_status, dispatch_status, stage_status) {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        //$('#btnQry').attr('disabled', true);
+        //$('#btnExport').attr('disabled', true);
+
+        var jsonData = {
+            'check_date_b': $("#check_date_b").val()
+            , 'check_date_e': $("#check_date_e").val()
+            , 'check_no': $("#check_no").val()
+            , 'fsc_range': $("#fsc_range").val()
+            , 'dispatch_status': $("#dispatch_status").val()
+            , 'clean_status': $("#clean_status").val()
+            , 'stage_status': $("#stage_status").val()
+        };
+
+        $.blockUI(); //畫面鎖起來
+
+        $('#qryResult').children().remove();
+
+        $('#qryResult').append('<table id="' + "grid" + '"></table>');
+        $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            url: '/OAP0004Q/qryVeTrace/',
+            postData: jsonData,
+            datatype: 'json',
+            jsonReader: {
+                root: "rows",
+                page: "page",
+                total: "total",
+                records: "records",
+                repeatitems: false,
+                id: 'check_no'
+            },
+            mtype: 'POST',
+
+            colModel: [
+                {
+                    label: '支票號碼',
+                    name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                },
+                {
+                    label: '支票到期日',
+                    name: 'check_date', align: 'center', width: '120', editable: false
+                },
+                {
+                    label: '支票金額',
+                    name: 'check_amt', align: 'right', editable: false,
+                    formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                },
+                {
+                    label: '保局範圍',
+                    name: 'fsc_range', align: 'center', editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getFscRange()
+                    }
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: false,
+            sortname: "exec_date",
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (check_no) {
+
+            },
+            loadComplete: function (data) {
+                $.unblockUI(); //畫面打開
+                var amt = data.amt;
+                $('#check_amt').val(Comma(data.amt));
+
+            }
+        });
+
+            //*-------------------GRID end--------------------*//
+
+
+        @*var jsonDataAmt = JSON.stringify({
+            'check_date_b': $("#check_date_b").val()
+            , 'check_date_e': $("#check_date_e").val()
+            , 'check_no': $("#check_no").val()
+            , 'fsc_range': $("#fsc_range").val()
+            , 'dispatch_status':dispatch_status
+            , 'clean_status': clean_status
+            , 'stage_status': stage_status
+        });
+
+
+        $.ajax({
+                type: "POST",
+                data: jsonDataAmt,
+                dataType: "json",
+                url: '@Url.Action("qryVeTraceAmt", "OAP0004Q")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        var amt = data.amt;
+                        $('#check_amt').val(Comma(data.amt));
+
+                        $('#btnExport').attr('disabled', false);
+                        if (data.amt == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });*@
+
+    }
+
+    function execExport(clean_status, dispatch_status, stage_status) {
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        var jsonData = JSON.stringify({
+            'check_date_b': $("#check_date_b").val()
+            , 'check_date_e': $("#check_date_e").val()
+            , 'check_no': $("#check_no").val()
+            , 'fsc_range': $("#fsc_range").val()
+            , 'dispatch_status': dispatch_status
+            , 'clean_status': clean_status
+            , 'stage_status': stage_status
+        });
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execExport", "OAP0004Q")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        var url = '/OAP0004Q/downloadRpt?id=' + data.guid;
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+    }
+
+
+    //取得"保局範圍"下拉選單
+    function getFscRange() {
+        return $('#hidFscRange').val();
+    }
+
+
+
+    $(function () {
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            @*$('#btnModify').attr('disabled', true);
+
+            $('#hidExecAction').val('@Html.Raw(ViewBag.execActionjqList)');*@
+            $('#hidFscRange').val('@Html.Raw(ViewBag.fscRangejqList)');
+
+        }
+
+        $('#check_date_b').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#check_date_e').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            //delObject = [];
+            $('#qryResult').children().remove();
+            $('#validationSummary').children().remove();
+
+            //$('#btnModify').attr('disabled', true);
+            //$('#btnExport').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+
+            $('#check_date_b').attr('disabled', false);
+            $('#check_date_e').attr('disabled', false);
+            $('#check_no').attr('disabled', false);
+            $('#fsc_range').attr('disabled', false);
+            $('#clean_status').attr('disabled', false);
+            $('#dispatch_status').attr('disabled', false);
+            $('#stage_status').attr('disabled', false);
+            //$('#fsc_range_n').attr('disabled', false);
+            $('#check_date_b').val("");
+            $('#check_date_e').val("");
+            $('#check_no').val("");
+            $('#fsc_range').val("");
+
+            $("#clean_status").selectpicker('deselectAll');
+            $("#dispatch_status").selectpicker('deselectAll');
+            $("#stage_status").selectpicker('deselectAll');
+
+            //$('#fsc_range_n').val("");
+            $("#check_amt").val("");
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+            //$("#onEdit").val("");
+            //$("#valueErr").val("");
+            //lastSelectRoot = "";
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+
+            chkData("btnQry");
+
+
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+
+        //*---------------匯出 begin ----------------*//
+        $("#btnExport").click().on('click', function () {
+
+            chkData("btnExport");
+
+
+        });
+        //*---------------匯出 end ----------------*//
+
+
+
+
+    });
+</script>
+
+

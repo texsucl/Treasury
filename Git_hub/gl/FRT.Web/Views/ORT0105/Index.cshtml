@@ -1,0 +1,1350 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+}
+@using FRT.Web.Enum;
+@using FRT.Web.BO;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="ORT0105s_Form">
+                    <table>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="ORT0105_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="ShowOrNot">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="ORT0105_Insert" value="新增" class="btn btn-primary" />
+        </div>
+        <div class="col-sm-24">
+            <div id="ORT0105_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div style="text-align:center;" class="Customer_Act">
+            <input type="button" id="ORT0105_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="ORT0105_Cancel" value="取消申請" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="ORT0105_Dialog" style="display:none;">
+        <form id="ORT0105_DialogForm">
+            <table>
+                <tr>
+                    <td style="width:50px">
+                        <label>類別 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("ORT0105_type", (SelectList)ViewBag.GOJ_TYPE, new { @class = "" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>性質 : </label>
+                    </td>
+                    <td>
+                        <select id="ORT0105_kind" class=""></select>                       
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>頻率 : </label>
+                        @Html.RadioButton("frequencyType", "ORT0105frequency_m", new { @checked = true }) 月
+                        @Html.RadioButton("frequencyType", "ORT0105frequency_d") 日
+                    </td>
+                    <td>
+                        <div class="frequencyType ORT0105frequency_m">
+                            <label>執行工作天 : </label>
+                            <input type="text" id="ORT0105_frequency_m" value="0" style="width:50px" />
+                            <label>(月頻率)</label>
+                        </div>
+                        <div class="frequencyType ORT0105frequency_d" style="display:none;">
+                            <label>系統基準日 : </label>
+                            <input type="text" id="ORT0105_frequency_d" value="0" style="width:50px"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>自動執行時間 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("ORT0105_SCHEDULER_TIME_HH", (SelectList)ViewBag.SCHEDULER_TIME_HH, new { @class = "" })
+                        <label id="ORT0105_referral_dep_name_d"> : </label>
+                        @Html.DropDownList("ORT0105_SCHEDULER_TIME_MM", (SelectList)ViewBag.SCHEDULER_TIME_MM, new { @class = "" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>資料區間起始日 : </label>
+                        <div>
+                            @Html.RadioButton("start_date_type", "ORT0105startdate_1", new { @checked = true }) 固定日期
+                        </div>
+                        <div>
+                            @Html.RadioButton("start_date_type", "ORT0105startdate_2") 執行前XX月
+                        </div>
+                        <div>
+                            @Html.RadioButton("start_date_type", "ORT0105startdate_3") 同系統基準日
+                        </div>
+                        <div>
+                            @Html.RadioButton("start_date_type", "ORT0105startdate_4") 執行前XX日
+                        </div>             
+                    </td>
+                    <td  width="250px">
+                        <div class="start_date_type ORT0105startdate_1">
+                            <label>固定日期 : </label>
+                            <input type="text" id="ORT0105_start_date_value_date" style="width:150px" autocomplete="off"/>
+                        </div>
+                        <div class="start_date_type ORT0105startdate_2" style="display:none;">
+                            <label>執行前 </label>
+                            <input type="text" id="ORT0105_start_date_value_m" style="width:50px"  />
+                            <label> 月</label>
+                        </div>
+                        <div class="start_date_type ORT0105startdate_3" style="display:none;">
+                            <label>同系統基準日</label>
+                        </div>
+                        <div class="start_date_type ORT0105startdate_4" style="display:none;">
+                            <label>執行前 </label>
+                            <input type="text" id="ORT0105_start_date_value_d" style="width:50px"/>
+                            <label> 日</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Mail群組(ORTB015) : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("ORT0105_MAIL_GROUP", (SelectList)ViewBag.MAIL_GROUP, new { @class = "" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>報表加密 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="ORT0105_MAIL_KEY"  />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div>                            
+                            <input type="button" id="ORT0105_SubInsert" value="新增明細" class="btn btn-primary" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="ORT0105_SubjqgridDiv" class="jqd">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="ORT0105_btnInsert_Mod" value="新增" class="btn btn-primary" />
+                        <input type="button" id="ORT0105_btnUpdate_Mod" value="修改" class="btn btn-primary" />
+                        <input type="button" id="ORT0105_btnDelete_Mod" value="刪除" class="btn btn-primary" />
+                        <input type="hidden" id="ORT0105_hPk_id" />
+                        <input type="hidden" id="ORT0105_hexec_action" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ORT0105_btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="ORT0105_SubDialog" style="display:none;">
+        <form id="ORT0105_SubDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>平台 : </label>
+                    </td>
+                    <td>
+                        @Html.DropDownList("ORT0105_platform", (SelectList)ViewBag.PLATFORM, new { @class = "" })
+                        @*<input type="text" id="ORT0105_reason_code_d" name="ORT0105_reason_code_d" maxlength="10" />*@
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>檔案代碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="ORT0105_file_code" name="ORT0105_file_code" maxlength="30" style="width:300px" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>檔案中文 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="ORT0105_file_code_d" name="ORT0105_file_code_d" maxlength="50" style="width:300px"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea id="ORT0105_memo" name="ORT0105_memo" maxlength="200" style="width:300px;height:100px"></textarea>
+                        @*<input type="" id="ORT0105_memo" name="ORT0105_memo" maxlength="200" />*@
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @*<input type="button" id="ORT0105_SubbtnConfirm" value="確認" class="btn btn-primary" />*@
+                        <input type="button" id="ORT0105_SubbtnInsert_Mod" value="新增" class="btn btn-primary" />
+                        <input type="button" id="ORT0105_SubbtnUpdate_Mod" value="修改" class="btn btn-primary" />
+                        <input type="button" id="ORT0105_SubbtnDelete_Mod" value="刪除" class="btn btn-primary" />
+                        <input type="hidden" id="ORT0105_SubhPk_id" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ORT0105_SubbtnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.search = '@Url.Action("qryORT0105", "ORT0105")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "ORT0105")';
+        UrlFor.InsertData = '@Url.Action("updateORT0105", "ORT0105")';
+        UrlFor.UpdateData = '@Url.Action("updateORT0105", "ORT0105")';
+        UrlFor.DeleteData = '@Url.Action("updateORT0105", "ORT0105")';
+        UrlFor.InsertSubData = '@Url.Action("updateORT0105Sub", "ORT0105")';
+        UrlFor.UpdateSubData = '@Url.Action("updateORT0105Sub", "ORT0105")';
+        UrlFor.DeleteSubData = '@Url.Action("updateORT0105Sub", "ORT0105")';
+        UrlFor.GetGOJ_TYPE_GROUP = '@Url.Action("GetGOJ_TYPE_GROUP", "ORT0105")';
+        UrlFor.ResetData = '@Url.Action("ResetData", "ORT0105")';
+        UrlFor.ApplyData = '@Url.Action("ApplyData", "ORT0105")';
+        UrlFor.GetDeptName = '@Url.Action("GetDeptNameData", "ORT0105")';
+        //#endregion
+
+        //#region 參數設定
+        var ORT0105_type_id = 'ORT0105_type'; //類別ID
+        var ORT0105_kind_id = 'ORT0105_kind'; //性質ID
+        var ORT0105_frequency_Type_id = 'frequencyType'; //頻率類別
+        var ORT0105_frequency_m_id = 'ORT0105_frequency_m'; //頻率參數(月)
+        var ORT0105_frequency_d_id = 'ORT0105_frequency_d'; //頻率參數(日)
+        var ORT0105_SCHEDULER_TIME_HH_id = 'ORT0105_SCHEDULER_TIME_HH'; //執行時間(時)
+        var ORT0105_SCHEDULER_TIME_MM_id = 'ORT0105_SCHEDULER_TIME_MM'; //執行時間(分)
+        var ORT0105_start_date_type_id = 'start_date_type'; //資料區間起始日類別
+        var ORT0105_start_date_value_date_id = 'ORT0105_start_date_value_date'; //固定日期
+        var ORT0105_start_date_value_m_id = 'ORT0105_start_date_value_m'; //執行前XX月
+        var ORT0105_start_date_value_d_id = 'ORT0105_start_date_value_d'; //執行前XX日
+        var ORT0105_MAIL_GROUP_id = 'ORT0105_MAIL_GROUP'; //Mail群組(ORTB015)
+        var ORT0105_MAIL_KEY_id = 'ORT0105_MAIL_KEY'; //MailKey
+        var ORT0105_platform_id = 'ORT0105_platform'; //平台
+        var ORT0105_file_code_id = 'ORT0105_file_code'; //檔案代碼
+        var ORT0105_file_code_d_id = 'ORT0105_file_code_d'; //檔案中文
+        var ORT0105_memo_id = 'ORT0105_memo'; //備註
+
+
+        var ORT0105_hPk_id = 'ORT0105_hPk_id'; 
+        var ORT0105_hSub_id = 'ORT0105_SubhPk_id';
+        var ORT0105_FormId = 'ORT0105_DialogForm';
+        var ORT0105_SubFormId = 'ORT0105_SubDialogForm';
+        var ORT0105_SubInsertBtnId = 'ORT0105_SubInsert';
+        var ORT0105_hexec_action_id = 'ORT0105_hexec_action';
+
+        const numberRules = /^[-]?[0-9]*$/;
+        const dateRules = /^((?!0000)[0-9]{4}[/|-]((0[1-9]|1[0-2])[/|-](0[1-9]|1[0-9]|2[0-8])|(0[13-9]|1[0-2])[/|-](29|30)|(0[13578]|1[02])[/|-]31)|([0-9]{2}(0[48]|[2468][048]|[13579][26])|(0[48]|[2468][048]|[13579][26])00)[/|-]02[/|-]29)$/;
+
+        var _ConfirmFlag = false; //離開時提醒訊息
+        //#endregion
+
+        function set_Verified() {
+            //verified.required(ORT0105_FormId, ORT0105_reason_code_d_id, message.required('原因代碼'));
+            //verified.required(ORT0105_FormId, ORT0105_reason_d_id, message.required('原因中文'));
+        }
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始動作
+            set_Verified();
+            $('.ShowOrNot').hide();
+            $('#' + ORT0105_start_date_value_date_id).datepicker();
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'ORT0105_Search':
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'ORT0105_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ORT0105_InsertFun(); });
+                        break;
+                    case 'ORT0105_btnInsert_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { InsertDataFun(); });
+                        break;
+                    case 'ORT0105_btnUpdate_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { UpdateDataFun(); });
+                        break;
+                    case 'ORT0105_btnDelete_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DeleteDataFun(); });
+                        break;
+                    case 'ORT0105_SubInsert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ORT0105_InsertSubFun(); });
+                        break;
+                    case 'ORT0105_SubbtnInsert_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { InsertSubDataFun(); });
+                        break;
+                    case 'ORT0105_SubbtnUpdate_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { UpdateSubDataFun(); });
+                        break;
+                    case 'ORT0105_SubbtnDelete_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DeleteSubDataFun(); });
+                        break;
+                    case 'ORT0105_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApplyDataFun(); });
+                        break;
+                    case 'ORT0105_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            _ConfirmFlag = false;
+                            ORT0105_CancelFun();
+                        });
+                        break;
+                    case 'ORT0105_btnCancel':
+                    case 'ORT0105_SubbtnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+
+            $('input[name=' + ORT0105_frequency_Type_id+']').on('change', function () {
+                var type = $('input[name='+ORT0105_frequency_Type_id+']:checked').val();
+                $('#validationSummary').children().remove();
+                $('.' + ORT0105_frequency_Type_id).hide();
+                $('.' + type).show();
+            });
+
+            $('input[name=' + ORT0105_start_date_type_id+']').on('change', function () {
+                var type = $('input[name='+ORT0105_start_date_type_id+']:checked').val();
+                $('#validationSummary').children().remove();
+                $('.' + ORT0105_start_date_type_id).hide();
+                $('.' + type).show();
+            });
+
+            $('#' + ORT0105_type_id).change(function () {
+                KindChange($('#' + ORT0105_type_id).val());               
+            });
+
+            function KindChange(type, kind) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        type: type,                        
+                    }),
+                    url: UrlFor.GetGOJ_TYPE_GROUP,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    $('#' + ORT0105_kind_id).find('option').remove();
+                    customerUtility.addoption(ORT0105_kind_id, result);
+                    if (kind != null)
+                        $('#' + ORT0105_kind_id).val(kind);
+                    else
+                        $('#' + ORT0105_kind_id).val($($('#' + ORT0105_kind_id + ' option')[0]).val());
+                });
+            }
+            //#endregion
+
+            //#region 申請覆核
+            function ApplyDataFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ApplyData,
+                    contentType: 'application/json',
+                }).done(function (result) {                    
+                    if (result.RETURN_FLAG) {
+                        ORT0105_SearchGrid();
+                        customerUtility.alertAuto(result);
+                    }
+                    else {
+                        alert(result.DESCRIPTION);
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 取消申請
+            function ORT0105_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                        ResetDialog();
+                        ORT0105_SearchGrid();
+                });
+            }
+            //#endregion
+
+            function ORT0105_InsertFun() {
+                dialogOpen('@Ref.ActionType.Add.ToString()', null);
+                $('#' + ORT0105_SubInsertBtnId).show();
+            }
+
+            function ORT0105_InsertSubFun() {
+                SubdialogOpen('@Ref.ActionType.Add.ToString()', null);
+            }
+
+            //#region 新增
+    
+            function InsertDataFun() {
+                $('#validationSummary').children().remove();
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                if (!$('#' + ORT0105_FormId).valid()) {
+                    return false;
+                }
+                var ORT0105_type_val = ($('#' + ORT0105_type_id).val()||'').trim();
+                var ORT0105_kind_val = ($('#' + ORT0105_kind_id).val() || '').trim();
+                var ORT0105_type_text = $("#" + ORT0105_type_id + " option:selected").text() || '';
+                var ORT0105_kind_text = $("#" + ORT0105_kind_id + " option:selected").text() || '';
+                var ORT0105_frequency_Type_val = $('input[name=frequencyType]:checked').val();
+                var ORT0105_frequency_Type = ORT0105_frequency_Type_val.split('_')[1];
+                var ORT0105_frequency_m_val = ($('#' + ORT0105_frequency_m_id).val()||'').trim();
+                var ORT0105_frequency_d_val = ($('#' + ORT0105_frequency_d_id).val()||'').trim();
+                var ORT0105_frequency_val = ORT0105_frequency_Type == 'm' ? ORT0105_frequency_m_val : ORT0105_frequency_d_val;
+                var ORT0105_SCHEDULER_TIME_HH_val = ($('#' + ORT0105_SCHEDULER_TIME_HH_id).val()||'').trim();
+                var ORT0105_SCHEDULER_TIME_MM_val = ($('#' + ORT0105_SCHEDULER_TIME_MM_id).val()||'').trim();
+                var ORT0105_start_date_type_val = $('input[name=start_date_type]:checked').val();
+                var ORT0105_start_date_type = ORT0105_start_date_type_val.split('_')[1];
+                var ORT0105_start_date_value = '';
+                var ORT0105_start_date_value_date_val = ($('#' + ORT0105_start_date_value_date_id).val()||'').trim();
+                var ORT0105_start_date_value_m_val = ($('#' + ORT0105_start_date_value_m_id).val()||'').trim();
+                var ORT0105_start_date_value_d_val = ($('#' + ORT0105_start_date_value_d_id).val()||'').trim();
+                if (ORT0105_start_date_type == '1')
+                    ORT0105_start_date_value = ORT0105_start_date_value_date_val;
+                else if (ORT0105_start_date_type == '2')
+                    ORT0105_start_date_value = ORT0105_start_date_value_m_val;
+                else if (ORT0105_start_date_type == '4')
+                    ORT0105_start_date_value = ORT0105_start_date_value_d_val;
+                var ORT0105_MAIL_GROUP_val = ($('#' + ORT0105_MAIL_GROUP_id).val() || '').trim();
+                var ORT0105_MAIL_KEY_val = ($('#' + ORT0105_MAIL_KEY_id).val() || '').trim();
+                if (ORT0105_type_val == '') {
+                    alert('類別必輸入!');
+                    return false;
+                }
+                if (ORT0105_kind_val == '') {
+                    alert('性質必輸入!');
+                    return false;
+                }
+                if (ORT0105_frequency_val == '' || !numberRules.test(ORT0105_frequency_val)) {
+                    alert('系統基準日參數必輸入!');
+                    return false;
+                }
+                if (ORT0105_frequency_Type == 'm' && parseInt(ORT0105_frequency_val) < 0) {
+                    alert('執行工作天需大於等於 0');
+                    return false;
+                }
+                if (ORT0105_frequency_Type == 'd' &&  parseInt(ORT0105_frequency_val) > 0) {
+                    alert('系統基準日需小於等於 0');
+                    return false;
+                }
+                if (ORT0105_SCHEDULER_TIME_HH_val == '' || ORT0105_SCHEDULER_TIME_MM_val == '') {
+                    alert('執行時間必輸入!');
+                    return false;
+                }
+                if (!(ORT0105_start_date_type == '3' || ORT0105_start_date_value != '')) {
+                    alert('資料區間起始日的設定值必輸入!');
+                    return false;
+                }
+                if (ORT0105_start_date_type == '1' && !dateRules.test(ORT0105_start_date_value)) {
+                    alert('資料區間類別參數必為YYYY-MM-DD!');
+                    return false;
+                }
+                if ((ORT0105_start_date_type == '3' || ORT0105_start_date_type == '4') && ORT0105_frequency_Type != 'd') {
+                    alert('此設定需為日頻率者!');                   
+                    return false;
+                }
+                if ((ORT0105_start_date_type == '2' && !numberRules.test(ORT0105_start_date_value)) ||
+                    (ORT0105_start_date_type == '4' && !numberRules.test(ORT0105_start_date_value)) ||
+                    parseInt(ORT0105_start_date_value) < 0 ) {
+                    alert('資料區間類別參數必為數字 且須大於等於0!');
+                    return false;
+                }
+                if (ORT0105_start_date_type == '4' && Math.abs(parseInt(ORT0105_frequency_val)) > Math.abs(parseInt(ORT0105_start_date_value))) {
+                    alert('選擇執行前N日者 系統基準日數字需 <= 執行前N日數字設定!');
+                    return false;
+                }
+                if (ORT0105_MAIL_GROUP_val == '') {
+                    alert('Mail群組必輸入!');
+                    return false;
+                }
+                if (ORT0105_MAIL_KEY_val == '' || (!verified.isEnglishNumber(ORT0105_MAIL_KEY_val))) {
+                    alert('報表加密必輸入 or 只能輸入大小寫英文或半形數字 !');
+                    return false;
+                }
+               
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: ORT0105ViewModel(
+                            'A' + created.uuid(),
+                            'A',
+                            ORT0105_type_val,
+                            ORT0105_kind_val,
+                            ORT0105_frequency_Type,
+                            ORT0105_frequency_val,
+                            ORT0105_SCHEDULER_TIME_HH_val,
+                            ORT0105_SCHEDULER_TIME_MM_val,
+                            ORT0105_start_date_type,
+                            ORT0105_start_date_value,
+                            ORT0105_MAIL_GROUP_val,
+                            ORT0105_MAIL_KEY_val,
+                            ORT0105_type_text,
+                            ORT0105_kind_text
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.InsertData,
+                    contentType: 'application/json',
+                }).done(function (result) {                 
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_btnInsert_Mod'));
+                        ORT0105_SearchGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 修改
+            function UpdateDataFun() {
+                $('#validationSummary').children().remove();
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                if (!$('#' + ORT0105_FormId).valid()) {
+                    return false;
+                }
+
+                var ORT0105_type_val = ($('#' + ORT0105_type_id).val()||'').trim();
+                var ORT0105_kind_val = ($('#' + ORT0105_kind_id).val() || '').trim();
+                var ORT0105_type_text = $("#" + ORT0105_type_id + " option:selected").text() || '';
+                var ORT0105_kind_text = $("#" + ORT0105_kind_id + " option:selected").text() || '';
+                var ORT0105_frequency_Type_val = $('input[name=frequencyType]:checked').val();
+                var ORT0105_frequency_Type = ORT0105_frequency_Type_val.split('_')[1];
+                var ORT0105_frequency_m_val = ($('#' + ORT0105_frequency_m_id).val()||'').trim();
+                var ORT0105_frequency_d_val = ($('#' + ORT0105_frequency_d_id).val()||'').trim();
+                var ORT0105_frequency_val = ORT0105_frequency_Type == 'm' ? ORT0105_frequency_m_val : ORT0105_frequency_d_val;
+                var ORT0105_SCHEDULER_TIME_HH_val = ($('#' + ORT0105_SCHEDULER_TIME_HH_id).val()||'').trim();
+                var ORT0105_SCHEDULER_TIME_MM_val = ($('#' + ORT0105_SCHEDULER_TIME_MM_id).val()||'').trim();
+                var ORT0105_start_date_type_val = $('input[name=start_date_type]:checked').val();
+                var ORT0105_start_date_type =  ORT0105_start_date_type_val.split('_')[1];
+                var ORT0105_start_date_value = '';
+                var ORT0105_start_date_value_date_val = ($('#' + ORT0105_start_date_value_date_id).val()||'').trim();
+                var ORT0105_start_date_value_m_val = ($('#' + ORT0105_start_date_value_m_id).val()||'').trim();
+                var ORT0105_start_date_value_d_val = ($('#' + ORT0105_start_date_value_d_id).val()||'').trim();
+                if (ORT0105_start_date_type == '1')
+                    ORT0105_start_date_value = ORT0105_start_date_value_date_val;
+                else if (ORT0105_start_date_type == '2')
+                    ORT0105_start_date_value = ORT0105_start_date_value_m_val;
+                else if (ORT0105_start_date_type == '4')
+                    ORT0105_start_date_value = ORT0105_start_date_value_d_val;
+                var ORT0105_MAIL_GROUP_val = ($('#' + ORT0105_MAIL_GROUP_id).val() || '').trim();
+                var ORT0105_MAIL_KEY_val = ($('#' + ORT0105_MAIL_KEY_id).val() || '').trim();
+                var ORT0105_hPk_val = $('#' + ORT0105_hPk_id).val().trim(); 
+
+                if (ORT0105_type_val == '') {
+                    alert('類別必輸入!');
+                    return false;
+                }
+                if (ORT0105_kind_val == '') {
+                    alert('性質必輸入!');
+                    return false;
+                }
+                if (ORT0105_frequency_val == '' || !numberRules.test(ORT0105_frequency_val)) {
+                    alert('系統基準日參數必輸入!');
+                    return false;
+                }
+                if (ORT0105_frequency_Type == 'm' && parseInt(ORT0105_frequency_val) < 0) {
+                    alert('執行工作天需大於等於 0');
+                    return false;
+                }
+                if (ORT0105_frequency_Type == 'd' &&  parseInt(ORT0105_frequency_val) > 0) {
+                    alert('系統基準日需小於等於 0');
+                    return false;
+                }
+                if (ORT0105_SCHEDULER_TIME_HH_val == '' || ORT0105_SCHEDULER_TIME_MM_val == '') {
+                    alert('執行時間必輸入!');
+                    return false;
+                }
+                if (!(ORT0105_start_date_type == '3' || ORT0105_start_date_value != '')) {
+                    alert('資料區間起始日的設定值必輸入!');
+                    return false;
+                }
+                if (ORT0105_start_date_type == '1' && !dateRules.test(ORT0105_start_date_value)) {
+                    alert('資料區間類別參數必為YYYY-MM-DD!');
+                    return false;
+                }
+                if ((ORT0105_start_date_type == '3' || ORT0105_start_date_type == '4') &&
+                    ORT0105_frequency_Type != 'd') {
+                    alert('此設定需為日頻率者!');                   
+                    return false;
+                }
+                if ((ORT0105_start_date_type == '2' && !numberRules.test(ORT0105_start_date_value)) ||
+                    (ORT0105_start_date_type == '4' && !numberRules.test(ORT0105_start_date_value)) ||
+                    parseInt(ORT0105_start_date_value) < 0 ) {
+                    alert('資料區間類別參數必為數字 且須大於等於0!');
+                    return false;
+                }
+                if (ORT0105_start_date_type == '4' && Math.abs(parseInt(ORT0105_frequency_val)) > Math.abs(parseInt(ORT0105_start_date_value))) {
+                    alert('選擇執行前N日者 系統基準日數字需 <= 執行前N日數字設定!');
+                    return false;
+                }
+                if (ORT0105_MAIL_GROUP_val == '') {
+                    alert('Mail群組必輸入!');
+                    return false;
+                }
+
+                if (ORT0105_MAIL_KEY_val == '' || (!verified.isEnglishNumber(ORT0105_MAIL_KEY_val))) {
+                    alert('報表加密必輸入 or 只能輸入大小寫英文或半形數字 !');
+                    return false;
+                }
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: ORT0105ViewModel(
+                            ORT0105_hPk_val,
+                            'U',
+                            ORT0105_type_val,
+                            ORT0105_kind_val,
+                            ORT0105_frequency_Type,
+                            ORT0105_frequency_val,
+                            ORT0105_SCHEDULER_TIME_HH_val,
+                            ORT0105_SCHEDULER_TIME_MM_val,
+                            ORT0105_start_date_type,
+                            ORT0105_start_date_value,
+                            ORT0105_MAIL_GROUP_val,
+                            ORT0105_MAIL_KEY_val,
+                            ORT0105_type_text,
+                            ORT0105_kind_text
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.UpdateData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_btnUpdate_Mod'));
+                        ORT0105_SearchGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //customerUtility.alertAuto(result,'a');
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 刪除
+            function DeleteDataFun() {
+                $('#validationSummary').children().remove();
+                var ORT0105_hPk_val = $('#' + ORT0105_hPk_id).val().trim(); 
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: ORT0105ViewModel(
+                            ORT0105_hPk_val,
+                            'D'
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.DeleteData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_btnDelete_Mod'));
+                        ORT0105_SearchGrid();
+                        _ConfirmFlag = true;
+
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //customerUtility.alertAuto(result,'a');
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 新增註記
+            function InsertSubDataFun() {
+                var ORT0105_hPk_val = $('#' + ORT0105_hPk_id).val().trim();  
+                var ORT0105_platform_val = $('#' + ORT0105_platform_id).val().trim();
+                var ORT0105_file_code_val = $('#' + ORT0105_file_code_id).val().trim();
+                var ORT0105_file_code_d_val = $('#' + ORT0105_file_code_d_id).val().trim();
+                var ORT0105_memo_val = $('#' + ORT0105_memo_id).val().trim();
+
+                if (ORT0105_platform_val == '') {
+                    alert('平台必輸入!');
+                    return false;
+                }
+                if (ORT0105_file_code_val == '') {
+                    alert('檔案代碼必輸入!');
+                    return false;
+                }
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewSubModel: ORT0105SubViewModel(
+                            ORT0105_hPk_val,
+                            'S' + created.uuid(),
+                            'A',
+                            ORT0105_platform_val,
+                            ORT0105_file_code_val,
+                            ORT0105_file_code_d_val,
+                            ORT0105_memo_val
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.InsertSubData,
+                    contentType: 'application/json',
+                }).done(function (result) {                 
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_SubbtnInsert_Mod'));
+                        ORT0105_SearchSubGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //customerUtility.alertAuto(result,'a');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 修改註記
+            function UpdateSubDataFun() {
+                $('#validationSummary').children().remove();
+             
+                var ORT0105_hPk_val = $('#' + ORT0105_hPk_id).val().trim();  
+                var ORT0105_hSub_val = $('#' + ORT0105_hSub_id).val().trim();
+                var ORT0105_platform_val = $('#' + ORT0105_platform_id).val().trim();
+                var ORT0105_file_code_val = $('#' + ORT0105_file_code_id).val().trim();
+                var ORT0105_file_code_d_val = $('#' + ORT0105_file_code_d_id).val().trim();
+                var ORT0105_memo_val = $('#' + ORT0105_memo_id).val().trim();
+
+                if (ORT0105_platform_val == '') {
+                    alert('平台必輸入!');
+                    return false;
+                }
+                if (ORT0105_file_code_val == '') {
+                    alert('檔案代碼必輸入!');
+                    return false;
+                }
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewSubModel: ORT0105SubViewModel(
+                            ORT0105_hPk_val,
+                            ORT0105_hSub_val,
+                            'U',
+                            ORT0105_platform_val,
+                            ORT0105_file_code_val,
+                            ORT0105_file_code_d_val,
+                            ORT0105_memo_val
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.UpdateSubData,
+                    contentType: 'application/json',
+                }).done(function (result) {                 
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_SubbtnUpdate_Mod'));
+                        ORT0105_SearchSubGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //customerUtility.alertAuto(result,'a');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 刪除註記
+            function DeleteSubDataFun() {
+                $('#validationSummary').children().remove();
+                var ORT0105_hPk_val = $('#' + ORT0105_hPk_id).val().trim(); 
+                var ORT0105_hSub_val = $('#' + ORT0105_hSub_id).val().trim();
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewSubModel: ORT0105SubViewModel(
+                            ORT0105_hPk_val,
+                            ORT0105_hSub_val,
+                            'D'
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.DeleteSubData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0105_SubbtnDelete_Mod'));
+                        ORT0105_SearchSubGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        //customerUtility.alertAuto(result, 'a');
+                        alert(result.DESCRIPTION);
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('ORT0105_jqgridDiv');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    //$('#' + dialogId).dialog('open');
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        ORT0105_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 查詢Grid
+            function ORT0105_SearchGrid() {
+                var colNameArray = ['動作', '執行功能', '資料狀態', '類別', '性質', '頻率', '執行時間', '資料區間起始日',
+                    'Mail群組','報表加密','最後修改人員', '最後修改時間','建立人員', '建立時間',
+                    '執行功能代碼', '資料狀態代碼', '類別(v)', '性質(v)', '頻率類別', '頻率參數', '執行時間(小時)', '執行時間(分鐘)',
+                    '資料區間起始日類別', '資料區間起始日類別參數','Mail群組參數','pkid'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "data_status_value", index: "data_status_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "type_d", index: "type_d", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "kind_d", index: "kind_d", width: 220, sortable: false, align: 'left' });
+                colModelArray.push({ name: "frequency_d", index: "frequency_d", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "scheduler_time_d", index: "scheduler_time_d", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "start_date_d", index: "start_date_d", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "mail_group_d", index: "mail_group_d", width: 300, sortable: false, align: 'center' });
+                colModelArray.push({ name: "mail_key", index: "mail_key", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_name", index: "update_name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_datetime", index: "update_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "create_id", index: "create_id", width: 100, sortable: false, align: 'center', hidden: true });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime", width: 100, sortable: false, align: 'center', hidden: true });
+                colModelArray.push({ name: "exec_action", index: "exec_action", hidden: true });
+                colModelArray.push({ name: "data_status", index: "data_status", hidden: true });
+                colModelArray.push({ name: "type", index: "type", hidden: true });
+                colModelArray.push({ name: "kind", index: "kind", hidden: true });
+                colModelArray.push({ name: "frequency", index: "frequency", hidden: true });
+                colModelArray.push({ name: "frequency_value", index: "frequency_value", hidden: true });
+                colModelArray.push({ name: "scheduler_time_hh", index: "scheduler_time_hh", hidden: true });
+                colModelArray.push({ name: "scheduler_time_mm", index: "scheduler_time_mm", hidden: true });
+                colModelArray.push({ name: "start_date_type", index: "start_date_type", hidden: true });
+                colModelArray.push({ name: "start_date_value", index: "start_date_value", hidden: true });
+                colModelArray.push({ name: "mail_group", index: "mail_group", hidden: true });
+                colModelArray.push({ name: "check_id", index: "check_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'ORT0105_jqgridDiv',
+                'ORT0105_SearchList',
+                'ORT0105_SearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'ORT0105Model'
+                },
+                colNameArray,
+                colModelArray,
+                '跨系統勾稽作業維護檔',
+                jqgridCustom.getPage('ORT0105_jqgridDiv'),
+                jqgridCustom.getRowNum('ORT0105_jqgridDiv'),
+                ORT0105_CompleteFun,
+                true
+                );
+            }
+            //#endregion
+
+            //#region
+            function ORT0105_SearchSubGrid() {
+                var colNameArray = ['動作', '執行功能', '平台', '檔案代碼', '檔案中文', '備註',
+                    '建立人員', '建立時間', '最後修改人員', '最後修改時間',
+                    '執行功能代碼', 'pkid'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "platform", index: "platform", width: 70, sortable: false, align: 'center' });
+                colModelArray.push({ name: "file_code", index: "file_code", width: 150, sortable: false, align: 'left' });
+                colModelArray.push({ name: "file_code_d", index: "file_code_d", width: 150, sortable: false, align: 'left' });
+                colModelArray.push({ name: "memo", index: "memo", width: 250, sortable: false, align: 'left' });
+                colModelArray.push({ name: "create_id", index: "create_id",  hidden: true });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime",  hidden: true});
+                colModelArray.push({ name: "update_id", index: "update_id",  hidden: true});
+                colModelArray.push({ name: "update_datetime", index: "update_datetime",  hidden: true });
+                colModelArray.push({ name: "exec_action", index: "exec_action", hidden: true });
+                colModelArray.push({ name: "sub_id", index: "sub_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'ORT0105_SubjqgridDiv',
+                'ORT0105_SubSearchList',
+                'ORT0105_SubSearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'ORT0105SubModel',
+                    check_id: $('#' + ORT0105_hPk_id).val().trim()
+                },
+                colNameArray,
+                colModelArray,
+                '跨系統勾稽作業程式明細檔',
+                jqgridCustom.getPage('ORT0105_SubjqgridDiv'),
+                jqgridCustom.getRowNum('ORT0105_SubjqgridDiv'),
+                ORT0105_SubCompleteFun,
+                true
+                );
+            }
+            //#endregion
+
+            //#region jqgrid 事件
+            function ORT0105_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'ORT0105_Search', ORT0105ActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_data_status]', listId)).text();
+                    //var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_exec_action]', listId)).text();
+
+                    if (status == '2') { //資料異動中不能刪除
+                        $(this).find('.actionDeleIcon').hide();
+                        $(this).find('.actionEditIcon').hide();
+                    }
+                });
+                //ORT0105_SearchSubGrid();
+            }
+
+            var ORT0105ActFun = {};
+            ORT0105ActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+                $('#' + ORT0105_SubInsertBtnId).show();
+            }
+            ORT0105ActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+                $('#' + ORT0105_SubInsertBtnId).hide();
+            }
+            ORT0105ActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+                $('#' + ORT0105_SubInsertBtnId).hide();
+            }
+            //#endregion
+
+            //#region Sub jqgrid 事件
+            function ORT0105_SubCompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'ORT0105_SubSearch', ORT0105SubActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_data_status]', listId)).text();
+                    //var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_exec_action]', listId)).text();
+                    if ($('#' + ORT0105_hexec_action_id).val() == '@Ref.ActionType.Dele.ToString()' || 
+                        $('#' + ORT0105_hexec_action_id).val() == '@Ref.ActionType.View.ToString()') { //資料異動中不能刪除
+                        $(this).find('.actionDeleIcon').hide();
+                        $(this).find('.actionEditIcon').hide();
+                    }
+                });
+            }
+
+            var ORT0105SubActFun = {};
+            ORT0105SubActFun.Edit = function (i) {
+                SubdialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            ORT0105SubActFun.Dele = function (i) {
+                SubdialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            ORT0105SubActFun.View = function (i) {
+                SubdialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                var dialogId = 'ORT0105_Dialog';
+                var listId = 'ORT0105_SearchList';
+                $('#' + ORT0105_hexec_action_id).val(type);
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    //position: { my: "top+20%", at: "center top", of: window },
+                    position: { my: "top", at: "center top", of: window },
+                    title: title + '跨系統勾稽作業檔',
+                    width: '850px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+                ResetDialog();
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                var data = $("#" + listId).getRowData(rowid);
+                $('#' + ORT0105_hPk_id).val(data.check_id);    
+                $('#ORT0105_btnInsert_Mod,#ORT0105_btnUpdate_Mod,#ORT0105_btnDelete_Mod').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {                  
+                    $('#' + ORT0105_type_id).prop('disabled', false);
+                    $('#' + ORT0105_kind_id).prop('disabled', false);
+                    $('input[name=' + ORT0105_frequency_Type_id + ']').prop('disabled', false);
+                    $('#' + ORT0105_frequency_m_id).prop('disabled', false);
+                    $('#' + ORT0105_frequency_d_id).prop('disabled', false);
+                    $('#' + ORT0105_SCHEDULER_TIME_HH_id).prop('disabled', false);
+                    $('#' + ORT0105_SCHEDULER_TIME_MM_id).prop('disabled', false);
+                    $('input[name=' + ORT0105_start_date_type_id + ']').prop('disabled', false);
+                    $('#' + ORT0105_start_date_value_date_id).prop('disabled', false);
+                    $('#' + ORT0105_start_date_value_m_id).prop('disabled', false);
+                    $('#' + ORT0105_start_date_value_d_id).prop('disabled', false);
+                    $('#' + ORT0105_MAIL_GROUP_id).prop('disabled', false);
+                    $('#' + ORT0105_MAIL_KEY_id).prop('disabled', false);
+                    $('#ORT0105_btnInsert_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.Edit.ToString()') {      
+                    dialogSetData(listId, rowid);
+                    if (data.data_status != '2') {
+                        if (data.exec_action == 'A') {
+                            $('#' + ORT0105_type_id).prop('disabled', false);
+                            $('#' + ORT0105_kind_id).prop('disabled', false);
+                        }
+                        //$('#' + ORT0105_type_id).prop('disabled', false);
+                        //$('#' + ORT0105_kind_id).prop('disabled', false);
+                        $('input[name=' + ORT0105_frequency_Type_id + ']').prop('disabled', false);
+                        $('#' + ORT0105_frequency_m_id).prop('disabled', false);
+                        $('#' + ORT0105_frequency_d_id).prop('disabled', false);
+                        $('#' + ORT0105_SCHEDULER_TIME_HH_id).prop('disabled', false);
+                        $('#' + ORT0105_SCHEDULER_TIME_MM_id).prop('disabled', false);
+                        $('input[name=' + ORT0105_start_date_type_id + ']').prop('disabled', false);
+                        $('#' + ORT0105_start_date_value_date_id).prop('disabled', false);
+                        $('#' + ORT0105_start_date_value_m_id).prop('disabled', false);
+                        $('#' + ORT0105_start_date_value_d_id).prop('disabled', false);
+                        $('#' + ORT0105_MAIL_GROUP_id).prop('disabled', false);
+                        $('#' + ORT0105_MAIL_KEY_id).prop('disabled', false);
+                    }                   
+                    $('#ORT0105_btnUpdate_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#ORT0105_btnDelete_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                }
+                ORT0105_SearchSubGrid();               
+            }
+            //#endregion
+
+            //#region Sub dialog open
+            function SubdialogOpen(type, rowid) {
+                //$('#' + ORT0105_SubFormId).validate().resetForm();               
+                var dialogId = 'ORT0105_SubDialog';
+                var listId = 'ORT0105_SubSearchList';              
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+20%", at: "center top", of: window },
+                    title: title + '跨系統勾稽作業明細資料檔',
+                    width: '450px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+                ResetSubDialog();
+                var data = $("#" + listId).getRowData(rowid);     
+                $('#ORT0105_SubbtnInsert_Mod,#ORT0105_SubbtnUpdate_Mod,#ORT0105_SubbtnDelete_Mod').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {
+                    $('#' + ORT0105_platform_id).prop('disabled', false);
+                    $('#' + ORT0105_file_code_id).prop('disabled', false);
+                    $('#' + ORT0105_file_code_d_id).prop('disabled', false);
+                    $('#' + ORT0105_memo_id).prop('disabled', false);
+                    $('#ORT0105_SubbtnInsert_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.Edit.ToString()') {
+                    dialogSetSubData(listId, rowid);
+                    $('#' + ORT0105_platform_id).prop('disabled', false);
+                    $('#' + ORT0105_file_code_id).prop('disabled', false);
+                    $('#' + ORT0105_file_code_d_id).prop('disabled', false);
+                    $('#' + ORT0105_memo_id).prop('disabled', false);                
+                    $('#ORT0105_SubbtnUpdate_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetSubData(listId, rowid);
+                    $('#ORT0105_SubbtnDelete_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetSubData(listId, rowid);
+                }
+                
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#' + ORT0105_hPk_id).val(data.check_id);              
+                    $('#' + ORT0105_type_id).val(data.type);
+                    //$('#' + ORT0105_kind_id).val(data.kind);
+                    KindChange(data.type, data.kind);
+                    $('input[name=' + ORT0105_frequency_Type_id+']').prop('disabled', false);
+                    $('input[name=' + ORT0105_frequency_Type_id + '][value="ORT0105frequency_' + data.frequency + '"]').click();
+                    $('input[name=' + ORT0105_frequency_Type_id+']').prop('disabled', true);
+                    if (data.frequency == 'm') {
+                        $('#' + ORT0105_frequency_m_id).val(data.frequency_value);
+                    }
+                    else if (data.frequency == 'd') {
+                         $('#' + ORT0105_frequency_d_id).val(data.frequency_value);
+                    }
+                    $('#' + ORT0105_SCHEDULER_TIME_HH_id).val((data.scheduler_time_hh).padStart(2,'0'));
+                    $('#' + ORT0105_SCHEDULER_TIME_MM_id).val((data.scheduler_time_mm).padStart(2,'0'));
+                    var _date_type = data.start_date_type;
+                     $('input[name=' + ORT0105_start_date_type_id+']').prop('disabled', false);
+                    $('input[name=' + ORT0105_start_date_type_id + '][value="ORT0105startdate_' + _date_type + '"]').click();
+                     $('input[name=' + ORT0105_start_date_type_id+']').prop('disabled', true);
+                    if (_date_type == '1') {
+                        $('#' + ORT0105_start_date_value_date_id).val(data.start_date_value);
+                    }
+                    else if (_date_type == '2') {
+                        $('#' + ORT0105_start_date_value_m_id).val(data.start_date_value);
+                    }
+                    else if (_date_type == '4') {
+                        $('#' + ORT0105_start_date_value_d_id).val(data.start_date_value);
+                    }
+                    $('#' + ORT0105_MAIL_GROUP_id).val(data.mail_group);
+                    $('#' + ORT0105_MAIL_KEY_id).val(data.mail_key);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetDialog() {
+                 $('#' + ORT0105_hPk_id).val('');               
+                 $('#' + ORT0105_type_id).val('');
+                 $('#' + ORT0105_kind_id + ' option').remove();
+                 $('input[name=' + ORT0105_frequency_Type_id+']').prop('disabled', false);
+                 $('input[name=' + ORT0105_frequency_Type_id + '][value="ORT0105frequency_m"]').click();
+                 $('input[name=' + ORT0105_frequency_Type_id+']').prop('disabled', true);
+                 $('#' + ORT0105_frequency_m_id).val('');
+                 $('#' + ORT0105_frequency_d_id).val('');
+                 $('#' + ORT0105_SCHEDULER_TIME_HH_id).val('');
+                 $('#' + ORT0105_SCHEDULER_TIME_MM_id).val('');
+                 $('input[name=' + ORT0105_start_date_type_id+']').prop('disabled', false);
+                 $('input[name=' + ORT0105_start_date_type_id + '][value="ORT0105startdate_1"]').click();
+                 $('input[name=' + ORT0105_start_date_type_id+']').prop('disabled', true);
+                 $('#' + ORT0105_start_date_value_date_id).val('');
+                 $('#' + ORT0105_start_date_value_m_id).val('');
+                 $('#' + ORT0105_start_date_value_d_id).val('');
+                 $('#' + ORT0105_MAIL_GROUP_id).val('');
+                 $('#' + ORT0105_MAIL_KEY_id).val('');
+                 $('#' + ORT0105_type_id).prop('disabled', true);
+                 $('#' + ORT0105_kind_id).prop('disabled', true);
+                 //$('input[name=' + ORT0105_frequency_Type_id+']').prop('disabled', true);
+                 $('#' + ORT0105_frequency_m_id).prop('disabled', true);
+                 $('#' + ORT0105_frequency_d_id).prop('disabled', true);
+                 $('#' + ORT0105_SCHEDULER_TIME_HH_id).prop('disabled', true);
+                 $('#' + ORT0105_SCHEDULER_TIME_MM_id).prop('disabled', true);
+                 //$('input[name=' + ORT0105_start_date_type_id+']').prop('disabled', true);
+                 $('#' + ORT0105_start_date_value_date_id).prop('disabled', true);
+                 $('#' + ORT0105_start_date_value_m_id).prop('disabled', true);
+                 $('#' + ORT0105_start_date_value_d_id).prop('disabled', true);
+                 $('#' + ORT0105_MAIL_GROUP_id).prop('disabled', true);
+                 $('#' + ORT0105_MAIL_KEY_id).prop('disabled', true);
+            }
+            //#endregion
+
+            //#region Dialog Set Sub Data
+            function dialogSetSubData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#' + ORT0105_hSub_id).val(data.sub_id);  
+                    $('#' + ORT0105_platform_id).val(data.platform);                  
+                    $('#' + ORT0105_file_code_id).val(data.file_code);
+                    $('#' + ORT0105_file_code_d_id).val(data.file_code_d);
+                    $('#' + ORT0105_memo_id).val(data.memo);
+                    $('#' + ORT0105_platform_id).prop('disabled', true);
+                    $('#' + ORT0105_file_code_id).prop('disabled', true);
+                    $('#' + ORT0105_file_code_d_id).prop('disabled', true);
+                    $('#' + ORT0105_memo_id).prop('disabled', true);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetSubDialog() {
+                $('#' + ORT0105_hSub_id).val('');     
+                if ($('#' + ORT0105_platform_id + ' option').length > 0) {
+                    $('#' + ORT0105_platform_id).val($($('#' + ORT0105_platform_id + ' option')[0]).val());
+                }
+                $('#' + ORT0105_file_code_id).val('');
+                $('#' + ORT0105_file_code_d_id).val('');
+                $('#' + ORT0105_memo_id).val('');
+                $('#' + ORT0105_platform_id).prop('disabled', false);
+                $('#' + ORT0105_file_code_id).prop('disabled', false);
+                $('#' + ORT0105_file_code_d_id).prop('disabled', false);
+                $('#' + ORT0105_memo_id).prop('disabled', false);
+            }
+            //#endregion
+
+
+            //#region ORT0105ViewModel
+            function ORT0105ViewModel(
+                check_id,
+                exec_action,
+                type,
+                kind,
+                frequency,
+                frequency_value,
+                scheduler_time_hh,
+                scheduler_time_mm,
+                start_date_type,
+                start_date_value,
+                mail_group,
+                mail_key,
+                type_d,
+                kind_d
+                ) {
+                var obj = {};
+                obj['check_id'] = check_id;
+                obj['exec_action'] = exec_action;
+                obj['type'] = type;
+                obj['kind'] = kind;
+                obj['frequency'] = frequency;
+                obj['frequency_value'] = frequency_value;
+                obj['scheduler_time_hh'] = scheduler_time_hh;
+                obj['scheduler_time_mm'] = scheduler_time_mm;
+                obj['start_date_type'] = start_date_type;
+                obj['start_date_value'] = start_date_value;
+                obj['mail_group'] = mail_group; 
+                obj['mail_key'] = mail_key;
+                obj['type_d'] = type_d;
+                obj['kind_d'] = kind_d;
+                return obj;
+            }
+            //#endregion
+
+            //#region ORT0105SubViewModel
+            function ORT0105SubViewModel(
+                check_id,
+                sub_id,
+                exec_action,
+                platform,
+                file_code,
+                file_code_d,
+                memo) {
+                var obj = {};
+                obj['check_id'] = check_id;
+                obj['sub_id'] = sub_id;
+                obj['exec_action'] = exec_action;
+                obj['platform'] = platform;
+                obj['file_code'] = file_code;
+                obj['file_code_d'] = file_code_d;
+                obj['memo'] = memo;                                             
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

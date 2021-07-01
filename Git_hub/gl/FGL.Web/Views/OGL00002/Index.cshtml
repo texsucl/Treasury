@@ -1,0 +1,1519 @@
+﻿@model FGL.Web.ViewModels.OGL00002Model
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+    var isIfrs4List = ViewBag.isIfrs4List as SelectList;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidOnlyTmp", false)
+                <span style="color:red;">若轉換資料規則有兩筆資料以上有規則衝突時，則以覆核時間最後一筆資料為轉換規則!!!</span>
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isQryTmp)：@Html.CheckBox("isQryTmp", false)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranA)：@Html.TextBoxFor(model => model.tranA, new { @size = "3", @maxlength = "2", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranB)：@Html.TextBoxFor(model => model.tranB, new { @size = "2", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranC)：@Html.TextBoxFor(model => model.tranC, new { @size = "2", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranD)：@Html.TextBoxFor(model => model.tranD, new { @size = "3", @maxlength = "2", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+
+                    <tr>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranE)：@Html.TextBoxFor(model => model.tranE, new { @size = "2", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranF)：@Html.TextBoxFor(model => model.tranF, new { @size = "3", @maxlength = "2", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranG)：@Html.TextBoxFor(model => model.tranG, new { @size = "3", @maxlength = "2", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranH)：@Html.TextBoxFor(model => model.tranH, new { @size = "4", @maxlength = "3", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.tranI)：@Html.TextBoxFor(model => model.tranI, new { @size = "5", @maxlength = "4", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranJ)：@Html.TextBoxFor(model => model.tranJ, new { @size = "2", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tranK)：@Html.TextBoxFor(model => model.tranK, new { @size = "2", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+
+                </table>
+
+
+                <table style="text-align:center">
+                    <tr>
+                        <td colspan="27" style="text-align:left">
+                            保險商品編號：
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>9</td>
+                        <td>10</td>
+                        <td>11</td>
+                        <td>12</td>
+                        <td>13</td>
+                        <td>14</td>
+                        <td>15</td>
+                        <td>16</td>
+                        <td>17</td>
+                        <td>18</td>
+                        <td>19</td>
+                        <td>20</td>
+                        <td>21</td>
+                        <td>22</td>
+                        <td>23</td>
+                        <td>24</td>
+                        <td>25</td>
+                        <td>26</td>
+                        <td>27</td>
+                    </tr>
+                    <tr>
+                        <td>@Html.TextBoxFor(model => model.p01, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p02, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p03, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p04, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p05, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p06, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p07, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p08, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p09, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p10, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p11, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p12, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p13, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p14, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p15, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p16, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p17, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p18, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p19, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p20, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p21, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p22, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p23, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p24, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p25, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p26, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                        <td>@Html.TextBoxFor(model => model.p27, new { @size = "1", @maxlength = "1", @onkeyup = "this.value = this.value.toUpperCase();" })</td>
+                    </tr>
+                </table>
+
+
+                    <div class="row">
+                        <div class="col-sm-24" style="text-align:center;">
+                            <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                            <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                            <input type="submit" id="btnDelTmp" name="btnDelTmp" value="刪除暫存資料" class="btn btn-primary" />
+                            <input type="submit" id="btnQryHis" name="btnQryHis" value="查詢歷史資料" class="btn btn-primary" />
+                            <input type="submit" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                            <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        </div>
+                    </div>
+                    <br>
+
+                    <button id="btnNew" name="btnNew" class="btn btn-primary">新增</button>
+                    <button id="btnImport" name="btnImport" class="btn btn-primary">匯入</button>
+                    <div class="row">
+                        <div id="qryResult" class="col-sm-24">
+                            <table id="grid"></table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>
+
+                 <!-- Modal -->
+                    <div class="modal fade" id="modal" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="margin-left:10px">
+                            <div class="modal-content" style="width:1000px;position:relative;left:10px">
+                                <!-- Modal Header -->
+                                <!-- Modal Body -->
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form" onsubmit="return false">
+                                        @Html.Hidden("iTempId", "")
+                                        @Html.Hidden("iExecAction", "")
+                                        <table>
+                                            <tr>
+                                                <td colspan="27" align="center">保險商品編號(欄位空白表示不檢核轉換)</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>01</td>
+                                                <td>02</td>
+                                                <td>03</td>
+                                                <td>04</td>
+                                                <td>05</td>
+                                                <td>06</td>
+                                                <td>07</td>
+                                                <td>08</td>
+                                                <td>09</td>
+                                                <td>10</td>
+                                                <td>11</td>
+                                                <td>12</td>
+                                                <td>13</td>
+                                                <td>14</td>
+                                                <td>15</td>
+                                                <td>16</td>
+                                                <td>17</td>
+                                                <td>18</td>
+                                                <td>19</td>
+                                                <td>20</td>
+                                                <td>21</td>
+                                                <td>22</td>
+                                                <td>23</td>
+                                                <td>24</td>
+                                                <td>25</td>
+                                                <td>26</td>
+                                                <td>27</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="text" id="iP01" maxlength="1" style="width:30px" /></td>
+                                                <td><input type="text" id="iP02" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP03" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP04" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP05" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP06" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP07" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP08" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP09" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP10" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP11" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP12" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP13" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP14" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP15" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP16" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP17" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP18" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP19" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP20" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP21" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP22" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP23" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP24" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP25" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP26" maxlength='1' style="width:30px" /></td>
+                                                <td><input type="text" id="iP27" maxlength='1' style="width:30px" /></td>
+                                            </tr>
+                                        </table>
+                                        <table>
+                                            <tr>
+                                                <td colspan="11" align="center" class="bo">對照欄位</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:center">A</td>
+                                                <td style="text-align:center">B</td>
+                                                <td style="text-align:center">C</td>
+                                                <td style="text-align:center">D</td>
+                                                <td style="text-align:center">E</td>
+                                                <td style="text-align:center">F</td>
+                                                <td style="text-align:center">G</td>
+                                                <td style="text-align:center">H</td>
+                                                <td style="text-align:center">I</td>
+                                                <td style="text-align:center">J</td>
+                                                <td style="text-align:center">K</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:center">險種細分類</td>
+                                                <td style="text-align:center">個人團體別</td>
+                                                <td style="text-align:center">契約別</td>
+                                                <td style="text-align:center">傳統非傳統</td>
+                                                <td style="text-align:center">主附約</td>
+                                                <td style="text-align:center">險種類型2</td>
+                                                <td style="text-align:center">危險分類</td>
+                                                <td style="text-align:center">年歲滿期</td>
+                                                <td style="text-align:center">審查/特殊商品/給付別</td>
+                                                <td style="text-align:center">速報註記</td>
+                                                <td style="text-align:center">公司別註記</td>
+
+                                            </tr>
+                                            <tr>
+                                                <td><input type="text" class="form-control" id="iTranA" maxlength='2' size='3' /></td>
+                                                <td><input type="text" class="form-control" id="iTranB" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranC" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranD" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranE" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranF" maxlength='2' size='3' /></td>
+                                                <td><input type="text" class="form-control" id="iTranG" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranH" maxlength='3' size='4' /></td>
+                                                <td><input type="text" class="form-control" id="iTranI" maxlength='4' size='5' /></td>
+                                                <td><input type="text" class="form-control" id="iTranJ" maxlength='1' size='2' /></td>
+                                                <td><input type="text" class="form-control" id="iTranK" maxlength='1' size='2' /></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="11">
+                                                    <button type="button" id="btnConfirm" class="btn btn-primary"> 確定</button>
+                                                    <button type="button" id="btnCancel" class="btn btn-primary"> 取消</button>
+                                                </td>
+
+                                            </tr>
+                                        </table>
+                                    </form>
+                                </div>
+
+                                <!-- Modal Footer -->
+                                @*<div class="modal-footer">
+                                        <button type="button" class="btn btn-default"
+                                                data-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="button" class="btn btn-primary">
+                                            Save changes
+                                        </button>
+                                    </div>*@
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="modal fade" id="modalImport" tabindex="-1" role="dialog"
+                         aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="margin-left:10px">
+                            <div class="modal-content" style="width:1000px;position:relative;left:10px">
+                                <!-- Modal Header -->
+                                <!-- Modal Body -->
+                                <div class="modal-body">
+                                    <form class="form-horizontal" role="form" onsubmit="return false">
+
+                                        <table>
+
+                                            <tr>
+                                                <td>
+                                                    <label for="file" class="filestyle" style="color:red;">＊匯入檔案：</label>
+
+                                                </td>
+                                                <td>
+                                                    <input type="file" id="fileUpload" name="file" accept=".xls,.xlsx" />
+
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" align="center">
+                                                    <button type="button" id="btnUpload" class="btn btn-primary"> 執行匯入</button>
+                                                    <button type="button" id="btnCancelUpload" class="btn btn-primary"> 取消</button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </form>
+                                </div>
+
+                                <!-- Modal Footer -->
+                                @*<div class="modal-footer">
+                                        <button type="button" class="btn btn-default"
+                                                data-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="button" class="btn btn-primary">
+                                            Save changes
+                                        </button>
+                                    </div>*@
+                            </div>
+                        </div>
+                    </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //匯出
+    $("#btnExport").on("click", function () {
+        $.blockUI();
+
+        $.ajax({
+            url: "@Url.Action("execExport", "OGL00002")",
+            data: JSON.stringify({
+                model: {
+                    'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    'tranA': $('#tranA').val(),
+                    'tranB': $('#tranB').val(),
+                    'tranC': $('#tranC').val(),
+                    'tranD': $('#tranD').val(),
+                    'tranE': $('#tranE').val(),
+                    'tranF': $('#tranF').val(),
+                    'tranG': $('#tranG').val(),
+                    'tranH': $('#tranH').val(),
+                    'tranI': $('#tranI').val(),
+                    'tranJ': $('#tranJ').val(),
+                    'tranK': $('#tranK').val(),
+
+                    'p01': $('#p01').val(),
+                    'p02': $('#p02').val(),
+                    'p03': $('#p03').val(),
+                    'p04': $('#p04').val(),
+                    'p05': $('#p05').val(),
+                    'p06': $('#p06').val(),
+                    'p07': $('#p07').val(),
+                    'p08': $('#p08').val(),
+                    'p09': $('#p09').val(),
+                    'p10': $('#p10').val(),
+                    'p11': $('#p11').val(),
+                    'p12': $('#p12').val(),
+                    'p13': $('#p13').val(),
+                    'p14': $('#p14').val(),
+                    'p15': $('#p15').val(),
+                    'p16': $('#p16').val(),
+                    'p17': $('#p17').val(),
+                    'p18': $('#p18').val(),
+                    'p19': $('#p19').val(),
+                    'p20': $('#p20').val(),
+                    'p21': $('#p21').val(),
+                    'p22': $('#p22').val(),
+                    'p23': $('#p23').val(),
+                    'p24': $('#p24').val(),
+                    'p25': $('#p25').val(),
+                    'p26': $('#p26').val(),
+                    'p27': $('#p27').val()
+
+                },'onlyTmp' :$('#hidOnlyTmp').val()
+            }),
+        type: "POST",
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+
+            if (data.success) {
+
+                var url = '/OGL00002/downloadRpt?fileName=' + data.fileName;
+
+                    window.location = url;
+
+            } else {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (data.err.length > 0) {
+                    validationSummary.append('<li>' + data.err + '</li>');
+                }
+            }
+
+            $.unblockUI();
+        },
+        error: function () {
+            $.unblockUI();
+        }
+    });
+
+
+    });
+
+
+    //匯入
+    $("#btnImport").on("click", function () {
+        $('#modalImport').modal('show');
+    });
+
+    //取消匯入
+    $("#btnCancelUpload").on("click", function () {
+        $('#modalImport').modal('hide');
+    });
+
+
+    //執行匯入
+    $("#btnUpload").on("click", function () {
+
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        jQuery("#grid").jqGrid('clearGridData')
+                        .trigger("reloadGrid");
+        $('#hidOnlyTmp').val(true);
+
+
+        //## 宣告一個FormData
+        var data = new FormData();
+        //## 將檔案append FormData
+        var files = $("#fileUpload").get(0).files;
+        if (files.length > 0) {
+            data.append("UploadedFile", files[0]);
+        }
+
+        $.ajax({
+            type: "POST",
+            data: data,
+            dataType: "json",
+            url: '@Url.Action("procImport", "OGL00002")',
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                $('#modalImport').modal('hide');
+                $("#fileUpload").val('');
+                $.unblockUI(); //畫面打開
+
+                validationSummary.append('<li>本次作業共匯入：' + data.iRow + '筆　　成功：'
+                     + data.iSuccess + '筆　　失敗：' + data.iFail + '筆</li>');
+
+                if (data.success) {
+
+
+                    validationSummary.append('<li>作業成功</li>');
+                    //  $("#btnDelTmp").prop("disabled", false);
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                    if (data.errList != null) {
+                        for (var i = 0; i <= data.errList.length - 1; i++) {
+                            validationSummary.append('<li>' + data.errList[i] + '</li>');
+                        }
+                    }
+                }
+
+                if (data.iSuccess > 0) {
+                    $("#isQryTmp").prop("checked", true);
+                    $("#btnDelTmp").prop("disabled", false);
+                    qryDetail(false);
+                }
+
+            }
+        });
+
+
+    });
+
+
+
+    //取消編輯轉碼設定
+    $("#btnCancel").on("click", function () {
+        $('#modal').modal('hide');
+    });
+
+
+    //新增
+    $("#btnNew").on("click", function () {
+        $('#iTempId').val("");
+        $('#iExecAction').val("A");
+
+
+        $('#iTranA').val("");
+        $('#iTranB').val("");
+        $('#iTranC').val("");
+        $('#iTranD').val("");
+        $('#iTranE').val("");
+        $('#iTranF').val("");
+        $('#iTranG').val("");
+        $('#iTranH').val("");
+        $('#iTranI').val("");
+        $('#iTranJ').val("");
+        $('#iTempId').val("");
+        $('#iTranK').val("");
+
+        $('#iP01').val("");
+        $('#iP02').val("");
+        $('#iP03').val("");
+        $('#iP04').val("");
+        $('#iP05').val("");
+        $('#iP06').val("");
+        $('#iP07').val("");
+        $('#iP08').val("");
+        $('#iP09').val("");
+        $('#iP10').val("");
+        $('#iP11').val("");
+        $('#iP12').val("");
+        $('#iP13').val("");
+        $('#iP14').val("");
+        $('#iP15').val("");
+        $('#iP16').val("");
+        $('#iP17').val("");
+        $('#iP18').val("");
+        $('#iP19').val("");
+        $('#iP20').val("");
+        $('#iP21').val("");
+        $('#iP22').val("");
+        $('#iP23').val("");
+        $('#iP24').val("");
+        $('#iP25').val("");
+        $('#iP26').val("");
+        $('#iP27').val("");
+        $('#iP28').val("");
+        $('#iP29').val("");
+
+        $('#modal').modal('show');
+
+    });
+
+    function TheOnEditFunction(rowid) {
+
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+
+        $('#iTempId').val(rowData.tempId);
+        $('#iExecAction').val("U");
+
+        $('#iTranA').val(rowData.tranA);
+        $('#iTranB').val(rowData.tranB);
+        $('#iTranC').val(rowData.tranC);
+        $('#iTranD').val(rowData.tranD);
+        $('#iTranE').val(rowData.tranE);
+        $('#iTranF').val(rowData.tranF);
+        $('#iTranG').val(rowData.tranG);
+        $('#iTranH').val(rowData.tranH);
+        $('#iTranI').val(rowData.tranI);
+        $('#iTranJ').val(rowData.tranJ);
+        $('#iTranK').val(rowData.tranK);
+
+
+        $('#iP01').val(rowData.p01.trim());
+        $('#iP02').val(rowData.p02.trim());
+        $('#iP03').val(rowData.p03.trim());
+        $('#iP04').val(rowData.p04.trim());
+        $('#iP05').val(rowData.p05.trim());
+        $('#iP06').val(rowData.p06.trim());
+        $('#iP07').val(rowData.p07.trim());
+        $('#iP08').val(rowData.p08.trim());
+        $('#iP09').val(rowData.p09.trim());
+        $('#iP10').val(rowData.p10.trim());
+        $('#iP11').val(rowData.p11.trim());
+        $('#iP12').val(rowData.p12.trim());
+        $('#iP13').val(rowData.p13.trim());
+        $('#iP14').val(rowData.p14.trim());
+        $('#iP15').val(rowData.p15.trim());
+        $('#iP16').val(rowData.p16.trim());
+        $('#iP17').val(rowData.p17.trim());
+        $('#iP18').val(rowData.p18.trim());
+        $('#iP19').val(rowData.p19.trim());
+        $('#iP20').val(rowData.p20.trim());
+        $('#iP21').val(rowData.p21.trim());
+        $('#iP22').val(rowData.p22.trim());
+        $('#iP23').val(rowData.p23.trim());
+        $('#iP24').val(rowData.p24.trim());
+        $('#iP25').val(rowData.p25.trim());
+        $('#iP26').val(rowData.p26.trim());
+        $('#iP27').val(rowData.p27.trim());
+
+
+        ////取得對應下一筆的保險商品編號
+        //var ids = jQuery("#grid").jqGrid('getDataIDs');
+        //var pRowId = "";
+        //for (var i = 0; i < ids.length; i++) {
+        //    if (ids[i] == rowid) {
+        //        pRowId = ids[i + 1];
+        //        break;
+        //    }
+        //}
+
+        //var rowDataP = jQuery("#grid").jqGrid("getRowData", pRowId);
+
+        //$('#iP01').val(rowDataP.p01.trim());
+        //$('#iP02').val(rowDataP.p02.trim());
+        //$('#iP03').val(rowDataP.p03.trim());
+        //$('#iP04').val(rowDataP.p04.trim());
+        //$('#iP05').val(rowDataP.p05.trim());
+        //$('#iP06').val(rowDataP.p06.trim());
+        //$('#iP07').val(rowDataP.p07.trim());
+        //$('#iP08').val(rowDataP.p08.trim());
+        //$('#iP09').val(rowDataP.p09.trim());
+        //$('#iP10').val(rowDataP.p10.trim());
+        //$('#iP11').val(rowDataP.p11.trim());
+        //$('#iP12').val(rowDataP.p12.trim());
+        //$('#iP13').val(rowDataP.p13.trim());
+        //$('#iP14').val(rowDataP.p14.trim());
+        //$('#iP15').val(rowDataP.p15.trim());
+        //$('#iP16').val(rowDataP.p16.trim());
+        //$('#iP17').val(rowDataP.p17.trim());
+        //$('#iP18').val(rowDataP.p18.trim());
+        //$('#iP19').val(rowDataP.p19.trim());
+        //$('#iP20').val(rowDataP.p20.trim());
+        //$('#iP21').val(rowDataP.p21.trim());
+        //$('#iP22').val(rowDataP.p22.trim());
+        //$('#iP23').val(rowDataP.p23.trim());
+        //$('#iP24').val(rowDataP.p24.trim());
+        //$('#iP25').val(rowDataP.p25.trim());
+        //$('#iP26').val(rowDataP.p26.trim());
+        //$('#iP27').val(rowDataP.p27.trim());
+
+
+        jQuery("#grid").setSelection(rowid, true);
+
+
+        $('#validationSummary').children().remove();
+
+        $('#modal').modal('show');
+    }
+
+
+    //輸入完轉碼資料，執行"確定"
+    $('#btnConfirm').on('click', function () {
+        var biP = false;
+        var bTran = false;
+        if ($('#iP01').val() == "" && $('#iP02').val() == "" && $('#iP03').val() == "" && $('#iP04').val() == "" && $('#iP05').val() == "" && $('#iP06').val() == ""
+             && $('#iP07').val() == "" && $('#iP08').val() == "" && $('#iP09').val() == "" && $('#iP10').val() == "" && $('#iP11').val() == "" && $('#iP12').val() == ""
+             && $('#iP13').val() == "" && $('#iP14').val() == "" && $('#iP15').val() == "" && $('#iP16').val() == "" && $('#iP17').val() == "" && $('#iP18').val() == ""
+             && $('#iP19').val() == "" && $('#iP20').val() == "" && $('#iP21').val() == "" && $('#iP22').val() == "" && $('#iP23').val() == "" && $('#iP24').val() == ""
+             && $('#iP25').val() == "" && $('#iP26').val() == "" && $('#iP27').val() == "") {
+            biP = true;
+        }
+
+        if ($('#iTranA').val() == "" && $('#iTranB').val() == "" && $('#iTranC').val() == "" && $('#iTranD').val() == "" && $('#iTranE').val() == "" && $('#iTranF').val() == ""
+            && $('#iTranG').val() == "" && $('#iTranH').val() == "" && $('#iTranI').val() == "" && $('#iTranJ').val() == "" && $('#iTranK').val() == "") {
+            bTran = true;
+        }
+
+        if (biP & bTran) {
+            alert("商品編號1~27碼及對照欄位A~K皆空白，不可存檔!!");
+            return;
+        }
+
+        if (bTran) {
+            alert("對照欄位A~K皆空白，不可存檔!!");
+            return;
+        }
+
+
+        var bChange = true;
+
+        if ($('#iExecAction').val() == "U") {
+            var ids = jQuery("#grid").jqGrid('getDataIDs');
+            var rowId = "";
+            //var pRowId = "";
+            for (var i = 0; i < ids.length; i++) {
+                var data = jQuery("#grid").jqGrid("getRowData", ids[i]);
+
+                if (data.tempId == $('#iTempId').val()) {
+                    rowId = ids[i];
+                    //pRowId = ids[i + 1];
+                    break;
+                }
+            }
+
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowId);
+            //var rowDataP = jQuery("#grid").jqGrid("getRowData", pRowId);
+
+            //if ($('#iP01').val() == rowDataP.p01.trim() && $('#iP02').val() == rowDataP.p02.trim() && $('#iP03').val() == rowDataP.p03.trim() &&
+            //    $('#iP04').val() == rowDataP.p04.trim() && $('#iP05').val() == rowDataP.p05.trim() && $('#iP06').val() == rowDataP.p06.trim() &&
+            //    $('#iP07').val() == rowDataP.p07.trim() && $('#iP08').val() == rowDataP.p08.trim() && $('#iP09').val() == rowDataP.p09.trim() &&
+            //    $('#iP10').val() == rowDataP.p10.trim() && $('#iP11').val() == rowDataP.p11.trim() && $('#iP12').val() == rowDataP.p12.trim() &&
+            //    $('#iP13').val() == rowDataP.p13.trim() && $('#iP14').val() == rowDataP.p14.trim() && $('#iP15').val() == rowDataP.p15.trim() &&
+            //    $('#iP16').val() == rowDataP.p16.trim() && $('#iP17').val() == rowDataP.p17.trim() && $('#iP18').val() == rowDataP.p18.trim() &&
+            //    $('#iP19').val() == rowDataP.p19.trim() && $('#iP20').val() == rowDataP.p20.trim() && $('#iP21').val() == rowDataP.p21.trim() &&
+            //    $('#iP22').val() == rowDataP.p22.trim() && $('#iP23').val() == rowDataP.p23.trim() && $('#iP24').val() == rowDataP.p24.trim() &&
+            //    $('#iP25').val() == rowDataP.p25.trim() && $('#iP26').val() == rowDataP.p26.trim() && $('#iP27').val() == rowDataP.p27.trim() &&
+            if ($('#iP01').val() == rowData.p01.trim() && $('#iP02').val() == rowData.p02.trim() && $('#iP03').val() == rowData.p03.trim() &&
+            $('#iP04').val() == rowData.p04.trim() && $('#iP05').val() == rowData.p05.trim() && $('#iP06').val() == rowData.p06.trim() &&
+            $('#iP07').val() == rowData.p07.trim() && $('#iP08').val() == rowData.p08.trim() && $('#iP09').val() == rowData.p09.trim() &&
+            $('#iP10').val() == rowData.p10.trim() && $('#iP11').val() == rowData.p11.trim() && $('#iP12').val() == rowData.p12.trim() &&
+            $('#iP13').val() == rowData.p13.trim() && $('#iP14').val() == rowData.p14.trim() && $('#iP15').val() == rowData.p15.trim() &&
+            $('#iP16').val() == rowData.p16.trim() && $('#iP17').val() == rowData.p17.trim() && $('#iP18').val() == rowData.p18.trim() &&
+            $('#iP19').val() == rowData.p19.trim() && $('#iP20').val() == rowData.p20.trim() && $('#iP21').val() == rowData.p21.trim() &&
+            $('#iP22').val() == rowData.p22.trim() && $('#iP23').val() == rowData.p23.trim() && $('#iP24').val() == rowData.p24.trim() &&
+            $('#iP25').val() == rowData.p25.trim() && $('#iP26').val() == rowData.p26.trim() && $('#iP27').val() == rowData.p27.trim() &&
+
+                $('#iTranA').val() == rowData.tranA.trim() && $('#iTranB').val() == rowData.tranB.trim() && $('#iTranC').val() == rowData.tranC.trim() &&
+                $('#iTranD').val() == rowData.tranD.trim() && $('#iTranE').val() == rowData.tranE.trim() && $('#iTranF').val() == rowData.tranF.trim() &&
+                $('#iTranG').val() == rowData.tranG.trim() && $('#iTranH').val() == rowData.tranH.trim() && $('#iTranI').val() == rowData.tranI.trim() &&
+                $('#iTranJ').val() == rowData.tranJ.trim() && $('#iTranK').val() == rowData.tranK.trim()
+                ){
+                bChange = false;
+            }
+        }
+
+
+        if (bChange) {
+            $.blockUI(); //畫面鎖起來
+            var productNo = "";
+            for (var i = 1; i <= 27; i++) {
+                if (i < 10) {
+                    if ($('#iP0' + i.toString()).val().length == 0)
+                        productNo += " ";
+                    else
+                        productNo += $('#iP0' + i.toString()).val();
+                }
+                else {
+                    if ($('#iP' + i.toString()).val().length == 0)
+                        productNo += " ";
+                    else
+                        productNo += $('#iP' + i.toString()).val();
+
+                }
+            }
+
+
+            procHisDetail(productNo, $('#iExecAction').val());
+        } else {
+            $('#modal').modal('hide');
+        }
+
+    })
+
+
+    //jqgrid中的刪除
+    function TheOnDelFunction(rowid) {
+        if (window.confirm('您確定要刪除嗎？') == true) {
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+            var productNoArr = rowData.tempId.split("|")
+            $('#iTempId').val(rowData.tempId);
+            procHisDetail(productNoArr[0], "D");
+        }
+    }
+
+
+    //將資料寫入暫存檔
+    function procHisDetail(productNo, execAction) {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+
+                    'tempId': $('#iTempId').val(),
+                    'productNo': productNo,
+                    'tranA': $('#iTranA').val(),
+                    'tranB': $('#iTranB').val(),
+                    'tranC': $('#iTranC').val(),
+                    'tranD': $('#iTranD').val(),
+                    'tranE': $('#iTranE').val(),
+                    'tranF': $('#iTranF').val(),
+                    'tranG': $('#iTranG').val(),
+                    'tranH': $('#iTranH').val(),
+                    'tranI': $('#iTranI').val(),
+                    'tranJ': $('#iTranJ').val(),
+                    'tranK': $('#iTranK').val()
+
+                }, 'execAction': execAction
+
+            }),
+            dataType: "json",
+            url: '@Url.Action("procHisDetail", "OGL00002")',
+            contentType: 'application/json',
+            success: function (data) {
+                $.unblockUI(); //畫面打開
+                if (data.success) {
+
+                    $("#isQryTmp").prop("checked", true);
+                    //  $("#btnDelTmp").prop("disabled", false);
+                    qryDetail(true);
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+                }
+
+                $("#btnDelTmp").prop("disabled", false);
+                if (execAction != "D")
+                    $('#modal').modal('hide');
+            }
+        });
+    }
+
+
+
+
+    //刪除暫存資料
+    $("#btnDelTmp").on("click", function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        var data = [];
+        var gridData = $("#grid").jqGrid('getGridParam', 'data');
+        for (j = 0; j <= gridData.length - 1; j++) {
+            rowData = gridData[j];
+            if (rowData.execAction != "" & rowData.dataStatus == "1")
+                data.push(rowData);
+        }
+
+
+        if (data.length == 0) {
+            validationSummary.append('<li>該資料申請覆核且資料凍結中，無法進行維護作業。</li>');
+            return;
+        }
+
+
+
+        if (window.confirm('是否依畫面上的查詢條件刪除暫存資料?') == false) {
+            return
+        }
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        $.blockUI(); //畫面鎖起來
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'tranA': $('#tranA').val(),
+                    'tranB': $('#tranB').val(),
+                    'tranC': $('#tranC').val(),
+                    'tranD': $('#tranD').val(),
+                    'tranE': $('#tranE').val(),
+                    'tranF': $('#tranF').val(),
+                    'tranG': $('#tranG').val(),
+                    'tranH': $('#tranH').val(),
+                    'tranI': $('#tranI').val(),
+                    'tranJ': $('#tranJ').val(),
+                    'tranK': $('#tranK').val()
+
+                }
+            }),
+            dataType: "json",
+            url: '@Url.Action("delTmp", "OGL00002")',
+            contentType: 'application/json',
+            success: function (data) {
+                $.unblockUI(); //畫面打開
+                if (data.success) {
+                    qryDetail();
+                } else {
+                    validationSummary.append('<li>' + data.err + '</li>');
+                }
+            }
+        });
+
+    });
+
+
+    //查詢明細
+    function qryDetail(clrMsg) {
+        $('#btnQry').attr('disabled', true);
+        $('#isQryTmp').attr('disabled', true);
+        $('#tranA').attr('disabled', true);
+        $('#tranB').attr('disabled', true);
+        $('#tranC').attr('disabled', true);
+        $('#tranD').attr('disabled', true);
+        $('#tranE').attr('disabled', true);
+        $('#tranF').attr('disabled', true);
+        $('#tranG').attr('disabled', true);
+        $('#tranH').attr('disabled', true);
+        $('#tranI').attr('disabled', true);
+        $('#tranJ').attr('disabled', true);
+        $('#tranK').attr('disabled', true);
+
+
+        $('#p01').attr('disabled', true);
+        $('#p02').attr('disabled', true);
+        $('#p03').attr('disabled', true);
+        $('#p04').attr('disabled', true);
+        $('#p05').attr('disabled', true);
+        $('#p06').attr('disabled', true);
+        $('#p07').attr('disabled', true);
+        $('#p08').attr('disabled', true);
+        $('#p09').attr('disabled', true);
+        $('#p10').attr('disabled', true);
+        $('#p11').attr('disabled', true);
+        $('#p12').attr('disabled', true);
+        $('#p13').attr('disabled', true);
+        $('#p14').attr('disabled', true);
+        $('#p15').attr('disabled', true);
+        $('#p16').attr('disabled', true);
+        $('#p17').attr('disabled', true);
+        $('#p18').attr('disabled', true);
+        $('#p19').attr('disabled', true);
+        $('#p20').attr('disabled', true);
+        $('#p21').attr('disabled', true);
+        $('#p22').attr('disabled', true);
+        $('#p23').attr('disabled', true);
+        $('#p24').attr('disabled', true);
+        $('#p25').attr('disabled', true);
+        $('#p26').attr('disabled', true);
+        $('#p27').attr('disabled', true);
+
+
+        if (clrMsg)
+            $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                model: {
+                    'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    'tranA': $('#tranA').val(),
+                    'tranB': $('#tranB').val(),
+                    'tranC': $('#tranC').val(),
+                    'tranD': $('#tranD').val(),
+                    'tranE': $('#tranE').val(),
+                    'tranF': $('#tranF').val(),
+                    'tranG': $('#tranG').val(),
+                    'tranH': $('#tranH').val(),
+                    'tranI': $('#tranI').val(),
+                    'tranJ': $('#tranJ').val(),
+                    'tranK': $('#tranK').val(),
+
+                    'p01': $('#p01').val(),
+                    'p02': $('#p02').val(),
+                    'p03': $('#p03').val(),
+                    'p04': $('#p04').val(),
+                    'p05': $('#p05').val(),
+                    'p06': $('#p06').val(),
+                    'p07': $('#p07').val(),
+                    'p08': $('#p08').val(),
+                    'p09': $('#p09').val(),
+                    'p10': $('#p10').val(),
+                    'p11': $('#p11').val(),
+                    'p12': $('#p12').val(),
+                    'p13': $('#p13').val(),
+                    'p14': $('#p14').val(),
+                    'p15': $('#p15').val(),
+                    'p16': $('#p16').val(),
+                    'p17': $('#p17').val(),
+                    'p18': $('#p18').val(),
+                    'p19': $('#p19').val(),
+                    'p20': $('#p20').val(),
+                    'p21': $('#p21').val(),
+                    'p22': $('#p22').val(),
+                    'p23': $('#p23').val(),
+                    'p24': $('#p24').val(),
+                    'p25': $('#p25').val(),
+                    'p26': $('#p26').val(),
+                    'p27': $('#p27').val()
+
+                },'onlyTmp' :$('#hidOnlyTmp').val()
+            }),
+            dataType: "json",
+            url: '@Url.Action("loadData", "OGL00002")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    //更新畫面GRID
+                    jQuery("#grid").jqGrid('clearGridData')
+                        .jqGrid('setGridParam', { data: data.dataList })
+                        .trigger("reloadGrid");
+
+
+                    if (data.dataList.length == 0)
+                        validationSummary.append('<li>' + '資料不存在，請進行新增維護!!"' + '</li>');
+
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+
+    }
+
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+    $("#btnModify").click().on('click', function () {
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var bPass = true;
+
+            if ($('#onEdit').val() == "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '畫面尚有資料未存檔!!' + '</li>');
+            }
+
+
+            if (bPass == false)
+                return;
+
+            var data = [];
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+            for (j = 0; j <= gridData.length - 1; j++) {
+                rowData = gridData[j];
+                if (rowData.execAction != "" & rowData.dataStatus == "1") {
+                    data.push({
+                        'tempId': rowData.tempId
+                    });
+                }
+
+
+            }
+
+            //for (j = 0; j <= gridData.length - 1; j++) {
+            //    rowData = gridData[j];
+            //    var productNoArr = rowData.tempId.split("|")
+            //    if (productNoArr[1] == "2" & rowData.dataStatus != "") {
+            //        rowData1 = gridData[j - 1];
+            //        var productNoArr1 = rowData.tempId.split("|")
+
+            //        if (productNoArr[0] == productNoArr1[0] & rowData1.dataStatus == "1")
+            //            data.push(rowData);
+            //    }
+
+            //}
+
+            if (data.length == 0) {
+                validationSummary.append('<li>未異動畫面資料，將不進行修改覆核作業!!</li>');
+                return;
+            }
+
+
+
+            $.blockUI();
+
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'dataList': data
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OGL00002")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    if (data.success) {
+
+                        $('#hidOnlyTmp').val(false);
+
+                        $("#btnModify").attr('disabled', true);
+                        $("#btnDelTmp").attr('disabled', true);
+                        $("#btnNew").attr('disabled', true);
+                        validationSummary.append('<li>' + '儲存資料成功，覆核單號:' + data.aplyNo + '</li>');
+
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var rowId = ids[i];
+
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                            $("#btn_save_" + rowId).hide();
+                            $("#btn_cancel_" + rowId).hide();
+
+                        }
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+            });
+
+            $.unblockUI();
+
+        });
+    //*---------------修改(申請覆核) end ----------------*//
+
+
+    //查詢歷史資料
+    $("#btnQryHis").on("click", function () {
+
+        var url = '@Html.Raw(Url.Action("aplyHis", "OGL00002"))';
+        var params = url;
+        window.location.href = params;
+
+    });
+
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            $('#hidOnlyTmp').val(false);
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            $("#isQryTmp").prop("checked", false);
+            $('#hidOnlyTmp').val(false);
+
+            $('#tranA').val("");
+            $('#tranB').val("");
+            $('#tranC').val("");
+            $('#tranD').val("");
+            $('#tranE').val("");
+            $('#tranF').val("");
+            $('#tranG').val("");
+            $('#tranH').val("");
+            $('#tranI').val("");
+            $('#tranJ').val("");
+            $('#tranK').val("");
+
+
+            $('#p01').val("");
+            $('#p02').val("");
+            $('#p03').val("");
+            $('#p04').val("");
+            $('#p05').val("");
+            $('#p06').val("");
+            $('#p07').val("");
+            $('#p08').val("");
+            $('#p09').val("");
+            $('#p10').val("");
+            $('#p11').val("");
+            $('#p12').val("");
+            $('#p13').val("");
+            $('#p14').val("");
+            $('#p15').val("");
+            $('#p16').val("");
+            $('#p17').val("");
+            $('#p18').val("");
+            $('#p19').val("");
+            $('#p20').val("");
+            $('#p21').val("");
+            $('#p22').val("");
+            $('#p23').val("");
+            $('#p24').val("");
+            $('#p25').val("");
+            $('#p26').val("");
+            $('#p27').val("");
+
+
+            $('#isQryTmp').attr('disabled', false);
+            $('#tranA').attr('disabled', false);
+            $('#tranB').attr('disabled', false);
+            $('#tranC').attr('disabled', false);
+            $('#tranD').attr('disabled', false);
+            $('#tranE').attr('disabled', false);
+            $('#tranF').attr('disabled', false);
+            $('#tranG').attr('disabled', false);
+            $('#tranH').attr('disabled', false);
+            $('#tranI').attr('disabled', false);
+            $('#tranJ').attr('disabled', false);
+            $('#tranK').attr('disabled', false);
+
+            $('#p01').attr('disabled', false);
+            $('#p02').attr('disabled', false);
+            $('#p03').attr('disabled', false);
+            $('#p04').attr('disabled', false);
+            $('#p05').attr('disabled', false);
+            $('#p06').attr('disabled', false);
+            $('#p07').attr('disabled', false);
+            $('#p08').attr('disabled', false);
+            $('#p09').attr('disabled', false);
+            $('#p10').attr('disabled', false);
+            $('#p11').attr('disabled', false);
+            $('#p12').attr('disabled', false);
+            $('#p13').attr('disabled', false);
+            $('#p14').attr('disabled', false);
+            $('#p15').attr('disabled', false);
+            $('#p16').attr('disabled', false);
+            $('#p17').attr('disabled', false);
+            $('#p18').attr('disabled', false);
+            $('#p19').attr('disabled', false);
+            $('#p20').attr('disabled', false);
+            $('#p21').attr('disabled', false);
+            $('#p22').attr('disabled', false);
+            $('#p23').attr('disabled', false);
+            $('#p24').attr('disabled', false);
+            $('#p25').attr('disabled', false);
+            $('#p26').attr('disabled', false);
+            $('#p27').attr('disabled', false);
+
+
+            $('#btnQry').attr('disabled', false);
+            $('#btnModify').attr('disabled', false);
+            $('#btnDelTmp').attr('disabled', false);
+            $('#btnNew').attr('disabled', false);
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+
+            qryDetail(true);
+        });
+
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            caption: '異動清單',
+            jsonReader: {
+                repeatitems: true, id: 'tempId'
+            },
+            colModel: [
+                 {
+                     label: 'tempId',
+                     name: 'tempId', align: 'center', hidden: true,
+                     editable: false, cellattr: function (rowId, tv, rawObject, cm, rdata) { return 'style="white-space: pre;"' }
+                 },
+                 {
+                     label: 'rowType',
+                     name: 'rowType', align: 'center', hidden: true,
+                     editable: false
+                 },
+                 {
+                     label: "修改", name: 'Action', index: 'Action', search: false, align: 'center', width: 120//, cellattr: arrtRowspan
+                 },
+                 {
+                     label: '資料狀態',
+                     name: 'dataStatus', align: 'center', hidden: true,
+                     editable: false
+                 },
+                 {
+                     label: '資料狀態',
+                     name: 'dataStatusDesc', align: 'center', width: 80,
+                     editable: false
+                 },
+                 {
+                     label: '執行功能',
+                     name: 'execAction', align: 'center', hidden: true,
+                     editable: false
+                 },
+                 {
+                     label: '執行功能',
+                     name: 'execActionDesc', align: 'center', width: 80,
+                     editable: false
+                 },
+                 { label: '1', name: 'p01', align: 'center', editable: false, width: 35 },
+                 { label: '2', name: 'p02', align: 'center', editable: false, width: 35 },
+                 { label: '3', name: 'p03', align: 'center', editable: false, width: 35 },
+                 { label: '4', name: 'p04', align: 'center', editable: false, width: 35 },
+                 { label: '5', name: 'p05', align: 'center', editable: false, width: 35 },
+                 { label: '6', name: 'p06', align: 'center', editable: false, width: 35 },
+                 { label: '7', name: 'p07', align: 'center', editable: false, width: 35 },
+                 { label: '8', name: 'p08', align: 'center', editable: false, width: 35 },
+                 { label: '9', name: 'p09', align: 'center', editable: false, width: 35 },
+                 { label: '10', name: 'p10', align: 'center', editable: false, width: 35 },
+                 { label: '11', name: 'p11', align: 'center', editable: false, width: 35 },
+                 { label: '12', name: 'p12', align: 'center', editable: false, width: 35 },
+                 { label: '13', name: 'p13', align: 'center', editable: false, width: 35 },
+                 { label: '14', name: 'p14', align: 'center', editable: false, width: 35 },
+                 { label: '15', name: 'p15', align: 'center', editable: false, width: 35 },
+                 { label: '16', name: 'p16', align: 'center', editable: false, width: 35 },
+                 { label: '17', name: 'p17', align: 'center', editable: false, width: 35 },
+                 { label: '18', name: 'p18', align: 'center', editable: false, width: 35 },
+                 { label: '19', name: 'p19', align: 'center', editable: false, width: 35 },
+                 { label: '20', name: 'p20', align: 'center', editable: false, width: 35 },
+                 { label: '21', name: 'p21', align: 'center', editable: false, width: 35 },
+                 { label: '22', name: 'p22', align: 'center', editable: false, width: 35 },
+                 { label: '23', name: 'p23', align: 'center', editable: false, width: 35 },
+                 { label: '24', name: 'p24', align: 'center', editable: false, width: 35 },
+                 { label: '25', name: 'p25', align: 'center', editable: false, width: 35 },
+                 { label: '26', name: 'p26', align: 'center', editable: false, width: 35 },
+                 { label: '27', name: 'p27', align: 'center', editable: false, width: 35 },
+
+                 { label: 'A', name: 'tranA', align: 'center', editable: false, width: 35 },
+                 { label: 'B', name: 'tranB', align: 'center', editable: false, width: 35 },
+                 { label: 'C', name: 'tranC', align: 'center', editable: false, width: 35 },
+                 { label: 'D', name: 'tranD', align: 'center', editable: false, width: 35 },
+                 { label: 'E', name: 'tranE', align: 'center', editable: false, width: 35 },
+                 { label: 'F', name: 'tranF', align: 'center', editable: false, width: 35 },
+                 { label: 'G', name: 'tranG', align: 'center', editable: false, width: 35 },
+                 { label: 'H', name: 'tranH', align: 'center', editable: false, width: 40 },
+                 { label: 'I', name: 'tranI', align: 'center', editable: false, width: 45 },
+                 { label: 'J', name: 'tranJ', align: 'center', editable: false, width: 35 },
+                 { label: 'K', name: 'tranK', align: 'center', editable: false, width: 35 },
+
+                 { label: "異動人員", name: 'updateId', align: 'center', editable: false, width: 80 },
+                 { label: "異動時間", name: 'updateDatetime', align: 'center', editable: false, width: 160 },
+
+            { label: "覆核人員", name: 'apprId', align: 'center', editable: false, width: 80 },
+                 { label: "覆核時間", name: 'apprDt', align: 'center', editable: false, width: 160 }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            rowNum: 20,
+            rowList: [20, 50],
+            viewrecords: true,
+            pager: "#pager",
+            //sortname: "tempId",
+            resizeStop: function () {
+                resizeColumnHeader.call(this);
+                fixPositionsOfFrozenDivs.call(this);
+                fixGboxHeight.call(this);
+            },
+            onSelectRow: function (tempId) {
+
+            },
+            loadComplete: function () {
+                $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    var dataStatus = "";
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+
+                        rowData = $("#grid").jqGrid('getRowData', rowId);
+                        be = "<input class=\"edit\" style='height:28x;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+                        de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + de });
+
+                        if (rowData.dataStatus == "2") {
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                        }
+
+                        //if (rowData.rowType == "1") {
+                        //    dataStatus = rowData.dataStatus;
+                        //    be = "<input class=\"edit\" style='height:28x;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+                        //    jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be });
+
+                        //    if(dataStatus == "2")
+                        //        $("#btn_edit_" + rowId).hide();
+                        //} else {
+                        //    de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+                        //    jQuery("#grid").jqGrid('setRowData', ids[i], { Action: de });
+
+                        //    if (dataStatus == "2")
+                        //        $("#btn_del_" + rowId).hide();
+                        //}
+
+                        //if (i % 4 == 2 || i % 4 == 3)
+                        //    $("#grid").jqGrid('setRowData', rowId, false, {  weightfont: 'bold', background: 'lightgoldenrodyellow' });
+                    }
+                }
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+        jQuery("#grid").jqGrid('setGroupHeaders', {
+            useColSpanStyle: true,
+            groupHeaders: [
+                { startColumnName: 'p01', numberOfColumns: 27, titleText: '保險商品編號(欄位空白表示不檢核轉換)' }
+                , { startColumnName: 'tranA', numberOfColumns: 11, titleText: '對照欄位' }
+                //, { startColumnName: 'updateId', numberOfColumns: 1, titleText: '覆核人員' }
+                //, { startColumnName: 'updateDatetime', numberOfColumns: 1, titleText: '覆核日期' }
+                //, { startColumnName: 'updateDatetime', numberOfColumns: 1, titleText: '覆核日期' }
+            ]
+
+        });
+
+        ////grid.jqGrid("setGroupHeaders", {
+        ////    useColSpanStyle: true,
+        ////    groupHeaders: [{
+        ////        startColumnName: "p01",
+        ////        numberOfColumns: 5,
+        ////        titleText:
+        ////            '<table style="width:100%;border-spacing:0px;">' +
+        ////            '<tr><td id="h0" colspan="2"><em>Details</em></td></tr>' +
+        ////            '<tr>' +
+        ////                '<td id="h1">Price</td>' +
+        ////                '<td id="h2">Shiping</td>' +
+        ////            '</tr>' +
+        ////            '</table>'
+        ////    }]
+        ////});
+
+
+        //function arrtColspan(rowId, cellValue, rawObject, cm, rdata) {
+        //    return ' colspan=' + '"2"';
+
+        //}
+        //function arrtRowspan(rowId, cellValue, rawObject, cm, rdata) {
+        //    return ' rowspan=' + '"2"';
+
+        //}
+
+    });
+</script>
+
+

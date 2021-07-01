@@ -1,0 +1,93 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td width="150px">
+                            銀行出款日 :
+                        </td>
+                        <td>
+                            <input type="text" id="VHR_NO1_DT"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td >
+                            下送SQL編號 :
+                        </td>
+                        <td >
+                            <input type="text" id="VHR_NO1" onkeyup="InputToUpper(this);" />
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnReport" name="btnReport" value="執行報表" class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+   $(function () {
+       var opScope = '@Html.Raw(ViewBag.opScope)';
+
+       if (opScope == "" || opScope == "0") {
+           $('#validationSummary').children().remove();
+
+           var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+           if (validationSummary.length == 0) {
+               $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+               validationSummary = $('#validationSummary ul.validation-summary-errors');
+           }
+           validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+       } else {
+           $('#VHR_NO1_DT').datepicker();
+                   //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'btnReport':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        var VHR_NO1 = ($('#VHR_NO1').val() || '').trim().toUpperCase();
+                        if (!verified.isDate($('#VHR_NO1_DT').val())) {
+                             alert('日期為必輸 or 日期格式不正確 !!');
+                             return false;
+                        }
+                         $.blockUI(); //畫面鎖起來
+                         var parms = [];
+                         parms.push(customerUtility.reportParm('VHR_NO1_DT',  $('#VHR_NO1_DT').val()));
+                         parms.push(customerUtility.reportParm('VHR_NO1', VHR_NO1));
+                         customerUtility.report(
+                         customerUtility.reportModel('快速付款銀行出款彙總表', 'ORTB020'),
+                         parms,
+                         null);
+                         $.unblockUI(); //畫面打開
+                    });
+                    break;
+            }
+        });
+       }
+
+
+    });
+</script>
+
+

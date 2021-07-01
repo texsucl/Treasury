@@ -1,0 +1,580 @@
+﻿@using FRT.Web.Enum;
+@model FRT.Web.ViewModels.ORT0103Model
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+    var bMaintain = ViewBag.bMaintain;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                if (bMaintain == "Y")
+                {
+                    <span style="color:red;">如須”新增”或”刪除”，請先按”查詢”!</span>
+                }
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <input type="button" id="btnNew" name="btnNew" value="新增" class="btn btn-primary" style="margin-bottom:10px" />
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <div id="ORT0103jqgridDiv" class="jqd" style="padding-bottom:5px;">
+                        </div>
+                    </div>
+                </div>
+                <div id="ORT0103Dialog" style="display:none;">
+                    <form id="ORT0103DialogForm">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label>退匯原因 : </label>
+                                </td>
+                                <td>
+                                    @*@Html.DropDownList("rejected_Code", (SelectList)ViewBag.rejectedSelect, new { @class = "" })*@
+                                    <select id="rejected_Code" class="ORT0103InsertType"></select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>收款人ID : </label>
+                                </td>
+                                <td>
+                                    @Html.DropDownList("received_Id", (SelectList)ViewBag.BoolSelect, new { @class = "ORT0103InsertType" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>收款人戶名 : </label>
+                                </td>
+                                <td>
+                                    @Html.DropDownList("received_Account", (SelectList)ViewBag.BoolSelect, new { @class = "ORT0103InsertType" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>銀行代號 : </label>
+                                </td>
+                                <td>
+                                    @Html.DropDownList("bank_Code", (SelectList)ViewBag.BoolSelect, new { @class = "ORT0103InsertType" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>銀行帳號 : </label>
+                                </td>
+                                <td>
+                                    @Html.DropDownList("bank_Account", (SelectList)ViewBag.BoolSelect, new { @class = "ORT0103InsertType" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="hidden" id="hRejected_Code" />
+
+                                    <input type="hidden" id="received_Id_o" />
+                                    <input type="hidden" id="received_Account_o" />
+                                    <input type="hidden" id="bank_Code_o" />
+                                    <input type="hidden" id="bank_Account_o" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" id="ORT0103InsertTemp" value="新增" class="btn btn-primary" />
+                                    <input type="button" id="ORT0103UpdateTemp" value="修改" class="btn btn-primary" />
+                                    <input type="button" id="ORT0103DeleteTemp" value="刪除" class="btn btn-primary" />
+                                </td>
+                                <td style="text-align:right;">
+                                    <input type="button" id="ORT0103CancelTemp" value="取消" class="btn btn-primary" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var ORT0103url = {};
+        ORT0103url.query = '@Url.Action("QryData", "ORT0103")';
+        ORT0103url.getData = '@Url.Action("GetCacheData", "ORT0103")';
+        ORT0103url.InsertTempData = '@Url.Action("InsertTempData", "ORT0103")';
+        ORT0103url.UpdateTempData = '@Url.Action("UpdateTempData", "ORT0103")';
+        ORT0103url.DeleteTempData = '@Url.Action("DeleteTempData", "ORT0103")';
+        ORT0103url.ResetTempData = '@Url.Action("ResetTempData", "ORT0103")';
+        ORT0103url.ResetInsertTempData = '@Url.Action("ResetInsertTempData", "ORT0103")';
+        ORT0103url.execSave = '@Url.Action("execSave", "ORT0103")';
+
+        var ORT0103btnQry = 'btnQry'; //queryId
+        var ORT0103btnModify = 'btnModify'; //btnModify
+        var ORT0103btnClear = 'btnClear'; //btnClear
+        var ORT0103btnNew = 'btnNew'; //btnNew
+        var ORT0103InsertTempId = 'ORT0103InsertTemp';
+        var ORT0103UpdateTempId = 'ORT0103UpdateTemp';
+        var ORT0103DeleteTempId = 'ORT0103DeleteTemp';
+        var ORT0103CancelTempId = 'ORT0103CancelTemp';
+        var ORT0103jqgridDivId = 'ORT0103jqgridDiv'; //jqgridDivId
+        var ORT0103DialogId = 'ORT0103Dialog'; //dialogId
+        var ORT0103DialogFormId = 'ORT0103DialogForm'; //dialogFormId
+        var ORT0103rejected_Code = 'rejected_Code'; //退匯原因 SelectList
+        var ORT0103received_Id = 'received_Id'; //收款人ID(Y/N) SelectList
+        var ORT0103received_Account = 'received_Account'; //收款人戶名(Y/N) SelectList
+        var ORT0103bank_Code = 'bank_Code'; //銀行代號(Y/N) SelectList
+        var ORT0103bank_Account = 'bank_Account'; //銀行帳號(Y/N) SelectList
+        var ORT0103hRejected_Code = 'hRejected_Code'; //Id(hidden)
+
+        var ORT0103received_Id_o = 'received_Id_o'; //收款人ID(Y/N) SelectList
+        var ORT0103received_Account_o = 'received_Account_o'; //收款人戶名(Y/N) SelectList
+        var ORT0103bank_Code_o = 'bank_Code_o'; //銀行代號(Y/N) SelectList
+        var ORT0103bank_Account_o = 'bank_Account_o'; //銀行帳號(Y/N) SelectList
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        var bMaintain = '@Html.Raw(ViewBag.bMaintain)';
+
+        if (opScope == "" || opScope == "0") {
+            customerUtility.reSetSummary('無使用權限');
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+            if (bMaintain == 'N') {
+                $('#btnNew').hide();
+                $('#btnModify').hide();
+            }
+                
+        }
+
+        //#region 初始動作
+
+        //#endregion
+
+        //#region 註冊事件
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case ORT0103btnQry:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103SearchFun(); });
+                    break;
+                case ORT0103btnModify:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103ApplyFun(); });
+                    break;
+                case ORT0103btnClear:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103CancelFun(); });
+                    break;
+                case ORT0103btnNew:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103InsertFun(); });
+                    break;
+                case ORT0103InsertTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103InsertTempFun(); });
+                    break;
+                case ORT0103UpdateTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103UpdateTempFun(); });
+                    break;
+                case ORT0103DeleteTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { ORT0103DeleteTempFun(); });
+                    break;
+                case ORT0103CancelTempId:
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () { customerUtility.closeDialog($('#' + ORT0103CancelTempId)); });
+                    break;
+            };
+        });
+        //#endregion
+
+        function ORT0103SearchFun() {
+            customerUtility.reSetSummary();
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORT0103url.query,
+                contentType: 'application/json'
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORT0103btnQry).attr('disabled', true);
+                    $('#' + ORT0103btnNew).attr('disabled', false);
+                    $('#rejected_Code').empty();
+                    customerUtility.addoption('rejected_Code', result.Datas);
+                    ORT0103TempGrid();
+
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+
+        function ORT0103ApplyFun() {
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORT0103url.execSave,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORT0103btnModify).attr('disabled', true);
+                    $('#' + ORT0103btnNew).attr('disabled', true);
+                    $('#' + ORT0103btnQry).attr('disabled', false);
+                    jqgridCustom.clearJqgrid(ORT0103jqgridDivId);
+                }
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function ORT0103CancelFun() {
+            $.blockUI(); //畫面鎖起來
+            customerUtility.reSetSummary();
+            $('#' + ORT0103btnModify).attr('disabled', true);
+            $('#' + ORT0103btnNew).attr('disabled', true);
+            $('#' + ORT0103btnQry).attr('disabled', false);
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: ORT0103url.ResetTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                jqgridCustom.clearJqgrid(ORT0103jqgridDivId);
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function unformatterDefault(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function formatterDataStatus(cellvalue, options, rdata) {
+            switch (rdata.appr_stat) {
+                @{
+                    foreach (var item in ((Dictionary<string,string>)(ViewBag.dataStatusjqList)))
+                    {
+                    <text>
+               case '@item.Key':
+                return '@item.Value';
+                    </text>
+                    }
+                }
+            }
+        return '';
+        }
+
+        function formatterStatus(cellvalue, options, rdata) {
+        switch (rdata.status) {
+            @{
+            foreach (var item in ((Dictionary<string,string>)(ViewBag.statusjqList)))
+            {
+                <text>
+               case '@item.Key':
+                return '@item.Value';
+                </text>
+            }
+            }
+        }
+            return cellvalue || '';
+        }
+
+        function ORT0103TempGrid() {
+            //var colNameArray = ['動作', '資料狀態', '執行動作', '退匯代碼', '退匯原因', '收款人ID', '收款人戶名', '銀行代號', '銀行帳號', '異動人員', '異動日期', '覆核人員', '覆核日期'];
+            var colNameArray = [];
+            var colModelArray = [];
+            if (bMaintain == 'Y')
+            {
+                colNameArray.push('動作', '執行類型')
+                colModelArray.push({ name: "act", index: "act", width: 90, sortable: false });
+                colModelArray.push({ name: "status", index: "status", width: 80, align: 'center', sortable: false, formatter: formatterStatus, unformat: unformatterDefault });
+            }
+            colNameArray.push('資料狀態', '退匯代碼', '退匯原因', '收款人ID', '收款人戶名', '銀行代號', '銀行帳號');
+            colModelArray.push({ name: "appr_stat", index: "appr_stat", width: 80, align: 'center', sortable: false, formatter: formatterDataStatus, unformat: unformatterDefault });
+            colModelArray.push({ name: "rejected_Code", index: "rejected_Code", width: 80, align: 'center' });
+            colModelArray.push({ name: "rejected_Reason", index: "rejected_Reason", width: 195, align: 'left' });
+            colModelArray.push({ name: "received_Id", index: "received_Id", width: 100, align: 'center' });
+            colModelArray.push({ name: "received_Account", index: "received_Account", width: 100, align: 'center' });
+            colModelArray.push({ name: "bank_Code", index: "bank_Code", width: 120, align: 'center' });
+            colModelArray.push({ name: "bank_Account", index: "bank_Account", width: 120, align: 'center' });
+            //colModelArray.push({ name: "updateUName", index: "updateUName", width: 80, align: 'center', sortable: false });
+            //colModelArray.push({ name: "updDatetime", index: "updDatetime", width: 160, align: 'center', sortable: false });
+            //colModelArray.push({ name: "apprName", index: "apprName", width: 80, align: 'center', sortable: false });
+            //colModelArray.push({ name: "apprDt", index: "apprDt", width: 160, align: 'center', sortable: false });
+            jqgridCustom.createJqgridByCache(
+                ORT0103jqgridDivId,
+                'ORT0103TempList',
+                'ORT0103TempPeger',
+                ORT0103url.getData,
+                {
+
+                },
+                colNameArray,
+                colModelArray,
+                '退匯原因對應可修欄位作業',
+                jqgridCustom.getPage(ORT0103jqgridDivId),
+                jqgridCustom.getRowNum(ORT0103jqgridDivId),
+                ORT0103TempCompleteFun,
+                true
+            );
+        }
+
+        function ORT0103TempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'ORT0103Temp', tempActFun);
+
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function () {
+                let tr = $(this);
+                let dataStatus = tr.find($.validator.format('td[aria-describedby$={0}_appr_stat]', listId)).text();
+                if (dataStatus == '凍結中') {
+                    tr.find('.actionEditIcon').hide();
+                    tr.find('.actionDeleIcon').hide();
+                }
+            });
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+        }
+        tempActFun.View = function (i) {
+            dialogOpen('@Ref.ActionType.View.ToString()', i);
+        }
+
+        //#region function
+        function ORT0103InsertFun() {
+            dialogOpen('@Ref.ActionType.Add.ToString()', null);
+        }
+
+        function dialogOpen(type, rowid) {
+            $('#' + ORT0103DialogFormId).validate().resetForm();
+            var listId = 'ORT0103TempList';
+            var ORT0103InsertClass = 'ORT0103InsertType';
+            var title = customerUtility.getDialogType(type);
+            $('#' + ORT0103DialogId).dialog({
+                position: { my: "top+30%", at: "center top", of: window },
+                title: title + '退匯原因',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            $('#' + ORT0103InsertTempId + ',#' + ORT0103UpdateTempId + ',#' + ORT0103DeleteTempId).hide();
+            if (type == '@Ref.ActionType.Add.ToString()') {
+                ResetInsertDialog();
+                $('#' + ORT0103InsertTempId).show();
+                $('.' + ORT0103InsertClass).prop('disabled', false);
+            }
+            else if (type == '@Ref.ActionType.Dele.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#' + ORT0103DeleteTempId).show();
+                $('.' + ORT0103InsertClass).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#' + ORT0103UpdateTempId).show();
+                $('.' + ORT0103InsertClass).prop('disabled', false);
+                $('#' + ORT0103rejected_Code).prop('disabled', true);
+            }
+            else if (type == '@Ref.ActionType.View.ToString()') {
+                dialogSetData(listId, rowid);
+                $('.' + ORT0103InsertClass).prop('disabled', true);
+            }
+            $('#' + ORT0103DialogId).dialog('open');
+        }
+
+        function ResetInsertDialog() {
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: ORT0103ViewModel(
+
+                    )
+                }),
+                dataType: "json",
+                url: ORT0103url.ResetInsertTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $('#rejected_Code').empty();
+                    customerUtility.addoption('rejected_Code', result.Datas);
+                    $('#rejected_Code option:first').prop('selected', true);
+                    $('#received_Id option:first').prop('selected', true);
+                    $('#received_Account option:first').prop('selected', true);
+                    $('#bank_Code option:first').prop('selected', true);
+                    $('#bank_Account option:first').prop('selected', true);
+                    $('#' + ORT0103hRejected_Code).val('');
+                }
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+            //ResetInsertDialog();
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                //set value
+                //$('#' + ORT0103rejected_Code).val(data.rejected_Code).prop('selected', true);
+                $('#rejected_Code').empty();
+                $('#rejected_Code').append($('<option>', { value: data.rejected_Code, text: data.rejected_Reason }));
+                $('#' + ORT0103received_Id).val(data.received_Id).prop('selected', true);
+                $('#' + ORT0103received_Account).val(data.received_Account).prop('selected', true);
+                $('#' + ORT0103bank_Code).val(data.bank_Code).prop('selected', true);
+                $('#' + ORT0103bank_Account).val(data.bank_Account).prop('selected', true);
+                $('#' + ORT0103hRejected_Code).val(data.rejected_Code);
+
+                $('#' + ORT0103received_Id_o).val(data.received_Id).prop('selected', true);
+                $('#' + ORT0103received_Account_o).val(data.received_Account).prop('selected', true);
+                $('#' + ORT0103bank_Code_o).val(data.bank_Code).prop('selected', true);
+                $('#' + ORT0103bank_Account_o).val(data.bank_Account).prop('selected', true);
+            }
+        }
+
+        //新增
+        function ORT0103InsertTempFun() {
+            if ($('#' + ORT0103DialogFormId).valid()) {
+                if ($('#' + ORT0103rejected_Code).val().trim() == '') {
+                    alert('退匯原因不可為空白')
+                    return false;
+                }
+
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ORT0103ViewModel(
+                            //created.uuid(),
+                            $('#' + ORT0103rejected_Code).val().trim(),
+                            $('#' + ORT0103rejected_Code + ' option:selected').text().trim(),
+                            $('#' + ORT0103received_Id).val().trim(),
+                            $('#' + ORT0103received_Account).val().trim(),
+                            $('#' + ORT0103bank_Code).val().trim(),
+                            $('#' + ORT0103bank_Account).val().trim()
+                        )
+                    }),
+                    dataType: "json",
+                    url: ORT0103url.InsertTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        $('#' + ORT0103btnModify).attr('disabled', false);
+                        customerUtility.closeDialog($('#' + ORT0103InsertTempId));
+                        $('#rejected_Code').empty();
+                        customerUtility.addoption('rejected_Code', result.Datas);
+                        ORT0103TempGrid();
+                    }
+                    $.unblockUI(); //畫面打開
+                })
+            }
+        }
+
+        function ORT0103UpdateTempFun() {
+            if ($('#' + ORT0103received_Id).val().trim() == $('#' + ORT0103received_Id_o).val().trim()
+                && $('#' + ORT0103received_Account).val().trim() == $('#' + ORT0103received_Account_o).val().trim()
+                && $('#' + ORT0103bank_Code).val().trim() == $('#' + ORT0103bank_Code_o).val().trim()
+                && $('#' + ORT0103bank_Account).val().trim() == $('#' + ORT0103bank_Account_o).val().trim()) {
+                alert('資料未異動 ,請確認')
+                return false;
+            }
+
+
+
+            if ($('#' + ORT0103DialogFormId).valid()) {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        model: ORT0103ViewModel(
+                            $('#' + ORT0103hRejected_Code).val(),
+                            '',
+                            $('#' + ORT0103received_Id).val().trim(),
+                            $('#' + ORT0103received_Account).val().trim(),
+                            $('#' + ORT0103bank_Code).val().trim(),
+                            $('#' + ORT0103bank_Account).val().trim()
+                        )
+                    }),
+                    dataType: "json",
+                    url: ORT0103url.UpdateTempData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result);
+                    if (result.RETURN_FLAG) {
+                        $('#' + ORT0103btnModify).attr('disabled', false);
+                        customerUtility.closeDialog($('#' + ORT0103UpdateTempId));
+                        $('#rejected_Code').empty();
+                        customerUtility.addoption('rejected_Code', result.Datas);
+                        ORT0103TempGrid();
+                    }
+                    $.unblockUI(); //畫面打開
+                })
+            }
+        }
+
+        function ORT0103DeleteTempFun() {
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    model: ORT0103ViewModel(
+                        $('#' + ORT0103hRejected_Code).val(),
+                        $('#' + ORT0103rejected_Code + ' option:selected').text().trim()
+                    )
+                }),
+                dataType: "json",
+                url: ORT0103url.DeleteTempData,
+                contentType: 'application/json',
+            }).done(function (result) {
+                customerUtility.alertAuto(result);
+                if (result.RETURN_FLAG) {
+                    $('#' + ORT0103btnModify).attr('disabled', false);
+                    customerUtility.closeDialog($('#' + ORT0103DeleteTempId));
+                    $('#rejected_Code').empty();
+                    customerUtility.addoption('rejected_Code', result.Datas);
+                    ORT0103TempGrid();
+                }
+                $.unblockUI(); //畫面打開
+            })
+        }
+
+        function ORT0103ViewModel(
+            rejected_Code,
+            rejected_Reason,
+            received_Id,
+            received_Account,
+            bank_Code,
+            bank_Account
+        ) {
+            var obj = {};
+            obj['rejected_Code'] = rejected_Code;
+            obj['rejected_Reason'] = rejected_Reason;
+            obj['received_Id'] = received_Id;
+            obj['received_Account'] = received_Account;
+            obj['bank_Code'] = bank_Code;
+            obj['bank_Account'] = bank_Account;
+            return obj;
+        }
+    });
+</script>

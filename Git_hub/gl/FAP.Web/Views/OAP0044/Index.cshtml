@@ -1,0 +1,695 @@
+﻿@model FAP.Web.ViewModels.OAP0044Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var dispatchList = ViewBag.dispatchList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+                @Html.Hidden("hidOPaidCd", "")
+                @Html.Hidden("hidStatus", "")
+        <span style="color:red;">執行匯入時，即為自動申請覆核!</span>
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_interview_id_o)：@Html.TextBoxFor(model => model.tel_interview_id_o, new { @size = "12", @maxlength = "10" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.check_no)：@Html.TextBoxFor(model => model.check_no, new { @size = "12", @maxlength = "9" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "11", @maxlength = "10" })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="button" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                        <input type="button" id="btnImport" name="btnImport" value="匯入" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.tel_interview_id_n)：@Html.DropDownList("tel_interview_id_n", dispatchList, "請選擇")
+                            @*@Html.DisplayNameFor(model => model.tel_interview_id_n)：@Html.TextBoxFor(model => model.tel_interview_id_n, new { @size = "12", @maxlength = "10" })*@
+                        </td>
+                        <td>
+                            派件日期：<input id="dispatch_date" name="dispatch_date" type="text">(格式：YYYY-MM-DD，例：2021-03-01)
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="modal_import" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="margin-left:10px">
+        <div class="modal-content" style="width:850px;position:relative;left:10px">
+            <!-- Modal Header -->
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form class="form-horizontal" role="form" onsubmit="return false">
+
+                    <table>
+                        <tr>
+                            <td><span style="color:red;">＊</span>匯入檔案：<input type="file" id="fileUpload" name="file" accept=".xls,.xlsx" style="display:inline" /></td>
+                        </tr>
+                    </table>
+
+                    <button type="button" id="btnImpSave" class="btn btn-primary">確定</button>
+                    <button type="button" id="btnImpCancel" class="btn btn-primary"> 取消</button>
+
+                </form>
+
+                <div class="row">
+                    <div id="impqryResult" class="col-sm-24">
+                        <table id="impgrid"></table>
+                        <div id="imppager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    //執行"匯入"
+    $("#btnImport").on("click", function () {
+        $('#fileUpload').val("");
+        $('#modal_import').modal('show');
+
+        jQuery("#impgrid").jqGrid('clearGridData').trigger("reloadGrid");
+        
+    });
+
+       //匯入檔案-確定
+    $("#btnImpSave").on("click", function () {
+        $('#validationSummary').children().remove();
+
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        var bPass = true;
+
+        //## 宣告一個FormData
+        var data = new FormData();
+
+
+        //## 將檔案append FormData
+        var files = $("#fileUpload").get(0).files;
+        if (files.length > 0) {
+            data.append("UploadedFile", files[0]);
+        } else {
+            validationSummary.append('<li>未選擇「匯入檔案」!!</li>');
+            bPass = false;
+        }
+
+
+        data.append("type", $("#type").val());
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            data: data,
+            dataType: "json",
+            url: '@Url.Action("procImport", "OAP0044")',
+            contentType: false,
+            processData: false,
+            success: function (data) {
+
+                //更新畫面GRID
+                jQuery("#impgrid").jqGrid('clearGridData')
+                    .jqGrid('setGridParam', { data: data.errList })
+                    .trigger("reloadGrid");
+
+                
+
+                if (data.success & data.errList.length == 0) {
+                    alert(data.msg);
+                    $('#modal_import').modal('hide');
+                    qryTelCheck();
+                }
+
+                if (!data.success)
+                    alert(data.err);
+                $.unblockUI(); //畫面打開
+
+
+
+            }
+        });
+    });
+
+
+
+    //匯入檔案-取消
+    $("#btnImpCancel").on("click", function () {
+        $('#modal_import').modal('hide');
+
+    });
+
+
+    //*---------------查詢 begin ----------------*//
+    function qryTelCheck() {
+        $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+
+        $('#tel_interview_id_o').attr('disabled', true);
+        $('#check_no').attr('disabled', true);
+        $('#paid_id').attr('disabled', true);
+
+        $('#btnQry').attr('disabled', true);
+        $('#btnModify').attr('disabled', false);
+        $('#btnExport').attr('disabled', false);
+
+        var jsonData = JSON.stringify({
+            'tel_interview_id_o': $("#tel_interview_id_o").val()
+            , 'check_no': $("#check_no").val()
+            , 'paid_id': $("#paid_id").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryTelCheck", "OAP0044")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+    }
+    //*---------------查詢 end ----------------*//
+
+
+
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True")
+            recList.push(rowId);
+        else if (index >= 0)
+            recList.splice(index, 1);
+
+    };
+
+
+    $("#btnQry").click().on('click', function () {
+        qryTelCheck();
+    });
+
+
+
+    //*---------------清除 begin ----------------*//
+    function execClear() {
+        recList = [];
+
+        $('#validationSummary').children().remove();
+
+        //畫面功能鍵
+        $('#btnModify').attr('disabled', true);
+        $('#btnExport').attr('disabled', true);
+        $('#btnQry').attr('disabled', false);
+
+        //查詢條件
+        $('#tel_interview_id_o').attr('disabled', false);
+        $('#tel_interview_id_o').val("");
+
+        $('#check_no').attr('disabled', false);
+        $('#check_no').val("");
+
+        $('#paid_id').attr('disabled', false);
+        $('#paid_id').val("");
+
+        $('#tel_interview_id_n').val("");
+
+
+        jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+    }
+   //*---------------清除 end ----------------*//
+
+
+
+
+
+    //取得"給付性質"下拉選單
+    function getOPaidCd() {
+        return $('#hidOPaidCd').val();
+    }
+
+
+    //取得"資料狀態"下拉選單
+    function getStatus() {
+        return $('#hidStatus').val();
+    }
+
+    //勾選、取消勾選的支票
+    var $grid = $("#grid"), recList = [], ckRec = function (chItem, rowId) {
+        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+        var value = chItem.checked;
+        var index = $.inArray(rowId, recList);
+
+        if (value == true) {
+            recList.push(rowId);
+        } else {
+            if (index >= 0) {
+                recList.splice(index, 1);
+            }
+        }
+    };
+
+
+    $(function () {
+        $('#dispatch_date').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnExport').attr('disabled', true);
+
+            $('#hidOPaidCd').val('@Html.Raw(ViewBag.oPaidCdjqList)');
+            $('#hidStatus').val('@Html.Raw(ViewBag.statusjqList)');
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            execClear();
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "temp_id" },
+            colModel: [
+                {
+                    label: '選取',
+                    name: 'rec', index: 'rec', align: 'center', width: '70', editable: true
+                    , formatter: function (cellvalue, options, rowObject) {
+                        var id = options.rowId.length == 0 ? "0" : options.rowId;
+                        return '<input type="checkbox" id="chk_rec_' + id + '" onClick="ckRec(this,' + '\'' + id + '\'' + ')"';
+                    }
+                },
+                {
+                    label: '原派件人員',
+                    name: 'tel_interview_id', align: 'center', width: '120', editable: false, align: 'center', hidden: true
+                },
+                {
+                    label: '原派件人員',
+                    name: 'tel_interview_name', align: 'center', width: '100', editable: false, align: 'center'
+                },
+                {
+                    label: '系統別',
+                    name: 'system', align: 'center', width: '60', editable: false, align: 'center'
+                },
+                {
+                    label: '支票號碼',
+                    name: 'check_no', align: 'center', width: '120', editable: false, align: 'center'
+                },
+                {
+                    label: '支票帳號簡稱',
+                    name: 'check_acct_short', align: 'center', width: '100', editable: false
+                },
+                {
+                    label: '支票到期日',
+                    name: 'check_date', align: 'center', width: '100', editable: false
+                },
+                {
+                    label: '支票金額',
+                    name: 'check_amt', align: 'right', width: '100',
+                    editable: false,
+                    formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                },
+                {
+                    label: '給付性質',
+                    name: 'o_paid_cd', align: 'center', editable: false, width: '80',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getOPaidCd()
+                    }
+                },
+                {
+                    label: '給付對象ID',
+                    name: 'paid_id', align: 'center', width: '120', editable: false, align: 'center'
+                },
+                {
+                    label: '給付對象姓名',
+                    name: 'paid_name', align: 'center', width: '100', editable: false, align: 'center'
+                },
+                {
+                    label: '資料狀態',
+                    name: 'data_status', align: 'center', width: '80',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getStatus()
+                    }
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 25,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (temp_id) {
+
+
+
+            },
+            loadComplete: function () {
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+
+
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.temp_id == recList[i])
+                                $("input#chk_rec_" + rowData.temp_id).prop("checked", true);
+                        }
+                    }
+
+                    //判斷可否"申請覆核"
+                    if (rowData.data_status != "2") {
+                        $("input#chk_rec_" + rowData.temp_id).show();
+                    } else {
+                        $("input#chk_rec_" + rowData.temp_id).hide();
+                        $("input#chk_rec_" + rowData.temp_id).prop("checked", false);
+                    }
+
+                }
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+
+        //*-------------------匯入失敗 GRID begin--------------------*//
+        $("#impgrid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '錯誤資料',
+            jsonReader: {
+                repeatitems: false, id: 'temp_id'
+            },
+            colModel: [
+
+                {
+                    label: 'sheet', width: 110,
+                    name: 'sheet_name', align: 'center',
+                    editable: false,
+                },
+                {
+                    label: '在檔位置',
+                    name: 'linePos', align: 'center', width: 80,
+                    editable: false,
+                },
+                {
+                    label: '支票號碼', width: 110,
+                    name: 'check_no', align: 'center',
+                    editable: false,
+                },
+                {
+                    label: '錯誤原因', width: 300,
+                    name: 'err_msg', align: 'left',
+                    editable: false,
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#imppager",
+            onSelectRow: function () {
+
+
+
+            },
+            loadComplete: function () {
+
+
+            }
+        });
+
+            //*-------------------匯入失敗 GRID end--------------------*//
+
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var bPass = true;
+
+            if ($('#tel_interview_id_n').val() == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入新派件人員!!' + '</li>');
+            }
+
+
+            if (bPass == false)
+                return;
+
+            var recData = [];
+
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+            for (j = 0; j <= gridData.length - 1; j++) {
+                rowData = gridData[j];
+
+                if (recList.length > 0) {
+                    for (i = 0, count = recList.length; i < count; i++) {
+                        if (rowData.temp_id == recList[i]) {
+                            recData.push({
+                                'temp_id': rowData.temp_id,
+                                'paid_id': rowData.paid_id,
+                                'check_no': rowData.check_no,
+                                'check_acct_short': rowData.check_acct_short,
+                                'system': rowData.system,
+                                'tel_interview_id': rowData.tel_interview_id
+                            });
+                        }
+                    }
+                } else {
+                    recData = null;
+                }
+            }
+
+            if (recData == null) {
+                validationSummary.append('<li>' + '請勾選要處理的資料!!' + '</li>');
+                return;
+            }
+
+
+            $.blockUI();
+
+            $.ajax({
+                    url: "@Url.Action("execSave", "OAP0044")",
+                data: JSON.stringify({ 'tel_interview_id_n': $('#tel_interview_id_n').val(), 'dispatch_date': $('#dispatch_date').val(), 'gridData': recData }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        alert("作業成功！");
+                        validationSummary.append('<li>作業成功！</li>');
+                        recList = [];
+                        qryTelCheck();
+
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+                });
+
+        });
+        //*---------------修改(申請覆核) end ----------------*//
+
+
+
+
+
+        //*---------------匯出 begin ----------------*//
+        $("#btnExport").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            var jsonData = JSON.stringify({
+                'tel_interview_id_o': $("#tel_interview_id_o").val()
+                , 'check_no': $("#check_no").val()
+                , 'paid_id': $("#paid_id").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                    url: "@Url.Action("execExport", "OAP0044")",
+                data: jsonData,
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+
+                    if (data.success) {
+                        var url = '/OAP0044/downloadRpt?id=' + data.guid;
+
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+                });
+
+        });
+        //*---------------匯出 end ----------------*//
+    });
+</script>
+
+

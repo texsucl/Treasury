@@ -1,0 +1,280 @@
+﻿@model FGL.Web.ViewModels.OGL00003Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isQryTmp)：@Html.CheckBox("isQryTmp", false)
+                        </td>
+                        </tr>
+                    <tr>
+                        <td>
+                            異動日期：
+                            <input id="updDateB" name="updDateB" type="text">
+                            ~
+                            <input id="updDateE" name="updDateE" type="text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.item)：@Html.TextBoxFor(model => model.item, new { @size = "10", @maxlength = "8", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+  
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //轉跳"明細"畫面
+    function showDetal(tempId) {
+        rowData = $("#grid").jqGrid('getRowData', tempId);
+
+        var pTempId = rowData.tempId;
+        var pIsQryTmp = $('#isQryTmp')[0].checked == true ? "1" : "0";
+
+        var url = '@Html.Raw(Url.Action("detail", "OGL00007"
+                  , new {  tempId = "__pTempId__", isQryTmp = "__pIsQryTmp__" }))';
+        var params = url.replace('__pTempId__', pTempId).replace('__pIsQryTmp__', pIsQryTmp);
+        window.location.href = params;
+
+    }
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+
+        $('#updDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#updDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+       
+
+
+            //異動日期檢核
+            if (($("#updDateB").val().length == 0 && $("#updDateE").val().length > 0) || ($("#updDateB").val().length > 0 && $("#updDateE").val().length == 0)) {
+                validationSummary.append('<li>' + '「異動日期起訖」均需輸入!!' + '</li>');
+                return;
+            } else if ($("#updDateB").val().length > 0 & $("#updDateE").val().length > 0) {
+                if (!checkDate($("#updDateB").val(), true)) {
+                    validationSummary.append('<li>「異動日期起」格式錯誤!!</li>');
+                    return;
+                }
+
+                if (!checkDate($("#updDateE").val(), true)) {
+                    validationSummary.append('<li>「異動日期訖」格式錯誤!!</li>');
+                    return;
+                }
+
+                if ($("#updDateE").val() < $("#updDateB").val()) {
+                    validationSummary.append('<li>「異動訖日期」不可小於「異動起日期」 !!</li>');
+                    return;
+                }
+            }
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    isQryTmp: $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    updDateB: $("#updDateB").val(),
+                    updDateE: $("#updDateE").val(),
+                    item: $("#item").val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("LoadData", "OGL00007")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                 {
+                     label: 'tempId',
+                     name: 'tempId', align: 'center', hidden: true,
+                     editable: false,
+                 },
+                 {
+                     name: '明細', index: 'detail', align: 'center', width: 110,
+                     formatter: function (cellvalue, options, rowObject) {
+                         return "<input type='button' id='btn-" + rowObject.tempId + "' value='明細' onclick='showDetal(" + options.rowId + ");'>";
+
+                         //return '<a style="color:Blue;text-decoration:underline;" href="/OGL00001/detail/?tempId=' + rowObject.tempId + ' ">修改</a>';
+
+                     }
+                 },
+               {
+                   label: '險種',
+                   name: 'item', align: 'center',
+                   editable: false
+
+               },
+               {
+                   label: '險種類別',
+                   name: 'productTypeDesc', align: 'center',
+                   editable: false
+
+               },
+               {
+                   label: '外幣註記',
+                   name: 'fuMkDesc', align: 'center',
+                   editable: false
+
+               },
+               {
+                   label: '合約分類',
+                   name: 'itemConDesc', align: 'center',
+                   editable: false
+
+               },
+               {
+                   label: '裁量參與特性',
+                   name: 'discPartFeat', align: 'center',
+                   editable: false
+
+               },
+               {
+                   label: '申請人',
+                   name: 'aplyUId', align: 'center',
+                   editable: false
+               },
+                {
+                    label: '申請日期',
+                    name: 'aplyDt', align: 'center',
+                    editable: false
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: true,
+            forceFit: true,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+                }
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+
+
+
+    });
+</script>
+
+

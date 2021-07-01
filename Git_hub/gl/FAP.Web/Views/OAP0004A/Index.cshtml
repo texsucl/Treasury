@@ -1,0 +1,198 @@
+﻿@model FAP.Web.ViewModels.OAP0004Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidFscRange", "")
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //轉跳"申請單明細"畫面
+    function qryDetail(aplyNo) {
+        document.location.href = "/OAP0004A/detailAply/?aplyNo=" + aplyNo;
+    }
+
+    //取得"保局範圍"下拉選單
+    function getFscRange() {
+        return $('#hidFscRange').val();
+    }
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#hidFscRange').val('@Html.Raw(ViewBag.fscRangejqList)');
+            createGrid();
+        }
+
+
+
+        //*--------------查詢待覆核資料  begin-----------------*//
+        function createGrid() {
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/OAP0004A/LoadData/',
+               // postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'aply_no'
+                },
+                mtype: 'POST',
+                colModel: [
+                {
+                    label: '覆核單編號',
+                    name: 'aply_no', align: 'center',
+                    editable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var aplyNo = rowObject.aplyNo;
+                        return '<a href="javascript:qryDetail(\'' + options.rowId + '\')" style="color: #3366ff" id="' + options.rowId + '" >' + cellvalue.trim() + '</a>';
+
+                    }
+                },
+
+               {
+                   label: '支票到期日',
+                   name: 'check_date', align: 'center',
+                   editable: false
+               },
+               {
+                   label: '支票號碼',
+                   name: 'check_no', align: 'center',
+                   editable: false
+               },
+               {
+                   label: '原保局範圍',
+                   name: 'fsc_range', align: 'center',
+                   editable: false,
+                   edittype: "select",
+                   formatter: 'select',
+                   editoptions: {
+                       value: getFscRange()
+                   }
+               },
+               {
+                   label: '異動後保局範圍',
+                   name: 'fsc_range_n', align: 'center',
+                   editable: false,
+                   edittype: "select",
+                   formatter: 'select',
+                   editoptions: {
+                   value: getFscRange()
+                }
+               },
+               {
+                   label: '異動筆數',
+                   name: 'update_cnt', align: 'center',
+                   editable: false
+               },
+               {
+                   label: '申請人',
+                   name: 'update_id', align: 'center',
+                   editable: false
+               },
+                {
+                    label: '申請日期',
+                    name: 'update_datetime', align: 'center',
+                    editable: false
+                }
+                ],
+
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aply_no',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+
+
+
+
+
+    });
+</script>
+
+

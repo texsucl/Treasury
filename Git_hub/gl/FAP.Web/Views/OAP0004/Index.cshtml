@@ -1,0 +1,567 @@
+﻿@model FAP.Web.ViewModels.OAP0004Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var fscRangeList = ViewBag.fscRangeList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidStatus", "")
+                @Html.Hidden("hidExecAction", "")
+                @Html.Hidden("hidFscRange", "")
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.check_date_b)：
+                            <input id="check_date_b" name="check_date_b" type="text">
+                            ~
+                            <input id="check_date_e" name="check_date_e" type="text">
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.check_no)：@Html.TextBoxFor(model => model.check_no, new { @size = "12", @maxlength = "10", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fsc_range)：@Html.DropDownList("fsc_range", fscRangeList, "請選擇")
+                        </td>
+                        <td>
+                        @Html.DisplayNameFor(model => model.fsc_range_n)：@Html.DropDownList("fsc_range_n", fscRangeList, "請選擇")
+                            </td>
+                        </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.check_amt)：@Html.TextBoxFor(model => model.check_amt, new { @size = "30", @maxlength = "30", @disabled = true, onchange = "javascript:this.value=Comma(this.value);" })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                @Html.Hidden("onEdit", "")
+                @Html.Hidden("valueErr", "")
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    var lastSelectRoot = "";
+    var delObject = [];
+
+    //jqgrid中的刪除
+    function TheOnDelFunction(rowid) {
+        var cnt = jQuery("#grid").jqGrid('getGridParam', 'records');
+        if (cnt == 1) {
+            alert("單筆資料,無須刪除");
+            return;
+        }
+
+        
+
+        if (window.confirm('您確定要刪除嗎？') == true) {
+            rowData = $("#grid").jqGrid('getRowData', rowid);
+            delObject.push({
+                'check_no': rowData.check_no
+            });
+
+            if (rowData.data_status == "") {
+                //if (rowData.code_id.indexOf("jqg") >= 0) {
+                $("#grid").jqGrid('delRowData', rowid);
+                jQuery("#grid").trigger("reloadGrid");
+            } else {
+                $("#grid").jqGrid("setCell", rowid, "exec_action", "D");
+            }
+
+            $("#check_amt").val(Comma(Number(replaceAll($("#check_amt").val(),',','')) - Number(rowData.check_amt)));
+        }
+    }
+
+
+
+
+    $(document).click(function (e) {
+        if ($("#onEdit").val() == "Y" & e.target.id != "btnClear") {
+            if (e.target.id.indexOf(lastSelectRoot) < 0) {
+                alert("畫面仍有資料在編輯中，不可執行其它功能!!");
+                return
+            }
+        }
+    });
+
+
+
+
+    //取得"執行功能"下拉選單
+    function getExecAction() {
+        return $('#hidExecAction').val();
+    }
+
+    //取得"保局範圍"下拉選單
+    function getFscRange() {
+        return $('#hidFscRange').val();
+    }
+
+
+
+    $(function () {
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+
+            $('#hidExecAction').val('@Html.Raw(ViewBag.execActionjqList)');
+            $('#hidFscRange').val('@Html.Raw(ViewBag.fscRangejqList)');
+
+        }
+
+        $('#check_date_b').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#check_date_e').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            delObject = [];
+            $('#qryResult').children().remove();
+            $('#validationSummary').children().remove();
+
+            $('#btnModify').attr('disabled', true);
+            $('#btnExport').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+
+            $('#check_date_b').attr('disabled', false);
+            $('#check_date_e').attr('disabled', false);
+            $('#check_no').attr('disabled', false);
+            $('#fsc_range').attr('disabled', false);
+            $('#fsc_range_n').attr('disabled', false);
+            $('#check_date_b').val("");
+            $('#check_date_e').val("");
+            $('#check_no').val("");
+            $('#fsc_range').val("");
+            $('#fsc_range_n').val("");
+            $("#check_amt").val("");
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+            $("#onEdit").val("");
+            $("#valueErr").val("");
+            lastSelectRoot = "";
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            delObject = [];
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#check_date_b").val().length == 0 && $("#check_date_e").val().length == 0 &&
+                $("#check_no").val().length == 0 && $("#fsc_range").val().length == 0) {
+
+                validationSummary.append('<li>' + '「支票到期日」、「支票號碼」、「現在保局範圍」需擇一輸入!!"' + '</li>');
+                return
+            } else {
+
+                $('#check_date_b').attr('disabled', true);
+                $('#check_date_e').attr('disabled', true);
+                $('#check_no').attr('disabled', true);
+                $('#fsc_range').attr('disabled', true);
+            }
+
+
+
+
+            $('#btnQry').attr('disabled', true);
+            $('#btnModify').attr('disabled', false);
+            $('#btnExport').attr('disabled', true);
+            
+
+            var jsonData = {
+                'check_date_b': $("#check_date_b").val()
+              , 'check_date_e': $("#check_date_e").val()
+              , 'check_no': $("#check_no").val()
+              , 'fsc_range': $("#fsc_range").val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            //*-------------------GRID begin--------------------*//
+            $("#grid").jqGrid({
+                url: '/OAP0004/qryVeTrace/',
+                postData: jsonData,
+                datatype: 'json',
+                jsonReader: {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    id: 'check_no'
+                },
+                mtype: 'POST',
+
+                colModel: [
+                    {
+                        label: "刪除", name: 'Action', index: 'Action', search: false, align: 'center', width: '120'
+                    },
+
+                     {
+                         label: '執行功能',
+                         name: 'exec_action', align: 'center', width: '80',
+                         editable: false,
+                         edittype: "select",
+                         formatter: 'select',
+                         editoptions: {
+                             value: getExecAction()
+                         }
+                     },
+                      {
+                          label: '支票號碼',
+                          name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                      },
+                      {
+                          label: '支票到期日',
+                          name: 'check_date', align: 'center', width: '120', editable: false
+                      },
+                      {
+                          label: '支票金額',
+                          name: 'check_amt', align: 'right', editable: false,
+                          formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                      },
+                      {
+                          label: '保局範圍',
+                          name: 'fsc_range', align: 'center', editable: false,
+                          edittype: "select",
+                          formatter: 'select',
+                          editoptions: {
+                              value: getFscRange()
+                          }
+                      }
+                ],
+                autowidth: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: false,
+                forceFit: false,
+                loadonce: false,
+                sortname: "exec_date",
+                rownumbers: true,
+                viewrecords: true,
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                pager: "#pager",
+                onSelectRow: function (check_no) {
+
+                },
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+
+
+                    //var cnt = $('#grid').getGridParam('records')
+
+                    //if (cnt == 0) {
+                    //    $('#validationSummary').children().remove();
+
+                    //    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    //    if (validationSummary.length == 0) {
+                    //        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    //        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    //    }
+                    //    validationSummary.append('<li>' + '沒有符合查詢條件的資料，請重新輸入查詢條件！' + '</li>');
+
+                    //}
+
+                    if ($("#valueErr").val() == "Y") {
+                    } else {
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var rowId = ids[i];
+                            de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+                            jQuery("#grid").jqGrid('setRowData', ids[i], { Action: de });
+                        }
+                    }
+
+
+
+                    //還原畫面有勾選的資料
+                    ids = $(this).jqGrid('getDataIDs');
+
+                    if (ids.length > 0)
+                        $('#btnExport').attr('disabled', false);
+
+
+
+                    for (j = 0; j <= ids.length - 1; j++) {
+                        rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                        for (i = 0, count = delObject.length; i < count; i++) {
+                            if (rowData.check_no == delObject[i].check_no)
+                                $("#grid").jqGrid("setCell", ids[j], "exec_action", "D");
+                        }
+                    }
+                }
+            });
+
+            //*-------------------GRID end--------------------*//
+
+            var jsonDataAmt = JSON.stringify({
+                'check_date_b': $("#check_date_b").val()
+                       , 'check_date_e': $("#check_date_e").val()
+                       , 'check_no': $("#check_no").val()
+                       , 'fsc_range': $("#fsc_range").val()
+            });
+
+            $.ajax({
+                type: "POST",
+                data: jsonDataAmt,
+                dataType: "json",
+                url: '@Url.Action("qryVeTraceAmt", "OAP0004")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        var amt = data.amt;
+                        $('#check_amt').val(Comma(data.amt));
+
+
+                        if (data.amt == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+
+        //*---------------匯出 begin ----------------*//
+        $("#btnExport").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var jsonData = JSON.stringify({
+                'check_date_b': $("#check_date_b").val()
+                     , 'check_date_e': $("#check_date_e").val()
+                     , 'check_no': $("#check_no").val()
+                     , 'fsc_range': $("#fsc_range").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execExport", "OAP0004")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        var url = '/OAP0004/downloadRpt?id=' + data.guid;
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------匯出 end ----------------*//
+
+
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var bPass = true;
+
+            if ($('#onEdit').val() == "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '畫面資料未存檔!!' + '</li>');
+            }
+
+
+            if (bPass == false)
+                return;
+
+
+            //var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+            //var rowObject = [];
+            //for (j = 0; j <= gridData.length - 1; j++) {
+            //    rowData = gridData[j];
+            //    if (rowData.exec_action == "D")
+            //        rowObject.push({
+            //            'check_no': rowData.check_no
+            //        });
+            //}
+
+            if ($("#fsc_range_n").val().length == 0) {
+                validationSummary.append('<li>' + '請輸入「修改指定保局範圍」!!' + '</li>');
+                return
+            }
+
+            //if (gridData.length == 0) {
+            //    validationSummary.append('<li>' + '無修改資料，請重新查詢!!' + '</li>');
+            //    return
+            //}
+
+            var jsonData = JSON.stringify({
+                'check_date_b': $("#check_date_b").val(),
+                'check_date_e': $("#check_date_e").val(),
+                'check_no': $("#check_no").val(),
+                'fsc_range': $("#fsc_range").val(),
+                'fsc_range_n': $("#fsc_range_n").val(),
+                'gridData': delObject
+            });
+
+
+            $.blockUI();
+
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execSave", "OAP0004")',
+                contentType: 'application/json',
+                success: function (data) {
+                    delObject = [];
+
+                    if (data.success) {
+                        $("#btnModify").attr('disabled', true);
+                        validationSummary.append('<li>' + '申請覆核成功!!' + '</li>');
+
+                        if (data.err.length > 0)
+                            validationSummary.append('<li>' + '以下資料覆核中，不可修改/刪除此筆資料：' + data.err + '</li>');
+
+                        //var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        //for (var i = 0; i < ids.length; i++) {
+                        //    var rowId = ids[i];
+
+                        //    $("#btn_edit_" + rowId).hide();
+                        //    $("#btn_del_" + rowId).hide();
+                        //    $("#btn_save_" + rowId).hide();
+                        //    $("#btn_cancel_" + rowId).hide();
+
+
+                        //    rowData = $("#grid").jqGrid('getRowData', rowId);
+                        //    if(rowData.exec_action != "")
+                        //        $("#grid").jqGrid("setCell", rowId, "data_status", "2");
+
+                        //}
+
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+
+
+        });
+        //*---------------修改(申請覆核) end ----------------*//
+
+    });
+</script>
+
+

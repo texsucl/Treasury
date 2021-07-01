@@ -1,0 +1,169 @@
+﻿@using FGL.Web.ViewModels
+@{
+    ViewBag.Title = "Index";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+}
+
+
+<div class="nav-side-menu">
+
+        <div class="brand">會計管理系統</div>
+
+
+        <i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+
+    <div class="menu-list">
+        @if (@HttpContext.Current.Session["UserID"] != null)
+            {
+            <ul class="menu-content collapse out">
+                <table>
+                    <tr>
+                        <td><a><span class="glyphicon glyphicon-user"></span> @HttpContext.Current.Session["UserID"] @HttpContext.Current.Session["UserName"]</a></td>
+                        <td><a href="@Url.Action("Logout", "Account")"><span class="glyphicon glyphicon-log-out"></span> 登出</a></td>
+                    </tr>
+                </table>
+            </ul>
+        }
+
+        <ul id="menu-content" class="menu-content collapse out">
+
+
+            @foreach (var menu in Model)
+            {
+                if (menu.SubMenu.Count > 0)
+                {
+                    foreach (MenuModel subMenu in menu.SubMenu)
+                    {
+                        if (subMenu.SubMenu.Count > 0)
+                        {
+
+                            <li data-toggle="collapse" data-target="#@subMenu.MenuID" class="collapsed active">
+                                <a href="#"><i class="fa fa-gift fa-lg"></i> @Html.Raw(subMenu.Title) <span class="arrow"></span></a>
+                            </li>
+
+                                <ul class="sub-menu collapse" id=@subMenu.MenuID>
+
+
+                                    @foreach (MenuModel subMenu2 in subMenu.SubMenu)
+                            {
+                                if (subMenu2.SubMenu.Count > 0)
+                                {
+                                            <li data-toggle="collapse" data-target="#@subMenu2.MenuID" class="collapsed active">
+                                                <a href="#"><i class="fa fa-gift fa-lg"></i> @Html.Raw(subMenu2.Title) <span class="arrow"></span></a>
+                                            </li>
+                                            <ul class="sub-menu collapse" id=@subMenu2.MenuID>
+
+                                                @foreach (MenuModel itemMenu in subMenu2.SubMenu)
+                                                {
+                                                    if (itemMenu.SubMenu.Count > 0)
+                                                    {
+                                                        <li data-toggle="collapse" data-target="#@itemMenu.MenuID" class="collapsed">
+                                                            <a href="#"><i class="fa fa-car fa-lg"></i> @Html.Raw(itemMenu.Title) <span class="arrow"></span></a>
+                                                        </li>
+                                                        <ul class="sub-menu collapse" id=@itemMenu.MenuID>
+                                                            @foreach (MenuModel item in itemMenu.SubMenu)
+                                                            {
+                                                                if (item.IsAction)
+                                                                {
+                                                                    <li><a href="@Url.Content(item.Link)">@item.Title</a></li>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <li><a href="@Html.Raw(item.Link)"> @Html.Raw(item.Title)</a></li>
+                                                                }
+                                                            }
+
+                                                        </ul>
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (itemMenu.IsAction)
+                                                        {
+                                                            <li><a href="@Url.Content(itemMenu.Link)">@itemMenu.Title</a></li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li><a href="@Html.Raw(itemMenu.Link)"> @Html.Raw(itemMenu.Title)</a></li>
+                                                        }
+                                                    }
+
+
+
+                                                }
+
+                                            </ul>
+
+
+
+                                        }
+                                        else
+                                        {
+                                            if (subMenu2.Link != "")
+                                            {
+                                                <li><a href="@Url.Content(subMenu2.Link)">@subMenu2.Title</a></li>
+                                            }
+
+
+                                        }
+
+                                    }
+
+                                </ul>
+
+                        }
+
+                    }
+
+
+                }
+                @*else
+                    {
+                        if (menu.IsAction)
+                        {
+                            <li><a href="@Url.Action(menu.Action, menu.Controller)" class="@menu.Class"> @Html.Raw(menu.Title)</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="@Html.Raw(menu.Link)" class="@menu.Class"> @Html.Raw(menu.Title)</a></li>
+                        }
+                    }*@
+            }
+
+        </ul>
+    </div>
+
+    </div>
+
+<div id="content"></div>
+<script>
+
+    $(document).ready(function () {
+        
+        //$("a").each(function () {
+        //    $(this).on("click", function (event) {
+
+        //        if (document.all) { //判断IE浏览器
+        //            window.event.returnValue = false;
+        //            $("#content").load("https://www.google.com.tw");
+        //        }
+        //        else {
+        //            event.preventDefault();
+        //            alert(this.href);
+        //            $("#content").load(this.href);
+        //        };
+
+
+              
+               
+        //        //$("#content").load(this.href);
+        //    });
+        //});
+
+    });
+</script>
+
+

@@ -1,0 +1,418 @@
+﻿@model FGL.Web.ViewModels.OGL00003Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+    var apprMkList = ViewBag.apprMkList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.isQryTmp)：@Html.CheckBox("isQryTmp", false)
+                        </td>
+                       
+                    </tr>
+                    <tr>
+                        <td>
+                            異動日期：
+                            <input id="updDateB" name="updDateB" type="text">
+                            ~
+                            <input id="updDateE" name="updDateE" type="text">
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.item)：@Html.TextBoxFor(model => model.item, new { @size = "10", @maxlength = "8", @onkeyup = "this.value = this.value.toUpperCase();" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.apprMk)：@Html.DropDownList("apprMk", apprMkList, "請選擇")
+                        </td>
+
+                        <td>
+                            生效日期：
+                            <input id="effectDateB" name="effectDateB" type="text">
+                            ~
+                            <input id="effectDateE" name="effectDateE" type="text">
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+  
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //轉跳"明細"畫面
+    function showDetal(tempId) {
+        rowData = $("#grid").jqGrid('getRowData', tempId);
+
+        var pTempId = rowData.tempId;
+        var pIsQryTmp = $('#isQryTmp')[0].checked == true ? "1" : "0";
+
+
+        var url = '@Html.Raw(Url.Action("detail", "OGL00006"
+                  , new {  tempId = "__pTempId__", isQryTmp = "__pIsQryTmp__" }))';
+        var params = url.replace('__pTempId__', pTempId).replace('__pIsQryTmp__', pIsQryTmp);
+        window.location.href = params;
+
+    }
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+
+        $('#updDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#updDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        $('#effectDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#effectDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#updDateB").val().length == 0 && $("#updDateE").val().length == 0
+                && $("#item").val().length == 0) {
+
+                validationSummary.append('<li>' + '「異動日期起訖」、「險種代號」需擇一輸入!!' + '</li>');
+                return;
+            }
+                
+            //異動日期檢核
+            if (($("#updDateB").val().length == 0 && $("#updDateE").val().length > 0) || ($("#updDateB").val().length > 0 && $("#updDateE").val().length == 0)) {
+                validationSummary.append('<li>' + '「異動日期起訖」均需輸入!!' + '</li>');
+                return;
+            } else if ($("#updDateB").val().length > 0 & $("#updDateE").val().length > 0) {
+                if (!checkDate($("#updDateB").val(), true)) {
+                    validationSummary.append('<li>「異動日期起」格式錯誤!!</li>');
+                    return;
+                }
+
+                if (!checkDate($("#updDateE").val(), true)) {
+                    validationSummary.append('<li>「異動日期訖」格式錯誤!!</li>');
+                    return;
+                }
+
+                if ($("#updDateE").val() < $("#updDateB").val()) {
+                    validationSummary.append('<li>「異動訖日期」不可小於「異動起日期」 !!</li>');
+                    return;
+                }
+            }
+
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    isQryTmp: $('#isQryTmp')[0].checked == true ? "1" : "0",
+                    updDateB: $("#updDateB").val(),
+                    updDateE: $("#updDateE").val(),
+                    item: $("#item").val(),
+                    apprMk: $("#apprMk").val(),
+                    effectDateB: $("#effectDateB").val(),
+                    effectDateE: $("#effectDateE").val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("LoadData", "OGL00006")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            jsonReader: {
+                repeatitems: false, id: 'tempId'
+            },
+            colModel: [
+                 {
+                     label: 'tempId',
+                     name: 'tempId', align: 'center', hidden: true,
+                     editable: false, frozen: true,
+                 },
+                 {
+                     name: '明細', index: 'detail', align: 'center', width: 60, frozen: true,
+                     formatter: function (cellvalue, options, rowObject) {
+                         return "<input type='button' id='btn-" + rowObject.tempId + "' value='明細' onclick='showDetal(" + options.rowId + ");'>";
+
+                         //return '<a style="color:Blue;text-decoration:underline;" href="/OGL00001/detail/?tempId=' + rowObject.tempId + ' ">修改</a>';
+
+                     }
+                 },
+               {
+                   label: '險種', width: 60, frozen: true,
+                   name: 'item', align: 'center',
+                   editable: false
+
+               },
+     {
+         label: '覆核註記', width: 120, frozen: true,
+         name: 'apprMkDesc', align: 'left',
+         editable: false
+
+     },
+               {
+                   label: '異動人員',
+                   name: 'prodUpId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '異動日期',
+                    name: 'prodUpDt', align: 'left', width: 150,
+                    editable: false
+                },
+               {
+                   label: '覆核人員',
+                   name: 'prodApprId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '覆核日期',
+                    name: 'prodApprDt', align: 'left', width: 150,
+                    editable: false
+                },
+               {
+                   label: '異動人員',
+                   name: 'investUpId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '異動日期',
+                    name: 'investUpDt', align: 'left', width: 150,
+                    editable: false
+                },
+               {
+                   label: '覆核人員',
+                   name: 'investApprId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '覆核日期',
+                    name: 'investApprDt', align: 'left', width: 150,
+                    editable: false
+                },
+               {
+                   label: '異動人員',
+                   name: 'acctUpId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '異動日期',
+                    name: 'acctUpDt', align: 'left', width: 150,
+                    editable: false
+                },
+               {
+                   label: '覆核人員',
+                   name: 'acctApprId', align: 'center', width: 90,
+                   editable: false
+               },
+                {
+                    label: '覆核日期',
+                    name: 'acctApprDt', align: 'left', width: 150,
+                    editable: false
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            pager: '#pager',
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            resizeStop: function () {
+                resizeColumnHeader.call(this);
+                fixPositionsOfFrozenDivs.call(this);
+                fixGboxHeight.call(this);
+            }, 
+            onSelectRow: function (tempId) {
+
+
+
+            },
+            loadComplete: function () {
+                
+                fixPositionsOfFrozenDivs.call(this);
+            }
+        });
+
+        jQuery("#grid").jqGrid('setFrozenColumns');
+        jQuery("#grid").jqGrid('setGroupHeaders', {
+            useColSpanStyle: false,
+            groupHeaders: [
+              { startColumnName: 'prodUpId', numberOfColumns: 4, titleText: '商品維護' },
+              { startColumnName: 'investUpId', numberOfColumns: 4, titleText: '投資交易' },
+              { startColumnName: 'acctUpId', numberOfColumns: 4, titleText: '商品/投資' },
+            ]
+        });
+
+        //處理凍結grid時...凍結行的高度與原grid行不一致問題
+        resizeColumnHeader = function () {
+            var rowHight, resizeSpanHeight,
+                // get the header row which contains
+                headerRow = $(this).closest("div.ui-jqgrid-view")
+                    .find("table.ui-jqgrid-htable>thead>tr.ui-jqgrid-labels");
+
+            // reset column height
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.height = '';
+            });
+
+            // increase the height of the resizing span
+            resizeSpanHeight = 'height: ' + headerRow.height() + 'px !important; cursor: col-resize;';
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.cssText = resizeSpanHeight;
+            });
+
+            // set position of the dive with the column header text to the middle
+            rowHight = headerRow.height();
+            headerRow.find("div.ui-jqgrid-sortable").each(function () {
+                var ts = $(this);
+                ts.css('top', (rowHight - ts.outerHeight()) / 2 + 'px');
+            });
+        },
+               fixPositionsOfFrozenDivs = function () {
+                   var $rows;
+                   if (typeof this.grid.fbDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-btable>tbody>tr', this.grid.bDiv);
+                       $('>table.ui-jqgrid-btable>tbody>tr', this.grid.fbDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           if ($(this).hasClass("jqgrow")) {
+                               $(this).height(rowHight);
+                               rowHightFrozen = $(this).height();
+                               if (rowHight !== rowHightFrozen) {
+                                   $(this).height(rowHight + (rowHight - rowHightFrozen));
+                               }
+                           }
+                       });
+                       $(this.grid.fbDiv).height(this.grid.bDiv.clientHeight);
+                       $(this.grid.fbDiv).css($(this.grid.bDiv).position());
+                   }
+                   if (typeof this.grid.fhDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-htable>thead>tr', this.grid.hDiv);
+                       $('>table.ui-jqgrid-htable>thead>tr', this.grid.fhDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           $(this).height(rowHight);
+                           rowHightFrozen = $(this).height();
+                           if (rowHight !== rowHightFrozen) {
+                               $(this).height(rowHight + (rowHight - rowHightFrozen));
+                           }
+                       });
+                       $(this.grid.fhDiv).height(this.grid.hDiv.clientHeight);
+                       $(this.grid.fhDiv).css($(this.grid.hDiv).position());
+                   }
+               },
+               fixGboxHeight = function () {
+                   var gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight(),
+                       pagerHeight = $(this.p.pager).outerHeight();
+
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+                   gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight();
+                   pagerHeight = $(this.p.pager).outerHeight();
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+               };
+
+        //*-------------------GRID end--------------------*//
+
+
+
+
+    });
+</script>
+
+

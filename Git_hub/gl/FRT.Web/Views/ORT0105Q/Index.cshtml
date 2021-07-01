@@ -1,0 +1,485 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+@using FRT.Web.Enum;
+@using FRT.Web.BO;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="ORT0105Q_Form">
+                    <table>
+                        <tr>
+                            <td style="width:50px">
+                                <label>類別 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("ORT0105Q_type", (SelectList)ViewBag.GOJ_TYPE, new { @class = "" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>性質 : </label>
+                            </td>
+                            <td>
+                                <select id="ORT0105Q_kind" class=""></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="ORT0105Q_Search" value="查詢" />
+                                @Html.Hidden("h_aply_no")
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class=" ShowOrNot">
+        <div class="col-sm-24">
+            <div id="Review_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+    </div>
+    <div id="ORT0105Q_Dialog" style="display:none;">
+        <form id="ORT0105Q_DialogForm">
+            <table>
+                <tr>
+                    <td style="width:50px">
+                        <label>類別 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_type_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>性質 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_kind_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>頻率 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_frequency_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>自動執行時間 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_scheduler_time_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>資料區間起始日 : </label>
+                    </td>
+                    <td width="250px">
+                        <label id="ORT0105Q_start_date_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px">
+                        <label>Mail群組(ORTB015) : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_MAIL_GROUP"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <label>報表加密 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_MAIL_KEY"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="ORT0105Q_SubjqgridDiv" class="jqd">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="hidden" id="ORT0105Q_check_id" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ORT0105Q_btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="ORT0105Q_SubDialog" style="display:none;">
+        <form id="ORT0105Q_SubDialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>平台 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_platform"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>檔案代碼 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_file_code"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>檔案中文 : </label>
+                    </td>
+                    <td>
+                        <label id="ORT0105Q_file_code_d"></label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>備註 : </label>
+                    </td>
+                    <td>
+                        <textarea disabled id="ORT0105Q_memo" name="ORT0105Q_memo" maxlength="200" style="width:300px;height:100px"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">
+                        <input type="button" id="ORT0105Q_SubbtnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("qryORT0105Q", "ORT0105Q")';
+        UrlFor.GetGOJ_TYPE_GROUP = '@Url.Action("GetGOJ_TYPE_GROUP", "ORT0105Q")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "ORT0105Q")';
+        //#endregion
+
+        //region 參數設定
+        var check_id = 'ORT0105Q_check_id'; //申請單號
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始設定
+            $('.ShowOrNot').hide();
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'ORT0105Q_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'ORT0105Q_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            $('#' + check_id).val('');
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                    case 'ORT0105Q_SubbtnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+            //#endregion
+
+            $('#ORT0105Q_type').change(function () {
+                KindChange($('#ORT0105Q_type').val());               
+            });
+
+            function KindChange(type) {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        type: type,                        
+                    }),
+                    url: UrlFor.GetGOJ_TYPE_GROUP,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    $('#ORT0105Q_kind').find('option').remove();
+                    customerUtility.addoption('ORT0105Q_kind', result);
+                });
+            }
+
+            //region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('Review_jqgridDiv');
+                $('.ShowOrNot').hide();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        type: $('#ORT0105Q_type').val(),
+                        kind: $('#ORT0105Q_kind').val()
+                    }),
+                    dataType: "json",
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        review_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+
+            //查詢Grid
+            function review_SearchGrid() {
+                var colNameArray = [ '檢視', '類別', '性質', '頻率', '執行時間', '資料區間起始日', 'Mail群組', '報表加密',
+                     '異動人員', '異動日期', '覆核人員','覆核日期','id'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 40, sortable: false });
+                colModelArray.push({ name: "type_d", index: "type_d", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "kind_d", index: "kind_d", width: 220, sortable: false, align: 'left' });
+                colModelArray.push({ name: "frequency_d", index: "frequency_d", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "scheduler_time_d", index: "scheduler_time_d", width: 80, sortable: false, align: 'center' });
+                colModelArray.push({ name: "start_date_d", index: "start_date_d", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "mail_group_d", index: "mail_group_d", width: 300, sortable: false, align: 'center' });
+                colModelArray.push({ name: "mail_key", index: "mail_key", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_name", index: "update_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_datetime", index: "update_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_name", index: "appr_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_datetime", index: "appr_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "check_id", index: "check_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'Review_jqgridDiv',
+                    'Review_List',
+                    'Review_Peger',
+                     UrlFor.GetData,
+                     {
+                         type: 'ORT0105QViewData'
+                     },
+                     colNameArray,
+                     colModelArray,
+                     '跨系統勾稽作業查詢',
+                     jqgridCustom.getPage('Review_jqgridDiv'),
+                     jqgridCustom.getRowNum('Review_jqgridDiv'),
+                     ReviewrGridCompeleteFun,
+                     true
+                    )
+            }
+
+            function review_SearchSubGrid() {
+                var colNameArray = ['檢視', '平台', '檔案代碼', '檔案中文', '備註',
+                    '建立人員', '建立時間', '最後修改人員', '最後修改時間',
+                    '執行功能代碼', 'pkid'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 40, sortable: false });
+                colModelArray.push({ name: "platform", index: "platform", width: 70, sortable: false, align: 'center' });
+                colModelArray.push({ name: "file_code", index: "file_code", width: 150, sortable: false, align: 'left' });
+                colModelArray.push({ name: "file_code_d", index: "file_code_d", width: 150, sortable: false, align: 'left' });
+                colModelArray.push({ name: "memo", index: "memo", width: 290, sortable: false, align: 'left' });
+                colModelArray.push({ name: "create_id", index: "create_id",  hidden: true });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime",  hidden: true});
+                colModelArray.push({ name: "update_id", index: "update_id",  hidden: true});
+                colModelArray.push({ name: "update_datetime", index: "update_datetime",  hidden: true });
+                colModelArray.push({ name: "exec_action", index: "exec_action", hidden: true });
+                colModelArray.push({ name: "sub_id", index: "sub_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'ORT0105Q_SubjqgridDiv',
+                'ORT0105Q_SubSearchList',
+                'ORT0105Q_SubSearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'ORT0105QViewSubData',
+                    check_id: $('#' + check_id).val()
+                },
+                colNameArray,
+                colModelArray,
+                '跨系統勾稽作業程式明細檔',
+                jqgridCustom.getPage('ORT0105Q_SubjqgridDiv'),
+                jqgridCustom.getRowNum('ORT0105Q_SubjqgridDiv'),
+                ORT0105_SubCompleteFun,
+                true
+                );
+            }
+
+            function ReviewrGridCompeleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'ORT0105Q_Search', ORT0105QActFun);
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                    $(this).find('.actionEditIcon').hide();
+                });
+            }
+
+            function ORT0105_SubCompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'ORT0105Q_SubSearch', ORT0105QSubActFun);
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                    $(this).find('.actionEditIcon').hide();
+                });
+            }
+
+            //#endregion
+
+            var ORT0105QActFun = {};
+            ORT0105QActFun.Edit = function (i) {
+            }
+            ORT0105QActFun.Dele = function (i) {
+            }
+            ORT0105QActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                var dialogId = 'ORT0105Q_Dialog';
+                var listId = 'Review_List';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    //position: { my: "top+20%", at: "center top", of: window },
+                    position: { my: "top", at: "center top", of: window },
+                    title: title + '跨系統勾稽作業檔',
+                    width: '850px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+                var data = $("#" + listId).getRowData(rowid);
+                $('#' + check_id).val(data.check_id);
+                if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                }
+                review_SearchSubGrid();
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                $('#ORT0105Q_type_d').text('');
+                $('#ORT0105Q_kind_d').text('');
+                $('#ORT0105Q_frequency_d').text('');
+                $('#ORT0105Q_scheduler_time_d').text('');
+                $('#ORT0105Q_start_date_d').text('');
+                $('#ORT0105Q_MAIL_GROUP').text('');
+                $('#ORT0105Q_MAIL_KEY').text('');
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#ORT0105Q_type_d').text(data.type_d); //類別
+                    $('#ORT0105Q_kind_d').text(data.kind_d); //性質
+                    $('#ORT0105Q_frequency_d').text(data.frequency_d); //頻率
+                    $('#ORT0105Q_scheduler_time_d').text(data.scheduler_time_d); //自動執行時間
+                    $('#ORT0105Q_start_date_d').text(data.start_date_d); //資料區間起始日
+                    $('#ORT0105Q_MAIL_GROUP').text(data.mail_group_d); //Mail群組(ORTB015)
+                    $('#ORT0105Q_MAIL_KEY').text(data.mail_key);
+                }
+            }
+            //#endregion
+
+            var ORT0105QSubActFun = {};
+
+            ORT0105QSubActFun.Edit = function (i) {
+            }
+            ORT0105QSubActFun.Dele = function (i) {
+            }
+            ORT0105QSubActFun.View = function (i) {
+                SubdialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+
+            //#region dialog open
+            function SubdialogOpen(type, rowid) {
+                //$('#' + ORT0105_FormId).validate().resetForm();
+                var dialogId = 'ORT0105Q_SubDialog';
+                var listId = 'ORT0105Q_SubSearchList';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    //position: { my: "top+20%", at: "center top", of: window },
+                    position: { my: "top+20%", at: "center top", of: window },
+                    title: title + '跨系統勾稽作業明細資料檔',
+                    width: '450px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+                if (type == '@Ref.ActionType.View.ToString()') {
+                    SubdialogSetData(listId, rowid);
+                }
+            }
+            //#endregion
+
+            //#region Sub Dialog Set Data
+            function SubdialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                $('#ORT0105Q_platform').text('');
+                $('#ORT0105Q_file_code').text('');
+                $('#ORT0105Q_file_code_d').text('');
+                $('#ORT0105Q_memo').val('');
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#ORT0105Q_platform').text(data.platform); //平台
+                    $('#ORT0105Q_file_code').text(data.file_code); //檔案代碼
+                    $('#ORT0105Q_file_code_d').text(data.file_code_d); //檔案中文
+                    $('#ORT0105Q_memo').val(data.memo); //備註
+                }
+            }
+            //#endregion
+        }
+    });
+</script>

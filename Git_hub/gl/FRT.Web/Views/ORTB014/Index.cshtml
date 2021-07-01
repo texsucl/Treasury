@@ -1,0 +1,562 @@
+﻿@model FRT.Web.ViewModels.ORTB014Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+    var statusjqList = ViewBag.statusjqList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidStatus", "")
+                <span style="color:red;">「日期區間」及「銀行代號+帳號」可擇一查詢!</span>
+                <table>
+                    <tr>
+                        <td>
+
+                            @Html.DisplayNameFor(model => model.qDateB)：
+                            <input id="qDateB" name="qDateB" type="text">
+                            ~
+                            <input id="qDateE" name="qDateE" type="text">
+                        </td>
+                        </tr>
+                    <tr>
+                        <td>
+                             @Html.DisplayNameFor(model => model.bankNo)：@Html.TextBoxFor(model => model.bankNo, new { @size = "13", @maxlength = "11" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.bankAct)：@Html.TextBoxFor(model => model.bankAct, new { @size = "36", @maxlength = "34"})
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnSave" name="btnSave" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    
+
+
+    //取得"資料狀態"下拉選單
+    function getStatus() {
+        return $('#hidStatus').val();
+    }
+
+    var $grid = $("#grid"), recList = [], ckRec = function (chItem, rowId) {
+        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+        var value = chItem.checked;
+
+        var index = $.inArray(rowId, recList);
+
+        //if (value == true) {
+        //    recList.push(rowId);
+        //} else {
+        //    if (index >= 0)
+        //        recList.splice(index, 1);
+        //}
+
+
+
+        var gridData = $("#grid").jqGrid('getGridParam', 'data');
+        for (j = 0; j <= gridData.length - 1; j++) {
+            growData = gridData[j];
+
+            index = $.inArray(growData.tempId, recList);
+
+            if (growData.bankNo == rowData.bankNo && growData.bankAct == rowData.bankAct
+                && growData.rejectPay == rowData.rejectPay && growData.filler10 == rowData.filler10) {
+
+                if (value == true) {
+                    recList.push(growData.tempId);
+                    $("input#chk_rec_" + growData.tempId).prop("checked", true);
+                } else {
+                    $("input#chk_rec_" + growData.tempId).prop("checked", false);
+
+                    if (index >= 0)
+                        recList.splice(index, 1);
+                }
+
+            }
+        }
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (chItem, rowId) {
+        rowData = $("#grid").jqGrid('getRowData', rowId);
+
+        var value = chItem.checked;
+
+        var index = $.inArray(rowId, rtnList);
+
+        //if (value == true) {
+        //    rtnList.push(rowId);
+        //} else {
+        //    if (index >= 0)
+        //        rtnList.splice(index, 1);
+        //}
+
+
+        var gridData = $("#grid").jqGrid('getGridParam', 'data');
+        for (j = 0; j <= gridData.length - 1; j++) {
+            growData = gridData[j];
+
+            index = $.inArray(growData.tempId, rtnList);
+
+            if (growData.bankNo == rowData.bankNo && growData.bankAct == rowData.bankAct
+                && growData.rejectPay == rowData.rejectPay && growData.filler10 == rowData.filler10) {
+
+                if (value == true) {
+                    rtnList.push(growData.tempId);
+                    $("input#chk_rtn_" + growData.tempId).prop("checked", true);
+                } else {
+                    $("input#chk_rtn_" + growData.tempId).prop("checked", false);
+
+                    if (index >= 0)
+                        rtnList.splice(index, 1);
+                }
+
+            }
+        }
+    }
+
+    function setDefaultDate() {
+        var date = new Date();
+        date.setDate(date.getDate() - 1);
+
+        var currentYear = date.getFullYear();
+        var currentMonth = date.getMonth() + 1;
+        var currentDay = date.getDate();
+
+        var strDate = leftPad(String(currentYear), 4, '0') +
+            leftPad(String(currentMonth), 2, '0') +
+            leftPad(String(currentDay), 2, '0')
+
+        $('#qDateB').val(strDate.substring(0, 4) + "-" + strDate.substring(4, 6) + "-" + strDate.substring(6, 8));
+        $('#qDateE').val(strDate.substring(0, 4) + "-" + strDate.substring(4, 6) + "-" + strDate.substring(6, 8));
+    }
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            setDefaultDate();
+
+            $('#hidStatus').val('@Html.Raw(ViewBag.statusjqList)');
+        }
+
+        $('#qDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#qDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#bankNo').val("");
+            $('#bankAct').val("");
+            setDefaultDate();
+
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            createGrid(true);
+        });
+
+        //*--------------查詢資料  begin-----------------*//
+        function createGrid(bClearMsg) {
+
+            if (bClearMsg)
+                $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            recList = [];
+            rtnList = [];
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            if (!checkDate($("#qDateB").val(), false)) {
+                validationSummary.append('<li>日期起-格式錯誤!!</li>');
+                return;
+            }
+
+            if (!checkDate($("#qDateE").val(), false)) {
+                validationSummary.append('<li>日期訖-格式錯誤!!</li>');
+                return;
+            }
+
+            if ($('#bankAct').val().length == 0 && $("#qDateB").val().length == 0 && $("#qDateE").val().length == 0) {
+                validationSummary.append('<li>' + '「輸入日期」、「銀行帳號」需擇一輸入!!' + '</li>');
+                return;
+            }
+
+            var para = {
+                bankNo: $("#bankNo").val(),
+                bankAct: $("#bankAct").val(),
+                qDateB: $("#qDateB").val(),
+                qDateE: $("#qDateE").val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/ORTB014/qryFRTRVMY/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'tempId'
+                },
+                mtype: 'POST',
+                colModel: [
+                    { label: 'tempId', name: 'tempId', align: 'center', hidden: true, frozen: true },
+                    {
+                        label: '拒絕付款',
+                        name: 'rec', index: 'rec', align: 'center', width: '70', editable: true
+                        ,formatter: function (cellvalue, options, rowObject) {
+                            var id = options.rowId.length == 0 ? "0" : options.rowId;
+                            if (rowObject.rejectPay == "" & rowObject.filler10 == "") {
+                                return '<input type="checkbox" id="chk_rec_' + id + '" onClick="ckRec(this,' + '\'' + id + '\'' + ')"';
+                            } else {
+                                return "<input type='checkbox' id=" + id + " disabled/>";
+                            }
+                        }, frozen: true
+                    },
+                    {
+                        label: '停用',
+                        name: 'rtn', index: 'rtn', align: 'center', width: '50', editable: true
+                        , formatter: function (cellvalue, options, rowObject) {
+                            var id = options.rowId.length == 0 ? "0" : options.rowId;
+                            if (rowObject.rejectPay == "Y" & rowObject.filler10 == "") {
+                                return '<input type="checkbox" id="chk_rtn_' + id + '" onClick="ckRtn(this,' + '\'' + id + '\'' + ')"';
+
+                            } else {
+                                return "<input type='checkbox' id=" + id + " disabled/>";
+                            }
+                        }, frozen: true
+                    },
+                    
+                    
+                    { label: '銀行代號', name: 'bankNo', align: 'center', width: '80', frozen: true },
+                    { label: '銀行帳號', name: 'bankAct', align: 'left', frozen: true },
+                    { label: '失敗代碼', name: 'failCode', align: 'center', width: '70', frozen: true },
+                    { label: '失敗代碼說明', name: 'failCodeDesc', align: 'center', width: '150' },
+                    {
+                        label: '資料狀態',
+                        name: 'status', align: 'center', width: '80',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getStatus()
+                        }
+                    },
+                    { label: '輸入日期', name: 'entryDate', align: 'center', width: '80' },
+                    { label: '匯費序號', name: 'feeSeqn', align: 'center', width: '110' },
+                    { label: '拒絕付款', name: 'rejectPay', align: 'center', width: '80' },
+                    { label: '異動日期', name: 'updDate', align: 'center', width: '80' },
+                    { label: '異動時間', name: 'updTimeN', align: 'center', width: '80' },
+                    { label: '異動人員代號', name: 'updId', align: 'center', width: '100' },
+                    { label: '覆核日期', name: 'apprDate', align: 'center', width: '80' },
+                    { label: '覆核時間', name: 'apprTimeN', align: 'center', width: '80' },
+                    { label: '覆核人員', name: 'apprId', align: 'center', width: '80' },
+                    { label: '備用１０', name: 'filler10', align: 'center', width: '80' },
+                    { label: '備用２０', name: 'filler20', align: 'center', width: '80' },
+                    { label: '備用數字０８', name: 'filler08N', align: 'center', width: '80' }
+
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: false,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 100,
+                rowList: [10, 100, 150],
+                //sortname: 'fastNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+                    fixPositionsOfFrozenDivs.call(this);
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (data.success) {
+                        if (bClearMsg & cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+
+                    } else if (data.success == false && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                    }
+
+                    var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                    for (j = 0; j <= gridData.length - 1; j++) {
+                        rowData = gridData[j];
+
+                        if (recList.length > 0) {
+                            for (i = 0, count = recList.length; i < count; i++) {
+                                if (rowData.tempId == recList[i])
+                                    $("input#chk_rec_" + rowData.tempId).prop("checked", true);
+                            }
+                        } 
+
+                        if (rtnList.length > 0) {
+                            for (i = 0, count = rtnList.length; i < count; i++) {
+                                if (rowData.tempId == rtnList[i])
+                                    $("input#chk_rtn_" + rowData.tempId).prop("checked", true);
+                            }
+                        } 
+                    }
+
+
+                },
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                }
+
+            });
+
+
+            jQuery("#grid").jqGrid('setFrozenColumns');
+            $.unblockUI(); //畫面打開
+        }
+
+
+        //處理凍結grid時...凍結行的高度與原grid行不一致問題
+        resizeColumnHeader = function () {
+            var rowHight, resizeSpanHeight,
+                // get the header row which contains
+                headerRow = $(this).closest("div.ui-jqgrid-view")
+                    .find("table.ui-jqgrid-htable>thead>tr.ui-jqgrid-labels");
+
+            // reset column height
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.height = '';
+            });
+
+            // increase the height of the resizing span
+            resizeSpanHeight = 'height: ' + headerRow.height() + 'px !important; cursor: col-resize;';
+            headerRow.find("span.ui-jqgrid-resize").each(function () {
+                this.style.cssText = resizeSpanHeight;
+            });
+
+            // set position of the dive with the column header text to the middle
+            rowHight = headerRow.height();
+            headerRow.find("div.ui-jqgrid-sortable").each(function () {
+                var ts = $(this);
+                ts.css('top', (rowHight - ts.outerHeight()) / 2 + 'px');
+            });
+        },
+               fixPositionsOfFrozenDivs = function () {
+                   var $rows;
+                   if (typeof this.grid.fbDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-btable>tbody>tr', this.grid.bDiv);
+                       $('>table.ui-jqgrid-btable>tbody>tr', this.grid.fbDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           if ($(this).hasClass("jqgrow")) {
+                               $(this).height(rowHight);
+                               rowHightFrozen = $(this).height();
+                               if (rowHight !== rowHightFrozen) {
+                                   $(this).height(rowHight + (rowHight - rowHightFrozen));
+                               }
+                           }
+                       });
+                       $(this.grid.fbDiv).height(this.grid.bDiv.clientHeight);
+                       $(this.grid.fbDiv).css($(this.grid.bDiv).position());
+                   }
+                   if (typeof this.grid.fhDiv !== "undefined") {
+                       $rows = $('>div>table.ui-jqgrid-htable>thead>tr', this.grid.hDiv);
+                       $('>table.ui-jqgrid-htable>thead>tr', this.grid.fhDiv).each(function (i) {
+                           var rowHight = $($rows[i]).height(), rowHightFrozen = $(this).height();
+                           $(this).height(rowHight);
+                           rowHightFrozen = $(this).height();
+                           if (rowHight !== rowHightFrozen) {
+                               $(this).height(rowHight + (rowHight - rowHightFrozen));
+                           }
+                       });
+                       $(this.grid.fhDiv).height(this.grid.hDiv.clientHeight);
+                       $(this.grid.fhDiv).css($(this.grid.hDiv).position());
+                   }
+               },
+               fixGboxHeight = function () {
+                   var gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight(),
+                       pagerHeight = $(this.p.pager).outerHeight();
+
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+                   gviewHeight = $("#gview_" + $.jgrid.jqID(this.id)).outerHeight();
+                   pagerHeight = $(this.p.pager).outerHeight();
+                   $("#gbox_" + $.jgrid.jqID(this.id)).height(gviewHeight + pagerHeight);
+               };
+
+        //*--------------查詢資料  end-----------------*//
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+
+
+            $('#validationSummary').children().remove();
+
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+
+                validationSummary.append('<li>' + '請選擇要 拒絕付款 或 停用 的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.tempId == recList[i])
+                                recData.push(rowData);
+                        }
+                    } else {
+                        recData = null;
+                    }
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.tempId == rtnList[i])
+                                rtnData.push(rowData);
+                        }
+                    } else {
+                        rtnData = null;
+                    }
+
+                }
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "ORTB014")",
+                    data: JSON.stringify({
+                        'bankNo': $('#bankNo').val(),
+                        'recData': recData, 'rtnData': rtnData
+                    }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        validationSummary.append('<li>作業成功！</li>');
+                    } else {
+                        if (data.err.length > 0) {
+                            for (var i = 0; i <= data.err.length - 1; i++) {
+                                validationSummary.append('<li>帳號=' + data.err[i].bankAct
+                                    + ' 錯誤代碼=' + data.err[i].failCode + ':'
+                                    + data.err[i].errorMsg + '</li>');
+                            }
+                        }
+
+                    }
+
+                    recList = [];
+                    rtnList = [];
+
+                    createGrid(false);
+
+                    $.unblockUI(); //畫面打開
+
+                },
+                error: function () {
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+    });
+</script>
+
+

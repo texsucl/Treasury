@@ -1,0 +1,189 @@
+﻿@model FRT.Web.ViewModels.ORT0104Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //轉跳"申請單明細"畫面
+    function qryDetail(aply_no) {
+        document.location.href = "/ORT0104A/detailAply/?aply_no=" + aply_no;
+
+
+    }
+
+    //取得"退匯原因"下拉選單
+    function getFailCode() {
+        var list = '@Html.Raw(ViewBag.failCodejsList)'
+        return list;
+
+    }
+
+
+    $(function () {
+        $.unblockUI();
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            createGrid();
+        }
+
+
+
+        //*--------------查詢待覆核資料  begin-----------------*//
+        function createGrid() {
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/ORT0104A/LoadData/',
+               // postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'aply_no'
+                },
+                mtype: 'POST',
+                colModel: [
+                {
+                    label: '覆核單編號',
+                        name: 'aply_no', align: 'center', width:'120',
+                    editable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var aply_no = rowObject.aply_no;
+                        // return '<a style="color:Blue;text-decoration:underline;" href="/FGL10181A/detailAply/?aplyNo=' + options.rowId + ' ">' + cellvalue.trim() + '</a>';
+                        return '<a href="javascript:qryDetail(\'' + options.rowId + '\')" style="color: #3366ff" id="' + options.rowId + '" >' + cellvalue.trim() + '</a>';
+
+                    }
+                },
+                    { label: '幣別', name: 'currency', align: 'center', editable: false, width: '60' },
+                    { label: '帳本代號', name: 'corp_no', align: 'center', editable: false, width: '80' },
+                    { label: '轉帳憑證編號', name: 'vhr_no1', align: 'center', editable: false, width: '120' },
+                    { label: '處理序號', name: 'pro_no', align: 'center', editable: false, width: '120'},
+                    { label: '收款人ＩＤ', name: 'paid_id', align: 'center', editable: false, width: '100' },
+                    {
+                        label: '退匯原因',
+                        name: 'fail_code', align: 'left',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getFailCode()
+                        }
+                    },
+                    { label: '新處理序號', name: 'seqn', align: 'center', editable: false, width: '120' },
+                    {
+                        label: '退匯原因_異動前',
+                        name: 'fail_code_o', align: 'left',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getFailCode()
+                        }
+                    },
+                    { label: '新處理序號_異動前', name: 'seqn_o', align: 'center', editable: false, width: '120' },
+
+
+                    { label: '申請人員', name: 'update_name', align: 'center', editable: false },
+                    { label: '申請日期', name: 'update_datetime', align: 'center', editable: false }
+
+           
+                ],
+
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: false,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'aply_no',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    if (cnt == 0) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+
+
+
+
+
+    });
+</script>
+
+

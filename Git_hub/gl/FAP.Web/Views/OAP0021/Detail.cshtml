@@ -1,0 +1,811 @@
+﻿@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+@model FAP.Web.ViewModels.OAP0021DetailModel
+
+<div class="row" style="width:990px">
+    <div>
+        <table>
+            <tr>
+                <td style="width:120px">
+                    <label>申請單號 : </label>
+                </td>
+                <td style="width:250px">
+                    <label>@Model.apply_no</label>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label>【辦理】</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>變更原因 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OAP0021_mark_rsn2", (SelectList)ViewBag.MARK_RSN, new { @class = "OAP0021DetailStatus" })
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <label>申辦方式 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OAP0021_mark_mth2", (SelectList)ViewBag.MARK_MTH, new { @class = "OAP0021DetailStatus" })
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><label>登錄字號 : </label></td>
+                <td>
+                    <input type="text" id="OAP0021_send_id" value="@Model.send_id" class="OAP0021DetailStatus"/>
+                </td>
+                <td>
+                    <label id="OAP0021_send_id_D">@Model.send_id_D</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>寄送保戶 : </label>
+                </td>
+                <td>
+                    <label id="OAP0021_reg_yn">@Model.reg_yn</label>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <label>行政單位 : </label>
+                </td>
+                <td colspan="2">
+                    <label id="OAP0021_apply_unit_id">@Model.apply_unit_D</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>收件人 : </label>
+                </td>
+                <td colspan="2">
+                    <input type="text" id="OAP0021_rcv_name_id" value="@Model.rcv_name" class="OAP0021DetailStatus" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>寄送地址 : </label>
+                </td>
+                <td >
+                    <input type="text" id="OAP0021_zip_code_id" style="width:60px;" value="@Model.zip_code" class="OAP0021DetailStatus" />
+                </td>
+                <td>                  
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="2">
+                    <input type="text" id="OAP0021_addr_id" style="width:620px;" value="@Model.addr" class="OAP0021DetailStatus" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>保戶電話 : </label>
+                </td>
+                <td colspan="2">
+                    <input type="text" id="OAP0021_tel_id" value="@Model.tel" class="OAP0021DetailStatus" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label>【支票】</label>
+                </td>
+            </tr>
+            <tr class="OAP0021DetailEdit" style="display:none">
+                <td>
+                    <label>支票號碼 : </label>
+                </td>
+                <td>
+                    <input type="text" id="OAP0021_Insert_check_no" class="OAP0021DetailStatus"/>
+                </td>
+                <td>
+                    <input type="button" id="OAP0021_Insert" value="新增" class="btn btn-primary OAP0021DetailEdit"  style="display:none"/>
+                </td>
+            </tr>
+        </table>             
+    </div>
+    <div id="OAP0021SubjqgridDiv" class="jqd"  style="padding-bottom:5px; ">
+
+    </div>
+    <div style="text-align:center;">
+        <input type="button" id="OAP0021RECE" value="接收" class="btn btn-primary OAP0021DetailEdit" style="display:none;margin-right: 50px;"/>
+        <input type="button" id="OAP0021Reject" value="退回" class="btn btn-primary OAP0021DetailEdit" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OAP0021AD" value="補件" class="btn btn-primary OAP0021DetailEdit" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OAP0021APPRY" value="覆核" class="btn btn-primary OAP0021DetailAPPR" style="display:none;margin-right: 50px;"/>
+        <input type="button" id="OAP0021APPRN" value="駁回" class="btn btn-primary OAP0021DetailAPPR" style="display:none;margin-right: 50px;" />
+        <input type="button" id="OAP0021Back" value="取消" class="btn btn-primary" />
+    </div>
+    <div id="OAP0021OpenRejectDialog" style="display:none;overflow-y:auto;">
+        <table>
+            <tr>
+                <td style="width:130px;">
+                    <label>實體支票欄位 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OAP0021_check_flag", (SelectList)ViewBag.YN, new { @class = "OAP0021DetailStatus" })
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <label>退件原因 : </label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea id="OAP0021_rej_rsn" style="width:100%;" ></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="OAP0021RejectSuccess" value="確認退件" class="btn btn-primary" />
+                </td>
+                <td style="text-align:right;">
+                    <input type="button" id="OAP0021RejectCancel" value="取消" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div  id="OAP0021OpenDetailDialog" style="display:none;overflow-y:auto;">
+        <table>
+            <tr>
+                <td>
+                    <label>支票號碼 : </label>
+                </td>
+                <td style="width:300px">
+                    <label id="OAP0021check_no_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>金額 : </label>
+                </td>
+                <td>
+                    <label id="OAP0021amount_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>給付對象 : </label>
+                </td>
+                <td>
+                    <label id="OAP0021receiver_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>支票到期日 : </label>
+                </td>
+                <td>
+                    <label id="OAP0021check_date_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>支票狀態</label>
+                </td>
+                <td>
+                    <label id="OAP0021check_stat_D_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>系統註記</label>
+                </td>
+                <td>
+                    <label id="OAP0021system_D"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>註記 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OAP0021_mark_type2_D", (SelectList)ViewBag.MARK_TYPE)
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <label>新抬頭 : </label>
+                </td>
+                <td>
+                    <input type="text" id="OAP0021_new_head_D"/>
+                </td>
+                <td style="width:360px;">
+                    <label id="OAP0021_new_head_msg_D" style="color:red;"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="OAP0021_btnUpdate_Mod" value="修改" class="btn btn-primary" />
+                </td>
+                <td colspan="2" style="text-align:right;">
+                    <input type="button" id="OAP0021_btnCancel" value="取消" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="OAP0021OpenADDialog" style="display:none;overflow-y:auto;">
+        <table>
+            <tr>
+                <td colspan="2">
+                    <label>補件原因 : </label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea id="OAP0021_AD_memo" style="width:100%;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="OAP0021ADSuccess" value="確認補件" class="btn btn-primary" />
+                </td>
+                <td style="text-align:right;">
+                    <input type="button" id="OAP0021ADCancel" value="取消" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    $(function () {
+
+        var OAP0021Detailurl = {};
+        OAP0021Detailurl.getData = '@Url.Action("GetCacheData", "OAP0021")';
+        OAP0021Detailurl.deleteCheckNo = '@Url.Action("removeSubData", "OAP0021")';
+        OAP0021Detailurl.addCheckNo = '@Url.Action("addSubData", "OAP0021")';
+        OAP0021Detailurl.getSend_Name = '@Url.Action("changeSend_Id", "OAP0021")';
+        OAP0021Detailurl.APPR = '@Url.Action("OAP0021APPRByApply_no", "OAP0021A")';
+        OAP0021Detailurl.OAP0021RECE = '@Url.Action("OAP0021RECE", "OAP0021")';
+        OAP0021Detailurl.OAP0021REJ = '@Url.Action("OAP0021REJ", "OAP0021")';
+        OAP0021Detailurl.checkName = '@Url.Action("checkName", "OAP0021")';
+        OAP0021Detailurl.OAP0021AD = '@Url.Action("OAP0021AD", "OAP0021")';
+        OAP0021Detailurl.updateSubData = '@Url.Action("updateSubData", "OAP0021")';
+
+        var check_no_D = 'OAP0021check_no_D';
+        var amount_D = 'OAP0021amount_D';
+        var receiver_D = 'OAP0021receiver_D';
+        var check_date_D = 'OAP0021check_date_D';
+        var check_stat_D_D = 'OAP0021check_stat_D_D';
+        var system_D = 'OAP0021system_D';
+        var mark_type2_D = 'OAP0021_mark_type2_D';
+        var new_head_D = 'OAP0021_new_head_D';
+
+        var action = '@ViewBag.action';
+        var self = ('True' == '@ViewBag.self');
+        if (action == '@Ref.ActionType.View.ToString()')
+        {
+            if (!self)
+                $('.OAP0021DetailAPPR').show();
+            $('.OAP0021DetailStatus').prop('disabled', true);
+        }
+        else if (action == '@Ref.ActionType.Edit.ToString()')
+        {
+            $('.OAP0021DetailEdit').show();
+            $('.OAP0021DetailStatus').prop('disabled', false);
+        }
+
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'OAP0021RECE':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        OAP0021DetailEvent('OAP0021RECE')
+                    });
+                    break;
+                case 'OAP0021Reject':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        var dialogId = 'OAP0021OpenRejectDialog';
+                        $('#' + dialogId).dialog({
+                            position: { my: "top", at: "center top", of: window },
+                            title: '退回原因',
+                            width: '600px',
+                            autoOpen: false,
+                            resizable: false,
+                            maxHeight: 600,
+                            closeText: '取消',
+                            close: function () {
+                                $('#OAP0021_check_flag').val(' ');
+                                $('#OAP0021_rej_rsn').val('');
+                            }
+                        });
+                        $('#' + dialogId).dialog('open');
+                    });
+                    break;
+                case 'OAP0021APPRY':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        OAP0021DetailEvent('OAP0021APPRY')
+                    });
+                    break;
+                case 'OAP0021APPRN':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        OAP0021DetailEvent('OAP0021APPRN')
+                    });
+                    break;
+                case 'OAP0021Back':
+                case 'OAP0021RejectCancel':
+                case 'OAP0021ADCancel':
+                case 'OAP0021_btnCancel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        customerUtility.closeDialog(this);
+                    });
+                    break;
+                case 'OAP0021RejectSuccess':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        OAP0021DetailEvent('OAP0021RejectSuccess');
+                    });
+                    break;
+                case 'OAP0021ADSuccess':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        OAP0021DetailEvent('OAP0021ADSuccess');
+                    });
+                    break;
+                case 'OAP0021_Insert':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                check_no: $('#OAP0021_Insert_check_no').val()
+                            }),
+                            dataType: "json",
+                            url: OAP0021Detailurl.addCheckNo,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                OAP0021SubData();
+                            }
+                            else {
+                                alert(result.DESCRIPTION);
+                            }
+                            $.unblockUI(); //畫面打開
+                        })
+                    });
+                    break;
+                case 'OAP0021_btnUpdate_Mod':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                detailModel: OAP0021DetailSubModel(
+                                    $('#' + check_no_D).text(),
+                                    $('#' + mark_type2_D).val(),
+                                    $('#' + new_head_D).val()
+                                )
+                            }),
+                            dataType: "json",
+                            url: OAP0021Detailurl.updateSubData,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                OAP0021SubData();
+                                customerUtility.closeDialog($('#' + id));
+                            }
+                            else {
+                                alert(result.DESCRIPTION);
+                            }
+                            $.unblockUI(); //畫面打開
+                        })
+                    });
+                    break;
+                case 'OAP0021AD':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function(){
+                        var dialogId = 'OAP0021OpenADDialog';
+                        $('#' + dialogId).dialog({
+                            position: { my: "top", at: "center top", of: window },
+                            title: '補件原因',
+                            width: '600px',
+                            autoOpen: false,
+                            resizable: false,
+                            maxHeight: 600,
+                            closeText: '取消',
+                            close: function () {
+                            }
+                        });
+                        $('#' + dialogId).dialog('open');
+                    });
+                    break;
+            }
+        });
+
+        OAP0021SubData();
+
+        $('#OAP0021_mark_type2_D').on('change', function () {
+            var val = $(this).val();
+            if (val == '3' || val == '4' || val == '5') {
+                $('#OAP0021_new_head_msg_D').text('@ViewBag.Q33');
+            }
+            else {
+                $('#OAP0021_new_head_msg_D').text('');
+            }
+        });
+
+        $('#OAP0021_send_id').off('keyup')
+        $('#OAP0021_send_id').on('keyup', function () {
+            var val = $(this).val() || '';
+            val = val.trim();
+            if (val.length == 10) {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        id: val
+                    }),
+                    dataType: "json",
+                    url: OAP0021Detailurl.getSend_Name,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#OAP0021_send_id_D').text(result.Datas);
+                    }
+                    else {
+                        alert(result.DESCRIPTION);
+                    }                   
+                    $.unblockUI(); //畫面打開
+                })
+            }
+            else {
+                $('#OAP0021_send_id_D').text('');
+            }
+        });
+
+        function OAP0021SubData() {
+            var colNameArray = ['動作', '支票號碼', '金額', '給付對象', '支票到期日', '支票狀態', '系統註記', '註記', '新抬頭', '註記(value)'];
+            var colModelArray = [];       
+            colModelArray.push({ name: "act", index: "act", width: 60, sortable: false, hidden: (action == '@Ref.ActionType.View.ToString()') });
+            colModelArray.push({ name: "check_no", index: "check_no", width: 100, sortable: false, align: 'center' });
+            colModelArray.push({ name: "amount", index: "amount", width: 95, sortable: false, align: 'right' });
+            colModelArray.push({ name: "receiver", index: "receiver", width: 185, sortable: false });
+            colModelArray.push({ name: "check_date", index: "check_date", width: 90, sortable: false, align: 'center' });
+            colModelArray.push({ name: "check_stat_D", index: "check_stat_D", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "system", index: "system", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "mark_type2_D", index: "mark_type2_D", width: 120, sortable: false, align: 'center' });
+            colModelArray.push({ name: "new_head", index: "new_head", width: 130, sortable: false, align: 'left' });
+            colModelArray.push({ name: "mark_type2", index: "mark_type2", width: 110, hidden: true});
+            jqgridCustom.createJqgridByCache(
+                'OAP0021SubjqgridDiv',
+                'OAP0021SubTempList',
+                'OAP0021SubTempPeger',
+                OAP0021Detailurl.getData,
+                {
+                    type: "OAP0021SubData"
+                },
+                colNameArray,
+                colModelArray,
+                '支票明細資料',
+                jqgridCustom.getPage('OAP0021SubjqgridDiv'),
+                jqgridCustom.getRowNum('OAP0021SubjqgridDiv'),
+                OAP0021SubTempCompleteFun,
+                true,
+                '950px'
+                );
+        }
+
+        function OAP0021DetailEvent(type)
+        {
+            switch (type)
+            {
+                case 'OAP0021RECE':
+                    //if(($('#OAP0021_reg_yn').val().trim() || '') == '')
+                    //{
+                    //    alert('請選擇寄送保戶!');
+                    //    return false;
+                    //}
+                    $.blockUI(); //畫面鎖起來
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        url: OAP0021Detailurl.checkName,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        $.unblockUI(); //畫面打開
+                        if (!result.RETURN_FLAG && (result.DESCRIPTION || '') == '')
+                        {
+                            alert('系統有誤,請通知管理員!');
+                            return false;
+                        }
+                        if (!result.RETURN_FLAG && !confirm(result.DESCRIPTION)) {
+                            return false;
+                        }
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                detailModel: OAP0021DetailModel(
+                                    '@Model.apply_no',
+                                    $('#OAP0021_mark_rsn2').val(),
+                                    $('#OAP0021_mark_mth2').val(),
+                                    $('#OAP0021_send_id').val(),
+                                    null,//$('#OAP0021_reg_yn').val(),
+                                    null,
+                                    null,
+                                    $('#OAP0021_zip_code_id').val(), 
+                                    $('#OAP0021_addr_id').val(), 
+                                    $('#OAP0021_rcv_name_id').val(),
+                                    $('#OAP0021_tel_id').val(), 
+                                    null
+                                )
+                            }),
+                            dataType: "json",
+                            url: OAP0021Detailurl.OAP0021RECE,
+                            contentType: 'application/json',
+                        }).done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                customerUtility.closeDialog($('#OAP0021Back'));
+                            }
+                            alert(result.DESCRIPTION);
+                            $.unblockUI(); //畫面打開
+                        });
+                    });
+                    break;
+                case 'OAP0021RejectSuccess':
+                    if (($('#OAP0021_rej_rsn').val().trim() || '') == '') {
+                        alert('請填寫退件原因!');
+                        return false;
+                    }
+                    if(($('#OAP0021_check_flag').val().trim() || '') == '')
+                    {
+                        alert('請選擇實體支票欄位!');
+                        return false;
+                    }
+                    $.blockUI(); //畫面鎖起來
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            detailModel : OAP0021DetailModel(
+                                '@Model.apply_no',
+                                null,
+                                null,
+                                null,
+                                null,
+                                $('#OAP0021_rej_rsn').val(),
+                                $('#OAP0021_check_flag').val(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null
+                            )
+                        }),
+                        dataType: "json",
+                        url: OAP0021Detailurl.OAP0021REJ,
+                        contentType: 'application/json',
+                    }).done(function (result) {                      
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#OAP0021RejectCancel'));
+                            customerUtility.closeDialog($('#OAP0021Back'));
+
+                        }
+                        alert(result.DESCRIPTION);
+                        $.unblockUI(); //畫面打開
+                    });
+                    break;
+                case 'OAP0021ADSuccess':
+                    if (($('#OAP0021_AD_memo').val().trim() || '') == '') {
+                        alert('請填寫補件原因!');
+                        return false;
+                    }
+                    $.blockUI(); //畫面鎖起來
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            detailModel: OAP0021DetailModel(
+                                '@Model.apply_no',
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                $('#OAP0021_AD_memo').val()
+                            )
+                        }),
+                        dataType: "json",
+                        url: OAP0021Detailurl.OAP0021AD,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#OAP0021ADCancel'));
+                            customerUtility.closeDialog($('#OAP0021Back'));
+                        }
+                        alert(result.DESCRIPTION);
+                        $.unblockUI(); //畫面打開
+                    });
+                    break;
+                case 'OAP0021APPRY':
+                case 'OAP0021APPRN':
+                    $.blockUI(); //畫面鎖起來
+                    $.ajax({
+                        type: "POST",
+                        data: JSON.stringify({
+                            apply_no: '@Model.apply_no',
+                            flag: (type == 'OAP0021APPRY')
+                        }),
+                        dataType: "json",
+                        url: OAP0021Detailurl.APPR,
+                        contentType: 'application/json',
+                    }).done(function (result) {
+                        if (result.RETURN_FLAG) {
+                            customerUtility.closeDialog($('#OAP0021Back'));
+                        }
+                        alert(result.DESCRIPTION);
+                        $.unblockUI(); //畫面打開
+                    });
+                    break;
+            }
+        }
+
+        function OAP0021SubTempCompleteFun(listId) {
+            jqgridCustom.randerAction(listId, 'OAP0021SubTemp', tempActFun);
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {              
+                $(this).find('.actionViewIcon').hide();
+            });
+
+            if (action == '@Ref.ActionType.View.ToString()') {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('.actionDeleIcon').hide();
+                    $(this).find('.actionEditIcon').hide();
+                });
+            }
+        }
+
+        var tempActFun = {};
+        tempActFun.Edit = function (i) {
+            dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+        }
+        tempActFun.Dele = function (i) {
+            var check_no = $("#" + 'OAP0021SubTempList').getRowData(i).check_no;
+            if (confirm("請確認是要刪除 支票號碼:" + check_no + " 該筆支票?"))
+            {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        check_no: check_no
+                    }),
+                    dataType: "json",
+                    url: OAP0021Detailurl.deleteCheckNo,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        OAP0021SubData();
+                    }
+                    else {
+                        alert(result.DESCRIPTION);
+                    }
+                    $.unblockUI(); //畫面打開
+                })
+            }
+        }
+        tempActFun.View = function (i) {
+
+        }
+
+        //#region dialog open
+        function dialogOpen(type, rowid) {
+            var dialogId = 'OAP0021OpenDetailDialog';
+            var listId = 'OAP0021SubTempList';
+            var title = customerUtility.getDialogType(type);
+            $('#' + dialogId).dialog({
+                position: { my: "top+20%", at: "center top", of: window },
+                title: title + '支票明細資料',
+                width: 'auto',
+                autoOpen: false,
+                resizable: false,
+                closeText: '取消',
+                close: function (event, ui) {
+                    customerUtility.closeDialog(this);
+                }
+            });
+            ResetDialog();
+
+            $('#OAP0021_btnUpdate_Mod').hide();
+            if (type == '@Ref.ActionType.Edit.ToString()') {
+                dialogSetData(listId, rowid);
+                $('#OAP0021_btnUpdate_Mod').show();
+            }
+            $('#' + dialogId).dialog('open');
+        }
+
+        function ResetDialog() {
+            if ($('#' + mark_type2_D + ' option').length > 0) {
+                $('#' + mark_type2_D).val($($('#' + mark_type2_D + ' option')[0]).val());
+            }
+            $('#' + check_no_D).text('');
+            $('#' + amount_D).text('');
+            $('#' + receiver_D).text('');
+            $('#' + check_date_D).text('');
+            $('#' + check_stat_D_D).text('');
+            $('#' + system_D).text('');
+            $('#' + new_head_D).val('');
+            $('#OAP0021_new_head_msg_D').text('');
+        }
+        //#endregion
+
+        //#region Dialog Set Data
+        function dialogSetData(listId, rowid) {
+            listId = listId || '';
+            rowid = rowid || 0;
+
+            if (rowid > 0) {
+                var data = $("#" + listId).getRowData(rowid);
+                $('#' + check_no_D).text(data.check_no);
+                $('#' + amount_D).text(data.amount);
+                $('#' + receiver_D).text(data.receiver);
+                $('#' + check_date_D).text(data.check_date);
+                $('#' + check_stat_D_D).text(data.check_stat_D);
+                $('#' + system_D).text(data.system);
+                $('#' + mark_type2_D).val(data.mark_type2).change();
+                $('#' + new_head_D).val(data.new_head);
+            }
+        }
+        //#endregion
+
+        function OAP0021DetailModel(
+            apply_no,
+            mark_rsn2,
+            mark_mth2,
+            send_id,
+            reg_yn,
+            rej_rsn,
+            check_flag,
+            zip_code,
+            addr,
+            rcv_name,
+            tel,
+            add_rsn
+            ) {
+            var obj = {};
+            obj['apply_no'] = apply_no;
+            obj['mark_rsn2'] = mark_rsn2;
+            obj['mark_mth2'] = mark_mth2;
+            obj['send_id'] = send_id;
+            obj['reg_yn'] = reg_yn;
+            obj['rej_rsn'] = rej_rsn;
+            obj['check_flag'] = check_flag;
+            obj['zip_code'] = zip_code;
+            obj['addr'] = addr;
+            obj['rcv_name'] = rcv_name;
+            obj['tel'] = tel;
+            obj['add_rsn'] = add_rsn;
+            return obj;
+        }
+
+        function OAP0021DetailSubModel(
+            check_no,
+            mark_type2,
+            new_head
+            ){
+            var obj = {};
+            obj['check_no'] = check_no;
+            obj['mark_type2'] = mark_type2;
+            obj['new_head'] = new_head;
+            return obj;
+        }
+    })
+</script>

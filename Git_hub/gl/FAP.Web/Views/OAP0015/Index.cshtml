@@ -1,0 +1,255 @@
+﻿@model FAP.Web.ViewModels.OAP0015Model
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+                                    @if (opScope != "" && opScope != "0")
+            {
+
+                                        <table class="table table-bordered">
+                                            <tr>
+                                                <td>
+                                                    保局範圍
+                                                </td>
+                                                <td>
+                                                    <table id="fscRangeList">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td colspan="4">
+                                                                    <input name="chkFsc" id="fsc_chkALL" type="checkbox"> 全選
+                                                                    </td>
+                                                                <tr>
+                                                            @{
+                                                                int fscTotal = 0;
+                                                            }
+                                                            @foreach (var item in Model.fscRangeList)
+                                                            {
+                                                                if (fscTotal % 4 == 0)
+                                                                {
+                                                                    @: <tr>
+                                                                        }
+
+                                                                        <td>
+                                                                            <input id="fsc_chk@(item.code_id)"
+                                                                                   name="chkFsc"
+                                                                                   type="checkbox"
+                                                                                   value="@item.code_id"
+                                                                                   onclick="fscOnClick()" />
+                                                                            @item.code_value
+                                                                        </td>
+
+                                                                        if ((fscTotal + 1) % 4 == 0)
+                                                                        {
+                                                                        @:</tr>
+                                                                }
+                                                                fscTotal++;
+                                                            }
+
+                                                            </tbody>
+                                                        </table>
+                                    
+                                    
+
+                        </td>
+</tr>
+                                            <tr>
+                                                <td>清理狀態
+                                                    </td>
+                                                <td>
+                                                    <input id="status_chk2" name="chkStatus" type="checkbox" value="2" />已清理結案
+                                                    <input id="status_chk3" name="chkStatus" type="checkbox" value="3" />已通知尚未給付
+                                                    <input id="status_chk4" name="chkStatus" type="checkbox" value="4" />尚未通知
+                                                </td>
+                                            <tr>
+                                                <td>統計截止區間
+                                                    </td>
+                                                <td>
+                                                    <input id="date_e" name="date_e" type="text">
+                                                    </td>
+
+</tr>
+            
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="匯出" class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    function fscOnClick() {
+        $("#fsc_chkALL").prop("checked", false);
+    }
+
+    
+
+    //"保局範圍"的全選/全不選
+    $("#fsc_chkALL").click(function() {
+        if($("#fsc_chkALL").prop("checked")) {
+            $("input[name='chkFsc']").each(function () {
+                $(this).prop("checked", true);
+            });
+        } else {
+            $("input[name='chkFsc']").each(function () {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+
+
+    
+
+    $(function () {
+
+
+        $('#date_e').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            $('#btnPrint').attr('disabled', true);
+
+        }
+
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            recList = [];
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            
+            var bPass = true;
+
+            //取得有勾選的"保局範圍"
+            var rFsc = document.getElementsByName("chkFsc");
+            var fsc_range = "";
+            for (var i = 0; i < rFsc.length; i++) {
+                if (rFsc[i].checked) 
+                    fsc_range = fsc_range + rFsc[i].value + '|';
+            }
+
+            if (fsc_range == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請勾選一個以上的「保局範圍」!!' + '</li>');
+            } 
+
+
+            //取得有勾選的"清理狀態"
+            var rStatus = document.getElementsByName("chkStatus");
+            var status = "";
+            for (var i = 0; i < rStatus.length; i++) {
+                if (rStatus[i].checked)
+                    status = status + rStatus[i].value + '|';
+            }
+            if (status == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請勾選一個以上的「清理狀態」!!' + '</li>');
+            } 
+
+
+
+
+
+            //檢核"統計截止區間"
+            if ($("#date_e").val().length == 0) {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入「統計截止迄日期」!!' + '</li>');
+            }
+
+
+            if (!bPass)
+                return;
+
+
+            var jsonData = JSON.stringify({
+                'fsc_range': fsc_range
+                , 'date_e': $("#date_e").val()
+                , 'status': status
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execExport", "OAP0015")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        var url = '/OAP0015/downloadRpt?id=' + data.guid;
+
+                        window.location = url;
+
+                    } else {  
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+    });
+</script>
+
+

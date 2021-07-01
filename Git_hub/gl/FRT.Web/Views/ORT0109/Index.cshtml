@@ -1,0 +1,481 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+}
+@using FRT.Web.Enum;
+@using FRT.Web.BO;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="ORT0109s_Form">
+                    <table>
+                        <tr>
+                            <td style="width:100px">
+                                <label >
+                                    帳號 : 
+                                </label>
+                            </td>
+                            <td>
+                                <input type="text" id="ORT0109_s_bank_acct_no"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="ORT0109_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="ShowOrNot">
+        <div style="padding-bottom:5px;">
+            <input type="button" id="ORT0109_Insert" value="新增" class="btn btn-primary" />
+        </div>
+        <div class="col-sm-24">
+            <div id="ORT0109_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div style="text-align:center;" class="Customer_Act">
+            <input type="button" id="ORT0109_Apply" value="申請覆核" class="btn btn-primary" />
+            <input type="button" id="ORT0109_Cancel" value="取消申請" class="btn btn-primary" />
+        </div>
+    </div>
+    <div id="ORT0109_Dialog" style="display:none;">
+        <form id="ORT0109_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>帳號 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="ORT0109_bank_acct_no" />
+                    </td>
+                </tr>
+                @*<tr>
+                    <td>
+                        <label>銀行簡稱 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="ORT0109_bank_acct_make_out" />
+                    </td>
+                </tr>*@
+                <tr>
+                    <td>
+                        <input type="button" id="ORT0109_btnInsert_Mod" value="新增" class="btn btn-primary" />
+                        <input type="button" id="ORT0109_btnDelete_Mod" value="刪除" class="btn btn-primary" />
+                        <input type="hidden" id="ORT0109_hPk_id" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="ORT0109_btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.search = '@Url.Action("qryORT0109", "ORT0109")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "ORT0109")';
+        UrlFor.InsertData = '@Url.Action("updateORT0109", "ORT0109")';
+        UrlFor.DeleteData = '@Url.Action("updateORT0109", "ORT0109")';
+        UrlFor.ResetData = '@Url.Action("ResetData", "ORT0109")';
+        UrlFor.ApplyData = '@Url.Action("ApplyData", "ORT0109")';
+        //#endregion
+
+        //#region 參數設定
+        var ORT0109_bank_acct_no_id = 'ORT0109_bank_acct_no'; //帳號ID
+        var ORT0109_bank_acct_make_out_id = 'ORT0109_bank_acct_make_out'; //銀行簡稱 
+        var ORT0109_hPk_id = 'ORT0109_hPk_id'; 
+
+        var ORT0109_FormId = 'ORT0109_DialogForm';
+
+
+        var _ConfirmFlag = false; //離開時提醒訊息
+        //#endregion
+
+        function set_Verified() {
+            //verified.required(ORT0109_FormId, ORT0109_reason_code_d_id, message.required('原因代碼'));
+            //verified.required(ORT0109_FormId, ORT0109_reason_d_id, message.required('原因中文'));
+        }
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始動作
+            set_Verified();
+            $('.ShowOrNot').hide();
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'ORT0109_Search':
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'ORT0109_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ORT0109_InsertFun(); });
+                        break;
+                    case 'ORT0109_btnInsert_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { InsertDataFun(); });
+                        break;
+                    case 'ORT0109_btnDelete_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { DeleteDataFun(); });
+                        break;
+                    case 'ORT0109_Apply':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApplyDataFun(); });
+                        break;
+                    case 'ORT0109_Cancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if (_ConfirmFlag && !confirm('@Ref.MessageType.application_Audit_Confirm.GetDescription()')) {
+                                return false;
+                            }
+                            _ConfirmFlag = false;
+                            ORT0109_CancelFun();
+                        });
+                        break;
+                    case 'ORT0109_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+
+            //#endregion
+
+            //#region 申請覆核
+            function ApplyDataFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        bank_acct_no : ($('#ORT0109_s_bank_acct_no').val() || '').trim()
+                    }),
+                    url: UrlFor.ApplyData,
+                    contentType: 'application/json',
+                }).done(function (result) {                    
+                    if (result.RETURN_FLAG) {
+                        ORT0109_SearchGrid();
+                        customerUtility.alertAuto(result);
+                    }
+                    else {
+                        alert(result.DESCRIPTION);
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 取消申請
+            function ORT0109_CancelFun() {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                        ResetDialog();
+                        ORT0109_SearchGrid();
+                });
+            }
+            //#endregion
+
+            function ORT0109_InsertFun() {
+                dialogOpen('@Ref.ActionType.Add.ToString()', null);
+            }
+
+
+            //#region 新增
+    
+            function InsertDataFun() {
+                $('#validationSummary').children().remove();
+                //$('#' + ORT0109_FormId).validate().resetForm();
+                if (!$('#' + ORT0109_FormId).valid()) {
+                    return false;
+                }
+                var ORT0109_bank_acct_no_val = ($('#' + ORT0109_bank_acct_no_id).val()||'').trim();
+
+                if (ORT0109_bank_acct_no_val == '') {
+                    alert('帳號必輸入!');
+                    return false;
+                }
+
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: ORT0109ViewModel(
+                            'A' + created.uuid(),
+                            'A',
+                            ORT0109_bank_acct_no_val
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.InsertData,
+                    contentType: 'application/json',
+                }).done(function (result) {                 
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0109_btnInsert_Mod'));
+                        ORT0109_SearchGrid();
+                        _ConfirmFlag = true;
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 刪除
+            function DeleteDataFun() {
+                $('#validationSummary').children().remove();
+                var ORT0109_hPk_val = $('#' + ORT0109_hPk_id).val().trim(); 
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        viewModel: ORT0109ViewModel(
+                            ORT0109_hPk_val,
+                            'D'
+                            )
+                    }),
+                    dataType: "json",
+                    url: UrlFor.DeleteData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#ORT0109_btnDelete_Mod'));
+                        ORT0109_SearchGrid();
+                        _ConfirmFlag = true;
+
+                    } else {
+                        alert(result.DESCRIPTION);
+                        //customerUtility.alertAuto(result,'a');
+                        //var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //if (validationSummary.length == 0) {
+                        //    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        //    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        //}
+                        //validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('ORT0109_jqgridDiv');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        bank_acct_no : ($('#ORT0109_s_bank_acct_no').val() || '').trim()
+                    }),
+                    dataType: "json",
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    //$('#' + dialogId).dialog('open');
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        ORT0109_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 查詢Grid
+            function ORT0109_SearchGrid() {
+                var colNameArray = ['動作', '執行功能', '資料狀態', '帳號', '銀行簡稱', '建立人員', '建立時間','最後異動人員','最後異動日期','覆核人員', '覆核時間',
+                    '執行功能代碼', '資料狀態代碼','pkid'];
+                var colModelArray = [];
+                colModelArray.push({ name: "act", index: "act", width: 85, sortable: false });
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "data_status_value", index: "data_status_value", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "bank_acct_no", index: "bank_acct_no", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "bank_acct_make_out", index: "bank_acct_make_out", width: 220, sortable: false, align: 'center' });              
+                colModelArray.push({ name: "create_name", index: "create_name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_name", index: "update_name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_datetime", index: "update_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_name", index: "appr_name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_datetime", index: "appr_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "exec_action", index: "exec_action", hidden: true });
+                colModelArray.push({ name: "data_status", index: "data_status", hidden: true });
+                colModelArray.push({ name: "pk_id", index: "pk_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'ORT0109_jqgridDiv',
+                'ORT0109_SearchList',
+                'ORT0109_SearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'ORT0109Model'
+                },
+                colNameArray,
+                colModelArray,
+                '銀存銷帳不比對帳號維護檔',
+                jqgridCustom.getPage('ORT0109_jqgridDiv'),
+                jqgridCustom.getRowNum('ORT0109_jqgridDiv'),
+                ORT0109_CompleteFun,
+                true
+                );
+            }
+            //#endregion
+
+
+            //#region jqgrid 事件
+            function ORT0109_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'ORT0109_Search', ORT0109ActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var status = tr.find($.validator.format('td[aria-describedby$={0}_data_status]', listId)).text();
+                    //var Is_Disabled = tr.find($.validator.format('td[aria-describedby$={0}_vIS_DISABLED]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_exec_action]', listId)).text();
+                    $(this).find('.actionEditIcon').hide(); //不提供修改功能
+                    if (status == '2') { //資料異動中不能刪除
+                        $(this).find('.actionDeleIcon').hide();
+                    }
+                });
+                //ORT0109_SearchSubGrid();
+            }
+
+            var ORT0109ActFun = {};
+            ORT0109ActFun.Edit = function (i) {
+
+            }
+            ORT0109ActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            ORT0109ActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#endregion
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                //$('#' + ORT0109_FormId).validate().resetForm();
+                var dialogId = 'ORT0109_Dialog';
+                var listId = 'ORT0109_SearchList';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    //position: { my: "top+20%", at: "center top", of: window },
+                    position: { my: "top", at: "center top", of: window },
+                    title: title + '銀存銷帳不比對帳號',
+                    width: '850px',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                $('#' + dialogId).dialog('open');
+                ResetDialog();
+                //$('#' + ORT0109_FormId).validate().resetForm();
+                var data = $("#" + listId).getRowData(rowid);
+                $('#' + ORT0109_hPk_id).val(data.check_id);    
+                $('#ORT0109_btnInsert_Mod,#ORT0109_btnDelete_Mod').hide();
+                if (type == '@Ref.ActionType.Add.ToString()') {                  
+                    $('#' + ORT0109_bank_acct_no_id).prop('disabled', false);
+                    $('#ORT0109_btnInsert_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.Edit.ToString()') {      
+
+                }
+                else if (type == '@Ref.ActionType.Dele.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#ORT0109_btnDelete_Mod').show();
+                }
+                else if (type == '@Ref.ActionType.View.ToString()') {
+                    dialogSetData(listId, rowid);
+                }    
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#' + ORT0109_hPk_id).val(data.pk_id);              
+                    $('#' + ORT0109_bank_acct_no_id).val(data.bank_acct_no);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetDialog() {
+                 $('#' + ORT0109_hPk_id).val('');               
+                 $('#' + ORT0109_bank_acct_no_id).val('');
+                 $('#' + ORT0109_bank_acct_no_id).prop('disabled', true);
+            }
+            //#endregion
+
+            //#region ORT0109ViewModel
+            function ORT0109ViewModel(
+                pk_id,
+                exec_action,
+                bank_acct_no
+                //,bank_acct_make_out
+                ) {
+                var obj = {};
+                obj['pk_id'] = pk_id;
+                obj['exec_action'] = exec_action;
+                obj['bank_acct_no'] = bank_acct_no;
+                //obj['bank_acct_make_out'] = bank_acct_make_out;
+                return obj;
+            }
+            //#endregion
+
+        }
+    });
+</script>

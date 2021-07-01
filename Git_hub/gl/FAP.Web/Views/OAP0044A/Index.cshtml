@@ -1,0 +1,412 @@
+﻿@model FAP.Web.ViewModels.OAP0044Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidOPaidCd", "")
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //取得"給付性質"下拉選單
+    function getOPaidCd() {
+        return $('#hidOPaidCd').val();
+    }
+
+
+
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+
+            if (valueRec == "True")
+                recList.push(rowId);
+            else if (index >= 0)
+                recList.splice(index, 1);
+
+        }
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+
+            if (valueRtn == "True")
+                rtnList.push(rowId);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+
+
+    //*--------------查詢待覆核資料  begin-----------------*//
+    function createGrid(bClearMsg) {
+
+        recList = [];
+        rtnList = [];
+        $('#qryResult').children().remove();
+
+        $('#qryResult').append('<table id="' + "grid" + '"></table>');
+        $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+        $.blockUI(); //畫面鎖起來
+
+        //var para = {
+        //    code_type: $('#code_type').val()
+        //};
+
+        $("#grid").jqGrid({
+            url: '/OAP0044A/LoadData/',
+            //postData: para,
+            datatype: 'json',
+            jsonReader: {
+                repeatitems: false, id: 'temp_id'
+            },
+            mtype: 'POST',
+            colModel: [
+                {
+                    label: '核可',
+                    name: 'rec', index: 'rec', align: 'center', width: '60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                    cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                        return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                    }, editoptions: { value: "True:False" }
+                },
+                {
+                    label: '駁回',
+                    name: 'rtn', index: 'rtn', align: 'center', width: '60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                    cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                        return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                    }, editoptions: { value: "True:False" }
+                },
+                { label: '申請單號', name: 'aply_no', align: 'center', hidden: true },
+
+                {
+                    label: 'temp_id',
+                    name: 'temp_id', align: 'center', width: '120', editable: false, align: 'center', hidden: true
+                },
+                {
+                    label: '申請人員',
+                    name: 'update_id', align: 'center', width: '100', editable: false, align: 'center', hidden: true
+                },
+                {
+                    label: '申請人員姓名',
+                    name: 'update_name', align: 'center', width: '100', editable: false, align: 'center'
+                },
+                { label: '申請日期', name: 'update_datetime', align: 'center', hidden: true },
+
+                {
+                    label: '原派件人員',
+                    name: 'tel_interview_id_o', align: 'center', width: '120', editable: false, align: 'center'
+                },
+                {
+                    label: '新派件人員',
+                    name: 'tel_interview_id', align: 'center', width: '120', editable: false, align: 'center', hidden: true
+                },
+                {
+                    label: '新派件人員',
+                    name: 'tel_interview_name', align: 'center', width: '100', editable: false, align: 'center'
+                },
+                {
+                    label: '派件日期',
+                    name: 'dispatch_date', align: 'center', width: '100', editable: false, align: 'center'
+                },
+                {
+                    label: '系統別',
+                    name: 'system', align: 'center', width: '60', editable: false, align: 'center'
+                },
+                {
+                    label: '支票號碼',
+                    name: 'check_no', align: 'center', width: '120', editable: false, align: 'center'
+                },
+                {
+                    label: '支票帳號簡稱',
+                    name: 'check_acct_short', align: 'center', width: '100', editable: false
+                },
+                {
+                    label: '支票到期日',
+                    name: 'check_date', align: 'center', width: '100', editable: false
+                },
+                {
+                    label: '支票金額',
+                    name: 'check_amt', align: 'right', width: '100',
+                    editable: false,
+                    formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                },
+                {
+                    label: '給付性質',
+                    name: 'o_paid_cd', align: 'center', editable: false, width: '80',
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getOPaidCd()
+                    }
+                },
+                {
+                    label: '給付對象ID',
+                    name: 'paid_id', align: 'center', width: '120', editable: false, align: 'center'
+                },
+                {
+                    label: '給付對象姓名',
+                    name: 'paid_name', align: 'center', width: '100', editable: false, align: 'center'
+                }
+            ],
+            autowidth: true,
+            shrinkToFit: false,
+            forceFit: true,
+            pager: '#pager',
+            width: 'auto',
+            height: 'auto',
+            rowNum: 25,
+            rowList: [10, 25, 50],
+            //sortname: 'temp_id',
+            //sortorder: "acs",
+            viewrecords: true,
+            loadonce: true,
+            loadComplete: function (data) {
+                var cnt = $('#grid').getGridParam('records')
+
+                if (bClearMsg)
+                    $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    if (bClearMsg & cnt == 0)
+                        validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                } else {
+    if (!data.success && cnt == 0)
+                    validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+    }
+
+
+
+                //還原畫面有勾選的資料
+                ids = $(this).jqGrid('getDataIDs');
+
+                for (j = 0; j <= ids.length - 1; j++) {
+                    rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                    for (i = 0, count = recList.length; i < count; i++) {
+                        if (rowData.temp_id == recList[i])
+                            $("#grid").jqGrid("setCell", rowData.temp_id, "rec", "True");
+                    }
+
+                    for (i = 0, count = rtnList.length; i < count; i++) {
+                        if (rowData.code_id == rtnList[i])
+                            $("#grid").jqGrid("setCell", rowData.temp_id, "rtn", "True");
+                    }
+                }
+            }
+
+        });
+
+        $.unblockUI(); //畫面打開
+    }
+
+    //*--------------查詢待覆核資料  end-----------------*//
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            $('#hidOPaidCd').val('@Html.Raw(ViewBag.oPaidCdjqList)');
+            createGrid();
+        }
+
+
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.temp_id == recList[i]) {
+                                recData.push({
+                                    'temp_id': rowData.temp_id,
+                                    'aply_no': rowData.aply_no,
+                                    'paid_id': rowData.paid_id,
+                                    'check_no': rowData.check_no,
+                                    'tel_interview_id': rowData.tel_interview_id,
+                                    'update_id': rowData.update_id,
+                                    'update_datetime': rowData.update_datetime,
+                                    'dispatch_date': rowData.dispatch_date
+                                });
+                                //recData.push(rowData);
+                            }
+
+                        }
+                    } else {
+                        recData = null;
+                    }
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.temp_id == rtnList[i]) {
+
+                                rtnData.push({
+                                    'temp_id': rowData.temp_id,
+                                    'aply_no': rowData.aply_no,
+                                    'paid_id': rowData.paid_id,
+                                    'check_no': rowData.check_no,
+                                    'tel_interview_id': rowData.tel_interview_id,
+                                    'update_id': rowData.update_id,
+                                    'update_datetime': rowData.update_datetime
+                                });
+
+                                //rtnData.push(rowData);
+                            }
+
+                        }
+                    } else {
+                        rtnData = null;
+                    }
+
+                }
+
+
+
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "OAP0044A")",
+                    data: JSON.stringify({ 'recData': recData, 'rtnData': rtnData }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        recList = [];
+                        rtnList = [];
+
+                        validationSummary.append('<li>作業成功！</li>');
+
+                        createGrid(false);
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+            });
+
+
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+
+
+    });
+</script>
+
+

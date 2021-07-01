@@ -1,0 +1,275 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="O19_Form">
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                <label>異動日期&ensp;:&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" class="" autocomplete="off" id="Update_DateTime_B" name="Update_DateTime_B" />
+                                <label>&ensp;至&ensp;</label>
+                                <input type="text" class="" autocomplete="off" id="Update_DateTime_E" name="Update_DateTime_E" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="100px">
+                                <label>覆核單位 :&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" id="t19_appr" name="t19_appr" maxlength="5" />
+                                <label id="l19_appr" name="l19_appr"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="100px">
+                                <label>承辦單位 :&ensp;</label>
+                            </td>
+                            <td>
+                                <input type="text" id="t19_user" name="t19_user" maxlength="5" />
+                                <label id="l19_user" name="l19_user"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="center">
+                                <input type="button" class="btn btn-primary" id="O19_Search" value="查詢" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="col-sm-24">
+        <div id="O19_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+    </div>
+</div>
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("SearchData", "OAP0019")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "OAP0019")';
+        UrlFor.GetDeptName = '@Url.Action("GetDeptNameData", "OAP0019")';
+        //#endregion
+
+        //region 參數設定
+        var t19_appr_id = 't19_appr';
+        var l19_appr_id = 'l19_appr';
+        var t19_user_id = 't19_user';
+        var l19_user_id = 'l19_user';
+        var Update_DateTime_B_Id = 'Update_DateTime_B';
+        var Update_DateTime_E_Id = 'Update_DateTime_E';
+
+        var isGroupHeaders = true;//合併欄位
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        } else {
+            //#region 初始動作
+            $('#Update_DateTime_B').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+
+            $('#Update_DateTime_E').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'O19_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                }
+            });
+
+            $('input:text').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 't19_appr':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + t19_appr_id).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + t19_appr_id).val();
+                                getDeptName(DeptId, 'A');  //A = 覆核單位(查詢)
+                            } else {
+                                $('#' + l19_appr_id).text('');
+                            }
+                        });
+                        break;
+                    case 't19_user':
+                        $('#' + id).off('keyup');
+                        $('#' + id).on('keyup', function () {
+                            var cLength = $('#' + t19_user_id).val().length;
+                            if (cLength == 5) {
+                                var DeptId = $('#' + t19_user_id).val();
+                                getDeptName(DeptId, 'U');  //U = 承辦單位(查詢)
+                            } else {
+                                $('#' + l19_user_id).text('');
+                            }
+                        });
+                        break;
+                }
+            });
+            //#endregion
+
+            //#region 取部門名稱
+            function getDeptName(deptId, swithType) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        deptId: deptId
+                    }),
+                    dataType: "json",
+                    url: UrlFor.GetDeptName,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result != '' || result != null) {
+                        if (swithType == 'A')
+                            $('#' + l19_appr_id).text(result);
+
+                        if (swithType == 'U')
+                            $('#' + l19_user_id).text(result);
+                    }
+                    else {
+                        if (swithType == 'A')
+                            $('#' + l19_appr_id).text('');
+
+                        if (swithType == 'U')
+                            $('#' + l19_user_id).text('');
+                    }
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: O19SearchViewModel(
+                            $('#' + Update_DateTime_B_Id).val(),
+                            $('#' + Update_DateTime_E_Id).val(),
+                            $('#' + t19_appr_id).val(),
+                            $('#' + t19_user_id).val())
+                    }),
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    //$('#' + dialogId).dialog('open');
+                    if (result.RETURN_FLAG) {
+                        O19_SearchGrid();
+                    }
+                    else {
+                        $('#validationSummary').children().remove();
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+            //#endregion
+
+            function  O19_SearchGrid() {
+                var colNameArray = [
+               //'修改前', '修改後', '修改前', '修改後', '修改前', '修改後', '修改前', '修改後',
+               '執行功能', '功能', '覆核單位', '承辦單位', '備註說明',
+               '異動人員', '異動時間', '覆核人員', '覆核時間'
+                ];
+                colModelArray = [];
+                colModelArray.push({ name: "exec_action_value", index: "exec_action_value", width: 65, sortable: false, align: 'center' });
+                //colModelArray.push({ name: "fun_value_before", index: "fun_value_before", width: 210, sortable: false, align: 'center' });
+                colModelArray.push({ name: "fun_value", index: "fun_value", width: 210, sortable: false, align: 'center' });
+                
+                //colModelArray.push({ name: "appr_unit_name_before", index: "appr_unit_name_before", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_unit_name", index: "appr_unit_name", width: 210, sortable: false, align: 'left' });
+
+                //colModelArray.push({ name: "user_unit_name_before", index: "user_unit_name_before", width: 200, sortable: false, align: 'center' });
+                colModelArray.push({ name: "user_unit_name", index: "user_unit_name", width: 210, sortable: false, align: 'left' });
+                
+                //colModelArray.push({ name: "memo_before", index: "memo_before", width: 160, sortable: false, align: 'center' });
+                colModelArray.push({ name: "memo", index: "memo", width: 160, sortable: false, align: 'left' });
+                
+                colModelArray.push({ name: "apply_name", index: "apply_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "apply_time", index: "apply_time", width: 150, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_name", index: "appr_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_time", index: "appr_time", width: 150, sortable: false, align: 'center' });
+                jqgridCustom.createJqgridByCache(
+              'O19_jqgridDiv',
+              'O19_SearchList',
+              'O19_SearchPager',
+              UrlFor.GetData,
+              {
+                  type: 'Search'
+              },
+              colNameArray,
+              colModelArray,
+              '查詢列表',
+              jqgridCustom.getPage('O19_jqgridDiv'),
+              jqgridCustom.getRowNum('O19_jqgridDiv'),
+              O19_CompleteFun,
+              true
+              );
+            }
+
+            function O19_CompleteFun(listId) {
+            //    if (isGroupHeaders) {
+            //        jQuery('#' + listId).jqGrid('setGroupHeaders', {
+            //            useColSpanStyle: true,
+            //            groupHeaders: [
+            //                { startColumnName: 'fun_value_before', numberOfColumns: 2, titleText: '功能' },
+            //                { startColumnName: 'appr_unit_name_before', numberOfColumns: 2, titleText: '覆核單位' },
+            //                { startColumnName: 'user_unit_name_before', numberOfColumns: 2, titleText: '承辦單位' },
+            //                { startColumnName: 'memo_before', numberOfColumns: 2, titleText: '備註說明' }
+            //            ]
+            //        });
+            //        isGroupHeaders = false;
+            //    }
+            }
+
+            //#region 查詢畫面  ViewModel
+            function O19SearchViewModel(update_time_start, update_time_end, appr_unit, user_unit) {
+                var obj = {};
+                obj['update_time_start'] = update_time_start;
+                obj['update_time_end'] = update_time_end;
+                obj['appr_unit'] = appr_unit;
+                obj['user_unit'] = user_unit;
+
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

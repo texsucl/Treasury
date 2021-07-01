@@ -1,0 +1,252 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <div>
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                性質 :
+                            </td>
+                            <td>
+                                @Html.DropDownList("ORT0107_cross_system", (SelectList)ViewBag.cross_system)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                日期 :
+                            </td>
+                            <td>
+                                <input id="ORT0107_s" name="ORT0107_s" type="text">
+                                ~
+                                <input id="ORT0107_e" name="ORT0107_e" type="text">
+                            </td>
+                        </tr>
+                        <tr id="ORT0107_deadline_tr" style="display:none;" >
+                            <td>
+                                未銷帳截止日 :
+                            </td>
+                            <td>
+                                <input id="ORT0107_deadline" name="ORT0107_deadline" type="text">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                執行狀態 :
+                            </td>
+                            <td>
+                                <label id="ORT0107RunCheck"></label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnReport" name="btnReport" value="執行報表" class="btn btn-primary" disabled/>
+                    </div>
+                </div>              
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+$(function () {
+    var ORT0107url = {};
+    ORT0107url.GetDetail = '@Url.Action("GetDetail", "ORT0107")';
+    ORT0107url.GetReport = '@Url.Action("GetReport", "ORT0107")';
+    ORT0107url.GetCacheReport = '@Url.Action("GetReportByCacheData", "Report")';
+
+    var opScope = '@Html.Raw(ViewBag.opScope)';
+    if (opScope == "" || opScope == "0") {
+        $('#validationSummary').children().remove();
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+        validationSummary.append('<li>' + '無使用權限' + '</li>');
+    } else {
+        $('#ORT0107_s').datepicker();
+        $('#ORT0107_e').datepicker();
+        $('#ORT0107_deadline').datepicker();
+        $('#ORT0107_cross_system').on('change', function () {
+            $('#ORT0107RunCheck').text('');
+            $('#ORT0107_s').val('');
+            $('#ORT0107_e').val('');
+            $('#ORT0107_deadline').val('');
+            $('#btnReport').prop('disabled', (($(this).val() || '') == ''))
+            var _pars = $('#ORT0107_cross_system').val().split('_');
+            var _val = '';
+            if (_pars.length > 2) {
+                _val = _pars[0] + _pars[1];
+            }
+            if (_val == 'BD2') {
+                $('#ORT0107_deadline_tr').show();
+            }
+            else {
+                $('#ORT0107_deadline_tr').hide();
+            }
+            $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                check_id: $('#ORT0107_cross_system').val()
+            }),
+            dataType: "json",
+            url: ORT0107url.GetDetail,
+            contentType: 'application/json',
+            }).done(function (result) {
+            if (result.RETURN_FLAG) {
+                $('#ORT0107_s').val(result.Datas.date_s);
+                $('#ORT0107_e').val(result.Datas.date_e);
+                if (_val == 'BD2') {
+                     $('#ORT0107_deadline').val(result.Datas.date_e);
+                }
+                var _runFlag = result.Datas.runFlag;
+                if (_runFlag == 'Y') {
+                     $('#ORT0107RunCheck').text('執行中');
+                }
+                else {
+                     $('#ORT0107RunCheck').text('未執行');
+                }
+            }
+            //else {
+            //    $('#validationSummary ul.validation-summary-errors').append('<li>' + result.DESCRIPTION + '</li>');
+            //}
+                $.unblockUI(); //畫面打開
+            });      
+        });
+    }
+
+
+    $('#btnReport').on('click', function () {
+        $('#validationSummary').children().remove();
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+
+
+        if (verified.isDate($('#ORT0107_s').val()) && verified.isDate($('#ORT0107_e').val())) {
+                    $.blockUI(); //畫面鎖起來
+        var _model = {
+            id: $('#ORT0107_cross_system').val(),
+            date_s: $('#ORT0107_s').val(),
+            date_e: $('#ORT0107_e').val(),
+            deadline: $('#ORT0107_deadline').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                 model : _model
+            }),
+            dataType: "json",
+            url: ORT0107url.GetReport,
+            contentType: 'application/json',
+        }).done(function (result) {
+            $.unblockUI(); //畫面打開
+            if (result.RETURN_FLAG) {
+                if (result.DESCRIPTION == 'SAME') {
+                    if (confirm('勾稽報表執行中,是否執行?')) {
+                        $.blockUI(); //畫面鎖起來
+                        var _model2 = {
+                            id: $('#ORT0107_cross_system').val(),
+                            date_s: $('#ORT0107_s').val(),
+                            date_e: $('#ORT0107_e').val(),
+                            runFlag: 'Y',
+                            deadline: $('#ORT0107_deadline').val()
+                            }         
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                model : _model2                        
+                            }),
+                            dataType: "json",
+                            url: ORT0107url.GetReport,
+                            contentType: 'application/json',
+                        }).done(function (result2) {
+                            if (result2.RETURN_FLAG) {
+                                //ORT0107Report(result2);
+                                alert(result2.DESCRIPTION);
+                            }
+                            else {
+                                alert(result2.DESCRIPTION);
+                            }
+                            $.unblockUI(); //畫面打開
+                        });
+                    }
+                }
+                else {
+                    //ORT0107Report(result);
+                    alert(result.DESCRIPTION);
+                }
+            }
+            else {
+                alert(result.DESCRIPTION);
+            }
+        });
+        }
+        else {
+            alert('日期為必輸 or 日期格式不正確 !!');
+        }
+
+
+    });
+
+    function ORT0107Report(result) {
+        $.ajax({
+            type: "POST",
+            url: ORT0107url.GetCacheReport,
+            contentType: 'application/json',
+            data: JSON.stringify({
+                id:  $('#ORT0107_cross_system').val(),
+                type: 'A'
+            }),
+        })
+        .done(function (result) {
+            if (result.RETURN_FLAG) {
+                window.open((customerUtility.reportUrl) + "?ReportId=" + result.Datas);
+            }
+            else
+                alert(result.DESCRIPTION);
+        })
+        if (result.Datas) {
+            setTimeout(
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: ORT0107url.GetCacheReport,
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        id:  $('#ORT0107_cross_system').val(),
+                        type: 'B'
+                    }),
+                })
+                .done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        window.open((customerUtility.reportUrl) + "?ReportId=" + result.Datas);
+                    }
+                    else
+                        alert(result.DESCRIPTION);
+                })
+            }, 500);
+        }
+    }
+});
+</script>
+
+

@@ -1,0 +1,132 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr >
+                        <td >
+                            <label>執行項目 : </label>
+                            @Html.RadioButton("searchType", "OAP0028_exec", new { @checked = true }) 1.執行明細表產出&列印
+                            @Html.RadioButton("searchType", "OAP0028_print") 2.申請單號區間列印
+                        </td>
+                    </tr>
+                    <tr class="searchType OAP0028_exec">
+                        <td >                        
+                            <input type="button" class="btn btn-primary" style="margin-right:20px;" id="OAP0028_btnexec" value="執行明細表產出&列印" />                        
+                        </td>
+                    </tr>
+                    <tr class="searchType OAP0028_print" style="display:none;color:red;">
+                        <td >
+                            申請單號 :
+                            <input type="text" id="applyNo_S" style="color:black;" onkeyup="InputToUpper(this);" />
+                            ~
+                            <input type="text" id="applyNo_E" style="color:black;" onkeyup="InputToUpper(this);" />
+                            <label style="color:red;"> (申請單號,起訖均須輸入)</label>
+                            <br>
+                            <input type="button" class="btn btn-primary" style="margin-right:20px; margin-top:10px;" id="OAP0028_btnPrint" value="列印" />                     
+                        </td>
+                    </tr>
+                </table>
+                <br>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var OAP0028url = {};
+        OAP0028url.exec = '@Url.Action("execDetail", "OAP0028")';
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        } else {
+
+            $('#OAP0028_btnexec').on('click', function () {
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        entry_date: ''
+                    }),
+                    dataType: "json",
+                    url: OAP0028url.exec,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        PrintReport('', '');
+                    }
+                    else {
+                        alert(result.DESCRIPTION);
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            });
+
+            $('#OAP0028_btnPrint').on('click', function () {
+                var _applyNo_S = $('#applyNo_S').val().trim();
+                var _applyNo_E = $('#applyNo_E').val().trim();
+                if (_applyNo_S == '' || _applyNo_E == '')
+                {
+                    alert('申請單號,起訖均為必輸!');
+                    return false;
+                }
+                PrintReport(_applyNo_S, _applyNo_E)
+            });
+
+            $('input[name=searchType]').on('change', function () {
+                var type = $('input[name=searchType]:checked').val();
+                $('#validationSummary').children().remove();
+                $('.searchType').hide();
+                $('.' + type).show();
+                $('#btnReport').attr('disabled', true);
+                $('#applyNo_S').val('');
+                $('#applyNo_E').val('');
+            });
+
+
+            function PrintReport(applyNo_S, applyNo_E)
+            {
+                applyNo_S = applyNo_S || '';
+                applyNo_E = applyNo_E || '';
+                var parms = [];
+                parms.push(customerUtility.reportParm('applyNo_S', applyNo_S));
+                parms.push(customerUtility.reportParm('applyNo_E', applyNo_E));
+                customerUtility.report(
+                customerUtility.reportModel('應付票據_抽票明細表', 'OAP0028'),
+                parms,
+                null);
+            }
+
+            $('#btnReport').on('click', function () {
+                $.blockUI(); //畫面鎖起來
+                PrintReport();
+                $.unblockUI(); //畫面打開
+            });
+
+
+        }
+    });
+</script>
+
+

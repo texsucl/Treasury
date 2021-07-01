@@ -1,0 +1,399 @@
+﻿@model FAP.Web.ViewModels.OAP0004Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.Title = ViewBag.funcName;
+
+    var fscRangeList = ViewBag.fscRangeList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            @Html.Hidden("hidFscRange", "")
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aply_no)：
+                        @Html.DisplayTextFor(model => model.aply_no)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_id)：
+                        @Html.DisplayTextFor(model => model.update_id)@Html.DisplayTextFor(model => model.update_name)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_datetime)：
+                        @Html.DisplayTextFor(model => model.update_datetime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_date)：
+                        @Html.DisplayTextFor(model => model.check_date)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_no)：
+                        @Html.DisplayTextFor(model => model.check_no)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.fsc_range)：
+                        @Html.DropDownList("fsc_range", fscRangeList, "", new { @disabled = true })
+                        @*@Html.DropDownListFor(model => model.fsc_range, fscRangeList, new { id= "fsc_range", name= "fsc_range", @disabled = true })*@
+                  
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.fsc_range_n)：
+                        @Html.DropDownList("fsc_range_n", fscRangeList, "", new { @disabled = true })
+                        @*@Html.DropDownListFor(model => model.fsc_range_n, fscRangeList, new { id = "fsc_range_n", name = "fsc_range_n", @disabled = true })*@
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_amt)：@Html.TextBoxFor(model => model.check_amt, new { @size = "30", @maxlength = "30", @disabled = true, onchange = "javascript:this.value=Comma(this.value);" })
+                    </td>
+                </tr>
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //取得"保局範圍"下拉選單
+    function getFscRange() {
+        return $('#hidFscRange').val();
+    }
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            $('#hidFscRange').val('@Html.Raw(ViewBag.fscRangejqList)');
+            genGrid();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+        //*---------------修改明細查詢 begin ----------------*//
+        function genGrid() {
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            $.blockUI(); //畫面鎖起來
+
+            var jsonData = {
+                'aply_no': '@Html.Raw(ViewBag.aply_no)'
+            };
+
+
+
+            //*-------------------GRID begin--------------------*//
+            $("#grid").jqGrid({
+                url: '/OAP0004A/qryVeTraceHis/',
+                postData: jsonData,
+                datatype: 'json',
+                jsonReader: {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    id: 'check_no'
+                },
+                mtype: 'POST',
+                //caption: '明細資料',
+
+                colModel: [
+                      {
+                          label: '支票號碼',
+                          name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                      },
+                      {
+                          label: '支票到期日',
+                          name: 'check_date', align: 'center', width: '120', editable: false
+                      },
+                      {
+                          label: '支票金額',
+                          name: 'check_amt', align: 'right', editable: false,
+                          formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                      },
+                      {
+                          label: '原保局範圍',
+                          name: 'fsc_range', align: 'center', editable: false,
+                          edittype: "select",
+                          formatter: 'select',
+                          editoptions: {
+                              value: getFscRange()
+                          }
+                      },
+                      {
+                          label: '異動後保局範圍',
+                          name: 'fsc_range_n', align: 'center', editable: false,
+                          edittype: "select",
+                          formatter: 'select',
+                          editoptions: {
+                              value: getFscRange()
+                          }
+                      }
+                ],
+                autowidth: true,
+                height: 'auto',
+                width: 'auto',
+                shrinkToFit: false,
+                forceFit: false,
+                loadonce: false,
+                sortname: "exec_date",
+                rownumbers: true,
+                viewrecords: true,
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                pager: "#pager",
+                onSelectRow: function (check_no) {
+
+                },
+                loadComplete: function () {
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+            //*-------------------GRID end--------------------*//
+
+
+            var jsonData =  JSON.stringify({
+                'aply_no':'@Html.Raw(ViewBag.aply_no)'
+
+            });
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryVeTraceHisAmt", "OAP0004A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        var amt = data.amt;
+                        $('#check_amt').val(Comma(data.amt));
+
+
+                        if (data.amt == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+        //*---------------修改明細查詢 end ----------------*//
+
+
+
+
+        ////*-------------------GRID begin--------------------*//
+        //$("#grid").jqGrid({
+        //    editurl: 'clientArray',
+        //    datatype: "local",
+        //    //caption: '明細資料',
+        //    localReader: { id: "check_no" },
+        //    colModel: [
+        //          {
+        //              label: '支票號碼',
+        //              name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+        //          },
+        //          {
+        //              label: '支票到期日',
+        //              name: 'check_date', align: 'center', width: '120', editable: false
+        //          },
+        //          {
+        //              label: '支票金額',
+        //              name: 'check_amt', align: 'right', editable: false,
+        //              formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+        //          },
+        //          {
+        //              label: '原保局範圍',
+        //              name: 'fsc_range', align: 'center', editable: false,
+        //              edittype: "select",
+        //              formatter: 'select',
+        //              editoptions: {
+        //                  value: getFscRange()
+        //              }
+        //          },
+        //          {
+        //              label: '異動後保局範圍',
+        //              name: 'fsc_range_n', align: 'center', editable: false,
+        //              edittype: "select",
+        //              formatter: 'select',
+        //              editoptions: {
+        //                  value: getFscRange()
+        //              }
+        //          }
+        //    ],
+        //    autowidth: true,
+        //    height: 'auto',
+        //    width: 'auto',
+        //    shrinkToFit: false,
+        //    forceFit: false,
+        //    loadonce: true,
+        //    sortname: "exec_date",
+        //    rownumbers: true,
+        //    viewrecords: true,
+        //    rowNum: 25,
+        //    rowList: [10, 25, 50],
+        //    pager: "#pager",
+        //    onSelectRow: function (check_no) {
+
+        //    },
+        //    loadComplete: function () {
+
+        //    }
+        //});
+
+        ////*-------------------GRID end--------------------*//
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10181A/index");
+            history.go(-1)
+        })
+
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+                $.ajax({
+                    type: "POST",
+                    data:JSON.stringify({
+                        'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                        ,'apprStat': "3"
+                        ,'fsc_range': '@Html.Raw(ViewBag.fsc_range_n)'
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OAP0004A")',
+            contentType: 'application/json',
+            success: function (data) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+    });
+
+
+
+    //*------------------------核可--------------------------*//
+    $("#btnConfirm").click().on('click', function () {
+        $('#validationSummary').children().remove();
+        $.blockUI();
+
+        var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                , 'apprStat': "2"
+                , 'fsc_range': '@Html.Raw(ViewBag.fsc_range_n)'
+            }),
+            dataType: "json",
+            url: '@Url.Action("execSave", "OAP0004A")',
+            contentType: 'application/json',
+            success: function (data) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+    });
+
+
+
+    });
+</script>
+
+

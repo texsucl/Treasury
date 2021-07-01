@@ -1,0 +1,585 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+@using FAP.Web.Enum;
+@using FAP.Web.Utilitys;
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;"></div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OAP0029s_Form">
+                    <table>
+                        <tr>
+                            <td width="100px">
+                                <label>寄送方式 : </label>
+                            </td>
+                            <td>
+                                @Html.DropDownList("OAP0029_send_style", (SelectList)ViewBag.sendStyle_A, new { @class = "" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <input type="button" class="btn btn-primary" id="OAP0029_Search" value="查詢" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <input type="hidden" id="OAP0029_str1" />
+                                <input type="hidden" id="OAP0029_str2" />
+                                <input type="hidden" id="OAP0029_str3" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="ShowOrNot">
+        <div class="col-sm-24">
+            <div id="OAP0029_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div style="text-align:center;" class="Customer_Act">
+            <input type="button" id="OAP0029_Appr" value="申請核准" class="btn btn-primary" disabled />
+            <input type="button" id="OAP0029_Rej" value="申請退件" class="btn btn-primary" disabled />
+            @*<input type="button" id="OAP0029_All" value="全選" class="btn btn-primary" />*@
+        </div>
+
+    </div>
+    <div id="OAP0029_Dialog" style="display:none;">
+        <form id="OAP0029_DialogForm">
+            <table>
+                <tr>
+                    <td>
+                        <label>申請單號 : </label>
+                    </td>
+                    <td>
+                        <label id="OAP0029_apply_no_d" name="OAP0029_apply_no_d"  />                       
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>支票號碼 : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="OAP0029_check_no_d" name="OAP0029_check_no_d"  onkeyup="InputToUpper(this);"/>
+                        <input type="button" id="OAP0029_check_checkNo" value="檢核支票號碼" class="btn btn-primary" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>支票面額 : </label>
+                    </td>
+                    <td>
+                        <label id="OAP0029_amount_d" name="OAP0029_amount_d" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>支票抬頭 : </label>
+                    </td>
+                    <td>
+                        <label id="OAP0029_receiver_d" name="OAP0029_receiver_d" />
+                    </td>
+                </tr>           
+                <tr>
+                    <td>
+                        <input type="button" id="OAP0029_btnUpdate_Mod" value="修改" class="btn btn-primary" />
+                        <input type="hidden" id="OAP0029_bank_code" />
+                        <input type="hidden" id="OAP0029_check_no" />
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="button" id="OAP0029_btnCancel" value="取消" class="btn btn-primary" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="OAP0029OpenRejectDialog" style="display:none;overflow-y:auto;">
+        <table>
+            <tr>
+                <td style="width:130px;">
+                    <label>退件原因 : </label>
+                </td>
+                <td>
+                    @Html.DropDownList("OAP0029_REJ_RSN", (SelectList)ViewBag.REJ_RSN, new { @class = "" })
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <label>其他說明 : </label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea id="OAP0029_REJ_RSN_memo" style="width:100%;" disabled></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="OAP0029RejectSuccess" value="確認退件" class="btn btn-primary" />
+                </td>
+                <td style="text-align:right;">
+                    <input type="button" id="OAP0029RejectCancel" value="取消" class="btn btn-primary" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.search = '@Url.Action("qryOAP0029", "OAP0029")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "OAP0029")';
+        UrlFor.UpdateData = '@Url.Action("updateOAP0029", "OAP0029")';
+        UrlFor.RejData = '@Url.Action("RejData", "OAP0029")';
+        UrlFor.ApplyData = '@Url.Action("ApplyData", "OAP0029")';
+        UrlFor.CheckChange = '@Url.Action("CheckChange","OAP0029")';
+        UrlFor.GetCheckNo = '@Url.Action("GetCheckNo", "OAP0029")';
+        //#endregion
+
+        //region 參數設定
+        var OAP0029_send_style_id = 'OAP0029_send_style'; //查詢區塊寄送方式ID
+        var OAP0029_apply_no_d_id = 'OAP0029_apply_no_d'; //明細部分申請單號ID
+        var OAP0029_check_no_d_id = 'OAP0029_check_no_d'; //明細部分支票號碼ID
+        var OAP0029_amount_d_id = 'OAP0029_amount_d'; //明細部分支票面額ID
+        var OAP0029_receiver_d_id = 'OAP0029_receiver_d'; //明細部分支票抬頭ID
+        var OAP0029_bank_code_id = 'OAP0029_bank_code'; //明細部分付款帳戶ID
+        var OAP0029_FormId = 'OAP0029_DialogForm';
+        var _ConfirmFlag = false; //離開時提醒訊息
+        var OAP0029_ReApproved = 'OAP0029_Appr' //核准
+        var OAP0029_ReRejected = 'OAP0029_Rej' //駁回
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始動作
+            $('.ShowOrNot').hide();
+            //#endregion
+
+            //#region 註冊事件
+
+            $('#OAP0029_REJ_RSN').on('change', function () {
+                switch ($('#OAP0029_REJ_RSN').val())
+                {
+                    case ' ':
+                    case 'a':
+                    case 'b':
+                        $('#OAP0029_REJ_RSN_memo').prop('disabled', true);
+                        $('#OAP0029_REJ_RSN_memo').val('');
+                        break;
+                    case 'c':
+                        $('#OAP0029_REJ_RSN_memo').prop('disabled', false);
+                        break;
+                }
+            });
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'OAP0029_Search':
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;
+                    case 'OAP0029_btnUpdate_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { UpdateDataFun(); });
+                        break;
+                    case 'OAP0029_Appr':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            ApprDataFun();
+                        });
+                        break;
+                    case 'OAP0029_Rej':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            if ($('#OAP0029_str3').val() == 'Y')
+                                alert('@ViewBag.Q32');
+                            var dialogId = 'OAP0029OpenRejectDialog';
+                            $('#' + dialogId).dialog({
+                                position: { my: "top+30%", at: "center top", of: window },
+                                title: '退件原因',
+                                width: '600px',
+                                autoOpen: false,
+                                resizable: false,
+                                maxHeight: 600,
+                                closeText: '取消',
+                                close: function () {
+                                    $('#OAP0029_REJ_RSN').val(' ');
+                                    $('#OAP0029_REJ_RSN_memo').val('');
+                                    $('#OAP0029_REJ_RSN_memo').prop('disabled',true);
+                                }
+                            });
+                            $('#OAP0029_REJ_RSN').val($('#OAP0029_str1').val());
+                            $('#OAP0029_REJ_RSN_memo').val($('#OAP0029_str2').val());
+                            if ($('#OAP0029_str1').val() == 'c')
+                            {
+                                $('#OAP0029_REJ_RSN_memo').prop('disabled', false);
+                            }
+                            $('#' + dialogId).dialog('open');
+                        });
+                        break;
+                    case 'OAP0029RejectSuccess':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            RejDataFun();
+                        });
+                        break;
+                    case 'OAP0029_check_checkNo':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            GetCheckNo($('#' + OAP0029_check_no_d_id).val());
+                        });
+                        break;
+                    case 'OAP0029RejectCancel':
+                    case 'OAP0029_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click',
+                        function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+
+            //#endregion
+
+            //#region 使用支票號碼讀取資料
+            function GetCheckNo(checkNo) {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        applyNo : $('#' + OAP0029_apply_no_d_id).text(),
+                        checkNo : checkNo
+                    }),
+                    dataType: "json",
+                    url: UrlFor.GetCheckNo,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + OAP0029_amount_d_id).text(result.Datas.amount);
+                        $('#' + OAP0029_receiver_d_id).text(result.Datas.receiver);
+                    }
+                    else {
+                        $('#' + OAP0029_amount_d_id).text('');
+                        $('#' + OAP0029_receiver_d_id).text('');
+                        alert(result.DESCRIPTION);
+                    }
+                });
+            }
+            //#endregion
+
+            //申請覆核
+            function ApprDataFun() {
+                $('#validationSummary').children().remove();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: UrlFor.ApplyData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    if (result.RETURN_FLAG) {
+                        OAP0029_SearchGrid();
+                        $("#" + OAP0029_ReApproved + ",#" + OAP0029_ReRejected).prop('disabled', true);
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //申請退回
+            function RejDataFun() {
+                if ($('#OAP0029_REJ_RSN').val().trim() == '')
+                {
+                    alert('請選擇原因!');
+                    return false;
+                }
+                if ($('#OAP0029_REJ_RSN').val() == 'c' && $('#OAP0029_REJ_RSN_memo').val().trim() == '')
+                {
+                    alert('選擇其他時,請輸入原因!');
+                    return false;
+                }
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        rej_rsn: $('#OAP0029_REJ_RSN').val(),
+                        memo: $('#OAP0029_REJ_RSN_memo').val().trim()
+                    }),
+                    dataType: "json",
+                    url: UrlFor.RejData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG)
+                    {
+                        customerUtility.closeDialog($('#OAP0029RejectSuccess'));
+                        OAP0029_SearchGrid();
+                        $("#" + OAP0029_ReApproved + ",#" + OAP0029_ReRejected).prop('disabled', true);
+                    }
+                    customerUtility.alertAuto(result,'a');
+                    $.unblockUI(); //畫面打開
+                });
+
+            }
+            //#endregion
+
+            //#region 修改
+            function UpdateDataFun() {
+                if ($('#' + OAP0029_check_no_d_id).val().trim() != '' && ($('#' + OAP0029_amount_d_id).text() == ''))
+                {
+                    alert('當支票號碼有輸入時,請檢核支票號碼,否則請清空!');
+                    return false;
+                }
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        applyNo : $('#' + OAP0029_apply_no_d_id).text(),
+                        checkNo : $('#' + OAP0029_check_no_d_id).val().trim()
+                    }),
+                    dataType: "json",
+                    url: UrlFor.UpdateData,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    customerUtility.alertAuto(result,'a');
+                    if (result.RETURN_FLAG) {
+                        customerUtility.closeDialog($('#OAP0029_btnUpdate_Mod'));
+                        OAP0029_SearchGrid();
+                        _ConfirmFlag = true;
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('OAP0029_jqgridDiv');
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    data: JSON.stringify({
+                        searchModel: OAP0029SearchModel(
+                            $('#' + OAP0029_send_style_id).val())
+                    }),
+                    url: UrlFor.search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        OAP0029_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //#region jqgrid
+            function formatterCheck(cellvalue, options, rdata) {
+                var str = '';
+                str = "<input type='checkbox' class = 'ApprovedIschecked' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.Ischecked == true ? 'checked' : ' ') + " />";
+                return str;
+            }
+            //#endregion
+
+            //查詢Grid
+            function OAP0029_SearchGrid() {
+                var colNameArray = ['勾選', '支票修改', '來源', '支票號碼(抽)', '支票面額', '支票抬頭', '抽票申請單號', '退件原因','其他說明',''];
+                var colModelArray = [];
+                colModelArray.push({ name: "Ischecked", index: "Ischecked", width: 50, sortable: false, align: 'center', formatter: formatterCheck });
+                colModelArray.push({ name: "act", index: "act", width: 70, sortable: false });
+                colModelArray.push({ name: "scre_from", index: "scre_from", width: 65, sortable: false, align: 'center' });
+                colModelArray.push({ name: "check_no", index: "check_no", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "amount", index: "amount", width: 150, sortable: false, align: 'right' });
+                colModelArray.push({ name: "receiver", index: "receiver", width: 150, sortable: false, align: 'left' });
+                colModelArray.push({ name: "apply_no", index: "apply_no", width: 120, sortable: false, align: 'left' });
+                colModelArray.push({ name: "rej_rsn", index: "rej_rsn", width: 150, sortable: false, align: 'center' });
+                colModelArray.push({ name: "memo", index: "memo", width: 200, sortable: false, align: 'left' });
+                colModelArray.push({ name: "update_flag", index: "update_flag", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                'OAP0029_jqgridDiv',
+                'OAP0029_SearchList',
+                'OAP0029_SearchPager',
+                UrlFor.GetData,
+                {
+                    type: 'OAP0029ViewData'
+                },
+                colNameArray,
+                colModelArray,
+                '應付票據抽票結果回覆功能',
+                jqgridCustom.getPage('OAP0029_jqgridDiv'),
+                jqgridCustom.getRowNum('OAP0029_jqgridDiv'),
+                OAP0029_CompleteFun,
+                true
+                );
+            }
+            //#endregion
+
+            //#region jqgrid 事件
+            function OAP0029_CompleteFun(listId) {
+                jqgridCustom.randerAction(listId, 'OAP0029_Search', OAP0029ActFun);
+
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    var tr = $(this);
+                    var update_flag = tr.find($.validator.format('td[aria-describedby$={0}_update_flag]', listId)).text();
+                    var exec_action = tr.find($.validator.format('td[aria-describedby$={0}_exec_action]', listId)).text();
+
+                    if (update_flag == 'false') {
+                        $(this).find('.actionEditIcon').hide();
+                    }
+                    $(this).find('.actionDeleIcon').hide();
+                    $(this).find('.actionViewIcon').hide();
+
+                    $(this).find('td').find('.ApprovedIschecked').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            forChecked(i + 1, $(this).prop('checked'));
+                        });
+                    });
+                });
+            }
+
+            //region 打勾事件
+            function forChecked(rowid, flag) {
+                var listId = 'OAP0029_SearchList';
+                var data = $("#" + listId).getRowData(rowid);
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        apply_no: data.apply_no,
+                        flag: flag
+                    }),
+                    dataType: "json",
+                    url: UrlFor.CheckChange,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $("#" + OAP0029_ReApproved + ",#" + OAP0029_ReRejected).prop('disabled', !result.Datas.Item1);
+                        $('#OAP0029_str1').val(result.Datas.Item2);
+                        $('#OAP0029_str2').val(result.Datas.Item3);
+                        $('#OAP0029_str3').val(result.Datas.Item4);
+                    }
+                });
+            }
+
+            var OAP0029ActFun = {};
+            OAP0029ActFun.Edit = function (i) {
+                dialogOpen('@Ref.ActionType.Edit.ToString()', i);
+            }
+            OAP0029ActFun.Dele = function (i) {
+                dialogOpen('@Ref.ActionType.Dele.ToString()', i);
+            }
+            OAP0029ActFun.View = function (i) {
+                dialogOpen('@Ref.ActionType.View.ToString()', i);
+            }
+            //#endregion
+
+            //#region dialog open
+            function dialogOpen(type, rowid) {
+                $('#' + OAP0029_FormId).validate().resetForm();
+                var dialogId = 'OAP0029_Dialog';
+                var listId = 'OAP0029_SearchList';
+                var title = customerUtility.getDialogType(type);
+                $('#' + dialogId).dialog({
+                    position: { my: "top+20%", at: "center top", of: window },
+                    title: title + '支票號碼',
+                    width: 'auto',
+                    autoOpen: false,
+                    resizable: false,
+                    closeText: '取消',
+                    close: function (event, ui) {
+                        customerUtility.closeDialog(this);
+                    }
+                });
+                ResetDialog();
+
+                $('#OAP0029_btnInsert_Mod,#OAP0029_btnUpdate_Mod,#OAP0029_btnDelete_Mod').hide();
+                if (type == '@Ref.ActionType.Edit.ToString()') {
+                    dialogSetData(listId, rowid);
+                    $('#' + OAP0029_check_no_d_id).prop('disabled', false);
+                    $('#OAP0029_btnUpdate_Mod').show();
+                }
+
+                $('#' + dialogId).dialog('open');
+            }
+            //#endregion
+
+            //#region Dialog Set Data
+            function dialogSetData(listId, rowid) {
+                listId = listId || '';
+                rowid = rowid || 0;
+                if (rowid > 0) {
+                    var data = $("#" + listId).getRowData(rowid);
+                    $('#' + OAP0029_apply_no_d_id).text(data.apply_no);
+                    $('#' + OAP0029_check_no_d_id).val(data.check_no);
+                    $('#' + OAP0029_amount_d_id).text(data.amount);
+                    $('#' + OAP0029_receiver_d_id).text(data.receiver);
+                }
+            }
+            //#endregion
+
+            //#region 重設輸入項目
+            function ResetDialog() {
+                $('#' + OAP0029_apply_no_d_id).text('');
+                $('#' + OAP0029_check_no_d_id).val('');
+                $('#' + OAP0029_amount_d_id).text('');
+                $('#' + OAP0029_receiver_d_id).text('');
+                $('#' + OAP0029_check_no_d_id).prop('disabled', true);
+
+                $('#validationSummary').children().remove();
+            }
+            //#endregion
+
+            //#region 查詢畫面  ViewModel
+            function OAP0029SearchModel(send_style) {
+                var obj = {};
+                obj['send_style'] = send_style;
+                return obj;
+            }
+            //#endregion
+
+            //#region OAP0029ViewModel
+            function OAP0029ViewModel(check_no, apply_no) {
+                var obj = {};
+                obj['check_no'] = check_no;
+                obj['apply_no'] = apply_no;
+                return obj;
+            }
+            //#endregion
+        }
+    });
+</script>

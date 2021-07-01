@@ -1,0 +1,529 @@
+﻿@model FRT.Web.ViewModels.ORTB006Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var failCodejqList = ViewBag.failCodejqList as SelectList;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidFailCode", "")
+
+                <table>
+                    <tr>
+                        <td>
+                            <label>選項 : </label>
+                            @Html.RadioButton("type", "fast", new { @checked = true }) 快速付款
+                            @Html.RadioButton("type", "fbo") 快速付款改FBO匯款
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.fastNo)：@Html.TextBoxFor(model => model.fastNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.policyNo)：@Html.TextBoxFor(model => model.policyNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                            - @Html.TextBoxFor(model => model.policySeq, new { @size = "2", @maxlength = "2" })
+                            - @Html.TextBoxFor(model => model.idDup, new { @size = "1", @maxlength = "1" })
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                @Html.Hidden("onEdit", "")
+                @Html.Hidden("valueErr", "")
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    var lastSelectRoot = "";
+
+    //jqgrid中的修改
+    function TheOnEditFunction(rowid) {
+        if ($("#onEdit").val() == "Y") {
+            alert("畫面仍有資料在編輯中，不可修改!!");
+        } else {
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+
+            jQuery("#grid").setSelection(rowid, true);
+            jQuery("#grid").editRow(rowid);
+
+
+            $("#btn_save_" + rowid).css("visibility", "visible");
+            $("#btn_cancel_" + rowid).css("visibility", "visible");
+
+            $("#btn_edit_" + rowid).css("visibility", "hidden");
+            //$("#btn_del_" + rowid).css("visibility", "hidden");
+            $("#btn_edit_" + rowid).hide();
+            //$("#btn_del_" + rowid).hide();
+            $("#btn_save_" + rowid).show();
+            $("#btn_cancel_" + rowid).show();
+
+            $("#onEdit").val("Y");
+            lastSelectRoot = rowid;
+        }
+
+    }
+
+
+    //jqgrid中的儲存
+    function TheOnSaveFunction(rowid) {
+        chkData(rowid, "Edit")
+    }
+
+
+    //檢查該筆資料是否已在覆核中或已存在主檔
+    function chkData(rowid, execBtn) {
+
+        var fastNo = "";
+
+        var errMsg = "";
+
+        rowData = $("#grid").jqGrid('getRowData', rowid);
+        fastNo = rowData.fastNo;
+
+        if (execBtn == "Edit") {
+
+            failCode = $("#" + rowid + "_failCode").val();
+
+            if (failCode.length == 0 || failCode == "#")
+                errMsg += " 錯誤代碼-輸入錯誤";
+
+
+            if (errMsg != "") {
+                $("#valueErr").val("Y");
+                alert(errMsg);
+                return;
+            }
+
+
+        } else {
+            failCode = rowData.failCode;
+        }
+
+
+        rowData = $("#grid").jqGrid('getRowData', rowid);
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("chkData", "ORTB006")',
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: {
+                'fastNo': fastNo
+            },
+            success: function (json) {
+
+                if (json.success) {
+                    jQuery("#grid").saveRow(rowid, false);
+
+                    DisplayEditButton(rowid);
+
+                } else {
+                    $("#valueErr").val("Y");
+                    alert(json.err);
+
+                }
+            }
+        });
+    }
+
+
+
+    //jqgrid中的取消
+    function TheOnCancelFunction(rowid) {
+        $("#onEdit").val("");
+        $("#valueErr").val("");
+        lastSelectRoot = "";
+
+        jQuery("#grid").restoreRow(rowid);
+
+
+        $("#btn_save_" + rowid).css("visibility", "hidden");
+        $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+        $("#btn_edit_" + rowid).css("visibility", "visible");
+        //$("#btn_del_" + rowid).css("visibility", "visible");
+        $("#btn_edit_" + rowid).show();
+        //$("#btn_del_" + rowid).show();
+        $("#btn_save_" + rowid).hide();
+        $("#btn_cancel_" + rowid).hide();
+
+    }
+
+
+
+    function DisplayEditButton(rowid) {
+        if ($("#valueErr").val() == "Y") {
+        } else {
+            jQuery("#grid").trigger("reloadGrid");
+            $("#btn_save_" + rowid).css("visibility", "hidden");
+            $("#btn_cancel_" + rowid).css("visibility", "hidden");
+
+            $("#btn_edit_" + rowid).css("visibility", "visible");
+           // $("#btn_del_" + rowid).css("visibility", "visible");
+            $("#btn_edit_" + rowid).show();
+            //$("#btn_del_" + rowid).show();
+            $("#btn_save_" + rowid).hide();
+            $("#btn_cancel_" + rowid).hide();
+
+            $("#onEdit").val("");
+            lastSelectRoot = "";
+
+        }
+    }
+
+
+    $(document).click(function (e) {
+        if ($("#onEdit").val() == "Y" & e.target.id != "btnNew" & e.target.id != "btnClear") {
+            if (e.target.id.indexOf(lastSelectRoot) < 0) {
+                alert("畫面仍有資料在編輯中，不可執行其它功能!!");
+                return
+            }
+
+        }
+
+    });
+
+
+    //取得"失敗原因"下拉選單
+    function getFailCode() {
+        return $('#hidFailCode').val();
+    }
+
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+
+            $('#hidFailCode').val('@Html.Raw(ViewBag.failCodejqList)');
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#fastNo').val("");
+            $('#policyNo').val("");
+            $('#policySeq').val("");
+            $('#idDup').val("");
+
+            $('#fastNo').attr('disabled', false);
+            $('#policyNo').attr('disabled', false);
+            $('#policySeq').attr('disabled', false);
+            $('#idDup').attr('disabled', false);
+
+            $('#btnModify').attr('disabled', true);
+            //$('#btnNew').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+            $("#onEdit").val("");
+            $("#valueErr").val("");
+            lastSelectRoot = ""; 
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $('#fastNo').attr('disabled', true);
+            $('#policyNo').attr('disabled', true);
+            $('#policySeq').attr('disabled', true);
+            $('#idDup').attr('disabled', true);
+
+
+            $('#btnQry').attr('disabled', true);
+            //$('#btnNew').attr('disabled', false);
+            $('#btnModify').attr('disabled', false);
+
+            var jsonData = JSON.stringify({
+                'type': $('input[name=type]:checked').val(),
+                'fastNo': $("#fastNo").val(),
+                'policyNo': $("#policyNo").val(),
+                'policySeq': $("#policySeq").val(),
+                'idDup': $("#idDup").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryFRTBARM", "ORTB006")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if(data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "fastNo" },
+            colModel: [
+                {
+                    label: "修改", name: 'Action', index: 'Action', search: false, align: 'center', width: '120',
+                },
+                {
+                    label: '匯款失敗原因',
+                    name: 'failCode', align: 'center', width: '130',
+                    editable: true,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getFailCode()
+                    }
+                },
+                {
+                    label: '快速付款編號',
+                    name: 'fastNo', align: 'center', width: '120',
+                    editable: false
+
+                },
+                {
+                    label: '匯款日期',
+                    name: 'remitDate', align: 'center', width: '90',
+                    editable: false
+                },
+                {
+                    label: '銀行代號',
+                    name: 'bankCode', align: 'center', width: '100',
+                    editable: false
+                },
+                {
+                    label: '匯款帳號',
+                    name: 'bankAct', align: 'left', width: '340',
+                    editable: false
+                },
+                {
+                    label: '收款人戶名',
+                    name: 'rcvName', align: 'center', width: '150',
+                    editable: false
+                },
+                {
+                    label: '匯款金額',
+                    name: 'remitAmt', align: 'center', width: '120', formatter: "number", formatoptions: { thousandsSeparator: ',', decimalPlaces: 0 } ,
+                    editable: false
+                }
+                
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            loadComplete: function () {
+                if ($("#valueErr").val() == "Y") {
+                } else {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+                        be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+
+                        //de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+
+                        se = "<input class=\"save\" style='height:28px;width:50px; ' type='button' id='btn_save_" + rowId + "' value='儲存' onclick=\"TheOnSaveFunction('" + rowId + "');\"  />";
+                        ce = "<input class=\"cancel\" style='height:28px;width:50px; visibility: hidden;' type='button' id='btn_cancel_" + rowId + "'  value='取消' onclick=\"TheOnCancelFunction('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + se + ce });
+
+                        $("#btn_save_" + rowId).hide();
+                        $("#btn_cancel_" + rowId).hide();
+
+                    }
+                }
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+       
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            var bPass = true;
+
+            if ($('#onEdit').val() == "Y") {
+                bPass = false;
+                validationSummary.append('<li>' + '畫面資料未存檔!!' + '</li>');
+            }
+
+
+
+
+            if (bPass == false)
+                return;
+
+            var rowObject = [];
+            //var gridData = $("#grid").jqGrid('getRowData');
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+            for (j = 0; j <= gridData.length - 1; j++) {
+                rowData = gridData[j];
+                if (rowData.failCode != "#")
+                    rowObject.push(rowData);
+
+            }
+
+            var jsonData = JSON.stringify({
+                'gridData': rowObject
+            });
+
+
+            $.blockUI();
+
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execSave", "ORTB006")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        $("#btnModify").attr('disabled', true);
+                      //  $("#btnNew").attr('disabled', true);
+                        validationSummary.append('<li>' + '申請覆核成功!!' + '</li>');
+
+                        if (data.errFastNo.length > 0) {
+                            validationSummary.append('<li>' + '以下快速付款編號資料已在覆核中，不可申請覆核：' + '</li>');
+                            for (var i = 0; i < data.errFastNo.length; i++) {
+                                validationSummary.append('<br/>' + data.errFastNo[i]);
+                            }
+                        }
+
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var rowId = ids[i];
+
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_save_" + rowId).hide();
+                            $("#btn_cancel_" + rowId).hide();
+
+                        }
+
+
+
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+            
+
+        });
+        //*---------------修改(申請覆核) end ----------------*//
+
+    });
+</script>
+
+

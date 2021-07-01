@@ -1,0 +1,793 @@
+﻿@model FRT.Web.ViewModels.ORT0001Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    
+
+    var opScope = ViewBag.opScope;
+    var rmResnList = ViewBag.rmResnList as SelectList;
+    var rmResnjsList = ViewBag.rmResnjsList as SelectList;
+
+    var rmTypeList = ViewBag.rmTypeList as SelectList;
+    var rmTypejsList = ViewBag.rmTypejsList as SelectList;
+
+    var remitKindList = ViewBag.remitKindList as SelectList;
+    var remitKindjsList = ViewBag.remitKindjsList as SelectList;
+
+    var amlUnitList = ViewBag.amlUnitList as SelectList;
+    var amlUnitjsList = ViewBag.amlUnitjsList as SelectList;
+
+    var statusjqList = ViewBag.statusjqList as SelectList;
+    var dataStatusjqList = ViewBag.dataStatusjqList as SelectList;
+
+    var ynList = ViewBag.ynList as SelectList;
+    var ynjsList = ViewBag.ynjsList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.rm_resn)：@Html.DropDownList("q_rm_resn", rmResnList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.rm_type)：@Html.DropDownList("q_rm_type", rmTypeList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.remit_kind)：@Html.DropDownList("q_remit_kind", remitKindList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.aml_unit)：@Html.DropDownList("q_aml_unit", amlUnitList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.call_aml)：@Html.DropDownList("q_call_aml", ynList, "請選擇")
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        <input type="submit" id="btnRtn" name="btnRtn" value="回上一頁" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                @Html.Hidden("valueErr", "")
+                <button id="btnNew" name="btnNew" class="btn btn-primary">新增</button>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modal" tabindex="-1" role="dialog"
+                     aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" style="margin-left:10px">
+                        <div class="modal-content" style="width:600px;position:relative;left:10px">
+                            <!-- Modal Header -->
+                            <!-- Modal Body -->
+                            <div class="modal-body">
+                                <form class="form-horizontal" role="form" onsubmit="return false">
+                                    @Html.Hidden("iTempId", "")
+                                    @Html.Hidden("iExecAction", "")
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayNameFor(model => model.rm_resn)：@Html.DropDownList("rm_resn", rmResnList, "請選擇")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayNameFor(model => model.rm_type)：@Html.DropDownList("rm_type", rmTypeList, "請選擇")
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayNameFor(model => model.remit_kind)：@Html.DropDownList("remit_kind", remitKindList, "請選擇")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayNameFor(model => model.aml_unit)：@Html.DropDownList("aml_unit", amlUnitList, "請選擇")
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayNameFor(model => model.call_aml)：@Html.DropDownList("call_aml", ynList, "請選擇")
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <button type="button" id="btnConfirm" class="btn btn-primary"> 確定</button>
+                                                <button type="button" id="btnCancel" class="btn btn-primary"> 取消</button>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //取消編輯模式
+    $("#btnCancel").on("click", function () {
+        $('#modal').modal('hide');
+    });
+
+
+    //新增
+    $("#btnNew").on("click", function () {
+        $('#iTempId').val("");
+        $('#iExecAction').val("A");
+
+        $('#rm_resn').val("");
+        $('#rm_type').val("");
+        $('#remit_kind').val("");
+        $('#aml_unit').val("");
+        $('#call_aml').val("");
+
+        $('#modal').modal('show');
+
+    });
+
+    //修改
+    function TheOnEditFunction(rowid) {
+
+        var rowData = jQuery("#grid").jqGrid("getRowData", rowid);
+
+        $('#iTempId').val(rowData.tempId);
+        $('#iExecAction').val("U");
+
+        $('#rm_resn').val(rowData.rm_resn);
+        $('#rm_type').val(rowData.rm_type);
+        $('#remit_kind').val(rowData.remit_kind);
+        $('#aml_unit').val(rowData.aml_unit);
+        $('#call_aml').val(rowData.call_aml);
+
+        jQuery("#grid").setSelection(rowid, true);
+
+        $('#validationSummary').children().remove();
+
+        $('#modal').modal('show');
+    }
+
+
+
+    //輸入資料，執行"確定"
+    $('#btnConfirm').on('click', function () {
+        var msg = "";
+        var bPass = true;
+
+        if ($('#rm_resn').val() == "") {
+            bPass = false;
+            msg += "繳款原因；"
+        }
+
+        if ($('#rm_type').val() == "") {
+            bPass = false;
+            msg += "繳款類別；"
+        }
+
+        if ($('#remit_kind').val() == "") {
+            bPass = false;
+            msg += "給付方式；"
+        }
+
+        if ($('#aml_unit').val() == "") {
+            bPass = false;
+            msg += "傳入AML系統UNIT代碼；"
+        }
+
+        if ($('#call_aml').val() == "") {
+            bPass = false;
+            msg += "洗錢態樣審查；"
+        }
+
+        if (!bPass) {
+
+            alert("請輸入 " + msg);
+            return;
+        }
+
+
+        var bChange = true;
+
+        var rowId = "";
+
+        if ($('#iExecAction').val() == "A")
+            $('#iTempId').val($('#rm_resn').val() + $('#rm_type').val() + $('#remit_kind').val());
+
+        if ($('#iExecAction').val() == "U") {
+            var ids = jQuery("#grid").jqGrid('getDataIDs');
+
+            //var pRowId = "";
+            for (var i = 0; i < ids.length; i++) {
+                var data = jQuery("#grid").jqGrid("getRowData", ids[i]);
+
+                if (data.tempId == $('#iTempId').val()) {
+                    rowId = ids[i];
+                    //pRowId = ids[i + 1];
+                    break;
+                }
+            }
+        }
+
+        chkData(rowId, "Edit");
+
+
+
+    })
+
+
+
+    //jqgrid中的刪除
+    function TheOnDelFunction(rowid) {
+        if (window.confirm('您確定要刪除嗎？') == true) {
+            chkData(rowid, "Delete");
+        }
+    }
+
+    //jqgrid中的儲存
+    function TheOnSaveFunction(rowid) {
+        chkData(rowid, "Edit")
+
+    }
+
+
+    //檢查該筆資料是否已在覆核中或已存在主檔
+    function chkData(rowId, execBtn) {
+        var errMsg = "";
+        var status = "";
+        var tempId = "";
+        if (rowId == "") {
+            status = "A";
+        } else {
+            var rowData = jQuery("#grid").jqGrid("getRowData", rowId);
+            tempId = rowData.tempId;
+        }
+
+        if (execBtn == "Edit") {
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+            for (i = 0, count = gridData.length; i < count; i += 1) {
+                if (tempId != gridData[i].tempId
+                    && $('#rm_resn').val() == gridData[i].rm_resn
+                    && $('#rm_type').val() == gridData[i].rm_type
+                    && $('#remit_kind').val() == gridData[i].remit_kind)
+                    errMsg += "　資料重覆請確認";
+
+                if (rowId == gridData[i].tempId)
+                    status = gridData[i].status
+            }
+
+
+            if (errMsg != "") {
+                alert(errMsg);
+                return;
+            }
+        }
+
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("chkData", "ORT0001")',
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: {
+                'iTempId': $('#iTempId').val(),
+                'rm_resn': $('#rm_resn').val(),
+                'rm_type': $('#rm_type').val(),
+                'remit_kind': $('#remit_kind').val(),
+                'status': status
+            },
+            success: function (json) {
+
+                if (json.success) {
+                    if (execBtn == "Edit") {
+
+                        if (rowId == "") {
+                            $("#grid").jqGrid('addRow', "new", { addParams: { position: "last" } });
+                            rowId = $('#grid').jqGrid('getGridParam', 'selrow');
+                            $("#grid").jqGrid("setCell", rowId, "tempId", $('#iTempId').val());
+                            $("#grid").jqGrid("setCell", rowId, "status", $('#iExecAction').val());
+
+                            be = "<input class=\"edit\" style='height:28px;width:50px;' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\" TheOnEditFunction ('" + rowId + "');\"  />";
+                            de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+
+                            jQuery("#grid").jqGrid('setRowData', rowId, { Action: be + de });
+                        }
+
+                        var rowData = jQuery("#grid").jqGrid("getRowData", rowId);
+                        if (rowData.status == "A")
+                            $("#grid").jqGrid("setCell", rowId, "status", "A");
+                        else
+                            $("#grid").jqGrid("setCell", rowId, "status", "U");
+
+
+                        $("#grid").jqGrid("setCell", rowId, "rm_resn", $('#rm_resn').val());
+                        $("#grid").jqGrid("setCell", rowId, "rm_type", $('#rm_type').val());
+                        $("#grid").jqGrid("setCell", rowId, "remit_kind", $('#remit_kind').val());
+                        $("#grid").jqGrid("setCell", rowId, "aml_unit", $('#aml_unit').val());
+                        $("#grid").jqGrid("setCell", rowId, "call_aml", $('#call_aml').val());
+
+
+
+                    } else {
+                        var rowData = $("#grid").jqGrid('getRowData', rowId);
+                        if (rowData.dataStatus == "") {
+                            $("#grid").jqGrid('delRowData', rowId);
+                            jQuery("#grid").trigger("reloadGrid");
+                        } else {
+                            $("#grid").jqGrid("setCell", rowId, "status", "D");
+                        }
+                    }
+
+                    $('#modal').modal('hide');
+                    if ($('#call_aml').val() == "Y")
+                        alert("請至AML洗錢態樣檢核TABLE檔設定檢核條件!");
+                } else {
+                    alert(json.err);
+                }
+            }
+        });
+    }
+
+
+
+
+
+
+    //取得"執行功能"下拉選單
+    function getStatus() {
+        var list = '@Html.Raw(ViewBag.statusjqList)'
+        return list;
+    }
+
+    //取得"繳款原因"下拉選單
+    function getRmRest() {
+        var list = '@Html.Raw(ViewBag.rmResnjsList)'
+        return list;
+
+    }
+
+    //取得"繳款類別"下拉選單
+    function getRmType() {
+        var list = '@Html.Raw(ViewBag.rmTypejsList)'
+        return list;
+
+    }
+
+    //取得"給付方式"下拉選單
+    function getRemitKind() {
+        var list = '@Html.Raw(ViewBag.remitKindjsList)'
+        return list;
+
+    }
+
+    //取得"傳入AML系統UNIT代碼"下拉選單
+    function getAmlUnit() {
+        var list = '@Html.Raw(ViewBag.amlUnitjsList)'
+        return list;
+
+    }
+
+    //取得"洗錢態樣審查"下拉選單
+    function getCallAml() {
+        var list = '@Html.Raw(ViewBag.ynjsList)'
+        return list;
+
+    }
+
+    //取得"資料狀態"下拉選單
+    function getDataStatus() {
+        var list = '@Html.Raw(ViewBag.dataStatusjqList)'
+        return list;
+
+    }
+
+
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        var bMaintain = '@Html.Raw(ViewBag.bMaintain)';
+        var bRtn = '@Html.Raw(ViewBag.bRtn)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnModify').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+
+
+            if (bMaintain == "Y") {
+            } else {
+                $('#btnModify').hide();
+                $('#btnNew').hide();
+            }
+
+            if(bRtn == "Y")
+                $('#btnRtn').show();
+            else
+                $('#btnRtn').hide();
+        }
+
+
+        //*---------------回上一頁 begin ----------------*//
+        $("#btnRtn").click().on('click', function () {
+
+            $.blockUI(); //畫面鎖起來
+            history.go(-1)
+
+        });
+        //*---------------回上一頁 end ----------------*//
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#q_rm_resn').val("");
+            $('#q_rm_type').val("");
+            $('#q_remit_kind').val("");
+            $('#q_aml_unit').val("");
+            $('#q_call_aml').val("");
+
+            $('#btnModify').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+            $('#btnQry').attr('disabled', false);
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+
+            $('#btnQry').attr('disabled', true);
+            $('#btnNew').attr('disabled', false);
+            $('#btnModify').attr('disabled', false);
+
+            var jsonData = JSON.stringify({
+                'rm_resn': $("#q_rm_resn").val(),
+                'rm_type': $("#q_rm_type").val(),
+                'remit_kind': $("#q_remit_kind").val(),
+                'aml_unit': $("#q_aml_unit").val(),
+                'call_aml': $("#q_call_aml").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryFRTCODE", "ORT0001")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在，請進行新增維護!!"' + '</li>');
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "tempId" },
+            colModel: [
+                {
+                    label: "修改/刪除", name: 'Action', index: 'Action', search: false, align: 'center', width: '120'
+                },
+                {
+                    label: '資料狀態',
+                    name: 'dataStatus', align: 'center', width: '70',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getDataStatus()
+                    }
+                },
+                 {
+                     label: '執行功能',
+                     name: 'status', align: 'center', width: '80',
+                     editable: false,
+                     edittype: "select",
+                     formatter: 'select',
+                     editoptions: {
+                         value: getStatus()
+                     }
+                 },
+    {
+        label: 'tempId',
+        name: 'tempId', align: 'center', hidden: true,
+        editable: false,
+    },
+                {
+                    label: '繳款原因',
+                    name: 'rm_resn', align: 'center',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRmRest()
+                    }
+
+                },
+                {
+                    label: '繳款類別',
+                    name: 'rm_type', align: 'center',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRmType()
+                    }
+
+                },
+                {
+                    label: '給付方式',
+                    name: 'remit_kind', align: 'center',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getRemitKind()
+                    }
+
+                },
+                {
+                    label: '傳入AML系統UNIT代碼',
+                    name: 'aml_unit', align: 'center',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getAmlUnit()
+                    }
+
+                },
+                {
+                    label: '洗錢態樣審查',
+                    name: 'call_aml', align: 'center',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getCallAml()
+                    }
+
+                },
+
+      {
+          label: '異動人員',
+          name: 'update_name', align: 'center', width: '80',
+          editable: false,
+      },
+    {
+        label: '異動日期',
+        name: 'update_datetime', align: 'center', width: '90',
+        editable: false,
+    },
+    {
+        label: '覆核人員',
+        name: 'appr_name', align: 'center', width: '80',
+        editable: false,
+    },
+    {
+        label: '覆核日期',
+        name: 'appr_datetime', align: 'center', width: '90',
+        editable: false,
+    },
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            loadComplete: function () {
+
+                var bMaintain = '@Html.Raw(ViewBag.bMaintain)';
+
+                if (bMaintain == "Y") {
+                    var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+                        be = "<input class=\"edit\" style='height:28px;width:50px; ' type='button' id='btn_edit_" + rowId + "' value='修改' onclick=\"TheOnEditFunction('" + rowId + "');\"  />";
+                        de = "<input class=\"del\" style='height:28px;width:50px;' type='button' id='btn_del_" + rowId + "' value='刪除' onclick=\" TheOnDelFunction ('" + rowId + "');\"  />";
+                        jQuery("#grid").jqGrid('setRowData', ids[i], { Action: be + de });
+
+                        rowData = $("#grid").jqGrid('getRowData', ids[i]);
+                        if (rowData.dataStatus == "2") {
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                        }
+                    }
+                } else
+                    jQuery("#grid").jqGrid('hideCol', ["Action"]);
+
+
+
+
+            }
+        });
+
+
+        //*-------------------GRID end--------------------*//
+
+
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+            var rowObject = [];
+            for (j = 0; j <= gridData.length - 1; j++) {
+                rowData = gridData[j];
+                if (rowData.status == "A" || rowData.status == "U" || rowData.status == "D")
+                    rowObject.push({
+                        'tempId': rowData.tempId,
+                        'rm_resn': rowData.rm_resn,
+                        'rm_type': rowData.rm_type,
+                        'remit_kind': rowData.remit_kind,
+                        'aml_unit': rowData.aml_unit,
+                        'call_aml': rowData.call_aml,
+                        'status': rowData.status
+                    });
+
+            }
+
+
+            if (rowObject.length == 0) {
+                validationSummary.append('<li>' + '畫面資料未異動!!' + '</li>');
+                return 0;
+            }
+
+            var jsonData = JSON.stringify({
+                'gridData': rowObject
+            });
+
+            $.blockUI();
+
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execSave", "ORT0001")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        $("#btnModify").attr('disabled', true);
+                        $("#btnNew").attr('disabled', true);
+                        validationSummary.append('<li>' + '申請覆核成功!!' + '</li>');
+
+                        if (data.err.length > 0)
+                            validationSummary.append('<li>' + '以下資料覆核中，不可修改/刪除此筆資料：' + data.err + '</li>');
+
+
+                        var ids = jQuery("#grid").jqGrid('getDataIDs');
+                        for (var i = 0; i < ids.length; i++) {
+                            var rowId = ids[i];
+
+                            $("#btn_edit_" + rowId).hide();
+                            $("#btn_del_" + rowId).hide();
+                        }
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+
+
+        });
+        //*---------------修改(申請覆核) end ----------------*//
+
+    });
+</script>
+
+

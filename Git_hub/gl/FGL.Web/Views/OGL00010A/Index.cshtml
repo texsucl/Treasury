@@ -1,0 +1,324 @@
+﻿@using FGL.Web.Enum;
+@using FGL.Web.Utilitys;
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <form id="OGL00010A_Form">
+                    <table>
+                        <tr>
+                            <td style="width:100px;">
+                                <label>退費類別 : </label>
+                            </td>
+                            <td>
+                                <input type="text" id="OGL00010A_payclass"/>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" class="btn btn-primary" id="OGL00010A_Search" value="查詢" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="ShowOrNot">
+        <div >
+            <div id="OGL00010AjqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-24" style="text-align:center;">
+                <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnApproved_Mod" value="核准" disabled />
+                <input type="button" class="btn btn-primary" style="margin-right:20px;" id="btnRejected_Mod" value="駁回" disabled />
+            </div>
+        </div>
+    </div>
+    <div id="OGL00010AOpenSearchDialog" style="display:none;" role="dialog" class="myDialog">
+        <div id="OGL00010AOpenSearchDetail"></div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function () {
+
+        var OGL00010Aurl = {};
+        OGL00010Aurl.qryOGL00010A = '@Url.Action("qryOGL00010A", "OGL00010A")';
+        OGL00010Aurl.getData = '@Url.Action("GetCacheData", "OGL00010A")';
+        OGL00010Aurl.Approved = '@Url.Action("ApprovedData", "OGL00010A")';
+        OGL00010Aurl.Rejected = '@Url.Action("RejectedData", "OGL00010A")';
+        OGL00010Aurl.Detail = '@Url.Action("Detail", "OGL00010")';
+        OGL00010Aurl.CheckChange = '@Url.Action("CheckChange", "OGL00010A")';
+
+        var ReApproved = 'btnApproved_Mod' //核准
+        var ReRejected = 'btnRejected_Mod' //駁回
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            $("#" + ReApproved).hide();
+            $("#" + ReRejected).hide();
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'OGL00010A_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { OGL00010A_SearchFun(); });
+                        break;
+                    case 'btnApproved_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { ApprovedDataFun(); });
+                        break;
+                    case 'btnRejected_Mod':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { RejectedDataFun(); });
+                        break;
+                }
+            });
+        }
+
+        //#region 核准
+        function ApprovedDataFun() {
+            $('#validationSummary').children().remove();
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: 'POST',
+                url: OGL00010Aurl.Approved,
+                contentType: 'application/json',
+            }).done(function (result) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                if (result.RETURN_FLAG) {
+                    OGL00010AData();
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+        //#endregion
+
+        //region 駁回
+        function RejectedDataFun() {
+            $('#validationSummary').children().remove();
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: 'POST',
+                url: OGL00010Aurl.Rejected,
+                contentType: 'application/json',
+            }).done(function (result) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                if (result.RETURN_FLAG) {
+                    OGL00010AData();
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+        //#endregion
+
+        function OGL00010A_SearchFun() {
+            $("#" + ReApproved).hide();
+            $("#" + ReRejected).hide();
+            jqgridCustom.clearJqgrid('OGL00010AjqgridDiv');
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    payclass: $('#OGL00010A_payclass').val()
+                }),
+                dataType: "json",
+                url: OGL00010Aurl.qryOGL00010A,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    OGL00010AData();
+                }
+                else {
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                }
+                $.unblockUI(); //畫面打開
+            });
+        }
+
+        function formatterCheck(cellvalue, options, rdata) {
+            var str = '';
+            if (rdata.review_flag) {
+                str = "<input type='checkbox' class = 'ApprovedIschecked' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.Ischecked == true ? 'checked' : ' ') + " />";
+            }
+            return str;
+        }
+
+        function formatterOGL00010pay_class(cellvalue, options, rdata) {
+            return "<a href='#' class='openDialog DialogPayClass' style='text-decoration:underline; color:blue;' return:false; id='" + options.gid + "PayClass" + options.rowId + "'  name='" + cellvalue + "' title='" + cellvalue + "' >" + cellvalue + "</a>";
+        }
+
+        function UnformatterOGL00010pay_class(cellvalue, options, rdata) {
+            return cellvalue;
+        }
+
+        function OGL00010AData() {
+            $("#" + ReApproved).show();
+            $("#" + ReRejected).show();
+            $("#" + ReApproved).prop('disabled', true);
+            $("#" + ReRejected).prop('disabled', true);
+            var colNameArray = ['勾選', '執行功能', '退費項目類別', '說明', '險種否', '年次否', '保費類別否',
+                '費用單位否', '送金單否', '合約別否', '帳本否', 'pk_id', '權限'];
+            var colModelArray = [];
+            colModelArray.push({ name: "Ischecked", index: "Ischecked", width: 50, sortable: false, align: 'center', formatter: formatterCheck });
+            colModelArray.push({ name: "exec_action_D", index: "exec_action_D", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "pay_class", index: "pay_class", width: 100, sortable: false, formatter: formatterOGL00010pay_class, unformat: UnformatterOGL00010pay_class });
+            colModelArray.push({ name: "memo_n", index: "memo_n", width: 280, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "item_yn_n", index: "item_yn_n", width: 50, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "year_yn_n", index: "year_yn_n", width: 50, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "prem_yn_n", index: "prem_yn_n", width: 80, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "unit_yn_n", index: "unit_yn_n", width: 80, sortable: false, align: 'center' });
+            colModelArray.push({ name: "recp_yn_n", index: "recp_yn_n", width: 70, sortable: false, align: 'center' });
+            colModelArray.push({ name: "cont_yn_n", index: "cont_yn_n", width: 70, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "corp_yn_n", index: "corp_yn_n", width: 50, sortable: false, align: 'center'  });
+            colModelArray.push({ name: "pk_id", index: "pk_id", hidden: true });
+            colModelArray.push({ name: "review_flag", index: "review_flag", hidden: true });
+            jqgridCustom.createJqgridByCache(
+                'OGL00010AjqgridDiv',
+                'OGL00010ATempList',
+                'OGL00010ATempPeger',
+                OGL00010Aurl.getData,
+                {
+                    type: "OGL00010AViewData"
+                },
+                colNameArray,
+                colModelArray,
+                '退費類別覆核作業',
+                jqgridCustom.getPage('OGL00010AjqgridDiv'),
+                jqgridCustom.getRowNum('OGL00010AjqgridDiv'),
+                OGL00010ATempCompleteFun,
+                true
+                );
+        }
+
+        function OGL00010ATempCompleteFun(listId)
+        {
+            $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                //CheckBox
+                $(this).find('td').find('.ApprovedIschecked').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        forChecked(i + 1, $(this).prop('checked'));
+                    });
+                });
+                $(this).find('td').find('a.DialogPayClass').each(function () {
+                    $(this).off('click');
+                    $(this).on('click', function () {
+                        OGL00010AOpenPkIdFun(listId, i + 1, 'APPR');
+                    });
+                });
+            });
+        }
+
+        //region 打勾事件
+        function forChecked(rowid, flag) {
+            var listId = 'OGL00010ATempList';
+            var data = $("#" + listId).getRowData(rowid);
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    pk_id: data.pk_id,
+                    flag: flag
+                }),
+                dataType: "json",
+                url: OGL00010Aurl.CheckChange,
+                contentType: 'application/json',
+            }).done(function (result) {
+                if (result.RETURN_FLAG) {
+                    $("#" + ReApproved + ",#" + ReRejected).prop('disabled', !result.Datas);
+                }
+            });
+        }
+        //#endregion
+
+        function openOGL00010ADetailDialog(title, width, dialogId) {
+            title = title || '';
+            width = width || 'auto';
+            $('#' + dialogId).dialog({
+                position: { my: "top", at: "center top", of: window },
+                title: title,
+                width: width,
+                autoOpen: false,
+                resizable: false,
+                maxHeight: 800,
+                closeText: '取消',
+                close: function () {
+                    OGL00010AData();
+                }
+            });
+            $('#' + dialogId).dialog('open');
+        }
+
+        function OGL00010AOpenPkIdFun(listId, rowid, action)
+        {
+            var _pk_id = '';
+            var _appr_Flag = 'N';
+            if (rowid != -1) {
+                _pk_id = $("#" + listId).getRowData(rowid).pk_id;
+                if ($("#" + listId).getRowData(rowid).review_flag == 'true')
+                    _appr_Flag = "Y";
+            }
+            $.blockUI(); //畫面鎖起來
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({
+                    pk_id: _pk_id,
+                    action: action,
+                    apprFlag: _appr_Flag
+                }),
+                dataType: 'html',
+                url: OGL00010Aurl.Detail,
+                contentType: 'application/json',
+                success: function (data, textStatus, jqXHR) {
+                    $('#OGL00010AOpenSearchDetail').html(data);
+                    $.unblockUI(); //畫面打開
+                    openOGL00010ADetailDialog('退費類別設定', '970px', 'OGL00010AOpenSearchDialog');
+                }
+            })
+        }
+    });
+</script>
+
+

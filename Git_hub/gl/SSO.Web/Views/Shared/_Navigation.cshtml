@@ -1,0 +1,285 @@
+﻿
+@using SSO.Web.ViewModels
+
+<div class="nav-side-menu">
+
+        <div class="brand">財會管理系統<br /><span style="color:red;font-size:xx-large" />測試環境</div>
+
+
+        <i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+
+        <div class="menu-list">
+            @if (@HttpContext.Current.Session["UserID"] != null)
+            {
+                <ul class="menu-content collapse out">
+                    <table>
+                        <tr>
+                            <td><a><span class="glyphicon glyphicon-user"></span> @HttpContext.Current.Session["UserID"] @HttpContext.Current.Session["UserName"]</a></td>
+                            <td><a href="@Url.Action("Logout", "Account")"><span class="glyphicon glyphicon-log-out"></span> 登出</a></td>
+                            </tr>
+                        </table>
+                </ul>
+            }
+
+            <ul id="menu-content" class="menu-content collapse out">
+
+
+                @foreach (var menu in Model)
+                {
+                    if (menu.SubMenu.Count > 0)
+                    {
+                        foreach (MenuModel subMenu in menu.SubMenu)
+                        {
+                            if (subMenu.SubMenu.Count > 0)
+                            {
+
+                                <li data-toggle="collapse" data-target="#@subMenu.MenuID" class="collapsed active">
+                                    <a href="#"><i class="fa fa-gift fa-lg"></i> @Html.Raw(subMenu.Title) <span class="arrow"></span></a>
+                                </li>
+
+                                <ul class="sub-menu collapse" id=@subMenu.MenuID>
+
+
+                            @foreach (MenuModel subMenu2 in subMenu.SubMenu)
+                            {
+                                if (subMenu2.SubMenu.Count > 0)
+                                {
+                                    <li data-toggle="collapse" data-target="#@subMenu2.MenuID"  style="background-color: #d6e9c6;">
+                                        <a href="#"><i class="fa fa-gift fa-lg"></i> @Html.Raw(subMenu2.Title) <span class="arrow"></span></a>
+                                    </li>
+                                <ul class="sub-menu collapse" id=@subMenu2.MenuID style="background-color: dodgerblue;">
+
+                                    @foreach (MenuModel itemMenu in subMenu2.SubMenu)
+                                                        {
+                                                        if (itemMenu.SubMenu.Count > 0)
+                                                        {
+    <li data-toggle="collapse" data-target="#@itemMenu.MenuID" class="collapsed" style="background-color: lightgoldenrodyellow;padding-left: 20px;">
+        <a href="#"><i class="fa fa-car fa-lg"></i> @Html.Raw(itemMenu.Title) <span class="arrow"></span></a>
+    </li>
+                                            <ul class="sub-menu collapse" id=@itemMenu.MenuID>
+                                                @foreach (MenuModel item in itemMenu.SubMenu)
+                                                {
+                                                    if (item.Link != "")
+                                                    {
+                                                        <li><a href="@Url.Content(item.Link)">@item.Title</a></li>
+                                                    }
+                                                                    @*if (item.IsAction)
+                                                                    {
+                                                    <li><a href="@Url.Content(item.Link)">@item.Title</a></li>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                    <li><a href="@Html.Raw(item.Link)"> @Html.Raw(item.Title)</a></li>
+                                                                    }*@
+                                                                }
+
+                                            </ul>
+                                        
+                                                        }
+                                                        else
+                                                        {
+
+
+                                                        @*if (itemMenu.IsAction)
+                                                        {
+                                        <li><a href="@Url.Content(itemMenu.Link)">@itemMenu.Title</a></li>
+                                                        }
+                                                        else
+                                                        {
+                                        <li><a href="@Html.Raw(itemMenu.Link)"> @Html.Raw(itemMenu.Title)</a></li>
+                                            }*@
+
+                                            if (itemMenu.Link != "")
+                                            {
+                                                <li><a href="@Url.Content(itemMenu.Link)">@itemMenu.Title</a></li>
+                                            }
+                                        }
+
+
+
+                                    }
+
+                                </ul>
+
+                            
+
+                            }
+                            else
+                            {
+                            if (subMenu2.Link != "")
+                            {
+                            <li><a href="@Url.Content(subMenu2.Link)">@subMenu2.Title</a></li>
+                            }
+
+
+                            }
+
+                            }
+
+                        </ul>
+
+                            }
+
+                            }
+
+
+                            }
+                    @*else
+                {
+                    if (menu.IsAction)
+                    {
+                        <li><a href="@Url.Action(menu.Action, menu.Controller)" class="@menu.Class"> @Html.Raw(menu.Title)</a></li>
+                    }
+                    else
+                    {
+                        <li><a href="@Html.Raw(menu.Link)" class="@menu.Class"> @Html.Raw(menu.Title)</a></li>
+                    }
+                }*@
+                            }
+
+            </ul>
+</div>
+    
+ 
+    </div>
+<div class="containerMenu">
+    <div id="loadingMessage"  style="background-color:white;padding:10px;height:100%;width:100%;margin-bottom:5px;">請稍候...</div>
+    <iframe id="iframe" frameBorder="0" onload="this.height=screen.height -100;" style="width:100%;border:none;overflow:hidden;"></iframe>
+    @*<iframe id="iframe" frameBorder="0"  onload="this.height=screen.height -180;"  style="width:100%;border:none;overflow:hidden;"></iframe>*@
+    @*<iframe id="iframe" frameBorder="0" scrolling="yes" onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));' style="height:200px;width:100%;border:none;overflow:hidden;"></iframe>*@
+@*<iframe id="iframe" frameBorder="0"  scrolling="yes" onload="this.width=screen.width - 270;this.height=screen.height -180;"></iframe>*@
+
+    
+
+</div>
+
+
+
+<script>
+    $('#iframe').ready(function () {
+        $('#loadingMessage').css('display', 'none');
+    });
+
+
+    $(document).ready(function () {
+        
+        $("a").each(function () {
+            $(this).on("click", function (event) {
+                if (this.href.indexOf('Logout') > 0) {
+                } else {
+                    
+
+                    if (this.href.indexOf('/Home/Index') == -1) {
+                  
+                        if (document.all) { //判断IE浏览器
+                            window.event.returnValue = false;
+                            $('#loadingMessage').css('display', 'block');
+                            $('#iframe').on('load', function () {
+                                $('#loadingMessage').css('display', 'none');
+                            });
+
+                            if (this.href.indexOf('http://10.240.68.38:8090') == -1) {
+                                $("#iframe").prop('src', this.href)
+                            } else {
+                                var win = window.open(this.href, '_blank');
+                                win.focus();
+                                //var winName = 'Treasury';
+                                //var winURL = 'http://10.240.68.38:8090/Account/Login';
+                                ////  var windowoption = 'resizable=yes,height=600,width=800,location=0,menubar=0,scrollbars=1';
+                                //var params = { 'UserId': 'B0077', 'Password': '3edc$RFV' };
+                                //var form = document.createElement("form");
+                                //form.setAttribute("method", "post");
+                                //form.setAttribute("action", winURL);
+                                //form.setAttribute("target", winName);
+                                //for (var i in params) {
+                                //    if (params.hasOwnProperty(i)) {
+                                //        var input = document.createElement('input');
+                                //        input.type = 'hidden';
+                                //        input.name = i;
+                                //        input.value = params[i];
+                                //        form.appendChild(input);
+                                //    }
+                                //}
+
+                                //var input1 = document.createElement('input');
+                                //input1.type = 'hidden';
+                                //input1.name = "__RequestVerificationToken";
+                                //input1.value = $('#__AjaxAntiForgeryForm input[name=__RequestVerificationToken]').val();
+                                //form.appendChild(input1);
+
+
+
+                                //document.body.appendChild(form);
+
+                                //map = window.open("", "Treasury");
+
+                                ////window.open('', winName, windowoption);
+                                ////window.open('', winName);
+                                //form.target = winName;
+                                //form.submit();
+                                ////document.body.removeChild(form);
+
+                                ////var win = window.open(this.href, '_blank');
+                                ////win.focus();
+                            }
+                            
+                        }
+                        else {
+                            event.preventDefault();
+                            $('#loadingMessage').css('display', 'block');
+                            $('#iframe').on('load', function () { $('#loadingMessage').css('display', 'none'); });
+
+                            if (this.href.indexOf('http://10.240.68.38:8090') == -1) {
+                                $('#iframe').prop('src', this.href)
+                            } else {
+
+                                //var winName = 'Treasury';
+                                //var winURL = 'http://10.240.68.38:8090/Account/Login';
+                                ////  var windowoption = 'resizable=yes,height=600,width=800,location=0,menubar=0,scrollbars=1';
+                                //var params = { 'UserId': 'B0077', 'Password':'3edc$RFV' };
+                                //var form = document.createElement("form");
+                                //form.setAttribute("method", "post");
+                                //form.setAttribute("action", winURL);
+                                //form.setAttribute("target", winName);
+                                //for (var i in params) {
+                                //    if (params.hasOwnProperty(i)) {
+                                //        var input = document.createElement('input');
+                                //        input.type = 'hidden';
+                                //        input.name = i;
+                                //        input.value = params[i];
+                                //        form.appendChild(input);
+                                //    }
+                                //}
+                                //document.body.appendChild(form);
+
+                                //map = window.open("", "Treasury");
+
+                                ////window.open('', winName, windowoption);
+                                ////window.open('', winName);
+                                //form.target = winName;
+                                //form.submit();
+                                ////document.body.removeChild(form);
+
+                                var win = window.open(this.href, '_blank');
+                                win.focus();
+                            }
+                            
+                        };
+                    }
+                }
+
+                
+                
+
+
+              
+               
+                //$("#content").load(this.href);
+            });
+        });
+
+    });
+
+
+
+</script>

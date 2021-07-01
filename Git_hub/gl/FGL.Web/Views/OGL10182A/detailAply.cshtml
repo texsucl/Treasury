@@ -1,0 +1,328 @@
+﻿@model FGL.Web.ViewModels.GLAplyRecModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = "科目樣本對應SQL會科覆核作業";
+
+
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+
+                        @Html.DisplayTextFor(model => model.aplyNo)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createUid)：
+
+                        @Html.DisplayTextFor(model => model.createUid)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createDt)：
+
+                        @Html.DisplayTextFor(model => model.createDt)
+                    </td>
+                </tr>
+
+
+
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+            <br>
+
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row">
+                <div id="qryResultFormal" class="col-sm-24">
+                    <table id="gridFormal"></table>
+                    <div id="pagerFormal"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            createGrid();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+         /*------------------異動的科目代號---------------------*/
+        function createGrid() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/OGL10182A/qrySmpaHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false//, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                caption: '異動清單',
+                colNames: ['執行功能', '科目代號', '險種類別', '險種類別', '帳本', '帳務類別', '帳務類別', 'SQL會計科目', 'SQL會計名稱'],
+                colModel: [
+                     { name: 'execActionDesc', align: 'center', width: 80 },
+                    { name: 'smpNum', align: 'center', width: 70 },
+                    { name: 'productType', align: 'left', hidden: true },
+                    { name: 'productTypeDesc', align: 'left', width: 110 },
+                    { name: 'corpNo', align: 'center', width: 50 },
+                    { name: 'acctType', align: 'left', hidden: true },
+                    { name: 'acctTypeDesc', align: 'left', width: 170 },
+                    { name: 'sqlActNum', align: 'center', width: 100 },
+                    { name: 'sqlActNm', align: 'left', width: 300 }
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'itemType',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+
+                    $.unblockUI(); //畫面打開
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (cnt > 0) {
+                        createGridFormal(aplyNo);
+                    }
+                }
+
+            });
+        }
+
+
+        /*------------------正式檔的科目代號 begin---------------------*/
+        function createGridFormal(aplyNo) {
+
+            $('#qryResultFormal').children().remove();
+
+            $('#qryResultFormal').append('<table id="' + "gridFormal" + '"></table>');
+            $('#qryResultFormal').append('<div id="' + "pagerFormal" + '"></div>');
+
+            var para = {
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#gridFormal").jqGrid({
+                url: '/OGL10182A/qryFormal/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false//, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                caption: '正式檔清單',
+                colNames: [ '科目代號', '險種類別', '險種類別', '帳本', '帳務類別', '帳務類別', 'SQL會計科目', 'SQL會計名稱'],
+                colModel: [
+                    { name: 'smpNum', align: 'center', width: 70 },
+                    { name: 'productType', align: 'left', hidden: true },
+                    { name: 'productTypeDesc', align: 'left', width: 110 },
+                    { name: 'corpNo', align: 'center', width: 50 },
+                    { name: 'acctType', align: 'left', hidden: true },
+                    { name: 'acctTypeDesc', align: 'left', width: 170 },
+                    { name: 'sqlActNum', align: 'center', width: 100 },
+                    { name: 'sqlActNm', align: 'left', width: 300 }
+                ],
+                autowidth: true,
+                shrinkToFit: true,
+                forceFit: true,
+                pager: '#pagerFormal',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'productType',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#gridFormal").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#gridFormal").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    var cnt = $('#gridFormal').getGridParam('records')
+
+                    $.unblockUI(); //畫面打開
+                }
+
+            });
+
+
+        }
+        /*------------------正式檔的科目代號 end---------------------*/
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10182A/index");
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        apprStat: "3"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OGL10182A")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+
+                        $.unblockUI();
+                    }
+                });
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        apprStat: "2"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OGL10182A")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+
+                        $.unblockUI();
+                    }
+                });
+
+        });
+
+
+
+    });
+</script>
+
+

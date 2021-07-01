@@ -1,0 +1,161 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+}
+
+@using FRT.Web.Enum;
+@using FRT.Web.BO;
+
+    <div class="container-fluid" id="main">
+        <div class="panel panel-primary">
+            <div class="panel-heading">@ViewBag.Title</div>
+            <div class="panel-body">
+                <div id="validationSummary" style="color:red;"></div>
+                @if (opScope != "" && opScope != "0")
+                {
+                    <form id="ORT0109Q_Form">
+                        <table>
+                            <tr>
+                                <td style="width:50px">
+                                    <label>帳號 : </label>
+                                </td>
+                                <td>
+                                    <input type="text" id="ORT0109Q_No" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <input type="button" class="btn btn-primary" id="ORT0109Q_Search" value="查詢" />
+                                    @Html.Hidden("h_aply_no")
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class=" ShowOrNot">
+            <div class="col-sm-24">
+                <div id="Review_jqgridDiv" class="jqd" style="padding-bottom:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(function () {
+        //region set url
+        var UrlFor = {};
+        UrlFor.Search = '@Url.Action("qryORT0109Q", "ORT0109Q")';
+        UrlFor.GetData = '@Url.Action("GetCacheData", "ORT0109Q")';
+        //#endregion
+
+        //region 參數設定
+        //#endregion
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }
+        else {
+            //#region 初始設定
+            $('.ShowOrNot').hide();
+            $('.Review_DetailAct').hide();
+
+            //#endregion
+
+            //#region 註冊事件
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'ORT0109Q_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { form_Search(); });
+                        break;             
+                    case 'ORT0109Q_btnCancel':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            customerUtility.closeDialog(this);
+                        });
+                        break;
+                }
+            });
+            //#endregion
+
+
+            //region 查詢
+            function form_Search() {
+                $('#validationSummary').children().remove();
+                jqgridCustom.clearJqgrid('Review_jqgridDiv');
+                $('.ShowOrNot').hide();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: 'POST',
+                    dataType: "json",
+                    data: JSON.stringify({
+                        bank_acct_no : ($('#ORT0109Q_No').val() || '').trim()
+                    }),
+                    url: UrlFor.Search,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('.ShowOrNot').show();
+                        review_SearchGrid();
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+            //#endregion
+
+            //查詢Grid
+            function review_SearchGrid() {
+                var colNameArray = ['帳號','銀行簡稱','建立人員', '建立時間','最後異動人員','最後異動日期','覆核人','覆核日期','申請編號'];
+                var colModelArray = [];
+                colModelArray.push({ name: "bank_acct_no", index: "bank_acct_no", width: 220, sortable: false, align: 'center' });
+                colModelArray.push({ name: "bank_acct_make_out", index: "bank_acct_make_out", width: 220, sortable: false, align: 'center' }); 
+                colModelArray.push({ name: "create_name", index: "create_name", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "create_datetime", index: "create_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_name", index: "update_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "update_datetime", index: "update_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_name", index: "appr_name", width: 130, sortable: false, align: 'center' });
+                colModelArray.push({ name: "appr_datetime", index: "appr_datetime", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "his_pk_id", index: "his_pk_id", hidden: true });
+                jqgridCustom.createJqgridByCache(
+                    'Review_jqgridDiv',
+                    'Review_List',
+                    'Review_Peger',
+                     UrlFor.GetData,
+                     {
+                         type: 'ORT0109QModel'
+                     },
+                     colNameArray,
+                     colModelArray,
+                     '跨系統資料庫勾稽銀存銷帳不比對帳號',
+                     jqgridCustom.getPage('Review_jqgridDiv'),
+                     jqgridCustom.getRowNum('Review_jqgridDiv'),
+                     null,
+                     true
+                    )
+            }
+
+            //#endregion
+        }
+    });
+</script>

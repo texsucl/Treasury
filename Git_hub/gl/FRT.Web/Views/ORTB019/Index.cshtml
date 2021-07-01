@@ -1,0 +1,238 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            快速付款編號 :
+                        </td>
+                        <td>
+                            <input type="text" id="fastNo_S" onkeyup="InputToUpper(this);" />
+                            ~
+                            <input type="text" id="fastNo_E" onkeyup="InputToUpper(this);" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:20px;">
+                            筆數/金額 (勾選合計) :
+                        </td>
+                        <td style="font-size:20px;color:red;">
+                            <label id="ORTB019_Checked">0/0</label>
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="修改核對註記" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    @*<div id="qryResult" class="col-sm-24">
+                            <table id="grid"></table>
+                            <div id="pager"></div>
+                        </div>*@
+                    <div id="ORTB019jqgridDiv" class="jqd" style="padding-bottom:5px;">
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+   $(function () {
+       var ORTB019url = {};
+       ORTB019url.query = '@Url.Action("qryORTB019", "ORTB019")';
+       ORTB019url.getData = '@Url.Action("GetCacheData", "ORTB019")';
+       ORTB019url.check = '@Url.Action("ORTB019Check", "ORTB019")';
+       ORTB019url.Update = '@Url.Action("ORTB019Update", "ORTB019")';
+       //$(window).bind('resize', function () {
+       //    var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+       //    jQuery("#grid").setGridWidth(newWidth, false);
+       //}).trigger('resize');
+
+       var opScope = '@Html.Raw(ViewBag.opScope)';
+
+       if (opScope == "" || opScope == "0") {
+           $('#validationSummary').children().remove();
+
+           var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+           if (validationSummary.length == 0) {
+               $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+               validationSummary = $('#validationSummary ul.validation-summary-errors');
+           }
+           validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+       } else {
+           $('#btnModify').attr('disabled', true);
+       }
+
+
+       //*---------------清除 begin ----------------*//
+       $("#btnClear").click().on('click', function () {
+           $('#fastNo_S').val('');
+           $('#fastNo_S').attr('disabled', false);
+           $('#fastNo_E').val('');
+           $('#fastNo_E').attr('disabled', false);
+           $('#btnQry').attr('disabled', false);
+           $('#btnModify').attr('disabled', true);
+           $('#ORTB019_Checked').text('0/0');
+           $('#validationSummary').children().remove();
+           jqgridCustom.clearJqgrid('ORTB019jqgridDiv');
+       });
+       //*---------------清除 end ----------------*//
+
+       $('#btnModify').on('click', function () {
+           $.blockUI(); //畫面鎖起來
+           $.ajax({
+               type: "POST",
+               dataType: "json",
+               url: ORTB019url.Update,
+               contentType: 'application/json'
+           }).done(function (result) {
+               $('#validationSummary').children().remove();
+               var validationSummary = $('#validationSummary ul.validation-summary-errors');
+               if (validationSummary.length == 0) {
+                   $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                   validationSummary = $('#validationSummary ul.validation-summary-errors');
+               }
+               validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+               if (result.RETURN_FLAG) {
+                   $('#btnModify').attr('disabled', true);
+                   $('#ORTB019_Checked').text('0/0');
+                   jqgridCustom.clearJqgrid('ORTB019jqgridDiv');
+               }
+               $.unblockUI(); //畫面打開
+           });
+       })
+
+       //*---------------查詢 begin ----------------*//
+       $("#btnQry").click().on('click', function () {
+           $('#validationSummary').children().remove();
+
+           var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+           if (validationSummary.length == 0) {
+               $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+               validationSummary = $('#validationSummary ul.validation-summary-errors');
+           }
+
+           $.blockUI(); //畫面鎖起來
+           $('#ORTB019_Checked').text('0/0');
+           $.ajax({
+               type: "POST",
+               data: JSON.stringify({
+                   fastNo_S: $('#fastNo_S').val(), //快速付款起號
+                   fastNo_E: $('#fastNo_E').val(), //快速付款迄號
+               }),
+               dataType: "json",
+               url: ORTB019url.query,
+               contentType: 'application/json'
+           }).done(function (result) {
+               if (result.RETURN_FLAG) {
+                   $('#fastNo_S').attr('disabled', true);
+                   $('#fastNo_E').attr('disabled', true);
+                   $('#btnModify').attr('disabled', false);
+                   $('#btnQry').attr('disabled', true);
+                   $('#ORTB019_Checked').text(result.DESCRIPTION);
+                   ORTB019Grid();
+               }
+               else {
+                   validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+               }
+               $.unblockUI(); //畫面打開
+           })
+           ;
+       });
+       //*---------------查詢 end ----------------*//
+
+       function formatterCheckFlag(cellvalue, options, rdata) {
+           var str = "<input type='checkbox' class = 'ORTB019checkFlag' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (cellvalue == true ? 'checked' : ' ') + " />";
+           return str;
+       }
+
+       function ORTB019Grid() {
+           var colNameArray = ['人工比對', '快速付款編號', '收款人ID', '銀行代號', '匯款帳號', '匯款金額', '收款人戶名'];
+           var colModelArray = [];
+           colModelArray.push({ name: "checkFlag", index: "checkFlag", sortable: false, align: 'center', formatter: formatterCheckFlag });
+           colModelArray.push({ name: "FAST_NO", index: "FAST_NO", width: 120, sortable: false });
+           colModelArray.push({ name: "PAID_ID", index: "PAID_ID", width: 120, sortable: false });
+           colModelArray.push({ name: "BANK_CODE_SUB_BANK", index: "BANK_CODE_SUB_BANK", width: 120, sortable: false});
+           colModelArray.push({ name: "BANK_ACT", index: "BANK_ACT", width: 120, sortable: false });
+           colModelArray.push({ name: "REMIT_AMT", index: "REMIT_AMT", width: 120, sortable: false });
+           colModelArray.push({ name: "RCV_NAME", index: "RCV_NAME", width: 120, sortable: false });
+           jqgridCustom.createJqgridByCache(
+               'ORTB019jqgridDiv',
+               'ORTB019TempList',
+               'ORTB019TempPeger',
+               ORTB019url.getData,
+               {
+
+               },
+               colNameArray,
+               colModelArray,
+               '快速付款人工比對作業',
+               jqgridCustom.getPage('ORTB019jqgridDiv'),
+               jqgridCustom.getRowNum('ORTB019jqgridDiv'),
+               ORTB019CompleteFun,
+               true
+               );
+       }
+
+       function ORTB019CompleteFun(listId) {
+           $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+               $(this).find('td').find('.ORTB019checkFlag').each(function () {
+                   $(this).off('click');
+                   $(this).on('click', function () {
+                       ORTB019Check(i + 1, $(this).prop('checked'));
+                   });
+               });
+           });
+       }
+
+       function ORTB019Check(rowid, flag) {
+           var listId = 'ORTB019TempList';
+           var data = $("#" + listId).getRowData(rowid);
+           $.ajax({
+               type: "POST",
+               data: JSON.stringify({
+                   fastNo: data.FAST_NO,
+                   flag: flag
+               }),
+               dataType: "json",
+               url: ORTB019url.check,
+               contentType: 'application/json',
+           }).done(function (result) {
+               if (result.RETURN_FLAG) {
+                   $('#' + 'btnModify').attr('disabled', !result.Datas);
+                   $('#ORTB019_Checked').text(result.DESCRIPTION);
+                   //ORTB019Grid();
+               }
+               else {
+                   $('#ORTB019_Checked').text('');
+                   validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+               }
+           });
+       }
+
+    });
+</script>
+
+

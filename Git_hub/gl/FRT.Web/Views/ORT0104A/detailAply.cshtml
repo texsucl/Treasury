@@ -1,0 +1,267 @@
+﻿@model FRT.Web.ViewModels.ORT0104Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+}
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            <table>
+                <tr>
+                    <td colspan="2">
+                        @Html.DisplayNameFor(model => model.aply_no)：
+                        @Html.DisplayTextFor(model => model.aply_no)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_id)：
+                        @Html.DisplayTextFor(model => model.update_id)@Html.DisplayTextFor(model => model.update_name)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_datetime)：
+                        @Html.DisplayTextFor(model => model.update_datetime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.currency)：
+                        @Html.DisplayTextFor(model => model.currency)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.vhr_no1)：
+                        @Html.DisplayTextFor(model => model.vhr_no1)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.pro_no)：
+                        @Html.DisplayTextFor(model => model.pro_no)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_id)：
+                        @Html.DisplayTextFor(model => model.paid_id)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        @Html.DisplayNameFor(model => model.payment)：
+                        @Html.DisplayTextFor(model => model.payment)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        @Html.DisplayNameFor(model => model.remit_amt)：
+                        @Html.DisplayTextFor(model => model.remit_amt)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.bank_no)：
+                        @Html.DisplayTextFor(model => model.bank_no)@Html.DisplayTextFor(model => model.bank_name)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.bank_act)：
+                        @Html.DisplayTextFor(model => model.bank_act)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.fee_seqn)：
+                        @Html.DisplayTextFor(model => model.fee_seqn)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.fbo_no)：
+                        @Html.DisplayTextFor(model => model.fbo_no)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <span style="color:red;">
+                            @Html.DisplayNameFor(model => model.fail_code)：
+                            @Html.DisplayTextFor(model => model.fail_code)
+                            </span>
+                    </td>
+                    <td>
+                        <span style="        color: blue;">
+                            @Html.DisplayNameFor(model => model.fail_code_o)：
+                            @Html.DisplayTextFor(model => model.fail_code_o)
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <span style="color:red;">
+                            @Html.DisplayNameFor(model => model.seqn)：
+                            @Html.DisplayTextFor(model => model.seqn)
+                        </span>
+                    </td>
+                    <td>
+                        <span style="color:blue;">
+                            @Html.DisplayNameFor(model => model.seqn_o)：
+                            @Html.DisplayTextFor(model => model.seqn_o)
+                        </span>
+                    </td>
+                </tr>
+
+                </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                    , 'appr_stat': "3"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "ORT0104A")',
+                contentType: 'application/json',
+                success: function (data) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+
+
+            });
+
+
+
+
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                        'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                    , 'appr_stat': "2"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "ORT0104A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+
+        });
+
+
+
+    });
+</script>
+
+

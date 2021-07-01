@@ -1,0 +1,394 @@
+﻿@model FAP.Web.ViewModels.OAP0054Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidStatus", "")
+                @Html.Hidden("hidOPaidCd", "")
+
+        <table>
+            <tr>
+                <td>
+                    清理狀態
+                </td>
+                <td>
+                    <input id="status_chk0" name="chkStatus" type="checkbox" value="0" />空值
+                    <input id="status_chk1" name="chkStatus" type="checkbox" value="1" />已給付
+                    <input id="status_chk2" name="chkStatus" type="checkbox" value="2" />已清理結案
+                    <input id="status_chk3" name="chkStatus" type="checkbox" value="3" />已通知尚未給付
+                    <input id="status_chk4" name="chkStatus" type="checkbox" value="4" />尚未通知
+                </td>
+
+            </tr>
+
+
+        </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnExport" name="btnExport" value="匯出" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //取得"清理狀態"下拉選單
+    function getStatus() {
+        return $('#hidStatus').val();
+    }
+
+
+    //取得"原給付性質"下拉選單
+    function getOPaidCd() {
+        return $('#hidOPaidCd').val();
+    }
+
+
+
+    $(function () {
+
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#hidOPaidCd').val('@Html.Raw(ViewBag.oPaidCdjqList)');
+            $('#hidStatus').val('@Html.Raw(ViewBag.clrStatusjqList)');
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            $('#btnQry').attr('disabled', false);
+
+            $("#status_chk0").prop("checked", false);
+            $("#status_chk1").prop("checked", false);
+            $("#status_chk2").prop("checked", false);
+            $("#status_chk3").prop("checked", false);
+            $("#status_chk4").prop("checked", false);
+            createGrid("");
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            var bPass = true;
+
+            //取得有勾選的"清理狀態"
+            var rStatus = document.getElementsByName("chkStatus");
+            var status = "";
+            for (var i = 0; i < rStatus.length; i++) {
+                if (rStatus[i].checked)
+                    status = status + rStatus[i].value + '|';
+            }
+            if (status == "") {
+                bPass = false;
+                validationSummary.append('<li>' + '請勾選一個以上的「清理狀態」!!' + '</li>');
+            } else {
+                status = status.substring(0, status.length - 1);
+            }
+
+            if (!bPass)
+                return;
+
+            createGrid(status);
+
+            @*$('#btnQry').attr('disabled', true);
+
+            var jsonData = JSON.stringify({
+                'status': status
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryCheck", "OAP0054")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+                        else {
+                            $("#paid_id").val(data.paid_id);
+                            $("#paid_name").val(data.paid_name);
+                        }
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });*@
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+
+
+        //查詢結果清單
+        function createGrid(status) {
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var dataType = $('input:radio:checked[name="dataType"]').val();
+
+            var para = {
+                'status': status
+            };
+
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/OAP0054/qryCheck/',
+                postData: para,
+                datatype: 'json',
+                //jsonReader: {
+                //    repeatitems: false, id: 'tempId'
+                //},
+                jsonReader: {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    Id: 'check_no'
+                },
+                mtype: 'POST',
+                caption: '查詢結果',
+                colModel: [
+                    {
+                        label: '給付對象ID',
+                        name: 'paid_id', align: 'center', width: '120', editable: false,
+                    },
+                    {
+                        label: '支票號碼',
+                        name: 'check_no', align: 'center', width: '120', editable: false
+                    },
+                    {
+                        label: '支票帳號簡稱',
+                        name: 'check_acct_short', align: 'center', width: '110', editable: false
+                    },
+                    {
+                        label: '支票到期日',
+                        name: 'check_date', align: 'center', width: '120', editable: false
+                    },
+                    {
+                        label: '支票金額',
+                        name: 'check_amt', align: 'right', width: '120', editable: false,
+                        formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                    },
+                    {
+                        label: '給付性質',
+                        name: 'o_paid_cd', align: 'center', width: '120', editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getOPaidCd()
+                        }
+                    },
+                    {
+                        label: '大系統別',
+                        name: 'system', align: 'center', width: '80', editable: false
+                    },
+                    {
+                        label: '清理狀態',
+                        name: 'status', align: 'center', width: '160', editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getStatus()
+                        }
+                    }
+
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20, 50],
+                sortname: 'paid_id',
+                sortorder: "acs",
+                viewrecords: true,
+                rownumbers: true,
+                loadonce: false,
+                loadComplete: function () {
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (cnt == 0) {
+                        $('#validationSummary').children().remove();
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + '沒有符合查詢條件的資料，請重新輸入查詢條件！' + '</li>');
+
+                    }
+                    $.unblockUI(); //畫面打開
+                }
+            });
+
+        }
+
+
+
+        //*-------------------GRID end--------------------*//
+
+
+        //*---------------匯出 begin ----------------*//
+            $("#btnExport").click().on('click', function () {
+                $('#validationSummary').children().remove();
+
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                var bPass = true;
+
+                //取得有勾選的"清理狀態"
+                var rStatus = document.getElementsByName("chkStatus");
+                var status = "";
+                for (var i = 0; i < rStatus.length; i++) {
+                    if (rStatus[i].checked)
+                        status = status + rStatus[i].value + '|';
+                }
+                if (status == "") {
+                    bPass = false;
+                    validationSummary.append('<li>' + '請勾選一個以上的「清理狀態」!!' + '</li>');
+                } else {
+                    status = status.substring(0, status.length - 1);
+                }
+
+                if (!bPass)
+                    return;
+
+
+                var jsonData = JSON.stringify({
+                    'status': status
+                });
+
+
+
+                $.blockUI(); //畫面鎖起來
+
+                $.ajax({
+                    type: "POST",
+                    data: jsonData,
+                    dataType: "json",
+                    url: '@Url.Action("execExport", "OAP0054")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data.success) {
+                            var url = '/OAP0054/downloadRpt?id=' + data.guid;
+
+                            window.location = url;
+
+                        } else {
+
+                            if (data.err.length > 0) {
+                                validationSummary.append('<li>' + data.err + '</li>');
+                            }
+                        }
+
+
+                        $.unblockUI(); //畫面打開
+                    }
+                });
+            });
+            //*---------------匯出 end ----------------*//
+    });
+</script>
+
+

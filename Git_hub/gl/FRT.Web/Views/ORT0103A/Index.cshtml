@@ -1,0 +1,321 @@
+﻿@model FRT.Web.ViewModels.ORT0103Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                    </div>
+                </div>
+
+                <div id="dataSum" style="color:red;">
+                </div>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var rejected_Code = $('#grid').jqGrid('getCell', rowId, 'rejected_Code');
+        var index = $.inArray(rejected_Code, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRec == "True")
+                recList.push(rejected_Code);
+            else if (index >= 0)
+                recList.splice(index, 1);
+        }
+
+    };
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var rejected_Code = $('#grid').jqGrid('getCell', rowId, 'rejected_Code');
+        var index = $.inArray(rejected_Code, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRtn == "True")
+                rtnList.push(rejected_Code);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+    function formatterStatus(cellvalue, options, rdata) {
+        switch (cellvalue) {
+            @{
+                foreach (var item in ((Dictionary<string,string>)(ViewBag.statusjqList)))
+                {
+                        <text>
+                    case '@item.Key':
+                        return '@item.Value';
+                        </text>
+                }
+            }
+        }
+        return '';
+    }
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            //dataSum
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        }else {
+            createGrid(true);
+        }
+
+         //*--------------查詢待覆核資料  begin-----------------*//
+
+        function createGrid(bClearMsg) {
+            recList = [];
+            rtnList = [];
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/ORT0103A/LoadData/',
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false,
+                },
+                mtype: 'POST',
+                colModel: [
+                    {
+                        label: '核可',
+                        name: 'rec', index: 'rec', align: 'center', width: '50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    {
+                        label: '駁回',
+                        name: 'rtn', index: 'rtn', align: 'center', width: '50', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    //{ label: 'rejected_Code', name: 'rejected_Code', align: 'center', hidden: true },
+                    {
+                        label: '執行類型',
+                        name: 'status', align: 'center', width: '120',
+                        formatter: formatterStatus,
+                    },
+                    {
+                        label: '退匯代碼',
+                        name: 'rejected_Code', align: 'center', width: '80',
+                    },
+                    {
+                        label: '退匯原因',
+                        name: 'rejected_Reason', align: 'center', width: '100',
+                    },
+                    {
+                        label: '收款人ID',
+                        name: 'received_Id', align: 'center', width: '100'
+                    },
+                    {
+                        label: '收款人戶名',
+                        name: 'received_Account', align: 'center', width: '100'
+                    },
+                    {
+                        label: '銀行代號',
+                        name: 'bank_Code', align: 'center', width: '100'
+                    },
+                    {
+                        label: '銀行帳號',
+                        name: 'bank_Account', align: 'center', width: '100'
+                    },
+                    {
+                        label: '申請單號',
+                        name: 'aplyNo', align: 'center', width: '80', hidden: true,
+                        editable: false,
+                    },
+                    {
+                        label: '申請人ID',
+                        name: 'update_Id', align: 'center', width: '80',
+                        editable: false,
+                    },
+                    {
+                        label: '申請人員',
+                        name: 'update_Name', align: 'center', width: '80',
+                        editable: false,
+                    },
+                    { label: '申請日期時間', name: 'update_Datetime', align: 'center', width: '160' }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                sortname: 'aplyNo',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+                    var cnt = $('#grid').getGridParam('records');
+
+                    if (bClearMsg)
+                        $('#validationSummary').children().remove();
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        if (bClearMsg & cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+                    } else if (!data.success && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+                        //還原畫面有勾選的資料
+                        ids = $(this).jqGrid('getDataIDs');
+                        for (j = 0; j <= ids.length - 1; j++) {
+                            rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                            for (i = 0, count = recList.length; i < count; i++) {
+                                if (rowData.refNoN == recList[i])
+                                    $("#grid").jqGrid("setCell", rowData.refNoN, "rec", "True");
+                            }
+
+                            for (i = 0, count = rtnList.length; i < count; i++) {
+                                if (rowData.refNoN == rtnList[i])
+                                    $("#grid").jqGrid("setCell", rowData.refNoN, "rtn", "True");
+                            }
+                        }
+                    }
+                }
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+         //*--------------查詢待覆核資料  end-----------------*//
+
+         //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+            } else {
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.rejected_Code == recList[i])
+                                recData.push(rowData);
+                        }
+                    } else
+                        recData = null;
+
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.rejected_Code == rtnList[i])
+                                rtnData.push(rowData);
+                        }
+                    } else
+                        rtnData = null;
+                }
+
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "ORT0103A")",
+                    data: JSON.stringify({
+                        'recData': recData,
+                        'rtnData': rtnData
+                    }
+                    ),
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+
+                        if (data.success) {
+                            validationSummary.append('<li>作業成功！</li>');
+                        } else {
+                            if (data.err.length > 0) {
+                                for (var i = 0; i <= data.err.length - 1; i++) {
+                                    validationSummary.append('<li>' + data.err[i].refNo + ':' + data.err[i].errorMsg + '</li>');
+                                }
+                            }
+                        }
+
+                        recList = [];
+                        rtnList = [];
+
+                        createGrid(false);
+
+                        $.unblockUI(); //畫面打開
+                    },
+                    error: function () {
+                        $.unblockUI(); //畫面打開
+                    }
+                });
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="dbFDModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="FFD_ITEM_ACCOUNT_HIS">
+          <Key>
+            <PropertyRef Name="aply_no" />
+            <PropertyRef Name="item" />
+            <PropertyRef Name="item_kind" />
+            <PropertyRef Name="fund_ac_corp_no" />
+            <PropertyRef Name="item_effective_date" />
+          </Key>
+          <Property Name="aply_no" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="exec_action" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="item" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="item_kind" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="fund_ac_corp_no" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="item_account" Type="varchar" MaxLength="10" />
+          <Property Name="item_desc" Type="nvarchar" MaxLength="100" />
+          <Property Name="item_remark" Type="nvarchar" MaxLength="200" />
+          <Property Name="item_transfer" Type="char" MaxLength="1" />
+          <Property Name="item_effective_date" Type="date" Nullable="false" />
+          <Property Name="item_expiration_date" Type="date" />
+          <Property Name="update_id" Type="varchar" MaxLength="10" />
+          <Property Name="update_datetime" Type="datetime" />
+          <Property Name="appr_stat" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityContainer Name="dbFDModelStoreContainer">
+          <EntitySet Name="FFD_ITEM_ACCOUNT_HIS" EntityType="Self.FFD_ITEM_ACCOUNT_HIS" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="dbFDModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="FFD_ITEM_ACCOUNT_HIS">
+          <Key>
+            <PropertyRef Name="aply_no" />
+            <PropertyRef Name="item" />
+            <PropertyRef Name="item_kind" />
+            <PropertyRef Name="fund_ac_corp_no" />
+            <PropertyRef Name="item_effective_date" />
+          </Key>
+          <Property Name="aply_no" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="exec_action" Type="String" MaxLength="1" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="item" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="item_kind" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="fund_ac_corp_no" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="item_account" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="item_desc" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="item_remark" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="item_transfer" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="item_effective_date" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="item_expiration_date" Type="DateTime" Precision="0" />
+          <Property Name="update_id" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="update_datetime" Type="DateTime" Precision="3" />
+          <Property Name="appr_stat" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityContainer Name="dbFDEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="FFD_ITEM_ACCOUNT_HIS" EntityType="Self.FFD_ITEM_ACCOUNT_HIS" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="dbFDModelStoreContainer" CdmEntityContainer="dbFDEntities">
+          <EntitySetMapping Name="FFD_ITEM_ACCOUNT_HIS">
+            <EntityTypeMapping TypeName="dbFDModel.FFD_ITEM_ACCOUNT_HIS">
+              <MappingFragment StoreEntitySet="FFD_ITEM_ACCOUNT_HIS">
+                <ScalarProperty Name="aply_no" ColumnName="aply_no" />
+                <ScalarProperty Name="exec_action" ColumnName="exec_action" />
+                <ScalarProperty Name="item" ColumnName="item" />
+                <ScalarProperty Name="item_kind" ColumnName="item_kind" />
+                <ScalarProperty Name="fund_ac_corp_no" ColumnName="fund_ac_corp_no" />
+                <ScalarProperty Name="item_account" ColumnName="item_account" />
+                <ScalarProperty Name="item_desc" ColumnName="item_desc" />
+                <ScalarProperty Name="item_remark" ColumnName="item_remark" />
+                <ScalarProperty Name="item_transfer" ColumnName="item_transfer" />
+                <ScalarProperty Name="item_effective_date" ColumnName="item_effective_date" />
+                <ScalarProperty Name="item_expiration_date" ColumnName="item_expiration_date" />
+                <ScalarProperty Name="update_id" ColumnName="update_id" />
+                <ScalarProperty Name="update_datetime" ColumnName="update_datetime" />
+                <ScalarProperty Name="appr_stat" ColumnName="appr_stat" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

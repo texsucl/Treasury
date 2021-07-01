@@ -1,0 +1,359 @@
+﻿@model FGL.Web.ViewModels.GLAplyRecModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = "OGL00002A 保險商品編號代碼轉換覆核作業";
+
+
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+
+                        @Html.DisplayTextFor(model => model.aplyNo)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createUid)：
+
+                        @Html.DisplayTextFor(model => model.createUid)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.createDt)：
+
+                        @Html.DisplayTextFor(model => model.createDt)
+                    </td>
+                </tr>
+
+
+
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+            <br>
+
+            <table>
+                <tr>
+                    <td>A 險種細分類</td>
+                    <td>B 個人團體別</td>
+                    <td>C 契約別</td>
+                    <td>D 傳統非傳統</td>
+                    <td>E 主附約</td>
+                    <td>F 險種類型2</td>
+                </tr>
+                <tr>
+                    <td>G 危險分類</td>
+                    <td>H 年歲滿期</td>
+                    <td>I 審查/特殊商品/給付別</td>
+                    <td>J 速報註記</td>
+                    <td>K 公司別註記</td>
+                </tr>
+            </table>
+
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+            <br>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            createGrid();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+         /*------------------異動的科目代號---------------------*/
+        function createGrid() {
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            var para = {
+                aplyNo: aplyNo
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/OGL00002A/qryHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false//, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                caption: '異動清單',
+                colModel: [
+                     { label: '執行功能', name: 'execActionDesc', align: 'center', width: 80 },
+                    { label: '1', name: 'p01', align: 'center', editable: false, width: 35 },
+                 { label: '2', name: 'p02', align: 'center', editable: false, width: 35 },
+                 { label: '3', name: 'p03', align: 'center', editable: false, width: 35 },
+                 { label: '4', name: 'p04', align: 'center', editable: false, width: 35 },
+                 { label: '5', name: 'p05', align: 'center', editable: false, width: 35 },
+                 { label: '6', name: 'p06', align: 'center', editable: false, width: 35 },
+                 { label: '7', name: 'p07', align: 'center', editable: false, width: 35 },
+                 { label: '8', name: 'p08', align: 'center', editable: false, width: 35 },
+                 { label: '9', name: 'p09', align: 'center', editable: false, width: 35 },
+                 { label: '10', name: 'p10', align: 'center', editable: false, width: 35 },
+                 { label: '11', name: 'p11', align: 'center', editable: false, width: 35 },
+                 { label: '12', name: 'p12', align: 'center', editable: false, width: 35 },
+                 { label: '13', name: 'p13', align: 'center', editable: false, width: 35 },
+                 { label: '14', name: 'p14', align: 'center', editable: false, width: 35 },
+                 { label: '15', name: 'p15', align: 'center', editable: false, width: 35 },
+                 { label: '16', name: 'p16', align: 'center', editable: false, width: 35 },
+                 { label: '17', name: 'p17', align: 'center', editable: false, width: 35 },
+                 { label: '18', name: 'p18', align: 'center', editable: false, width: 35 },
+                 { label: '19', name: 'p19', align: 'center', editable: false, width: 35 },
+                 { label: '20', name: 'p20', align: 'center', editable: false, width: 35 },
+                 { label: '21', name: 'p21', align: 'center', editable: false, width: 35 },
+                 { label: '22', name: 'p22', align: 'center', editable: false, width: 35 },
+                 { label: '23', name: 'p23', align: 'center', editable: false, width: 35 },
+                 { label: '24', name: 'p24', align: 'center', editable: false, width: 35 },
+                 { label: '25', name: 'p25', align: 'center', editable: false, width: 35 },
+                 { label: '26', name: 'p26', align: 'center', editable: false, width: 35 },
+                 { label: '27', name: 'p27', align: 'center', editable: false, width: 35 },
+
+                 { label: 'A', name: 'tranA', align: 'center', editable: false, width: 35 },
+                 { label: 'B', name: 'tranB', align: 'center', editable: false, width: 35 },
+                 { label: 'C', name: 'tranC', align: 'center', editable: false, width: 35 },
+                 { label: 'D', name: 'tranD', align: 'center', editable: false, width: 35 },
+                 { label: 'E', name: 'tranE', align: 'center', editable: false, width: 35 },
+                 { label: 'F', name: 'tranF', align: 'center', editable: false, width: 35 },
+                 { label: 'G', name: 'tranG', align: 'center', editable: false, width: 35 },
+                 { label: 'H', name: 'tranH', align: 'center', editable: false, width: 40 },
+                 { label: 'I', name: 'tranI', align: 'center', editable: false, width: 45 },
+                 { label: 'J', name: 'tranJ', align: 'center', editable: false, width: 35 },
+                 { label: 'K', name: 'tranK', align: 'center', editable: false, width: 35 }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: false,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 20,
+                rowList: [20, 50],
+               // sortname: 'itemType',
+               // sortorder: "acs",
+                resizeStop: function () {
+                    resizeColumnHeader.call(this);
+                    fixPositionsOfFrozenDivs.call(this);
+                    fixGboxHeight.call(this);
+                },
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    var cnt = $('#grid').getGridParam('records')
+                    $('#validationSummary').children().remove();
+
+                    //var ids = jQuery("#grid").jqGrid('getDataIDs');
+                    //for (var i = 0; i < ids.length; i++) {
+                    //    var rowId = ids[i];
+                    //    if (i % 4 == 2 || i % 4 == 3)
+                    //        $("#grid").jqGrid('setRowData', rowId, false, { weightfont: 'bold', background: 'lightgoldenrodyellow' });
+                    //}
+
+                    $.unblockUI(); //畫面打開
+                }
+
+            });
+
+            jQuery("#grid").jqGrid('setGroupHeaders', {
+                useColSpanStyle: true,
+                groupHeaders: [
+                    { startColumnName: 'p01', numberOfColumns: 27, titleText: '保險商品編號(欄位空白表示不檢核轉換)' }
+                    , { startColumnName: 'tranA', numberOfColumns: 11, titleText: '對照欄位' }
+
+                ]
+
+            });
+            //jQuery("#grid").jqGrid('setGroupHeaders', {
+            //    useColSpanStyle: true,
+            //    groupHeaders: [
+            //        { startColumnName: 'p01', numberOfColumns: 2, titleText: 'A' }
+            //    , { startColumnName: 'p03', numberOfColumns: 1, titleText: 'B' }
+            //    , { startColumnName: 'p04', numberOfColumns: 1, titleText: 'C' }
+            //    , { startColumnName: 'p05', numberOfColumns: 1, titleText: 'D' }
+            //    , { startColumnName: 'p06', numberOfColumns: 1, titleText: 'E' }
+            //    , { startColumnName: 'p07', numberOfColumns: 2, titleText: 'F' }
+            //    , { startColumnName: 'p09', numberOfColumns: 1, titleText: 'G' }
+            //    , { startColumnName: 'p10', numberOfColumns: 3, titleText: 'H' }
+            //    , { startColumnName: 'p13', numberOfColumns: 4, titleText: 'I' }
+            //    , { startColumnName: 'p17', numberOfColumns: 1, titleText: 'J' }
+            //    , { startColumnName: 'p18', numberOfColumns: 1, titleText: 'K' }
+            //    , { startColumnName: 'p19', numberOfColumns: 9, titleText: '' }
+            //    ]
+
+            //});
+        }
+
+
+
+        //function arrtColspan(rowId, cellValue, rawObject, cm, rdata) {
+        //    return ' colspan=' + '"2"';
+
+        //}
+        //function arrtRowspan(rowId, cellValue, rawObject, cm, rdata) {
+        //    return ' rowspan=' + '"2"';
+
+        //}
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10182A/index");
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        apprStat: "3"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OGL00002A")',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+
+                        $.unblockUI();
+                    }
+                });
+           
+
+
+
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aplyNo: aplyNo,
+                        apprStat: "2"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OGL00002A")',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+
+                        if (data.success) {
+                            $("#btnConfirm").attr('disabled', true);
+                            $("#btnReturn").attr('disabled', true);
+                            validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                        } else {
+                            validationSummary.append('<li>' + data.errors + '</li>');
+                        }
+
+                        $.unblockUI();
+                    } 
+                });
+
+
+        });
+
+
+
+    });
+</script>
+
+

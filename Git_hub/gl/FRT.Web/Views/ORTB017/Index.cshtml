@@ -1,0 +1,359 @@
+﻿ @{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr >
+                        <td colspan="2">
+                            <label>查詢條件 : </label>
+                            @Html.RadioButton("searchType", "ORTB017_fastNo", new { @checked = true }) 快速付款編號查詢
+                            @Html.RadioButton("searchType", "ORTB017_transfer_No") 匯款轉檔批號查詢
+                        </td>
+                    </tr>
+                    <tr class="searchType ORTB017_fastNo">
+                        <td colspan="2">
+                            快速付款編號 :
+                            <input type="text" id="fastNo_S" style="color:black;" onkeyup="InputToUpper(this);" />
+                            ~
+                            <input type="text" id="fastNo_E" style="color:black;" onkeyup="InputToUpper(this);" />
+                            <label style="color:red;"> (如有輸入快速付款編號,起訖均須輸入)</label>
+                        </td>
+                    </tr>
+                    <tr class="searchType ORTB017_transfer_No" style="display:none;color:red;" >
+                        <td colspan="2">
+                            * 匯款轉檔批號 :
+                            <input type="text"  style="color:black;" id="transfer_No"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <label>下載格式 : </label>
+                            @Html.RadioButton("downloadType", "FBO", new { @checked = true }) FBO
+                            @Html.RadioButton("downloadType", "RT") 臨櫃
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:20px" width="50%">
+                            筆數/金額 (勾選合計) :
+                            <label id="ORTB017_Checked" style="font-size:20px;color:red;">0/0</label>
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnFBO" name="btnFBO" value="產生FBO匯款格式" class="btn btn-primary" />
+                        <input type="submit" id="btnReport" name="btnReport" value="列印報表" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+                <div class="row" style="padding-right:20px">
+                    @*<div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>*@
+                    <div id="ORTB017jqgridDiv" class="jqd" style="padding-bottom:5px;">
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var ORTB017url = {};
+        ORTB017url.query = '@Url.Action("qryORTB017", "ORTB017")';
+        ORTB017url.getData = '@Url.Action("GetCacheData", "ORTB017")';
+        ORTB017url.check = '@Url.Action("ORTB017Check", "ORTB017")';
+        ORTB017url.FBO = '@Url.Action("ORTB017FBO", "ORTB017")';
+        ORTB017url.CheckFBO = '@Url.Action("CheckORTB017FBO", "ORTB017")';
+        ORTB017url.getReportParm = '@Url.Action("GetReportParm", "ORTB017")';
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        } else {
+            $('#btnFBO').attr('disabled', true);
+            $('#btnReport').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+
+
+            $('input[name=searchType]').on('change', function () {
+                var type = $('input[name=searchType]:checked').val();
+                $('#validationSummary').children().remove();
+                $('.searchType').hide();
+                $('.' + type).show();
+                $('#btnReport').attr('disabled', true);
+                $('#fastNo_S').val('');
+                $('#fastNo_E').val('');
+                $('#transfer_No').val('');
+            });
+
+
+            //*---------------清除 begin ----------------*//
+            $("#btnClear").on('click', function () {
+                $('input[name=searchType]').attr('disabled', false);
+                $('#validationSummary').children().remove();
+                $('#fastNo_S').val('');
+                $('#fastNo_S').attr('disabled', false);
+                $('#fastNo_E').val('');
+                $('#fastNo_E').attr('disabled', false);
+                $('#transfer_No').val('');
+                $('#transfer_No').attr('disabled', false);
+                $('#btnQry').attr('disabled', false);
+                $('#btnFBO').attr('disabled', true);
+                $('#btnReport').attr('disabled', true);
+                $('#ORTB017_Checked').text('0/0');
+                jqgridCustom.clearJqgrid('ORTB017jqgridDiv');
+            });
+            //*---------------清除 end ----------------*//
+
+            function PrintReport()
+            {
+                var _fillrt_20 = '';
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: ORTB017url.getReportParm,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    _fillrt_20 = _fillrt_20 || result;
+                    if (_fillrt_20.trim() != '') {
+                        var parms = [];
+                        parms.push(customerUtility.reportParm('fillrt_20', _fillrt_20));
+                        customerUtility.report(
+                        customerUtility.reportModel('快速付款改FBO匯款報表', 'ORTB017'),
+                        parms,
+                        null);
+                    }
+                });
+            }
+
+            $('#btnReport').on('click', function () {
+                $.blockUI(); //畫面鎖起來
+                PrintReport();
+                $.unblockUI(); //畫面打開
+            });
+
+            $('#btnFBO').on('click', function () {
+                $('#validationSummary').children().remove();
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    dataType: "Json",
+                    url: ORTB017url.CheckFBO,
+                    contentType: 'application/json'
+                })
+                .done(function (checkresult) {
+                    if (checkresult.RETURN_FLAG) {
+                        if (checkresult.DESCRIPTION != '')
+                            if (!confirm(checkresult.DESCRIPTION))
+                            {
+                                $.unblockUI(); //畫面打開
+                                return false;
+                            }
+                        $.blockUI(); //畫面鎖起來
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                filler_20: $('#transfer_No').val(), //轉檔批號
+                                downloadType: $('input[name=downloadType]:checked').val() //FNO or 臨櫃
+                            }),
+                            dataType: "json",
+                            url: ORTB017url.FBO,
+                            contentType: 'application/json'
+                        }).done(function (result) {
+                            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                            if (validationSummary.length == 0) {
+                                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                            }
+                            validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                            if (result.RETURN_FLAG) {
+                                $('#btnFBO').attr('disabled', true);
+                                $('#ORTB017_Checked').text('0/0');
+                                jqgridCustom.clearJqgrid('ORTB017jqgridDiv');
+                                var _filler_20 = result.Datas;
+                                setTimeout(function () { window.location.href = "@Url.RouteUrl(new{ Controller = "ORTB017", Action = "DownloadFBOzip" })/?filler_20=" + _filler_20 + "&downloadType=" + $('input[name=downloadType]:checked').val(); }, 3000);
+                                PrintReport();
+                                $('#btnReport').attr('disabled', false);
+                            }
+                            $.unblockUI(); //畫面打開
+                        });
+                    }
+                    else {
+                        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        if (validationSummary.length == 0) {
+                            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                            validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        }
+                        validationSummary.append('<li>' + checkresult.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            })
+
+
+            //*---------------查詢 begin ----------------*//
+            $("#btnQry").on('click', function () {
+                $('#validationSummary').children().remove();
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                var _fastNo_S = '';
+                var _fastNo_E = '';
+                var _filler_20 = '';
+                var searchType =$('input[name=searchType]:checked').val();
+                if (searchType == "ORTB017_fastNo") {
+                    if (($('#fastNo_S').val().trim() != '' || $('#fastNo_E').val().trim() != '') && ($('#fastNo_S').val().trim() == '' || $('#fastNo_E').val().trim() == '')) {
+                        validationSummary.append('<li>' + '快速付款編號起訖均為必輸' + '</li>');
+                        return false;
+                    }
+                    else {
+                        _fastNo_S = $('#fastNo_S').val().trim();
+                        _fastNo_E = $('#fastNo_E').val().trim();
+                    }
+                }
+                else {
+                    if ($('#transfer_No').val().trim() == '') {
+                        validationSummary.append('<li>' + '匯款轉檔批號為必輸' + '</li>');
+                        return false;
+                    }
+                    else {
+                        _filler_20 = $('#transfer_No').val().trim();
+                    }
+                }
+                $('#btnReport').attr('disabled', true);
+                $.blockUI(); //畫面鎖起來
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        fastNo_S: _fastNo_S, //快速付款起號
+                        fastNo_E: _fastNo_E, //快速付款迄號
+                        filler_20: _filler_20 //轉檔批號
+                    }),
+                    dataType: "json",
+                    url: ORTB017url.query,
+                    contentType: 'application/json'
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('input[name=searchType]').attr('disabled', true);
+                        $('#fastNo_S').attr('disabled', true);
+                        $('#fastNo_E').attr('disabled', true);
+                        $('#transfer_No').attr('disabled', true);
+                        $('#btnQry').attr('disabled', true);
+                        ORTB017Grid();
+                    }
+                    else {
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                        if(_filler_20 != '' && result.DESCRIPTION.indexOf('已有轉檔批號') > -1)
+                            $('#btnReport').attr('disabled', false);
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            });
+            //*---------------查詢 end ----------------*//
+
+            function formatterCheckFlag(cellvalue, options, rdata) {
+                //var str = "<div class='checkbox checkbox-info' title=' ' style='padding-top: 0px; margin-top: 0px; margin-bottom: 0px; vertical-align:middle; position:static ;'><input type='checkbox' id='" + options.gid + options.colModel.index + options.rowId + "' ' tage='" + options.colModel.index + "' name='" +
+                //        options.gid + options.colModel.index + options.rowId + "' title =' ' " + (cellvalue == true ? 'checked' : ' ') + " class='cbox ORTB017checkFlag customerCheck'></div>";
+
+                var str = "<input type='checkbox' class = 'ORTB017checkFlag' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ''" + (cellvalue == true ? 'checked' : ' ') + " />";
+                return str;
+            }
+
+            function ORTB017Grid() {
+                var colNameArray = ['FBO匯款', '快速付款編號', '收款人ID', '銀行代號', '匯款帳號', '匯款金額', '收款人戶名'];
+                var colModelArray = [];
+                colModelArray.push({ name: "checkFlag", index: "checkFlag", width: 80, sortable: false, align: 'center', formatter: formatterCheckFlag });
+                colModelArray.push({ name: "FAST_NO", index: "FAST_NO", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "PAID_ID", index: "PAID_ID", width: 120, sortable: false, align: 'center' });
+                colModelArray.push({ name: "BANK_CODE_SUB_BANK", index: "BANK_CODE_SUB_BANK", width: 70, sortable: false});
+                colModelArray.push({ name: "BANK_ACT", index: "BANK_ACT", width: 170, sortable: false });
+                colModelArray.push({ name: "REMIT_AMT", index: "REMIT_AMT", width: 170, sortable: false, align: 'right' });
+                colModelArray.push({ name: "RCV_NAME", index: "RCV_NAME", width: 220, sortable: false });
+                jqgridCustom.createJqgridByCache(
+                    'ORTB017jqgridDiv',
+                    'ORTB017TempList',
+                    'ORTB017TempPeger',
+                    ORTB017url.getData,
+                    {
+
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '快速付款改FBO匯款作業(BCP-緊急應變措施)',
+                    jqgridCustom.getPage('ORTB017jqgridDiv'),
+                    jqgridCustom.getRowNum('ORTB017jqgridDiv'),
+                    ORTB017CompleteFun,
+                    true
+                    );
+            }
+
+            function ORTB017CompleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('td').find('.ORTB017checkFlag').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            ORTB017Check(i + 1, $(this).prop('checked'));
+                        });
+                    });
+                });
+            }
+
+            function ORTB017Check(rowid, flag) {
+                var listId = 'ORTB017TempList';
+                var data = $("#" + listId).getRowData(rowid);
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        fastNo: data.FAST_NO,
+                        flag: flag
+                    }),
+                    dataType: "json",
+                    url: ORTB017url.check,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#' + 'btnFBO').attr('disabled', !result.Datas);
+                        $('#ORTB017_Checked').text(result.DESCRIPTION);
+                        //ORTB017Grid();
+                    }
+                    else {
+                        $('#ORTB017_Checked').text('');
+                        $('#validationSummary ul.validation-summary-errors').append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+        }
+    });
+</script>
+
+

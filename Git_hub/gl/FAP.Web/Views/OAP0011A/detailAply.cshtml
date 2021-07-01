@@ -1,0 +1,324 @@
+﻿@model FAP.Web.ViewModels.OAP0011Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.Title = ViewBag.funcName;
+
+    var clrLevel1List = ViewBag.clrLevel1List as SelectList;
+    var clrLevel2List = ViewBag.clrLevel2List as SelectList;
+}
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aply_no)：
+                        @Html.DisplayTextFor(model => model.aply_no)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.check_amt)：
+                        @Html.TextBoxFor(model => model.check_amt, new { @disabled = true })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_id)：
+                        @Html.DisplayTextFor(model => model.update_id)@Html.DisplayTextFor(model => model.update_name)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.update_datetime)：
+                        @Html.DisplayTextFor(model => model.update_datetime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_id)：
+                        @Html.DisplayTextFor(model => model.paid_id)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.paid_name)：
+                        @Html.DisplayTextFor(model => model.paid_name)
+                    </td>
+                    
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.closed_no)：
+                        @Html.DisplayTextFor(model => model.closed_no)
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.closed_date)：
+                        @Html.TextBoxFor(model => model.closed_date, new { @disabled = true })
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.level_1)：
+                        @Html.DropDownList("level_1", clrLevel1List, "", new { @disabled = true })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.level_2)：
+                        @Html.DropDownList("level_2", clrLevel2List, "", new { @disabled = true })
+                    </td>
+                </tr>
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="qryResult" class="col-sm-24">
+                    <table id="grid"></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+
+        if (bHaveData) {
+            $('#hidFscRange').val('@Html.Raw(ViewBag.fscRangejqList)');
+
+            
+            genGrid();
+
+        } else {
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+        //*---------------修改明細查詢 begin ----------------*//
+        function genGrid() {
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+            $.blockUI(); //畫面鎖起來
+
+            var jsonData = JSON.stringify({
+                'aply_no': '@Html.Raw(ViewBag.aply_no)'
+            });
+
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryVeTraceHis", "OAP0011A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+                        if (data.dataList.length == 0)
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+        //*---------------修改明細查詢 end ----------------*//
+
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "check_no" },
+            colModel: [
+                  {
+                      label: '支票號碼',
+                      name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                  },
+                  {
+                      label: '支票帳號簡稱',
+                      name: 'check_acct_short', align: 'center', width: '120', editable: false
+                },
+                {
+                    label: '清理狀態',
+                    name: 'status', align: 'center', width: '120', editable: false, hidden: true
+                },
+                  {
+                      label: '支票金額',
+                      name: 'check_amt', align: 'right', editable: false,
+                      formatter: 'currency', formatoptions: { decimalSeparator: ".", thousandsSeparator: ",", decimalPlaces: 0 }
+                  },
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            sortname: "exec_date",
+            rownumbers: true,
+            viewrecords: true,
+            rowNum: 25,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            onSelectRow: function (check_no) {
+
+            },
+            loadComplete: function () {
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+                var checkAmt = 0;
+                $("#btnConfirm").attr('disabled', false);    //modify by daiyu 20210331
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+                    checkAmt += Number(rowData.check_amt);
+
+                    if (rowData.status == "1")
+                        $("#btnConfirm").attr('disabled', true);     //modify by daiyu 20210331
+                }
+
+                //$('#check_amt').val(checkAmt);
+                $("#check_amt").val(Comma(checkAmt));
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10181A/index");
+            history.go(-1)
+        })
+
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+                $.ajax({
+                    type: "POST",
+                    data:JSON.stringify({
+                        'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                        , 'apprStat': "3"
+                    }),
+                    dataType: "json",
+                    url: '@Url.Action("execSave", "OAP0011A")',
+            contentType: 'application/json',
+            success: function (data) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+    });
+
+
+
+    //*------------------------核可--------------------------*//
+    $("#btnConfirm").click().on('click', function () {
+        $('#validationSummary').children().remove();
+        $.blockUI();
+
+        var aply_no = '@Html.Raw(ViewBag.aply_no)';
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                'aply_no': '@Html.Raw(ViewBag.aply_no)'
+                , 'apprStat': "2"
+            }),
+            dataType: "json",
+            url: '@Url.Action("execSave", "OAP0011A")',
+            contentType: 'application/json',
+            success: function (data) {
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+
+                if (data.success) {
+                    $("#btnConfirm").attr('disabled', true);
+                    $("#btnReturn").attr('disabled', true);
+                    validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                } else {
+                    validationSummary.append('<li>' + data.errors + '</li>');
+                }
+
+                $.unblockUI();
+            }
+        });
+    });
+
+
+
+    });
+</script>
+
+

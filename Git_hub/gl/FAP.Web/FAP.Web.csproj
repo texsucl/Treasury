@@ -1,0 +1,1500 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7FA3FEAD-1C0E-4703-9E30-9E88D5CA762B}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FAP.Web</RootNamespace>
+    <AssemblyName>FAP.Web</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\MyMVCRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AlexPilotti.FTPS.Client, Version=1.1.0.27735, Culture=neutral, PublicKeyToken=48316da1e84b328d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\AlexPilotti.FTPS.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML, Version=0.91.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClosedXML.0.91.0\lib\net452\ClosedXML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CsvHelper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsvHelper.2.16.3.0\lib\net45\CsvHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DotNetZip, Version=1.15.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.15.0\lib\net40\DotNetZip.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ExcelNumberFormat, Version=1.0.3.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelNumberFormat.1.0.3\lib\net20\ExcelNumberFormat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FastMember.Signed, Version=1.0.0.9, Culture=neutral, PublicKeyToken=9e8f22703bef9a29, processorArchitecture=MSIL">
+      <HintPath>..\packages\FastMember.Signed.1.1.0\lib\net40\FastMember.Signed.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Fubon.Orm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\Fubon.Orm.dll</HintPath>
+    </Reference>
+    <Reference Include="Fubon.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\Fubon.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.11.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.11\lib\itextsharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="itextsharp.xmlworker, Version=5.5.11.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itextsharp.xmlworker.5.5.11\lib\itextsharp.xmlworker.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.Agent.Intercept, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.Agent.Intercept.1.2.1\lib\net45\Microsoft.AI.Agent.Intercept.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.DependencyCollector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.DependencyCollector.2.0.0\lib\net45\Microsoft.AI.DependencyCollector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.PerfCounterCollector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.PerfCounterCollector.2.0.0\lib\net45\Microsoft.AI.PerfCounterCollector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.ServerTelemetryChannel, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.2.0.0\lib\net45\Microsoft.AI.ServerTelemetryChannel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.Web.2.0.0\lib\net45\Microsoft.AI.Web.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AI.WindowsServer, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.WindowsServer.2.0.0\lib\net45\Microsoft.AI.WindowsServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ApplicationInsights, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ApplicationInsights.2.0.0\lib\net46\Microsoft.ApplicationInsights.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.ReportViewer.Common, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.DataVisualization, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.DataVisualization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Design, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.Design.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebDesign, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebDesign.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WebForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WinForms, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.WebForms.140.1000.523\lib\net40\Microsoft.ReportViewer.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MvcSiteMapProvider, Version=4.6.22.0, Culture=neutral, PublicKeyToken=1923abe4657913cc, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvcSiteMapProvider.MVC5.Core.4.6.22\lib\net45\MvcSiteMapProvider.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MvcSiteMapProvider.WebActivator, Version=4.6.22.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvcSiteMapProvider.MVC5.4.6.22\lib\net45\MvcSiteMapProvider.WebActivator.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OOXML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXml4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXmlFormats.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Quartz, Version=2.6.0.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Quartz.2.6.0\lib\net40\Quartz.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\Renci.SshNet.dll</HintPath>
+    </Reference>
+    <Reference Include="SendMail">
+      <HintPath>RefDlls\SendMail.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.EasycomClient, Version=3.0.0.1, Culture=neutral, PublicKeyToken=2b0a044ea83b83d8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>RefDlls\System.Data.EasycomClient.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.0.1\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Packaging, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Packaging.4.0.0\lib\net46\System.IO.Packaging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebActivatorEx.2.0.1\lib\net40\WebActivatorEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WebGrease">
+      <Private>True</Private>
+      <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr3.Runtime">
+      <Private>True</Private>
+      <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Net.Http.Formatting">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ActionFilter\ValidateModelAttribute.cs" />
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="ActionFilter\CheckSessionFilterAttribute.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="AS400Models\FAPPPASModel.cs" />
+    <Compile Include="AS400Models\FAPPPAWModel.cs" />
+    <Compile Include="AS400Models\FMNPPAAModel.cs" />
+    <Compile Include="AS400Models\FPMCODEModel.cs" />
+    <Compile Include="AS400Models\OAP0050PYCK.cs" />
+    <Compile Include="AS400Models\OAP0001PYCK.cs" />
+    <Compile Include="AS400Models\SAP7018TelModel.cs" />
+    <Compile Include="AS400Models\SAP7018Model.cs" />
+    <Compile Include="AS400Models\SGLZ001Model.cs" />
+    <Compile Include="AS400Models\SRTB0010Model.cs" />
+    <Compile Include="AS400PGM\SAPGETIDUtil.cs" />
+    <Compile Include="AS400PGM\SAPPYCTUtil.cs" />
+    <Compile Include="AS400PGM\SAP7018Util.cs" />
+    <Compile Include="AS400PGM\SGLZ001Util.cs" />
+    <Compile Include="AS400PGM\SRTB0010Util.cs" />
+    <Compile Include="BO\LydiaUtil.cs" />
+    <Compile Include="BO\ReportWrapperO.cs" />
+    <Compile Include="BO\LyodsAmlUtil.cs" />
+    <Compile Include="BO\VeTelUtil.cs" />
+    <Compile Include="BO\VeCleanUtil.cs" />
+    <Compile Include="BO\MaskUtil.cs" />
+    <Compile Include="BO\ObjectUtil.cs" />
+    <Compile Include="BO\FileRelated.cs" />
+    <Compile Include="BO\MailUtil.cs" />
+    <Compile Include="BO\ReportUtil.cs" />
+    <Compile Include="BO\ReportWrapper.cs" />
+    <Compile Include="BO\UserAuthUtil.cs" />
+    <Compile Include="BO\CommonUtil.cs" />
+    <Compile Include="BO\DateUtil.cs" />
+    <Compile Include="BO\UnicodeFontFactory.cs" />
+    <Compile Include="BO\UserFunc.cs" />
+    <Compile Include="BO\Utility.cs" />
+    <Compile Include="BO\ValidateUtil.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CommonController.cs" />
+    <Compile Include="Controllers\FileController.cs" />
+    <Compile Include="Controllers\OAP0050AController.cs" />
+    <Compile Include="Controllers\OAP0050Controller.cs" />
+    <Compile Include="Controllers\OAP0052Controller.cs" />
+    <Compile Include="Controllers\OAP0054Controller.cs" />
+    <Compile Include="Controllers\OAP0053Controller.cs" />
+    <Compile Include="Controllers\OAP0051Controller.cs" />
+    <Compile Include="Controllers\OAP0055Controller.cs" />
+    <Compile Include="Controllers\OAP0044AController.cs" />
+    <Compile Include="Controllers\OAP0048AController.cs" />
+    <Compile Include="Controllers\OAP0044Controller.cs" />
+    <Compile Include="Controllers\OAP0049Controller.cs" />
+    <Compile Include="Controllers\OAP0048Controller.cs" />
+    <Compile Include="Controllers\OAP0047AController.cs" />
+    <Compile Include="Controllers\OAP0046AController.cs" />
+    <Compile Include="Controllers\OAP0047Controller.cs" />
+    <Compile Include="Controllers\OAP0046Controller.cs" />
+    <Compile Include="Controllers\OAP0045AController.cs" />
+    <Compile Include="Controllers\OAP0045Controller.cs" />
+    <Compile Include="Controllers\OAP0043AController.cs" />
+    <Compile Include="Controllers\OAP0043Controller.cs" />
+    <Compile Include="Controllers\OAP0042Controller.cs" />
+    <Compile Include="Controllers\OAP0004QController.cs" />
+    <Compile Include="Controllers\OAP0006QController.cs" />
+    <Compile Include="Controllers\OAP0041AController.cs" />
+    <Compile Include="Controllers\OAP0041Controller.cs" />
+    <Compile Include="Controllers\OAP0018AController.cs" />
+    <Compile Include="Controllers\OAP0018Controller.cs" />
+    <Compile Include="Controllers\OAP0017Controller.cs" />
+    <Compile Include="Controllers\OAP0016Controller.cs" />
+    <Compile Include="Controllers\OAP0019Controller.cs" />
+    <Compile Include="Controllers\OAP0020Controller.cs" />
+    <Compile Include="Controllers\OAP0021AController.cs" />
+    <Compile Include="Controllers\OAP0032Controller.cs" />
+    <Compile Include="Controllers\OAP0033Controller.cs" />
+    <Compile Include="Controllers\OAP0025Controller.cs" />
+    <Compile Include="Controllers\OAP0024Controller.cs" />
+    <Compile Include="Controllers\OAP0023Controller.cs" />
+    <Compile Include="Controllers\OAP0022Controller.cs" />
+    <Compile Include="Controllers\OAP0021Controller.cs" />
+    <Compile Include="Controllers\OAP0026AController.cs" />
+    <Compile Include="Controllers\OAP0026Controller.cs" />
+    <Compile Include="Controllers\OAP0027AController.cs" />
+    <Compile Include="Controllers\OAP0027Controller.cs" />
+    <Compile Include="Controllers\OAP0028Controller.cs" />
+    <Compile Include="Controllers\OAP0031Controller.cs" />
+    <Compile Include="Controllers\OAP0030Controller.cs" />
+    <Compile Include="Controllers\OAP0029Controller.cs" />
+    <Compile Include="Controllers\OAP0029AController.cs" />
+    <Compile Include="Controllers\OAP0042AController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\VeAMLController.cs" />
+    <Compile Include="Controllers\VeCleanController.cs" />
+    <Compile Include="Controllers\OAP0011AController.cs" />
+    <Compile Include="Controllers\OAP0004AController.cs" />
+    <Compile Include="Controllers\OAP0008AController.cs" />
+    <Compile Include="Controllers\OAP0004Controller.cs" />
+    <Compile Include="Controllers\OAP0015Controller.cs" />
+    <Compile Include="Controllers\OAP0014Controller.cs" />
+    <Compile Include="Controllers\OAP0013Controller.cs" />
+    <Compile Include="Controllers\OAP0012Controller.cs" />
+    <Compile Include="Controllers\OAP0011Controller.cs" />
+    <Compile Include="Controllers\OAP0010Controller.cs" />
+    <Compile Include="Controllers\OAP0008Controller.cs" />
+    <Compile Include="Controllers\OAP0007Controller.cs" />
+    <Compile Include="Controllers\OAP0009Controller.cs" />
+    <Compile Include="Controllers\OAP0003AController.cs" />
+    <Compile Include="Controllers\OAP0002AController.cs" />
+    <Compile Include="Controllers\OAP0003Controller.cs" />
+    <Compile Include="Controllers\OAP0002Controller.cs" />
+    <Compile Include="Controllers\OAP0001Controller.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\OAP0006AController.cs" />
+    <Compile Include="Controllers\OAP0006Controller.cs" />
+    <Compile Include="Controllers\OAP0005Controller.cs" />
+    <Compile Include="Controllers\OAP0005AController.cs" />
+    <Compile Include="Daos\CodeSysInfo.cs" />
+    <Compile Include="Daos\FAPPPASDao.cs" />
+    <Compile Include="Daos\FAPPYCTDao.cs" />
+    <Compile Include="Daos\FAPPPATDao.cs" />
+    <Compile Include="Daos\FAPTelProcDao.cs" />
+    <Compile Include="Daos\FAPTelInterviewHisDao.cs" />
+    <Compile Include="Daos\FAPTelInterviewDao.cs" />
+    <Compile Include="Daos\FAPTelCodeHisDao.cs" />
+    <Compile Include="Daos\FAPTelCodeDao.cs" />
+    <Compile Include="Daos\FAPTelPoliDao.cs" />
+    <Compile Include="Daos\FAPTelCheckHisDao.cs" />
+    <Compile Include="Daos\FAPVeClosedProcDao.cs" />
+    <Compile Include="Daos\FAPVeClosedProcHisDao.cs" />
+    <Compile Include="Daos\FAPTelCheckDao.cs" />
+    <Compile Include="Daos\FAPTelSmsTempDao.cs" />
+    <Compile Include="Daos\FAPVeTraceImpDao.cs" />
+    <Compile Include="Daos\FNBADDNDao.cs" />
+    <Compile Include="Daos\FPMADDRDao.cs" />
+    <Compile Include="Daos\FECPTELDao.cs" />
+    <Compile Include="Daos\FIVJAMLDDao.cs" />
+    <Compile Include="Daos\FAPPPAWDao.cs" />
+    <Compile Include="Daos\FAPVeTracePoliDao.cs" />
+    <Compile Include="Daos\FAPVeTraceHisDao.cs" />
+    <Compile Include="Daos\FAPVeTraceProcHisDao.cs" />
+    <Compile Include="Daos\FAPVeTraceProcDao.cs" />
+    <Compile Include="Daos\FAPVeTraceDao.cs" />
+    <Compile Include="Daos\FAPHouseholdAddrDao.cs" />
+    <Compile Include="Daos\FAPVeCodeHisDao.cs" />
+    <Compile Include="Daos\FAPVeCodeDao.cs" />
+    <Compile Include="Daos\FAPPpaaDHisDao.cs" />
+    <Compile Include="Daos\FAPPpaaSHisDao.cs" />
+    <Compile Include="Daos\FFAFAPHDao.cs" />
+    <Compile Include="Daos\FAPAplyRecDao.cs" />
+    <Compile Include="Daos\FGLCALEDao.cs" />
+    <Compile Include="Daos\FPMCODEDao.cs" />
+    <Compile Include="Daos\FMNPPADDao.cs" />
+    <Compile Include="Daos\FRTMailLogDao.cs" />
+    <Compile Include="Daos\FRTMailNotifyDao.cs" />
+    <Compile Include="Daos\FRTRMREDao.cs" />
+    <Compile Include="Daos\FMNPPAADao.cs" />
+    <Compile Include="Daos\FAPPYCKDao.cs" />
+    <Compile Include="Daos\FAPCKERDao.cs" />
+    <Compile Include="Daos\FFAPYCKDao.cs" />
+    <Compile Include="Daos\FAPScheduleJobDao.cs" />
+    <Compile Include="Daos\SysParaDao.cs" />
+    <Compile Include="Daos\SysParaHisDao.cs" />
+    <Compile Include="Daos\SysSeqDao.cs" />
+    <Compile Include="Daos\CodeUserDao.cs" />
+    <Compile Include="Daos\LogDao.cs" />
+    <Compile Include="Daos\OaDeptDao.cs" />
+    <Compile Include="Daos\OaEmpDao.cs" />
+    <Compile Include="Daos\PiaLogMainDao.cs" />
+    <Compile Include="Daos\SysCodeDao.cs" />
+    <Compile Include="Daos\UserAuthDao.cs" />
+    <Compile Include="Enum\ActionType.cs" />
+    <Compile Include="Enum\MessageType.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\BaseController.cs" />
+    <Compile Include="BO\StringUtil.cs" />
+    <Compile Include="Models\CODE_FUNC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CODE_ROLE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CODE_ROLE_FUNC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CODE_SYS_INFO.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CODE_USER.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CODE_USER_ROLE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\dbFGL.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dbFGL.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\dbFGL.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\dbFGL.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dbFGL.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\db_intra.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>db_intra.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\db_intra.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>db_intra.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\db_intra.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>db_intra.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DFDBUT.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DFDBUT.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DFDBUT.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DFDBUT.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DFDBUT.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DFDBUT.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DF_SCH_DEP.cs">
+      <DependentUpon>DFDBUT.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DF_SCH_MEM.cs">
+      <DependentUpon>DFDBUT.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_APLY_REC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_CE_APPLY_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_CODE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_CODE_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_CROSS_DEPARMENT.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_CROSS_DEPARMENT_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_FAPPYCD0_REPORT.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_HOUSEHOLD_ADDR.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_MAIL_LABEL.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_MAIL_LABEL_D.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_NOTES_PAYABLE_RECEIVED.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_NOTES_PAYABLE_RECEIVED_D.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_PAID_DEPARMENT.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_PAID_DEPARMENT_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_PPAA_D_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_PPAA_S_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_SCHEDULE_JOB.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_CHECK.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_CHECK_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_CODE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_CODE_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_INTERVIEW.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_INTERVIEW_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_POLI.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_PROC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_TEL_SMS_TEMP.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_CLOSED_PROC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_CLOSED_PROC_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_CODE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_CODE_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE_IMP.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE_POLI.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE_PROC.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FAP_VE_TRACE_PROC_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FRT_MAIL_LOG.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\FRT_MAIL_NOTIFY.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Log.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\PIA_LOG_MAIN.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SYS_CODE.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SYS_PARA.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SYS_PARA_HIS.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SYS_SEQ.cs">
+      <DependentUpon>dbFGL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\VW_OA_DEPT.cs">
+      <DependentUpon>db_intra.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\VW_OA_EMP.cs">
+      <DependentUpon>db_intra.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\V_EMPLY.cs">
+      <DependentUpon>db_intra.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\V_EMPLY2.cs">
+      <DependentUpon>db_intra.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Report\Data\IReportData.cs" />
+    <Compile Include="Report\Data\OAP0033.cs" />
+    <Compile Include="Report\Data\OAP0028.cs" />
+    <Compile Include="Report\Data\OAP0025.cs" />
+    <Compile Include="Report\Data\OAP0022.cs" />
+    <Compile Include="Report\Data\ReportData.cs" />
+    <Compile Include="Report\OAP0011PViewer.aspx.cs">
+      <DependentUpon>OAP0011PViewer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Report\OAP0011PViewer.aspx.designer.cs">
+      <DependentUpon>OAP0011PViewer.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Report\ReportViewer.aspx.cs">
+      <DependentUpon>ReportViewer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Report\ReportViewer.aspx.designer.cs">
+      <DependentUpon>ReportViewer.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Report\RptDataSet.Designer.cs" />
+    <Compile Include="Report\RptDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RptDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\AMLDFileJob.cs" />
+    <Compile Include="Scheduler\BAP0003Job.cs" />
+    <Compile Include="Scheduler\BAP0004Job.cs" />
+    <Compile Include="Scheduler\OAP0028Job.cs" />
+    <Compile Include="Scheduler\BAP0002Job.cs" />
+    <Compile Include="Scheduler\DailyRoutineJob.cs" />
+    <Compile Include="Scheduler\FAPPYRELJob.cs" />
+    <Compile Include="Scheduler\JobScheduler.cs" />
+    <Compile Include="Service\Actual\BAP0004.cs" />
+    <Compile Include="Service\Actual\Common.cs" />
+    <Compile Include="Service\Actual\DefaultCacheProvider.cs" />
+    <Compile Include="Service\Actual\FileService.cs" />
+    <Compile Include="Service\Actual\OAP0018.cs" />
+    <Compile Include="Service\Actual\OAP0018A.cs" />
+    <Compile Include="Service\Actual\OAP0019.cs" />
+    <Compile Include="Service\Actual\OAP0020.cs" />
+    <Compile Include="Service\Actual\OAP0022.cs" />
+    <Compile Include="Service\Actual\OAP0023.cs" />
+    <Compile Include="Service\Actual\OAP0021.cs" />
+    <Compile Include="Service\Actual\OAP0024.cs" />
+    <Compile Include="Service\Actual\OAP0026.cs" />
+    <Compile Include="Service\Actual\OAP0026A.cs" />
+    <Compile Include="Service\Actual\OAP0033.cs" />
+    <Compile Include="Service\Actual\OAP0032.cs" />
+    <Compile Include="Service\Actual\OAP0031.cs" />
+    <Compile Include="Service\Actual\OAP0030.cs" />
+    <Compile Include="Service\Actual\OAP0027.cs" />
+    <Compile Include="Service\Actual\OAP0027A.cs" />
+    <Compile Include="Service\Actual\OAP0028.cs" />
+    <Compile Include="Service\Actual\OAP0029.cs" />
+    <Compile Include="Service\Actual\OAP0029A.cs" />
+    <Compile Include="Service\Interface\IBAP0004.cs" />
+    <Compile Include="Service\Interface\ICacheProvider.cs" />
+    <Compile Include="Service\Interface\IFileService.cs" />
+    <Compile Include="Service\Interface\IOAP0018.cs" />
+    <Compile Include="Service\Interface\IOAP0018A.cs" />
+    <Compile Include="Service\Interface\IOAP0019.cs" />
+    <Compile Include="Service\Interface\IOAP0020.cs" />
+    <Compile Include="Service\Interface\IOAP0021.cs" />
+    <Compile Include="Service\Interface\IOAP0022.cs" />
+    <Compile Include="Service\Interface\IOAP0023.cs" />
+    <Compile Include="Service\Interface\IOAP0024.cs" />
+    <Compile Include="Service\Interface\IOAP0026.cs" />
+    <Compile Include="Service\Interface\IOAP0026A.cs" />
+    <Compile Include="Service\Interface\IOAP0027.cs" />
+    <Compile Include="Service\Interface\IOAP0027A.cs" />
+    <Compile Include="Service\Interface\IOAP0033.cs" />
+    <Compile Include="Service\Interface\IOAP0032.cs" />
+    <Compile Include="Service\Interface\IOAP0031.cs" />
+    <Compile Include="Service\Interface\IOAP0030.cs" />
+    <Compile Include="Service\Interface\IOAP0028.cs" />
+    <Compile Include="Service\Interface\IOAP0029.cs" />
+    <Compile Include="Service\Interface\IOAP0029A.cs" />
+    <Compile Include="SqlServerTypes\Loader.cs" />
+    <Compile Include="Utilitys\CacheList.cs" />
+    <Compile Include="Utilitys\Extension.cs" />
+    <Compile Include="Utilitys\UtilityFileRelated.cs" />
+    <Compile Include="Utilitys\Jqgrid.cs" />
+    <Compile Include="Utilitys\jqGridParam.cs" />
+    <Compile Include="Utilitys\TypeTransfer.cs" />
+    <Compile Include="Utilitys\Utilitys.cs" />
+    <Compile Include="ViewModels\ADModel.cs" />
+    <Compile Include="ViewModels\APAplyRecModel.cs" />
+    <Compile Include="ViewModels\Lydia004Model.cs" />
+    <Compile Include="ViewModels\Lydia001Model.cs" />
+    <Compile Include="ViewModels\MailNotifyModel.cs" />
+    <Compile Include="ViewModels\FAP_MAIL_LABEL_TEMP.cs" />
+    <Compile Include="ViewModels\IFileDownLoadModel.cs" />
+    <Compile Include="ViewModels\IFileUpLoadModel.cs" />
+    <Compile Include="ViewModels\OAP0001FileModel.cs" />
+    <Compile Include="ViewModels\LyodsAmlFSKWSModel.cs" />
+    <Compile Include="ViewModels\AMLDFileModel.cs" />
+    <Compile Include="ViewModels\OAP0050Model.cs" />
+    <Compile Include="ViewModels\OAP0052Model.cs" />
+    <Compile Include="ViewModels\OAP0054Model.cs" />
+    <Compile Include="ViewModels\OAP0053Model.cs" />
+    <Compile Include="ViewModels\OAP0051Model.cs" />
+    <Compile Include="ViewModels\OAP0055Model.cs" />
+    <Compile Include="ViewModels\OAP0046DModel.cs" />
+    <Compile Include="ViewModels\OAP0044Model.cs" />
+    <Compile Include="ViewModels\OAP0049DModel.cs" />
+    <Compile Include="ViewModels\OAP0049Model.cs" />
+    <Compile Include="ViewModels\OAP0048Model.cs" />
+    <Compile Include="ViewModels\OAP0047ProcModel.cs" />
+    <Compile Include="ViewModels\OAP0046Model.cs" />
+    <Compile Include="ViewModels\OAP0045Model.cs" />
+    <Compile Include="ViewModels\OAP0043Model.cs" />
+    <Compile Include="ViewModels\TelDispatchRptModel.cs" />
+    <Compile Include="ViewModels\OAP0042Model.cs" />
+    <Compile Include="ViewModels\VeCleanPracModel.cs" />
+    <Compile Include="ViewModels\OAP0041Model.cs" />
+    <Compile Include="ViewModels\OAP0004DModel.cs" />
+    <Compile Include="ViewModels\OAP0018AHisViewModel.cs" />
+    <Compile Include="ViewModels\OAP0018ASearchViewModel.cs" />
+    <Compile Include="ViewModels\OAP0018AViewModel.cs" />
+    <Compile Include="ViewModels\OAP0018InsertViewModel.cs" />
+    <Compile Include="ViewModels\OAP0018SearchViewModel.cs" />
+    <Compile Include="ViewModels\OAP0022SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0030SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0032SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0031ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0031SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0029SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0029ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0027ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0027SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0026SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0026ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0018ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0019SearchViewModel.cs" />
+    <Compile Include="ViewModels\OAP0019ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0021ASearchModel.cs" />
+    <Compile Include="ViewModels\OAP0024Model.cs" />
+    <Compile Include="ViewModels\OAP0024SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0023SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0023Model.cs" />
+    <Compile Include="ViewModels\OAP0022Model.cs" />
+    <Compile Include="ViewModels\OAP0021SearchModel.cs" />
+    <Compile Include="ViewModels\OAP0021Model.cs" />
+    <Compile Include="ViewModels\OAP0017Model.cs" />
+    <Compile Include="ViewModels\OAP0016Model.cs" />
+    <Compile Include="ViewModels\OAP0020InsertModel.cs" />
+    <Compile Include="ViewModels\OAP0020ViewModel.cs" />
+    <Compile Include="ViewModels\OAP0021DetailSubModel.cs" />
+    <Compile Include="ViewModels\OAP0021DetailModel.cs" />
+    <Compile Include="ViewModels\VeAMLRptModel.cs" />
+    <Compile Include="ViewModels\VeCleanModel.cs" />
+    <Compile Include="ViewModels\OAP0007Model.cs" />
+    <Compile Include="ViewModels\OAP0015Model.cs" />
+    <Compile Include="ViewModels\OAP0014Model.cs" />
+    <Compile Include="ViewModels\OAP0013Model.cs" />
+    <Compile Include="ViewModels\OAP0012Model.cs" />
+    <Compile Include="ViewModels\OAP0011Model.cs" />
+    <Compile Include="ViewModels\OAP0010DModel.cs" />
+    <Compile Include="ViewModels\OAP0010Model.cs" />
+    <Compile Include="ViewModels\OAP0009Model.cs" />
+    <Compile Include="ViewModels\OAP0002Model.cs" />
+    <Compile Include="ViewModels\OAP0001Model.cs" />
+    <Compile Include="ViewModels\LoginModel.cs" />
+    <Compile Include="ViewModels\MenuModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\MyDynamicNodeProvider.cs" />
+    <Compile Include="BO\DbUtil.cs" />
+    <Compile Include="ViewModels\OAP0008Model.cs" />
+    <Compile Include="ViewModels\OAP0004Model.cs" />
+    <Compile Include="ViewModels\VeClearSchedulerModel.cs" />
+    <Compile Include="ViewModels\VeLevelDetailModel.cs" />
+    <Compile Include="ViewModels\VeTraceModel.cs" />
+    <Compile Include="ViewModels\OAP0003PoliModel.cs" />
+    <Compile Include="ViewModels\OAP0003Model.cs" />
+    <Compile Include="ViewModels\OAP0002PoliModel.cs" />
+    <Compile Include="ViewModels\UnitInfoModel.cs" />
+    <Compile Include="ViewModels\UserBossModel .cs" />
+    <Compile Include="ViewModels\UserMgrModel.cs" />
+    <Compile Include="ViewModels\ValidateFiles.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap-dialog.css" />
+    <Content Include="Content\bootstrap-select.css" />
+    <Content Include="Content\bootstrap-select.min.css" />
+    <Content Include="Content\bootstrap-theme.css" />
+    <Content Include="Content\bootstrap-theme.min.css" />
+    <Content Include="Content\bootstrap-treeview.css" />
+    <Content Include="Content\bootstrap-treeview.min.css" />
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\customerUtility.css" />
+    <Content Include="Content\dataTables.bootstrap.css" />
+    <Content Include="Content\datepicker.css" />
+    <Content Include="Content\font-awesome.css" />
+    <Content Include="Content\fubon.css" />
+    <Content Include="Content\jquery.jqGrid\ellipsis-xbl.xml" />
+    <Content Include="Content\jquery.jqGrid\ui.jqgrid.css" />
+    <Content Include="Content\themes\base\accordion.css" />
+    <Content Include="Content\themes\base\all.css" />
+    <Content Include="Content\themes\base\autocomplete.css" />
+    <Content Include="Content\themes\base\base.css" />
+    <Content Include="Content\themes\base\button.css" />
+    <Content Include="Content\themes\base\core.css" />
+    <Content Include="Content\themes\base\datepicker.css" />
+    <Content Include="Content\themes\base\dialog.css" />
+    <Content Include="Content\themes\base\draggable.css" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_444444_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_555555_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_777620_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_777777_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cc0000_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Content\themes\base\jquery-ui.css" />
+    <Content Include="Content\themes\base\jquery-ui.min.css" />
+    <Content Include="Content\themes\base\menu.css" />
+    <Content Include="Content\themes\base\progressbar.css" />
+    <Content Include="Content\themes\base\resizable.css" />
+    <Content Include="Content\themes\base\selectable.css" />
+    <Content Include="Content\themes\base\selectmenu.css" />
+    <Content Include="Content\themes\base\slider.css" />
+    <Content Include="Content\themes\base\sortable.css" />
+    <Content Include="Content\themes\base\spinner.css" />
+    <Content Include="Content\themes\base\tabs.css" />
+    <Content Include="Content\themes\base\theme.css" />
+    <Content Include="Content\themes\base\tooltip.css" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_75_d0e5f5_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_85_dfeffc_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_217bc0_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_469bdd_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_6da8d5_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_f9bd01_256x240.png" />
+    <Content Include="Content\themes\redmond\jquery-ui.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.accordion.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.all.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.autocomplete.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.base.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.button.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.core.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.datepicker.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.dialog.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.menu.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.progressbar.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.resizable.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.selectable.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.slider.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.spinner.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.tabs.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.theme.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.tooltip.css" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_75_d0e5f5_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_85_dfeffc_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_217bc0_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_469bdd_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_6da8d5_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_f9bd01_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\jquery-ui.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.accordion.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.autocomplete.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.button.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.core.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.datepicker.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.dialog.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.menu.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.progressbar.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.resizable.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.selectable.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.slider.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.spinner.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.tabs.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.theme.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="Content\themes\start\images\ui-bg_glass_45_0078ae_1x400.png" />
+    <Content Include="Content\themes\start\images\ui-bg_glass_55_f8da4e_1x400.png" />
+    <Content Include="Content\themes\start\images\ui-bg_glass_75_79c9ec_1x400.png" />
+    <Content Include="Content\themes\start\images\ui-bg_gloss-wave_45_e14f1c_500x100.png" />
+    <Content Include="Content\themes\start\images\ui-bg_gloss-wave_50_6eac2c_500x100.png" />
+    <Content Include="Content\themes\start\images\ui-bg_gloss-wave_75_2191c0_500x100.png" />
+    <Content Include="Content\themes\start\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\start\images\ui-icons_0078ae_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_056b93_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_e0fdff_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_f5e175_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_f7a50d_256x240.png" />
+    <Content Include="Content\themes\start\images\ui-icons_fcd113_256x240.png" />
+    <Content Include="Content\themes\start\jquery-ui.css" />
+    <Content Include="Content\themes\start\jquery.ui.accordion.css" />
+    <Content Include="Content\themes\start\jquery.ui.all.css" />
+    <Content Include="Content\themes\start\jquery.ui.autocomplete.css" />
+    <Content Include="Content\themes\start\jquery.ui.base.css" />
+    <Content Include="Content\themes\start\jquery.ui.button.css" />
+    <Content Include="Content\themes\start\jquery.ui.core.css" />
+    <Content Include="Content\themes\start\jquery.ui.datepicker.css" />
+    <Content Include="Content\themes\start\jquery.ui.dialog.css" />
+    <Content Include="Content\themes\start\jquery.ui.menu.css" />
+    <Content Include="Content\themes\start\jquery.ui.progressbar.css" />
+    <Content Include="Content\themes\start\jquery.ui.resizable.css" />
+    <Content Include="Content\themes\start\jquery.ui.selectable.css" />
+    <Content Include="Content\themes\start\jquery.ui.slider.css" />
+    <Content Include="Content\themes\start\jquery.ui.spinner.css" />
+    <Content Include="Content\themes\start\jquery.ui.tabs.css" />
+    <Content Include="Content\themes\start\jquery.ui.theme.css" />
+    <Content Include="Content\themes\start\jquery.ui.tooltip.css" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_glass_45_0078ae_1x400.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_glass_55_f8da4e_1x400.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_glass_75_79c9ec_1x400.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_gloss-wave_45_e14f1c_500x100.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_gloss-wave_50_6eac2c_500x100.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_gloss-wave_75_2191c0_500x100.png" />
+    <Content Include="Content\themes\start\minified\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_0078ae_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_056b93_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_e0fdff_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_f5e175_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_f7a50d_256x240.png" />
+    <Content Include="Content\themes\start\minified\images\ui-icons_fcd113_256x240.png" />
+    <Content Include="Content\themes\start\minified\jquery-ui.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.accordion.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.autocomplete.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.button.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.core.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.datepicker.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.dialog.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.menu.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.progressbar.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.resizable.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.selectable.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.slider.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.spinner.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.tabs.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.theme.min.css" />
+    <Content Include="Content\themes\start\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="favicon.ico" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Icon.png" />
+    <Content Include="Models\dbFGL.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>dbFGL.edmx</DependentUpon>
+      <LastGenOutput>dbFGL.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\dbFGL.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>dbFGL.edmx</DependentUpon>
+      <LastGenOutput>dbFGL.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\db_intra.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>db_intra.edmx</DependentUpon>
+      <LastGenOutput>db_intra.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\db_intra.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>db_intra.edmx</DependentUpon>
+      <LastGenOutput>db_intra.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\DFDBUT.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>DFDBUT.edmx</DependentUpon>
+      <LastGenOutput>DFDBUT.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\DFDBUT.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>DFDBUT.edmx</DependentUpon>
+      <LastGenOutput>DFDBUT.cs</LastGenOutput>
+    </Content>
+    <Content Include="quartz_jobs.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="RefDlls\AlexPilotti.FTPS.Client.dll" />
+    <Content Include="RefDlls\Easycom_Core.dll" />
+    <Content Include="RefDlls\Fubon.Orm.dll" />
+    <Content Include="Global.asax" />
+    <Content Include="Content\Site.css" />
+    <Content Include="Images\cancel.png" />
+    <Content Include="Images\fubon.png" />
+    <Content Include="Images\loading.gif" />
+    <Content Include="RefDlls\Dapper.dll" />
+    <Content Include="ApplicationInsights.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="RefDlls\Fubon.Utility.dll" />
+    <Content Include="RefDlls\itextsharp.dll" />
+    <Content Include="RefDlls\itextsharp.xmlworker.dll" />
+    <Content Include="RefDlls\Renci.SshNet.dll" />
+    <Content Include="RefDlls\System.Data.EasycomClient.dll" />
+    <Content Include="Report\OAP0011PViewer.aspx" />
+    <Content Include="Report\ReportViewer.aspx" />
+    <Content Include="Scripts\ai.0.15.0-build58334.js" />
+    <Content Include="Scripts\bootstrap-dialog.js" />
+    <Content Include="Scripts\bootstrap-select.js" />
+    <Content Include="Scripts\bootstrap-select.min.js" />
+    <Content Include="Scripts\bootstrap-treeview.js" />
+    <Content Include="Scripts\bootstrap-treeview.min.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\customerUtility.js" />
+    <Content Include="Scripts\customJqgrid.js" />
+    <Content Include="Scripts\dataTables.bootstrap.js" />
+    <Content Include="Scripts\datepicker.js" />
+    <Content Include="fonts\FUBONLIFEKAIU.TTF" />
+    <Content Include="fonts\FUBONLIFEMING.TTF" />
+    <Content Include="Mvc.sitemap" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="app.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Content\bootstrap-select.css.map" />
+    <None Include="job_scheduling_data_2_0.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <EntityDeploy Include="Models\db_intra.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>db_intra.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\db_intra.edmx.diagram">
+      <DependentUpon>db_intra.edmx</DependentUpon>
+    </Content>
+    <EntityDeploy Include="Models\dbFGL.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>dbFGL.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\dbFGL.edmx.diagram">
+      <DependentUpon>dbFGL.edmx</DependentUpon>
+    </Content>
+    <EntityDeploy Include="Models\DFDBUT.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>DFDBUT.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\DFDBUT.edmx.diagram">
+      <DependentUpon>DFDBUT.edmx</DependentUpon>
+    </Content>
+    <None Include="MvcSiteMapSchema.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Scripts\fubon.js" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="quartz_jobs.config" />
+    <Content Include="Report\RptDataSet.xsc">
+      <DependentUpon>RptDataSet.xsd</DependentUpon>
+    </Content>
+    <None Include="Report\RptDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>RptDataSet2.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Report\RptDataSet.xss">
+      <DependentUpon>RptDataSet.xsd</DependentUpon>
+    </Content>
+    <Content Include="Scripts\bootstrap-select.js.map" />
+    <Content Include="Scripts\bootstrap-select.min.js.map" />
+    <Content Include="Scripts\i18n\grid.locale-ar.js" />
+    <Content Include="Scripts\i18n\grid.locale-bg.js" />
+    <Content Include="Scripts\i18n\grid.locale-bg1251.js" />
+    <Content Include="Scripts\i18n\grid.locale-cat.js" />
+    <Content Include="Scripts\i18n\grid.locale-cn.js" />
+    <Content Include="Scripts\i18n\grid.locale-cs.js" />
+    <Content Include="Scripts\i18n\grid.locale-da.js" />
+    <Content Include="Scripts\i18n\grid.locale-de.js" />
+    <Content Include="Scripts\i18n\grid.locale-dk.js" />
+    <Content Include="Scripts\i18n\grid.locale-el.js" />
+    <Content Include="Scripts\i18n\grid.locale-en.js" />
+    <Content Include="Scripts\i18n\grid.locale-es.js" />
+    <Content Include="Scripts\i18n\grid.locale-fa.js" />
+    <Content Include="Scripts\i18n\grid.locale-fi.js" />
+    <Content Include="Scripts\i18n\grid.locale-fr.js" />
+    <Content Include="Scripts\i18n\grid.locale-gl.js" />
+    <Content Include="Scripts\i18n\grid.locale-he.js" />
+    <Content Include="Scripts\i18n\grid.locale-hr.js" />
+    <Content Include="Scripts\i18n\grid.locale-hr1250.js" />
+    <Content Include="Scripts\i18n\grid.locale-hu.js" />
+    <Content Include="Scripts\i18n\grid.locale-id.js" />
+    <Content Include="Scripts\i18n\grid.locale-is.js" />
+    <Content Include="Scripts\i18n\grid.locale-it.js" />
+    <Content Include="Scripts\i18n\grid.locale-ja.js" />
+    <Content Include="Scripts\i18n\grid.locale-kr.js" />
+    <Content Include="Scripts\i18n\grid.locale-lt.js" />
+    <Content Include="Scripts\i18n\grid.locale-mne.js" />
+    <Content Include="Scripts\i18n\grid.locale-nl.js" />
+    <Content Include="Scripts\i18n\grid.locale-no.js" />
+    <Content Include="Scripts\i18n\grid.locale-pl.js" />
+    <Content Include="Scripts\i18n\grid.locale-pt-br.js" />
+    <Content Include="Scripts\i18n\grid.locale-pt.js" />
+    <Content Include="Scripts\i18n\grid.locale-ro.js" />
+    <Content Include="Scripts\i18n\grid.locale-ru.js" />
+    <Content Include="Scripts\i18n\grid.locale-sk.js" />
+    <Content Include="Scripts\i18n\grid.locale-sr-latin.js" />
+    <Content Include="Scripts\i18n\grid.locale-sr.js" />
+    <Content Include="Scripts\i18n\grid.locale-sv.js" />
+    <Content Include="Scripts\i18n\grid.locale-th.js" />
+    <Content Include="Scripts\i18n\grid.locale-tr.js" />
+    <Content Include="Scripts\i18n\grid.locale-tw.js" />
+    <Content Include="Scripts\i18n\grid.locale-ua.js" />
+    <Content Include="Scripts\i18n\grid.locale-vi.js" />
+    <None Include="Scripts\jquery-3.5.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.5.1.js" />
+    <Content Include="Scripts\jquery-3.5.1.min.js" />
+    <Content Include="Scripts\jquery-3.5.1.slim.js" />
+    <Content Include="Scripts\jquery-3.5.1.slim.min.js" />
+    <Content Include="Scripts\jquery-ui-1.12.1.js" />
+    <Content Include="Scripts\jquery-ui-1.12.1.min.js" />
+    <Content Include="Scripts\jquery.blockUI.js" />
+    <Content Include="Scripts\jquery.dataTables.js" />
+    <None Include="Properties\PublishProfiles\SAVRE.pubxml" />
+    <Content Include="Scripts\jquery-3.5.1.min.map" />
+    <Content Include="Scripts\jquery-3.5.1.slim.min.map" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.jqGrid.js" />
+    <Content Include="Scripts\jquery.jqGrid.min.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\FAP.js" />
+    <Content Include="Scripts\locales\datepicker.en.js" />
+    <Content Include="Scripts\locales\datepicker.zh-TW.js" />
+    <Content Include="Scripts\locale\lang-zh-TW.js" />
+    <Content Include="Scripts\lodash.core.js" />
+    <Content Include="Scripts\lodash.js" />
+    <Content Include="Scripts\message.js" />
+    <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\moment-with-locales.js" />
+    <Content Include="Scripts\moment.js" />
+    <Content Include="Scripts\npm.js" />
+    <Content Include="Scripts\respond.js" />
+    <None Include="Scripts\_references.js" />
+    <Content Include="Scripts\verification.js" />
+    <Content Include="SqlServerTypes\readme.htm" />
+    <Content Include="SqlServerTypes\x64\msvcr120.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x64\SqlServerSpatial140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x86\msvcr120.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlServerTypes\x86\SqlServerSpatial140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Template\MqOut.txt" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SiteMapTitleHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SiteMapPathHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SiteMapNodeModelList.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SiteMapNodeModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SiteMapHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\MetaRobotsHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\MenuHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\CanonicalHelperModel.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\BootstrapMenuHelperModel.cshtml" />
+    <Content Include="Views\Shared\_Navigation.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_LayoutFrame.cshtml" />
+    <Content Include="Views\OAP0001\Index.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Account\Error.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\OAP0002\Index.cshtml" />
+    <Content Include="Views\OAP0002A\detailAply.cshtml" />
+    <Content Include="Views\OAP0002A\Index.cshtml" />
+    <Content Include="Views\OAP0003A\detailAply.cshtml" />
+    <Content Include="Views\OAP0003A\Index.cshtml" />
+    <Content Include="Views\OAP0003\Index.cshtml" />
+    <Content Include="Views\OAP0005\Index.cshtml" />
+    <Content Include="Views\OAP0005A\Index.cshtml" />
+    <Content Include="Views\OAP0006\Index.cshtml" />
+    <Content Include="Views\OAP0006A\Index.cshtml" />
+    <Content Include="Views\OAP0009\Index.cshtml" />
+    <Content Include="Views\OAP0007\Index.cshtml" />
+    <Content Include="Views\OAP0008\Index.cshtml" />
+    <Content Include="Views\OAP0008A\Index.cshtml" />
+    <Content Include="Views\OAP0004\Index.cshtml" />
+    <Content Include="Views\OAP0004A\detailAply.cshtml" />
+    <Content Include="Views\OAP0004A\Index.cshtml" />
+    <Content Include="Views\OAP0010\Index.cshtml" />
+    <Content Include="Views\OAP0011\Index.cshtml" />
+    <Content Include="Views\OAP0011A\detailAply.cshtml" />
+    <Content Include="Views\OAP0011A\Index.cshtml" />
+    <Content Include="Views\OAP0012\Index.cshtml" />
+    <Content Include="Views\OAP0013\Index.cshtml" />
+    <Content Include="Views\OAP0014\Index.cshtml" />
+    <Content Include="Views\OAP0015\Index.cshtml" />
+    <Content Include="Views\OAP0016\Index.cshtml" />
+    <Content Include="Views\OAP0017\Index.cshtml" />
+    <Content Include="Views\CrossDept\Index.cshtml" />
+    <Content Include="Views\OAP0020\Index.cshtml" />
+    <Content Include="Views\OAP0021\Index.cshtml" />
+    <Content Include="Views\OAP0021\Detail.cshtml" />
+    <Content Include="Views\OAP0021A\Index.cshtml" />
+    <Content Include="Views\OAP0022\Index.cshtml" />
+    <Content Include="Views\OAP0018\Index.cshtml" />
+    <Content Include="Views\OAP0018A\Index.cshtml" />
+    <Content Include="Views\OAP0019\Index.cshtml" />
+    <Content Include="Views\OAP0023\Index.cshtml" />
+    <Content Include="Views\OAP0024\Index.cshtml" />
+    <Content Include="Views\OAP0025\Index.cshtml" />
+    <Content Include="Views\OAP0026\Index.cshtml" />
+    <Content Include="Views\OAP0026A\Index.cshtml" />
+    <Content Include="Views\OAP0027\Index.cshtml" />
+    <Content Include="Views\OAP0027A\Index.cshtml" />
+    <Content Include="Views\OAP0028\Index.cshtml" />
+    <Content Include="Views\OAP0029\Index.cshtml" />
+    <Content Include="Views\OAP0029A\Index.cshtml" />
+    <Content Include="Views\OAP0030\Index.cshtml" />
+    <Content Include="Views\OAP0031\Index.cshtml" />
+    <Content Include="Views\OAP0033\Index.cshtml" />
+    <Content Include="Views\OAP0032\Index.cshtml" />
+    <Content Include="Views\OAP0041\Index.cshtml" />
+    <Content Include="Views\OAP0041A\Index.cshtml" />
+    <Content Include="Views\OAP0004Q\Index.cshtml" />
+    <Content Include="Views\OAP0006Q\Index.cshtml" />
+    <Content Include="Views\OAP0042\Index.cshtml" />
+    <Content Include="Views\OAP0042A\Index.cshtml" />
+    <Content Include="Views\OAP0042A\detailAply.cshtml" />
+    <Content Include="Views\OAP0043\Index.cshtml" />
+    <Content Include="Views\OAP0043A\detailAply.cshtml" />
+    <Content Include="Views\OAP0043A\Index.cshtml" />
+    <Content Include="Views\OAP0045\Index.cshtml" />
+    <Content Include="Views\OAP0045A\Index.cshtml" />
+    <Content Include="Views\OAP0046\Index.cshtml" />
+    <Content Include="Views\OAP0046A\detailAply.cshtml" />
+    <Content Include="Views\OAP0046A\Index.cshtml" />
+    <Content Include="Views\OAP0047\Index.cshtml" />
+    <Content Include="Views\OAP0047A\detailAply.cshtml" />
+    <Content Include="Views\OAP0047A\Index.cshtml" />
+    <Content Include="Views\OAP0048\Index.cshtml" />
+    <Content Include="Views\OAP0048A\Index.cshtml" />
+    <Content Include="Views\OAP0044\Index.cshtml" />
+    <Content Include="Views\OAP0044A\Index.cshtml" />
+    <Content Include="Views\OAP0049\Index.cshtml" />
+    <Content Include="Views\OAP0055\Index.cshtml" />
+    <Content Include="Views\OAP0051\Index.cshtml" />
+    <Content Include="Views\OAP0053\Index.cshtml" />
+    <Content Include="Views\OAP0054\Index.cshtml" />
+    <Content Include="Views\OAP0050\Index.cshtml" />
+    <Content Include="Views\OAP0050A\Index.cshtml" />
+    <Content Include="Views\OAP0052\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Handler\" />
+    <Folder Include="Views\Common\" />
+    <Folder Include="Views\File\" />
+    <Folder Include="Views\Report\" />
+    <Folder Include="參考文件\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="packages.config" />
+    <None Include="Project_Readme.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Report\Rdlc\OAP0028.rdlc">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Report\Rdlc\OAP0025.rdlc">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Report\Rdlc\OAP0022.rdlc">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Report\Rdlc\OAP0033.rdlc">
+      <SubType>Designer</SubType>
+    </Content>
+    <EmbeddedResource Include="Report\Rdlc\AMLDFileP.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\OAP0011P.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\TelProcResult.rdlc" />
+    <EmbeddedResource Include="Report\Rdlc\VeAMLP3.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\VeAMLP2.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Rdlc\VeAMLP1.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>54492</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:54497</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>此專案參考這部電腦上所缺少的 NuGet 封裝。請啟用 NuGet 封裝還原，以下載該封裝。如需詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的檔案是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

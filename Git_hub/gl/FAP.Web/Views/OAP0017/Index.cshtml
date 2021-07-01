@@ -1,0 +1,295 @@
+﻿@model FAP.Web.ViewModels.OAP0017Model
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var clrStatusList = ViewBag.clrStatusList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <table class="table table-bordered">
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.status)
+                        </td>
+                        <td>
+                            @Html.DropDownList("status", clrStatusList, "請選擇")
+                    </td>
+                </tr>
+                    <tr>
+                        <td>
+                            踐行日期區間
+                        </td>
+                        <td>
+                            <input id="date_b" name="date_b" type="text">
+                            ~
+                            <input id="date_e" name="date_e" type="text">
+                        </td>
+
+                    </tr>
+                <tr>
+                    <td>踐行程序</td>
+                    <td><div id="practice" /></td>
+
+                </tr>
+
+            </table>
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="submit" id="btnQry" name="btnQry" value="匯出" class="btn btn-primary" />
+                </div>
+            </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    //取得"踐行程序"項目
+    function qryPractice() {
+        $('#practice').children().remove();
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            //data: JSON.stringify({
+            //    model: {
+            //        'isQryTmp': $('#isQryTmp')[0].checked == true ? "1" : "0",
+            //        'aplyNo': $('#hidAplyNo').val(),
+            //        'item': $('#item').val(),
+            //        'productType': $('#productType').val(),
+            //        'fuMk': $('#fuMk').val(),
+            //        'itemCon': $('#itemCon').val(),
+            //        'discPartFeat': $('#discPartFeat').val()
+            //    }
+            //}),
+            dataType: "json",
+            url: '@Url.Action("qryPractice", "OAP0017")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                //var pracList = data.pracList;
+
+                if (data.success) {
+                    var practice = document.getElementById('practice');
+
+                    if (data.pracList.length > 0) {
+
+                        for (var i = 0; i <= data.pracList.length - 1; i++) {
+                            var nowId = data.pracList[i].code_id;
+
+                            var radioIg = document.createElement("input");
+                            radioIg.setAttribute("type", "radio");
+                            radioIg.setAttribute("id", "radioIg" + nowId);
+                            radioIg.setAttribute("name", "Boolean" + nowId);
+                            radioIg.setAttribute("value", "IG");
+                            radioIg.setAttribute("checked", true);
+                            var lblIG = document.createElement("lable");
+                            lblIG.innerHTML = "不判斷　";
+
+
+                            var radioEq = document.createElement("input");
+                            radioEq.setAttribute("type", "radio");
+                            radioEq.setAttribute("id", "radioEq" + nowId);
+                            radioEq.setAttribute("name", "Boolean" + nowId);
+                            radioEq.setAttribute("value", "EQ");
+                            var lblEq = document.createElement("label");
+                            lblEq.innerHTML = "等於　";
+
+
+                            var radioNq = document.createElement("input");
+                            radioNq.setAttribute("type", "radio");
+                            radioNq.setAttribute("id", "radioNq" + nowId);
+                            radioNq.setAttribute("name", "Boolean" + nowId);
+                            radioNq.setAttribute("value", "NQ");
+                            var lblNq = document.createElement("label");
+                            lblNq.innerHTML = "不等於　";
+
+
+                            var wording = document.createElement("label");
+                            wording.setAttribute("name", "label" + nowId);
+                            //wording.setAttribute("name", "label" + nowId);
+                            wording.innerHTML = data.pracList[i].code_value;
+
+
+
+                            practice.appendChild(radioIg);
+                            practice.appendChild(lblIG);
+
+                            practice.appendChild(radioEq);
+                            practice.appendChild(lblEq);
+
+                            practice.appendChild(radioNq);
+                            practice.appendChild(lblNq);
+
+                            practice.appendChild(wording);
+
+                            var spaceBr = document.createElement("br");
+                            practice.appendChild(spaceBr);
+
+
+                        }
+                    }
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+    }
+
+
+
+    $(function () {
+
+        $('#date_b').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#date_e').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+            $('#btnPrint').attr('disabled', true);
+            qryPractice();
+        }
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            recList = [];
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            
+            var bPass = true;
+            if ($("#status").val().length == 0) {
+                bPass = false;
+                validationSummary.append('<li>' + '請輸入「清理狀態」!!' + '</li>');
+            }
+
+            //取得"踐行程序"的設定值
+            var pracList = [];
+            var r = $('[name^="Boolean"]');
+            for (var i = 0; i < r.length; i++) {
+                var id = r[i].name.replace("Boolean", "");
+
+                var inList = false;
+                for (var d in pracList) {
+                    if (pracList[d].id == id) {
+                        inList = true;
+                        break;
+                    }
+                }
+
+                if (!inList) {
+                    var value = "";
+                    try {
+                        value = document.querySelector('input[name="' + r[i].name + '"]:checked').value;
+                    } catch (err) {
+                        value = "";
+                        var errItem = document.getElementsByName('label' + id);
+                        validationSummary.append('<li>踐行程序：「' + errItem[0].innerHTML + '」未設定!!</li>');
+
+                        $.unblockUI(); //畫面打開
+                        return;
+                    }
+
+                    if (value != "IG")
+                        pracList.push({ id: id, value: value });
+                }
+               
+            }
+
+
+            if (!bPass)
+                return;
+
+
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    status: $("#status").val(),
+                    pracList: pracList,
+                    date_b: $("#date_b").val(),
+                    date_e: $("#date_e").val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("execExport", "OAP0017")',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.success) {
+                        var url = '/OAP0017/downloadRpt?id=' + data.guid;
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+    });
+</script>
+
+

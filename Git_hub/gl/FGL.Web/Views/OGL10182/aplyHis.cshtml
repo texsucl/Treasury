@@ -1,0 +1,268 @@
+﻿@model FGL.Web.ViewModels.OGL10182Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName + "歷史紀錄查詢";
+
+    var opScope = ViewBag.opScope;
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var acctTypeList = ViewBag.acctTypeList as SelectList;
+    var apprStatList = ViewBag.apprStatList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.smpNum)：@Html.TextBoxFor(model => model.smpNum, new {@size = "5", @maxlength = "4" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.corpNo)：@Html.TextBoxFor(model => model.corpNo, new { @size = "2", @maxlength = "1" })
+                        </td>
+                        
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.acctType)：@Html.DropDownList("acctType", acctTypeList, "請選擇")
+                        </td>
+                        <td>覆核日期：
+                            <input id="apprDateB" name="apprDateB" type="text">
+                            ~
+                            <input id="apprDateE" name="apprDateE" type="text">
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.apprStat)：@Html.DropDownList("apprStat", apprStatList, "請選擇")
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                        <input type="button" id="btnReturn" name="btnReturn" value="返回" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+
+   
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+
+        $('#apprDateB').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        $('#apprDateE').datepicker({
+            dateFormat: 'yyyy-mm-dd'
+        });
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#smpNum').val("");
+            $('#productType').val("");
+            $('#corpNo').val("");
+            $('#acctType').val("");
+            $('#apprStat').val("");
+
+            $('#apprDateB').val("");
+            $('#apprDateE').val("");
+
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+        });
+        //*---------------清除 end ----------------*//
+
+
+        /*------------------查詢 begin---------------------*/
+
+        $("#btnQry").click().on('click', function () {
+            createGrid();
+        });
+
+
+        function createGrid() {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+
+
+            var bPass = true;
+
+            if ($('#smpNum').val().length == 0 && $('#productType').val() == ""
+           && $('#acctType').val() == "" && $('#corpNo').val().length == 0) {
+                validationSummary.append('<li>' + '請輸入一個以上的查詢條件!!"' + '</li>');
+                bPass = false;
+            }
+
+
+            //覆核日期期檢核
+            if (!checkDate($("#apprDateB").val(), false)) {
+                validationSummary.append('<li>覆核日期起-格式錯誤!!</li>');
+                bPass = false;
+            }
+
+            if (!checkDate($("#apprDateE").val(), false)) {
+                validationSummary.append('<li>覆核日期訖-格式錯誤!!</li>');
+                bPass = false;
+            }
+
+            if ($("#apprDateB").val().length > 0 & $("#apprDateE").val().length > 0 & ($("#apprDateE").val() < $("#apprDateB").val())) {
+                validationSummary.append('<li>覆核日期訖 不可小於 覆核日期訖 !!</li>');
+                bPass = false;
+            }
+
+            if (!bPass)
+                return;
+
+
+            var para = {
+                smpNum: $("#smpNum").val()
+                , productType: $("#productType").val()
+                , corpNo: $("#corpNo").val()
+                 , acctType: $("#acctType").val()
+                , apprStat: $('#apprStat').val()
+             , apprDateB: $("#apprDateB").val()
+             , apprDateE: $("#apprDateE").val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/OGL10182/qryApprHis/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false//, id: 'cFunctionID'
+                },
+                mtype: 'POST',
+                //caption: '異動清單',
+                colNames: ['覆核單號', '覆核結果', '執行功能', '科目代號', '險種類別', '險種類別', '帳本別', '帳務類別', '帳務類別', 'SQL會計科目', 'SQL會計名稱', '覆核人員', '覆核日期', '申請人', '申請日期'],
+                colModel: [
+                     { name: 'aplyNo', align: 'center', width: 120 },
+                     { name: 'apprStat', align: 'center', width: 80 },
+                     { name: 'execActionDesc', align: 'center', width: 80 },
+                    { name: 'smpNum', align: 'center', width: 80 },
+                    { name: 'productType', align: 'left', hidden: true },
+                    { name: 'productTypeDesc', align: 'left', width: 120 },
+                    { name: 'corpNo', align: 'center', width: 70 },
+                    { name: 'acctType', align: 'left', hidden: true },
+                    { name: 'acctTypeDesc', align: 'left', width: 160 },
+                    { name: 'sqlActNum', align: 'left', width: 160 },
+                    { name: 'sqlActNm', align: 'left', width: 200 },
+                    { name: 'apprId', align: 'center', width: 70 },
+                    { name: 'apprDt', align: 'center', width: 180 },
+                    { name: 'updateId', align: 'center', width: 70 },
+                    { name: 'updateDatetime', align: 'center', width: 180 }
+                    
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 20],
+                sortname: 'productType',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function () {
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("text-align", "center").children("span.ui-jqgrid-title").css("float", "none");
+                    $("#grid").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").children("span.ui-jqgrid-title").css("font-size", "16px");
+
+                    var cnt = $('#grid').getGridParam('records')
+                    if (cnt == 0) {
+                        validationSummary.append('<li>' + '查無資料!!"' + '</li>');
+                    }
+
+                    $.unblockUI(); //畫面打開
+                }
+
+            });
+
+
+        }
+        /*------------------查詢 end---------------------*/
+
+
+
+        //回上一頁
+        $("#btnReturn").click().on('click', function () {
+            //$("#iframe").load("/GL/FGL10181A/index");
+            history.go(-1)
+        })
+    });
+</script>
+
+

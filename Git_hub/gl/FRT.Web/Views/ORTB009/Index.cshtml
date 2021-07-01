@@ -1,0 +1,310 @@
+﻿@model FRT.Web.ViewModels.ORTB009Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊ @Html.DisplayNameFor(model => model.fastNo)：</span>@Html.TextBoxFor(model => model.fastNo, new { @size = "12", @maxlength = "10", @onkeyup = "InputToUpper(this);" })
+                        </td>
+
+
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnModify" name="btnModify" value="申請覆核" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    //處理畫面勾選的明細
+    var $grid = $("#grid"), idsOfSelectedRows = [],
+    updateIdsOfSelectedRows = function (id, isSelected) {
+        var rowData = $("#grid").jqGrid('getRowData', id);
+        var fastNo = rowData.fastNo;
+        var index = $.inArray(fastNo, idsOfSelectedRows);
+
+        if (!isSelected && index >= 0) {
+            idsOfSelectedRows.splice(index, 1); // remove id from the list
+        } else if (index < 0) {
+            idsOfSelectedRows.push(fastNo);
+        }
+    };
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#fastNo').val("");
+
+            jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($('#fastNo').val().length == 0)
+            {
+                validationSummary.append('<li>' + '快速付款編號  必需輸入!!' + '</li>');
+                return;
+            }
+
+
+            var jsonData = JSON.stringify({
+                'fastNo': $("#fastNo").val()
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("qryFRTBARM", "ORTB009")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+                        //更新畫面GRID
+                        jQuery("#grid").jqGrid('clearGridData')
+                            .jqGrid('setGridParam', { data: data.dataList })
+                            .trigger("reloadGrid");
+
+                        if (data.dataList.length == 0) {
+                            validationSummary.append('<li>' + '資料不存在!!"' + '</li>');
+                        } else {
+                            if (data.dataList[0].remitStat == "1")
+                                alert("是否已跟IT確認未成功產生電文，如已確認請按【申請覆核】!");
+                        }
+                            
+
+
+                    } else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        });
+        //*---------------查詢 end ----------------*//
+
+
+
+        //*-------------------GRID begin--------------------*//
+        $("#grid").jqGrid({
+            editurl: 'clientArray',
+            datatype: "local",
+            //caption: '明細資料',
+            localReader: { id: "fastNo" },
+            colModel: [
+                {
+                    label: '快速付款編號',
+                    name: 'fastNo', align: 'center', width: '120',
+                    editable: false
+
+                },
+                {
+                    label: '收款人ID',
+                    name: 'paidId', align: 'center', width: '100',
+                    editable: false
+                },
+                {
+                    label: '銀行代號',
+                    name: 'bankCode', align: 'center', width: '100',
+                    editable: false
+                },
+                {
+                    label: '匯款帳號',
+                    name: 'bankAct', align: 'left', width: '340',
+                    editable: false
+                },
+                {
+                    label: '匯款金額',
+                    name: 'remitAmt', align: 'center', width: '120', formatter: "number", formatoptions: { thousandsSeparator: ',', decimalPlaces: 0 } ,
+                    editable: false
+                },
+                {
+                    label: '收款人戶名',
+                    name: 'rcvName', align: 'center', width: '150',
+                    editable: false
+                }
+            ],
+            autowidth: true,
+            height: 'auto',
+            width: 'auto',
+            shrinkToFit: false,
+            forceFit: false,
+            loadonce: true,
+            rownumbers: true,
+            viewrecords: true,
+            multiselect: true,
+            onSelectRow: updateIdsOfSelectedRows,
+            rowNum: 10,
+            rowList: [10, 25, 50],
+            pager: "#pager",
+            loadComplete: function () {
+                $("#cb_grid").css("visibility", "hidden");    //隱藏全選checkbox
+
+            }
+        });
+
+        //*-------------------GRID end--------------------*//
+
+       
+
+
+        //*---------------修改(申請覆核) begin ----------------*//
+        $("#btnModify").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+            if (idsOfSelectedRows.length == 0) {
+                validationSummary.append('<li>' + '未勾選資料!!"' + '</li>');
+                return;
+            }
+
+
+            var rowObject = [];
+
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+
+            for (i = 0, count = idsOfSelectedRows.length; i < count; i++) {
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+                    if (rowData.fastNo == idsOfSelectedRows[i]) {
+                        rowObject.push(rowData);
+                    }
+                }
+            }
+
+
+
+            //var gridData = $("#grid").jqGrid('getRowData');
+            var gridData = $("#grid").jqGrid('getGridParam', 'data');
+
+            var jsonData = JSON.stringify({
+                'fastNo': rowObject
+            });
+
+
+            $.blockUI();
+
+
+            $.ajax({
+                type: "POST",
+                data: jsonData,
+                dataType: "json",
+                url: '@Url.Action("execSave", "ORTB009")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success) {
+
+                        validationSummary.append('<li>' + '申請覆核成功!!' + '</li>');
+
+                        if (data.errFastNo.length > 0) {
+                            validationSummary.append('<li>' + '以下快速付款編號資料已在覆核中，不可申請覆核：' + '</li>');
+                            for (var i = 0; i < data.errFastNo.length; i++) {
+                                validationSummary.append('<br/>' + data.errFastNo[i]);
+                            }
+                        }
+
+                        jQuery("#grid").jqGrid('clearGridData').trigger("reloadGrid");
+                        idsOfSelectedRows = [];
+                    } else {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+           
+
+        });
+        //*---------------修改(申請覆核) end ----------------*//
+
+    });
+</script>
+
+

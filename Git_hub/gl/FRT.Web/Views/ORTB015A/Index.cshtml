@@ -1,0 +1,482 @@
+﻿@model FRT.Web.ViewModels.ORTB015Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+
+    var mailGroupList = ViewBag.mailGroupList as SelectList;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                @Html.Hidden("hidDataStatus", "")
+                @Html.Hidden("hidStatus", "")
+                @Html.Hidden("hidMailGroup", "")
+                @Html.Hidden("hidEmpType", "")
+                @Html.Hidden("hidYN", "")
+                <table>
+                    <tr>
+                        <td>
+                            <span style="color:red;">＊@Html.DisplayNameFor(model => model.groupCode)：</span>@Html.DropDownList("groupCode", mailGroupList, "請選擇")
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.codeReserve1)：@Html.TextBoxFor(model => model.codeReserve1, new { @size = "30", @maxlength = "50", @disabled = true })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.codeReserve2)：@Html.TextBoxFor(model => model.codeReserve2, new { @size = "30", @maxlength = "50", @disabled = true })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @Html.DisplayNameFor(model => model.codeRemark)：@Html.TextAreaFor(model => model.codeRemark, new { @cols = "120", @rows = "3", @disabled = true })
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //切換MAIL群組
+    $("#groupCode").on("change", function () {
+        $("#codeReserve1").val("");
+        $("#codeReserve2").val("");
+        $("#codeRemark").val("");
+
+        if ("" == $("#groupCode").val())
+            return
+
+
+        $.blockUI();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("qryGroupCode", "ORTB015")',
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: {
+                'code': $("#groupCode").val()
+            },
+            success: function (json) {
+
+                if (json.success) {
+                    $("#codeReserve1").val(json.codeReserve1);
+                    $("#codeReserve2").val(json.codeReserve2);
+                    $("#codeRemark").val(json.codeRemark);
+                } else {
+                    alert(json.err);
+                }
+
+                $.unblockUI();
+            }
+        });
+
+    });
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRec == "True")
+                recList.push(rowId);
+            else if (index >= 0)
+                recList.splice(index, 1);
+        }
+
+
+
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRtn == "True")
+                rtnList.push(rowId);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+    //取得"DataStatus"下拉選單
+    function getDataStatus() {
+        return $('#hidDataStatus').val();
+    }
+
+
+    //取得"資料狀態"下拉選單
+    function getStatus() {
+        return $('#hidStatus').val();
+    }
+
+    //取得"角色/帳號"下拉選單
+    function getEmpType() {
+        return $('#hidEmpType').val();
+    }
+
+    //取得"可設定的MAIL群組"下拉選單
+    function getMailGroup() {
+        return $('#hidMailGroup').val();
+    }
+
+    //取得"可設定的MAIL群組"下拉選單
+    function getYN() {
+        return $('#hidYN').val();
+    }
+
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+             $('#hidDataStatus').val('@Html.Raw(ViewBag.dataStatusjqList)');
+            $('#hidStatus').val('@Html.Raw(ViewBag.statusjqList)');
+            $('#hidEmpType').val('@Html.Raw(ViewBag.empTypejqList)');
+            $('#hidMailGroup').val('@Html.Raw(ViewBag.mailGroupjqList)');
+            $('#hidYN').val('@Html.Raw(ViewBag.ynjqList)');
+
+            createGrid();
+        }
+
+        //*---------------查詢----------------*//
+        $("#btnQry").click().on('click', function () {
+            createGrid(true);
+        });
+
+
+        //*--------------查詢待覆核資料  begin-----------------*//
+        function createGrid(bClearMsg) {
+            recList = [];
+            rtnList = [];
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+            var para = {
+                groupCode: $("#groupCode").val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '/ORTB015A/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'tempId'
+                },
+                mtype: 'POST',
+                colModel: [
+                    {
+                        label: '核可',
+                        name: 'rec', index: 'rec', align: 'center', width:'60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    {
+                        label: '駁回',
+                        name: 'rtn', index: 'rtn', align: 'center', width:'60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    { label: 'tempId', name: 'tempId', align: 'center', hidden: true },
+                    { label: '申請單號', name: 'aplyNo', align: 'center', hidden: true },
+                    {
+                        label: '資料狀態',
+                        name: 'status', align: 'center', width: '80',
+                        editable: false,
+                        edittype: "select",
+                        formatter: 'select',
+                        editoptions: {
+                            value: getStatus()
+                        }
+                    },
+                {
+                    label: 'MAIL群組',
+                    name: 'groupCode', align: 'center', width: '160',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getMailGroup()
+                    }
+
+                },
+                {
+                    label: '設定類型',
+                    name: 'empType', align: 'center', width: '100',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getEmpType()
+                    }
+
+                },
+                {
+                    label: '角色/帳號',
+                    name: 'receiverEmpno', align: 'center', width: '110',
+                    editable: false
+                },
+                {
+                    label: '角色/帳號名稱',
+                    name: 'receiverEmpDesc', align: 'center', width: '120',
+                    editable: false
+                },
+                {
+                    label: 'MAIL給科主管',
+                    name: 'isNotifyMgr', align: 'center', width: '110',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getYN()
+                    }
+
+                },
+                {
+                    label: 'MAIL給部主管',
+                    name: 'isNotifyDeptMgr', align: 'center', width: '110',
+                    editable: false,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getYN()
+                    }
+
+                },
+                {
+                    label: '申請人員',
+                    name: 'updId', align: 'center', width: '80', hidden: true,
+                    editable: false,
+                },
+      {
+          label: '申請人員',
+          name: 'updateUName', align: 'center', width: '80',
+          editable: false,
+      },
+    {
+        label: '申請日期',
+        name: 'updDatetime', align: 'center', width: '160',
+        editable: false,
+    }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                sortname: 'tempId',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (bClearMsg)
+                        $('#validationSummary').children().remove();
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        if (bClearMsg & cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+                    } else if (!data.success && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                    }
+
+
+                    //還原畫面有勾選的資料
+                    ids = $(this).jqGrid('getDataIDs');
+
+                    for (j = 0; j <= ids.length - 1; j++) {
+                        rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.tempId == recList[i])
+                                $("#grid").jqGrid("setCell", rowData.tempId, "rec", "True");
+                        }
+
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.tempId == rtnList[i])
+                                $("#grid").jqGrid("setCell", rowData.tempId, "rtn", "True");
+                        }
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.tempId == recList[i])
+                                recData.push(rowData);
+                        }
+                    } else {
+                        recData = null;
+                    }
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.tempId == rtnList[i])
+                                rtnData.push(rowData);
+                        }
+                    } else {
+                        rtnData = null;
+                    }
+
+                }
+
+
+
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "ORTB015A")",
+                    data: JSON.stringify({ 'recData': recData, 'rtnData': rtnData }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        recList = [];
+                        rtnList = [];
+
+                        validationSummary.append('<li>作業成功！</li>');
+
+                        createGrid(false);
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                    $.unblockUI();
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+            });
+
+
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+    });
+</script>
+
+

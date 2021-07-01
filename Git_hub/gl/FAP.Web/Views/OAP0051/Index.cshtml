@@ -1,0 +1,282 @@
+﻿@model FAP.Web.ViewModels.OAP0051Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var codeTypeList = ViewBag.codeTypeList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+        <table>
+            <tr>
+                <td>
+                    <span style="color:red;">＊</span>報表類別：@Html.RadioButton("rpt_type", "tel_result", new { @checked = true, onchange = "qryTypeChange();" })
+                    <span>電訪成統計表</span>　　　@Html.RadioButton("rpt_type", "tel_interview_id", new { onchange = "qryTypeChange();" })<span>電訪人員成效統計表</span><br />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span style="color:red;">＊</span> 統計方式：@Html.RadioButton("cnt_type", "P", new { @checked = true })<span>給付對象ID</span>　　　@Html.RadioButton("cnt_type", "C")<span>支票號碼</span><br />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.tel_std_appr_date_b)：
+                    @Html.TextBoxFor(model => model.tel_std_appr_date_b, new { @size = "8", @maxlength = "7" })
+                    ~
+                    @Html.TextBoxFor(model => model.tel_std_appr_date_e, new { @size = "8", @maxlength = "7" })
+                    (民國年YYYMMDD，例:0980507)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.tel_interview_f_datetime_b)：
+                    @Html.TextBoxFor(model => model.tel_interview_f_datetime_b, new { @size = "8", @maxlength = "7" })
+                    ~
+                    @Html.TextBoxFor(model => model.tel_interview_f_datetime_e, new { @size = "8", @maxlength = "7" })
+                    (民國年YYYMMDD，例:0980507)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.dispatch_date_b)：
+                    @Html.TextBoxFor(model => model.dispatch_date_b, new { @size = "8", @maxlength = "7" })
+                    ~
+                    @Html.TextBoxFor(model => model.dispatch_date_e, new { @size = "8", @maxlength = "7" })
+                    (民國年YYYMMDD，例:0980507)
+                </td>
+            </tr>
+        </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="匯出" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    //切換查詢條件
+    function qryTypeChange() {
+
+        $('#tel_std_appr_date_b').val("");
+        $('#tel_std_appr_date_e').val("");
+        $('#tel_interview_f_datetime_b').val("");
+        $('#tel_interview_f_datetime_e').val("");
+        $('#dispatch_date_b').val("");
+        $('#dispatch_date_e').val("");
+
+
+        value = $('input:radio:checked[name="rpt_type"]').val();
+
+        if (value == 'tel_result') {
+            execClear();
+            $('input[id=rpt_type][value=tel_result]').prop("checked", true);
+
+            $('#tel_std_appr_date_b').attr('disabled', false);
+            $('#tel_std_appr_date_e').attr('disabled', false);
+
+        } else if (value == 'tel_interview_id') {
+            execClear();
+            $('input[id=qryType][value=tel_interview_id]').prop("checked", true);
+
+            $('#tel_std_appr_date_b').attr('disabled', true);
+            $('#tel_std_appr_date_e').attr('disabled', true);
+        }
+    }
+
+
+
+    //*---------------查詢 begin ----------------*//
+    function qryTelClean() {
+
+        $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+        var bPass = true;
+        rpt_type = $('input:radio:checked[name="rpt_type"]').val();
+        cnt_type = $('input:radio:checked[name="cnt_type"]').val();
+
+
+        //資料檢核-電訪成效統計表
+        if (rpt_type == 'tel_result') {
+            if (!checkChtDate($('#tel_std_appr_date_b').val(), true) || !checkChtDate($('#tel_std_appr_date_e').val(), true)) {
+                bPass = false;
+                validationSummary.append('<li>「電訪標準覆核日」錯誤!!</li>');
+            }
+
+            if ((!checkChtDate($('#tel_interview_f_datetime_b').val(), true) & !checkChtDate($('#dispatch_date_b').val(), true))
+                ||
+                (!checkChtDate($('#tel_interview_f_datetime_e').val(), true) & !checkChtDate($('#dispatch_date_e').val(), true))
+            ) {
+                bPass = false;
+                validationSummary.append('<li>「派件日期」、「電訪日期」錯誤，需至少擇一輸入!!</li>');
+            }
+        } else {
+
+            if (!checkChtDate($('#tel_interview_f_datetime_b').val(), true) & !checkChtDate($('#tel_interview_f_datetime_e').val(), true)) {
+                bPass = false;
+                validationSummary.append('<li>「電訪日期」錯誤!!</li>');
+            }
+
+            if (!checkChtDate($('#dispatch_date_b').val(), true) & !checkChtDate($('#dispatch_date_e').val(), true)) {
+                bPass = false;
+                validationSummary.append('<li>「派件日期」錯誤!!</li>');
+            }
+
+        }
+
+        
+        if (!bPass)
+            return
+
+
+            var jsonData = JSON.stringify({
+                model: {
+                    'rpt_type': rpt_type
+                    , 'cnt_type': cnt_type
+                    , 'tel_std_appr_date_b': $("#tel_std_appr_date_b").val()
+                    , 'tel_std_appr_date_e': $("#tel_std_appr_date_e").val()
+                    , 'tel_interview_f_datetime_b': $("#tel_interview_f_datetime_b").val()
+                    , 'tel_interview_f_datetime_e': $("#tel_interview_f_datetime_e").val()
+                    , 'dispatch_date_b': $("#dispatch_date_b").val()
+                    , 'dispatch_date_e': $("#dispatch_date_e").val()
+                }
+
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                    url: "@Url.Action("execExport", "OAP0051")",
+                data: jsonData,
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+
+                    if (data.success) {
+                        var url = '/OAP0051/downloadRpt?id=' + data.guid;
+
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+                });
+    }
+    //*---------------查詢 end ----------------*//
+
+
+
+
+
+    $("#btnQry").click().on('click', function () {
+        qryTelClean();
+    });
+
+
+
+    //*---------------清除 begin ----------------*//
+    function execClear() {
+        $('#validationSummary').children().remove();
+
+        //畫面功能鍵
+
+        $('#btnQry').attr('disabled', false);
+
+        //查詢條件
+        $('input[id=rpt_type][value=tel_interview_id]').prop("checked", true);
+        $('#tel_std_appr_date_b').attr('disabled', false);
+        $('#tel_std_appr_date_e').attr('disabled', false);
+
+        $('#tel_std_appr_date_b').val("");
+        $('#tel_std_appr_date_e').val("");
+        $('#tel_interview_f_datetime_b').val("");
+        $('#tel_interview_f_datetime_e').val("");
+        $('#dispatch_date_b').val("");
+        $('#dispatch_date_e').val("");
+
+    }
+   //*---------------清除 end ----------------*//
+
+
+
+
+    $(function () {
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } 
+        
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            execClear();
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+
+
+
+
+
+    });
+</script>
+
+

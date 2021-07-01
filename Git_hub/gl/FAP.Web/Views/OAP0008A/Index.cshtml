@@ -1,0 +1,599 @@
+﻿@model FAP.Web.ViewModels.OAP0008Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+               @Html.Hidden("hidExecAction", "")
+
+                @Html.Hidden("hidLevel1", "")
+                @Html.Hidden("hidLevel2", "")
+                @Html.Hidden("hidPractice", "")
+                @Html.Hidden("hidCertDoc", "")
+
+                <table>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_id)：@Html.TextBoxFor(model => model.paid_id, new { @size = "12", @maxlength = "10", @onkeyup = "qryName()" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.paid_name)：@Html.TextBoxFor(model => model.paid_name, new { @size = "30", @maxlength = "30", @disabled = true })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnSave" name="btnSave" value="確認" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+
+    //查詢"給付對象姓名"
+    function qryName() {
+        if ($('#paid_id').val().length == 10) {
+            $('#paid_name').val("");
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'paid_id': $('#paid_id').val()
+                }),
+                dataType: "json",
+                url: '@Url.Action("qryPaidName", "OAP0008")',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    if (data.success)
+                        $('#paid_name').val(data.paid_name);
+                    else
+                        validationSummary.append('<li>' + data.err + '</li>');
+
+                    $.unblockUI(); //畫面打開
+                }
+            });
+        }
+    }
+
+
+    //取得"執行功能"下拉選單
+    function getExecAction() {
+        return $('#hidExecAction').val();
+    }
+
+    //取得"清理大類"下拉選單
+    function getLevel1() {
+        return $('#hidLevel1').val();
+    }
+
+    //取得"清理小類"下拉選單
+    function getLevel2() {
+        return $('#hidLevel2').val();
+    }
+
+    //取得"踐行程序"下拉選單
+    function getPractice() {
+        return $('#hidPractice').val();
+    }
+
+    //取得"証明文件"下拉選單
+    function getCertDoc() {
+        return $('#hidCertDoc').val();
+    }
+
+
+
+    var $grid = $("#grid"), recList = [], ckRec = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, recList);
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            var status = $('#grid').jqGrid('getCell', rowId, 'status');
+          
+            if (status == "1" || status == "2") {
+                alert("此支票的清理狀態為已結案或已給付，不可執行核可作業!!");
+                $("#grid").jqGrid("setCell", rowId, "rec", "False");
+            } else {
+                if (valueRec == "True")
+                    recList.push(rowId);
+                else if (index >= 0)
+                    recList.splice(index, 1);
+            }
+
+            
+        }
+    };
+
+
+    var $grid = $("#grid"), rtnList = [], ckRtn = function (rowId) {
+
+        var valueRec = $('#grid').jqGrid('getCell', rowId, 'rec');
+        var valueRtn = $('#grid').jqGrid('getCell', rowId, 'rtn');
+        var index = $.inArray(rowId, rtnList);
+
+
+        if (valueRec == "True" && valueRtn == "True") {
+            $("#grid").jqGrid("setCell", rowId, "rtn", "False");
+            alert("不可同時勾選 核可 與 駁回!!");
+        } else {
+            if (valueRtn == "True")
+                rtnList.push(rowId);
+            else if (index >= 0)
+                rtnList.splice(index, 1);
+        }
+    }
+
+
+  
+
+    $(function () {
+
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            $('#hidExecAction').val('@Html.Raw(ViewBag.execActionjqList)');
+            $('#hidLevel1').val('@Html.Raw(ViewBag.level1jqList)');
+            $('#hidLevel2').val('@Html.Raw(ViewBag.level2jqList)');
+            $('#hidPractice').val('@Html.Raw(ViewBag.practicejqList)');
+            $('#hidCertDoc').val('@Html.Raw(ViewBag.certDocjqList)');
+
+            
+        }
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+
+            $('#paid_id').attr('disabled', false);
+            $('#paid_id').val("");
+            $('#paid_name').val("");
+
+
+            jQuery("#grid").jqGrid('clearGridData');
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+            if ($("#paid_id").val().length == 0) {
+                validationSummary.append('<li>' + '請輸入「給付對象ID」!!"' + '</li>');
+                return
+            } else
+                $('#paid_id').attr('disabled', true);
+
+
+            createGrid(true);
+
+        });
+        //*---------------查詢 end ----------------*//
+
+
+        //*--------------查詢待覆核資料  begin-----------------*//
+        function createGrid(bClearMsg) {
+
+            recList = [];
+            rtnList = [];
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+;
+
+            $.blockUI(); //畫面鎖起來
+
+            var para = {
+                paid_id: $("#paid_id").val()
+            };
+
+
+
+            $("#grid").jqGrid({
+                url: '/OAP0008A/LoadData/',
+                postData: para,
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false, id: 'temp_id'
+                },
+                mtype: 'POST',
+                colModel: [
+                    {
+                        label: "核可", name: 'rec', index: 'rec', align: 'center', width: '60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRec(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                    {
+                        label: "駁回", name: 'rtn', index: 'rtn', align: 'center', width: '60', editable: true, edittype: 'checkbox', formatter: "checkbox", formatoptions: { disabled: false },
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' onClick="ckRtn(' + '\'' + rowId + '\'' + ')"';
+                        }, editoptions: { value: "True:False" }
+                    },
+                     {
+                         label: 'temp_id',
+                         name: 'temp_id', align: 'center', hidden: true,
+                         editable: false,
+                     },
+                    { label: "申請單號", name: 'aply_no', align: 'center', hidden: true },
+                    { label: "執行功能", name: 'exec_action', align: 'center', width: '100' ,
+                    edittype: "select",
+                    formatter: 'select',
+                    editoptions: {
+                        value: getExecAction()
+                    }
+                    },
+                    {
+                        label: '支票號碼',
+                        name: 'check_no', align: 'center', width: '120', editable: false, width: '100'
+                    },
+                  {
+                      label: '支票帳號簡稱',
+                      name: 'check_acct_short', align: 'center', width: '120', editable: false
+                  },
+                  {
+                      label: '清理大類',
+                      name: 'level_1', align: 'center', editable: false, hidden: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getLevel1()
+                      }
+                  },
+                  {
+                      label: '清理大類',
+                      name: 'level_1_1', align: 'center', editable: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getLevel1()
+                      }
+                  },
+                  {
+                      label: '清理小類',
+                      name: 'level_2', align: 'center', editable: false, hidden: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getLevel2()
+                      }
+                  },
+                  {
+                      label: '清理小類',
+                      name: 'level_2_1', align: 'center', editable: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getLevel2()
+                      }
+                  },
+                  {
+                      label: '踐行程序',
+                      name: 'practice', align: 'left', hidden: true,
+                      editable: false,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getPractice()
+                      }
+                  },
+                  {
+                      label: '踐行程序',
+                      name: 'practice_1', align: 'left',
+                      editable: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getPractice()
+                      }
+                  },
+                  {
+                      label: '証明文件',
+                      name: 'cert_doc', align: 'left', hidden: true,
+                      editable: false,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getCertDoc()
+                      }
+                  },
+                  {
+                      label: '証明文件',
+                      name: 'cert_doc_1', align: 'left',
+                      editable: true,
+                      edittype: "select",
+                      formatter: 'select',
+                      editoptions: {
+                          value: getCertDoc()
+                      }
+                  },
+                  {
+                      label: '執行日期',
+                      name: 'exec_date', align: 'center', width: '80', hidden: true,
+                      editable: false
+                  },
+                {
+                    label: '執行日期',
+                    name: 'exec_date_1', align: 'center', width: '80',
+                    editable: true,
+                    editoptions: {
+                        size: 7,
+                        maxlength: 7
+                    }
+                },
+                {
+                    label: '過程說明',
+                    name: 'proc_desc', align: 'left', width: '200',
+                    editable: false,
+                    edittype: "textarea",
+                    editoptions: {
+                        rows: "3"
+                    }, cellattr: function (rowId, tv, rawObject, cm, rdata) { return 'style="white-space: pre;"' }
+                },
+                    { label: '申請人', name: 'update_id', align: 'center', width:'80' },
+                    { label: '申請人姓名', name: 'update_name', align: 'center', width: '120' },
+                    { label: '申請日期', name: 'update_datetime', align: 'center', width: '160' },
+                { label: '清理狀態', name: 'status', align: 'center', width: '160', hidden: true },
+                { label: '資料來源', name: 'srce_from', align: 'center', width: '160', hidden: true }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 25,
+                rowList: [10, 25, 50],
+                sortname: 'temp_id',
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    if (bClearMsg)
+                        $('#validationSummary').children().remove();
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        if (bClearMsg & cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+
+                    } else if (!data.success && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                    }
+
+
+                    //還原畫面有勾選的資料
+                    ids = $(this).jqGrid('getDataIDs');
+
+                    for (j = 0; j <= ids.length - 1; j++) {
+                        rowData = $("#grid").jqGrid('getRowData', ids[j]);
+
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.temp_id == recList[i])
+                                $("#grid").jqGrid("setCell", rowData.temp_id, "rec", "True");
+                        }
+
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.temp_id == rtnList[i])
+                                $("#grid").jqGrid("setCell", rowData.temp_id, "rtn", "True");
+                        }
+                    }
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+        //*--------------查詢待覆核資料  end-----------------*//
+
+
+
+
+        //*--------------覆核確認  begin-----------------*//
+        $("#btnSave").click().on('click', function () {
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (recList.length == 0 && rtnList.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+                validationSummary.append('<li>' + '請選擇要核可或駁回的資料！' + '</li>');
+
+            } else {
+
+                ids = $("#grid").jqGrid('getDataIDs');
+                var recData = [];
+                var rtnData = [];
+
+                var gridData = $("#grid").jqGrid('getGridParam', 'data');
+                for (j = 0; j <= gridData.length - 1; j++) {
+                    rowData = gridData[j];
+
+                    if (recList.length > 0) {
+                        for (i = 0, count = recList.length; i < count; i++) {
+                            if (rowData.temp_id == recList[i]) {
+                                recData.push({
+                                    'aply_no': rowData.aply_no,
+                                    'paid_id': $("#paid_id").val(),
+                                    'check_no': rowData.check_no,
+                                    'check_acct_short': rowData.check_acct_short,
+                                    'level_1': rowData.level_1,
+                                    'level_1_1': rowData.level_1_1,
+                                    'level_2': rowData.level_2,
+                                    'level_2_1': rowData.level_2_1,
+                                    'practice': rowData.practice,
+                                    'practice_1': rowData.practice_1,
+                                    'cert_doc': rowData.cert_doc,
+                                    'cert_doc_1': rowData.cert_doc_1,
+                                    'exec_date': rowData.exec_date,
+                                    'exec_date_1': rowData.exec_date_1,
+                                    'proc_desc': rowData.proc_desc,
+                                    'update_id': rowData.update_id,
+                                    'srce_from': rowData.srce_from
+                                });
+
+                            }
+                        }
+                    } else {
+                        recData = null;
+                    }
+
+                    if (rtnList.length > 0) {
+                        for (i = 0, count = rtnList.length; i < count; i++) {
+                            if (rowData.temp_id == rtnList[i]) {
+                                rtnData.push({
+                                    'aply_no': rowData.aply_no,
+                                    'paid_id': $("#paid_id").val(),
+                                    'check_no': rowData.check_no,
+                                    'check_acct_short': rowData.check_acct_short,
+                                    'practice': rowData.practice,
+                                    'practice_1': rowData.practice_1,
+                                    'cert_doc': rowData.cert_doc,
+                                    'cert_doc_1': rowData.cert_doc_1,
+                                    'exec_date': rowData.exec_date,
+                                    'exec_date_1': rowData.exec_date_1,
+                                    'proc_desc': rowData.proc_desc,
+                                    'update_id': rowData.update_id
+                                });
+                            }
+                        }
+                    } else {
+                        rtnData = null;
+                    }
+                }
+
+
+
+                $.blockUI();
+
+                $.ajax({
+                    url: "@Url.Action("execSave", "OAP0008A")",
+                    data: JSON.stringify({ 'recData': recData, 'rtnData': rtnData }
+                    ),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    if (data.success) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                        recList = [];
+                        rtnList = [];
+
+                        validationSummary.append('<li>作業成功！</li>');
+
+                        createGrid(false);
+
+                    } else {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+            });
+
+
+        }
+        });
+
+        //*--------------覆核確認  end-----------------*//
+    });
+</script>
+
+

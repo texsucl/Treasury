@@ -1,0 +1,348 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+<style>
+    .OAP0023_clear_c {
+        width:100px;
+    }
+</style>
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td style="width:110px">
+                            <label>支票收件部門 : </label>
+                        </td>
+                        <td colspan="5">
+                            @Html.DropDownList("OAP0023_dept", (SelectList)ViewBag.DEPT, new { @class = "OAP0023Status" })
+                        </td>
+                    </tr>
+                    <tr >
+                        <td colspan="6">
+                            <label>查詢條件 : </label>
+                            @Html.RadioButton("searchType", "OAP0023type_1", new { @checked = true }) 開票日期&給付類型查詢
+                            @Html.RadioButton("searchType", "OAP0023type_2") 支票號碼區段查詢
+                        </td>
+                    </tr>
+                    <tr class="searchType OAP0023type_1">
+                        <td>
+                            <label>開票日期 : </label>
+                        </td>
+                        <td style="width:230px">
+                            <input type="text" class="OAP0023_clear_c" id="OAP0023_date_S" />
+                            ~
+                            <input type="text" class="OAP0023_clear_c" id="OAP0023_date_E" />
+                        </td>
+                        <td style="width:110px">
+                            <label>給付類型(1) : </label>
+                        </td>
+                        <td colspan="3">
+                            <input type="text" class="OAP0023_clear_c"  style="width:20px;text-transform: uppercase;" maxlength="1" id="OAP0023_pay_class" />
+                        </td>
+                    </tr>
+                    <tr class="searchType OAP0023type_2" style="display:none;" >
+                        <td>
+                            <label>
+                                支票號碼(1) : 
+                            </label>
+                        </td>
+                        <td>
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_1_s" />
+                            ~
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_1_e" />
+                        </td>
+                        <td style="width:110px">
+                            <label>
+                                支票號碼(2) : 
+                            </label>
+                        </td>
+                        <td style="width:230px">
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_2_s" />
+                            ~
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_2_e" />
+                        </td>
+                        <td>
+                            <label>
+                                支票號碼(3) : 
+                            </label>
+                        </td>
+                        <td>
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_3_s" />
+                            ~
+                            <input type="text" class="OAP0023_clear_c" style="text-transform: uppercase;" id="OAP0023_check_no_3_e" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:15px" colspan="6">
+                            <label>符合條件,並選擇的支票共 </label>
+                            <label id="OAP0023_Checked" style="font-size:20px;">0</label>
+                            <label> 張支票</label>
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="OAP0023_Search" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="OAP0023_Insert" name="btnFBO" value="轉入應付票據簽收檔" disabled class="btn btn-primary" />                    
+                        <input type="button" id="OAP0023_Clear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+            }
+        </div>
+    </div>
+    <div class="row" style="padding-left:10px">
+        <div id="OAP0023jqgridDiv" class="jqd" style="padding-bottom:5px;">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var OAP0023url = {};
+        OAP0023url.query = '@Url.Action("qryOAP0023", "OAP0023")';
+        OAP0023url.getData = '@Url.Action("GetCacheData", "OAP0023")';
+        OAP0023url.CheckChange = '@Url.Action("CheckChange", "OAP0023")';
+        OAP0023url.insert = '@Url.Action("insertFAPPYSN0", "OAP0023")';
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+        } else {
+            $('#btnFBO').attr('disabled', true);
+            $('#btnReport').attr('disabled', true);
+            $('#btnNew').attr('disabled', true);
+
+
+            $('input[name=searchType]').on('change', function () {
+                var type = $('input[name=searchType]:checked').val();
+                $('#validationSummary').children().remove();
+                $('.searchType').hide();
+                $('.' + type).show();
+                $('.OAP0023_clear').val('');
+            });
+
+
+            $('#OAP0023_date_S').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+
+            $('#OAP0023_date_E').datepicker({
+                //dateFormat: 'yyyy-mm'
+            });
+
+            $('input:button').each(function () {
+                var id = $(this).attr('id');
+                switch (id) {
+                    case 'OAP0023_Search':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { OAP0023_SearchFun(); });
+                        break;
+                    case 'OAP0023_Insert':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () { OAP0023_InsertFun(); });
+                        break;
+                    case 'OAP0023_Clear':
+                        $('#' + id).off('click');
+                        $('#' + id).on('click', function () {
+                            $('#validationSummary').children().remove();
+                            $('.OAP0023_clear_c').val('');
+                            $('#OAP0023_Checked').text('0');
+                            jqgridCustom.clearJqgrid('OAP0023jqgridDiv');
+                        });
+                        break;
+                }
+            });
+
+            function OAP0023_SearchFun() {
+                jqgridCustom.clearJqgrid('OAP0023jqgridDiv');
+                $('#validationSummary').children().remove();
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        searchModel: OAP0023SearchModel(
+                         $('input[name=searchType]:checked').val().split('_')[1],
+                         $('#OAP0023_date_S').val(),
+                         $('#OAP0023_date_E').val(),
+                         ($('#OAP0023_pay_class').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_1_s').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_1_e').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_2_s').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_2_e').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_3_s').val() || '').toUpperCase(),
+                         ($('#OAP0023_check_no_3_e').val() || '').toUpperCase()
+                         )
+                    }),
+                    dataType: "json",
+                    url: OAP0023url.query,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        OAP0023Data();
+                        $('#OAP0023_Insert').attr('disabled', !result.Datas.Item1);
+                        $('#OAP0023_Checked').text(result.Datas.Item2);
+                    }
+                    else {
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+
+            function OAP0023_InsertFun() {
+                $('#validationSummary').children().remove();
+                var validationSummary = $('#validationSummary ul.validation-summary-errors');
+                if (validationSummary.length == 0) {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+                }
+                if (($('#OAP0023_dept').val() || ' ') == ' ')
+                {
+                    alert('請選擇支票收件部門!')
+                    return false;
+                }
+                $.blockUI(); //畫面鎖起來
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        aptid: $('#OAP0023_dept').val().split(',')[1],
+                        depid: $('#OAP0023_dept').val().split(',')[0],
+                    }),
+                    dataType: "json",
+                    url: OAP0023url.insert,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    if (result.RETURN_FLAG) {
+                        alert(result.DESCRIPTION);
+                        $('#OAP0023_Insert').attr('disabled', !result.Datas.Item1);
+                        $('#OAP0023_Checked').text(result.Datas.Item2);
+                        OAP0023Data();
+                    }
+                    $.unblockUI(); //畫面打開
+                });
+            }
+
+            function formatterCheck(cellvalue, options, rdata) {
+                var str = '';
+                if (rdata.flag != 'N') {
+                    str = "<input type='checkbox' class = 'OAP0023check' id='" + options.gid + options.colModel.index + options.rowId + "'  title= ' '" + (rdata.checkFlag == true ? 'checked' : ' ') + " />";
+                }
+                return str;
+            }
+
+            function OAP0023Data() {
+                var colNameArray = ['選擇', '支票號碼', '票面金額', '付款對象', '支票到期日', '給付類型', '行政單位', '簽收檔尚未簽收'];
+                var colModelArray = [];
+                colModelArray.push({ name: "chechFlag", index: "checkFlag", width: 70, sortable: false, align: 'center', formatter: formatterCheck }),
+                colModelArray.push({ name: "check_no", index: "check_no", width: 100, sortable: false });
+                colModelArray.push({ name: "check_mount", index: "check_mount", width: 150, sortable: false, align: 'right' });
+                colModelArray.push({ name: "receiver", index: "receiver", width: 100, sortable: false });
+                colModelArray.push({ name: "check_date", index: "check_date", width: 100, sortable: false, align: 'center' });
+                colModelArray.push({ name: "pay_class_text", index: "pay_class_text", width:250, sortable: false });
+                colModelArray.push({ name: "adm_unit", index: "adm_unit", width: 250, sortable: false }),
+                colModelArray.push({ name: "flag_D", index: "flag_D", width: 300, sortable: false }),
+                jqgridCustom.createJqgridByCache(
+                    'OAP0023jqgridDiv',
+                    'OAP0023TempList',
+                    'OAP0023TempPeger',
+                    OAP0023url.getData,
+                    {
+                        type: "OAP0023ViewData"
+                    },
+                    colNameArray,
+                    colModelArray,
+                    '應付票據–轉入支票簽收(簽收資料個案產出)',
+                    jqgridCustom.getPage('OAP0023jqgridDiv'),
+                    jqgridCustom.getRowNum('OAP0023jqgridDiv'),
+                    OAP0023TempCompleteFun,
+                    true
+                    );
+            }
+
+            function OAP0023TempCompleteFun(listId) {
+                $('#' + listId + ' > tbody > tr:gt(0) ').each(function (i, j) {
+                    $(this).find('td').find('.OAP0023check').each(function () {
+                        $(this).off('click');
+                        $(this).on('click', function () {
+                            OAP0023Check(i + 1, $(this).prop('checked'));
+                        });
+                    });
+                });
+            }
+
+            function OAP0023Check(rowid, flag) {
+                var listId = 'OAP0023TempList';
+                var data = $("#" + listId).getRowData(rowid);
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify({
+                        check_no: data.check_no,
+                        flag: flag
+                    }),
+                    dataType: "json",
+                    url: OAP0023url.CheckChange,
+                    contentType: 'application/json',
+                }).done(function (result) {
+                    if (result.RETURN_FLAG) {
+                        $('#OAP0023_Insert').attr('disabled', !result.Datas.Item1);
+                        $('#OAP0023_Checked').text(result.Datas.Item2);
+                    }
+                    else {
+                        validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                    }
+                });
+            }
+
+            function OAP0023SearchModel(
+            type,
+            stat_date_s,
+            stat_date_e,
+            pay_class,
+            check_no_1_s,
+            check_no_1_e,
+            check_no_2_s,
+            check_no_2_e,
+            check_no_3_s,
+            check_no_3_e
+            ) {
+                var obj = {};
+                obj['type'] = type;
+                obj['stat_date_s'] = stat_date_s;
+                obj['stat_date_e'] = stat_date_e;
+                obj['pay_class'] = pay_class;
+                obj['check_no_1_s'] = check_no_1_s;
+                obj['check_no_1_e'] = check_no_1_e;
+                obj['check_no_2_s'] = check_no_2_s;
+                obj['check_no_2_e'] = check_no_2_e;
+                obj['check_no_3_s'] = check_no_3_s;
+                obj['check_no_3_e'] = check_no_3_e;
+                return obj;
+            }
+        }
+    });
+</script>
+
+

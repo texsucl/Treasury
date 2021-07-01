@@ -1,0 +1,317 @@
+﻿@model FRT.Web.ViewModels.ORTB005Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+    var paidTypeList = ViewBag.paidTypeList as SelectList;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+
+                <table>
+                    <tr>
+                        <td><span style="color:red;" />＊
+                            @Html.DisplayNameFor(model => model.field081)：@Html.TextBoxFor(model => model.field081B, new { @size = "8", @maxlength = "8"}) ~ @Html.TextBoxFor(model => model.field081E, new { @size = "8", @maxlength = "8" })
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.paidType)：@Html.DropDownList("paidType", paidTypeList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.corpNo)：@Html.TextBoxFor(model => model.corpNo, new { @size = "1", @maxlength = "1" })
+                            </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.currency)：@Html.TextBoxFor(model => model.currency, new { @size = "3", @maxlength = "3" })
+                            </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.sqlNo)：@Html.TextBoxFor(model => model.sqlNo, new { @size = "20", @maxlength = "18" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.vhrNo1)：@Html.TextBoxFor(model => model.vhrNo1, new { @size = "20", @maxlength = "18" })
+                        </td>
+                    </tr>
+                </table>
+
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="submit" id="btnRptS" name="btnRptS" value="列印彙總表" class="btn btn-primary" />
+                        <input type="submit" id="btnRptD" name="btnRptD" value="列印明細表" class="btn btn-primary" />
+                        <input type="submit" id="btnClear" name="btnClear" value="清空" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+                <div class="row">
+                    <div id="qryResult" class="col-sm-24">
+                        <table id="grid"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            }
+
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $(window).bind('resize', function () {
+            var newWidth = $("#grid").closest(".ui-jqgrid").parent().width();
+            jQuery("#grid").setGridWidth(newWidth, false);
+        }).trigger('resize');
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        } else {
+
+            var nowDate = getChtYYYYMMDD();
+            $('#field081B').val(nowDate);
+            $('#field081E').val(nowDate);
+            
+            $('#btnRptS').attr('disabled', true);
+            $('#btnRptD').attr('disabled', true);
+            $('#hidPaidType').val('@Html.Raw(ViewBag.paidTypejqList)');
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $('#field081B').val("");
+            $('#field081E').val("");
+            $('#paidType').val("");
+            $('#corpNo').val("");
+            $('#currency').val("");
+            $('#sqlNo').val("");
+            $('#vhrNo1').val("");
+
+
+            $('#btnRptS').attr('disabled', true);
+            $('#btnRptD').attr('disabled', true);
+            $('#qryResult').children().remove();
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+
+        //*---------------查詢 begin ----------------*//
+        $("#btnQry").click().on('click', function () {
+            $('#btnRptS').attr('disabled', true);
+            $('#btnRptD').attr('disabled', true);
+
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+
+            if (!(checkDateTW($('#field081B').val(), true) || checkDateTW($('#field081B').val(), true))) {
+                validationSummary.append('<li>' + '“入帳日”欄位-請輸入正確的格式：民國年4碼+月份2碼+日期2碼！(ex:01070727)！' + '</li>');
+                return 
+
+            } else
+                createGrid()
+
+        });
+        //*---------------查詢 end ----------------*//
+
+
+        //查詢結果GRID
+        function createGrid() {
+
+            $.blockUI(); //畫面鎖起來
+
+
+            $('#qryResult').children().remove();
+
+            $('#qryResult').append('<table id="' + "grid" + '"></table>');
+            $('#qryResult').append('<div id="' + "pager" + '"></div>');
+            var para = {
+                'field081B': $('#field081B').val()
+                , 'field081E': $('#field081E').val()
+                , 'paidType': $('#paidType').val()
+                , 'corpNo': $('#corpNo').val()
+                , 'currency': $('#currency').val()
+                , 'sqlNo': $('#sqlNo').val()
+                , 'vhrNo1': $('#vhrNo1').val()
+            };
+
+            $.blockUI(); //畫面鎖起來
+
+            $("#grid").jqGrid({
+                url: '@Url.Action("LoadData", "ORTB005")',
+                postData: para,
+
+                datatype: 'json',
+                jsonReader: {
+                    repeatitems: false
+                },
+                mtype: 'POST',
+                colNames: ['類型', '入帳日', '下送SQL編號', '憑證編號', '帳本', '幣別', '匯款金額'],
+                colModel: [
+                    { name: 'paidType', align: 'center', width: '80' },
+                    { name: 'field081', align: 'center', width: '100' },
+                    { name: 'sqlNo', align: 'center', width: '160' },
+                    { name: 'vhrNo1', align: 'center', width: '120' },
+                    { name: 'corpNo', align: 'center', width: '70' },
+                    { name: 'currency', align: 'center', width: '80' },
+                    { name: 'remitAmt', align: 'right', width: '100', formatter: "number", formatoptions: { thousandsSeparator: ',', decimalPlaces: 2 } }
+                ],
+                autowidth: true,
+                shrinkToFit: false,
+                forceFit: true,
+                pager: '#pager',
+                width: 'auto',
+                height: 'auto',
+                rowNum: 10,
+                rowList: [10, 25, 50],
+                //sortname: 'tempId',
+                rownumbers: true,
+                sortorder: "acs",
+                viewrecords: true,
+                loadonce: true,
+                loadComplete: function (data) {
+                    $('#validationSummary').children().remove();
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    var cnt = $('#grid').getGridParam('records')
+
+                    //if (bClearMsg)
+                        
+
+                    if (data.success) {
+                        if (cnt == 0)
+                            validationSummary.append('<li>' + '無符合條件的資料!!' + '</li>');
+                        else {
+                            $('#btnRptS').attr('disabled', false);
+                            $('#btnRptD').attr('disabled', false);
+                        }
+
+                    } else if (!data.success && cnt == 0) {
+                        validationSummary.append('<li>' + '其它錯誤，請洽系統管理員!!' + '</li>');
+
+                    }
+
+                }
+
+            });
+
+            $.unblockUI(); //畫面打開
+        }
+
+
+        //列印彙總表
+        $("#btnRptS").click().on('click', function () {
+            genRpt("S");
+
+        });
+
+        //列印明細表
+        $("#btnRptD").click().on('click', function () {
+            genRpt("D");
+
+        });
+
+        //*---------------報表列印 begin ----------------*//
+        function genRpt(type) {
+            $('#validationSummary').children().remove();
+
+            $.blockUI();
+
+            $.ajax({
+                url: "@Url.Action("print", "ORTB005")",
+                data: JSON.stringify({
+                    'cRptType': type, 'field081B': $('#field081B').val()
+                , 'field081E': $('#field081E').val()
+                , 'paidType': $('#paidType').val()
+                , 'corpNo': $('#corpNo').val()
+                , 'currency': $('#currency').val()
+                , 'sqlNo': $('#sqlNo').val()
+                , 'vhrNo1': $('#vhrNo1').val()
+                }
+                ),
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var link = '';
+                if (data.success) {
+                    @*if (type == "S") {
+                        link = '@Url.HttpRouteUrl("Report", new { aspx = "ORTB005P1Viewer",  id = "-1"})';
+                    } else {
+                        link = '@Url.HttpRouteUrl("Report", new { aspx = "ORTB005P2Viewer",  id = "-1"})';
+
+                    }*@
+                    link = '@Url.HttpRouteUrl("Report", new { aspx = "ORTB005PViewer",  id = "-1"})';
+                    link = link.replace("-1", data.guid);
+                    window.open(link);
+
+
+                } else {
+                    $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                    validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (data.err.length > 0) {
+                        validationSummary.append('<li>' + data.err + '</li>');
+                    }
+                }
+
+                $.unblockUI();
+            },
+            error: function () {
+
+            }
+        });
+
+        
+        }
+
+        //*---------------報表列印 end ----------------*//
+
+    });
+</script>
+
+

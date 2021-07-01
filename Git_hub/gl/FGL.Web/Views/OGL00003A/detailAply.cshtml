@@ -1,0 +1,684 @@
+﻿@model FGL.Web.ViewModels.OGL00003Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = "OGL00003A 商品資料覆核作業-明細";
+
+    var productTypeList = ViewBag.productTypeList as SelectList;
+    var ynList = ViewBag.ynList as SelectList;
+    var itemConList = ViewBag.itemConList as SelectList;
+
+    var prodNoVerList = ViewBag.prodNoVerList as SelectList;
+    var sysTypeList = ViewBag.sysTypeList as SelectList;
+    var itemMainTypeList = ViewBag.itemMainTypeList as SelectList;
+    var investTypeList = ViewBag.investTypeList as SelectList;
+    var insTermList = ViewBag.insTermList as SelectList;
+    var busiTypeList = ViewBag.busiTypeList as SelectList;
+    var comTypeList = ViewBag.comTypeList as SelectList;
+    var flagList = ViewBag.flagList as SelectList;
+    var lodprmTypeList = ViewBag.lodprmTypeList as SelectList;
+
+
+}
+
+
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+
+            @Html.Hidden("hidYNFlag", "")
+            @Html.Hidden("hidAcctType", "")
+            @Html.HiddenFor(model => model.acctUpId)
+
+            <table>
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.aplyNo)：
+
+                        @Html.DisplayTextFor(model => model.aplyNo)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.prodUpId)：
+
+                        @Html.DisplayTextFor(model => model.prodUpId)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.prodUpDt)：
+
+                        @Html.DisplayTextFor(model => model.prodUpDt)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.item)：@Html.TextBoxFor(model => model.item, new { @size = "10", @maxlength = "8" })
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.productType)：@Html.DropDownList("productType", productTypeList, "請選擇")
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.flag)：@Html.DropDownList("flag", flagList, "請選擇", new { @disabled = true })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(model => model.fuMk)：@Html.DropDownList("fuMk", ynList, "請選擇")
+                    </td>
+                    <td>
+                        @Html.DisplayNameFor(model => model.itemCon)：@Html.DropDownList("itemCon", itemConList, "請選擇")
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(model => model.discPartFeat)：@Html.DropDownList("discPartFeat", ynList, "請選擇")
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <div class="row">
+                <div class="col-sm-24" style="text-align:center;">
+                    <input type="button" id="btnConfirm" name="btnConfirm" value="核可" class="btn btn-primary" />
+                    <input type="button" id="btnReturn" name="btnReturn" value="駁回" class="btn btn-primary" />
+                    <input type="button" id="btnPrepage" name="btnPrepage" value="回上一頁" class="btn btn-primary" />
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="panel panel-primary" id="itemInfo">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+
+                <a id="itemInfoC" data-toggle="collapse" data-parent="#itemInfo"
+                   href="#collapseItemInfo">
+                    Ｖ
+                </a>
+
+                險種資料
+            </h4>
+        </div>
+
+
+        <div id="collapseItemInfo" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.prodNoVer)：@Html.DropDownList("prodNoVer", prodNoVerList, "請選擇")
+
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.prodNo)：@Html.TextBoxFor(model => model.prodNo, new { @size = "32", @maxlength = "27" })
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.sysType)：@Html.DropDownList("sysType", sysTypeList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.itemMainType)：@Html.DropDownList("itemMainType", itemMainTypeList, "請選擇")
+                            (商品編號第5碼為9：其他時，請回歸主承保範圍)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+                            @Html.DisplayNameFor(model => model.itemName)：@Html.TextBoxFor(model => model.itemName, new { @size = "100", @maxlength = "100" })
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.investType)：@Html.DropDownList("investType", investTypeList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.insTerm)：@Html.DropDownList("insTerm", insTermList, "請選擇")
+                        </td>
+
+                        
+                    </tr>
+
+                    <tr>
+                        <td>
+                            @Html.DisplayNameFor(model => model.busiType)：@Html.DropDownList("busiType", busiTypeList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.comType)：@Html.DropDownList("comType", comTypeList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.coiType)：@Html.DropDownList("coiType", ynList, "請選擇")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        @*<td>
+                            @Html.DisplayNameFor(model => model.extSchedulType)：@Html.DropDownList("extSchedulType", ynList, "請選擇")
+                        </td>*@
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.pakindDmopType)：@Html.DropDownList("pakindDmopType", ynList, "請選擇")
+                        </td>
+
+                        <td>
+                            @Html.DisplayNameFor(model => model.lodprmType)：@Html.DropDownList("lodprmType", lodprmTypeList, "請選擇")
+                        </td>
+                        <td>
+                            @Html.DisplayNameFor(model => model.healthMgrType)：@Html.DropDownList("healthMgrType", ynList, "請選擇")
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel panel-primary" id="itemAcct">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#itemAcct"
+                   href="#collapseItemAcct">
+                    Ｖ
+                </a>
+                (給付項目/費用)
+            </h4>
+        </div>
+
+
+        <div id="collapseItemAcct" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <table>
+                    <tr>
+                        <td valign="top">
+                            <div id="ga" />
+                        </td>
+                        <td valign="top">
+                            <div id="sa" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+
+
+<script type="text/javascript">
+    //查詢正式檔資料
+    function qryFormal() {
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                item: $('#item').val(),
+                productType: $('#productType').val(),
+                fuMk: $('#fuMk').val(),
+                itemCon: $('#itemCon').val(),
+                discPartFeat: $('#discPartFeat').val()
+            }),
+            dataType: "json",
+            url: '@Url.Action("qryFormal", "OGL00003A")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    if (data.formal != null) {
+                        if ($("#prodNoVer").val() != data.formal.prodNoVer)
+                            $("#prodNoVer").css('color', 'red');
+
+                        if ($("#prodNo").val() != data.formal.prodNo)
+                            $("#prodNo").css('color', 'red');
+
+                        if ($("#sysType").val() != data.formal.sysType)
+                            $("#sysType").css('color', 'red');
+
+                        if ($("#itemMainType").val() != data.formal.itemMainType)
+                            $("#itemMainType").css('color', 'red');
+
+                        if ($("#investType").val() != data.formal.investType)
+                            $("#investType").css('color', 'red');
+
+                        if ($("#insTerm").val() != data.formal.insTerm)
+                            $("#insTerm").css('color', 'red');
+
+                        if ($("#busiType").val() != data.formal.busiType)
+                            $("#busiType").css('color', 'red');
+
+                        if ($("#comType").val() != data.formal.comType)
+                            $("#comType").css('color', 'red');
+
+                        if ($("#extSchedulType").val() != data.formal.extSchedulType)
+                            $("#extSchedulType").css('color', 'red');
+
+                        if ($("#pakindDmopType").val() != data.formal.pakindDmopType)
+                            $("#pakindDmopType").css('color', 'red');
+
+                        if ($("#lodprmType").val() != data.formal.lodprmType)
+                            $("#lodprmType").css('color', 'red');
+
+                        if ($("#healthMgrType").val() != data.formal.healthMgrType)
+                            $("#healthMgrType").css('color', 'red');
+
+                        if ($("#coiType").val() != data.formal.coiType)
+                            $("#coiType").css('color', 'red');
+
+                        if ($("#itemName").val() != data.formal.itemName)
+                            $("#itemName").css('color', 'red');
+                    } else {
+                        $("#prodNoVer").css('color', 'red');
+                        $("#prodNo").css('color', 'red');
+                        $("#sysType").css('color', 'red');
+                        $("#itemMainType").css('color', 'red');
+                        $("#investType").css('color', 'red');
+                        $("#insTerm").css('color', 'red');
+                        $("#busiType").css('color', 'red');
+                        $("#comType").css('color', 'red');
+                        $("#extSchedulType").css('color', 'red');
+                        $("#pakindDmopType").css('color', 'red');
+                        $("#lodprmType").css('color', 'red');
+                        $("#healthMgrType").css('color', 'red');
+                        $("#coiType").css('color', 'red');
+                        $("#itemName").css('color', 'red');
+                    }
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+    }
+
+
+    //查詢SA、GA項目
+    function qrySmpNum(aplyNo) {
+        $('#ga').children().remove();
+        $('#sa').children().remove();
+
+        $.blockUI(); //畫面鎖起來
+
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify({
+                aplyNo: aplyNo,
+                productType: $('#productType').val(),
+                fuMk: $('#fuMk').val(),
+                itemCon: $('#itemCon').val(),
+                discPartFeat: $('#discPartFeat').val()
+            }),
+            dataType: "json",
+            url: '@Url.Action("qrySmpNum", "OGL00003A")',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data.success) {
+                    var ga = document.getElementById('ga');
+                    var sa = document.getElementById('sa');
+
+                    //組合GA項目
+                    if (data.gaList.length > 0) {
+                        var lblHead = document.createElement("label");
+                        lblHead.innerHTML = "GA";
+                        lblHead.style.color = "red";
+                        lblHead.style.fontWeight = 'bold';
+                        ga.appendChild(lblHead);
+
+                        var spaceBrHead = document.createElement("br");
+                        ga.appendChild(spaceBrHead);
+
+
+                        for (var i = 0; i <= data.gaList.length - 1; i++) {
+                            var nowId = data.gaList[i].tempId;
+
+                            var radioYes = document.createElement("input");
+                            radioYes.setAttribute("class", "with-font");
+                            radioYes.setAttribute("type", "radio");
+                            radioYes.setAttribute("id", "radioYes" + nowId);
+                            radioYes.setAttribute("name", "Boolean" + nowId);
+                            radioYes.setAttribute("value", "Y");
+                            radioYes.setAttribute("disabled", true);
+
+                            var lblYes = document.createElement("label");
+                            lblYes.innerHTML = "Y　";
+
+
+                            var radioNo = document.createElement("input");
+                            radioNo.setAttribute("class", "with-font");
+                            radioNo.setAttribute("type", "radio");
+                            radioNo.setAttribute("id", "radioNo" + nowId);
+                            radioNo.setAttribute("name", "Boolean" + nowId);
+                            radioNo.setAttribute("value", "N");
+                            radioNo.setAttribute("disabled", true);
+
+
+                            var lblNo = document.createElement("label");
+                            lblNo.innerHTML = "N　";
+
+
+                            var wording = document.createElement("label");
+                            wording.setAttribute("name", "label" + nowId);
+                            wording.setAttribute("name", "label" + nowId);
+                            wording.innerHTML = "　" + data.gaList[i].smpName;
+
+                            var bChg = true;
+                            if (data.sumpD != null) {
+                                for (var j = 0; j <= data.sumpD.length - 1; j++) {
+                                    var sumpId = data.sumpD[j].smpNum + "|" + data.sumpD[j].productType + "|" + data.sumpD[j].acctType
+                                    if (sumpId == nowId) {
+                                        if (data.sumpD[j].flag == "Y") {
+                                            radioYes.setAttribute("checked", true);
+
+                                            //lblYes.setAttribute("style", "color: red;font-weight:bold");
+                                            //radioYes.css('color', 'green');
+                                        }
+                                        else {
+                                            radioNo.setAttribute("checked", true);
+                                            //radioNo.css('color', 'green');
+                                            //lblNo.setAttribute("style", "color: red;font-weight:bold");
+                                        }
+
+
+                                        bChg = data.sumpD[j].bChg;
+
+                                    }
+                                }
+                            }
+
+                            if (bChg)
+                                wording.style.color = "red";
+
+                            ga.appendChild(radioYes);
+                            ga.appendChild(lblYes);
+                            ga.appendChild(radioNo);
+                            ga.appendChild(lblNo);
+                            ga.appendChild(wording);
+
+                            var spaceBr = document.createElement("br");
+                            ga.appendChild(spaceBr);
+
+
+                        }
+                    }
+
+                    //組合SA項目
+                    if (data.saList.length > 0) {
+                        var lblHead = document.createElement("label");
+                        lblHead.innerHTML = "SA";
+                        lblHead.style.color = "red";
+                        lblHead.style.fontWeight = 'bold';
+                        sa.appendChild(lblHead);
+
+                        var spaceBrHead = document.createElement("br");
+                        sa.appendChild(spaceBrHead);
+
+
+                        for (var i = 0; i <= data.saList.length - 1; i++) {
+                            var radioYes = document.createElement("input");
+                            radioYes.setAttribute("class", "with-font");
+                            radioYes.setAttribute("type", "radio");
+                            radioYes.setAttribute("id", "radioYes" + data.saList[i].tempId);
+                            radioYes.setAttribute("name", "Boolean" + data.saList[i].tempId);
+                            radioYes.setAttribute("value", "Y");
+                            radioYes.setAttribute("disabled", true);
+
+                            var lblYes = document.createElement("label");
+                            lblYes.innerHTML = "Y　";
+                            //sa.appendChild(radioYes);
+                            //sa.appendChild(lblYes);
+
+                            var radioNo = document.createElement("input");
+                            radioNo.setAttribute("class", "with-font");
+                            radioNo.setAttribute("type", "radio");
+                            radioNo.setAttribute("id", "radioNo" + data.saList[i].tempId);
+                            radioNo.setAttribute("name", "Boolean" + data.saList[i].tempId);
+                            radioNo.setAttribute("value", "N");
+                            radioNo.setAttribute("disabled", true);
+
+                            var lblNo = document.createElement("label");
+                            lblNo.innerHTML = "N　";
+                            //sa.appendChild(radioNo);
+                            //sa.appendChild(lblNo);
+
+                            var wording = document.createElement("label");
+                            wording.innerHTML = "　" + data.saList[i].smpName;
+
+                            var bChg = true;
+                            if (data.sumpD != null) {
+                                for (var j = 0; j <= data.sumpD.length - 1; j++) {
+                                    var sumpId = data.sumpD[j].smpNum + "|" + data.sumpD[j].productType + "|" + data.sumpD[j].acctType
+                                    if (sumpId == data.saList[i].tempId) {
+                                        if (data.sumpD[j].flag == "Y") {
+                                            radioYes.setAttribute("checked", true);
+                                        } else {
+                                            radioNo.setAttribute("checked", true);
+                                        }
+
+                                    }
+                                    bChg = data.sumpD[j].bChg;
+                                }
+                            }
+
+                            if (bChg)
+                                wording.style.color = "red";
+
+                            sa.appendChild(radioYes);
+                            sa.appendChild(lblYes);
+                            sa.appendChild(radioNo);
+                            sa.appendChild(lblNo);
+                            sa.appendChild(wording);
+
+                            var spaceBr = document.createElement("br");
+                            sa.appendChild(spaceBr);
+
+
+                        }
+                    }
+
+
+                } else
+                    validationSummary.append('<li>' + data.err + '</li>');
+
+                $.unblockUI(); //畫面打開
+            }
+        });
+    }
+
+
+    $(function () {
+        var bHaveData = '@Html.Raw(ViewBag.bHaveData)';
+        var execAction = '@Html.Raw(ViewBag.execAction)';
+        var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+        if (validationSummary.length == 0) {
+            $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+            validationSummary = $('#validationSummary ul.validation-summary-errors');
+        }
+
+        if (bHaveData) {
+
+
+            $("#item").attr('disabled', true);
+            $("#productType").attr('disabled', true);
+            $("#fuMk").attr('disabled', true);
+            $("#itemCon").attr('disabled', true);
+            $("#discPartFeat").attr('disabled', true);
+
+
+            $("#prodNoVer").attr('disabled', true);
+            $("#prodNo").attr('disabled', true);
+            $("#sysType").attr('disabled', true);
+            $("#itemMainType").attr('disabled', true);
+            $("#investType").attr('disabled', true);
+            $("#insTerm").attr('disabled', true);
+            $("#busiType").attr('disabled', true);
+            $("#comType").attr('disabled', true);
+            $("#extSchedulType").attr('disabled', true);
+            $("#pakindDmopType").attr('disabled', true);
+            $("#lodprmType").attr('disabled', true);
+            $("#healthMgrType").attr('disabled', true);
+            $("#coiType").attr('disabled', true);
+            $("#itemName").attr('disabled', true);
+
+
+            qryFormal();
+
+
+            if ($("#flag").val() != "O") {
+                qrySmpNum('@Html.Raw(ViewBag.aplyNo)');
+                $("#itemAcct").show();
+
+                if ('@Html.Raw(ViewBag.itemHealthMgrMk)' != "Y")
+                    $("#healthMgrType").hide();
+
+                if ('@Html.Raw(ViewBag.itemInvestTypeMk)' != "Y")
+                    $("#investType").hide();
+
+                if ('@Html.Raw(ViewBag.itemLodprmMk)' != "Y")
+                    $("#lodprmType").hide();
+
+                if ('@Html.Raw(ViewBag.itemPakindDmopMk)' != "Y")
+                    $("#pakindDmopType").hide();
+
+                if ('@Html.Raw(ViewBag.itemCoiType)' != "Y")
+                    $("#coiType").hide();
+            } else
+                $("#itemAcct").hide();
+
+
+
+            if (execAction == "D")
+                validationSummary.append('<li>此商品申請"刪除"流程!!</li>');
+
+        } else {
+
+
+            validationSummary.append('<li>' + '無此覆核資料' + '</li>');
+        }
+
+
+
+        //關閉
+        $("#btnClose").click().on('click', function () {
+            window.close();
+        })
+
+        //回上一頁
+        $("#btnPrepage").click().on('click', function () {
+
+            history.go(-1)
+        })
+
+        //*------------------退回---------------------*//
+        $("#btnReturn").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            //var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'aplyNo': '@Html.Raw(ViewBag.aplyNo)',
+                    'execType': "R"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OGL00003A")',
+                contentType: 'application/json',
+                success: function (data) {
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '退回作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.errors + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+
+
+
+
+        });
+
+
+
+        //*------------------------核可--------------------------*//
+        $("#btnConfirm").click().on('click', function () {
+            $('#validationSummary').children().remove();
+            $.blockUI();
+
+            var aplyNo = '@Html.Raw(ViewBag.aplyNo)';
+
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify({
+                    'aplyNo': '@Html.Raw(ViewBag.aplyNo)',
+                    'execType': "C"
+                }),
+                dataType: "json",
+                url: '@Url.Action("execSave", "OGL00003A")',
+                contentType: 'application/json',
+                success: function (data) {
+
+
+                    var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+                    if (validationSummary.length == 0) {
+                        $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                        validationSummary = $('#validationSummary ul.validation-summary-errors');
+                    }
+
+                    if (data.success) {
+                        $("#btnConfirm").attr('disabled', true);
+                        $("#btnReturn").attr('disabled', true);
+                        validationSummary.append('<li>' + '核可作業成功!!' + '</li>');
+                    } else {
+                        validationSummary.append('<li>' + data.errors + '</li>');
+                    }
+
+                    $.unblockUI();
+                }
+            });
+
+        });
+
+
+
+    });
+</script>
+
+

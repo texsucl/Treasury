@@ -1,0 +1,159 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+    var opScope = ViewBag.opScope;
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+                <table>
+                    <tr>
+                        <td>
+                            結案日 :
+                        </td>
+                        <td>
+                            <input type="text" id="close_date_S" autocomplete="off" />
+                            ~
+                            <input type="text" id="close_date_E" autocomplete="off" />
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="button" id="btnQry" name="btnQry" value="查詢" class="btn btn-primary" />
+                        <input type="button" id="btnReport" name="btnReport" value="執行報表" class="btn btn-primary" disabled />
+                    </div>
+                </div>
+                <br>
+            }
+        </div>
+    </div>
+        <div id="ORTB021jqgridDiv" class="jqd" style="padding-bottom:5px;">
+        </div>
+
+</div>
+
+
+<script type="text/javascript">
+   $(function () {
+       var ORTB021url = {};
+       ORTB021url.query = '@Url.Action("qryORTB021", "ORTB021")';
+       ORTB021url.getData = '@Url.Action("GetCacheData", "ORTB021")';
+
+
+       var opScope = '@Html.Raw(ViewBag.opScope)';
+
+       if (opScope == "" || opScope == "0") {
+           $('#validationSummary').children().remove();
+
+           var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+           if (validationSummary.length == 0) {
+               $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+               validationSummary = $('#validationSummary ul.validation-summary-errors');
+           }
+           validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+       } else {
+           $('#close_date_S').datepicker();
+           $('#close_date_E').datepicker();
+                  //*---------------查詢 begin ----------------*//
+           $("#btnQry").off('click');
+           $("#btnQry").on('click', function () {
+               $('#validationSummary').children().remove();
+
+               var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+               if (validationSummary.length == 0) {
+                   $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                   validationSummary = $('#validationSummary ul.validation-summary-errors');
+               }
+
+               jqgridCustom.clearJqgrid('ORTB021jqgridDiv');
+               $('#btnReport').attr('disabled', true);
+
+               $.blockUI(); //畫面鎖起來
+               $.ajax({
+                   type: "POST",
+                   data: JSON.stringify({
+                       close_date_S: $('#close_date_S').val(), //結案日起
+                       close_date_E: $('#close_date_E').val(), //結案日迄
+                   }),
+                   dataType: "json",
+                   url: ORTB021url.query,
+                   contentType: 'application/json'
+               }).done(function (result) {
+                   if (result.RETURN_FLAG) {
+                       $('#btnReport').attr('disabled', !result.Datas);
+                       ORTB021Grid();
+                   }
+                   else {
+                       validationSummary.append('<li>' + result.DESCRIPTION + '</li>');
+                   }
+                   $.unblockUI(); //畫面打開
+               })
+               ;
+           });
+
+           $('#btnReport').off('click');
+           $('#btnReport').on('click', function () {
+                $.blockUI(); //畫面鎖起來
+                var parms = [];
+                parms.push(customerUtility.reportParm('CLOSE_DATE_S',  $('#close_date_S').val()));
+                parms.push(customerUtility.reportParm('CLOSE_DATE_E', $('#close_date_E').val()));
+                customerUtility.report(
+                customerUtility.reportModel('快速付款立沖帳餘額及取消件報表', 'ORTB021'),
+                parms,
+                null);
+                $.unblockUI(); //畫面打開
+           });
+
+           function ORTB021Grid() {
+               var colNameArray = ['結案日', '立帳金額', '沖銷金額', '剩餘金額', '取消件金額'];
+               var colModelArray = [];
+               colModelArray.push({ name: "CLOSE_DATE", index: "CLOSE_DATE", width: 120, sortable: false , align: 'right'});
+               colModelArray.push({ name: "REMIT_AMT", index: "REMIT_AMT", width: 210, sortable: false, align: 'right' });
+               colModelArray.push({ name: "WRITE_OFF_AMT", index: "WRITE_OFF_AMT", width: 210, sortable: false, align: 'right'});
+               colModelArray.push({ name: "REMAIN_AMT", index: "REMAIN_AMT", width: 210, sortable: false , align: 'right'});
+               colModelArray.push({ name: "CANCEL_AMT", index: "CANCEL_AMT", width: 210, sortable: false, align: 'right' });
+               jqgridCustom.createJqgridByCache(
+                   'ORTB021jqgridDiv',
+                   'ORTB021TempList',
+                   'ORTB021TempPeger',
+                   ORTB021url.getData,
+                   {
+
+                   },
+                   colNameArray,
+                   colModelArray,
+                   '快速付款立沖帳結果',
+                   jqgridCustom.getPage('ORTB021jqgridDiv'),
+                   jqgridCustom.getRowNum('ORTB021jqgridDiv'),
+                   ORTB021CompleteFun,
+                   true
+                   );
+           }
+
+           function ORTB021CompleteFun(listId) {
+
+           }
+
+           }
+
+
+
+       //*---------------查詢 end ----------------*//
+
+
+
+    });
+</script>
+
+

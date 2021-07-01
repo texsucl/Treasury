@@ -1,0 +1,173 @@
+﻿@model FAP.Web.ViewModels.OAP0053Model
+
+@{
+    Layout = "~/Views/Shared/_LayoutFrame.cshtml";
+    ViewBag.Title = ViewBag.funcName;
+
+    var opScope = ViewBag.opScope;
+
+    var codeTypeList = ViewBag.codeTypeList as SelectList;
+
+}
+
+
+<div class="container-fluid" id="main">
+    <div class="panel panel-primary">
+        <div class="panel-heading">@ViewBag.Title</div>
+        <div class="panel-body">
+            <div id="validationSummary" style="color:red;">
+            </div>
+            @if (opScope != "" && opScope != "0")
+            {
+        <table>
+
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(model => model.proc_date_b)：
+                    @Html.TextBoxFor(model => model.proc_date_b, new { @size = "8", @maxlength = "7" })
+                    ~
+                    @Html.TextBoxFor(model => model.proc_date_e, new { @size = "8", @maxlength = "7" })
+                    (民國年YYYMMDD，例:0980507)
+                </td>
+            </tr>
+          
+        </table>
+
+                <div class="row">
+                    <div class="col-sm-24" style="text-align:center;">
+                        <input type="submit" id="btnQry" name="btnQry" value="匯出" class="btn btn-primary" />
+                    </div>
+                </div>
+                <br>
+
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+
+   
+
+
+
+    //*---------------查詢 begin ----------------*//
+    function qryTelClean() {
+
+        $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+
+
+        var bPass = true;
+
+        if (!checkChtDate($('#proc_date_b').val(), true) || !checkChtDate($('#proc_date_e').val(), true)) {
+            bPass = false;
+            validationSummary.append('<li>「調閱完成日」錯誤!!</li>');
+        }
+
+
+
+        
+        if (!bPass)
+            return
+
+
+            var jsonData = JSON.stringify({
+                model: {
+                      'proc_date_b': $("#proc_date_b").val()
+                    , 'proc_date_e': $("#proc_date_e").val()
+                }
+            });
+
+            $.blockUI(); //畫面鎖起來
+
+            $.ajax({
+                    url: "@Url.Action("execExport", "OAP0053")",
+                data: jsonData,
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+
+                    if (data.success) {
+                        var url = '/OAP0053/downloadRpt?id=' + data.guid;
+
+
+                        window.location = url;
+
+                    } else {
+
+                        if (data.err.length > 0) {
+                            validationSummary.append('<li>' + data.err + '</li>');
+                        }
+                    }
+                    $.unblockUI();
+
+                },
+                error: function () {
+                    $.unblockUI();
+                }
+                });
+    }
+    //*---------------查詢 end ----------------*//
+
+
+
+    $("#btnQry").click().on('click', function () {
+        qryTelClean();
+    });
+
+
+
+    //*---------------清除 begin ----------------*//
+    function execClear() {
+        $('#validationSummary').children().remove();
+        $('#proc_date_b').val("");
+        $('#proc_date_e').val("");
+
+
+    }
+   //*---------------清除 end ----------------*//
+
+
+    $(function () {
+
+
+        var opScope = '@Html.Raw(ViewBag.opScope)';
+
+        if (opScope == "" || opScope == "0") {
+            $('#validationSummary').children().remove();
+
+            var validationSummary = $('#validationSummary ul.validation-summary-errors');
+
+            if (validationSummary.length == 0) {
+                $('#validationSummary').append('<ul class="validation-summary-errors"></ul>');
+                validationSummary = $('#validationSummary ul.validation-summary-errors');
+            }
+            validationSummary.append('<li>' + '無使用權限' + '</li>');
+
+        }
+
+
+        //*---------------清除 begin ----------------*//
+        $("#btnClear").click().on('click', function () {
+            execClear();
+
+        });
+        //*---------------清除 end ----------------*//
+
+
+    });
+</script>
+
+
