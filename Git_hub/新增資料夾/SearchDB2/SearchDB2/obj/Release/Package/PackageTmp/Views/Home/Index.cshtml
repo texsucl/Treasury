@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "查詢DB2";
+}
+<div class="row">
+    <div class="col-md-12">
+        <h2>SQL : </h2>
+        <textarea id="sqlStr" style="width:100%;max-width:100%;height:150px;margin-bottom:10px;"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <input type="button" class="btn btn-primary" id="Search" value="Search" />
+        <input type="button" class="btn btn-primary" id="Clear" value="Clear" />
+        <input type="button" class="btn btn-primary" id="ExecuteNonQuery" value="ExecuteNonQuery" />
+        <input type="button" class="btn btn-primary" id="DownLoadExcel" value="DownLoad Excel" />
+    </div>
+    <div class="col-md-1 form-group">
+        <h4>連線:</h4>
+    </div>
+    <div class="col-md-3 form-group">
+        @Html.DropDownList("CST", (SelectList)ViewBag.CST, new { @class = "form-control" })
+    </div>
+</div>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-12">
+        <div class="viewDetail">
+            <div id="jqgridDiv" class="jqd">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('input:button').each(function () {
+            var id = $(this).attr('id');
+            switch (id) {
+                case 'Search':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        clearJqgrid();
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                sqlStr: $('#sqlStr').val(),
+                                type: "S",
+                                transaction: false,
+                                connectionString : $('#CST').val()
+                            }),
+                            dataType: "json",
+                            url: '@Url.Action("work", "Home")',
+                            contentType: 'application/json',
+                        })
+                        .done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                createJqgrid("list1", "pager1", result.Datas.Data);
+                            }
+                            else
+                                customerUtility.alert(result.DESCRIPTION, 'w');
+                        });
+                    });
+                    break;
+                case 'Clear':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        $('#sqlStr').val('');
+                        clearJqgrid();
+                    });
+                    break;
+                case 'ExecuteNonQuery':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                        clearJqgrid();
+                        $.ajax({
+                            type: "POST",
+                            data: JSON.stringify({
+                                sqlStr: $('#sqlStr').val(),
+                                type: "E",
+                                transaction: false,
+                                connectionString : $('#CST').val()
+                            }),
+                            dataType: "json",
+                            url: '@Url.Action("work", "Home")',
+                            contentType: 'application/json',
+                        })
+                        .done(function (result) {
+                            if (result.RETURN_FLAG) {
+                                if (confirm(result.DESCRIPTION)) {
+                                    $.ajax({
+                                        type: "POST",
+                                        data: JSON.stringify({
+                                            sqlStr: $('#sqlStr').val(),
+                                            type: "E",
+                                            transaction: true,
+                                            connectionString : $('#CST').val()
+                                        }),
+                                        dataType: "json",
+                                        url: '@Url.Action("work", "Home")',
+                                        contentType: 'application/json',
+                                    })
+                                    .done(function (result2) {
+                                        if(result2.RETURN_FLAG)
+                                            customerUtility.alert(result2.DESCRIPTION, 's');
+                                        else
+                                            customerUtility.alert(result2.DESCRIPTION, 'w');
+                                    })
+                                }
+                                else {
+                                    customerUtility.alert('已取消異動!', 'w');
+                                }
+                            }
+                            else
+                                customerUtility.alert(result.DESCRIPTION, 'w');
+                        });
+                    });
+                    break;
+                case 'DownLoadExcel':
+                    $('#' + id).off('click');
+                    $('#' + id).on('click', function () {
+                         $.ajax({
+                         type: "POST",
+                         url: '@Url.Action("GetExcel", "Home")',
+                         contentType: 'application/json',
+                         })
+                         .done(function (result) {
+                             if (result.RETURN_FLAG) {
+                                 callExcel(result.DESCRIPTION);
+                             }
+                             else
+                                 customerUtility.alert(result.DESCRIPTION,'e');
+                         })
+                    });
+                    break;
+            }
+        });
+
+        async function callExcel (d) {
+           for (let i = 0; i < parseInt(d); i++) {
+               window.location.href = "@Url.RouteUrl(new { Controller = "Home", Action = "DownloadExcel"})/?type=" + (i + '')
+               await sleep(900000);
+           }
+        }
+
+        function sleep(ms) {
+             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        //#region clearJqgrid (清除JqGrid)
+        function clearJqgrid() {
+            $('#jqgridDiv').children().remove();
+        }
+        //#endregion clearJqgrid
+
+        //#region createJqgrid (建立JqGrid套件)
+        function createJqgrid(listId, pagerId, _data) {
+            $('#jqgridDiv').append('<table id="' + listId + '"></table>');
+            $('#jqgridDiv').append('<div id="' + pagerId + '"></div>');
+            $("#" + listId).jqGrid({
+                url: '@Url.Action("GetCacheData", "Home")',
+                datatype: "json",
+                mtype: "POST",
+                jsonReader:
+                {
+                    repeatitems: false,
+                },
+                colNames: _data.colNames,
+                colModel: _data.colModel,
+                rowNum: 10, //一頁筆數
+                rowList: [10,50,100], //設定一頁幾筆
+                pager: '#' + pagerId,
+                height: 'auto',
+                width: 'auto',
+                sortorder: "desc",
+                caption: '資料', //標題
+                autowidth: true,
+                viewrecords: true,
+                resizable: false,
+                shrinkToFit: false,
+                autoencode: true,
+                viewsortcols: [true, 'vertical', true],
+                ajaxRowOptions: { contentType: "application/json" },
+                serializeRowData: function (data) {
+                    return JSON.stringify(data);
+                },
+                loadComplete: function () {
+                    var table = $(this);
+                    jqgridCustom.updatePagerIcons(table);
+                }
+            });
+            $("#" + listId).jqGrid('navGrid', '#' + pagerId, { edit: false, add: false, del: false, search: false, refresh: false });
+
+        }
+        //#endregion createJqgrid
+    })
+</script>
